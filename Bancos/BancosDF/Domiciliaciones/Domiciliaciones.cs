@@ -13,7 +13,7 @@ using System.Globalization;
 
 namespace BancosDF.Domiciliaciones
 {
-    solo corrigiendo unchecked bug
+    hola dola coregido
 
     [ArchivoTextoIncontextual(162, TipoLinea = typeof(Linea), Culture = "es-ES", Codificacion = Codificacion.OEMMultilingualLatinIAndEuro, RellenarConCeros=RellenarConCeros.SoloNumeros)]
     public class Fichero
