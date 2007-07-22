@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" Nombre="FN.Financiero.DN.IBANDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="IBAN" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="Codigo" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="false" EsNavegable="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColOperaciones />
+</InstanciaMapXml>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<SalidaExcepcionalEntradaLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <mActor>ato</mActor>
+  <mFecha>2007-07-21T22:06:31.24+02:00</mFecha>
+  <mComentario>id sesion:435stv45amvzjo45mihtoe55</mComentario>
+  <mMensajeError>Debiera existri un cajon documentos para el tipo de documento requerido</mMensajeError>
+</SalidaExcepcionalEntradaLog>

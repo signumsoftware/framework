@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" NombreVis="Tarida" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" Nombre="FN.Seguros.Polizas.DN.TarifaDN-BASICA-ENT" ArbolNavegacionVisible="false" NavegacionesAutomaticas="false">
+  <ColEntradaMapNavBuscador />
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="ID" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="FEfecto" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="FEfecto" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Riesgo" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Riesgo" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Línea producto" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="180" NombreProp="ColLineaProducto" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="false" EsBuscable="false" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Importe" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="Importe" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="GrupoFraccionamientos" Editable="true" DatosControlAsignado="FN.GestionPagos.DN.GrupoFraccionamientosDN-BASICA-ENT" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="GrupoFraccionamientos" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="true" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="DatosTarifa" Editable="true" DatosControlAsignado="FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN-BASICA-ENT" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="DatosTarifa" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" TipoImpuesto="RiesgosVehiculosDN/FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap />
+  <ColNombresTiposComaptibles />
+</InstanciaMapXml>

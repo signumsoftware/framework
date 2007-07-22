@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="Cada una de las entidades que puedan ser entidades fiscales implementarán la interface Ientidadfiscal">
+    <Position X="4.042" Y="5.271" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Para que todas las entidades que refieren entidades fiscales solo presenten un id contra un tipo de entidad fiscal realmente se refieren a la clase EntidadFiscalGenerica&#xD;&#xA;Esta contine una interface que será mapeada en el mapeado de persistencia a todas las entidades fiscales distintas que se admitan en el sistema&#xD;&#xA;&#xD;&#xA;De este modo se puede obtener un unico id a nivel de en tidad fiscal y luego muchos fk contra cada tipo concreto de clase">
+    <Position X="1.781" Y="0.844" Height="1.083" Width="6.44" />
+  </Comment>
+  <Class Name="FN.Localizaciones.DN.ColIEntidadFiscalDN" Collapsed="true">
+    <Position X="3.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Fiscal\IdentificacionFiscalDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Localizaciones.DN.EntidadFiscalGenericaDN">
+    <Position X="1.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Fiscal\EntidadFiscalGenericaDN.vb</FileName>
+      <HashCode>AAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAIAAAAABAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mIentidadFiscal" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mIentidadFiscal" Type="FN.Localizaciones.DN.IEntidadFiscalDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.048" Y="1.05" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Interface Name="FN.Localizaciones.DN.IEntidadFiscalDN">
+    <Position X="4" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Fiscal\IdentificacionFiscalDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAIAgAAAAAAAAAAAAAAAAAEQBAAAQAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="IdentificacionFiscal" />
+      <Property Name="EntidadFiscalGenerica" />
+    </ShowAsAssociation>
+    <AssociationLine Name="EntidadFiscalGenerica" Type="FN.Localizaciones.DN.EntidadFiscalGenericaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.057" Y="0.362" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Interface>
+  <Interface Name="FN.Localizaciones.DN.IIdentificacionFiscal">
+    <Position X="6.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Fiscal\IdentificacionFiscalDN.vb</FileName>
+      <HashCode>AAAAAAAAAQAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

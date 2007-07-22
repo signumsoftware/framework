@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{72D64925-7C1F-4225-942E-8F49439128A4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FN.GestionPagos.DN</RootNamespace>
+    <AssemblyName>GestionPagosDN</AssemblyName>
+    <MyType>Windows</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>GestionPagosDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>GestionPagosDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AuxIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\AuxIU.dll</HintPath>
+    </Reference>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\ProcesosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TiposYReflexion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\TiposYReflexion.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CondicionesPagoDN.vb" />
+    <Compile Include="CondicionesPago\PlazoEfectoDN.vb" />
+    <Compile Include="FraccionamientoPagos\GrupoFraccionamientosDN.vb" />
+    <Compile Include="FraccionamientoPagos\GrupoPagosFraccionadosDN.vb" />
+    <Compile Include="FraccionamientoPagos\LimiteMinFraccionamientoDN.vb" />
+    <Compile Include="FraccionamientoPagos\PagoFraccionadoDN.vb" />
+    <Compile Include="FraccionamientoPagos\FraccionamientoDN.vb" />
+    <Compile Include="ImportesDebidos\AgrupApunteImpDDN.vb" />
+    <Compile Include="ImportesDebidos\ApunteImpDDN.vb" />
+    <Compile Include="AutorizacionDN.vb" />
+    <Compile Include="AutorizacionTalonDN.vb" />
+    <Compile Include="CampoDestino.vb" />
+    <Compile Include="CentroCostesDepartamentoDN.vb" />
+    <Compile Include="CentroCostesDN.vb" />
+    <Compile Include="ColContenedorImagenDN.vb" />
+    <Compile Include="ContenedorImagenDN.vb" />
+    <Compile Include="ConfiguracionImpresionTalonDN.vb" />
+    <Compile Include="ContenedorRTFDN.vb" />
+    <Compile Include="dtsGestionPagos.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dtsGestionPagos.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dtsGestionPagos.vb">
+      <DependentUpon>dtsGestionPagos.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="EstadoTalonDocumento.vb" />
+    <Compile Include="EstadoTalonNegocio.vb" />
+    <Compile Include="FicheroTransferenciaDN.vb" />
+    <Compile Include="HuellaContenedorRTFDN.vb" />
+    <Compile Include="ImportesDebidos\EntidadFiscalGenericaPrincipal.vb" />
+    <Compile Include="ImportesDebidos\ParEntFiscalGenericaParamDN.vb" />
+    <Compile Include="ImportesDebidos\OrigenIdevBaseDN.vb" />
+    <Compile Include="ImportesDebidos\HuellaIOrigenImpDebDN.vb" />
+    <Compile Include="ImportesDebidos\IImporteDebidoDN.vb" />
+    <Compile Include="ImportesDebidos\IOrigenIImporteDebidoDN.vb" />
+    <Compile Include="ImportesDebidos\LiquidacionMapDN.vb" />
+    <Compile Include="LimitePagoDN.vb" />
+    <Compile Include="ImportesDebidos\liquidacionPagoDN.vb" />
+    <Compile Include="ImportesDebidos\liquidadorConcretoOrigenIDMapDN.vb" />
+    <Compile Include="ImportesDebidos\OrigenIdevManualDN.vb" />
+    <Compile Include="ModalidadPago.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="NotificacionPagoDN.vb" />
+    <Compile Include="OrigenDN.vb" />
+    <Compile Include="PagoDN.vb" />
+    <Compile Include="PagoTrazaDN.vb" />
+    <Compile Include="PlantillaCartaDN.vb" />
+    <Compile Include="ReemplazoCartasTalonesDN.vb" />
+    <Compile Include="TalonDN.vb" />
+    <Compile Include="TalonDocumentoDN.vb" />
+    <Compile Include="TalonesOPRDN.vb" />
+    <Compile Include="TipoAutorizacion.vb" />
+    <Compile Include="ImportesDebidos\TipoEntidadOrigenDN.vb" />
+    <Compile Include="TransferenciaDN.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CondicionesPago\cdCondicionesPago.cd" />
+    <None Include="FraccionamientoPagos\DiagramaFraccionamiento.cd" />
+    <None Include="ImportesDebidos\cdImportesDebidos.cd" />
+    <None Include="DiagramaPagos.cd" />
+    <None Include="DiagramaTalones.cd" />
+    <None Include="dtsGestionPagos.xsc">
+      <DependentUpon>dtsGestionPagos.xsd</DependentUpon>
+    </None>
+    <None Include="dtsGestionPagos.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dtsGestionPagos.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="dtsGestionPagos.xss">
+      <DependentUpon>dtsGestionPagos.xsd</DependentUpon>
+    </None>
+    <None Include="ImportesDebidos\ClassDiagram1.cd" />
+    <None Include="ImportesDebidos\ClassDiagram2.cd" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EmpresasMod\EmpresaDN\EmpresasDN.vbproj">
+      <Project>{29535641-5F2F-49B4-8CAF-E70ADCA463A9}</Project>
+      <Name>EmpresasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\FinancieroMod\FinancieroDN\FinancieroDN.vbproj">
+      <Project>{E7D4E839-6DAE-4C43-B1C9-55C2E7FE16AE}</Project>
+      <Name>FinancieroDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Liquidaciones\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="ComisionRVSVDN representa&#xD;&#xA;&#xD;&#xA;todos los valores  de una comisión para una cobertura para cualquier fecha dada">
+    <Position X="3.812" Y="2.656" Height="0.875" Width="1.887" />
+  </Comment>
+  <Comment CommentText="ComisionRVDN representa&#xD;&#xA;&#xD;&#xA;el valor de una comisión para una cobertura en un periodo dado">
+    <Position X="4.468" Y="4.041" Height="0.854" Width="1.887" />
+  </Comment>
+  <Class Name="FN.RiesgosVehiculos.DN.ComisionRVSVDN">
+    <Position X="2.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ComisionRVSVDN.vb</FileName>
+      <HashCode>AAAAAAAACBAAAQQAIAAAAAAABACEAAAIYAAIAAA4AAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCobertura" />
+      <Field Name="mComision" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mCobertura" Type="FN.Seguros.Polizas.DN.CoberturaDN" FixedToPoint="true">
+      <Path>
+        <Point X="3.75" Y="1.562" />
+        <Point X="6.5" Y="1.562" />
+      </Path>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ComisionRVDN">
+    <Position X="6.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ComisionRVDN.vb</FileName>
+      <HashCode>AAAAAAAACAAAAQEAAAAAAAAEBAAAAAAIAAgIAAAQAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mComision" />
+      <Field Name="mCobertura" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mComision" Type="FN.RiesgosVehiculos.DN.ComisionDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.875" Y="5.022" />
+        <Point X="6.875" Y="6.188" />
+        <Point X="5.5" Y="6.188" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ComisionDN">
+    <Position X="4" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ComisionDN.vb</FileName>
+      <HashCode>AAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.CoberturaDN" Collapsed="true">
+    <Position X="6.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.DatosNegocio.EntidadTemporalDN" Collapsed="true">
+    <Position X="8.75" Y="3.25" Width="1.75" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mPeriodo" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mPeriodo" Type="Framework.DatosNegocio.Localizaciones.Temporales.IntervaloFechasDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.555" Y="0.631" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.Localizaciones.Temporales.IntervaloFechasDN" Collapsed="true">
+    <Position X="8.75" Y="5" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+</ClassDiagram>

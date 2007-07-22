@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" Nombre="FN.GestionPagos.DN.OrigenDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="TipoEntidadOrigen" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="TipoEntidadOrigen" CargarDatos="True" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="IDEntidad" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="IDEntidad" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap />
+</InstanciaMapXml>

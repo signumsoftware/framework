@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="primavaseRVSV recupera la tarifa de la cual depende y la recupera en  irecsumuvalor.datasources">
+    <Position X="1.26" Y="5.979" Height="1.177" Width="1.158" />
+  </Comment>
+  <Class Name="FN.RiesgosVehiculos.DN.CategoriaDN" Collapsed="true">
+    <Position X="5.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CategoriaDN.vb</FileName>
+      <HashCode>AAAIAAAEAAAAAAAAAAAAAAAAAAAABAAACAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColModelosDatos" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColModelosDatos" Type="FN.RiesgosVehiculos.DN.ModeloDatosDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.055" Y="0.266" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ConductorDN" Collapsed="true">
+    <Position X="10.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ConductorDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAACAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="7" Y="1.25" Width="2" />
+    <TypeIdentifier>
+      <FileName>DatosTarifaVehiculosDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColConductores" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.MarcaDN" Collapsed="true">
+    <Position X="8" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MarcaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.MatriculaDN" Collapsed="true">
+    <Position X="10.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MatriculaDN.vb</FileName>
+      <HashCode>AQAAAQAAAQAGAAAAAgAAAFAAIAQIAAAAQAAAQAAQABQ=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTipoMatricula" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModeloDN" Collapsed="true">
+    <Position X="8" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModeloDN.vb</FileName>
+      <HashCode>AAAAABAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mMarca" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.NumeroBastidorDN" Collapsed="true">
+    <Position X="10" Y="2.25" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>NumeroBastidorDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.RiesgoMotorDN" Collapsed="true">
+    <Position X="7.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RiesgoMotorDN.vb</FileName>
+      <HashCode>AAAgAIAAEEAACIAAAIJAAAAAIAAAAAAAAIgBABAAAQA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mMatricula" />
+      <Field Name="mNumeroBastidor" />
+      <Field Name="mModelo" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModeloDatosDN" Collapsed="true">
+    <Position X="5.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModeloDatosDN.vb</FileName>
+      <HashCode>AAAgAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAgAABAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mModelo" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.PrimaBaseRVDN" Collapsed="true">
+    <Position X="4" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PrimaBaseRVDN.vb</FileName>
+      <HashCode>AAAAAAAEAAAAAQAkAAEAAAAAAAAAAAAAgAAIAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCobertura" />
+      <Field Name="mCategoria" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mCobertura" Type="FN.Seguros.Polizas.DN.CoberturaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.378" Y="0.766" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mCategoria" Type="FN.RiesgosVehiculos.DN.CategoriaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.5" Y="7.375" />
+        <Point X="6.125" Y="7.375" />
+        <Point X="6.125" Y="6.63" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.317" Y="1.674" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.CoberturaDN" Collapsed="true">
+    <Position X="3.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.PrimabaseRVSVDN" Collapsed="true">
+    <Position X="1.5" Y="8" Width="2" />
+    <TypeIdentifier>
+      <FileName>PrimabaseRVSVDN.vb</FileName>
+      <HashCode>AAAAAAAAABAAAQQEoAAAAAAAAACEABAAQAAIAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mIRecSumiValorLN" />
+      <Field Name="mCobertura" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColPrimasBase" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mIRecSumiValorLN" Type="Framework.Operaciones.OperacionesDN.IRecSumiValorLN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.95" Y="0.412" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColPrimasBase" Type="FN.RiesgosVehiculos.DN.PrimaBaseRVDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.5" Y="8.188" />
+        <Point X="4.438" Y="8.188" />
+        <Point X="4.438" Y="7.63" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.244" Y="0.164" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mCobertura" Type="FN.Seguros.Polizas.DN.CoberturaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.682" Y="0.331" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Orientation="Bottom" Position="0.523" />
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.TarifaDN" Collapsed="true">
+    <Position X="1.25" Y="2" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mRiesgo" />
+      <Field Name="mDatosTarifa" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColLineaProducto" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColLineaProducto" Type="FN.Seguros.Polizas.DN.LineaProductoDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.079" Y="0.05" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mRiesgo" Type="FN.Seguros.Polizas.DN.IRiesgoDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.75" Y="2.312" />
+        <Point X="6.75" Y="2.312" />
+        <Point X="6.75" Y="3.25" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.LineaProductoDN" Collapsed="true">
+    <Position X="3.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mProducto" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.ProductoDN" Collapsed="true">
+    <Position X="3.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsCollectionAssociation>
+      <Field Name="mColCoberturas" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModuladorRVSVDN">
+    <Position X="1.25" Y="9.25" Width="3.25" />
+    <TypeIdentifier>
+      <FileName>ModuladorRVSVDN.vb</FileName>
+      <HashCode>AAAAAWAAABAAAQQEIAAAAAAAAACkQAAYQAEIAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColModuladorRV" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModuladorRVDN">
+    <Position X="8" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModuladorRVDN.vb</FileName>
+      <HashCode>AAAAAUAAAAAAAQAkIAAAAAAAAAAkQAAYgAAIAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCategoria" />
+      <Field Name="mCaracteristica" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mCategoria" Type="FN.RiesgosVehiculos.DN.CategoriaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.193" Y="0.518" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Cuestionario.CuestionarioDN.CaracteristicaDN" Collapsed="true">
+    <Position X="10.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN" Collapsed="true">
+    <Position X="10.5" Y="8" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Framework.Operaciones.OperacionesDN.IRecSumiValorLN">
+    <Position X="1.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="FN.Seguros.Polizas.DN.IRiesgoDN" Collapsed="true">
+    <Position X="6" Y="3.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="FN.Seguros.Polizas.DN.IDatosTarifaDN" Collapsed="true">
+    <Position X="5.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Enum Name="FN.RiesgosVehiculos.DN.TipoMatricula" Collapsed="true">
+    <Position X="10.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MatriculaDN.vb</FileName>
+      <HashCode>AAAABEgQAAAAEDFAACCFAAAAAAgRAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

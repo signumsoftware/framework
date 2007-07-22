@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<SalidaExcepcionalEntradaLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <mActor>ato</mActor>
+  <mFecha>2007-07-21T22:36:34.949+02:00</mFecha>
+  <mComentario>id sesion:nhnohd4543cl2145fsldju45</mComentario>
+  <mMensajeError>No se ha podido recuperar la operación configurada del grafo de tarificación actual</mMensajeError>
+</SalidaExcepcionalEntradaLog>

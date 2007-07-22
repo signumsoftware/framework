@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="true" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" Nombre="Framework.Notas.NotasDN.NotaDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" NombreVis="633154481549713705" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <TipoAgrupacionMap id="" Nombre="Solapas" />
+      <ColPropMap />
+      <ColAgrupacionMap>
+        <AgrupacionMapXML Instanciable="false" NombreVis="Básico" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+          <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="ID" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Nombre" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Nombre" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="comentario" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="200" NombreProp="comentario" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+        <AgrupacionMapXML Instanciable="false" NombreVis="Ampliados" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+          <TipoAgrupacionMap id="" Nombre="Elemento" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="Creador" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Creador" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Modificable" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Modificable" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Prioridad" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Prioridad" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="ColIHEntidad" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="ColIHEntidad" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+      </ColAgrupacionMap>
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap />
+  <ColNombresTiposComaptibles />
+  <ColEntradaMapNavBuscador />
+</InstanciaMapXml>

@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="FN.RiesgosVehiculos.DN.PrimabaseRVSVDN">
+    <Position X="3" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PrimabaseRVSVDN.vb</FileName>
+      <HashCode>AAAAAAAAABAAAQQEoAAACAAAAACEABAAQAAIAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCobertura" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColPrimasBase" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.CoberturaDN" Collapsed="true">
+    <Position X="6.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.PrimaBaseRVDN">
+    <Position X="6.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PrimaBaseRVDN.vb</FileName>
+      <HashCode>AAAAAAAEAAAAAQAkAAEAAAAEAAAAAAAIgAAoAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCobertura" />
+      <Field Name="mCategoria" />
+      <Field Name="mCategoriaModDatos" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.CategoriaDN" Collapsed="true">
+    <Position X="8.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CategoriaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.CategoriaModDatosDN" Collapsed="true">
+    <Position X="9.75" Y="5.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>CategoriaDN.vb</FileName>
+      <HashCode>AAAIAAAEAAAAAAAgAAAAAAAAAAAABAgIgAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCategoria" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColModelosDatos" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mCategoria" Type="FN.RiesgosVehiculos.DN.CategoriaDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="10.917" Y="5.5" />
+        <Point X="10.917" Y="2.5" />
+        <Point X="10" Y="2.5" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModeloDatosDN" Collapsed="true">
+    <Position X="8.5" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModeloDatosDN.vb</FileName>
+      <HashCode>AAAgAAAAAAAAAAAkAIAAAAAAAAAAAAAIgAgAABAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+</ClassDiagram>

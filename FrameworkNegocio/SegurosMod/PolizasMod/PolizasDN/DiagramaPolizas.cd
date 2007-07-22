@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="Preguntar Coaseguros y Financiación">
+    <Position X="0.726" Y="6.844" Height="0.323" Width="2.367" />
+  </Comment>
+  <Class Name="FN.Seguros.Polizas.DN.TomadorDN" Collapsed="true">
+    <Position X="3" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>TomadorDN.vb</FileName>
+      <HashCode>AAAABAgAAAAAAAgEBAIAAAAAAAAAABAIABAgAAAADAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEntidadFiscalGenerica" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mEntidadFiscalGenerica" Type="FN.Localizaciones.DN.EntidadFiscalGenericaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.203" Y="0.32" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.TarifaDN" Collapsed="true">
+    <Position X="9" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>TarifaDN.vb</FileName>
+      <HashCode>AAAAACAMAEGQAAgAIDEAAAEAQAACAgAsAEJAAgAAAAI=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mRiesgo" />
+      <Field Name="mDatosTarifa" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColLineaProducto" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mRiesgo" Type="FN.Seguros.Polizas.DN.IRiesgoDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.099" Y="0.383" Height="0.16" Width="0.714" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mDatosTarifa" Type="FN.Seguros.Polizas.DN.IDatosTarifaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.154" Y="0.266" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.LineaProductoDN" Collapsed="true">
+    <Position X="9" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>LineaProductoDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAIAAAAQAAAAEAAAAAAAAAIAAAQAkABAEI=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mProducto" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mProducto" Type="FN.Seguros.Polizas.DN.ProductoDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.661" Y="0.237" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.ProductoDN" Collapsed="true">
+    <Position X="9" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProductoDN.vb</FileName>
+      <HashCode>AAAAAAIAAAAAAAAAAAACAACAAAIAAAAAAACAAAAQAAI=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColCoberturas" />
+      <Field Name="mColProdDependientes" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColCoberturas" Type="FN.Seguros.Polizas.DN.CoberturaDN" FixedFromPoint="true">
+      <Path>
+        <Point X="9.75" Y="5.63" />
+        <Point X="9.75" Y="6.25" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mColProdDependientes" Type="FN.Seguros.Polizas.DN.ProductoDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="9" Y="5.188" />
+        <Point X="8.75" Y="5.188" />
+        <Point X="8.75" Y="5.5" />
+        <Point X="9" Y="5.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.088" Y="-0.242" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.CoberturaDN" Collapsed="true">
+    <Position X="9" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CoberturaDN.vb</FileName>
+      <HashCode>AAAAAAAQAAQAAAAAAAAAAAABAAAAAAAAAAAAAACAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCompania" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mCompania" Type="FN.Seguros.Polizas.DN.CompaniaDN" FixedFromPoint="true">
+      <Path>
+        <Point X="9.688" Y="6.88" />
+        <Point X="9.688" Y="7.25" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.CompaniaDN" Collapsed="true">
+    <Position X="9" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CompaniaDN.vb</FileName>
+      <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.PeriodoCoberturaDN">
+    <Position X="6.5" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>PeriodoCoberturaDN.vb</FileName>
+      <HashCode>AAAAQAEAAAIAAAAEAgAAAAAAAAAAAAAIAAAAABAAGAE=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTarifa" />
+      <Field Name="mCondicionesPago" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColTarifasPrevias" />
+    </ShowAsCollectionAssociation>
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <AssociationLine Name="mTarifa" Type="FN.Seguros.Polizas.DN.TarifaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.297" Y="3.75" />
+        <Point X="7.297" Y="2.75" />
+        <Point X="9" Y="2.75" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN" Collapsed="true">
+    <Position X="4.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PeriodoRenovacionPolizaDN.vb</FileName>
+      <HashCode>CgAAAAEgAAAEgAAAAACAAAAAAYBAAAAIAAAQABAQAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mPoliza" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColPeriodosCobertura" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColPeriodosCobertura" Type="FN.Seguros.Polizas.DN.PeriodoCoberturaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.015" Y="-0.377" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mPoliza" Type="FN.Seguros.Polizas.DN.PolizaDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.5" Y="2.875" />
+        <Point X="3" Y="2.875" />
+        <Point X="3" Y="3.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.661" Y="-0.419" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Localizaciones.DN.EntidadFiscalGenericaDN" Collapsed="true">
+    <Position X="2" Y="6" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.PolizaDN" Collapsed="true">
+    <Position X="2" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>PolizaDN.vb</FileName>
+      <HashCode>ABAAAAAAAIAAAAEAEQUAAAAAAAAAEAAMAAAAAAgABAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTomador" />
+      <Field Name="mEmisoraPolizas" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mTomador" Type="FN.Seguros.Polizas.DN.TomadorDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.275" Y="0.122" Height="0.16" Width="1.045" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mEmisoraPolizas" Type="FN.Seguros.Polizas.DN.EmisoraPolizasDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.9" Y="0.3" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.EmisoraPolizasDN" Collapsed="true">
+    <Position X="0.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EmisoraPolizasDN.vb</FileName>
+      <HashCode>AAAAAAAAABAAAAAEAAAAIAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEnidadFiscalGenerica" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.GestionPagos.DN.CondicionesPagoDN">
+    <Position X="6" Y="6" Width="1.75" />
+    <TypeIdentifier />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Interface Name="FN.Seguros.Polizas.DN.IRiesgoDN" Collapsed="true">
+    <Position X="11.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IRiesgoDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="FN.Seguros.Polizas.DN.IDatosTarifaDN" Collapsed="true">
+    <Position X="11.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IDatosTarifaDN.vb</FileName>
+      <HashCode>AAAAQAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

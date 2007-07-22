@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" NombreVis="Pago" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="true" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" Nombre="FN.GestionPagos.DN.PagoDN-BASICA-ENT" ArbolNavegacionVisible="false" NavegacionesAutomaticas="false">
+  <ColEntradaMapNavBuscador />
+  <ColComandoMap>
+    <ComandoMapDNXml Instanciable="false" NombreVis="Crear Transferencia" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <VinculoMetodo NombreMetodo="CrearTransferencia">
+        <VinculoClase NombreEnsamblado="GestionPagosLNC, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.GestionPagos.LNC.PagosLNC" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" NombreVis="Crear Talón" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <VinculoMetodo NombreMetodo="CrearTalon">
+        <VinculoClase NombreEnsamblado="GestionPagosLNC, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.GestionPagos.LNC.PagosLNC" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" Ico="EfectuarPago.ico" NombreVis="Efectuar Pago" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <VinculoMetodo NombreMetodo="EfectuarPago">
+        <VinculoClase NombreEnsamblado="GestionPagosIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.GestionPagos.IU.GestionPagosCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" Ico="CompensarPago.ico" NombreVis="Compensar Pago" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <VinculoMetodo NombreMetodo="CompensarPagoEfectuado">
+        <VinculoClase NombreEnsamblado="GestionPagosIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.GestionPagos.IU.GestionPagosCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" Ico="AnularPago.ico" NombreVis="Anular Pago" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <VinculoMetodo NombreMetodo="AnularPago">
+        <VinculoClase NombreEnsamblado="GestionPagosIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.GestionPagos.IU.GestionPagosCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" Ico="EfectuarYLiquidarPago.ico" NombreVis="Efectuar Y Liquidar" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <VinculoMetodo NombreMetodo="EfectuarYLiquidarPago">
+        <VinculoClase NombreEnsamblado="GestionPagosIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.GestionPagos.IU.GestionPagosCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" Ico="LiquidarPago.ico" NombreVis="LiquidarPago" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <VinculoMetodo NombreMetodo="LiquidarPago">
+        <VinculoClase NombreEnsamblado="GestionPagosIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.GestionPagos.IU.GestionPagosCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+  </ColComandoMap>
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" NombreVis="633170043867656250" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <TipoAgrupacionMap id="" Nombre="Solapas" />
+      <ColPropMap />
+      <ColAgrupacionMap>
+        <AgrupacionMapXML Instanciable="false" NombreVis="Datos Básicos" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="ID" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Importe" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Importe" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="true" NombreVis="Origen" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Origen.TipoMasID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="IImporteDebidoOrigen" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="IImporteDebidoOrigen" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Deudor" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Deudor" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="F.P. Emisión" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="FechaProgramadaEmision" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="F. Emision" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="FechaEmision" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="F. E. Efecto" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="FechaEfectoEsperada" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="F. Efecto" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="FechaEfecto" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Notificaciones" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="ColNotificacionPago" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="false" EsBuscable="false" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="FechaAnulacion" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="FechaAnulacion" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+        <AgrupacionMapXML Instanciable="false" NombreVis="Soporte" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <TipoAgrupacionMap id="" Nombre="Elemento" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="Cuenta Origen" Editable="true" DatosControlAsignado="FN.Financiero.DN.CuentaBancariaDN-CuentaBancariaDN_ligera" DatosBusqueda="vwCuentasXTitularesTodos*Donde*CIFNIF=B83204586" AnchoMaximo="0" DevolucionAutomatica="true" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="CuentaOrigenPago" CargarDatos="False" VisibleCabeceraResumen="true" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Transferencia" Editable="true" DatosControlAsignado="FN.GestionPagos.DN.TransferenciaDN-ligera" DatosBusqueda="vwCuentasXTitularesTodos*Donde*CIFNIF=@Destinatario.IdentificacionFiscal.Codigo" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Transferencia" CargarDatos="False" VisibleCabeceraResumen="true" EsReadOnly="false" EsEliminable="false" EsBuscable="false" EsNavegable="true" InvisibleSiNothing="true" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Talon" Editable="true" DatosControlAsignado="FN.GestionPagos.DN.TalonDN-ligera" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Talon" CargarDatos="False" VisibleCabeceraResumen="true" EsReadOnly="false" EsEliminable="false" EsBuscable="false" EsNavegable="true" InvisibleSiNothing="true" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+      </ColAgrupacionMap>
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColNombresTiposComaptibles />
+</InstanciaMapXml>

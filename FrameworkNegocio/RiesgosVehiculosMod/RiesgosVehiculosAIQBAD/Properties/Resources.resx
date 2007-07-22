@@ -1,0 +1,350 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="vwiPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.FormatShortDate(dbo.tlPresupuestoDN.Periodo_FInicio) AS FechaCreacion, 
+                      dbo.FormatShortDate(dbo.tlPresupuestoDN.Periodo_FInicio) AS Validez, dbo.tlTarifaDN.Importe
+FROM         dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID</value>
+  </data>
+  <data name="vwiPresupuestoFraccionamientoPagos" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoPagos]
+AS
+SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, 
+dbo.tlFraccionamientoDN.Nombre AS Fraccionamiento, 
+                      dbo.tlPagoFraccionadoDN.NumOrdenPago, dbo.tlPagoFraccionadoDN.Importe
+FROM         dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN INNER JOIN
+                      dbo.tlTarifaDN INNER JOIN
+                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa 
+INNER JOIN
+                      dbo.tlGrupoFraccionamientosDN ON dbo.tlTarifaDN.idGrupoFraccionamientos = 
+dbo.tlGrupoFraccionamientosDN.ID ON 
+                      
+dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idttlGrupoFraccionamientosDN = dbo.tlGrupoFraccionamientosDN.ID INNER
+                       JOIN
+                      dbo.tlFraccionamientoDN INNER JOIN
+                      dbo.tlGrupoPagosFraccionadosDN ON dbo.tlFraccionamientoDN.ID = 
+dbo.tlGrupoPagosFraccionadosDN.idTipoFraccionamiento ON 
+                      
+dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idptlGrupoPagosFraccionadosDN = dbo.tlGrupoPagosFraccionadosDN.ID
+                       INNER JOIN
+                      dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN ON 
+                      dbo.tlGrupoPagosFraccionadosDN.ID = 
+dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idttlGrupoPagosFraccionadosDN
+                       INNER JOIN
+                      dbo.tlPagoFraccionadoDN ON 
+                      
+dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idptlPagoFraccionadoDN = 
+dbo.tlPagoFraccionadoDN.ID
+ORDER BY dbo.tlFraccionamientoDN.ID, dbo.tlPagoFraccionadoDN.NumOrdenPago</value>
+  </data>
+  <data name="vwiPresupuestoLineasProductoAlcanzables" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuestoLineasProductoAlcanzables]
+AS
+SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlProductoDN.Nombre
+FROM         dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER 
+JOIN
+                      dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN ON 
+                      dbo.tlTarifaDN.ID = 
+dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
+                      dbo.tlLineaProductoDN ON 
+dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idptlLineaProductoDN = 
+dbo.tlLineaProductoDN.ID INNER JOIN
+                      dbo.tlProductoDN ON dbo.tlLineaProductoDN.idProducto = dbo.tlProductoDN.ID
+WHERE     (dbo.tlLineaProductoDN.Alcanzable = 1)
+ORDER BY dbo.tlProductoDN.Orden</value>
+  </data>
+  <data name="vwiPresupuestoLineasProductoEstablecidas" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuestoLineasProductoEstablecidas]
+AS
+SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlProductoDN.Nombre
+FROM         dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER 
+JOIN
+                      dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN ON 
+                      dbo.tlTarifaDN.ID = 
+dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
+                      dbo.tlLineaProductoDN ON 
+dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idptlLineaProductoDN = 
+dbo.tlLineaProductoDN.ID INNER JOIN
+                      dbo.tlProductoDN ON dbo.tlLineaProductoDN.idProducto = dbo.tlProductoDN.ID
+WHERE     (dbo.tlLineaProductoDN.Establecido = 1)
+ORDER BY dbo.tlProductoDN.Orden</value>
+  </data>
+  <data name="vwiPresupuestoMulticonductoresCuestionarioPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuestoMulticonductoresCuestionarioPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlDatosMCND.Nombre, dbo.tlDatosMCND.Apellido1, dbo.tlDatosMCND.Apellido2, 
+                      dbo.FormatShortDate(dbo.tlDatosMCND.FechaNacimiento) AS FechaNacimiento, dbo.tlNifDN.Codigo AS NIF, 
+                      CASE dbo.tlDatosMCND.Parentesco WHEN 0 THEN 'desconocido' WHEN 1 THEN 'cónyuge' WHEN 2 THEN 'hermano/a' WHEN 3 THEN 'padre/madre' WHEN
+                       4 THEN 'hijo/a' END AS Parentesco
+FROM         dbo.tlDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID ON 
+                      dbo.tlDatosTarifaVehiculosDN.ID = dbo.tlTarifaDN.idDatosTarifaDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlHeCuestionarioResueltoDN ON dbo.tlDatosTarifaVehiculosDN.idHeCuestionarioResuelto = dbo.tlHeCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN INNER JOIN
+                      dbo.tlCuestionarioResueltoDN ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idttlCuestionarioResueltoDN = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlRespuestaDN INNER JOIN
+                      dbo.tlPreguntaDN ON dbo.tlRespuestaDN.idPreguntaDN = dbo.tlPreguntaDN.ID ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idptlRespuestaDN = dbo.tlRespuestaDN.ID ON 
+                      dbo.tlHeCuestionarioResueltoDN.IdEntidadReferida = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlValorMCNDCaracteristicaDN ON 
+                      dbo.tlRespuestaDN.idIValorCaractDNValorMCNDCaracteristicaDN = dbo.tlValorMCNDCaracteristicaDN.ID INNER JOIN
+                      dbo.trtlValorMCNDCaracteristicaDNColDatosMCNDXtlDatosMCND ON 
+                      dbo.tlValorMCNDCaracteristicaDN.ID = dbo.trtlValorMCNDCaracteristicaDNColDatosMCNDXtlDatosMCND.idttlValorMCNDCaracteristicaDN INNER JOIN
+                      dbo.tlDatosMCND ON dbo.trtlValorMCNDCaracteristicaDNColDatosMCNDXtlDatosMCND.idptlDatosMCND = dbo.tlDatosMCND.ID INNER JOIN
+                      dbo.tlNifDN ON dbo.tlDatosMCND.idNIF = dbo.tlNifDN.ID
+WHERE     (dbo.tlPreguntaDN.Nombre = 'ColConductoresAdicionales')</value>
+  </data>
+  <data name="vwiRespuestaAñosSinsiniestroCuestionarioPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiRespuestaAñosSinsiniestroCuestionarioPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, CASE dbo.tlValorNumericoCaracteristicaDN.ValorNumerico WHEN 4 THEN '4 ó más' ELSE CONVERT(CHAR, 
+                      CONVERT(INT, dbo.tlValorNumericoCaracteristicaDN.ValorNumerico)) END AS AñosSinSiniestro
+FROM         dbo.tlDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID ON 
+                      dbo.tlDatosTarifaVehiculosDN.ID = dbo.tlTarifaDN.idDatosTarifaDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlHeCuestionarioResueltoDN ON dbo.tlDatosTarifaVehiculosDN.idHeCuestionarioResuelto = dbo.tlHeCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN INNER JOIN
+                      dbo.tlCuestionarioResueltoDN ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idttlCuestionarioResueltoDN = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlRespuestaDN INNER JOIN
+                      dbo.tlPreguntaDN ON dbo.tlRespuestaDN.idPreguntaDN = dbo.tlPreguntaDN.ID ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idptlRespuestaDN = dbo.tlRespuestaDN.ID ON 
+                      dbo.tlHeCuestionarioResueltoDN.IdEntidadReferida = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlValorNumericoCaracteristicaDN ON 
+                      dbo.tlRespuestaDN.idIValorCaractDNValorNumericoCaracteristicaDN = dbo.tlValorNumericoCaracteristicaDN.ID
+WHERE     (dbo.tlPreguntaDN.Nombre = 'AñosSinSiniestro')</value>
+  </data>
+  <data name="vwiRespuestaCPEstacionamientoCuestionarioPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiRespuestaCPEstacionamientoCuestionarioPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlValorNumericoCaracteristicaDN.ValorNumerico
+FROM         dbo.tlDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID ON 
+                      dbo.tlDatosTarifaVehiculosDN.ID = dbo.tlTarifaDN.idDatosTarifaDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlHeCuestionarioResueltoDN ON dbo.tlDatosTarifaVehiculosDN.idHeCuestionarioResuelto = dbo.tlHeCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN INNER JOIN
+                      dbo.tlCuestionarioResueltoDN ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idttlCuestionarioResueltoDN = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlRespuestaDN INNER JOIN
+                      dbo.tlPreguntaDN ON dbo.tlRespuestaDN.idPreguntaDN = dbo.tlPreguntaDN.ID ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idptlRespuestaDN = dbo.tlRespuestaDN.ID ON 
+                      dbo.tlHeCuestionarioResueltoDN.IdEntidadReferida = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlValorNumericoCaracteristicaDN ON 
+                      dbo.tlRespuestaDN.idIValorCaractDNValorNumericoCaracteristicaDN = dbo.tlValorNumericoCaracteristicaDN.ID
+WHERE     (dbo.tlPreguntaDN.Nombre = 'ZONA')</value>
+  </data>
+  <data name="vwiRespuestaFechaCarnetCuestionarioPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiRespuestaFechaCarnetCuestionarioPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.FormatShortDate(dbo.tlValorCaracteristicaFechaDN.ValorFecha) AS FechaCarnet
+FROM         dbo.tlDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID ON 
+                      dbo.tlDatosTarifaVehiculosDN.ID = dbo.tlTarifaDN.idDatosTarifaDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlHeCuestionarioResueltoDN ON dbo.tlDatosTarifaVehiculosDN.idHeCuestionarioResuelto = dbo.tlHeCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN INNER JOIN
+                      dbo.tlCuestionarioResueltoDN ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idttlCuestionarioResueltoDN = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlRespuestaDN INNER JOIN
+                      dbo.tlPreguntaDN ON dbo.tlRespuestaDN.idPreguntaDN = dbo.tlPreguntaDN.ID ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idptlRespuestaDN = dbo.tlRespuestaDN.ID ON 
+                      dbo.tlHeCuestionarioResueltoDN.IdEntidadReferida = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlValorCaracteristicaFechaDN ON dbo.tlRespuestaDN.idIValorCaractDNValorCaracteristicaFechaDN = dbo.tlValorCaracteristicaFechaDN.ID
+WHERE     (dbo.tlPreguntaDN.Nombre = 'FechaCarnet')</value>
+  </data>
+  <data name="vwiRespuestaJustificantesCuestionarioPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiRespuestaJustificantesCuestionarioPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, 
+                      CASE dbo.tlValorNumericoCaracteristicaDN.ValorNumerico WHEN 0 THEN 'ninguno' WHEN 1 THEN 'certificado' WHEN 2 THEN 'certificado y recibo' END
+                       AS justificantes
+FROM         dbo.tlDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID ON 
+                      dbo.tlDatosTarifaVehiculosDN.ID = dbo.tlTarifaDN.idDatosTarifaDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlHeCuestionarioResueltoDN ON dbo.tlDatosTarifaVehiculosDN.idHeCuestionarioResuelto = dbo.tlHeCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN INNER JOIN
+                      dbo.tlCuestionarioResueltoDN ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idttlCuestionarioResueltoDN = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlRespuestaDN INNER JOIN
+                      dbo.tlPreguntaDN ON dbo.tlRespuestaDN.idPreguntaDN = dbo.tlPreguntaDN.ID ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idptlRespuestaDN = dbo.tlRespuestaDN.ID ON 
+                      dbo.tlHeCuestionarioResueltoDN.IdEntidadReferida = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlValorNumericoCaracteristicaDN ON 
+                      dbo.tlRespuestaDN.idIValorCaractDNValorNumericoCaracteristicaDN = dbo.tlValorNumericoCaracteristicaDN.ID
+WHERE     (dbo.tlPreguntaDN.Nombre = 'Justificantes')</value>
+  </data>
+  <data name="vwiRespuestaTipoCarnetCuestionarioPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiRespuestaTipoCarnetCuestionarioPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, 
+                      CASE dbo.tlValorNumericoCaracteristicaDN.ValorNumerico WHEN 0 THEN 'B' WHEN 1 THEN 'A' WHEN 2 THEN 'A1' END AS carnet
+FROM         dbo.tlDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID ON 
+                      dbo.tlDatosTarifaVehiculosDN.ID = dbo.tlTarifaDN.idDatosTarifaDatosTarifaVehiculosDN INNER JOIN
+                      dbo.tlHeCuestionarioResueltoDN ON dbo.tlDatosTarifaVehiculosDN.idHeCuestionarioResuelto = dbo.tlHeCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN INNER JOIN
+                      dbo.tlCuestionarioResueltoDN ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idttlCuestionarioResueltoDN = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlRespuestaDN INNER JOIN
+                      dbo.tlPreguntaDN ON dbo.tlRespuestaDN.idPreguntaDN = dbo.tlPreguntaDN.ID ON 
+                      dbo.trtlCuestionarioResueltoDNColRespuestaDNXtlRespuestaDN.idptlRespuestaDN = dbo.tlRespuestaDN.ID ON 
+                      dbo.tlHeCuestionarioResueltoDN.IdEntidadReferida = dbo.tlCuestionarioResueltoDN.ID INNER JOIN
+                      dbo.tlValorNumericoCaracteristicaDN ON 
+                      dbo.tlRespuestaDN.idIValorCaractDNValorNumericoCaracteristicaDN = dbo.tlValorNumericoCaracteristicaDN.ID
+WHERE     (dbo.tlPreguntaDN.Nombre = 'TipoCarnet')</value>
+  </data>
+  <data name="vwiRiesgoMotorPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiRiesgoMotorPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlRiesgoMotorDN.Cilindrada, dbo.FormatShortDate(dbo.tlRiesgoMotorDN.FechaMatriculacion) 
+                      AS FechaMatriculacion, dbo.tlRiesgoMotorDN.NumeroBastidor, dbo.tlRiesgoMotorDN.Matriculado, dbo.tlRiesgoMotorDN.ValorMatricula, 
+                      dbo.tlModeloDN.Nombre AS Modelo, dbo.tlMarcaDN.Nombre AS Marca
+FROM         dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER JOIN
+                      dbo.tlDatosTarifaVehiculosDN ON dbo.tlTarifaDN.idDatosTarifaDatosTarifaVehiculosDN = dbo.tlDatosTarifaVehiculosDN.ID INNER JOIN
+                      dbo.tlRiesgoMotorDN ON dbo.tlTarifaDN.idRiesgoRiesgoMotorDN = dbo.tlRiesgoMotorDN.ID INNER JOIN
+                      dbo.tlModeloDN ON dbo.tlRiesgoMotorDN.idModelo = dbo.tlModeloDN.ID INNER JOIN
+                      dbo.tlMarcaDN ON dbo.tlModeloDN.idMarca = dbo.tlMarcaDN.ID</value>
+  </data>
+  <data name="vwiTomadorPresupuesto" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiTomadorPresupuesto]
+AS
+SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlFuturoTomadorDN.Nombre AS NombreTomador, dbo.tlFuturoTomadorDN.Apellido1FuturoTomador, 
+                      dbo.tlFuturoTomadorDN.Apellido2FuturoTomador, dbo.tlFuturoTomadorDN.NIFCIFFuturoTomador, dbo.tlProvinciaDN.Nombre AS Provincia, 
+                      dbo.tlLocalidadDN.Nombre AS Localidad, dbo.tlDireccionNoUnicaDN.CodPostal, dbo.tlTipoViaDN.Nombre AS TipoVia, dbo.tlDireccionNoUnicaDN.Via, 
+                      dbo.tlDireccionNoUnicaDN.Numero, dbo.FormatShortDate(dbo.tlFuturoTomadorDN.Periodo_FInicio) AS FechaNacimiento
+FROM         dbo.tlFuturoTomadorDN INNER JOIN
+                      dbo.tlPresupuestoDN ON dbo.tlFuturoTomadorDN.ID = dbo.tlPresupuestoDN.idFuturoTomador INNER JOIN
+                      dbo.tlDireccionNoUnicaDN ON dbo.tlFuturoTomadorDN.idDireccion = dbo.tlDireccionNoUnicaDN.ID INNER JOIN
+                      dbo.tlLocalidadDN ON dbo.tlDireccionNoUnicaDN.idLocalidad = dbo.tlLocalidadDN.ID INNER JOIN
+                      dbo.tlProvinciaDN ON dbo.tlLocalidadDN.idProvincia = dbo.tlProvinciaDN.ID INNER JOIN
+                      dbo.tlTipoViaDN ON dbo.tlDireccionNoUnicaDN.idTipoVia = dbo.tlTipoViaDN.ID</value>
+  </data>
+</root>

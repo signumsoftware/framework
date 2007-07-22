@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="EmpresasDN.ResponsableDePersonalDN" Collapsed="true">
+    <Position X="2.5" Y="1" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>ResponsableDePersonalDN.vb</FileName>
+      <HashCode>KQAIAAAAAACAAAAEIAAwAAgAAABAAQAAAAAAYgAAAAg=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEntidadResponsable" />
+      <Field Name="mDepartamentoACargoDN" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColEmpleadosACargoDN" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mEntidadResponsable" Type="EmpresasDN.EmpleadoDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.438" Y="1.63" />
+        <Point X="4.438" Y="1.812" />
+        <Point X="5.75" Y="1.812" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.491" Y="-0.376" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mDepartamentoACargoDN" Type="EmpresasDN.DepartamentoDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.336" Y="0.183" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColEmpleadosACargoDN" Type="EmpresasDN.EmpleadoDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.75" Y="1.062" />
+        <Point X="6.438" Y="1.062" />
+        <Point X="6.438" Y="1.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.252" Y="0.558" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="EmpresasDN.EmpleadoDN" Collapsed="true">
+    <Position X="5.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EmpleadoDN.vb</FileName>
+      <HashCode>AABAIAAAgAEAIAAAFCAQAAAAAAgAAQAAABAAYAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColRolDepartamentoDN" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColRolDepartamentoDN" Type="EmpresasDN.RolDepartamentoDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.869" Y="0.789" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.DepartamentoDN" Collapsed="true">
+    <Position X="2.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DepartamentoDN.vb</FileName>
+      <HashCode>AAAAAAIAAAIAAEAAAAAAgAiAAACAAQAAAQAQAAAAABA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresaDN" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mEmpresaDN" Type="EmpresasDN.EmpresaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.638" Y="0.422" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.RolDepartamentoDN" Collapsed="true">
+    <Position X="5.5" Y="4" Width="2" />
+    <TypeIdentifier>
+      <FileName>RolDepartamentoDN.vb</FileName>
+      <HashCode>EAAAAAAggAAAAAAgAAAAAAABAAgAAQAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mRolDeEmpresaDN" />
+      <Field Name="mDepartamentoDN" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="EmpresasDN.RolDeEmpresaDN" Collapsed="true">
+    <Position X="5.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RolDeEmpresaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAQAAAAgAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EmpresasDN.EmpresaDN" Collapsed="true">
+    <Position X="2.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EmpresaDN.vb</FileName>
+      <HashCode>AAAAAAAAABAIACAQhAAAgQgAEAAIAAAUAAAAAAAgAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="EmpresasDN.IResponsableDN">
+    <Position X="10.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IResponsable.vb</FileName>
+      <HashCode>AAAAAAAAAACAAAAAAAAgAAAAAABAAAAAAAAAQAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="EntidadResponsableDN" />
+      <Property Name="ClonColEntidadesACargoDN" />
+    </ShowAsAssociation>
+    <AssociationLine Name="EntidadResponsableDN" Type="Framework.DatosNegocio.IEntidadDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="10.25" Y="1.812" />
+        <Point X="9.875" Y="1.812" />
+        <Point X="9.875" Y="2.062" />
+        <Point X="9.5" Y="2.062" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.953" Y="-0.631" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="ClonColEntidadesACargoDN" Type="System.Collections.Generic.IList(Of T)">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.06" Y="0.332" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Interface>
+  <Interface Name="System.Collections.Generic.IList(Of T)" Collapsed="true">
+    <Position X="8" Y="0.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.IEntidadDN" Collapsed="true">
+    <Position X="8" Y="1.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+</ClassDiagram>

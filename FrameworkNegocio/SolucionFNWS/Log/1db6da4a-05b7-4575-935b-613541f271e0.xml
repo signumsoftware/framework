@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<SalidaExcepcionalEntradaLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <mActor>gestion</mActor>
+  <mFecha>2007-07-20T21:28:23.5861356+02:00</mFecha>
+  <mComentario>id sesion:ww1jt1rens3ws5fzbxdpddit</mComentario>
+  <mMensajeError>Referencia a objeto no establecida como instancia de un objeto.</mMensajeError>
+</SalidaExcepcionalEntradaLog>

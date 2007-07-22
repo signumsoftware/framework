@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{709D8066-BCC1-4188-A352-ADF3D1CB2865}</ProjectGuid>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <StartupObject>
+    </StartupObject>
+    <RootNamespace>RiesgosVehiculosTest2</RootNamespace>
+    <AssemblyName>RiesgosVehiculosTest2</AssemblyName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <IncrementalBuild>true</IncrementalBuild>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>RiesgosVehiculosTest2.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <IncrementalBuild>false</IncrementalBuild>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>RiesgosVehiculosTest2.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AccesoDatos, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\AccesoDatos.dll</HintPath>
+    </Reference>
+    <Reference Include="ClaseBaseLN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\ClaseBaseLN.dll</HintPath>
+    </Reference>
+    <Reference Include="CuestionarioDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\CuestionarioDN.dll</HintPath>
+    </Reference>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="LogicaNegocios, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\LogicaNegocios.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\WINDOWS\assembly\GAC_MSIL\Microsoft.VisualStudio.QualityTools.UnitTestFramework\8.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorAD, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\MotorAD.dll</HintPath>
+    </Reference>
+    <Reference Include="OperacionesDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\OperacionesDN.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\ProcesosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+    <Reference Include="TiposYReflexion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\TiposYReflexion.dll</HintPath>
+    </Reference>
+    <Reference Include="TiposyReflexionLN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\TiposyReflexionLN.dll</HintPath>
+    </Reference>
+    <Reference Include="Transacciones, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\Transacciones.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="UnitTest1.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AuthoringTests.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\PersonasMod\PersonasDN\PersonasDN.vbproj">
+      <Project>{5C3E9247-029F-47FC-9396-E270FF57B0B4}</Project>
+      <Name>PersonasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SegurosMod\PolizasMod\PolizasDN\PolizasDN.vbproj">
+      <Project>{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}</Project>
+      <Name>PolizasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosAD\RiesgosVehiculosAD.vbproj">
+      <Project>{D1E69286-73B7-4F6C-AC39-C74D5BF25C07}</Project>
+      <Name>RiesgosVehiculosAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosAIQBAD\RiesgosVehiculosAIQBAD.csproj">
+      <Project>{FF05E160-B610-4677-B470-C653C85FBE10}</Project>
+      <Name>RiesgosVehiculosAIQBAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosAIQBLN\RiesgosVehiculosAIQBLN.csproj">
+      <Project>{753A7ED8-DA83-4A59-BC1B-0F94A6E39572}</Project>
+      <Name>RiesgosVehiculosAIQBLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosDN\RiesgosVehiculosDN.vbproj">
+      <Project>{BB2EB0EF-4C2D-4526-9F54-73DFA311F74D}</Project>
+      <Name>RiesgosVehiculosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosLN\RiesgosVehiculosLN.vbproj">
+      <Project>{384E6C78-9842-4C44-83CA-0507E32B03AD}</Project>
+      <Name>RiesgosVehiculosLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosTest\RiesgosVehiculosTest.vbproj">
+      <Project>{A12A4522-B191-4DD4-AE28-0258E4B99423}</Project>
+      <Name>RiesgosVehiculosTest</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Settings.settings">
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="OrderedTestPruevaVigente.orderedtest" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.Targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

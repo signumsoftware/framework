@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Nombre="Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="ID" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Caracteristica" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="Caracteristica" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Valor" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="Valor" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Intervalo" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="Intervalo" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Periodo" Editable="true" DatosControlAsignado="Framework.DatosNegocio.IIntervaloTemporal-BASICA-ENT" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="Periodo" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="NumMapPadre" Editable="true" DatosControlAsignado="Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN-VerPADRE" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="NumMapPadre" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap />
+  <ColNombresTiposComaptibles />
+</InstanciaMapXml>

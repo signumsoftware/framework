@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tests>
+  <edtdocversion branch="retail" build="50727" revision="42" />
+  <AutoSuite type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <m_continueAfterFailure type="System.Boolean">False</m_continueAfterFailure>
+    <links type="System.Collections.ArrayList">
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">02ebfb56-5207-6e08-6cd6-924002c6057e</id>
+        <name type="System.String">CrearElEntorno</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">923363b6-1a0f-2408-2486-9225fb9cbcce</id>
+        <name type="System.String">pe1v0CrearOrigenImportedebidoManual</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">54fcea65-1211-6be0-ec8b-f5eb3c0bd7b4</id>
+        <name type="System.String">pe2v0CrearCrearPagoPlanificado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">99fa7076-76c7-732c-170c-327219d725fe</id>
+        <name type="System.String">pe2v1AnularCompensarCrearPagoPlanificado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">d960a4b0-80bc-151e-739a-218fd010605e</id>
+        <name type="System.String">pe3v0EmitirPagoPlanificado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">7a648360-5fc4-b400-a3fc-7725ea9d769f</id>
+        <name type="System.String">pe3v1AnularCompensarPagoEmitido</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">44a73db1-ad66-d9c6-bf63-d84bdccd28ff</id>
+        <name type="System.String">pe4v0EfectuarPagoEmitido</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">1f1e677e-4be4-78b6-e83f-b3116b0db69e</id>
+        <name type="System.String">pe4v01DevolverPagoEfectuado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">1642eaca-efb7-9e7f-80f6-7b33d14fb4a8</id>
+        <name type="System.String">pe4v1AnularCompensarPagoEfectuado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">ee979911-61b1-9cdc-944f-093873825aee</id>
+        <name type="System.String">pe4v2AnularCompensarPagoEfectuadoCompensadoYReAnulCompPagoCompensado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">e7fe226d-8755-59f9-0400-292612e93601</id>
+        <name type="System.String">pe5v0LiquidarPagoEfectuado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">2af989c5-42c9-6a90-7d2b-810efedeb80e</id>
+        <name type="System.String">pe5v1AnularCompensarPagoLiquidado</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">a93b2537-0b45-0a6e-954e-54be54567e47</id>
+        <name type="System.String">pe6v0LiquidarPagoEfectuadoyPagarLiquidaciones</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">a43d317e-57af-f641-c8e9-0aeb969b9508</id>
+        <name type="System.String">pe6v1AnularCompensarPagoLiquidadoLqPagada</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">2cd7f3be-a341-eb5e-05d2-a63d9e38e130</id>
+        <name type="System.String">pe7v0AnularCompensarOrigenID</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+    </links>
+    <cssProjectStructure type="System.String" />
+    <isRunOnRestart type="System.Boolean">False</isRunOnRestart>
+    <timeOut type="System.Int32">2147483647</timeOut>
+    <isGroupable type="System.Boolean">True</isGroupable>
+    <abortRunOnAgentFailure type="System.Boolean">False</abortRunOnAgentFailure>
+    <cssIteration type="System.String" />
+    <workItemIds type="System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]">
+      <_size type="System.Int32">0</_size>
+      <_version type="System.Int32">1</_version>
+    </workItemIds>
+    <id type="Microsoft.VisualStudio.TestTools.Common.TestId">
+      <id type="System.Guid">b0c42a30-ce7f-46ad-b3f9-53744bfd586b</id>
+    </id>
+    <name type="System.String">peOrderedtest</name>
+    <description type="System.String">Place your description here</description>
+    <enabled type="System.Boolean">True</enabled>
+    <owner type="System.String" />
+    <priority type="System.Int32">0</priority>
+    <executionId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </executionId>
+    <parentExecutId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </parentExecutId>
+    <deploymentItems type="Microsoft.VisualStudio.TestTools.Common.DeploymentItemCollection" />
+    <agentAttributes type="System.Collections.Specialized.StringDictionary, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <storage type="System.String">d:\signum\signum\frameworknegocio\solucionfn\gestionpagosmod\gestionpagoslntest\peorderedtest.orderedtest</storage>
+    <projectData type="Microsoft.VisualStudio.TestTools.Common.ProjectData">
+      <id type="System.Guid">c7f934e0-1876-49ca-8f1c-2e02faabe3d1</id>
+      <projectName type="System.String">GestionPagosLNTest</projectName>
+      <solutionName type="System.String">SolucionFN</solutionName>
+      <projectRelativePath type="System.String">GestionPagosMod\GestionPagosLNTest\GestionPagosLNTest.vbproj</projectRelativePath>
+    </projectData>
+    <m_nonRunnableReason type="System.String" />
+  </AutoSuite>
+</Tests>

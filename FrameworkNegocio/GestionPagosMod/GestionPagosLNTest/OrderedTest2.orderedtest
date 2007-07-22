@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tests>
+  <edtdocversion branch="retail" build="50727" revision="42" />
+  <AutoSuite type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <m_continueAfterFailure type="System.Boolean">False</m_continueAfterFailure>
+    <links type="System.Collections.ArrayList">
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">02ebfb56-5207-6e08-6cd6-924002c6057e</id>
+        <name type="System.String">CrearElEntorno</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">5790a8ff-4f76-61a9-3014-1e2f708fafd0</id>
+        <name type="System.String">CrearPagoConIDCompensadores</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">498f011b-f095-ac68-f0fb-575b7ab52652</id>
+        <name type="System.String">EfectuarPago</name>
+        <storage type="System.String">bin\gestionpagoslntest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+    </links>
+    <cssProjectStructure type="System.String" />
+    <isRunOnRestart type="System.Boolean">False</isRunOnRestart>
+    <timeOut type="System.Int32">2147483647</timeOut>
+    <isGroupable type="System.Boolean">True</isGroupable>
+    <abortRunOnAgentFailure type="System.Boolean">False</abortRunOnAgentFailure>
+    <cssIteration type="System.String" />
+    <workItemIds type="System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]">
+      <_size type="System.Int32">0</_size>
+      <_version type="System.Int32">1</_version>
+    </workItemIds>
+    <id type="Microsoft.VisualStudio.TestTools.Common.TestId">
+      <id type="System.Guid">7614d48c-9465-4c78-b653-3b5cdd6db0d7</id>
+    </id>
+    <name type="System.String">orderedtest2</name>
+    <description type="System.String">Place your description here</description>
+    <enabled type="System.Boolean">True</enabled>
+    <owner type="System.String" />
+    <priority type="System.Int32">0</priority>
+    <executionId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </executionId>
+    <parentExecutId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </parentExecutId>
+    <deploymentItems type="Microsoft.VisualStudio.TestTools.Common.DeploymentItemCollection" />
+    <agentAttributes type="System.Collections.Specialized.StringDictionary, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <storage type="System.String">d:\signum\signum\frameworknegocio\solucionfn\gestionpagosmod\gestionpagoslntest\orderedtest2.orderedtest</storage>
+    <projectData type="Microsoft.VisualStudio.TestTools.Common.ProjectData">
+      <id type="System.Guid">c7f934e0-1876-49ca-8f1c-2e02faabe3d1</id>
+      <projectName type="System.String">GestionPagosLNTest</projectName>
+      <solutionName type="System.String">SolucionFN</solutionName>
+      <projectRelativePath type="System.String">GestionPagosMod\GestionPagosLNTest\GestionPagosLNTest.vbproj</projectRelativePath>
+    </projectData>
+    <m_nonRunnableReason type="System.String" />
+  </AutoSuite>
+</Tests>

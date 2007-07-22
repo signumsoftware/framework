@@ -1,0 +1,496 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1FB96093-BDCE-426D-B835-5206871B1188}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>Sub Main</StartupObject>
+    <RootNamespace>ClienteAdmin</RootNamespace>
+    <AssemblyName>ClienteAdmin</AssemblyName>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <ApplicationIcon>node.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>ClienteAdmin.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>ClienteAdmin.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AS, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\AS.dll</HintPath>
+    </Reference>
+    <Reference Include="AuxIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\AuxIU.dll</HintPath>
+    </Reference>
+    <Reference Include="Configuracion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\Configuracion.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlesPBase, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\ControlesPBase.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlesPBaseAPI, Version=1.0.2711.14126, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\ControlesPBaseAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlesPGenericos, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\ControlesPGenericos.dll</HintPath>
+    </Reference>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\FicherosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosForm, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\FicherosForm.dll</HintPath>
+    </Reference>
+    <Reference Include="GestorMails, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\GestorMails.dll</HintPath>
+    </Reference>
+    <Reference Include="GestorMensajeriaDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\GestorMensajeriaDN.dll</HintPath>
+    </Reference>
+    <Reference Include="IUComun, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\IUComun.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaBasicasDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaBasicasDN.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaDN.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaIuWin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaIuWin.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaIuWinCtrl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaIuWinCtrl.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorIU.dll</HintPath>
+    </Reference>
+    <Reference Include="MV2Controles, Version=1.0.2746.23700, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MV2Controles.dll</HintPath>
+    </Reference>
+    <Reference Include="MV2DN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MV2DN.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosAS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\ProcesosAS.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\ProcesosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="PropiedadesControles, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\PropiedadesControles.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TiposYReflexion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\TiposYReflexion.dll</HintPath>
+    </Reference>
+    <Reference Include="UsrAS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsrAS.dll</HintPath>
+    </Reference>
+    <Reference Include="UsrControladores, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsrControladores.dll</HintPath>
+    </Reference>
+    <Reference Include="UsrForm, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsrForm.dll</HintPath>
+    </Reference>
+    <Reference Include="UsuariosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsuariosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="Utilidades, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\Utilidades.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controladores\Controles\ctrlOperadorControlador.vb" />
+    <Compile Include="Controladores\Controles\EmpresasControlador.vb" />
+    <Compile Include="Controladores\Formularios\frmAdministracionArbolctrl.vb" />
+    <Compile Include="Controladores\Formularios\frmAdministracionEstadoDocumentosctrl.vb" />
+    <Compile Include="Controladores\Formularios\frmAutorizacionctrl.vb" />
+    <Compile Include="Controladores\Formularios\frmOperacionEnFicheroCtrl.vb" />
+    <Compile Include="Controladores\Formularios\frmOperadorControlador.vb" />
+    <Compile Include="ctrlOperacionEnFichero.Designer.vb">
+      <DependentUpon>ctrlOperacionEnFichero.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ctrlOperacionEnFichero.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ctrlOperador.Designer.vb">
+      <DependentUpon>ctrlOperador.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ctrlOperador.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="frmAcercaDe.Designer.vb">
+      <DependentUpon>frmAcercaDe.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAcercaDe.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAdministracionArbol.Designer.vb">
+      <DependentUpon>frmAdministracionArbol.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAdministracionArbol.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAdministracionEstadoDocumentos.Designer.vb">
+      <DependentUpon>frmAdministracionEstadoDocumentos.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAdministracionEstadoDocumentos.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAutorizacion.Designer.vb">
+      <DependentUpon>frmAutorizacion.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAutorizacion.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCargaFicheros.Designer.vb">
+      <DependentUpon>frmCargaFicheros.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmCargaFicheros.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmFormularioGenerico.Designer.vb">
+      <DependentUpon>frmFormularioGenerico.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmFormularioGenerico.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmListaOperador.Designer.vb">
+      <DependentUpon>frmListaOperador.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmListaOperador.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMain.Designer.vb">
+      <DependentUpon>frmMain.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmMain.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmOperacionEnFichero.Designer.vb">
+      <DependentUpon>frmOperacionEnFichero.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmOperacionEnFichero.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmOperador.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmOperador.Designer.vb">
+      <DependentUpon>frmOperador.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Module1.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ctrlOperacionEnFichero.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ctrlOperacionEnFichero.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ctrlOperador.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ctrlOperador.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAcercaDe.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmAcercaDe.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAdministracionArbol.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmAdministracionArbol.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAdministracionEstadoDocumentos.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmAdministracionEstadoDocumentos.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAutorizacion.resx">
+      <DependentUpon>frmAutorizacion.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCargaFicheros.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmCargaFicheros.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmFormularioGenerico.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmFormularioGenerico.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmListaOperador.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmListaOperador.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMain.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmMain.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmOperacionEnFichero.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmOperacionEnFichero.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmOperador.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmOperador.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\delete_16.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\check2_16.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="iconos\Aceptar.ico" />
+    <Content Include="iconos\Buscar.ico" />
+    <Content Include="iconos\businessman_add.ico" />
+    <Content Include="iconos\businessman_find.ico" />
+    <Content Include="iconos\Cancelar.gif" />
+    <Content Include="iconos\Crear.ico" />
+    <Content Include="iconos\document_out.png" />
+    <Content Include="iconos\element_into.ico" />
+    <Content Include="iconos\excel_16.ico" />
+    <Content Include="iconos\Guardar.ico" />
+    <Content Include="iconos\money2.png" />
+    <Content Include="iconos\NavegarEditar.ico" />
+    <Content Include="iconos\NoReferir.ico" />
+    <Content Include="iconos\NoReferirTodos.ico" />
+    <Content Include="iconos\office-building.ico" />
+    <Content Include="iconos\office-building.png" />
+    <Content Include="iconos\refresh.png" />
+    <Content Include="iconos\wrench_16.ico" />
+    <Content Include="Mapeados\FN.Empresas.DN.DepartamentoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpleadoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpleadoYPuestosRDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpresaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpresaFiscalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.PuestoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.PuestoRealizadoDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.PuestoRealizadoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.SedeEmpresaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.TipoEmpresaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.TipoSedeDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CCCDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CuentaBancariaDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CuentaBancariaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CuentaBancariaDN-CuentaBancariaDN_ligera.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.IBANDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.FicheroTransferenciaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.LimitePagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.NotificacionPagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.OrigenDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.OrigenDN-ligera.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PagoTrazaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PlantillaCartaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.ReemplazosTextoCartasDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonDN-ligera.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonDocumentoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonNegocioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TipoEntidadOrigenDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TransferenciaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TransferenciaDN-ligera.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.IEntidadBaseDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.Localizaciones.Temporales.IntervaloFechasDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Procesos.ProcesosDN.OperacionDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.ProcesosDN.OperacionDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.TiposYReflexion.DN.VinculoClaseDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.TiposYReflexion.DN.VinculoMetodoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.AutorizacionRelacionalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.CasosUsoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.HuellaRolDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.MetodoSistemaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.PermisoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.PrincipalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.RolDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.CodigoPostalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.DatosContactoEntidadDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.DireccionNoUnicaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.DireccionNoUnicaDN-dos.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.IContactoElementoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.IEntidadFiscalDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.IEntidadFiscalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.IEntidadFiscalDN-ligera.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.LocalidadDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.LocalidadDN-Ligera.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.PaisDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.ProvinciaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.ProvinciaDN-Contenido.xml" />
+    <Content Include="Mapeados\LocalizacionesDN.TipoViaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\PersonasDN.PersonaDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\PersonasDN.PersonaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\PersonasDN.PersonaFiscalDN-BASICA-ENT.xml" />
+    <Content Include="node.ico" />
+    <None Include="Resources\error_16.ico" />
+    <None Include="Resources\ C__Users_alex_Documents_Mis archivos recibidos_error_16.ico.bmp" />
+    <None Include="Resources\ok_16.gif" />
+    <None Include="Resources\disk_blue_16.ico" />
+    <None Include="Resources\delete_161.ico" />
+    <None Include="Resources\check_16.ico" />
+    <None Include="Resources\document_warning.png" />
+    <None Include="Resources\document_view.png" />
+    <None Include="Resources\document_preferences.png" />
+    <None Include="Resources\at.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\EmpresasMod\EmpresaAS\EmpresasAS.vbproj">
+      <Project>{8A15EA66-70F3-43F1-9451-7872D8ADFC00}</Project>
+      <Name>EmpresasAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\EmpresasMod\EmpresaDN\EmpresasDN.vbproj">
+      <Project>{29535641-5F2F-49B4-8CAF-E70ADCA463A9}</Project>
+      <Name>EmpresasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\FinancieroMod\FinancieroDN\FinancieroDN.vbproj">
+      <Project>{E7D4E839-6DAE-4C43-B1C9-55C2E7FE16AE}</Project>
+      <Name>FinancieroDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\GestionPagosMod\GestionPagosDN\GestionPagosDN.vbproj">
+      <Project>{72D64925-7C1F-4225-942E-8F49439128A4}</Project>
+      <Name>GestionPagosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\GestionPagosMod\GestionPagosIU\GestionPagosIU.vbproj">
+      <Project>{D3CFC3AF-98CA-46F9-A278-AFB57500F908}</Project>
+      <Name>GestionPagosIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\GestionPagosMod\GestionPagosLNC\GestionPagosLNC.vbproj">
+      <Project>{5F4A81D8-A3F4-4EF1-A878-8888A51FF92C}</Project>
+      <Name>GestionPagosLNC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\..\FrameworkNegocio\PersonasMod\PersonasDN\PersonasDN.vbproj">
+      <Project>{5C3E9247-029F-47FC-9396-E270FF57B0B4}</Project>
+      <Name>PersonasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MixtosDir\AmvDocumentosDN\AmvDocumentosDN.vbproj">
+      <Project>{ACBA2D27-2BEA-4ADB-B57F-B3145B0D6265}</Project>
+      <Name>AmvDocumentosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ClienteDocEntrantesDir\ClienteAS\ClienteAS.vbproj">
+      <Project>{336BE66C-C007-474B-B042-DCC20FCD4BA3}</Project>
+      <Name>ClienteAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ClienteSondaDir\ClienteSonda\ClienteSonda.vbproj">
+      <Project>{F598C57E-C4F0-4D0C-A206-EA34BC1A12DC}</Project>
+      <Name>ClienteSonda %28AplicacionGDE\Clientes\ClienteSonda\ClienteSonda%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ClienteAdminLNC\ClienteAdminLNC.vbproj">
+      <Project>{2355A368-B5B2-48AF-A6F0-BBCE29CE1B35}</Project>
+      <Name>ClienteAdminLNC</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

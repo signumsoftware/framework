@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="Contactos de una empresa">
+    <Position X="6.271" Y="5.312" Height="0.263" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Propietarios de una empresa">
+    <Position X="3.615" Y="6.625" Height="0.263" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Junta Directiva de una empresa">
+    <Position X="0.5" Y="5.167" Height="0.284" Width="1.867" />
+  </Comment>
+  <Class Name="EmpresasDN.EmpresaCandidataDN" Collapsed="true">
+    <Position X="0.5" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\EmpresaCandidataDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresaReferida" />
+      <Field Name="mRolColaboracion" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mRolColaboracion" Type="EmpresasDN.TipoColaboracionDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.213" Y="0.279" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.EmpresaColaboradoraDN" Collapsed="true">
+    <Position X="6.25" Y="0.75" Width="2" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\EmpresaColaboradoraDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresaReferida" />
+      <Field Name="mRolColaboracion" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mRolColaboracion" Type="EmpresasDN.TipoColaboracionDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.171" Y="0.206" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.TipoColaboracionDN" Collapsed="true">
+    <Position X="3.25" Y="1" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\TipoColaboracionDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EmpresasDN.EmpresaDN" Collapsed="true">
+    <Position X="3.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EmpresaDN.vb</FileName>
+      <HashCode>AAgAAAAAABAIACAQhAAAgAgAEAAIAAAUAAAAAAAgAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="EmpresasDN.GrupoCapacidadDecisionEmpresaFiscalDN">
+    <Position X="0.5" Y="4" Width="3" />
+    <TypeIdentifier>
+      <FileName>CapacidadDecisión\GrupoCapacidadDecisionEmpresaFiscalDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAIAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresa" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mEmpresa" Type="EmpresasDN.IEmpresaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2" Y="4" />
+        <Point X="2" Y="3.25" />
+        <Point X="3.25" Y="3.25" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.GrupoIRelacionPropiedadEmpresaDN">
+    <Position X="3" Y="5.5" Width="2.75" />
+    <TypeIdentifier>
+      <FileName>Propiedad\GrupoIRelacionPropiedadEmpresaDN.vb</FileName>
+      <HashCode>AAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEntidadPoseida" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="EmpresasDN.GrupoRelacionEmpresaEntidadDN">
+    <Position X="5.5" Y="4" Width="2.5" />
+    <TypeIdentifier>
+      <FileName>ContactosEmpresa\GrupoRelacionEmpresaEntidadDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAAAAAAAAABAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEntidad" />
+    </ShowAsAssociation>
+  </Class>
+  <Interface Name="EmpresasDN.IEmpresaDN" Collapsed="true">
+    <Position X="3.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IEmpresaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAACAAAAAAgAAAAAAIAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

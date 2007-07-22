@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{082E26BF-0D66-42E7-BEE6-0F155515C4E3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ProyectoResumen</RootNamespace>
+    <AssemblyName>ProyectoResumen</AssemblyName>
+    <MyType>Windows</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>ProyectoResumen.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>ProyectoResumen.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LocalizacionesMod\LocalizacionesAD\LocalizacionesAD.vbproj">
+      <Project>{9BA6EA03-B25C-44AC-A3A4-7376AA61A72D}</Project>
+      <Name>LocalizacionesAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LocalizacionesMod\LocalizacionesAS\LocalizacionesAS.vbproj">
+      <Project>{65ECE918-5E5B-4921-ADD2-ECAA4CD802AD}</Project>
+      <Name>LocalizacionesAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LocalizacionesMod\LocalizacionesFS\LocalizacionesFS.vbproj">
+      <Project>{8C482FFC-36E9-4923-AEF1-561EBF6F6A24}</Project>
+      <Name>LocalizacionesFS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LocalizacionesMod\LocalizacionesLN\LocalizacionesLN.vbproj">
+      <Project>{E76F9E7F-E80E-4150-B295-364D22E28E66}</Project>
+      <Name>LocalizacionesLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EmpresasMod\EmpresaAD\EmpresasAD.vbproj">
+      <Project>{DE3F5623-7953-43CC-8AF5-42DC44F56F03}</Project>
+      <Name>EmpresasAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EmpresasMod\EmpresaAS\EmpresasAS.vbproj">
+      <Project>{8A15EA66-70F3-43F1-9451-7872D8ADFC00}</Project>
+      <Name>EmpresasAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EmpresasMod\EmpresaDN\EmpresasDN.vbproj">
+      <Project>{29535641-5F2F-49B4-8CAF-E70ADCA463A9}</Project>
+      <Name>EmpresasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EmpresasMod\EmpresaFS\EmpresasFS.vbproj">
+      <Project>{80681C54-4BD1-4D97-977B-622DFF7EDF99}</Project>
+      <Name>EmpresasFS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EmpresasMod\EmpresaLN\EmpresasLN.vbproj">
+      <Project>{33E22B2C-8D23-4F03-A587-BA7E282123D0}</Project>
+      <Name>EmpresasLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FinancieroMod\FinancieroDN\FinancieroDN.vbproj">
+      <Project>{E7D4E839-6DAE-4C43-B1C9-55C2E7FE16AE}</Project>
+      <Name>FinancieroDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosAD\GestionPagosAD.vbproj">
+      <Project>{F7CA0895-99C6-494E-BC51-F402DD177215}</Project>
+      <Name>GestionPagosAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosAS\GestionPagosAS.vbproj">
+      <Project>{D071424C-E2B8-4223-B636-F596D050CB14}</Project>
+      <Name>GestionPagosAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosDN\GestionPagosDN.vbproj">
+      <Project>{72D64925-7C1F-4225-942E-8F49439128A4}</Project>
+      <Name>GestionPagosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosFS\GestionPagosFS.vbproj">
+      <Project>{ADF22D11-3A4D-4E65-BEC9-AB3C9A3FFD4A}</Project>
+      <Name>GestionPagosFS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosIU\GestionPagosIU.vbproj">
+      <Project>{D3CFC3AF-98CA-46F9-A278-AFB57500F908}</Project>
+      <Name>GestionPagosIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosLNC\GestionPagosLNC.vbproj">
+      <Project>{5F4A81D8-A3F4-4EF1-A878-8888A51FF92C}</Project>
+      <Name>GestionPagosLNC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosLNTest\GestionPagosLNTest.vbproj">
+      <Project>{C7F934E0-1876-49CA-8F1C-2E02FAABE3D1}</Project>
+      <Name>GestionPagosLNTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestionPagosMod\GestionPagosLN\GestionPagosLN.vbproj">
+      <Project>{3E74E77B-8FF8-45DE-818A-A7DF70659AAB}</Project>
+      <Name>GestionPagosLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PersonasMod\PersonasAD\PersonasAD.vbproj">
+      <Project>{C485C991-F770-4A6C-ACF5-B205E3C6279B}</Project>
+      <Name>PersonasAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PersonasMod\PersonasLN\PersonasLN.vbproj">
+      <Project>{250783A8-F3A6-4997-97AD-51A3933F7F4F}</Project>
+      <Name>PersonasLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosLN\RiesgosVehiculosLN.vbproj">
+      <Project>{384E6C78-9842-4C44-83CA-0507E32B03AD}</Project>
+      <Name>RiesgosVehiculosLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosAD\RiesgosVehiculosAD.vbproj">
+      <Project>{D1E69286-73B7-4F6C-AC39-C74D5BF25C07}</Project>
+      <Name>RiesgosVehiculosAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosAS\RiesgosVehiculosAS.vbproj">
+      <Project>{6946790A-2329-4922-A129-68C7DBDB9E9A}</Project>
+      <Name>RiesgosVehiculosAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosDN\RiesgosVehiculosDN.vbproj">
+      <Project>{BB2EB0EF-4C2D-4526-9F54-73DFA311F74D}</Project>
+      <Name>RiesgosVehiculosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosIUControladores\RiesgosVehiculosIUControladores.vbproj">
+      <Project>{7C5724D2-792D-49A3-BE8B-AD8BC95D7D44}</Project>
+      <Name>RiesgosVehiculosIUControladores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosIUControles\RiesgosVehiculosIUControles.vbproj">
+      <Project>{2DB7705E-DF8C-4C28-87DC-ED62E9C8E065}</Project>
+      <Name>RiesgosVehiculosIUControles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosIU\RiesgosVehiculosIUForms.vbproj">
+      <Project>{C4C6EECD-70C5-46E3-86E5-5CBE0CAD33E6}</Project>
+      <Name>RiesgosVehiculosIUForms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehiculosTest\RiesgosVehiculosTest.vbproj">
+      <Project>{A12A4522-B191-4DD4-AE28-0258E4B99423}</Project>
+      <Name>RiesgosVehiculosTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosMod\RiesgosVehículosFS\RiesgosVehículosFS.vbproj">
+      <Project>{5A078767-766E-497B-8DAE-A09A7C6958B7}</Project>
+      <Name>RiesgosVehículosFS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SegurosMod\PolizasMod\PolizasAD\PolizasAD.vbproj">
+      <Project>{6C892444-C723-4740-871A-3CF6BF2959E4}</Project>
+      <Name>PolizasAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SegurosMod\PolizasMod\PolizasDN\PolizasDN.vbproj">
+      <Project>{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}</Project>
+      <Name>PolizasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SegurosMod\PolizasMod\PolizasFS\PolizasFS.vbproj">
+      <Project>{28EF22B9-893E-4D3A-B66A-F9FAD913ED39}</Project>
+      <Name>PolizasFS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SegurosMod\PolizasMod\PolizasIU\PolizasIU.vbproj">
+      <Project>{35C9F4FF-98E3-4B93-9BD4-488FECE7B5E2}</Project>
+      <Name>PolizasIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SegurosMod\PolizasMod\PolizasLN\PolizasLN.vbproj">
+      <Project>{823CA5CC-C8EE-4EF2-ABFE-4E76A5FEE8F2}</Project>
+      <Name>PolizasLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TrabajosMod\TrabajosAD\TrabajosAD.vbproj">
+      <Project>{0A8DCB09-B13F-4727-9739-A551B83B170B}</Project>
+      <Name>TrabajosAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TrabajosMod\TrabajosDN\TrabajosDN.vbproj">
+      <Project>{8060BBA6-86E6-4EF6-9166-9D4127679FAD}</Project>
+      <Name>TrabajosDN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

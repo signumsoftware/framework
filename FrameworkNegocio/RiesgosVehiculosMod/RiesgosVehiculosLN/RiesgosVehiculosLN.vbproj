@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{384E6C78-9842-4C44-83CA-0507E32B03AD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FN.RiesgosVehiculos.LN.RiesgosVehiculosLN</RootNamespace>
+    <AssemblyName>RiesgosVehiculosLN</AssemblyName>
+    <MyType>Windows</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>RiesgosVehiculosLN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>RiesgosVehiculosLN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ClaseBaseLN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\ClaseBaseLN.dll</HintPath>
+    </Reference>
+    <Reference Include="Configuracion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\Configuracion.dll</HintPath>
+    </Reference>
+    <Reference Include="CuestionarioDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\CuestionarioDN.dll</HintPath>
+    </Reference>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosAD, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\FicherosAD.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Proyectos\AMV\GestionSegurosAMV\Compilados\FicherosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosLN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\FicherosLN.dll</HintPath>
+    </Reference>
+    <Reference Include="LogicaNegocios, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Proyectos\AMV\GestionSegurosAMV\Compilados\LogicaNegocios.dll</HintPath>
+    </Reference>
+    <Reference Include="NotasDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\NotasDN.dll</HintPath>
+    </Reference>
+    <Reference Include="OperacionesDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\OperacionesDN.dll</HintPath>
+    </Reference>
+    <Reference Include="OperProgDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\OperProgDN.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\ProcesosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosLN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\ProcesosLN.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TiposYReflexion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\TiposYReflexion.dll</HintPath>
+    </Reference>
+    <Reference Include="Transacciones, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\Transacciones.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="LiquidadorConcretoRVLN.vb" />
+    <Compile Include="PolizaRvLcLN.vb" />
+    <Compile Include="PolizasOperLN.vb" />
+    <Compile Include="PrimasBaseLN.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="RecNivelBonificacionLN.vb" />
+    <Compile Include="RiesgosVehiculosLN.vb" />
+    <Compile Include="RVIRecSumiValorLN.vb" />
+    <Compile Include="TarificadorRVLN.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EmpresasMod\EmpresaAD\EmpresasAD.vbproj">
+      <Project>{DE3F5623-7953-43CC-8AF5-42DC44F56F03}</Project>
+      <Name>EmpresasAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\EmpresasMod\EmpresaDN\EmpresasDN.vbproj">
+      <Project>{29535641-5F2F-49B4-8CAF-E70ADCA463A9}</Project>
+      <Name>EmpresasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GestionPagosMod\GestionPagosAD\GestionPagosAD.vbproj">
+      <Project>{F7CA0895-99C6-494E-BC51-F402DD177215}</Project>
+      <Name>GestionPagosAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GestionPagosMod\GestionPagosDN\GestionPagosDN.vbproj">
+      <Project>{72D64925-7C1F-4225-942E-8F49439128A4}</Project>
+      <Name>GestionPagosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GestionPagosMod\GestionPagosLN\GestionPagosLN.vbproj">
+      <Project>{3E74E77B-8FF8-45DE-818A-A7DF70659AAB}</Project>
+      <Name>GestionPagosLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\PersonasMod\PersonasDN\PersonasDN.vbproj">
+      <Project>{5C3E9247-029F-47FC-9396-E270FF57B0B4}</Project>
+      <Name>PersonasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosAD\RiesgosVehiculosAD.vbproj">
+      <Project>{D1E69286-73B7-4F6C-AC39-C74D5BF25C07}</Project>
+      <Name>RiesgosVehiculosAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosDN\RiesgosVehiculosDN.vbproj">
+      <Project>{BB2EB0EF-4C2D-4526-9F54-73DFA311F74D}</Project>
+      <Name>RiesgosVehiculosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SegurosMod\PolizasMod\PolizasAD\PolizasAD.vbproj">
+      <Project>{6C892444-C723-4740-871A-3CF6BF2959E4}</Project>
+      <Name>PolizasAD</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SegurosMod\PolizasMod\PolizasDN\PolizasDN.vbproj">
+      <Project>{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}</Project>
+      <Name>PolizasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SegurosMod\PolizasMod\PolizasLN\PolizasLN.vbproj">
+      <Project>{823CA5CC-C8EE-4EF2-ABFE-4E76A5FEE8F2}</Project>
+      <Name>PolizasLN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

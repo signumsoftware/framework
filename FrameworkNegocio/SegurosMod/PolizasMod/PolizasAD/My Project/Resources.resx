@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="vwAlertasProximasVencimiento" xml:space="preserve">
+    <value>create view vwAlertasProximasVencimiento as
+
+SELECT     ID, Nombre, Comentario, FEjecProgramada, Atendida, Usuario, GUIDReferida
+FROM         dbo.vwAlertasyUsuario
+WHERE     (FEjecProgramada &lt; GETDATE() - 1) AND (Atendida = 0)</value>
+  </data>
+  <data name="vwAlertasxPresupuesto" xml:space="preserve">
+    <value>create view vwAlertasxPresupuesto as SELECT     dbo.tlAlertaDN.ID, dbo.tlAlertaDN.Nombre, dbo.tlAlertaDN.Comentario, dbo.tlAlertaDN.FEjecProgramada, dbo.tlAlertaDN.Atendida, 
+                      dbo.tlUsuarioDN.Nombre AS Usuario, dbo.tlHEDN.GUIDReferida
+FROM         dbo.tlAlertaDN INNER JOIN
+                      dbo.trtlAlertaDNColHEntidadXtlHEDN ON dbo.tlAlertaDN.ID = dbo.trtlAlertaDNColHEntidadXtlHEDN.idttlAlertaDN INNER JOIN
+                      dbo.tlHEDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlHEDN.GUID LEFT OUTER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlAlertaDN.idCreador = dbo.tlUsuarioDN.ID</value>
+  </data>
+  <data name="vwAlertasyUsuario" xml:space="preserve">
+    <value>create view vwAlertasyUsuario as
+SELECT     dbo.tlAlertaDN.ID, dbo.tlAlertaDN.Nombre, dbo.tlAlertaDN.Comentario, dbo.tlAlertaDN.FEjecProgramada, dbo.tlAlertaDN.Atendida, 
+                      dbo.tlUsuarioDN.Nombre AS Usuario, dbo.tlHEDN.GUIDReferida
+FROM         dbo.tlAlertaDN INNER JOIN
+                      dbo.trtlAlertaDNColHEntidadXtlHEDN ON dbo.tlAlertaDN.ID = dbo.trtlAlertaDNColHEntidadXtlHEDN.idttlAlertaDN INNER JOIN
+                      dbo.tlHEDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlHEDN.GUID LEFT OUTER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlAlertaDN.idCreador = dbo.tlUsuarioDN.ID</value>
+  </data>
+  <data name="vwCajonDocumentoVerificableXPoliza" xml:space="preserve">
+    <value>create view vwCajonDocumentoVerificableXPoliza as SELECT     dbo.tlCajonDocumentoDN.ID, dbo.tlPeriodoRenovacionPolizaDN.ID AS idPR
+FROM         dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN INNER JOIN
+                      dbo.tlCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN = dbo.tlCajonDocumentoDN.ID
+                       INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN = dbo.tlPeriodoRenovacionPolizaDN.GUID
+WHERE     (dbo.tlCajonDocumentoDN.FechaVerificacon IS NULL) AND (dbo.tlCajonDocumentoDN.idDocumento IS NOT NULL)</value>
+  </data>
+  <data name="vwCajonDocumentoVerificableXPresupuesto" xml:space="preserve">
+    <value>create view vwCajonDocumentoVerificableXPresupuesto as
+
+SELECT     dbo.tlCajonDocumentoDN.ID, dbo.tlPresupuestoDN.ID AS idPresupuesto, dbo.tlPeriodoCoberturaDN.ID AS idPeridoCobertura
+FROM         dbo.tlPeriodoCoberturaDN RIGHT OUTER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN ON 
+                      dbo.tlPresupuestoDN.GUID = dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN
+                       INNER JOIN
+                      dbo.tlCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN = dbo.tlCajonDocumentoDN.ID
+                       ON dbo.tlPeriodoCoberturaDN.idTarifa = dbo.tlPresupuestoDN.idTarifa
+WHERE     (dbo.tlCajonDocumentoDN.FechaVerificacon IS NULL) AND (dbo.tlPeriodoCoberturaDN.ID IS NULL) AND 
+                      (dbo.tlCajonDocumentoDN.idDocumento IS NOT NULL) AND (dbo.tlPresupuestoDN.FechaAnulacion IS NULL)</value>
+  </data>
+  <data name="vwCajonDocxPoliza" xml:space="preserve">
+    <value>create view vwCajonDocxPoliza as 
+SELECT     dbo.tlCajonDocumentoDN.ID, dbo.tlCajonDocumentoDN.FechaVerificacon, dbo.tlTipoFicheroDN.Nombre, dbo.tlCajonDocumentoDN.idDocumento, 
+                      dbo.tlAlertaDN.FEjecProgramada, dbo.tlAlertaDN.prioridad, dbo.tlAlertaDN.Comentario, dbo.tlPolizaDN.ID AS idPoliza
+FROM         dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN INNER JOIN
+                      dbo.tlCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN = dbo.tlCajonDocumentoDN.ID
+                       INNER JOIN
+                      dbo.tlTipoFicheroDN ON dbo.tlCajonDocumentoDN.idTipoDocumento = dbo.tlTipoFicheroDN.ID INNER JOIN
+                      dbo.tlAlertaDN ON dbo.tlCajonDocumentoDN.idAlerta = dbo.tlAlertaDN.ID INNER JOIN
+                      dbo.tlPolizaDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN = dbo.tlPolizaDN.GUID</value>
+  </data>
+  <data name="vwCajonDocxPresupuesto" xml:space="preserve">
+    <value>create view vwCajonDocxPresupuesto as SELECT     dbo.tlCajonDocumentoDN.ID, dbo.tlPresupuestoDN.ID AS idPresupuesto, dbo.tlCajonDocumentoDN.FechaVerificacon, dbo.tlTipoFicheroDN.Nombre, 
+                      dbo.tlCajonDocumentoDN.idDocumento, dbo.tlAlertaDN.FEjecProgramada, dbo.tlAlertaDN.prioridad, dbo.tlAlertaDN.Comentario
+FROM         dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN INNER JOIN
+                      dbo.tlCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN = dbo.tlCajonDocumentoDN.ID
+                       INNER JOIN
+                      dbo.tlPresupuestoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN = dbo.tlPresupuestoDN.GUID
+                       INNER JOIN
+                      dbo.tlTipoFicheroDN ON dbo.tlCajonDocumentoDN.idTipoDocumento = dbo.tlTipoFicheroDN.ID INNER JOIN
+                      dbo.tlAlertaDN ON dbo.tlCajonDocumentoDN.idAlerta = dbo.tlAlertaDN.ID</value>
+  </data>
+  <data name="vwImportesDebidosIncidentadosXPR" xml:space="preserve">
+    <value>create view vwImportesDebidosIncidentadosXPR as 
+
+SELECT     dbo.vwImportesDebidosIncidentados.*, dbo.tlPeriodoRenovacionPolizaOidDN.idPeriodoRenovacionPoliza
+FROM         dbo.vwImportesDebidosIncidentados INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaOidDN ON 
+                      dbo.vwImportesDebidosIncidentados.idID = dbo.tlPeriodoRenovacionPolizaOidDN.idIImporteDebidoApunteImpDDN</value>
+  </data>
+  <data name="vwLiquidacionesxPolizas" xml:space="preserve">
+    <value>create view vwLiquidacionesxPolizas as SELECT     dbo.vwLiquidacionesXPago.ID, dbo.tlPeriodoRenovacionPolizaDN.idPoliza, dbo.tlPeriodoRenovacionPolizaOidDN.idPeriodoRenovacionPoliza, 
+                      dbo.tlPeriodoRenovacionPolizaDN.Periodo_FInicio AS fiPR, dbo.tlPeriodoRenovacionPolizaDN.Periodo_FFinal AS ffPR, 
+                      dbo.vwLiquidacionesXPago.idPago, dbo.vwLiquidacionesXPago.ImportePago, dbo.vwLiquidacionesXPago.fePago, dbo.vwLiquidacionesXPago.faPago, 
+                      dbo.vwLiquidacionesXPago.fcID, dbo.vwLiquidacionesXPago.feID, dbo.vwLiquidacionesXPago.faID, dbo.vwLiquidacionesXPago.Importe, 
+                      dbo.vwLiquidacionesXPago.Acreedora, dbo.vwLiquidacionesXPago.Deudora
+FROM         dbo.vwLiquidacionesXPago INNER JOIN
+                      dbo.tlPagoDN ON dbo.vwLiquidacionesXPago.idPago = dbo.tlPagoDN.ID INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaOidDN ON 
+                      dbo.tlPagoDN.idApunteImpDOrigen = dbo.tlPeriodoRenovacionPolizaOidDN.idIImporteDebidoApunteImpDDN INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaDN ON dbo.tlPeriodoRenovacionPolizaOidDN.idPeriodoRenovacionPoliza = dbo.tlPeriodoRenovacionPolizaDN.ID</value>
+  </data>
+  <data name="vwNotasxPeridoRenovacion" xml:space="preserve">
+    <value>create view vwNotasxPeridoRenovacion as SELECT     dbo.tlNotaDN.ID, dbo.tlNotaDN.Nombre, dbo.tlNotaDN.Comentario, dbo.tlUsuarioDN.Nombre AS Usuario, dbo.tlNotaDN.FechaCreacion, 
+                      dbo.tlPeriodoRenovacionPolizaDN.ID AS idPR, dbo.tlPeriodoRenovacionPolizaDN.GUID AS guidPR
+FROM         dbo.tlNotaDN INNER JOIN
+                      dbo.trtlNotaDNColHEntidadXtlHEDN ON dbo.tlNotaDN.ID = dbo.trtlNotaDNColHEntidadXtlHEDN.idttlNotaDN INNER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlNotaDN.idCreador = dbo.tlUsuarioDN.ID INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaDN ON dbo.trtlNotaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlPeriodoRenovacionPolizaDN.GUID</value>
+  </data>
+  <data name="vwNotasxPoliza" xml:space="preserve">
+    <value>create view vwNotasxPoliza as SELECT     dbo.tlNotaDN.ID, dbo.tlNotaDN.Nombre, dbo.tlNotaDN.Comentario, dbo.tlUsuarioDN.Nombre AS Usuario, dbo.tlNotaDN.FechaCreacion, 
+                      dbo.tlPolizaDN.NumeroPoliza, dbo.tlPolizaDN.ID AS idPoliza, dbo.tlPolizaDN.GUID AS guidPoliza
+FROM         dbo.tlNotaDN INNER JOIN
+                      dbo.trtlNotaDNColHEntidadXtlHEDN ON dbo.tlNotaDN.ID = dbo.trtlNotaDNColHEntidadXtlHEDN.idttlNotaDN INNER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlNotaDN.idCreador = dbo.tlUsuarioDN.ID INNER JOIN
+                      dbo.tlPolizaDN ON dbo.trtlNotaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlPolizaDN.GUID</value>
+  </data>
+  <data name="vwPagosxPolizaSimple" xml:space="preserve">
+    <value>create view vwPagosxPolizaSimple as 
+
+SELECT     dbo.tlPagoDN.ID, dbo.tlPagoDN.ImportePago, dbo.tlPagoDN.FechaProgramadaEmision, dbo.tlPagoDN.FechaEmision, 
+                      dbo.tlPagoDN.FechaEfectoEsperada, dbo.tlPagoDN.FechaEfecto, dbo.tlPagoDN.FechaAnulacion, dbo.tlEntidadFiscalGenericaDN.ToSt AS Deudor, 
+                      tlEntidadFiscalGenericaDN_1.ToSt AS Acreedor, dbo.tlPolizaDN.ID AS idPol, dbo.tlPolizaDN.NumeroPoliza, 
+                      dbo.tlPeriodoRenovacionPolizaDN.ID AS idPeriodoRenovacion
+FROM         dbo.tlApunteImpDDN INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaOidDN ON dbo.tlApunteImpDDN.ID = dbo.tlPeriodoRenovacionPolizaOidDN.idIImporteDebidoApunteImpDDN INNER JOIN
+                      dbo.tlPolizaDN INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaDN ON dbo.tlPolizaDN.ID = dbo.tlPeriodoRenovacionPolizaDN.idPoliza ON 
+                      dbo.tlPeriodoRenovacionPolizaOidDN.idPeriodoRenovacionPoliza = dbo.tlPeriodoRenovacionPolizaDN.ID LEFT OUTER JOIN
+                      dbo.tlPagoDN RIGHT OUTER JOIN
+                      dbo.tlEntidadFiscalGenericaDN AS tlEntidadFiscalGenericaDN_1 ON dbo.tlPagoDN.idDestinatario = tlEntidadFiscalGenericaDN_1.ID RIGHT OUTER JOIN
+                      dbo.tlEntidadFiscalGenericaDN ON dbo.tlPagoDN.idDeudor = dbo.tlEntidadFiscalGenericaDN.ID ON 
+                      dbo.tlApunteImpDDN.ID = dbo.tlPagoDN.idApunteImpDOrigen</value>
+  </data>
+  <data name="vwPeridosRenovacionAlertados" xml:space="preserve">
+    <value>create view vwPeridosRenovacionAlertados as
+
+SELECT DISTINCT 
+                      dbo.tlPeriodoRenovacionPolizaDN.ID, dbo.tlPeriodoRenovacionPolizaDN.idPoliza, dbo.tlPeriodoRenovacionPolizaDN.idPeriodoCoberturaActivo, 
+                      dbo.tlAlertaDN.ID AS idAlerta
+FROM         dbo.trtlAlertaDNColHEntidadXtlHEDN INNER JOIN
+                      dbo.tlAlertaDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idttlAlertaDN = dbo.tlAlertaDN.ID INNER JOIN
+                      dbo.tlHEDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlHEDN.GUID INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaDN ON dbo.tlHEDN.GUIDReferida = dbo.tlPeriodoRenovacionPolizaDN.GUID
+WHERE     (dbo.tlAlertaDN.FEjecProgramada &lt; GETDATE())</value>
+  </data>
+  <data name="vwPeridosRenovacionImpDebIncidentados" xml:space="preserve">
+    <value>create view vwPeridosRenovacionImpDebIncidentados as
+
+SELECT     dbo.tlPeriodoRenovacionPolizaDN.ID, dbo.vwImportesDebidosIncidentados.comentario, dbo.tlPeriodoRenovacionPolizaDN.Periodo_FInicio, 
+                      dbo.tlPeriodoRenovacionPolizaDN.Periodo_FFinal, dbo.tlPolizaDN.ID AS idPoliza, dbo.tlTomadorDN.Vetado, dbo.tlTomadorDN.NoRenovacion, 
+                      dbo.tlTomadorDN.EsImpago, dbo.tlTomadorDN.ToSt AS Tomador
+FROM         dbo.tlPeriodoRenovacionPolizaDN INNER JOIN
+                      dbo.tlPolizaDN ON dbo.tlPeriodoRenovacionPolizaDN.idPoliza = dbo.tlPolizaDN.ID INNER JOIN
+                      dbo.tlTomadorDN ON dbo.tlPolizaDN.idTomador = dbo.tlTomadorDN.ID INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaOidDN ON 
+                      dbo.tlPeriodoRenovacionPolizaDN.ID = dbo.tlPeriodoRenovacionPolizaOidDN.idPeriodoRenovacionPoliza INNER JOIN
+                      dbo.vwImportesDebidosIncidentados ON 
+                      dbo.tlPeriodoRenovacionPolizaOidDN.idIImporteDebidoApunteImpDDN = dbo.vwImportesDebidosIncidentados.idID</value>
+  </data>
+  <data name="vwPeriodoRenovacionVisRapida" xml:space="preserve">
+    <value>create view vwPeriodoRenovacionVisRapida  as
+
+SELECT     dbo.tlPeriodoRenovacionPolizaDN.ID AS id, dbo.tlPolizaDN.NumeroPoliza, dbo.tlTomadorDN.ToSt AS Tomador, dbo.tlRiesgoMotorDN.ToSt AS Riesgo, 
+                      dbo.tlPeriodoRenovacionPolizaDN.FCreacion, dbo.tlPeriodoRenovacionPolizaDN.Periodo_FInicio, dbo.tlPeriodoRenovacionPolizaDN.Periodo_FFinal, 
+                      dbo.tlPeriodoRenovacionPolizaDN.FechaBaja
+FROM         dbo.tlPeriodoRenovacionPolizaDN INNER JOIN
+                      dbo.tlPolizaDN ON dbo.tlPeriodoRenovacionPolizaDN.idPoliza = dbo.tlPolizaDN.ID INNER JOIN
+                      dbo.tlPeriodoCoberturaDN ON dbo.tlPeriodoRenovacionPolizaDN.idPeriodoCoberturaActivo = dbo.tlPeriodoCoberturaDN.ID INNER JOIN
+                      dbo.tlTomadorDN ON dbo.tlPolizaDN.idTomador = dbo.tlTomadorDN.ID INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPeriodoCoberturaDN.idTarifa = dbo.tlTarifaDN.ID INNER JOIN
+                      dbo.tlRiesgoMotorDN ON dbo.tlTarifaDN.idRiesgoRiesgoMotorDN = dbo.tlRiesgoMotorDN.ID</value>
+  </data>
+  <data name="vwPeriodosRenovacionActivoSel" xml:space="preserve">
+    <value>create view vwPeriodosRenovacionActivoSel as
+
+SELECT     ID
+FROM         dbo.vwPeridosRenovacionAlertados
+UNION
+SELECT     idPR AS ID
+FROM         dbo.vwPeriodosRenovacionXCajonDocVerificables
+UNION
+SELECT     ID
+FROM         dbo.vwPeridosRenovacionImpDebIncidentados</value>
+  </data>
+  <data name="vwPeriodosRenovacionXCajonDocVerificables" xml:space="preserve">
+    <value>create view vwPeriodosRenovacionXCajonDocVerificables  as SELECT     dbo.tlPeriodoRenovacionPolizaDN.ID AS idPR, dbo.tlPeriodoRenovacionPolizaDN.idPoliza, dbo.tlCajonDocumentoDN.ID AS idCD
+FROM         dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN INNER JOIN
+                      dbo.tlCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN = dbo.tlCajonDocumentoDN.ID
+                       INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN = dbo.tlPeriodoRenovacionPolizaDN.GUID
+WHERE     (dbo.tlCajonDocumentoDN.FechaVerificacon IS NULL) AND (dbo.tlCajonDocumentoDN.idDocumento IS NOT NULL)</value>
+  </data>
+  <data name="vwPolizasXAlerta" xml:space="preserve">
+    <value>create view vwPolizasXAlerta as SELECT     dbo.tlPeriodoRenovacionPolizaDN.ID, dbo.tlPolizaDN.NumeroPoliza, dbo.tlPeriodoRenovacionPolizaDN.FCreacion, 
+                      dbo.tlPeriodoRenovacionPolizaDN.FechaBaja, dbo.tlPeriodoRenovacionPolizaDN.Periodo_FFinal, dbo.tlPeriodoRenovacionPolizaDN.Periodo_FInicio, 
+                      dbo.tlAlertaDN.Atendida, dbo.tlAlertaDN.prioridad, dbo.tlAlertaDN.FEjecProgramada, dbo.tlAlertaDN.Comentario, dbo.tlAlertaDN.idCreador
+FROM         dbo.trtlAlertaDNColHEntidadXtlHEDN INNER JOIN
+                      dbo.tlAlertaDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idttlAlertaDN = dbo.tlAlertaDN.ID LEFT OUTER JOIN
+                      dbo.tlHEDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlHEDN.GUID RIGHT OUTER JOIN
+                      dbo.tlPolizaDN INNER JOIN
+                      dbo.tlPeriodoRenovacionPolizaDN ON dbo.tlPolizaDN.ID = dbo.tlPeriodoRenovacionPolizaDN.idPoliza ON dbo.tlHEDN.GUID = dbo.tlPolizaDN.GUID</value>
+  </data>
+  <data name="vwPresupActivoPositSel" xml:space="preserve">
+    <value>create view vwPresupActivoPositSel as SELECT     ID
+FROM         dbo.vwPresupuestosAlertados
+UNION
+SELECT     ID
+FROM         dbo.vwPresupuestosxCDVerificable</value>
+  </data>
+  <data name="vwPresupuestos2" xml:space="preserve">
+    <value>create view vwPresupuestos2 as SELECT     dbo.tlPresupuestoDN.ID, dbo.tlMarcaDN.Nombre AS Marca, dbo.tlModeloDN.Nombre AS Modelo, dbo.tlRiesgoMotorDN.Cilindrada, 
+                      dbo.tlFuturoTomadorDN.Nombre, 
+                      dbo.tlFuturoTomadorDN.Apellido1FuturoTomador, dbo.tlFuturoTomadorDN.Apellido2FuturoTomador, dbo.tlTarifaDN.Importe,
+                      dbo.tlFuturoTomadorDN.NIFCIFFuturoTomador AS CifNif, dbo.tlRiesgoMotorDN.NumeroBastidor, dbo.tlRiesgoMotorDN.ValorMatricula AS Matricula, dbo.tlTarifaDN.ToSt
+FROM         dbo.tlPresupuestoDN INNER JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER JOIN
+                      dbo.tlRiesgoMotorDN ON dbo.tlTarifaDN.idRiesgoRiesgoMotorDN = dbo.tlRiesgoMotorDN.ID INNER JOIN
+                      dbo.tlModeloDN ON dbo.tlRiesgoMotorDN.idModelo = dbo.tlModeloDN.ID INNER JOIN
+                      dbo.tlMarcaDN ON dbo.tlModeloDN.idMarca = dbo.tlMarcaDN.ID INNER JOIN
+                      dbo.tlFuturoTomadorDN ON dbo.tlPresupuestoDN.idFuturoTomador = dbo.tlFuturoTomadorDN.ID</value>
+  </data>
+  <data name="vwPresupuestosAlertados" xml:space="preserve">
+    <value>create view vwPresupuestosAlertados as SELECT   DISTINCT  dbo.tlPresupuestoDN.ID
+FROM         dbo.trtlAlertaDNColHEntidadXtlHEDN INNER JOIN
+                      dbo.tlAlertaDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idttlAlertaDN = dbo.tlAlertaDN.ID INNER JOIN
+                      dbo.tlHEDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlHEDN.GUID INNER JOIN
+                      dbo.tlPresupuestoDN ON dbo.tlHEDN.GUIDReferida = dbo.tlPresupuestoDN.GUID LEFT OUTER JOIN
+                      dbo.tlPeriodoCoberturaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlPeriodoCoberturaDN.idTarifa
+WHERE     (dbo.tlPeriodoCoberturaDN.ID IS NULL) AND (dbo.tlPresupuestoDN.FechaAnulacion IS NULL) AND (dbo.tlAlertaDN.FEjecProgramada &lt; GETDATE())</value>
+  </data>
+  <data name="vwPresupuestosxCDVerificable" xml:space="preserve">
+    <value>create view vwPresupuestosxCDVerificable as SELECT     dbo.tlPresupuestoDN.ID
+FROM         dbo.tlPeriodoCoberturaDN RIGHT OUTER JOIN
+                      dbo.tlPresupuestoDN INNER JOIN
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN ON 
+                      dbo.tlPresupuestoDN.GUID = dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN
+                       INNER JOIN
+                      dbo.tlCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN = dbo.tlCajonDocumentoDN.ID
+                       ON dbo.tlPeriodoCoberturaDN.idTarifa = dbo.tlPresupuestoDN.idTarifa
+WHERE     (dbo.tlCajonDocumentoDN.FechaVerificacon IS NULL) AND (dbo.tlPeriodoCoberturaDN.ID IS NULL) AND 
+                      (dbo.tlCajonDocumentoDN.idDocumento IS NOT NULL) AND (dbo.tlPresupuestoDN.FechaAnulacion IS NULL)</value>
+  </data>
+  <data name="vwTomadorEntidadFiscalGen" xml:space="preserve">
+    <value>create view vwTomadorEntidadFiscalGen as SELECT     dbo.tlTomadorDN.ID AS idtomador, dbo.tlEntidadFiscalGenericaDN.ValorCifNif, dbo.tlTomadorDN.Baja
+FROM         dbo.tlTomadorDN INNER JOIN
+                      dbo.tlEntidadFiscalGenericaDN ON dbo.tlTomadorDN.idEntidadFiscalGenerica = dbo.tlEntidadFiscalGenericaDN.ID</value>
+  </data>
+</root>

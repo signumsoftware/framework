@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BB2EB0EF-4C2D-4526-9F54-73DFA311F74D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FN.RiesgosVehiculos.DN</RootNamespace>
+    <AssemblyName>RiesgosVehiculosDN</AssemblyName>
+    <MyType>Windows</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>RiesgosVehiculosDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>RiesgosVehiculosDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CuestionarioDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\CuestionarioDN.dll</HintPath>
+    </Reference>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\FicherosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="MNavegacionDatosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\MNavegacionDatosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="OperacionesDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\OperacionesDN.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TarificadorDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\TarificadorDN.dll</HintPath>
+    </Reference>
+    <Reference Include="TiposyReflexionLN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\TiposyReflexionLN.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AcreedoraTarifasConf.vb" />
+    <Compile Include="BonificacionDN.vb" />
+    <Compile Include="BonificacionRVDN.vb" />
+    <Compile Include="BonificacionRVSVDN.vb" />
+    <Compile Include="CategoriaDN.vb" />
+    <Compile Include="ComisionDN.vb" />
+    <Compile Include="ComisionRVDN.vb" />
+    <Compile Include="ComisionRVSVDN.vb" />
+    <Compile Include="DatosColaboradorDN.vb" />
+    <Compile Include="FraccionamientoRVDN.vb" />
+    <Compile Include="FraccionamientoRVSVDN.vb" />
+    <Compile Include="IOperacionCausaRVCacheDN.vb" />
+    <Compile Include="IRecuperadorNivelBonificacion.vb" />
+    <Compile Include="OperacionBonificacionRVCacheDN.vb" />
+    <Compile Include="OperacionComisionRVCacheDN.vb" />
+    <Compile Include="CuestionarioVehiculos.vb" />
+    <Compile Include="DatosMCND.vb" />
+    <Compile Include="GrupoConcesionarioDN.vb" />
+    <Compile Include="OperacionFracRVCacheDN.vb" />
+    <Compile Include="OperacionModuladorRVCacheDN.vb" />
+    <Compile Include="OperacionPrimaBaseRVCacheDN.vb" />
+    <Compile Include="OperacionImpuestoRVCacheDN.vb" />
+    <Compile Include="ConductorDN.vb" />
+    <Compile Include="ImpuestoDN.vb" />
+    <Compile Include="ImpuestoRVDN.vb" />
+    <Compile Include="ImpuestoRVSVDN.vb" />
+    <Compile Include="ModeloDatosDN.vb" />
+    <Compile Include="DatosTarifaVehiculosDN.vb" />
+    <Compile Include="MarcaDN.vb" />
+    <Compile Include="MatriculaDN.vb" />
+    <Compile Include="ModeloDN.vb" />
+    <Compile Include="ModuladorDN.vb" />
+    <Compile Include="ModuladorRVDN.vb" />
+    <Compile Include="ModuladorRVSVDN.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="NumeroBastidorDN.vb" />
+    <Compile Include="OperacionSumaRVCacheDN.vb" />
+    <Compile Include="PeriodoRenovacionPolizaOidDN.vb" />
+    <Compile Include="PrimaBaseRVDN.vb" />
+    <Compile Include="PrimabaseRVSVDN.vb" />
+    <Compile Include="RiesgoMotorDN.vb" />
+    <Compile Include="TipoModuladorDN.vb" />
+    <Compile Include="ValorMCNDCaracteristicaDN.vb" />
+    <Compile Include="ValorCPCaracteristicaDN.vb" />
+    <Compile Include="ValorDireccionNoUnicaCaracteristicaDN.vb" />
+    <Compile Include="ValorLocalidadCaracteristicaDN.vb" />
+    <Compile Include="ValorMarcaCaracterisitcaDN.vb" />
+    <Compile Include="ValorModeloCaracteristicaDN.vb" />
+    <Compile Include="ValorSexoCaracteristicaDN.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cdComisiones.cd" />
+    <None Include="cdImportesDebidosPagos.cd" />
+    <None Include="cdImpuestos.cd" />
+    <None Include="cdPrimaBase.cd" />
+    <None Include="cdModuladores.cd" />
+    <None Include="cdRiesgoVeiculo.cd" />
+    <None Include="dcCache.cd" />
+    <None Include="DiagramaRiesgosVehiculos.cd" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EmpresasMod\EmpresaDN\EmpresasDN.vbproj">
+      <Project>{29535641-5F2F-49B4-8CAF-E70ADCA463A9}</Project>
+      <Name>EmpresasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GestionPagosMod\GestionPagosDN\GestionPagosDN.vbproj">
+      <Project>{72D64925-7C1F-4225-942E-8F49439128A4}</Project>
+      <Name>GestionPagosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\PersonasMod\PersonasDN\PersonasDN.vbproj">
+      <Project>{5C3E9247-029F-47FC-9396-E270FF57B0B4}</Project>
+      <Name>PersonasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SegurosMod\PolizasMod\PolizasDN\PolizasDN.vbproj">
+      <Project>{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}</Project>
+      <Name>PolizasDN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

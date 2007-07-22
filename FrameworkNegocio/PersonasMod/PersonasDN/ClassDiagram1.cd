@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="FN.Personas.DN.PersonaDN">
+    <Position X="1.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PersonaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAgAAAUEAAAAAAAAAAAgQAIAQAAAAAAAAI=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Personas.DN.PersonaFiscalDN">
+    <Position X="4.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PersonaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAIAgAEBAABAAAAAQAAABAMQBAEAQACBAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEntidadFiscalGenerica" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.Localizaciones.DN.EntidadFiscalGenericaDN">
+    <Position X="7.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+</ClassDiagram>

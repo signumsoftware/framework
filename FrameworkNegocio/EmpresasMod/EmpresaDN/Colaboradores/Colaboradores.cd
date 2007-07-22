@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="FN.Empresas.DN.AgrupacionDeEmpresasDN" Collapsed="true">
+    <Position X="7.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Colaboradores\AgrupacionDeEmpresasDN.vb</FileName>
+      <HashCode>AAAAIQAAAEAAAAAAAAAAQgAAAAAAAAAAACAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTipoAgrupacionEmpresa" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColEmpresasDN" />
+      <Field Name="mColAgrupacionDeEmpresasDN" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColAgrupacionDeEmpresasDN" Type="FN.Empresas.DN.AgrupacionDeEmpresasDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.317" Y="0.435" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mTipoAgrupacionEmpresa" Type="FN.Empresas.DN.TipoAgrupacionEmpresa">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.659" Y="0.652" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Empresas.DN.EmpresaDN" Collapsed="true">
+    <Position X="7.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EmpresaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAACIEAAEBAAAAAAAAAAAIAAAAAAAgABA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Empresas.DN.EmpleadoDN" Collapsed="true">
+    <Position X="7.25" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EmpleadoDN.vb</FileName>
+      <HashCode>AAAQAAAAgIAAAAAEFAAAAAACAEAAAQBIAhAEAAgCAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mSedeEmpresa" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.Empresas.DN.SedeEmpresaDN" Collapsed="true">
+    <Position X="7.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>SedeEmpresaDN.vb</FileName>
+      <HashCode>ABAAEAAAAQAAAIAUACAAgSAAQACCAQAIAAAAAABAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresa" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.Empresas.DN.TipoAgrupacionEmpresa" Collapsed="true">
+    <Position X="9.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Colaboradores\AgrupacionDeEmpresasDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Empresas.DN.EntidadColaboradoraDN">
+    <Position X="1" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Colaboradores\EntidadColaboradoraDN.vb</FileName>
+      <HashCode>AAAAAAAAIAAAAAAEAIAAAAAAAAAAABAIAAABAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEntidadAsociada" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.Empresas.DN.HEEntidadColaboradoraDN" Collapsed="true">
+    <Position X="0.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Colaboradores\EntidadColaboradoraDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAggAACAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Framework.DatosNegocio.IEntidadDN" Collapsed="true">
+    <Position X="4.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+</ClassDiagram>

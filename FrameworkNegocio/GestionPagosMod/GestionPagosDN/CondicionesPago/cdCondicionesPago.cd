@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="Plazo efecto es la clase temporal usada para ver el tipo de cadecian que se adminte desde que el pago es emitido hasta que es efectuado o anulado dependiendo de la modalidad de pago elejida, no hay que confuncir con la fecha de emision de la factura que se podria negociar con cada cliente en este caso depende del tipo de canal usado">
+    <Position X="7.823" Y="4.802" Height="0.75" Width="3.554" />
+  </Comment>
+  <Class Name="FN.GestionPagos.DN.CondicionesPagoDN">
+    <Position X="2.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CondicionesPagoDN.vb</FileName>
+      <HashCode>AAAAABAAAAhAIACAAAAAgAAAAAgAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCuentaBancria" />
+      <Field Name="mModalidadDePago" />
+      <Field Name="mPlazoEjecucion" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mPlazoEjecucion" Type="Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.25" Y="3.062" />
+        <Point X="4.625" Y="3.062" />
+        <Point X="4.625" Y="2.719" />
+        <Point X="5.5" Y="2.719" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Financiero.DN.CuentaBancariaDN" Collapsed="true">
+    <Position X="2.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias" Collapsed="true">
+    <Position X="5.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="FN.GestionPagos.DN.PlazoEfectoDN">
+    <Position X="8.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CondicionesPago\PlazoEfectoDN.vb</FileName>
+      <HashCode>AAAAAAAAAABAAACAAAAAgAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mModalidadDePago" />
+      <Field Name="mPlazoEjecucion" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mPlazoEjecucion" Type="Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.75" Y="3.188" />
+        <Point X="8.375" Y="3.188" />
+        <Point X="8.375" Y="2.812" />
+        <Point X="7" Y="2.812" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.DatosNegocio.EntidadTemporalDN" Collapsed="true">
+    <Position X="8.75" Y="2" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Enum Name="FN.GestionPagos.DN.ModalidadPago">
+    <Position X="5.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModalidadPago.vb</FileName>
+      <HashCode>AgAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAABQA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

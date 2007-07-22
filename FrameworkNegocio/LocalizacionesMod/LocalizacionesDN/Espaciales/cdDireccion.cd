@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="FN.Localizaciones.DN.DireccionNoUnicaDN">
+    <Position X="6.5" Y="3.25" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>Espaciales\DireccionNoUnicaDN.vb</FileName>
+      <HashCode>AAAABAAAQAAAEAkEAIAAAAQFAAACAIAYAAAAIAABAkA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mVia" />
+      <Field Name="mNumero" />
+      <Field Name="mCodPostal" />
+      <Field Name="mLocalidad" />
+      <Field Name="mTipoVia" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mNumero" Type="System.String">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.617" Y="0.402" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mLocalidad" Type="FN.Localizaciones.DN.LocalidadDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.5" Y="5.688" />
+        <Point X="6.125" Y="5.688" />
+        <Point X="6.125" Y="5.591" />
+        <Point X="3.25" Y="5.591" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mTipoVia" Type="FN.Localizaciones.DN.TipoViaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.25" Y="3.688" />
+        <Point X="9.312" Y="3.688" />
+        <Point X="9.312" Y="2.38" />
+      </Path>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.Localizaciones.DN.ProvinciaDN">
+    <Position X="0.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Espaciales\ProvinciaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAQAAACAAAAAAAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mPais" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="System.String" Collapsed="true">
+    <Position X="6.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.Localizaciones.DN.PaisDN" Collapsed="true">
+    <Position X="1" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Espaciales\PaisDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Localizaciones.DN.LocalidadDN" Collapsed="true">
+    <Position X="1.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Espaciales\LocalidadDN.vb</FileName>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAABCBCAAAAICIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mProvincia" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColCodigoPostal" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColCodigoPostal" Type="FN.Localizaciones.DN.CodigoPostalDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.25" Y="5.335" />
+        <Point X="4.5" Y="5.335" />
+        <Point X="4.5" Y="2.38" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.Localizaciones.DN.TipoViaDN" Collapsed="true">
+    <Position X="8.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Espaciales\TipoViaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Localizaciones.DN.CodigoPostalDN" Collapsed="true">
+    <Position X="3.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Espaciales\CodigoPostalDN.vb</FileName>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+</ClassDiagram>

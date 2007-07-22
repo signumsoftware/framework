@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" NombreVis="Periodo de Renovacición" Editable="true" DatosControlAsignado="" DatosBusqueda="vwPeriodoRenovacionVisRapida" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="1000" Alto="900" Nombre="FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN-BASICA-ENT" ArbolNavegacionVisible="true" NavegacionesAutomaticas="false">
+  <ColEntradaMapNavBuscador>
+    <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Pagos" Editable="true" DatosControlAsignado="" DatosBusqueda="vwPagosxPolizaSimple" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="GestionPagosDN/FN.GestionPagos.DN.PagoDN" NombreCampo="idPeriodoRenovacion" NombrePropiedad="ID" EsNavegable="true">
+      <ColEntradaMapNavBuscador />
+    </EntradaMapNavBuscadorXML>
+    <EntradaMapNavBuscadorXML Instanciable="true" NombreVis="Notas" Editable="true" DatosControlAsignado="" DatosBusqueda="vwNotasxPeridoRenovacion" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="NotasDN/Framework.Notas.NotasDN.NotaDN" NombreCampo="idPR" NombrePropiedad="ID" EsNavegable="true">
+      <ColEntradaMapNavBuscador />
+    </EntradaMapNavBuscadorXML>
+    <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Documentos" Editable="true" DatosControlAsignado="" DatosBusqueda="vwCajonDocxPoliza" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="FicherosDN/Framework.Ficheros.FicherosDN.CajonDocumentoDN" NombreCampo="idPoliza" NombrePropiedad="Poliza.ID" EsNavegable="true">
+      <ColEntradaMapNavBuscador />
+    </EntradaMapNavBuscadorXML>
+    <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Alertas" Editable="true" DatosControlAsignado="" DatosBusqueda="vwAlertasXHEDN" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="OperProgDN/Framework.OperProg.OperProgDN.AlertaDN" NombreCampo="guidreferida" NombrePropiedad="GUID" EsNavegable="true">
+      <ColEntradaMapNavBuscador />
+    </EntradaMapNavBuscadorXML>
+  </ColEntradaMapNavBuscador>
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" NombreVis="633135576183593750" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <TipoAgrupacionMap id="" Nombre="Columnas" />
+      <ColPropMap />
+      <ColAgrupacionMap>
+        <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+          <ColEntradaMapNavBuscador />
+          <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="ID" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="F. Alta" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="FI" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="FechaBaja" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="FechaBaja" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Periodo" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Periodo" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="false" EsBuscable="false" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Poliza" Editable="true" DatosControlAsignado="FN.Seguros.Polizas.DN.PolizaDN-BASICA-ENT" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Poliza" CargarDatos="False" VisibleCabeceraResumen="true" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="ColPeriodosCobertura" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="ColPeriodosCobertura" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Alertas" Editable="true" ControlAsignado="MV2Controles, Version=1.0.2714.19664, Culture=neutral, PublicKeyToken=null/MV2Controles.CtrlBusquedaGD" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="150" NombreProp="" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="true">
+              <ColEntradaMapNavBuscador>
+                <EntradaMapNavBuscadorXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="vwAlertasProximasVencimiento" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="OperProgDN/Framework.OperProg.OperProgDN.AlertaDN" NombreCampo="GUIDReferida" NombrePropiedad="GUID" EsNavegable="true">
+                  <ColEntradaMapNavBuscador />
+                </EntradaMapNavBuscadorXML>
+              </ColEntradaMapNavBuscador>
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="Documentos" Editable="true" ControlAsignado="MV2Controles, Version=1.0.2714.19664, Culture=neutral, PublicKeyToken=null/MV2Controles.CtrlBusquedaGD" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="150" NombreProp="" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="true">
+              <ColEntradaMapNavBuscador>
+                <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Documentos" Editable="true" DatosControlAsignado="" DatosBusqueda="vwCajonDocxPoliza/vwCajonDocumentoVerificableXPoliza" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="FicherosDN/Framework.Ficheros.FicherosDN.CajonDocumentoDN" NombreCampo="idPR" NombrePropiedad="ID" EsNavegable="true">
+                  <ColEntradaMapNavBuscador />
+                </EntradaMapNavBuscadorXML>
+              </ColEntradaMapNavBuscador>
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="GUID" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="GUID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+        <AgrupacionMapXML Instanciable="false" NombreVis="633135579661875000" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+          <ColEntradaMapNavBuscador />
+          <TipoAgrupacionMap id="" Nombre="Elemento" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="Recivos" Editable="true" ControlAsignado="MV2Controles, Version=1.0.2714.19664, Culture=neutral, PublicKeyToken=null/MV2Controles.CtrlBusquedaGD" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="150" NombreProp="" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="true">
+              <ColEntradaMapNavBuscador>
+                <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Incidencias en Recivos" Editable="false" DatosControlAsignado="" DatosBusqueda="vwImportesDebidosIncidentadosXPR" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="OperProgDN/Framework.OperProg.OperProgDN.AlertaDN" NombreCampo="idPeriodoRenovacionPoliza" NombrePropiedad="ID" EsNavegable="false">
+                  <ColEntradaMapNavBuscador />
+                </EntradaMapNavBuscadorXML>
+              </ColEntradaMapNavBuscador>
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+            <PropMapXML Instanciable="false" NombreVis="PeridoCoberturaActivo" Editable="true" DatosControlAsignado="FN.Seguros.Polizas.DN.PeriodoCoberturaDN-BASICA-ENT" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="PeridoCoberturaActivo" CargarDatos="False" VisibleCabeceraResumen="true" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+              <ColEntradaMapNavBuscador />
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+      </ColAgrupacionMap>
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap>
+    <ComandoMapDNXml Instanciable="false" Ico="note_new16x16.ico" NombreVis="Crear Nota" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <VinculoMetodo NombreMetodo="CrearNotaPara">
+        <VinculoClase NombreEnsamblado="PolizasIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.Seguros.Polizas.PolizasIU.PolizasCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" Ico="warning16x16.ico" NombreVis="Crear Alerta" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <VinculoMetodo NombreMetodo="CrearAlertaGenerico">
+        <VinculoClase NombreEnsamblado="PolizasIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="FN.Seguros.Polizas.PolizasIU.PolizasCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+  </ColComandoMap>
+  <ColNombresTiposComaptibles />
+</InstanciaMapXml>

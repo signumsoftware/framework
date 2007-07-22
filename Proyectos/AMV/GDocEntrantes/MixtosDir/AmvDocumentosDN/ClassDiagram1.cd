@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="AmvDocumentosDN.TipoEntNegoioDN" Collapsed="true">
+    <Position X="5.5" Y="4.5" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>TipoEntNegoioDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.CanalEntradaDocsDN" Collapsed="true">
+    <Position X="4.75" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>CanalEntradaDocsDN.vb</FileName>
+      <HashCode>AAQAgCQAIAQAAEAAAABAAEAAAAAAAAAAAAAAAAAADEA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTipoEntNegocioReferidora" />
+      <Field Name="mTipoCanal" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mTipoEntNegocioReferidora" Type="AmvDocumentosDN.TipoEntNegoioDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.874" Y="0.263" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mTipoCanal" Type="AmvDocumentosDN.TipoCanalDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.75" Y="2.25" />
+        <Point X="4.312" Y="2.25" />
+        <Point X="4.312" Y="4.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.565" Y="0.204" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="AmvDocumentosDN.OperadorDN" Collapsed="true">
+    <Position X="7.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operador.vb</FileName>
+      <HashCode>AABAAAAAAIAAAAAEAAAAEAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.ColTipoEntNegoioDN" Collapsed="true">
+    <Position X="5.5" Y="5.25" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>TipoEntNegoioDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.RelacionENFicheroDN">
+    <Position X="12" Y="1" Width="2" />
+    <TypeIdentifier>
+      <FileName>RelacionENFicheroDN.vb</FileName>
+      <HashCode>AAAAIAAAAQABAAAAUAAEAAkgAACABAAIQAAAAAAAAQA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mHuellaFichero" />
+      <Field Name="mTipoEntNegoio" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mHuellaFichero" Type="Framework.Ficheros.FicherosDN.HuellaFicheroAlmacenadoIODN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.64" Y="0.226" Height="0.16" Width="1.183" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mTipoEntNegoio" Type="AmvDocumentosDN.TipoEntNegoioDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="12.438" Y="4.508" />
+        <Point X="12.438" Y="4.875" />
+        <Point X="7.75" Y="4.875" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="AmvDocumentosDN.NodoTipoEntNegoioDN" Collapsed="true">
+    <Position X="5.5" Y="6" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>NodoTipoEntNegoioDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.OperacionEnRelacionENFicheroDN" Collapsed="true">
+    <Position X="8" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <FileName>OperacionEnRelacionENFicheroDN.vb</FileName>
+      <HashCode>AAAAADwAAECAAEAACAEAAAAAAAAEACCAAAAQAAAIIiA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mRelacionENFichero" />
+      <Field Name="mOperador" />
+      <Field Name="mTipoOperacionREnFDN" />
+      <Field Name="mTipoCanal" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mRelacionENFichero" Type="AmvDocumentosDN.RelacionENFicheroDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.805" Y="0.475" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mTipoOperacionREnFDN" Type="AmvDocumentosDN.TipoOperacionREnFDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.565" Y="0.329" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="AmvDocumentosDN.TipoOperacionREnFDN" Collapsed="true">
+    <Position X="9.25" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>TipoOperacionREnFDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.ColOperadorDN" Collapsed="true">
+    <Position X="7.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operador.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.HuellaOperadorDN" Collapsed="true">
+    <Position X="7.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operador.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.ColNodoTipoEntNegoioDN" Collapsed="true">
+    <Position X="5.5" Y="6.75" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>NodoTipoEntNegoioDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.TipoCanalDN" Collapsed="true">
+    <Position X="3.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>TipoCanalDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Ficheros.FicherosDN.HuellaFicheroAlmacenadoIODN">
+    <Position X="14.75" Y="5.25" Width="2.25" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mRutaAlmacenamiento" />
+      <Field Name="mRutaRelativa" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColIdentificaciones" />
+    </ShowAsCollectionAssociation>
+    <Members>
+      <Field Name="mRutaRelativa" Hidden="true" />
+    </Members>
+    <AssociationLine Name="mRutaAlmacenamiento" Type="Framework.Ficheros.FicherosDN.RutaAlmacenamientoFicherosDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.473" Y="0.362" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColIdentificaciones" Type="Framework.Ficheros.FicherosDN.IdentificacionDocumentoDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.411" Y="0.352" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Ficheros.FicherosDN.RutaAlmacenamientoFicherosDN" Collapsed="true">
+    <Position X="18.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.Ficheros.FicherosDN.TipoFicheroDN" Collapsed="true">
+    <Position X="18.25" Y="3" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.Ficheros.FicherosDN.IdentificacionDocumentoDN" Collapsed="true">
+    <Position X="18.25" Y="6" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mTipoFichero" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mTipoFichero" Type="Framework.Ficheros.FicherosDN.TipoFicheroDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.169" Y="0.443" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Ficheros.FicherosDN.CajonDocumentoDN">
+    <Position X="16" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mTipoDocumento" />
+      <Field Name="mDocumento" />
+      <Field Name="mIdentificacionDocumento" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mHuellasEntidadesReferidas" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mTipoDocumento" Type="Framework.Ficheros.FicherosDN.TipoFicheroDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="17.5" Y="2.263" />
+        <Point X="18.938" Y="2.263" />
+        <Point X="18.938" Y="3" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mIdentificacionDocumento" Type="Framework.Ficheros.FicherosDN.IdentificacionDocumentoDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="17.5" Y="4.288" />
+        <Point X="19" Y="4.288" />
+        <Point X="19" Y="6" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.536" Y="0.893" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Ficheros.FicherosDN.HuellaEntidadReferidaCajonDocumentoDN" Collapsed="true">
+    <Position X="18.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="AmvDocumentosDN.FicheroParaAlta" Collapsed="true">
+    <Position X="8.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>FicheroParaAlta.vb</FileName>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAIAAQA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.DatosFicheroIncidentado" Collapsed="true">
+    <Position X="10" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>FicheroParaAlta.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AmvDocumentosDN.DatosDocumentoAIR" Collapsed="true">
+    <Position X="8.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>FicheroParaAlta.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAEAACAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+</ClassDiagram>

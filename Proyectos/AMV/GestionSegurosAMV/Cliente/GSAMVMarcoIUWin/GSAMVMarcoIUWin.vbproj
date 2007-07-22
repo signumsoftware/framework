@@ -1,0 +1,552 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CD4A3ADF-FB88-45B4-8DF0-777EE1CB0C88}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>Sub Main</StartupObject>
+    <RootNamespace>GSAMVMarcoIUWin</RootNamespace>
+    <AssemblyName>GSAMVMarcoIUWin</AssemblyName>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>GSAMVMarcoIUWin.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>GSAMVMarcoIUWin.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AS, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\AS.dll</HintPath>
+    </Reference>
+    <Reference Include="AuxIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\AuxIU.dll</HintPath>
+    </Reference>
+    <Reference Include="Configuracion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\Configuracion.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlesPBase, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\ControlesPBase.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlesPGenericos, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\ControlesPGenericos.dll</HintPath>
+    </Reference>
+    <Reference Include="CuestionarioDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\CuestionarioDN.dll</HintPath>
+    </Reference>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosAS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\FicherosAS.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\FicherosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosForm, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\FicherosForm.dll</HintPath>
+    </Reference>
+    <Reference Include="IUComun, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\IUComun.dll</HintPath>
+    </Reference>
+    <Reference Include="LogicaNegocios, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\LogicaNegocios.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaBasicasDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaBasicasDN.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaDN.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaIuWin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaIuWin.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaIuWinCtrl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaIuWinCtrl.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorIU.dll</HintPath>
+    </Reference>
+    <Reference Include="MV2ConfiguradorIUWin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <ExecutableExtension>.exe</ExecutableExtension>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MV2ConfiguradorIUWin.exe</HintPath>
+    </Reference>
+    <Reference Include="MV2Controles, Version=1.0.2713.21565, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MV2Controles.dll</HintPath>
+    </Reference>
+    <Reference Include="MV2DN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MV2DN.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\ProcesosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="PropiedadesControles, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\PropiedadesControles.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TiposYReflexion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\TiposYReflexion.dll</HintPath>
+    </Reference>
+    <Reference Include="UsrAS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsrAS.dll</HintPath>
+    </Reference>
+    <Reference Include="UsrControladores, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsrControladores.dll</HintPath>
+    </Reference>
+    <Reference Include="UsrCtrl, Version=1.0.2753.24386, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsrCtrl.dll</HintPath>
+    </Reference>
+    <Reference Include="UsrForm, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsrForm.dll</HintPath>
+    </Reference>
+    <Reference Include="UsuariosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsuariosDN.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="frmAcercaDe.Designer.vb">
+      <DependentUpon>frmAcercaDe.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAcercaDe.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAutorizacion.Designer.vb">
+      <DependentUpon>frmAutorizacion.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAutorizacion.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAutorizacionctrl.vb" />
+    <Compile Include="frmCuestionario1.Designer.vb">
+      <DependentUpon>frmCuestionario1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmCuestionario1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMain.Designer.vb">
+      <DependentUpon>frmMain.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmMain.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmListaElementos.Designer.vb">
+      <DependentUpon>frmListaElementos.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmListaElementos.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Module1.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="frmAcercaDe.resx">
+      <DependentUpon>frmAcercaDe.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAutorizacion.resx">
+      <DependentUpon>frmAutorizacion.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCuestionario1.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmCuestionario1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMain.resx">
+      <DependentUpon>frmMain.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmListaElementos.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmListaElementos.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="PlantillaTarifa2.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="iconos\Aceptar.ico" />
+    <Content Include="iconos\Buscar.ico" />
+    <Content Include="iconos\businessman_add.ico" />
+    <Content Include="iconos\businessman_find.ico" />
+    <Content Include="iconos\Cancelar.gif" />
+    <Content Include="iconos\check16x16.ico" />
+    <Content Include="iconos\contract16x16.ico" />
+    <Content Include="iconos\copy16x16.ico" />
+    <Content Include="iconos\Crear.ico" />
+    <Content Include="iconos\document_delete16x16.ico" />
+    <Content Include="iconos\document_edit16x16.ico" />
+    <Content Include="iconos\document_lock16x16.ico" />
+    <Content Include="iconos\document_out.png" />
+    <Content Include="iconos\document_out16x16.ico" />
+    <Content Include="iconos\document_pulse16x16.ico" />
+    <Content Include="iconos\document_refresh16x16.ico" />
+    <Content Include="iconos\element_into.ico" />
+    <Content Include="iconos\excel_16.ico" />
+    <Content Include="iconos\Guardar.ico" />
+    <Content Include="iconos\money2.png" />
+    <Content Include="iconos\NavegarEditar.ico" />
+    <Content Include="iconos\NoReferir.ico" />
+    <Content Include="iconos\NoReferirTodos.ico" />
+    <Content Include="iconos\note_new16x16.ico" />
+    <Content Include="iconos\office-building.ico" />
+    <Content Include="iconos\office-building.png" />
+    <Content Include="iconos\printer216x16.ico" />
+    <Content Include="iconos\refresh.png" />
+    <Content Include="iconos\warning16x16.ico" />
+    <Content Include="Mapeados\FN.Empresas.DN.DepartamentoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpleadoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpleadoYPuestosRDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpresaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EmpresaFiscalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.EntidadColaboradoraDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.PuestoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.PuestoRealizadoDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.PuestoRealizadoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.SedeEmpresaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.TipoEmpresaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Empresas.DN.TipoSedeDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CCCDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CuentaBancariaDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CuentaBancariaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.CuentaBancariaDN-CuentaBancariaDN_ligera.xml" />
+    <Content Include="Mapeados\FN.Financiero.DN.IBANDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.AgrupApunteImpDDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.ApunteImpDDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.CondicionesPagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.FicheroTransferenciaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.GrupoFraccionamientosDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.GrupoFraccionamientosDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.GrupoPagosFraccionadosDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.GrupoPagosFraccionadosDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.IImporteDebidoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.IOrigenIImporteDebidoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.LimitePagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.LiquidacionPagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.NotificacionPagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.OrigenDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.OrigenDN-ligera.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PagoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PagoFraccionadoDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PagoFraccionadoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PagoTrazaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.ParEntFiscalGenericaParamDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PlantillaCartaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.PlazoEfectoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.ReemplazosTextoCartasDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonDN-ligera.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonDocumentoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TalonNegocioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TipoEntidadOrigenDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TransferenciaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.GestionPagos.DN.TransferenciaDN-ligera.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.ContactoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.DireccionNoUnicaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.EmailDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.EntidadFiscalGenericaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.PaginaWebDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.TelefonoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Personas.DN.ContactoPersonaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Personas.DN.PersonaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.CategoriaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.ComisionRVDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.ConcesionarioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.ConductorDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.DatosMCND-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.DatosMCND-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN-Tarificador.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.DirectorConcesionarioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.GrupoConcesionarioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.ImpuestoRVDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.MarcaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.MatriculaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.ModeloDatosDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.ModeloDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.ModuladorRVDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.PeriodoRenovacionPolizaOidDN-.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.PeriodoRenovacionPolizaOidDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.PrimaBaseRVDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.RiesgosVehiculos.DN.RiesgoMotorDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.AltaPolizaPr-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.BajaPolizaPr-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.CoberturaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.CompaniaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.DocAsociadoPolizaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.EmisoraPolizasDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.FuturoTomadorDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.HEPeriodoRenovacionPolizaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.LineaProductoDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.LineaProductoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.NotaPolizaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PeriodoCoberturaDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PeriodoCoberturaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN-.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PolizaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PolizaDN-poliza-resumen-conta.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PresupuestoAlertaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PresupuestoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PresupuestoDN-Taricacion-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.PresupuestoDN-Tarificador.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.ProductoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.TarifaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.TarifaDN-Tarificador.xml" />
+    <Content Include="Mapeados\FN.Seguros.Polizas.DN.TomadorDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Trabajos.DN.AgenteDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Trabajos.DN.ServicioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Trabajos.DN.TipoServicioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Cuestionario.CuestionarioDN.CuestionarioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Cuestionario.CuestionarioDN.IValorCaracteristicaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Cuestionario.CuestionarioDN.PreguntaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Cuestionario.CuestionarioDN.RespuestaDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\Framework.Cuestionario.CuestionarioDN.RespuestaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.HEDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.IEntidadBaseDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.IIntervaloTemporal-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.IntvaloNumericoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.Localizaciones.Temporales.AñosMesesDias-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.DatosNegocio.Localizaciones.Temporales.IntervaloFechasDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Ficheros.FicherosDN.CajonDocumentoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Ficheros.FicherosDN.FicheroAsociadoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Ficheros.FicherosDN.HuellaFicheroAlmacenadoIODN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Ficheros.FicherosDN.TipoDocumentoRequeridoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Ficheros.FicherosDN.TipoFicheroDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Notas.NotasDN.NotaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.OperProg.OperProgDN.AlertaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Procesos.ProcesosDN.OperacionDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.ProcesosDN.OperacionDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN-VerPADRE.xml" />
+    <Content Include="Mapeados\Framework.TiposYReflexion.DN.VinculoClaseDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.TiposYReflexion.DN.VinculoMetodoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.AutorizacionRelacionalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.CasosUsoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.HuellaRolDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.MetodoSistemaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.PermisoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.PrincipalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.RolDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\Framework.Usuarios.DN.UsuarioDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.CodigoPostalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.DatosContactoEntidadDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.DireccionNoUnicaDN-dos.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.IContactoElementoDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.IEntidadFiscalDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.IEntidadFiscalDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.IEntidadFiscalDN-ligera.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.LocalidadDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.LocalidadDN-Ligera.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.PaisDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.ProvinciaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.ProvinciaDN-Contenido.xml" />
+    <Content Include="Mapeados\FN.Localizaciones.DN.TipoViaDN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Personas.DN.PersonaDN-BASICA-COL.xml" />
+    <Content Include="Mapeados\FN.PersonasDN.Persona.DN-BASICA-ENT.xml" />
+    <Content Include="Mapeados\FN.Personas.DN.PersonaFiscalDN-BASICA-ENT.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\EmpresasMod\EmpresaDN\EmpresasDN.vbproj">
+      <Project>{29535641-5F2F-49B4-8CAF-E70ADCA463A9}</Project>
+      <Name>EmpresasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\GestionPagosMod\GestionPagosAS\GestionPagosAS.vbproj">
+      <Project>{D071424C-E2B8-4223-B636-F596D050CB14}</Project>
+      <Name>GestionPagosAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\GestionPagosMod\GestionPagosDN\GestionPagosDN.vbproj">
+      <Project>{72D64925-7C1F-4225-942E-8F49439128A4}</Project>
+      <Name>GestionPagosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\GestionPagosMod\GestionPagosIU\GestionPagosIU.vbproj">
+      <Project>{D3CFC3AF-98CA-46F9-A278-AFB57500F908}</Project>
+      <Name>GestionPagosIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\GestionPagosMod\GestionPagosLNTest\GestionPagosLNTest.vbproj">
+      <Project>{C7F934E0-1876-49CA-8F1C-2E02FAABE3D1}</Project>
+      <Name>GestionPagosLNTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\RiesgosVehiculosMod\RiesgosVehiculosLN\RiesgosVehiculosLN.vbproj">
+      <Project>{384E6C78-9842-4C44-83CA-0507E32B03AD}</Project>
+      <Name>RiesgosVehiculosLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\RiesgosVehiculosMod\RiesgosVehiculosAS\RiesgosVehiculosAS.vbproj">
+      <Project>{6946790A-2329-4922-A129-68C7DBDB9E9A}</Project>
+      <Name>RiesgosVehiculosAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\RiesgosVehiculosMod\RiesgosVehiculosDN\RiesgosVehiculosDN.vbproj">
+      <Project>{BB2EB0EF-4C2D-4526-9F54-73DFA311F74D}</Project>
+      <Name>RiesgosVehiculosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\RiesgosVehiculosMod\RiesgosVehiculosIUControladores\RiesgosVehiculosIUControladores.vbproj">
+      <Project>{7C5724D2-792D-49A3-BE8B-AD8BC95D7D44}</Project>
+      <Name>RiesgosVehiculosIUControladores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\RiesgosVehiculosMod\RiesgosVehiculosIUControles\RiesgosVehiculosIUControles.vbproj">
+      <Project>{2DB7705E-DF8C-4C28-87DC-ED62E9C8E065}</Project>
+      <Name>RiesgosVehiculosIUControles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\RiesgosVehiculosMod\RiesgosVehiculosIU\RiesgosVehiculosIUForms.vbproj">
+      <Project>{C4C6EECD-70C5-46E3-86E5-5CBE0CAD33E6}</Project>
+      <Name>RiesgosVehiculosIUForms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\RiesgosVehiculosMod\RiesgosVehiculosTest\RiesgosVehiculosTest.vbproj">
+      <Project>{A12A4522-B191-4DD4-AE28-0258E4B99423}</Project>
+      <Name>RiesgosVehiculosTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\SegurosMod\PolizasMod\PolizasDN\PolizasDN.vbproj">
+      <Project>{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}</Project>
+      <Name>PolizasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\SegurosMod\PolizasMod\PolizasIU\PolizasIU.vbproj">
+      <Project>{35C9F4FF-98E3-4B93-9BD4-488FECE7B5E2}</Project>
+      <Name>PolizasIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\FrameworkNegocio\TrabajosMod\TrabajosDN\TrabajosDN.vbproj">
+      <Project>{8060BBA6-86E6-4EF6-9166-9D4127679FAD}</Project>
+      <Name>TrabajosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\GDocEntrantes\ClientesDir\ClienteDocEntrantesDir\Controladores\Controladores.vbproj">
+      <Project>{E8BBF757-F76A-4D13-891A-811A579123CF}</Project>
+      <Name>Controladores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\GDocEntrantes\ClientesDir\ClienteDocEntrantesDir\GDocEntrantes\GDocEntrantes.vbproj">
+      <Project>{B102BBB6-F658-4A44-B55E-A34D118F9C6C}</Project>
+      <Name>GDocEntrantes</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\GDocEntrantes\ClientesDir\ClienteMarcoDir\ClienteAdmin\ClienteAdmin.vbproj">
+      <Project>{1FB96093-BDCE-426D-B835-5206871B1188}</Project>
+      <Name>ClienteAdmin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\GDocEntrantes\MixtosDir\AmvDocumentosDN\AmvDocumentosDN.vbproj">
+      <Project>{ACBA2D27-2BEA-4ADB-B57F-B3145B0D6265}</Project>
+      <Name>AmvDocumentosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\GDocEntrantes\ServidorDir\GDocEntrantesFSTest\GDocEntrantesFSTest.vbproj">
+      <Project>{F5CFAC79-48D1-40FF-9398-EE71561DD054}</Project>
+      <Name>GDocEntrantesFSTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Auxiliares\GestionSegurosAMVTEST\GestionSegurosAMVTEST.vbproj">
+      <Project>{B0F4EA14-6258-460B-A8C3-EF73F223F8A3}</Project>
+      <Name>GestionSegurosAMVTEST</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GSAMVControladores\GSAMVControladores.vbproj">
+      <Project>{8DEDD927-6104-4448-93AA-ACBAB04F5CE9}</Project>
+      <Name>GSAMVControladores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GSAMVControlesP\GSAMVControlesP.vbproj">
+      <Project>{81490743-D485-482D-AADD-8436C937F539}</Project>
+      <Name>GSAMVControlesP</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

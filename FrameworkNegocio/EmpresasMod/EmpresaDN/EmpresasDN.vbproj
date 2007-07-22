@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{29535641-5F2F-49B4-8CAF-E70ADCA463A9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FN.Empresas.DN</RootNamespace>
+    <AssemblyName>EmpresasDN</AssemblyName>
+    <MyType>Windows</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>EmpresasDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>EmpresasDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Servidor|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Servidor\</OutputPath>
+    <DocumentationFile>EmpresasDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <FxCopLogFile>obj\Debug\CodeAnalysisLog.xml</FxCopLogFile>
+    <FxCopRuleAssemblies>DesignRules.dll;GlobalizationRules.dll;InteroperabilityRules.dll;MaintainabilityRules.dll;NamingRules.dll;PerformanceRules.dll;ReliabilityRules.dll;SecurityRules.dll;UsageRules.dll</FxCopRuleAssemblies>
+    <FxCopInputAssembly>bin\Debug\EmpresasDN.dll</FxCopInputAssembly>
+    <FxCopUseTypeNameInSuppression>true</FxCopUseTypeNameInSuppression>
+    <FxCopModuleSuppressionsFile>ModuleSuppressions.vb</FxCopModuleSuppressionsFile>
+    <BaseAddress>4194304</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <FxCopRules>
+    </FxCopRules>
+    <FxCopSpellCheckLanguages>
+    </FxCopSpellCheckLanguages>
+    <RunFxCop>false</RunFxCop>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Web1|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Web1\</OutputPath>
+    <DocumentationFile>EmpresasDN.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <FxCopLogFile>obj\Debug\CodeAnalysisLog.xml</FxCopLogFile>
+    <FxCopRuleAssemblies>DesignRules.dll;GlobalizationRules.dll;InteroperabilityRules.dll;MaintainabilityRules.dll;NamingRules.dll;PerformanceRules.dll;ReliabilityRules.dll;SecurityRules.dll;UsageRules.dll</FxCopRuleAssemblies>
+    <FxCopInputAssembly>bin\Debug\EmpresasDN.dll</FxCopInputAssembly>
+    <FxCopUseTypeNameInSuppression>true</FxCopUseTypeNameInSuppression>
+    <FxCopModuleSuppressionsFile>ModuleSuppressions.vb</FxCopModuleSuppressionsFile>
+    <BaseAddress>4194304</BaseAddress>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>
+    </DefineConstants>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <FxCopRules>
+    </FxCopRules>
+    <FxCopSpellCheckLanguages>
+    </FxCopSpellCheckLanguages>
+    <RunFxCop>false</RunFxCop>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="LogicaNegocios, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\LogicaNegocios.dll</HintPath>
+    </Reference>
+    <Reference Include="ProcesosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\ProcesosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UsuariosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\UsuariosDN.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Colaboradores\AgrupacionDeEmpresasDN.vb" />
+    <Compile Include="AutonomoDN.vb" />
+    <Compile Include="CapacidadDecisión\GrupoCapacidadDecisionEmpresaFiscalDN.vb" />
+    <Compile Include="CapacidadDecisión\OrganoDireccionDN.vb" />
+    <Compile Include="CapacidadDecisión\RelacionCapacidadDecisionDN.vb" />
+    <Compile Include="ColRolDeEmpresaDN.vb" />
+    <Compile Include="ColDepartamentosDN.vb" />
+    <Compile Include="colRolDepartamentoDN.vb" />
+    <Compile Include="ContactoEmpresaDN.vb" />
+    <Compile Include="ContactosEmpresa\GrupoRelacionEmpresaEntidadDN.vb" />
+    <Compile Include="DatosCompletosEmpresaDN.vb" />
+    <Compile Include="DepartamentoDN.vb" />
+    <Compile Include="DepartamentoNTareaNDN.vb" />
+    <Compile Include="DocumentoRespaldoIGrupoDN.vb" />
+    <Compile Include="DocumentosRespaldoDN.vb" />
+    <Compile Include="EmpleadoDN.vb" />
+    <Compile Include="EmpleadoRolesEmpresaDN.vb" />
+    <Compile Include="EmpleadoYPuestosRDN.vb" />
+    <Compile Include="Colaboradores\EntidadColaboradoraDN.vb" />
+    <Compile Include="EmpresaDN.vb" />
+    <Compile Include="HuellaAgrupacionDeEmpresaDN.vb" />
+    <Compile Include="HuellaCacheEmpleadoDN.vb" />
+    <Compile Include="HuellaCacheEmpresaDN.vb" />
+    <Compile Include="HuellaCacheSedeEmpresaDN.vb" />
+    <Compile Include="HuellaEmpleadoDN.vb" />
+    <Compile Include="HuellaEntidadTipadaDepartamento.vb" />
+    <Compile Include="IEmpresaDN.vb" />
+    <Compile Include="IResponsable.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Propiedad\ColIEntidadFiscalDN.vb" />
+    <Compile Include="Propiedad\GrupoIEntidadesPoseidasDN.vb" />
+    <Compile Include="Propiedad\GrupoIEntidadesPoseidasFiscalDN.vb" />
+    <Compile Include="Propiedad\GrupoIRelacionPropiedadEmpresaDN.vb" />
+    <Compile Include="Propiedad\GrupoIRelacionPropiedadFiscalDN.vb" />
+    <Compile Include="Propiedad\IEntidadFiscalDN.vb" />
+    <Compile Include="Propiedad\PropiedadDN.vb" />
+    <Compile Include="Propiedad\RelacionPropiedadEmpresaDN.vb" />
+    <Compile Include="Propiedad\RelacionPropiedadFiscalDN.vb" />
+    <Compile Include="PuestoDN.vb" />
+    <Compile Include="PuestoRealizadoDN.vb" />
+    <Compile Include="RelacionesEmpresa\ActividadDN.vb" />
+    <Compile Include="RelacionesEmpresa\AreaActuacionDN.vb" />
+    <Compile Include="RelacionesEmpresa\AvisoColaboracionDN.vb" />
+    <Compile Include="RelacionesEmpresa\ColaboracionDN.vb" />
+    <Compile Include="RelacionesEmpresa\EmpresaCandidataDN.vb" />
+    <Compile Include="RelacionesEmpresa\EmpresaColaboradoraDN.vb" />
+    <Compile Include="RelacionesEmpresa\EmpresaColaboradoraPlantillaDN.vb" />
+    <Compile Include="RelacionesEmpresa\InstalacionColaboracionDN.vb" />
+    <Compile Include="RelacionesEmpresa\InstalacionDN.vb" />
+    <Compile Include="RelacionesEmpresa\ServicioDN.vb" />
+    <Compile Include="RelacionesEmpresa\TipoColaboracionDN.vb" />
+    <Compile Include="RelacionSedeEmpresaDN.vb" />
+    <Compile Include="ResponsableAgrupacionDeEmpresasDN.vb" />
+    <Compile Include="ResponsableDePersonalDN.vb" />
+    <Compile Include="RolDeEmpresaDN.vb" />
+    <Compile Include="RolDepartamentoDN.vb" />
+    <Compile Include="SedeEmpresaDN.vb" />
+    <Compile Include="TareaNegocioDN.vb" />
+    <Compile Include="TipoDocumentoRespaldoDN.vb" />
+    <Compile Include="TipoEmpresaDN.vb" />
+    <Compile Include="TipoSedeDN.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CapacidadDecisión\DireccionEmpresa.cd" />
+    <None Include="Colaboradores\Colaboradores.cd" />
+    <None Include="ContactosEmpresa\cdContactosEmpresa.cd" />
+    <None Include="RelacionesEmpresa\cdDocumentoRespaldo.cd" />
+    <None Include="RelacionesEmpresa\cdEmpresaColaboradoraReducido.cd" />
+    <None Include="Empresa\cdEmpresaReducido.cd" />
+    <None Include="Empresa\cdEntidadFiscal.cd" />
+    <None Include="Empresa\DiagramaAgrupacionEmpresas.cd" />
+    <None Include="Empresa\cdEmpresaLogico.cd" />
+    <None Include="Empresa\DiagramaResponsablePersonal.cd" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="Propiedad\ClassDiagram1.cd" />
+    <None Include="Propiedad\EmpresaPropiedadyDireccionCD.cd" />
+    <None Include="RelacionesEmpresa\cdAvisoColaboracion.cd" />
+    <None Include="RelacionesEmpresa\cdColaboracionEmpleado.cd" />
+    <None Include="RelacionesEmpresa\cdEmpresaColaboradora.cd" />
+    <None Include="RelacionesEmpresa\cdRelacionesEmpresa.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj">
+      <Project>{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}</Project>
+      <Name>LocalizacionesDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\PersonasMod\PersonasDN\PersonasDN.vbproj">
+      <Project>{5C3E9247-029F-47FC-9396-E270FF57B0B4}</Project>
+      <Name>PersonasDN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+</Project>

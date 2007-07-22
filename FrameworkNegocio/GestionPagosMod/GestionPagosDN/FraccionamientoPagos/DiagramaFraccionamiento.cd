@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Segoe UI" Size="9" />
+  <Comment CommentText="El número de pagos debe coincidir con el número de pagos marcado por el tipo de fraccionamiento">
+    <Position X="8.427" Y="2.719" Height="0.75" Width="1.7" />
+  </Comment>
+  <Class Name="FN.GestionPagos.DN.GrupoFraccionamientosDN" Collapsed="true">
+    <Position X="1.75" Y="2" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>FraccionamientoPagos\GrupoFraccionamientosDN.vb</FileName>
+      <HashCode>AAAAAAgAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAgQ=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColGrupoPagosF" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColGrupoPagosF" Type="FN.GestionPagos.DN.GrupoPagosFraccionadosDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.005" Y="0.373" Height="0.182" Width="1.35" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.GestionPagos.DN.GrupoPagosFraccionadosDN" Collapsed="true">
+    <Position X="5.25" Y="2" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>FraccionamientoPagos\GrupoPagosFraccionadosDN.vb</FileName>
+      <HashCode>AAAAAAACAAAACAAEAAQgAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTipoFraccionamiento" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColPagoFraccionadoDN" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColPagoFraccionadoDN" Type="FN.GestionPagos.DN.PagoFraccionadoDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.375" Y="2" />
+        <Point X="6.375" Y="0.917" />
+        <Point X="8.25" Y="0.917" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.GestionPagos.DN.PagoFraccionadoDN">
+    <Position X="8.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>FraccionamientoPagos\PagoFraccionadoDN.vb</FileName>
+      <HashCode>AAAAAAAEAEAAAAAEAAMAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="FN.GestionPagos.DN.FraccionamientoDN">
+    <Position X="8.25" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <FileName>FraccionamientoPagos\FraccionamientoDN.vb</FileName>
+      <HashCode>AAAAgAAAAAAAAAAEAIAAAAIAAAAAAAAIBAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+  </Class>
+</ClassDiagram>

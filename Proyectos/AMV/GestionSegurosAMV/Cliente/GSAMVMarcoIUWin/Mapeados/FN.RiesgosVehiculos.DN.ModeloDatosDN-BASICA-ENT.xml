@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="true" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Nombre="FN.RiesgosVehiculos.DN.ModeloDatosDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="ID" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="true" NombreVis="Modelo" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="Modelo" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Matriculado" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" NombreProp="Matriculado" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap />
+  <ColNombresTiposComaptibles />
+</InstanciaMapXml>

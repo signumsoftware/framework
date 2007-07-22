@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="GuardarTalonDoc">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pTDoc" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarTalonDocResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GuardarTalonDocResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarTalonDN">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pTalonDN" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarTalonDNResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GuardarTalonDNResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CargarPagos">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pDtsGestionPagos" type="s:base64Binary" />
+            <s:element minOccurs="0" maxOccurs="1" name="tipoOrigen" type="s:base64Binary" />
+            <s:element minOccurs="0" maxOccurs="1" name="operacion" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CargarPagosResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CargarPagosResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AltaModificacionProveedores">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pDtsGestionPagos" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AltaModificacionProveedoresResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AltaModificacionProveedoresResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarConfiguracionImpresion">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pConfiguracionImp" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarConfiguracionImpresionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GuardarConfiguracionImpresionResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarPlantillaCarta">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pPlantillaCarta" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarPlantillaCartaResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GuardarPlantillaCartaResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarTalonDN">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pId" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarTalonDNResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarTalonDNResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarFicherosTransferenciasActivos">
+        <s:complexType />
+      </s:element>
+      <s:element name="RecuperarFicherosTransferenciasActivosResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarFicherosTransferenciasActivosResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GuardarTalonDocSoapIn">
+    <wsdl:part name="parameters" element="tns:GuardarTalonDoc" />
+  </wsdl:message>
+  <wsdl:message name="GuardarTalonDocSoapOut">
+    <wsdl:part name="parameters" element="tns:GuardarTalonDocResponse" />
+  </wsdl:message>
+  <wsdl:message name="GuardarTalonDNSoapIn">
+    <wsdl:part name="parameters" element="tns:GuardarTalonDN" />
+  </wsdl:message>
+  <wsdl:message name="GuardarTalonDNSoapOut">
+    <wsdl:part name="parameters" element="tns:GuardarTalonDNResponse" />
+  </wsdl:message>
+  <wsdl:message name="CargarPagosSoapIn">
+    <wsdl:part name="parameters" element="tns:CargarPagos" />
+  </wsdl:message>
+  <wsdl:message name="CargarPagosSoapOut">
+    <wsdl:part name="parameters" element="tns:CargarPagosResponse" />
+  </wsdl:message>
+  <wsdl:message name="AltaModificacionProveedoresSoapIn">
+    <wsdl:part name="parameters" element="tns:AltaModificacionProveedores" />
+  </wsdl:message>
+  <wsdl:message name="AltaModificacionProveedoresSoapOut">
+    <wsdl:part name="parameters" element="tns:AltaModificacionProveedoresResponse" />
+  </wsdl:message>
+  <wsdl:message name="GuardarConfiguracionImpresionSoapIn">
+    <wsdl:part name="parameters" element="tns:GuardarConfiguracionImpresion" />
+  </wsdl:message>
+  <wsdl:message name="GuardarConfiguracionImpresionSoapOut">
+    <wsdl:part name="parameters" element="tns:GuardarConfiguracionImpresionResponse" />
+  </wsdl:message>
+  <wsdl:message name="GuardarPlantillaCartaSoapIn">
+    <wsdl:part name="parameters" element="tns:GuardarPlantillaCarta" />
+  </wsdl:message>
+  <wsdl:message name="GuardarPlantillaCartaSoapOut">
+    <wsdl:part name="parameters" element="tns:GuardarPlantillaCartaResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarTalonDNSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarTalonDN" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarTalonDNSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarTalonDNResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarFicherosTransferenciasActivosSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarFicherosTransferenciasActivos" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarFicherosTransferenciasActivosSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarFicherosTransferenciasActivosResponse" />
+  </wsdl:message>
+  <wsdl:portType name="PagosWSSoap">
+    <wsdl:operation name="GuardarTalonDoc">
+      <wsdl:input message="tns:GuardarTalonDocSoapIn" />
+      <wsdl:output message="tns:GuardarTalonDocSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GuardarTalonDN">
+      <wsdl:input message="tns:GuardarTalonDNSoapIn" />
+      <wsdl:output message="tns:GuardarTalonDNSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CargarPagos">
+      <wsdl:input message="tns:CargarPagosSoapIn" />
+      <wsdl:output message="tns:CargarPagosSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AltaModificacionProveedores">
+      <wsdl:input message="tns:AltaModificacionProveedoresSoapIn" />
+      <wsdl:output message="tns:AltaModificacionProveedoresSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GuardarConfiguracionImpresion">
+      <wsdl:input message="tns:GuardarConfiguracionImpresionSoapIn" />
+      <wsdl:output message="tns:GuardarConfiguracionImpresionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GuardarPlantillaCarta">
+      <wsdl:input message="tns:GuardarPlantillaCartaSoapIn" />
+      <wsdl:output message="tns:GuardarPlantillaCartaSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTalonDN">
+      <wsdl:input message="tns:RecuperarTalonDNSoapIn" />
+      <wsdl:output message="tns:RecuperarTalonDNSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarFicherosTransferenciasActivos">
+      <wsdl:input message="tns:RecuperarFicherosTransferenciasActivosSoapIn" />
+      <wsdl:output message="tns:RecuperarFicherosTransferenciasActivosSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="PagosWSSoap" type="tns:PagosWSSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GuardarTalonDoc">
+      <soap:operation soapAction="http://tempuri.org/GuardarTalonDoc" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarTalonDN">
+      <soap:operation soapAction="http://tempuri.org/GuardarTalonDN" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CargarPagos">
+      <soap:operation soapAction="http://tempuri.org/CargarPagos" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AltaModificacionProveedores">
+      <soap:operation soapAction="http://tempuri.org/AltaModificacionProveedores" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarConfiguracionImpresion">
+      <soap:operation soapAction="http://tempuri.org/GuardarConfiguracionImpresion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarPlantillaCarta">
+      <soap:operation soapAction="http://tempuri.org/GuardarPlantillaCarta" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTalonDN">
+      <soap:operation soapAction="http://tempuri.org/RecuperarTalonDN" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarFicherosTransferenciasActivos">
+      <soap:operation soapAction="http://tempuri.org/RecuperarFicherosTransferenciasActivos" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="PagosWSSoap12" type="tns:PagosWSSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GuardarTalonDoc">
+      <soap12:operation soapAction="http://tempuri.org/GuardarTalonDoc" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarTalonDN">
+      <soap12:operation soapAction="http://tempuri.org/GuardarTalonDN" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CargarPagos">
+      <soap12:operation soapAction="http://tempuri.org/CargarPagos" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AltaModificacionProveedores">
+      <soap12:operation soapAction="http://tempuri.org/AltaModificacionProveedores" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarConfiguracionImpresion">
+      <soap12:operation soapAction="http://tempuri.org/GuardarConfiguracionImpresion" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarPlantillaCarta">
+      <soap12:operation soapAction="http://tempuri.org/GuardarPlantillaCarta" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTalonDN">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarTalonDN" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarFicherosTransferenciasActivos">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarFicherosTransferenciasActivos" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="PagosWS">
+    <wsdl:port name="PagosWSSoap" binding="tns:PagosWSSoap">
+      <soap:address location="http://localhost:3001/GDocEntrantesWS/PagosWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="PagosWSSoap12" binding="tns:PagosWSSoap12">
+      <soap12:address location="http://localhost:3001/GDocEntrantesWS/PagosWS.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

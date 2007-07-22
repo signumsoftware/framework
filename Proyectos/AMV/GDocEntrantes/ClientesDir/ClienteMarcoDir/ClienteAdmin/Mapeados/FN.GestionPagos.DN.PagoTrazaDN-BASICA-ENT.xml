@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" NombreVis="Traza de pagos" Editable="false" DatosControlAsignado="" DatosBusqueda="vwPagoTraza" AnchoMaximo="0" Nombre="FN.GestionPagos.DN.PagoTrazaDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="Pago.ID" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="Pago.ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="false" EsBuscable="false" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Realizado por" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="ActorNombre" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Operación" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="NombreOperacion" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Fecha creación" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="FechaCreacionTraza" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Entidad origen" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="EntidadOrigen" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Destinatario" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="NombreDestinatario" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="CIF/NIF Dest." Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="IdFiscalDestinatario" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Fecha programada" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="FechaProgramadaEmision" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Fecha cobro" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="FechaCobro" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Importe" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="Importe" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Cuenta origen" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="CuentaOrigen" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Núm. talón" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="NumeroTalon" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Cuenta destino" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="CuentaDestino" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap />
+  <ColNombresTiposComaptibles />
+</InstanciaMapXml>

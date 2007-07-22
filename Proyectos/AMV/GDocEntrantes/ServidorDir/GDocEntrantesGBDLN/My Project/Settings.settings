@@ -1,0 +1,362 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="datosCasosUso" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">&lt;ColRol&gt;
+  &lt;Rol Nombre='Administrador Total GDE'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Todos los permisos'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarColTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesClasificacionXTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarNumDocPendientesClasificaryPostClasificacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesPostClasificacionXTipoEntidadNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.AltaDocumento'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarArbolTiposEntNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.GuardarArbolTiposEntNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionAPostProcesar'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionAProcesar'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionEnCursoPara'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.GuardarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.ClasificarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.ClasificarYCerrarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.AnularOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.IncidentarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RechazarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.AutorizadoConfigurarClienteSonda'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionxID'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RegistrarFicheroIncidentado'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.ProcesarColComandoOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.EnviarMailFicheroIncidentados'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.GuardarOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.RecuperarListaOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.RecuperarOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.BajaOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.ReactivarOperador'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//CasosUsoFS.RecuperarListaCasosUso'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//CasosUsoFS.GuardarCasoUso'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//MetodoSistemaFS.RecuperarMetodos'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RolFS.RecuperarColRoles'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RolFS.GuardarRol'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.IniciarSesion'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.ObtenerPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.ObtenerPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.RecuperarListadoUsuarios'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.GuardarPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.GuardarPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.BajaPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.AltaPrincipal'/&gt;
+          &lt;Ms Nombre='FicherosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RutaAlmacenamientoFicheroFS.RecuperarListadoRutas'/&gt;
+          &lt;Ms Nombre='FicherosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RutaAlmacenamientoFicheroFS.GuardarRutaAlmacenamientoF'/&gt;
+          &lt;Ms Nombre='FicherosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RutaAlmacenamientoFicheroFS.CerrarRaf'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarEstructuraVista'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarDatos'/&gt;
+        &lt;/ColMs&gt;
+
+      &lt;/Cu&gt;
+
+    &lt;/ColCu&gt;
+
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Admin Ficheros'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Administrar Sondas'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarColTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.AltaDocumento'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.AutorizadoConfigurarClienteSonda'/&gt;
+          &lt;Ms Nombre='FicherosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RutaAlmacenamientoFicheroFS.RecuperarListadoRutas'/&gt;
+          &lt;Ms Nombre='FicherosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RutaAlmacenamientoFicheroFS.GuardarRutaAlmacenamientoF'/&gt;
+          &lt;Ms Nombre='FicherosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//RutaAlmacenamientoFicheroFS.CerrarRaf'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RegistrarFicheroIncidentado'/&gt;
+        &lt;/ColMs&gt;
+
+      &lt;/Cu&gt;
+
+    &lt;/ColCu&gt;
+
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Admin Negocio'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Administrar Estado Operaciones'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarColTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesClasificacionXTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarNumDocPendientesClasificaryPostClasificacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesPostClasificacionXTipoEntidadNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarArbolTiposEntNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionEnCursoPara'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.GuardarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionxID'/&gt;
+        &lt;/ColMs&gt;
+
+      &lt;/Cu&gt;
+
+      &lt;Cu Nombre='Admin Entidades Negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarColTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesClasificacionXTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarNumDocPendientesClasificaryPostClasificacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesPostClasificacionXTipoEntidadNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarArbolTiposEntNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.GuardarArbolTiposEntNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.ProcesarColComandoOperacion'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarEstructuraVista'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarDatos'/&gt;
+        &lt;/ColMs&gt;
+
+      &lt;/Cu&gt;
+
+      &lt;Cu Nombre='Admin Usuarios'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.GuardarOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.RecuperarListaOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.RecuperarOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.BajaOperador'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//OperadorFS.ReactivarOperador'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.ObtenerPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.ObtenerPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.RecuperarListadoUsuarios'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.GuardarPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.GuardarPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.BajaPrincipal'/&gt;
+          &lt;Ms Nombre='UsuariosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//UsuarioFS.AltaPrincipal'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarEstructuraVista'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarDatos'/&gt;
+        &lt;/ColMs&gt;
+
+      &lt;/Cu&gt;
+
+    &lt;/ColCu&gt;
+
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Operador Entrada'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='ProcesarDocEntrante'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarColTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesClasificacionXTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarNumDocPendientesClasificaryPostClasificacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesPostClasificacionXTipoEntidadNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarArbolTiposEntNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionAProcesar'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionEnCursoPara'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.ClasificarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.AnularOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.IncidentarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RechazarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionxID'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarEstructuraVista'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarDatos'/&gt;
+        &lt;/ColMs&gt;
+
+      &lt;/Cu&gt;
+
+    &lt;/ColCu&gt;
+
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Operador Cierre'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='ProcesarDocParaCierre'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarColTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesClasificacionXTipoCanal'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarNumDocPendientesClasificaryPostClasificacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecupearNumDocPendientesPostClasificacionXTipoEntidadNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarArbolTiposEntNegocio'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionAPostProcesar'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionEnCursoPara'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.ClasificarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.ClasificarYCerrarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.AnularOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.IncidentarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RechazarOperacion'/&gt;
+          &lt;Ms Nombre='GDocEntrantesFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//EntradaDocsFS.RecuperarOperacionxID'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarEstructuraVista'/&gt;
+          &lt;Ms Nombre='MotorBusquedaFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//GestorBusquedaFS.RecuperarDatos'/&gt;
+        &lt;/ColMs&gt;
+
+      &lt;/Cu&gt;
+
+    &lt;/ColCu&gt;
+
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Operador Siniestros'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Alta negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Operar pago negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Responsable Siniestros'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Alta negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Operar pago negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Validar pago negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Operador Gestión'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Alta negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Operar pago negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Responsable Gestión'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Alta negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Operar pago negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Validar pago negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Operador contabilidad'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Alta contabilidad'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Operar pago contabilidad'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Responsable contabilidad'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Alta contabilidad'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Operar pago contabilidad'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Validar pago contabilidad'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Verificar cobro'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Dirección empresa'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Alta negocio'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Alta contabilidad'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Firmar pago'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Reactivar talón anulado impresión'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Regenerar fichero transferencias'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Gestor impresión talones'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Imprimir talón'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+      &lt;Cu Nombre='Verificar impresión talón'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+  &lt;Rol Nombre='Gestor transferencias'&gt;
+    &lt;ColCu&gt;
+      &lt;Cu Nombre='Generar fichero transferencias'&gt;
+        &lt;ColMs&gt;
+          &lt;Ms Nombre='ProcesosFS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null//Framework.Procesos.ProcesosFS.OperacionesFS.EjecutarOperacion'/&gt;
+        &lt;/ColMs&gt;
+      &lt;/Cu&gt;
+    &lt;/ColCu&gt;
+  &lt;/Rol&gt;
+
+&lt;/ColRol&gt;</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

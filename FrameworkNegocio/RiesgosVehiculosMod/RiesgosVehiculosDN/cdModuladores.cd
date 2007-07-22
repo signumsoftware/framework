@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="FN.RiesgosVehiculos.DN.ModuladorRVSVDN">
+    <Position X="3" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>ModuladorRVSVDN.vb</FileName>
+      <HashCode>AAAAAWAAABAAAQQEIAAACAAAAACkQAAYQAEIAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCobertura" />
+      <Field Name="mCaracteristica" />
+      <Field Name="mModulador" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColModuladorRV" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColModuladorRV" Type="FN.RiesgosVehiculos.DN.ModuladorRVDN" FixedToPoint="true">
+      <Path>
+        <Point X="4.75" Y="4.955" />
+        <Point X="7" Y="4.955" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mModulador" Type="FN.RiesgosVehiculos.DN.ModuladorDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.025" Y="0.852" Height="0.16" Width="1.18" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="FN.Seguros.Polizas.DN.CoberturaDN" Collapsed="true">
+    <Position X="7" Y="3.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModuladorRVDN">
+    <Position X="7" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModuladorRVDN.vb</FileName>
+      <HashCode>AAAAAUAAAAAAAQAkIAAAAAAEAAAkQAAYgAAoAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCobertura" />
+      <Field Name="mCategoria" />
+      <Field Name="mCaracteristica" />
+      <Field Name="mModulador" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mCaracteristica" Type="Framework.Cuestionario.CuestionarioDN.CaracteristicaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7" Y="7.5" />
+        <Point X="6.625" Y="7.5" />
+        <Point X="6.625" Y="7.875" />
+        <Point X="4.25" Y="7.875" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.516" Y="-0.013" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mModulador" Type="FN.RiesgosVehiculos.DN.ModuladorDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.807" Y="0.393" Height="0.16" Width="0.964" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.CategoriaDN">
+    <Position X="9.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CategoriaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModeloDatosDN" Collapsed="true">
+    <Position X="9.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModeloDatosDN.vb</FileName>
+      <HashCode>AAAgAAAAAAAAAAAkAIAAAAAAAAAAAAAIgAgAABAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mModelo" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModeloDN" Collapsed="true">
+    <Position X="9.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModeloDN.vb</FileName>
+      <HashCode>AAAAABAAAAAAAAAEAIAAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Cuestionario.CuestionarioDN.CaracteristicaDN" Collapsed="true">
+    <Position X="2.75" Y="7.75" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mPadre" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mPadre" Type="Framework.Cuestionario.CuestionarioDN.CaracteristicaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.75" Y="7.875" />
+        <Point X="2.5" Y="7.875" />
+        <Point X="2.5" Y="8.312" />
+        <Point X="2.75" Y="8.312" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN">
+    <Position X="2.75" Y="9" Width="2" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mIntervalo" />
+      <Field Name="mNumMapPadre" />
+      <Field Name="mCaracteristica" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mIntervalo" Type="Framework.DatosNegocio.IntvaloNumericoDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.235" Y="-0.273" Height="0.16" Width="0.857" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mNumMapPadre" Type="Framework.Tarificador.TarificadorDN.ValorIntervalNumMapDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.125" Y="11.687" />
+        <Point X="4.125" Y="11.937" />
+        <Point X="3.375" Y="11.937" />
+        <Point X="3.375" Y="11.687" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.661" Y="0.414" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mCaracteristica" Type="Framework.Cuestionario.CuestionarioDN.CaracteristicaDN" FixedFromPoint="true">
+      <Path>
+        <Point X="3.188" Y="9" />
+        <Point X="3.188" Y="8.38" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.119" Y="0.227" Height="0.16" Width="1.347" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.908" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.IntvaloNumericoDN" Collapsed="true">
+    <Position X="6.25" Y="10.75" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.95" />
+  </Class>
+  <Class Name="Framework.Tarificador.TarificadorDN.TraductorxIntervNumDN">
+    <Position X="7.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsCollectionAssociation>
+      <Field Name="mColValorIntervalNumMapDN" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.95" />
+  </Class>
+  <Class Name="FN.RiesgosVehiculos.DN.ModuladorDN" Collapsed="true">
+    <Position X="5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ModuladorDN.vb</FileName>
+      <HashCode>ACAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="Framework.Cuestionario.CuestionarioDN.TipoCaracteristica" Collapsed="true">
+    <Position X="5.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier />
+  </Enum>
+</ClassDiagram>

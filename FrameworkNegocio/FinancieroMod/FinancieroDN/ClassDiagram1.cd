@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="FN.Financiero.DN.CCCDN" Collapsed="true">
+    <Position X="4.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CCCDN.vb</FileName>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAIAAAAAABAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FN.Financiero.DN.CuentaBancariaDN">
+    <Position X="3" Y="3.5" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>CuentaBancariaDN.vb</FileName>
+      <HashCode>ACAAAAAAAgAQAAAQAAAAAAAAAAAAAIAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mIBAN" />
+      <Field Name="mCCC" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mTitulares" />
+    </ShowAsCollectionAssociation>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="FN.Financiero.DN.IBANDN" Collapsed="true">
+    <Position X="2.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IBANDN.vb</FileName>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAIAAAAAABAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.DatosNegocio.ColIEntidadDN" Collapsed="true">
+    <Position X="12" Y="2.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Interface Name="LocalizacionesDN.IEntidadFiscalDN" Collapsed="true">
+    <Position X="6" Y="3.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+</ClassDiagram>

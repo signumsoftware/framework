@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" Nombre="Framework.DatosNegocio.Localizaciones.Temporales.IntervaloFechasDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0">
+      <TipoAgrupacionMap id="" Nombre="Columnas" />
+      <ColPropMap />
+      <ColAgrupacionMap>
+        <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0">
+          <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="FInicio" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="FInicio" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+        <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0">
+          <TipoAgrupacionMap id="" Nombre="Elemento" />
+          <ColPropMap>
+            <PropMapXML Instanciable="false" NombreVis="FInicio" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="FInicio" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true">
+              <ColNombresTiposComaptibles />
+            </PropMapXML>
+          </ColPropMap>
+          <ColAgrupacionMap />
+        </AgrupacionMapXML>
+      </ColAgrupacionMap>
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColOperaciones />
+</InstanciaMapXml>

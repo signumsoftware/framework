@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tests>
+  <edtdocversion branch="retail" build="50727" revision="42" />
+  <AutoSuite type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <m_continueAfterFailure type="System.Boolean">False</m_continueAfterFailure>
+    <links type="System.Collections.ArrayList">
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">ef84ee62-8ae5-d562-1f9b-8eef8a4bca78</id>
+        <name type="System.String">CargarCategoriaModDatos</name>
+        <storage type="System.String">..\..\..\..\..\frameworknegocio\solucionfn\riesgosvehiculosmod\riesgosvehiculostest\bin\riesgosvehiculostest.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">229adcb8-bb57-a558-c32f-0f7059c43fde</id>
+        <name type="System.String">CargarPrimasBase</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">12677d2a-be43-a5c6-8593-4e905706e15a</id>
+        <name type="System.String">CargarModuladores</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">8789413d-606c-9afe-6a1e-e11a9c2317d5</id>
+        <name type="System.String">CargarModuladores2Conductor</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">bd6bcf58-556b-91b9-d7b0-b28df61c3056</id>
+        <name type="System.String">CargarComisiones</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">8c0fd468-66f4-5d40-aaff-608235e99240</id>
+        <name type="System.String">CargarImpuesto</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">feb86179-f3db-7839-c66a-66882606c982</id>
+        <name type="System.String">CrearGrafoTarificacion</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+    </links>
+    <cssProjectStructure type="System.String" />
+    <isRunOnRestart type="System.Boolean">False</isRunOnRestart>
+    <timeOut type="System.Int32">2147483647</timeOut>
+    <isGroupable type="System.Boolean">True</isGroupable>
+    <abortRunOnAgentFailure type="System.Boolean">False</abortRunOnAgentFailure>
+    <cssIteration type="System.String" />
+    <workItemIds type="System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]">
+      <_size type="System.Int32">0</_size>
+      <_version type="System.Int32">1</_version>
+    </workItemIds>
+    <id type="Microsoft.VisualStudio.TestTools.Common.TestId">
+      <id type="System.Guid">3969cf6c-6880-4718-8df3-48b039975d92</id>
+    </id>
+    <name type="System.String">OrderedTestCargarDatosTarificador</name>
+    <description type="System.String">Place your description here</description>
+    <enabled type="System.Boolean">True</enabled>
+    <owner type="System.String" />
+    <priority type="System.Int32">0</priority>
+    <executionId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </executionId>
+    <parentExecutId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </parentExecutId>
+    <deploymentItems type="Microsoft.VisualStudio.TestTools.Common.DeploymentItemCollection" />
+    <agentAttributes type="System.Collections.Specialized.StringDictionary, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <storage type="System.String">d:\signum\signum\proyectos\amv\gestionsegurosamv\auxiliares\gestionsegurosamvtest\orderedtestcargardatostarificador.orderedtest</storage>
+    <projectData type="Microsoft.VisualStudio.TestTools.Common.ProjectData">
+      <id type="System.Guid">b0f4ea14-6258-460b-a8c3-ef73f223f8a3</id>
+      <projectName type="System.String">GestionSegurosAMVTEST</projectName>
+      <solutionName type="System.String">SolucionFN</solutionName>
+      <projectRelativePath type="System.String">..\..\Proyectos\AMV\GestionSegurosAMV\Auxiliares\GestionSegurosAMVTEST\GestionSegurosAMVTEST.vbproj</projectRelativePath>
+    </projectData>
+    <m_nonRunnableReason type="System.String" />
+  </AutoSuite>
+</Tests>

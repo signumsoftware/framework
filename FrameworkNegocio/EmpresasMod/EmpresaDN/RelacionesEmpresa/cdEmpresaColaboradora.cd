@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="La colección de servicios de la instalación estará restringido por los servicios de su InstalacionColaboracion">
+    <Position X="10.233" Y="5.352" Height="0.618" Width="2.231" />
+  </Comment>
+  <Class Name="EmpresasDN.EmpresaDN" Collapsed="true">
+    <Position X="3.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EmpresaDN.vb</FileName>
+      <HashCode>AAAAAAAAABEIACAQhAAAgQgAEAAIAAAUAAAAAAAgAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColEmpresaColaboradoraPlantilla" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="EmpresasDN.SedeEmpresaDN" Collapsed="true">
+    <Position X="5.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>SedeEmpresaDN.vb</FileName>
+      <HashCode>AACAAAAQAQAAAIAQAAQAgCAAAACAAQAAAQAAIBBAABA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EmpresasDN.InstalacionDN" Collapsed="true">
+    <Position X="5.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\InstalacionDN.vb</FileName>
+      <HashCode>AAAQAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresaColaboradora" />
+      <Field Name="mSedeEmpresa" />
+      <Field Name="mColaboracion" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mEmpresaColaboradora" Type="EmpresasDN.EmpresaColaboradoraDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.377" Y="0.371" Height="0.16" Width="1.756" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mSedeEmpresa" Type="EmpresasDN.SedeEmpresaDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.973" Y="0.216" Height="0.16" Width="1.129" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.EmpresaColaboradoraDN">
+    <Position X="2.5" Y="4.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\EmpresaColaboradoraDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAQAEAAAAAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresaReferida" />
+      <Field Name="mColaboracion" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mEmpresaReferida" Type="EmpresasDN.EmpresaDN" FixedToPoint="true">
+      <Path>
+        <Point X="3.562" Y="4.5" />
+        <Point X="3.562" Y="1.63" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.174" Y="1.935" Height="0.16" Width="1.315" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColaboracion" Type="EmpresasDN.ColaboracionDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.312" Y="5.601" />
+        <Point X="3.312" Y="6.769" />
+        <Point X="9" Y="6.769" />
+        <Point X="9" Y="5.009" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="2.152" Y="1.841" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.ActividadDN" Collapsed="true">
+    <Position X="11.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\ActividadDN.vb</FileName>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColServicios" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColServicios" Type="EmpresasDN.ServicioDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.876" Y="1.292" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.ColaboracionDN" Collapsed="true">
+    <Position X="8.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\ColaboracionDN.vb</FileName>
+      <HashCode>AAEAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColServicios" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="EmpresasDN.ServicioDN" Collapsed="true">
+    <Position X="11.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\ServicioDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EmpresasDN.InstalacionColaboracionDN" Collapsed="true">
+    <Position X="5.25" Y="2.75" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\InstalacionColaboracionDN.vb</FileName>
+      <HashCode>AAAAAAAQAACAAAAAAAAAAAAAAAAAABAAACAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEmpresaColaboradoraPlantilla" />
+      <Field Name="mEmpresaColaboracion" />
+      <Field Name="mAreaActuacion" />
+      <Field Name="mInstalacion" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mEmpresaColaboradoraPlantilla" Type="EmpresasDN.EmpresaColaboradoraPlantillaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.5" Y="3" />
+        <Point X="8.729" Y="3" />
+        <Point X="8.729" Y="1.63" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.69" Y="0.435" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mEmpresaColaboracion" Type="EmpresasDN.EmpresaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.25" Y="2.952" />
+        <Point X="4.125" Y="2.952" />
+        <Point X="4.125" Y="1.63" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.315" Y="0.485" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mAreaActuacion" Type="EmpresasDN.AreaActuacionDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.312" Y="3.259" />
+        <Point X="7.312" Y="3.812" />
+        <Point X="9.5" Y="3.812" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.694" Y="0.097" Height="0.16" Width="1.193" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mInstalacion" Type="EmpresasDN.InstalacionDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.747" Y="0.371" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="EmpresasDN.AreaActuacionDN" Collapsed="true">
+    <Position X="9.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\AreaActuacionDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="EmpresasDN.EmpresaColaboradoraPlantillaDN" Collapsed="true">
+    <Position X="8" Y="1" Width="2.5" />
+    <TypeIdentifier>
+      <FileName>RelacionesEmpresa\EmpresaColaboradoraPlantillaDN.vb</FileName>
+      <HashCode>AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mActividad" />
+    </ShowAsAssociation>
+  </Class>
+</ClassDiagram>

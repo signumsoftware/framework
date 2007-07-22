@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B102BBB6-F658-4A44-B55E-A34D118F9C6C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>Sub Main</StartupObject>
+    <RootNamespace>GDocEntrantes</RootNamespace>
+    <AssemblyName>GDocEntrantes</AssemblyName>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <ApplicationIcon>document_info.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>GDocEntrantes.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>GDocEntrantes.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AuxIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\AuxIU.dll</HintPath>
+    </Reference>
+    <Reference Include="Configuracion, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\Configuracion.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlesPBase, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\ControlesPBase.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlesPGenericos, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\ControlesPGenericos.dll</HintPath>
+    </Reference>
+    <Reference Include="DatosNegocio, Version=2.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\DatosNegocio.dll</HintPath>
+    </Reference>
+    <Reference Include="FicherosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\FicherosDN.dll</HintPath>
+    </Reference>
+    <Reference Include="GestorMails, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\GestorMails.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaBasicasDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaBasicasDN.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaDN.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaIuWin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaIuWin.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorBusquedaIuWinCtrl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaIuWinCtrl.dll</HintPath>
+    </Reference>
+    <Reference Include="MotorIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorIU.dll</HintPath>
+    </Reference>
+    <Reference Include="PropiedadesControles, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\PropiedadesControles.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UsuariosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\UsuariosDN.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AMVdbDataSet.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AMVdbDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="ctrlClasificar.Designer.vb">
+      <DependentUpon>ctrlClasificar.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ctrlClasificar.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ctrlPostClasificar.Designer.vb">
+      <DependentUpon>ctrlPostClasificar.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ctrlPostClasificar.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="frmAcercaDe.Designer.vb">
+      <DependentUpon>frmAcercaDe.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAcercaDe.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmArbol.Designer.vb">
+      <DependentUpon>frmArbol.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmArbol.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmArchivo.Designer.vb">
+      <DependentUpon>frmArchivo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmArchivo.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAutorizacion.Designer.vb">
+      <DependentUpon>frmAutorizacion.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAutorizacion.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDocsEntrantes.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDocsEntrantes.Designer.vb">
+      <DependentUpon>frmDocsEntrantes.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Module1.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ctrlClasificar.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ctrlClasificar.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ctrlPostClasificar.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ctrlPostClasificar.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAcercaDe.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmAcercaDe.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmArbol.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmArbol.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmArchivo.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmArchivo.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAutorizacion.resx">
+      <DependentUpon>frmAutorizacion.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDocsEntrantes.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmDocsEntrantes.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AMVdbDataSet.xsc">
+      <DependentUpon>AMVdbDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="AMVdbDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>AMVdbDataSet.Designer.vb</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="AMVdbDataSet.xss">
+      <DependentUpon>AMVdbDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="app.config" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-out-32.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-ok-32.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-stop-32.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-warning-32.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-ver-32.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\eliminar-documento32.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\eliminar-documento16.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-ok-16.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-out-16.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-stop-16.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento-warning-16.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="document_info.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MixtosDir\AmvDocumentosDN\AmvDocumentosDN.vbproj">
+      <Project>{ACBA2D27-2BEA-4ADB-B57F-B3145B0D6265}</Project>
+      <Name>AmvDocumentosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Controladores\Controladores.vbproj">
+      <Project>{E8BBF757-F76A-4D13-891A-811A579123CF}</Project>
+      <Name>Controladores</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
