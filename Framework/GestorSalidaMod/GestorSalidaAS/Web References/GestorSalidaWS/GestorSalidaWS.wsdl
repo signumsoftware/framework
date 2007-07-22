@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="EnviarDocumentoSalida">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pDocumentosalida" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EnviarDocumentoSalidaResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EnviarDocumentoSalidaResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarDocumentoSalidaPorTicket">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ticket" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarDocumentoSalidaPorTicketResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarDocumentoSalidaPorTicketResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarEstadoEnvioPorTicket">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ticket" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarEstadoEnvioPorTicketResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RecuperarEstadoEnvioPorTicketResult" type="tns:EstadoEnvio" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:simpleType name="EstadoEnvio">
+        <s:restriction base="s:string">
+          <s:enumeration value="Desconocido" />
+          <s:enumeration value="En_Cola" />
+          <s:enumeration value="En_Proceso" />
+          <s:enumeration value="Enviado" />
+          <s:enumeration value="Persistido" />
+          <s:enumeration value="Error" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="BajaContenedorDescriptorImpresora">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="impresora" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BajaContenedorDescriptorImpresoraResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="BajaContenedorDescriptorImpresoraResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AltaContenedorDescriptorImpresora">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="impresora" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AltaContenedorDescriptorImpresoraResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AltaContenedorDescriptorImpresoraResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="EnviarDocumentoSalidaSoapIn">
+    <wsdl:part name="parameters" element="tns:EnviarDocumentoSalida" />
+  </wsdl:message>
+  <wsdl:message name="EnviarDocumentoSalidaSoapOut">
+    <wsdl:part name="parameters" element="tns:EnviarDocumentoSalidaResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarDocumentoSalidaPorTicketSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarDocumentoSalidaPorTicket" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarDocumentoSalidaPorTicketSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarDocumentoSalidaPorTicketResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarEstadoEnvioPorTicketSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarEstadoEnvioPorTicket" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarEstadoEnvioPorTicketSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarEstadoEnvioPorTicketResponse" />
+  </wsdl:message>
+  <wsdl:message name="BajaContenedorDescriptorImpresoraSoapIn">
+    <wsdl:part name="parameters" element="tns:BajaContenedorDescriptorImpresora" />
+  </wsdl:message>
+  <wsdl:message name="BajaContenedorDescriptorImpresoraSoapOut">
+    <wsdl:part name="parameters" element="tns:BajaContenedorDescriptorImpresoraResponse" />
+  </wsdl:message>
+  <wsdl:message name="AltaContenedorDescriptorImpresoraSoapIn">
+    <wsdl:part name="parameters" element="tns:AltaContenedorDescriptorImpresora" />
+  </wsdl:message>
+  <wsdl:message name="AltaContenedorDescriptorImpresoraSoapOut">
+    <wsdl:part name="parameters" element="tns:AltaContenedorDescriptorImpresoraResponse" />
+  </wsdl:message>
+  <wsdl:portType name="GestorSalidaWSSoap">
+    <wsdl:operation name="EnviarDocumentoSalida">
+      <wsdl:input message="tns:EnviarDocumentoSalidaSoapIn" />
+      <wsdl:output message="tns:EnviarDocumentoSalidaSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarDocumentoSalidaPorTicket">
+      <wsdl:input message="tns:RecuperarDocumentoSalidaPorTicketSoapIn" />
+      <wsdl:output message="tns:RecuperarDocumentoSalidaPorTicketSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarEstadoEnvioPorTicket">
+      <wsdl:input message="tns:RecuperarEstadoEnvioPorTicketSoapIn" />
+      <wsdl:output message="tns:RecuperarEstadoEnvioPorTicketSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BajaContenedorDescriptorImpresora">
+      <wsdl:input message="tns:BajaContenedorDescriptorImpresoraSoapIn" />
+      <wsdl:output message="tns:BajaContenedorDescriptorImpresoraSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AltaContenedorDescriptorImpresora">
+      <wsdl:input message="tns:AltaContenedorDescriptorImpresoraSoapIn" />
+      <wsdl:output message="tns:AltaContenedorDescriptorImpresoraSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="GestorSalidaWSSoap" type="tns:GestorSalidaWSSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="EnviarDocumentoSalida">
+      <soap:operation soapAction="http://tempuri.org/EnviarDocumentoSalida" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarDocumentoSalidaPorTicket">
+      <soap:operation soapAction="http://tempuri.org/RecuperarDocumentoSalidaPorTicket" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarEstadoEnvioPorTicket">
+      <soap:operation soapAction="http://tempuri.org/RecuperarEstadoEnvioPorTicket" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BajaContenedorDescriptorImpresora">
+      <soap:operation soapAction="http://tempuri.org/BajaContenedorDescriptorImpresora" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AltaContenedorDescriptorImpresora">
+      <soap:operation soapAction="http://tempuri.org/AltaContenedorDescriptorImpresora" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="GestorSalidaWSSoap12" type="tns:GestorSalidaWSSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="EnviarDocumentoSalida">
+      <soap12:operation soapAction="http://tempuri.org/EnviarDocumentoSalida" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarDocumentoSalidaPorTicket">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarDocumentoSalidaPorTicket" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarEstadoEnvioPorTicket">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarEstadoEnvioPorTicket" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BajaContenedorDescriptorImpresora">
+      <soap12:operation soapAction="http://tempuri.org/BajaContenedorDescriptorImpresora" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AltaContenedorDescriptorImpresora">
+      <soap12:operation soapAction="http://tempuri.org/AltaContenedorDescriptorImpresora" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="GestorSalidaWS">
+    <wsdl:port name="GestorSalidaWSSoap" binding="tns:GestorSalidaWSSoap">
+      <soap:address location="http://localhost:3002/SolucionFrameworkWS/GestorSalidaWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="GestorSalidaWSSoap12" binding="tns:GestorSalidaWSSoap12">
+      <soap12:address location="http://localhost:3002/SolucionFrameworkWS/GestorSalidaWS.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

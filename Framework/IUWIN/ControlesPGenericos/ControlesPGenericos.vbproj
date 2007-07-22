@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{81A93BDE-4E4E-461B-831B-3A30D149C4CD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ControlesPGenericos</RootNamespace>
+    <AssemblyName>ControlesPGenericos</AssemblyName>
+    <MyType>Windows</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>ControlesPGenericos.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>ControlesPGenericos.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Arboles\ArbolNododeT.Designer.vb">
+      <DependentUpon>ArbolNododeT.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Arboles\ArbolNododeT.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Arboles\ArbolTConBusqueda.Designer.vb">
+      <DependentUpon>ArbolTConBusqueda.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Arboles\ArbolTConBusqueda.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Arboles\GestorPresentacionArbolesDefecto.vb" />
+    <Compile Include="ArbolxLista\ArbolNododeTxLista.Designer.vb">
+      <DependentUpon>ArbolNododeTxLista.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ArbolxLista\ArbolNododeTxLista.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DataGridViewXT.Designer.vb">
+      <DependentUpon>DataGridViewXT.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DataGridViewXT.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GestorPresentacion.vb" />
+    <Compile Include="ListaResizeable.Designer.vb">
+      <DependentUpon>ListaResizeable.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ListaResizeable.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="TiposGenericos\ctrlAdministracionTiposForm.vb" />
+    <Compile Include="TiposGenericos\ctrlListadoTipos.Designer.vb">
+      <DependentUpon>ctrlListadoTipos.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TiposGenericos\ctrlListadoTipos.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TiposGenericos\ctrlTipos.Designer.vb">
+      <DependentUpon>ctrlTipos.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TiposGenericos\ctrlTipos.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TiposGenericos\ctrlTiposDetalle.Designer.vb">
+      <DependentUpon>ctrlTiposDetalle.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TiposGenericos\ctrlTiposDetalle.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TiposGenericos\frmAdministracionTipos.Designer.vb">
+      <DependentUpon>frmAdministracionTipos.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TiposGenericos\frmAdministracionTipos.vb">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Arboles\ArbolNododeT.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ArbolNododeT.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Arboles\ArbolTConBusqueda.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ArbolTConBusqueda.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ArbolxLista\ArbolNododeTxLista.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ArbolNododeTxLista.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DataGridViewXT.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DataGridViewXT.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ListaResizeable.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ListaResizeable.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TiposGenericos\ctrlListadoTipos.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ctrlListadoTipos.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TiposGenericos\ctrlTipos.resx">
+      <DependentUpon>ctrlTipos.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TiposGenericos\ctrlTiposDetalle.resx">
+      <DependentUpon>ctrlTiposDetalle.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TiposGenericos\frmAdministracionTipos.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmAdministracionTipos.vb</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AS\AS.vbproj">
+      <Project>{2EFE4760-0615-4E9F-BB52-52F5CA6589B4}</Project>
+      <Name>AS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DatosNegocio\DatosNegocio.vbproj">
+      <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
+      <Name>DatosNegocio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AuxIU\AuxIU.vbproj">
+      <Project>{3A1255B0-734C-41C5-BFCB-6F919AFBC2EE}</Project>
+      <Name>AuxIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ControlesPBase\ControlesPBase.vbproj">
+      <Project>{4BCFA092-06B6-4DFF-85FA-5C743B16EA03}</Project>
+      <Name>ControlesPBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MotorIU\MotorIU.vbproj">
+      <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
+      <Name>MotorIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PropiedadesControles\PropiedadesControles.vbproj">
+      <Project>{2C2BCAE2-0C76-4477-97B7-EFECD9FF19A1}</Project>
+      <Name>PropiedadesControles</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\carpeta.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder_closed.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bullet_triangle_green.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bullet_triangle_blue.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bullet_triangle_yellow.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\navigate_left2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\navigate_left.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\navigate_right2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\navigate_right.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\folder_closed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\check.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cube_yellow_add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cube_yellow_delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cube_yellow_preferences.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refresh.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

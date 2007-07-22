@@ -1,0 +1,102 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{76BFF262-F847-4351-AEC9-E07FFCBDD357}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Framework.GestorSalida.Cliente.Controladores</RootNamespace>
+    <AssemblyName>GestorSalidaClienteControladores</AssemblyName>
+    <StartupObject>
+    </StartupObject>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GestorClienteControladores.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AS\AS.vbproj">
+      <Project>{2EFE4760-0615-4E9F-BB52-52F5CA6589B4}</Project>
+      <Name>AS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\configuracion\LectorConfiguracionXML\LectorConfiguracionXML.csproj">
+      <Project>{C8B487EE-2E44-4896-A7C8-6465A37DACA1}</Project>
+      <Name>LectorConfiguracionXML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DatosNegocio\DatosNegocio.vbproj">
+      <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
+      <Name>DatosNegocio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorSalidaAS\GestorSalidaAS.csproj">
+      <Project>{F24BC93F-2211-4A7D-9DF8-668E00F81AA9}</Project>
+      <Name>GestorSalidaAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorSalidaDN\GestorSalidaDN.csproj">
+      <Project>{BF9A137F-FA86-4056-A7BC-497C19960A22}</Project>
+      <Name>GestorSalidaDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorSalidaUtilidades\GestorSalidaUtilidades.csproj">
+      <Project>{BFC39581-D158-4386-974F-EE0375E43320}</Project>
+      <Name>GestorSalidaUtilidades</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GestorSalidaClienteControladores.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

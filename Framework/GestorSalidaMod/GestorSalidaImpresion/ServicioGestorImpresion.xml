@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- Este archivo contiene los parámetros necesarios para configurar el
+	   cliente del Gestor de Salida.-->
+<configuracion xmlns="http://signumsoftware.com/2007/GestorSalida">
+
+	<!-- Especifica si las categorías de cada función de impresión se comportan
+	   como un cluster o no-->
+	<propiedad nombre="ClusterImpresoras" valor="true" />
+
+	<!-- Especifica el número de errores consecutivos que debe producir una impresora
+	   para que se considere que está caída-->
+	<propiedad nombre="ErroresTopeImpresora" valor="3" />
+
+	<!-- Especifica el número de reintentos de impresión para un documento con errores
+	   antes de que se considere que es un error-->
+	<propiedad nombre="NumeroReintentosEnvio" valor="3" />
+	
+
+</configuracion>

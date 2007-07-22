@@ -1,0 +1,169 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0BD1CCCC-9812-4383-8E56-A1FD39B5F244}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Framework.GestorSalida.Administracion</RootNamespace>
+    <AssemblyName>GestorSalidaAdministracion</AssemblyName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AgenteImpresion, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Users\Olmo\Desktop\CompiladosDependencias\AgenteImpresion.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="controladores\ctrlContenedoresImpresoraCtrl.cs">
+    </Compile>
+    <Compile Include="controladores\frmAdministracionAreaImpresionCtrl.cs" />
+    <Compile Include="controladores\frmCategoriaImpresionCtrl.cs" />
+    <Compile Include="ctrlContenedoresImpresora.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ctrlContenedoresImpresora.Designer.cs">
+      <DependentUpon>ctrlContenedoresImpresora.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmAdministrarAreaImpresion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAdministrarAreaImpresion.Designer.cs">
+      <DependentUpon>frmAdministrarAreaImpresion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmCategoriaImpresion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCategoriaImpresion.Designer.cs">
+      <DependentUpon>frmCategoriaImpresion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmFuncionImpresion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmFuncionImpresion.Designer.cs">
+      <DependentUpon>frmFuncionImpresion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmSeleccionarImpresoras.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSeleccionarImpresoras.Designer.cs">
+      <DependentUpon>frmSeleccionarImpresoras.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ctrlContenedoresImpresora.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ctrlContenedoresImpresora.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAdministrarAreaImpresion.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmAdministrarAreaImpresion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCategoriaImpresion.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmCategoriaImpresion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmFuncionImpresion.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmFuncionImpresion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSeleccionarImpresoras.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmSeleccionarImpresoras.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\DatosNegocio\DatosNegocio.vbproj">
+      <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
+      <Name>DatosNegocio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\IUWIN\AuxIU\AuxIU.vbproj">
+      <Project>{3A1255B0-734C-41C5-BFCB-6F919AFBC2EE}</Project>
+      <Name>AuxIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\IUWIN\ControlesPBase\ControlesPBase.vbproj">
+      <Project>{4BCFA092-06B6-4DFF-85FA-5C743B16EA03}</Project>
+      <Name>ControlesPBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\IUWIN\MotorIU\MotorIU.vbproj">
+      <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
+      <Name>MotorIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\IUWIN\PropiedadesControles\PropiedadesControles.vbproj">
+      <Project>{2C2BCAE2-0C76-4477-97B7-EFECD9FF19A1}</Project>
+      <Name>PropiedadesControles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\UsuariosMod\IU\UsuariosForm\UsrForm.vbproj">
+      <Project>{D0E1DDCF-B9BE-4960-B1F7-5560AB46D4F9}</Project>
+      <Name>UsrForm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorSalidaAS\GestorSalidaAS.csproj">
+      <Project>{F24BC93F-2211-4A7D-9DF8-668E00F81AA9}</Project>
+      <Name>GestorSalidaAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorSalidaClienteControladores\GestorSalidaClienteControladores.csproj">
+      <Project>{76BFF262-F847-4351-AEC9-E07FFCBDD357}</Project>
+      <Name>GestorSalidaClienteControladores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorSalidaDN\GestorSalidaDN.csproj">
+      <Project>{BF9A137F-FA86-4056-A7BC-497C19960A22}</Project>
+      <Name>GestorSalidaDN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

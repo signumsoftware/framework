@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="true" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="0" Alto="0" Nombre="Framework.Usuarios.DN.PrincipalDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" NombreVis="UsiariosxPrincipal" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="0" Alto="0">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="Nombre" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="0" Alto="0" NombreProp="Nombre" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap>
+    <ComandoMapDNXml Instanciable="false" NombreVis="Crear Nota" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="0" Alto="0">
+      <VinculoMetodo NombreMetodo="CrearNotaPara">
+        <VinculoClase NombreEnsamblado="NotasIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="NotasIU.NotasCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+    <ComandoMapDNXml Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="0" Alto="0">
+      <VinculoMetodo NombreMetodo="CrearNotaPara">
+        <VinculoClase NombreEnsamblado="NotasIU, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" NombreClase="NotasIU.NotasCtrl" />
+      </VinculoMetodo>
+    </ComandoMapDNXml>
+  </ColComandoMap>
+  <ColNombresTiposComaptibles />
+  <ColEntradaMapNavBuscador>
+    <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Usuarios" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="false" Ancho="0" Alto="0" NombreEnsambladoyTipo="UsuariosDN/Framework.Usuarios.DN.UsuarioDN" NombreVista="vwuxp" NombreCampo="idp" NombrePropiedad="ID" />
+  </ColEntradaMapNavBuscador>
+</InstanciaMapXml>

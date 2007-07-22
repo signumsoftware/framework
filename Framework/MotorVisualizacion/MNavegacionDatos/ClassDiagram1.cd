@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="MNavegacionDatosDN.EntidadNavDN" Collapsed="true">
+    <Position X="2.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>EntidadNavDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAAIAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mVinculoClase" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="MNavegacionDatosDN.RelacionEntidadesNavDN" Collapsed="true">
+    <Position X="6.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RelacionEntidadesNavDN.vb</FileName>
+      <HashCode>AMAAAAAAAAIAAAAQAAAAIAQAAQAIAAEIAAIAAAAgAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mEntidadDatosOrigen" />
+      <Field Name="mEntidadDatosDestino" />
+      <Field Name="mCardinalidad" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mEntidadDatosOrigen" Type="MNavegacionDatosDN.EntidadNavDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.131" Y="-0.263" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mEntidadDatosDestino" Type="MNavegacionDatosDN.EntidadNavDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.215" Y="0.071" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.TiposYReflexion.DN.VinculoClaseDN" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="MV2DN.PropVinc" Collapsed="true">
+    <Position X="6.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.InstanciaVinc" Collapsed="true">
+    <Position X="2.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MNavegacionDatosDN.EntNavVincDN" Collapsed="true">
+    <Position X="2.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Vinc\EntNavVincDN.vb</FileName>
+      <HashCode>AAAAAAEQAAAAAAAAAQAAAAAAAAAAAQAIAAICAAAAQAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mInstanciaVinc" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColREentNavVincDN" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mInstanciaVinc" Type="MV2DN.InstanciaVinc">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.016" Y="0.341" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MNavegacionDatosDN.RelEntNavVincDN" Collapsed="true">
+    <Position X="6.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Vinc\RelEntNavVincDN.vb</FileName>
+      <HashCode>AAAAAQQQAAAAAAAAAAQAAAAAIAEgAAAAAAACAAAAQBA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mRelacionEntidadesNav" />
+      <Field Name="mPropVinc" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mRelacionEntidadesNav" Type="MNavegacionDatosDN.RelacionEntidadesNavDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.723" Y="0.185" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mPropVinc" Type="MV2DN.PropVinc">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.006" Y="0.362" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Enum Name="MNavegacionDatosDN.CardinalidadRelacion" Collapsed="true">
+    <Position X="6.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RelacionEntidadesNavDN.vb</FileName>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="BajaGenericoDN">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pObjeto" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BajaGenericoDNResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="BajaGenericoDNResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarListaTipos">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pTipo" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarListaTiposResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarListaTiposResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarListaTiposxListaIDs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="listaIDs" type="s:base64Binary" />
+            <s:element minOccurs="0" maxOccurs="1" name="pTipo" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarListaTiposxListaIDsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarListaTiposxListaIDsResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarPorValorIDenticoEnTipo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pTipo" type="s:base64Binary" />
+            <s:element minOccurs="0" maxOccurs="1" name="pValorHash" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarPorValorIDenticoEnTipoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarPorValorIDenticoEnTipoResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarListaTipos">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="lista" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarListaTiposResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="RecuperarGenerico">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="huellaEnt" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarGenericoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarGenericoResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarGenericoIdTipo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="idEnt" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="tipoEnt" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarGenericoIdTipoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarGenericoIdTipoResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarDNGenerico">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pIEntidadBaseDN" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarDNGenericoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GuardarDNGenericoResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="BajaGenericoDNSoapIn">
+    <wsdl:part name="parameters" element="tns:BajaGenericoDN" />
+  </wsdl:message>
+  <wsdl:message name="BajaGenericoDNSoapOut">
+    <wsdl:part name="parameters" element="tns:BajaGenericoDNResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarListaTiposSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarListaTipos" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarListaTiposSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarListaTiposResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarListaTiposxListaIDsSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarListaTiposxListaIDs" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarListaTiposxListaIDsSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarListaTiposxListaIDsResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarPorValorIDenticoEnTipoSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarPorValorIDenticoEnTipo" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarPorValorIDenticoEnTipoSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarPorValorIDenticoEnTipoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GuardarListaTiposSoapIn">
+    <wsdl:part name="parameters" element="tns:GuardarListaTipos" />
+  </wsdl:message>
+  <wsdl:message name="GuardarListaTiposSoapOut">
+    <wsdl:part name="parameters" element="tns:GuardarListaTiposResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarGenericoSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarGenerico" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarGenericoSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarGenericoResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarGenericoIdTipoSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarGenericoIdTipo" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarGenericoIdTipoSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarGenericoIdTipoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GuardarDNGenericoSoapIn">
+    <wsdl:part name="parameters" element="tns:GuardarDNGenerico" />
+  </wsdl:message>
+  <wsdl:message name="GuardarDNGenericoSoapOut">
+    <wsdl:part name="parameters" element="tns:GuardarDNGenericoResponse" />
+  </wsdl:message>
+  <wsdl:portType name="DatosBasicosWSSoap">
+    <wsdl:operation name="BajaGenericoDN">
+      <wsdl:input message="tns:BajaGenericoDNSoapIn" />
+      <wsdl:output message="tns:BajaGenericoDNSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListaTipos">
+      <wsdl:input message="tns:RecuperarListaTiposSoapIn" />
+      <wsdl:output message="tns:RecuperarListaTiposSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListaTiposxListaIDs">
+      <wsdl:input message="tns:RecuperarListaTiposxListaIDsSoapIn" />
+      <wsdl:output message="tns:RecuperarListaTiposxListaIDsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarPorValorIDenticoEnTipo">
+      <wsdl:input message="tns:RecuperarPorValorIDenticoEnTipoSoapIn" />
+      <wsdl:output message="tns:RecuperarPorValorIDenticoEnTipoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GuardarListaTipos">
+      <wsdl:input message="tns:GuardarListaTiposSoapIn" />
+      <wsdl:output message="tns:GuardarListaTiposSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarGenerico">
+      <wsdl:input message="tns:RecuperarGenericoSoapIn" />
+      <wsdl:output message="tns:RecuperarGenericoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarGenericoIdTipo">
+      <wsdl:input message="tns:RecuperarGenericoIdTipoSoapIn" />
+      <wsdl:output message="tns:RecuperarGenericoIdTipoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GuardarDNGenerico">
+      <wsdl:input message="tns:GuardarDNGenericoSoapIn" />
+      <wsdl:output message="tns:GuardarDNGenericoSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="DatosBasicosWSSoap" type="tns:DatosBasicosWSSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="BajaGenericoDN">
+      <soap:operation soapAction="http://tempuri.org/BajaGenericoDN" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListaTipos">
+      <soap:operation soapAction="http://tempuri.org/RecuperarListaTipos" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListaTiposxListaIDs">
+      <soap:operation soapAction="http://tempuri.org/RecuperarListaTiposxListaIDs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarPorValorIDenticoEnTipo">
+      <soap:operation soapAction="http://tempuri.org/RecuperarPorValorIDenticoEnTipo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarListaTipos">
+      <soap:operation soapAction="http://tempuri.org/GuardarListaTipos" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarGenerico">
+      <soap:operation soapAction="http://tempuri.org/RecuperarGenerico" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarGenericoIdTipo">
+      <soap:operation soapAction="http://tempuri.org/RecuperarGenericoIdTipo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarDNGenerico">
+      <soap:operation soapAction="http://tempuri.org/GuardarDNGenerico" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="DatosBasicosWSSoap12" type="tns:DatosBasicosWSSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="BajaGenericoDN">
+      <soap12:operation soapAction="http://tempuri.org/BajaGenericoDN" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListaTipos">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarListaTipos" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListaTiposxListaIDs">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarListaTiposxListaIDs" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarPorValorIDenticoEnTipo">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarPorValorIDenticoEnTipo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarListaTipos">
+      <soap12:operation soapAction="http://tempuri.org/GuardarListaTipos" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarGenerico">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarGenerico" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarGenericoIdTipo">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarGenericoIdTipo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarDNGenerico">
+      <soap12:operation soapAction="http://tempuri.org/GuardarDNGenerico" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="DatosBasicosWS">
+    <wsdl:port name="DatosBasicosWSSoap" binding="tns:DatosBasicosWSSoap">
+      <soap:address location="http://localhost:3002/SolucionFrameworkWS/DatosBasicosWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="DatosBasicosWSSoap12" binding="tns:DatosBasicosWSSoap12">
+      <soap12:address location="http://localhost:3002/SolucionFrameworkWS/DatosBasicosWS.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

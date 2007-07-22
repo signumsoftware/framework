@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.Procesos.ProcesosDN.TransicionRealizadaDN" Collapsed="true">
+    <Position X="2.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\TransicionRealizadaDN.vb</FileName>
+      <HashCode>BAAAAAACAEAAAAAAAAAAAAAACAAAAkAIKAIAAEkQABA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTransicion" />
+      <Field Name="mOperacionRealizadaOrigen" />
+      <Field Name="mOperacionRealizadaDestino" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mOperacionRealizadaOrigen" Type="Framework.Procesos.ProcesosDN.OperacionRealizadaDN" FixedFromPoint="true">
+      <Path>
+        <Point X="4.25" Y="3.5" />
+        <Point X="6.5" Y="3.5" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.OperacionRealizadaDN" Collapsed="true">
+    <Position X="6.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\OperacionRealizadaDN.vb</FileName>
+      <HashCode>EAAEAAAIABQABaCgCAFgNEDCAAQSEABIAAFIAAQAhYE=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mOperacion" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColSubTransiciones" />
+      <Field Name="mColSubTRIniciadas" />
+      <Field Name="mColOPRFinalizadasoEnCurso" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColSubTransiciones" Type="Framework.Procesos.ProcesosDN.TransicionDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.688" Y="3" />
+        <Point X="6.688" Y="1.812" />
+        <Point X="4.25" Y="1.812" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mColSubTRIniciadas" Type="Framework.Procesos.ProcesosDN.TransicionRealizadaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.938" Y="3.63" />
+        <Point X="6.938" Y="4.005" />
+        <Point X="4.062" Y="4.005" />
+        <Point X="4.062" Y="3.63" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.909" Y="0.11" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColOPRFinalizadasoEnCurso" Type="Framework.Procesos.ProcesosDN.OperacionRealizadaDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8" Y="3.438" />
+        <Point X="8.25" Y="3.438" />
+        <Point X="8.25" Y="3.188" />
+        <Point X="8" Y="3.188" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.268" Y="-0.213" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Orientation="Bottom" Position="0.835" />
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.TransicionDN" Collapsed="true">
+    <Position X="2.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\TransicionDN.vb</FileName>
+      <HashCode>AAAAAAAAAAiAAAgAMQAAAAAAAAAAgBAoACAAwAAIEAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mOperacionOrigen" />
+      <Field Name="mOperacionDestino" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mOperacionOrigen" Type="Framework.Procesos.ProcesosDN.OperacionDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.5" Y="1.25" />
+        <Point X="3.5" Y="0.875" />
+        <Point X="8.062" Y="0.875" />
+        <Point X="8.062" Y="1.25" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="2.331" Y="0.173" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mOperacionDestino" Type="Framework.Procesos.ProcesosDN.OperacionDN" FixedToPoint="true">
+      <Path>
+        <Point X="4.25" Y="1.438" />
+        <Point X="7.75" Y="1.438" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.OperacionDN" Collapsed="true">
+    <Position X="7.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\OperacionDN.vb</FileName>
+      <HashCode>AEAkAAAAAACABgAAAAAAAAAAAAIAAAAKACAIACAwAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.96" />
+  </Class>
+</ClassDiagram>

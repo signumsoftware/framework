@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.Procesos.ProcesosDN.OperacionDN" Collapsed="true" HideInheritanceLine="true">
+    <Position X="0.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\OperacionDN.vb</FileName>
+      <HashCode>AEAkAAAAAACABgAAAAAAAAAAAAIAAAAKACAIACAwAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mVerboOperacion" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColDNAceptadas" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.575" />
+  </Class>
+  <Class Name="Framework.TiposYReflexion.DN.VinculoMetodoDN">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mVinculoClase" />
+    </ShowAsAssociation>
+    <Members>
+      <Field Name="mVinculoClase" Hidden="true" />
+    </Members>
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.GrupoColDN" Collapsed="true">
+    <Position X="6.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\GrupoColDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mValor" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.GrupoDTSDN" Collapsed="true">
+    <Position X="6.5" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>Operaciones\GrupoColDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mValor" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="System.Data.DataSet" Collapsed="true">
+    <Position X="9.25" Y="1" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.164" />
+  </Class>
+  <Class Name="Framework.TiposYReflexion.DN.VinculoClaseDN" Collapsed="true">
+    <Position X="3.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.VerboDN" Collapsed="true">
+    <Position X="3.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\VerboDN.vb</FileName>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAIACAQAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Framework.Procesos.ProcesosDN.IOperacionDN">
+    <Position X="7.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\IOperacionRealizadaDN.vb</FileName>
+      <HashCode>AAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="VerboOperacion" />
+    </ShowAsAssociation>
+    <InheritanceLine Type="Framework.DatosNegocio.IEntidadDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="12.5" Y="3.75" />
+        <Point X="12.792" Y="3.75" />
+        <Point X="12.792" Y="6.255" />
+        <Point X="8.75" Y="6.255" />
+        <Point X="8.75" Y="6.25" />
+      </Path>
+    </InheritanceLine>
+  </Interface>
+  <Interface Name="Framework.Procesos.ProcesosDN.IOperacionRealizadaDN">
+    <Position X="7" Y="3.25" Width="2" />
+    <TypeIdentifier>
+      <FileName>Operaciones\IOperacionRealizadaDN.vb</FileName>
+      <HashCode>AAAAAAAAAAQAAIAAAABAAACAAAAAAAAAAAAAAAQAgAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="SujetoOperacion" />
+      <Property Name="ObjetoIndirectoOperacion" />
+      <Property Name="ObjetoDirectoOperacion" />
+      <Property Name="EstadoIOperacionRealizada" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Framework.Procesos.ProcesosDN.IEjecutorOperacionDN" Collapsed="true" HideInheritanceLine="true">
+    <Position X="3.5" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>Operaciones\IEjecutorOperacionDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="ColOperaciones" />
+    </ShowAsCollectionAssociation>
+    <InheritanceLine Type="Framework.DatosNegocio.IEntidadDN" IsHidden="true" />
+    <AssociationLine Name="ColOperaciones" Type="Framework.Procesos.ProcesosDN.OperacionDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.5" Y="3.75" />
+        <Point X="1.062" Y="3.75" />
+        <Point X="1.062" Y="5.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.442" Y="0.893" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Interface>
+  <Interface Name="System.Collections.IList" Collapsed="true">
+    <Position X="9.25" Y="2" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.IEntidadDN" Collapsed="true">
+    <Position X="11" Y="3.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Framework.Procesos.ProcesosDN.IGestorEjecutoresDeCliente">
+    <Position X="1" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <FileName>Operaciones\IGestorEjecutoresDeCliente.vb</FileName>
+      <HashCode>AAAIAAAAAAAAAAIAAAAAAAIAIAAAAAAAAEAAEAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Framework.Procesos.ProcesosDN.EstadoIOperacionRealizadaDN">
+    <Position X="10.25" Y="4.5" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>Operaciones\IOperacionRealizadaDN.vb</FileName>
+      <HashCode>QAAAAAQAAAAAAAAAIAAAAAAAAAAAgAAAAAAAAEAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

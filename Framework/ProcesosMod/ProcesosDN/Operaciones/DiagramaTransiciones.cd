@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="La transición deerá tener un operación origen, o una operación padre">
+    <Position X="4.823" Y="0.594" Height="0.562" Width="1.658" />
+  </Comment>
+  <Comment CommentText="La transición tendrá una condición de Guarda, ahora no implementado">
+    <Position X="7.281" Y="0.906" Height="0.583" Width="1.45" />
+  </Comment>
+  <Class Name="Framework.Procesos.ProcesosDN.OperacionDN" Collapsed="true">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\OperacionDN.vb</FileName>
+      <HashCode>AEAkAAAAAACABgAAAAAAAAAAAAIAAAAKACAIACAwAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.TransicionDN">
+    <Position X="5.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\TransicionDN.vb</FileName>
+      <HashCode>AAAAAAAAAAiAAAgAMQAAAAAAAAAAgBAoACAAwAAIEAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTipoTransicion" />
+      <Field Name="mOperacionOrigen" />
+      <Field Name="mOperacionDestino" />
+      <Field Name="mMetodoGuarda" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mOperacionOrigen" Type="Framework.Procesos.ProcesosDN.OperacionDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.984" Y="0.373" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mOperacionDestino" Type="Framework.Procesos.ProcesosDN.OperacionDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.5" Y="3.5" />
+        <Point X="5.5" Y="2.38" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.63" Y="0.748" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.TiposYReflexion.DN.VinculoMetodoDN" Collapsed="true">
+    <Position X="7.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Enum Name="Framework.Procesos.ProcesosDN.RecuperarColOperacionesTipos">
+    <Position X="2.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\TransicionDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgCAAAAAAAAAAI=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Framework.Procesos.ProcesosDN.TipoTransicionDN">
+    <Position X="2.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Operaciones\TransicionDN.vb</FileName>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAAAAAAAIIAAAAAAAAIAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

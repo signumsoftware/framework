@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.Mensajeria.GestorMensajeriaDN.NotificacionDN" Collapsed="true">
+    <Position X="1" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>NotificacionDN.vb</FileName>
+      <HashCode>AAAIAAAAAAQAAAAAAEAAAAAAAAAAAAAAAAAAIABAAAI=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mDatosMensaje" />
+      <Field Name="mCausa" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mCausa" Type="Framework.Mensajeria.GestorMensajeriaDN.CausaDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.183" Y="0.133" Height="0.16" Width="0.693" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mDatosMensaje" Type="Framework.Mensajeria.GestorMensajeriaDN.DatosMensajeDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.952" Y="0.633" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMensajeriaDN.CausaDN" Collapsed="true">
+    <Position X="3.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CausaDN.vb</FileName>
+      <HashCode>AAAIAAAAAAABAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMensajeriaDN.SuscripcionDN" Collapsed="true">
+    <Position X="6" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>SuscripcionDN.vb</FileName>
+      <HashCode>AAAIAAAAAAQAAAEAAEAAAAAAgAAAAAAAAAAAAgAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCausa" />
+      <Field Name="mDestino" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mCausa" Type="Framework.Mensajeria.GestorMensajeriaDN.CausaDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.214" Y="0.122" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mDestino" Type="Framework.Mensajeria.GestorMensajeriaDN.IDestinoDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.596" Y="0.548" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMensajeriaDN.SobreDN" Collapsed="true">
+    <Position X="3.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>SobreDN.vb</FileName>
+      <HashCode>AAFgAhAEAKEAAAEAAAAAAAAAgACAAgAIAAAAIhBAAII=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mDatosMensaje" />
+      <Field Name="mDestino" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mDatosMensaje" Type="Framework.Mensajeria.GestorMensajeriaDN.DatosMensajeDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.11" Y="0.341" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMensajeriaDN.DatosMensajeDN" Collapsed="true">
+    <Position X="0.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DatosMensajeDN.vb</FileName>
+      <HashCode>AAAAAAQAAAAAAAAAAAAQAAAAAAAAAACAAAAAgAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Framework.Mensajeria.GestorMensajeriaDN.IDestinoDN" Collapsed="true">
+    <Position X="6.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IDestinoDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAACAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Framework.Mensajeria.GestorMensajeriaDN.IFormateadorDatosACanal(Of T, k)">
+    <Position X="3.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IFormateadorDatosACanal.vb</FileName>
+      <HashCode>AAAAAAgAgAAAAlAAAAAAAAEAAAAAAAAAAAAAAAEAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

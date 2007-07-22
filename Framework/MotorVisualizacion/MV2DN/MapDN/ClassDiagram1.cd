@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="MV2DN.InstanciaMapDN" Collapsed="true">
+    <Position X="1" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\InstanciaMapDN.vb</FileName>
+      <HashCode>EQAAAAAAACQAEEAAACAIAACAgAIAAgDAABQACAAgAAY=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColAgrupacionMap" />
+    </ShowAsCollectionAssociation>
+    <InheritanceLine Type="MV2DN.ElementoMapDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="0.75" Y="4.697" />
+        <Point X="0.375" Y="4.697" />
+        <Point X="0.375" Y="1.812" />
+        <Point X="1" Y="1.812" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="mColAgrupacionMap" Type="MV2DN.AgrupacionMapDN" FixedToPoint="true">
+      <Path>
+        <Point X="2.5" Y="1.688" />
+        <Point X="5.25" Y="1.688" />
+      </Path>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.PropMapDN" Collapsed="true">
+    <Position X="3.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\propMapDN.vb</FileName>
+      <HashCode>AAEIAAAACE5EAAAAACAEJACSAAAAqAAAAgARABAoAAQ=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mInstanciaContenedora" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mInstanciaContenedora" Type="MV2DN.InstanciaMapDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4" Y="3.5" />
+        <Point X="4" Y="2.505" />
+        <Point X="1.812" Y="2.505" />
+        <Point X="1.812" Y="2.13" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="MV2DN.TipoAgrupacionMapDN" Collapsed="true">
+    <Position X="5.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\TipoAgrupacionMapDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAQ=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MV2DN.AgrupacionMapDN" Collapsed="true">
+    <Position X="5.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\AgrupacionMapDN.vb</FileName>
+      <HashCode>EQAAUAAAAAAEEEAQACAAAAAAgAAAAgBAABQAmQAgAAQ=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTipoAgrupacionMap" />
+      <Field Name="mInstanciaContenedora" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColPropMap" />
+      <Field Name="mColAgrupacionMap" />
+    </ShowAsCollectionAssociation>
+    <InheritanceLine Type="MV2DN.ElementoMapDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.75" Y="4.688" />
+        <Point X="6.312" Y="4.688" />
+        <Point X="6.312" Y="2.13" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="mColAgrupacionMap" Type="MV2DN.AgrupacionMapDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.75" Y="1.724" />
+        <Point X="8.393" Y="1.724" />
+        <Point X="8.393" Y="1.911" />
+        <Point X="6.75" Y="1.911" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mInstanciaContenedora" Type="MV2DN.InstanciaMapDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.25" Y="2.062" />
+        <Point X="4.875" Y="2.062" />
+        <Point X="4.875" Y="2.062" />
+        <Point X="2.5" Y="2.062" />
+      </Path>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.ElementoMapDN">
+    <Position X="0.75" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <FileName>MapDN\ElementMap.vb</FileName>
+      <HashCode>DAEAAAAQAiAQAAAAACQAABBAEIgAACAAAAASAAAhwAw=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.PropMapXML" Collapsed="true">
+    <Position X="5.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\propMapDN.vb</FileName>
+      <HashCode>IAEAAAAAAEgAAAAAAAAIIACQAAAACAAAAAARAAAIAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MV2DN.ElementoMapXML" Collapsed="true">
+    <Position X="3" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\ElementMap.vb</FileName>
+      <HashCode>KAEAAAAQAAAQAAAAAAAIAAAAAIgAACAAAAASAAABQAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.AgrupacionMapXML" Collapsed="true">
+    <Position X="8.25" Y="6.5" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>MapDN\AgrupacionMapDN.vb</FileName>
+      <HashCode>IAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAABAAkAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="ColPropMap" />
+      <Field Name="ColAgrupacionMap" />
+    </ShowAsCollectionAssociation>
+    <InheritanceLine Type="MV2DN.ElementoMapXML" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.875" Y="6.759" />
+        <Point X="3.875" Y="7.062" />
+        <Point X="8.25" Y="7.062" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="ColAgrupacionMap" Type="MV2DN.AgrupacionMapXML" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.833" Y="6.5" />
+        <Point X="8.833" Y="6.25" />
+        <Point X="9.344" Y="6.25" />
+        <Point X="9.344" Y="6.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.979" Y="0.272" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="MV2DN.InstanciaMapXml" Collapsed="true">
+    <Position X="3" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\InstanciaMapDN.vb</FileName>
+      <HashCode>IAAAAAAAAAAAAAAAAAAIgACAAAAAAAAAABAAAAAAAAI=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="ColAgrupacionMap" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="ColAgrupacionMap" Type="MV2DN.AgrupacionMapXML">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.13" Y="0.428" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="MV2DN.ComandoMapDN">
+    <Position X="8" Y="2.75" Width="2" />
+    <TypeIdentifier>
+      <FileName>MapDN\ComandoMapDN.vb</FileName>
+      <HashCode>gAAAAAAAIAACAACIACAAAAAAAAAACAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="MV2DN.IElemtoMapContenedor">
+    <Position X="11.25" Y="0.75" Width="2" />
+    <TypeIdentifier>
+      <FileName>MapDN\IElemtoMap.vb</FileName>
+      <HashCode>AQAAAAAAAAAAEAAAAAAAAAAAgAAAAgBAAAAACAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MV2DN.IElemtoMap">
+    <Position X="9" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\IElemtoMap.vb</FileName>
+      <HashCode>AAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAQAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

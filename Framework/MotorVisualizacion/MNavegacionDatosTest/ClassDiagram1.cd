@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="MNavegacionDatosTest.telefono" Collapsed="true">
+    <Position X="2" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mPersona" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="MNavegacionDatosTest.Hijo" Collapsed="true">
+    <Position X="4.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mPersona" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mPersona" Type="MNavegacionDatosTest.Persona">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.734" Y="0.581" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="MNavegacionDatosTest.Persona" Collapsed="true">
+    <Position X="4.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAABAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mcabeza" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="MNavegacionDatosTest.cabeza" Collapsed="true">
+    <Position X="7.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MNavegacionDatosTest.Equipo" Collapsed="true">
+    <Position X="5.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mcolPersonas" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mcolPersonas" Type="MNavegacionDatosTest.Persona">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.659" Y="0.266" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Class>
+  <Class Name="MNavegacionDatosTest.ParticipanteTA" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="2" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAQAAAAAAAACAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mPersona" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MNavegacionDatosTest.Concurso" Collapsed="true">
+    <Position X="2" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAgAACAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mIParticipante" />
+    </ShowAsAssociation>
+  </Class>
+  <Interface Name="MNavegacionDatosTest.IParticipante" Collapsed="true">
+    <Position X="2" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MNavegacionDatosTest.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

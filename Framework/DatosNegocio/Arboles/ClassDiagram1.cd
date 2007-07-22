@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.DatosNegocio.Arboles.ColNodosConHijosDN" Collapsed="true">
+    <Position X="8" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\ColNodosDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.Arboles.NodoBaseDN">
+    <Position X="5.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\NodoBaseDN.vb</FileName>
+      <HashCode>FAAQIAAAEgQIAAACAZCBggIAAgkIiACACgAAACIAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mHijos" />
+      <Field Name="mPadre" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.Arboles.ColNodosDN" Collapsed="true">
+    <Position X="8" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\ColNodosDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.Arboles.ColINodoTDN(Of T)" Collapsed="true">
+    <Position X="9.5" Y="9.5" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>Arboles\INodoTDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.ArrayListValidable" Collapsed="true">
+    <Position X="8" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Colecciones\ArrayListValidable.vb</FileName>
+      <HashCode>WEJAAACIAAIAAQAAAKAChAEAAggAAICACFAAAIAEADA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.Arboles.NodoBaseTDN(Of T)" Collapsed="true">
+    <Position X="6.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\NodoBaseTDN.vb</FileName>
+      <HashCode>FAQRMAAAEgUIAAACCJCAigBAAAkIkACAC0AAAAIBAAM=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mColHojas" />
+      <Field Name="mHijos" />
+      <Field Name="mPadre" />
+    </ShowAsAssociation>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <AssociationLine Name="mColHojas" Type="Framework.DatosNegocio.ArrayListValidable(Of T)" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.812" Y="8.75" />
+        <Point X="7.812" Y="8.562" />
+        <Point X="9.75" Y="8.562" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mHijos" Type="Framework.DatosNegocio.Arboles.ColINodoTDN(Of T)" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.438" Y="9.38" />
+        <Point X="7.438" Y="9.875" />
+        <Point X="9.5" Y="9.875" />
+      </Path>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.DatosNegocio.Arboles.ColNodoBaseTDN(Of T)" Collapsed="true">
+    <Position X="9.25" Y="10.75" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>Arboles\NodoBaseTDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.DatosNegocio.ArrayListValidable(Of T)" Collapsed="true">
+    <Position X="9.75" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Colecciones\ArrayListValidableDeT.vb</FileName>
+      <HashCode>WEJACEiILIqAARAQAKAWFAUkEgoaAoCACFkCAIFWMDA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Framework.DatosNegocio.Arboles.INodoConPadreDN">
+    <Position X="0.5" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>Arboles\INodoDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAACAAAAgAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="PadreNcP" />
+    </ShowAsAssociation>
+    <AssociationLine Name="PadreNcP" Type="Framework.DatosNegocio.Arboles.INodoConPadreDN" ManuallyRouted="true">
+      <Path>
+        <Point X="1.113" Y="5.266" />
+        <Point X="1.113" Y="5.787" />
+        <Point X="1.65" Y="5.787" />
+        <Point X="1.65" Y="5.266" />
+      </Path>
+    </AssociationLine>
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.Arboles.INodoConHijosDN">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\INodoDN.vb</FileName>
+      <HashCode>BAAAAAAAAAAAAAAAABAAAgAAAAAIiAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="HijosNcH" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.Arboles.INodoDN">
+    <Position X="3.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\INodoDN.vb</FileName>
+      <HashCode>AAAQIAAAAAAIAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="ColHojas" />
+    </ShowAsAssociation>
+    <InheritanceLine Type="Framework.DatosNegocio.Arboles.INodoConHijosDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2" Y="3.438" />
+        <Point X="2.375" Y="3.438" />
+        <Point X="2.375" Y="3.687" />
+        <Point X="3.25" Y="3.687" />
+      </Path>
+    </InheritanceLine>
+    <InheritanceLine Type="Framework.DatosNegocio.Arboles.INodoConPadreDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.25" Y="4.375" />
+        <Point X="2.625" Y="4.375" />
+        <Point X="2.625" Y="4.538" />
+        <Point X="3.25" Y="4.538" />
+      </Path>
+    </InheritanceLine>
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.INodoConHijosTDN(Of T)" Collapsed="true">
+    <Position X="0.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\INodoConHijosDNt.vb</FileName>
+      <HashCode>QAAAAAAAAAQAAAAACBAAAgAAAAAACAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="HijosNcH" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="HijosNcH" Type="Framework.DatosNegocio.INodoConHijosTDN(Of T)" ManuallyRouted="true">
+      <Path>
+        <Point X="1.268" Y="10.13" />
+        <Point X="1.268" Y="10.38" />
+        <Point X="1.743" Y="10.38" />
+        <Point X="1.743" Y="10.13" />
+      </Path>
+    </AssociationLine>
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.Arboles.INodoTDN(Of T)">
+    <Position X="3.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\INodoTDN.vb</FileName>
+      <HashCode>AAAQIAAAAAAIAAAAAAAAAAAAAAEAAAAAAAAAAAABAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Hijos" />
+      <Property Name="Padre" />
+    </ShowAsAssociation>
+    <InheritanceLine Type="Framework.DatosNegocio.INodoConHijosTDN(Of T)" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.25" Y="9.812" />
+        <Point X="4.375" Y="9.812" />
+        <Point X="4.375" Y="8.17" />
+      </Path>
+    </InheritanceLine>
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.Arboles.INodoConPadreTDN(Of T)" Collapsed="true">
+    <Position X="0.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\INodoConPadreTDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAACCAAAgAAAAAAAAAAAAAAAAAIAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="PadreNcP" />
+    </ShowAsAssociation>
+    <AssociationLine Name="PadreNcP" Type="Framework.DatosNegocio.Arboles.INodoConPadreTDN(Of T)" ManuallyRouted="true">
+      <Path>
+        <Point X="1.268" Y="7.13" />
+        <Point X="1.268" Y="7.585" />
+        <Point X="1.743" Y="7.585" />
+        <Point X="1.743" Y="7.13" />
+      </Path>
+    </AssociationLine>
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.IColNodos" Collapsed="true">
+    <Position X="0.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Arboles\ColNodosDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <InheritanceLine Type="System.Collections.IList" FixedToPoint="true">
+      <Path>
+        <Point X="3.25" Y="0.812" />
+        <Point X="2.25" Y="0.812" />
+      </Path>
+    </InheritanceLine>
+  </Interface>
+  <Interface Name="System.Collections.IList" Collapsed="true">
+    <Position X="3.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.IArrayListValidable(Of T)" Collapsed="true">
+    <Position X="0.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Colecciones\ArrayListValidableDeT.vb</FileName>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

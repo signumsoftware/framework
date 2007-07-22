@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.DatosNegocio.DatoConfigurableDN">
+    <Position X="2" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DatosConfigurables\DatoConfigurableDN.vb</FileName>
+      <HashCode>BAAAAABABAAAAAQAAAAAAAAAABAAAAAAAAABCAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTipoDatoConfigurable" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Framework.DatosNegocio.TipoDatoConfigurableDN">
+    <Position X="5.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>TipoDatoConfigurableDN.vb</FileName>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+</ClassDiagram>

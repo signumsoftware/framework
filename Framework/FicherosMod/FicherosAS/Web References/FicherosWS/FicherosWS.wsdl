@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="ObtenerCajonDocumentosRelacionados">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pGUID" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ObtenerCajonDocumentosRelacionadosResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObtenerCajonDocumentosRelacionadosResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarListadoRutas">
+        <s:complexType />
+      </s:element>
+      <s:element name="RecuperarListadoRutasResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarListadoRutasResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarRutaAlmacenamientoF">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RutaAlmacenamientoF" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GuardarRutaAlmacenamientoFResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GuardarRutaAlmacenamientoFResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CerrarRaf">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RutaAlmacenamiento" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CerrarRafResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CerrarRafResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarColTipoFichero">
+        <s:complexType />
+      </s:element>
+      <s:element name="RecuperarColTipoFicheroResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarColTipoFicheroResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VincularCajonDocumento">
+        <s:complexType />
+      </s:element>
+      <s:element name="VincularCajonDocumentoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="VincularCajonDocumentoResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="ObtenerCajonDocumentosRelacionadosSoapIn">
+    <wsdl:part name="parameters" element="tns:ObtenerCajonDocumentosRelacionados" />
+  </wsdl:message>
+  <wsdl:message name="ObtenerCajonDocumentosRelacionadosSoapOut">
+    <wsdl:part name="parameters" element="tns:ObtenerCajonDocumentosRelacionadosResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarListadoRutasSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarListadoRutas" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarListadoRutasSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarListadoRutasResponse" />
+  </wsdl:message>
+  <wsdl:message name="GuardarRutaAlmacenamientoFSoapIn">
+    <wsdl:part name="parameters" element="tns:GuardarRutaAlmacenamientoF" />
+  </wsdl:message>
+  <wsdl:message name="GuardarRutaAlmacenamientoFSoapOut">
+    <wsdl:part name="parameters" element="tns:GuardarRutaAlmacenamientoFResponse" />
+  </wsdl:message>
+  <wsdl:message name="CerrarRafSoapIn">
+    <wsdl:part name="parameters" element="tns:CerrarRaf" />
+  </wsdl:message>
+  <wsdl:message name="CerrarRafSoapOut">
+    <wsdl:part name="parameters" element="tns:CerrarRafResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarColTipoFicheroSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarColTipoFichero" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarColTipoFicheroSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarColTipoFicheroResponse" />
+  </wsdl:message>
+  <wsdl:message name="VincularCajonDocumentoSoapIn">
+    <wsdl:part name="parameters" element="tns:VincularCajonDocumento" />
+  </wsdl:message>
+  <wsdl:message name="VincularCajonDocumentoSoapOut">
+    <wsdl:part name="parameters" element="tns:VincularCajonDocumentoResponse" />
+  </wsdl:message>
+  <wsdl:portType name="FicherosWSSoap">
+    <wsdl:operation name="ObtenerCajonDocumentosRelacionados">
+      <wsdl:input message="tns:ObtenerCajonDocumentosRelacionadosSoapIn" />
+      <wsdl:output message="tns:ObtenerCajonDocumentosRelacionadosSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListadoRutas">
+      <wsdl:input message="tns:RecuperarListadoRutasSoapIn" />
+      <wsdl:output message="tns:RecuperarListadoRutasSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GuardarRutaAlmacenamientoF">
+      <wsdl:input message="tns:GuardarRutaAlmacenamientoFSoapIn" />
+      <wsdl:output message="tns:GuardarRutaAlmacenamientoFSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CerrarRaf">
+      <wsdl:input message="tns:CerrarRafSoapIn" />
+      <wsdl:output message="tns:CerrarRafSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarColTipoFichero">
+      <wsdl:input message="tns:RecuperarColTipoFicheroSoapIn" />
+      <wsdl:output message="tns:RecuperarColTipoFicheroSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VincularCajonDocumento">
+      <wsdl:input message="tns:VincularCajonDocumentoSoapIn" />
+      <wsdl:output message="tns:VincularCajonDocumentoSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="FicherosWSSoap" type="tns:FicherosWSSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ObtenerCajonDocumentosRelacionados">
+      <soap:operation soapAction="http://tempuri.org/ObtenerCajonDocumentosRelacionados" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListadoRutas">
+      <soap:operation soapAction="http://tempuri.org/RecuperarListadoRutas" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarRutaAlmacenamientoF">
+      <soap:operation soapAction="http://tempuri.org/GuardarRutaAlmacenamientoF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CerrarRaf">
+      <soap:operation soapAction="http://tempuri.org/CerrarRaf" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarColTipoFichero">
+      <soap:operation soapAction="http://tempuri.org/RecuperarColTipoFichero" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VincularCajonDocumento">
+      <soap:operation soapAction="http://tempuri.org/VincularCajonDocumento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="FicherosWSSoap12" type="tns:FicherosWSSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ObtenerCajonDocumentosRelacionados">
+      <soap12:operation soapAction="http://tempuri.org/ObtenerCajonDocumentosRelacionados" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarListadoRutas">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarListadoRutas" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GuardarRutaAlmacenamientoF">
+      <soap12:operation soapAction="http://tempuri.org/GuardarRutaAlmacenamientoF" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CerrarRaf">
+      <soap12:operation soapAction="http://tempuri.org/CerrarRaf" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarColTipoFichero">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarColTipoFichero" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VincularCajonDocumento">
+      <soap12:operation soapAction="http://tempuri.org/VincularCajonDocumento" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FicherosWS">
+    <wsdl:port name="FicherosWSSoap" binding="tns:FicherosWSSoap">
+      <soap:address location="http://localhost:3002/SolucionFrameworkWS/FicherosWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="FicherosWSSoap12" binding="tns:FicherosWSSoap12">
+      <soap12:address location="http://localhost:3002/SolucionFrameworkWS/FicherosWS.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

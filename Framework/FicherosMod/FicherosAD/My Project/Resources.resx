@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="uwCajonDocumentoxTipodocXEntidadReferida" xml:space="preserve">
+    <value>create view uwCajonDocumentoxTipodocXEntidadReferida as SELECT     dbo.tlCajonDocumentoDN.ID, dbo.tlTipoFicheroDN.Nombre, dbo.tlCajonDocumentoDN.FechaVerificacon, 
+                      dbo.tlHuellaEntidadReferidaCajonDocumentoDN.GUIDReferida, dbo.tlCajonDocumentoDN.idAlerta, 
+                      dbo.tlHuellaEntidadReferidaCajonDocumentoDN.TipoEntidadReferidaFullName
+FROM         dbo.tlCajonDocumentoDN INNER JOIN
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN ON 
+                      dbo.tlCajonDocumentoDN.ID = dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN
+                       INNER JOIN
+                      dbo.tlHuellaEntidadReferidaCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN = dbo.tlHuellaEntidadReferidaCajonDocumentoDN.GUID
+                       INNER JOIN
+                      dbo.tlTipoFicheroDN ON dbo.tlCajonDocumentoDN.idTipoDocumento = dbo.tlTipoFicheroDN.ID</value>
+  </data>
+  <data name="uwTipoDocRequeridoXEntidadRef" xml:space="preserve">
+    <value>create view uwTipoDocRequeridoXEntidadRef as SELECT     dbo.tlTipoDocumentoRequeridoDN.ID AS idTdr, dbo.tlHEDN.GUIDReferida, dbo.tlTipoDocumentoRequeridoDN.idTipoDoc, 
+                      dbo.tlTipoFicheroDN.Nombre
+FROM         dbo.tlHEDN INNER JOIN
+                      dbo.trtlTipoDocumentoRequeridoDNColEntidadesRequeridorasXtlHEDN ON 
+                      dbo.tlHEDN.GUID = dbo.trtlTipoDocumentoRequeridoDNColEntidadesRequeridorasXtlHEDN.idptlHEDN INNER JOIN
+                      dbo.tlTipoDocumentoRequeridoDN ON 
+                      dbo.trtlTipoDocumentoRequeridoDNColEntidadesRequeridorasXtlHEDN.idttlTipoDocumentoRequeridoDN = dbo.tlTipoDocumentoRequeridoDN.ID INNER
+                       JOIN
+                      dbo.tlTipoFicheroDN ON dbo.tlTipoDocumentoRequeridoDN.idTipoDoc = dbo.tlTipoFicheroDN.ID</value>
+  </data>
+  <data name="vwCajonDocumentoDNVincualdos" xml:space="preserve">
+    <value>create view  vwCajonDocumentoDNVincualdos   as
+SELECT     ID, idDocumento
+FROM         dbo.tlCajonDocumentoDN
+WHERE     (idDocumento IS NOT NULL)</value>
+  </data>
+  <data name="vwCajonDocumentoVis" xml:space="preserve">
+    <value>create view vwCajonDocumentoVis as    
+SELECT     dbo.tlCajonDocumentoDN.ID, dbo.tlCajonDocumentoDN.Nombre, dbo.tlTipoFicheroDN.Nombre AS TipoDoc, 
+                      dbo.tlIdentificacionDocumentoDN.Identificacion, dbo.tlCajonDocumentoDN.FechaVerificacon, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.NombreOriginalFichero, dbo.tlHuellaFicheroAlmacenadoIODN.Extension, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.ToSt
+FROM         dbo.tlCajonDocumentoDN INNER JOIN
+                      dbo.tlIdentificacionDocumentoDN ON dbo.tlCajonDocumentoDN.idIdentificacionDocumento = dbo.tlIdentificacionDocumentoDN.ID INNER JOIN
+                      dbo.tlTipoFicheroDN ON dbo.tlCajonDocumentoDN.idTipoDocumento = dbo.tlTipoFicheroDN.ID AND 
+                      dbo.tlIdentificacionDocumentoDN.idTipoFichero = dbo.tlTipoFicheroDN.ID LEFT OUTER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON dbo.tlCajonDocumentoDN.idDocumento = dbo.tlHuellaFicheroAlmacenadoIODN.ID</value>
+  </data>
+  <data name="vwCajonDocxIdentidadDoc" xml:space="preserve">
+    <value>vwCajonDocxIdentidadDoc</value>
+  </data>
+  <data name="vwCDIdentificadosNoVinculados" xml:space="preserve">
+    <value>create view  vwCDIdentificadosNoVinculados as
+
+SELECT  DISTINCT    dbo.tlCajonDocumentoDN.ID AS id, dbo.tlIdentificacionDocumentoDN.ID AS idIdentificacionDoc, dbo.tlIdentificacionDocumentoDN.Identificacion, 
+                      dbo.tlIdentificacionDocumentoDN.idTipoFichero
+FROM         dbo.tlCajonDocumentoDN INNER JOIN
+                      dbo.tlIdentificacionDocumentoDN ON dbo.tlCajonDocumentoDN.idIdentificacionDocumento = dbo.tlIdentificacionDocumentoDN.ID
+WHERE     (dbo.tlCajonDocumentoDN.idDocumento IS NULL) AND (dbo.tlIdentificacionDocumentoDN.Identificacion IS NOT NULL)</value>
+  </data>
+  <data name="vwCDyHFBienVincualdos" xml:space="preserve">
+    <value>create view  vwCDyHFBienVincualdos   as
+
+SELECT   DISTINCT   dbo.tlCajonDocumentoDN.ID AS idCajon, dbo.tlHuellaFicheroAlmacenadoIODN.ID AS idHF
+FROM         dbo.tlCajonDocumentoDN INNER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON dbo.tlCajonDocumentoDN.idDocumento = dbo.tlHuellaFicheroAlmacenadoIODN.ID INNER JOIN
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN ON 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.ID = dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idttlHuellaFicheroAlmacenadoIODN
+                       AND 
+                      dbo.tlCajonDocumentoDN.idIdentificacionDocumento = dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idptlIdentificacionDocumentoDN</value>
+  </data>
+  <data name="vwCDyHFMalVincualdos" xml:space="preserve">
+    <value>create view  vwCDyHFMalVincualdos   as
+
+SELECT DISTINCT dbo.vwCajonDocumentoDNVincualdos.ID, dbo.vwCajonDocumentoDNVincualdos.idDocumento, dbo.vwCDyHFBienVincualdos.idHF
+FROM         dbo.vwCajonDocumentoDNVincualdos LEFT OUTER JOIN
+                      dbo.vwCDyHFBienVincualdos ON dbo.vwCajonDocumentoDNVincualdos.ID = dbo.vwCDyHFBienVincualdos.idCajon
+WHERE     (dbo.vwCDyHFBienVincualdos.idHF IS NULL)</value>
+  </data>
+  <data name="vwCDyHFVinculables" xml:space="preserve">
+    <value>create view vwCDyHFVinculables as  SELECT     dbo.tlHuellaFicheroAlmacenadoIODN.ID AS idFichero, dbo.tlCajonDocumentoDN.ID AS id
+FROM         dbo.tlIdentificacionDocumentoDN INNER JOIN
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN ON 
+                      dbo.tlIdentificacionDocumentoDN.ID = dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idptlIdentificacionDocumentoDN
+                       INNER JOIN
+                      dbo.tlCajonDocumentoDN ON dbo.tlIdentificacionDocumentoDN.ID = dbo.tlCajonDocumentoDN.idIdentificacionDocumento AND 
+                      dbo.tlIdentificacionDocumentoDN.idTipoFichero = dbo.tlCajonDocumentoDN.idTipoDocumento INNER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON 
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idttlHuellaFicheroAlmacenadoIODN = dbo.tlHuellaFicheroAlmacenadoIODN.ID</value>
+  </data>
+  <data name="vwHuellaFicheroIdentificados" xml:space="preserve">
+    <value>create view  vwHuellaFicheroIdentificados as
+
+SELECT  DISTINCT    dbo.tlHuellaFicheroAlmacenadoIODN.ID, dbo.tlIdentificacionDocumentoDN.ID AS IdentificacionDocumento, 
+                      dbo.tlIdentificacionDocumentoDN.Identificacion, dbo.tlIdentificacionDocumentoDN.idTipoFichero
+FROM         dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN INNER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON 
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idttlHuellaFicheroAlmacenadoIODN = dbo.tlHuellaFicheroAlmacenadoIODN.ID
+                       INNER JOIN
+                      dbo.tlIdentificacionDocumentoDN ON 
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idptlIdentificacionDocumentoDN = dbo.tlIdentificacionDocumentoDN.ID
+WHERE     (dbo.tlIdentificacionDocumentoDN.Identificacion IS NOT NULL)</value>
+  </data>
+  <data name="vwHuellaFicheroIdentificadosNoVinculados" xml:space="preserve">
+    <value>create view vwHuellaFicheroIdentificadosNoVinculados as 
+SELECT DISTINCT 
+                      dbo.vwHuellaFicheroIdentificados.ID, dbo.vwHuellaFicheroIdentificados.IdentificacionDocumento, dbo.vwHuellaFicheroIdentificados.Identificacion, 
+                      dbo.vwHuellaFicheroIdentificados.idTipoFichero
+FROM         dbo.vwCDyHFBienVincualdos RIGHT OUTER JOIN
+                      dbo.vwHuellaFicheroIdentificados ON dbo.vwCDyHFBienVincualdos.idHF = dbo.vwHuellaFicheroIdentificados.ID
+WHERE     (dbo.vwCDyHFBienVincualdos.idCajon IS NULL)</value>
+  </data>
+  <data name="vwHuellaFicheroIdentificadosVis" xml:space="preserve">
+    <value>create view vwHuellaFicheroIdentificadosVis as 
+
+
+SELECT     ID, NombreOriginalFichero, Extension, Tipo, Identificacion
+FROM         dbo.vwHuellaFicheroVis
+WHERE     (Identificacion IS NOT NULL)</value>
+  </data>
+  <data name="vwHuellaFicheroVis" xml:space="preserve">
+    <value>create view vwHuellaFicheroVis as SELECT     dbo.tlHuellaFicheroAlmacenadoIODN.ID, dbo.tlHuellaFicheroAlmacenadoIODN.NombreOriginalFichero, dbo.tlHuellaFicheroAlmacenadoIODN.Extension, 
+                      dbo.tlTipoFicheroDN.Nombre AS Tipo, dbo.tlIdentificacionDocumentoDN.Identificacion
+FROM         dbo.tlIdentificacionDocumentoDN INNER JOIN
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN ON 
+                      dbo.tlIdentificacionDocumentoDN.ID = dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idptlIdentificacionDocumentoDN
+                       INNER JOIN
+                      dbo.tlTipoFicheroDN ON dbo.tlIdentificacionDocumentoDN.idTipoFichero = dbo.tlTipoFicheroDN.ID RIGHT OUTER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON 
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idttlHuellaFicheroAlmacenadoIODN = dbo.tlHuellaFicheroAlmacenadoIODN.ID</value>
+  </data>
+</root>

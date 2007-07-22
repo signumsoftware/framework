@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.AccesoDatos.MotorAD.DN.CampoPostRecuperacionDN" Collapsed="true">
+    <Position X="1" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\CampoPostRecuperacionDN.vb</FileName>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAEAAAAAAAAABAAAAAAAAEAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.AccesoDatos.MotorAD.DN.CondicionCampoDN" Collapsed="true">
+    <Position X="2.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\CondicionCampoDN.vb</FileName>
+      <HashCode>AAAAABAAAAAAAAEAAAAAAAAEAAAACAAAACAAAAAgJAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.AccesoDatos.MotorAD.DN.CondicionRelacionalDN" Collapsed="true">
+    <Position X="4.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\CondicionRelacionalDN.vb</FileName>
+      <HashCode>EAAAMBAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAIAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.AccesoDatos.MotorAD.DN.FiltroDN" Collapsed="true">
+    <Position X="7" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\FiltroDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.AccesoDatos.MotorAD.DN.ListaRelacionUnoNSqlsDN" Collapsed="true">
+    <Position X="1.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\ListaRelacionUnoNSqlsDN.vb</FileName>
+      <HashCode>AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.AccesoDatos.MotorAD.DN.RelacionUnoNSQLsDN" Collapsed="true">
+    <Position X="0.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\RelacionUnoNSQLsDN.vb</FileName>
+      <HashCode>IAICAQgQAGAAJAAAAAEAAAAAEAiAIAgQABAAAAAoIAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Framework.AccesoDatos.MotorAD.DN.RelacionUnoUnoSQLsDN" Collapsed="true">
+    <Position X="1.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\RelacionUnoUnoSQLsDN.vb</FileName>
+      <HashCode>IAICAAAUAAAAAAAAAAEAAAAAAAiAAAgQABAAAAAIIAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Framework.AccesoDatos.MotorAD.DN.ICondicionDN" Collapsed="true">
+    <Position X="6.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\ICondicionDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Framework.AccesoDatos.MotorAD.DN.IRelacionUnoNDN" Collapsed="true">
+    <Position X="6.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\IRelacionUnoNDN.vb</FileName>
+      <HashCode>AAICAQgAAGAABAAAAAAAAAAAEAAAAAAQABAAAAAgAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Framework.AccesoDatos.MotorAD.DN.IRelacionUnoUnoDN" Collapsed="true">
+    <Position X="7.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\IRelacionUnoUnoDN.vb</FileName>
+      <HashCode>AAICAAAEAAAAAAAAAAAAAAAAAAAAAAAQABAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

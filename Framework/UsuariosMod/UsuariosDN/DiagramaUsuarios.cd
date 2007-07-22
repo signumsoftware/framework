@@ -1,0 +1,247 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Comment CommentText="Autorizacion por Metodos de sistema (servicios)">
+    <Position X="1.604" Y="8.448" Height="0.427" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Autrorización por el modelo de opraciones">
+    <Position X="4.51" Y="8.417" Height="0.438" Width="3.471" />
+  </Comment>
+  <Comment CommentText="Autorización de permisos sobre entidades">
+    <Position X="7.995" Y="5.042" Height="0.375" Width="3.21" />
+  </Comment>
+  <Class Name="Framework.Usuarios.DN.CasosUsoDN" Collapsed="true">
+    <Position X="3.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CasosUsoDN.vb</FileName>
+      <HashCode>AACAAAAAAAAAAAAEAAAABAIAAAEAAACEAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColMetodosSistemaDN" />
+      <Field Name="mColOperaciones" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColMetodosSistemaDN" Type="Framework.Usuarios.DN.MetodoSistemaDN" FixedFromPoint="true">
+      <Path>
+        <Point X="3.25" Y="5.562" />
+        <Point X="2.469" Y="5.562" />
+        <Point X="2.469" Y="6.25" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.039" Y="0.325" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColOperaciones" Type="Framework.Procesos.ProcesosDN.OperacionDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.75" Y="5.5" />
+        <Point X="6" Y="5.5" />
+        <Point X="6" Y="6.25" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.117" Y="0.36" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.981" />
+  </Class>
+  <Class Name="Framework.Usuarios.DN.DatosIdentidadDN" Collapsed="true">
+    <Position X="1.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DatosIdentidadDN.vb</FileName>
+      <HashCode>AAAAAEAAAAAAAAAAAAIAAAAAABAAgCAAAAAEAIAAEEA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Usuarios.DN.RolDN" Collapsed="true">
+    <Position X="5.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>RolDN.vb</FileName>
+      <HashCode>AASCAAAAAAAgAAAEAgAQhAACAAAAAAAEAAAAAIgAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColCasosUso" />
+      <Field Name="mColPermisos" />
+      <Field Name="mColRol" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColCasosUso" Type="Framework.Usuarios.DN.CasosUsoDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.5" Y="3.812" />
+        <Point X="3.812" Y="3.812" />
+        <Point X="3.812" Y="5.25" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.452" Y="1.081" Height="0.16" Width="1.462" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColRol" Type="Framework.Usuarios.DN.RolDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.812" Y="4.13" />
+        <Point X="5.812" Y="4.551" />
+        <Point X="6.625" Y="4.551" />
+        <Point X="6.625" Y="4.13" />
+      </Path>
+    </AssociationLine>
+    <Lollipop Position="0.958" />
+  </Class>
+  <Class Name="Framework.Usuarios.DN.UsuarioDN">
+    <Position X="1.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>UsuarioDN.vb</FileName>
+      <HashCode>AAAAAAAAgAAAAAAACAAAACQgAAAAAAAAAAAAAQAAABQ=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.846" />
+  </Class>
+  <Class Name="Framework.Usuarios.DN.MetodoSistemaDN" Collapsed="true">
+    <Position X="1.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MetodoSistemaDN.vb</FileName>
+      <HashCode>AACAAAAAIBACAAAEgAAAAAAAAAAAAEAEAAAAABAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mVinculoMetodo" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Framework.TiposYReflexion.DN.VinculoMetodoDN" Collapsed="true">
+    <Position X="1.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.Usuarios.DN.PrincipalDN" Collapsed="true">
+    <Position X="3.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PrincipalDN.vb</FileName>
+      <HashCode>ACCAAAAAiCAAEAAEAgAYRAAAAQAAAQAAQEAAAAgAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mUsuarioDN" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColRol" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mUsuarioDN" Type="Framework.Usuarios.DN.UsuarioDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.5" Y="1.312" />
+        <Point X="1.75" Y="1.312" />
+        <Point X="1.75" Y="1.75" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mColRol" Type="Framework.Usuarios.DN.RolDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5" Y="1.375" />
+        <Point X="5.938" Y="1.375" />
+        <Point X="5.938" Y="3.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.19" Y="1.017" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.856" />
+  </Class>
+  <Class Name="Framework.Usuarios.DN.PermisoDN" Collapsed="true">
+    <Position X="8.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PermisoDN.vb</FileName>
+      <HashCode>AAQIAAAAAIAAAAAUgAAgAAAAAgAAAAAIQAhAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mDatoRef" />
+      <Field Name="mTipoPermiso" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mDatoRef" Type="Framework.DatosNegocio.IEntidadBaseDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.688" Y="3.88" />
+        <Point X="8.688" Y="4.058" />
+        <Point X="8.562" Y="4.058" />
+        <Point X="8.562" Y="4.25" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mTipoPermiso" Type="Framework.Usuarios.DN.TipoPermisoDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="10" Y="3.625" />
+        <Point X="10.562" Y="3.625" />
+        <Point X="10.562" Y="4.25" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="Framework.Usuarios.DN.TipoPermisoDN" Collapsed="true">
+    <Position X="9.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PermisoDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.OperacionDN" Collapsed="true">
+    <Position X="5.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Field Name="mVerboOperacion" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColDNAceptadas" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mVerboOperacion" Type="Framework.Procesos.ProcesosDN.VerboDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.214" Y="0.352" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColDNAceptadas" Type="Framework.TiposYReflexion.DN.VinculoClaseDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.525" Y="0.362" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.763" />
+  </Class>
+  <Class Name="Framework.TiposYReflexion.DN.VinculoClaseDN" Collapsed="true">
+    <Position X="6.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Framework.Procesos.ProcesosDN.VerboDN" Collapsed="true">
+    <Position X="4.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Interface Name="Framework.Usuarios.DN.IEjecutorOperacionRolDN" Collapsed="true">
+    <Position X="7.5" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>IEjecutorOperacionRolDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="ColRoles" />
+      <Property Name="ColPermisos" />
+    </ShowAsCollectionAssociation>
+    <InheritanceLine Type="Framework.Procesos.ProcesosDN.IEjecutorOperacionDN" FixedToPoint="true">
+      <Path>
+        <Point X="11" Y="2.062" />
+        <Point X="9.75" Y="2.062" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="ColRoles" Type="Framework.Usuarios.DN.RolDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.5" Y="1.967" />
+        <Point X="6.312" Y="1.967" />
+        <Point X="6.312" Y="3.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.627" Y="0.568" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="ColPermisos" Type="Framework.Usuarios.DN.PermisoDN" FixedToPoint="true">
+      <Path>
+        <Point X="8.938" Y="2.38" />
+        <Point X="8.938" Y="3.25" />
+      </Path>
+    </AssociationLine>
+  </Interface>
+  <Interface Name="Framework.DatosNegocio.IEntidadBaseDN" Collapsed="true">
+    <Position X="8" Y="4.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Framework.Procesos.ProcesosDN.IEjecutorOperacionDN" Collapsed="true">
+    <Position X="11" Y="1.75" Width="2.25" />
+    <TypeIdentifier />
+    <ShowAsCollectionAssociation>
+      <Property Name="ColOperaciones" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="ColOperaciones" Type="Framework.Procesos.ProcesosDN.OperacionDN">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.725" Y="0.112" Height="0.16" Width="0.922" />
+      </MemberNameLabel>
+    </AssociationLine>
+  </Interface>
+</ClassDiagram>

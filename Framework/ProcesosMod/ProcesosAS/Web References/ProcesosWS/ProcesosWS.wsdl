@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="RecuperarEjecutorCliente">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="nombreCliente" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarEjecutorClienteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarEjecutorClienteResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EjecutarOperacion">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pParametroOperacionPr" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EjecutarOperacionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EjecutarOperacionResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarTransicionesAutorizadasSobre">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pHuellaEntidadDN" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarTransicionesAutorizadasSobreResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarTransicionesAutorizadasSobreResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarTransicionesDeInicio">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="pTipoDN" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RecuperarTransicionesDeInicioResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RecuperarTransicionesDeInicioResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="RecuperarEjecutorClienteSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarEjecutorCliente" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarEjecutorClienteSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarEjecutorClienteResponse" />
+  </wsdl:message>
+  <wsdl:message name="EjecutarOperacionSoapIn">
+    <wsdl:part name="parameters" element="tns:EjecutarOperacion" />
+  </wsdl:message>
+  <wsdl:message name="EjecutarOperacionSoapOut">
+    <wsdl:part name="parameters" element="tns:EjecutarOperacionResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarTransicionesAutorizadasSobreSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarTransicionesAutorizadasSobre" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarTransicionesAutorizadasSobreSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarTransicionesAutorizadasSobreResponse" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarTransicionesDeInicioSoapIn">
+    <wsdl:part name="parameters" element="tns:RecuperarTransicionesDeInicio" />
+  </wsdl:message>
+  <wsdl:message name="RecuperarTransicionesDeInicioSoapOut">
+    <wsdl:part name="parameters" element="tns:RecuperarTransicionesDeInicioResponse" />
+  </wsdl:message>
+  <wsdl:portType name="ProcesosWSSoap">
+    <wsdl:operation name="RecuperarEjecutorCliente">
+      <wsdl:input message="tns:RecuperarEjecutorClienteSoapIn" />
+      <wsdl:output message="tns:RecuperarEjecutorClienteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EjecutarOperacion">
+      <wsdl:input message="tns:EjecutarOperacionSoapIn" />
+      <wsdl:output message="tns:EjecutarOperacionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTransicionesAutorizadasSobre">
+      <wsdl:input message="tns:RecuperarTransicionesAutorizadasSobreSoapIn" />
+      <wsdl:output message="tns:RecuperarTransicionesAutorizadasSobreSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTransicionesDeInicio">
+      <wsdl:input message="tns:RecuperarTransicionesDeInicioSoapIn" />
+      <wsdl:output message="tns:RecuperarTransicionesDeInicioSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ProcesosWSSoap" type="tns:ProcesosWSSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RecuperarEjecutorCliente">
+      <soap:operation soapAction="http://tempuri.org/RecuperarEjecutorCliente" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EjecutarOperacion">
+      <soap:operation soapAction="http://tempuri.org/EjecutarOperacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTransicionesAutorizadasSobre">
+      <soap:operation soapAction="http://tempuri.org/RecuperarTransicionesAutorizadasSobre" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTransicionesDeInicio">
+      <soap:operation soapAction="http://tempuri.org/RecuperarTransicionesDeInicio" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="ProcesosWSSoap12" type="tns:ProcesosWSSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RecuperarEjecutorCliente">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarEjecutorCliente" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EjecutarOperacion">
+      <soap12:operation soapAction="http://tempuri.org/EjecutarOperacion" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTransicionesAutorizadasSobre">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarTransicionesAutorizadasSobre" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecuperarTransicionesDeInicio">
+      <soap12:operation soapAction="http://tempuri.org/RecuperarTransicionesDeInicio" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ProcesosWS">
+    <wsdl:port name="ProcesosWSSoap" binding="tns:ProcesosWSSoap">
+      <soap:address location="http://localhost:3002/SolucionFrameworkWS/ProcesosWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="ProcesosWSSoap12" binding="tns:ProcesosWSSoap12">
+      <soap12:address location="http://localhost:3002/SolucionFrameworkWS/ProcesosWS.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

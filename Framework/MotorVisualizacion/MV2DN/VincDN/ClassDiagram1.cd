@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="MV2DN.AgrupacionVinc" Collapsed="true">
+    <Position X="3.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>VincDN\AgrupacionVinc.vb</FileName>
+      <HashCode>AAAAAAEAIBQBBAAAAQCAAAAAAAAAAIAAAAABAQAAAgA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mInstanciaVinc" />
+      <Field Name="mMap" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColAgrupacionVinc" />
+      <Field Name="mColPropVinc" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mInstanciaVinc" Type="MV2DN.InstanciaVinc" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="3.625" Y="3.259" />
+        <Point X="3.625" Y="3.692" />
+        <Point X="1.406" Y="3.692" />
+        <Point X="1.406" Y="3.259" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.576" Y="0.159" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColAgrupacionVinc" Type="MV2DN.AgrupacionVinc" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.25" Y="3.259" />
+        <Point X="4.25" Y="3.713" />
+        <Point X="4.812" Y="3.713" />
+        <Point X="4.812" Y="3.259" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.884" Y="0.479" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColPropVinc" Type="MV2DN.PropVinc" FixedFromPoint="true">
+      <Path>
+        <Point X="5" Y="3" />
+        <Point X="6.5" Y="3" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.362" Y="-0.311" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.InstanciaVinc" Collapsed="true">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>VincDN\InstanciaVinc.vb</FileName>
+      <HashCode>AAAAAAAAIBQBBABAAAAAAAAABEEAIIAAAAABAUAgIgQ=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mMap" />
+      <Field Name="mIRecuperadorInstanciaMap" />
+      <Field Name="mPropiedadReferidora" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColAgrupacionVinc" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mMap" Type="MV2DN.InstanciaMapDN" FixedToPoint="true">
+      <Path>
+        <Point X="0.75" Y="3.259" />
+        <Point X="0.75" Y="5.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.525" Y="0.419" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mColAgrupacionVinc" Type="MV2DN.AgrupacionVinc" FixedToPoint="true">
+      <Path>
+        <Point X="2" Y="3" />
+        <Point X="3.5" Y="3" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="mIRecuperadorInstanciaMap" Type="MV2DN.IRecuperadorInstanciaMap" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="0.625" Y="2.75" />
+        <Point X="0.625" Y="2.375" />
+        <Point X="0.688" Y="2.375" />
+        <Point X="0.688" Y="1.481" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.657" Y="0.18" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mPropiedadReferidora" Type="MV2DN.PropVinc" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.062" Y="3.259" />
+        <Point X="1.062" Y="4.129" />
+        <Point X="3.854" Y="4.129" Type="JumpStart" />
+        <Point X="4.021" Y="4.129" Type="JumpEnd" />
+        <Point X="7.042" Y="4.129" Type="JumpStart" />
+        <Point X="7.208" Y="4.129" Type="JumpEnd" />
+        <Point X="7.594" Y="4.129" />
+        <Point X="7.594" Y="3.259" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="4.714" Y="0.643" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.PropVinc" Collapsed="true">
+    <Position X="6.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>VincDN\PropVinc.vb</FileName>
+      <HashCode>AEAIAQkIJBARABBAAUACACQAAEAAgIAECEAhAAAQRgA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mInstanciaVincReferida" />
+      <Field Name="mInstanciaVinc" />
+      <Field Name="mMap" />
+    </ShowAsAssociation>
+    <AssociationLine Name="mInstanciaVincReferida" Type="MV2DN.InstanciaVinc" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.375" Y="2.75" />
+        <Point X="7.375" Y="2.238" />
+        <Point X="1.688" Y="2.238" />
+        <Point X="1.688" Y="2.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-2.406" Y="0.431" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="mInstanciaVinc" Type="MV2DN.InstanciaVinc" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.812" Y="2.75" />
+        <Point X="7.812" Y="2.003" />
+        <Point X="1.5" Y="2.003" />
+        <Point X="1.5" Y="2.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.603" Y="0.899" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.InstanciaMapDN" Collapsed="true">
+    <Position X="0.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\InstanciaMapDN.vb</FileName>
+      <HashCode>EQAAAAAAACQAEEAAACAIAACAgAIAAgDAABQACAAgAAY=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColAgrupacionMap" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.AgrupacionMapDN" Collapsed="true">
+    <Position X="3.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\AgrupacionMapDN.vb</FileName>
+      <HashCode>EQAAUAAAAAAEEEAQACAAAAAAgAAAAgBAABQAmQAgAAQ=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="mColPropMap" />
+      <Field Name="mColAgrupacionMap" />
+    </ShowAsCollectionAssociation>
+    <AssociationLine Name="mColAgrupacionMap" Type="MV2DN.AgrupacionMapDN">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.546" Y="0.32" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MV2DN.PropMapDN" Collapsed="true">
+    <Position X="6.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MapDN\propMapDN.vb</FileName>
+      <HashCode>AAEIAAAACE5EAAAAACAEJACSAAAAqAAAAgARABAoAAQ=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="MV2DN.IRecuperadorInstanciaMap">
+    <Position X="0.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <FileName>VincDN\IRecuperadorInstanciaMap.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MV2DN.IVincElemento">
+    <Position X="5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>VincDN\IVincElemento.vb</FileName>
+      <HashCode>AAAAAAEAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAgA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+</ClassDiagram>

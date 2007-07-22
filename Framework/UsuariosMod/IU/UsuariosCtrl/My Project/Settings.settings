@@ -1,0 +1,27 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="VistaListaEntidadUserSel" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">vwOperadoresVis</Value>
+    </Setting>
+    <Setting Name="VistaListaEntidadUserVis" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">vwOperadoresVis</Value>
+    </Setting>
+    <Setting Name="ColorAlterFiltro" Type="System.Drawing.Color" Scope="Application">
+      <Value Profile="(Default)">LightBlue</Value>
+    </Setting>
+    <Setting Name="ColorAlterResultados" Type="System.Drawing.Color" Scope="Application">
+      <Value Profile="(Default)">LightBlue</Value>
+    </Setting>
+    <Setting Name="TituloDestinoNavegacion" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Administración de Operadores</Value>
+    </Setting>
+    <Setting Name="DestinoNavegacion" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">EntidadUsuario</Value>
+    </Setting>
+    <Setting Name="FormularioNavegacion" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ListaEntidadUsuario</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{359EBF7C-5C58-4B69-B3EC-D2CD0A1C249A}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>Sub Main</StartupObject>
+    <RootNamespace>MV2ConfiguradorIUWin</RootNamespace>
+    <AssemblyName>MV2ConfiguradorIUWin</AssemblyName>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>MV2ConfiguradorIUWin.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>MV2ConfiguradorIUWin.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.vb">
+      <DependentUpon>Form1.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1ctrl.vb" />
+    <Compile Include="Form2.Designer.vb">
+      <DependentUpon>Form2.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form2.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MarcoMDI.Designer.vb">
+      <DependentUpon>MarcoMDI.vb</DependentUpon>
+    </Compile>
+    <Compile Include="MarcoMDI.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModuloNavegacion.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Form1.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>Form1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form2.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>Form2.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MarcoMDI.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MarcoMDI.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\configuracion\Configuracion.vbproj">
+      <Project>{AD9CFC39-D5D4-4BF8-B706-F25A8496F86A}</Project>
+      <Name>Configuracion</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DatosNegocio\DatosNegocio.vbproj">
+      <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
+      <Name>DatosNegocio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\IUWIN\ControlesPBase\ControlesPBase.vbproj">
+      <Project>{4BCFA092-06B6-4DFF-85FA-5C743B16EA03}</Project>
+      <Name>ControlesPBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\IUWIN\MotorIU\MotorIU.vbproj">
+      <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
+      <Name>MotorIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MotorBusqueda\MotorBusquedaBasicasDN\MotorBusquedaBasicasDN.vbproj">
+      <Project>{864FFDEA-1EB1-454D-9DB2-62C6997E1A87}</Project>
+      <Name>MotorBusquedaBasicasDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MotorBusqueda\MotorBusquedaDN\MotorBusquedaDN.vbproj">
+      <Project>{D61870E3-889D-4E28-8466-12EAC5A099C9}</Project>
+      <Name>MotorBusquedaDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ProcesosMod\ProcesosDN\ProcesosDN.vbproj">
+      <Project>{38B44E67-F841-4169-A43E-39A591B30E74}</Project>
+      <Name>ProcesosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\TiposyReflexion\TiposYReflexion.vbproj">
+      <Project>{45F3B925-470A-4095-8AEB-36FA6E533096}</Project>
+      <Name>TiposYReflexion</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MV2Controles\MV2Controles.vbproj">
+      <Project>{1F5FE0D7-3F3E-4591-97AB-F36236B8D645}</Project>
+      <Name>MV2Controles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MV2DN\MV2DN.vbproj">
+      <Project>{0BD7920F-A01B-4F3E-BF28-B26C4D2AD6EA}</Project>
+      <Name>MV2DN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

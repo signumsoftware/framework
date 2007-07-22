@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.Mensajeria.GestorMails.DespachadorMails&lt;T&gt;">
+    <Position X="2.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DespachadorMails.cs</FileName>
+      <HashCode>AAAAAAAAASAAAAEAAAAQAAAAAAiAAAAAIAAAAIAAEAg=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMails.DN.CanalMailDN" Collapsed="true">
+    <Position X="3" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\CanalMailDN.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMails.DN.DestinoMailDN" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="3" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\DestinoMailDN.cs</FileName>
+      <HashCode>AAAAAAAAACAABAAAACgAAACAAAAAAAAAAAAAAAAAAAg=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mCanalMail" />
+      <Field Name="mEmail" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMails.DN.ColDestinoMailDN" Collapsed="true">
+    <Position X="4.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\DestinoMailDN.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMails.DN.EmailDN" Collapsed="true">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\EmailDN.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAACEAgACAAAAAAAAIAQAAAAAEAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMails.DN.ColEmailDN" Collapsed="true">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>DN\EmailDN.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMails.LN.CorreoLN">
+    <Position X="6.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>LN\CorreoLN.cs</FileName>
+      <HashCode>IAAAAAAAAAAgAAAAAAAAAAAAAAAABAAAAAAABAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Framework.Mensajeria.GestorMails.LN.EnviadorMailsLN">
+    <Position X="4.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>LN\EnviadorMaislLN.cs</FileName>
+      <HashCode>EACAAAAAAAEQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+</ClassDiagram>

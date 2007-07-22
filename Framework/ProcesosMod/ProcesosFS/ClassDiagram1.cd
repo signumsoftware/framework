@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Framework.Procesos.ProcesosFS.OperacionesFS">
+    <Position X="1" Y="0.75" Width="3.25" />
+    <TypeIdentifier>
+      <FileName>OperacionesFS.vb</FileName>
+      <HashCode>EAACAAAAAAAAAAAAAAAAgAAAAAABAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+</ClassDiagram>

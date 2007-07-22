@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{327DB7D1-8438-40BB-88D7-C71020E8CD3A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <StartupObject>
+    </StartupObject>
+    <RootNamespace>Framework.Ficheros.FicherosIU</RootNamespace>
+    <AssemblyName>FicherosForm</AssemblyName>
+    <MyType>Windows</MyType>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>FicherosForm.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>FicherosForm.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controladores\ctrlCFicheros.vb" />
+    <Compile Include="Controladores\ctrlRutaAlmacenamientoFrm.vb" />
+    <Compile Include="ctrlRutaAlmacenamiento.Designer.vb">
+      <DependentUpon>ctrlRutaAlmacenamiento.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ctrlRutaAlmacenamiento.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FicherosVinculadosFrm.Designer.vb">
+      <DependentUpon>FicherosVinculadosFrm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FicherosVinculadosFrm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModuloFicheros.vb" />
+    <Compile Include="RutaAlmacenamientoFrm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RutaAlmacenamientoFrm.Designer.vb">
+      <DependentUpon>RutaAlmacenamientoFrm.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ctrlRutaAlmacenamiento.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ctrlRutaAlmacenamiento.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FicherosVinculadosFrm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FicherosVinculadosFrm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RutaAlmacenamientoFrm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>RutaAlmacenamientoFrm.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\DataSources\FN.Ficheros.FicherosDN.RutaAlmacenamientoFicherosDN.datasource" />
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Framework\DatosNegocio\DatosNegocio.vbproj">
+      <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
+      <Name>DatosNegocio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Framework\IUWIN\AuxIU\AuxIU.vbproj">
+      <Project>{3A1255B0-734C-41C5-BFCB-6F919AFBC2EE}</Project>
+      <Name>AuxIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Framework\IUWIN\ControlesPBase\ControlesPBase.vbproj">
+      <Project>{4BCFA092-06B6-4DFF-85FA-5C743B16EA03}</Project>
+      <Name>ControlesPBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Framework\IUWIN\MotorIU\MotorIU.vbproj">
+      <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
+      <Name>MotorIU</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Framework\IUWIN\PropiedadesControles\PropiedadesControles.vbproj">
+      <Project>{2C2BCAE2-0C76-4477-97B7-EFECD9FF19A1}</Project>
+      <Name>PropiedadesControles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\IUWIN\IUComun\IUComun.vbproj">
+      <Project>{EBAA3074-697C-4638-84C5-AC502B37280D}</Project>
+      <Name>IUComun</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\TiposyReflexion\TiposYReflexion.vbproj">
+      <Project>{45F3B925-470A-4095-8AEB-36FA6E533096}</Project>
+      <Name>TiposYReflexion</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\FicherosAS\FicherosAS.vbproj">
+      <Project>{FE9551F2-8C17-4789-9B4D-053C1F0109FD}</Project>
+      <Name>FicherosAS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\FicherosDN\FicherosDN.vbproj">
+      <Project>{4E45A33B-6518-47CD-B7E8-8B191D76CE21}</Project>
+      <Name>FicherosDN</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
