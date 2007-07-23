@@ -87,15 +87,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\FRAMEWORK\ClaseBaseLN\ClaseBaseLN.vbproj">
+    <ProjectReference Include="..\..\ClaseBaseLN\ClaseBaseLN.vbproj">
       <Project>{0EF22784-347C-4707-A67A-BA7446B41B4D}</Project>
       <Name>ClaseBaseLN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Framework\DatosNegocio\DatosNegocio.vbproj">
+    <ProjectReference Include="..\..\DatosNegocio\DatosNegocio.vbproj">
       <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
       <Name>DatosNegocio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Framework\LogicaNegocio\LogicaNegocios.vbproj">
+    <ProjectReference Include="..\..\LogicaNegocio\LogicaNegocios.vbproj">
       <Project>{44EB0293-1654-41F3-8C11-98699EF2B906}</Project>
       <Name>LogicaNegocios</Name>
     </ProjectReference>

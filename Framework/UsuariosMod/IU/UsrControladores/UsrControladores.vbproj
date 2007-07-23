@@ -88,7 +88,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Framework\IUWIN\MotorIU\MotorIU.vbproj">
+    <ProjectReference Include="..\..\..\IUWIN\MotorIU\MotorIU.vbproj">
       <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
       <Name>MotorIU</Name>
     </ProjectReference>

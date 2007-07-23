@@ -100,7 +100,7 @@
       <Project>{4E45A33B-6518-47CD-B7E8-8B191D76CE21}</Project>
       <Name>FicherosDN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Framework\Utilidades\Utilidades.vbproj">
+    <ProjectReference Include="..\..\Utilidades\Utilidades.vbproj">
       <Project>{FDF3F772-2931-49D6-9529-523773D9EC15}</Project>
       <Name>Utilidades</Name>
     </ProjectReference>

@@ -94,7 +94,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Framework\DatosNegocio\DatosNegocio.vbproj">
+    <ProjectReference Include="..\..\DatosNegocio\DatosNegocio.vbproj">
       <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
       <Name>DatosNegocio</Name>
     </ProjectReference>

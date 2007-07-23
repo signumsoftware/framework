@@ -125,23 +125,23 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Framework\DatosNegocio\DatosNegocio.vbproj">
+    <ProjectReference Include="..\..\..\DatosNegocio\DatosNegocio.vbproj">
       <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
       <Name>DatosNegocio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Framework\IUWIN\AuxIU\AuxIU.vbproj">
+    <ProjectReference Include="..\..\..\IUWIN\AuxIU\AuxIU.vbproj">
       <Project>{3A1255B0-734C-41C5-BFCB-6F919AFBC2EE}</Project>
       <Name>AuxIU</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Framework\IUWIN\ControlesPBase\ControlesPBase.vbproj">
+    <ProjectReference Include="..\..\..\IUWIN\ControlesPBase\ControlesPBase.vbproj">
       <Project>{4BCFA092-06B6-4DFF-85FA-5C743B16EA03}</Project>
       <Name>ControlesPBase</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Framework\IUWIN\MotorIU\MotorIU.vbproj">
+    <ProjectReference Include="..\..\..\IUWIN\MotorIU\MotorIU.vbproj">
       <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
       <Name>MotorIU</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Framework\IUWIN\PropiedadesControles\PropiedadesControles.vbproj">
+    <ProjectReference Include="..\..\..\IUWIN\PropiedadesControles\PropiedadesControles.vbproj">
       <Project>{2C2BCAE2-0C76-4477-97B7-EFECD9FF19A1}</Project>
       <Name>PropiedadesControles</Name>
     </ProjectReference>

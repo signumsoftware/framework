@@ -134,11 +134,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Framework\DatosNegocio\DatosNegocio.vbproj">
+    <ProjectReference Include="..\..\..\DatosNegocio\DatosNegocio.vbproj">
       <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
       <Name>DatosNegocio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Framework\IUWIN\PropiedadesControles\PropiedadesControles.vbproj">
+    <ProjectReference Include="..\..\..\IUWIN\PropiedadesControles\PropiedadesControles.vbproj">
       <Project>{2C2BCAE2-0C76-4477-97B7-EFECD9FF19A1}</Project>
       <Name>PropiedadesControles</Name>
     </ProjectReference>

@@ -85,15 +85,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Framework\FachadaLogica\FachadaLogica.vbproj">
+    <ProjectReference Include="..\..\FachadaLogica\FachadaLogica.vbproj">
       <Project>{DFE7224F-36A0-432C-9E82-57F5977C53A3}</Project>
       <Name>FachadaLogica</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Framework\LogicaNegocio\LogicaNegocios.vbproj">
+    <ProjectReference Include="..\..\LogicaNegocio\LogicaNegocios.vbproj">
       <Project>{44EB0293-1654-41F3-8C11-98699EF2B906}</Project>
       <Name>LogicaNegocios</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Framework\UsuariosMod\UsuariosDN\UsuariosDN.vbproj">
+    <ProjectReference Include="..\..\UsuariosMod\UsuariosDN\UsuariosDN.vbproj">
       <Project>{DC27C3D3-C8D7-49AE-AF82-C21682FDCFCD}</Project>
       <Name>UsuariosDN</Name>
     </ProjectReference>
