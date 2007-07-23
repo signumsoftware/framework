@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="DesktopBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- TO EDIT BUILD TYPE DEFINITION
+
+  To edit the build type, you will need to edit this file which was generated
+  by the Create New Build Type wizard.  This file is under source control and
+  needs to be checked out before making any changes.
+
+  The file is available at -
+      $/{TeamProjectName}/TeamBuildTypes/{BuildTypeName}
+  where you will need to replace TeamProjectName and BuildTypeName with your
+  Team Project and Build Type name that you created
+
+  Checkout the file
+    1. Open Source Control Explorer by selecting View -> Other Windows -> Source Control Explorer
+    2. Ensure that your current workspace has a mapping for the $/{TeamProjectName}/TeamBuildTypes folder and 
+       that you have done a "Get Latest Version" on that folder
+    3. Browse through the folders to {TeamProjectName}->TeamBuildTypes->{BuildTypeName} folder
+    4. From the list of files available in this folder, right click on TfsBuild.Proj. Select 'Check Out For Edit...'
+
+
+  Make the required changes to the file and save
+
+  Checkin the file
+    1. Right click on the TfsBuild.Proj file selected in Step 3 above and select 'Checkin Pending Changes'
+    2. Use the pending checkin dialog to save your changes to the source control
+
+  Once the file is checked in with the modifications, all future builds using
+  this build type will use the modified settings
+  -->
+  <!-- Do not edit this -->
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v8.0\TeamBuild\Microsoft.TeamFoundation.Build.targets" />
+  <ProjectExtensions>
+    <!--  DESCRIPTION
+     The description is associated with a build type. Edit the value for making changes.
+    -->
+    <Description>
+    </Description>
+    <!--  BUILD MACHINE
+     Name of the machine which will be used to build the solutions selected.
+    -->
+    <BuildMachine>Andromeda</BuildMachine>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <!--  TEAM PROJECT
+     The team project which will be built using this build type.
+    -->
+    <TeamProject>Signum</TeamProject>
+    <!--  BUILD DIRECTORY
+     The directory on the build machine that will be used to build the
+     selected solutions. The directory must be a local path on the build
+     machine (e.g. c:\build).
+    -->
+    <BuildDirectoryPath>C:\build\code</BuildDirectoryPath>
+    <!--  DROP LOCATION
+      The location to drop (copy) the built binaries and the log files after
+     the build is complete. This location has to be a valid UNC path of the
+     form \\Server\Share. The build machine service account and application
+     tier account need to have read write permission on this share.
+    -->
+    <DropLocation>\\Andromeda\drops</DropLocation>
+    <!--  TESTING
+     Set this flag to enable/disable running tests as a post build step.
+    -->
+    <RunTest>false</RunTest>
+    <!--  WorkItemFieldValues
+      Add/edit key value pairs to set values for fields in the work item created
+      during the build process. Please make sure the field names are valid 
+      for the work item type being used.
+    -->
+    <WorkItemFieldValues>Symptom=build break;Steps To Reproduce=Start the build using Team Build</WorkItemFieldValues>
+    <!--  CODE ANALYSIS
+       To change CodeAnalysis behavior edit this value. Valid values for this
+       can be Default,Always or Never.
+
+     Default - To perform code analysis as per the individual project settings
+     Always  - To always perform code analysis irrespective of project settings
+     Never   - To never perform code analysis irrespective of project settings
+     -->
+    <RunCodeAnalysis>Never</RunCodeAnalysis>
+    <!--  UPDATE ASSOCIATED WORK ITEMS
+     Set this flag to enable/disable updating associated workitems on a successful build
+    -->
+    <UpdateAssociatedWorkItems>true</UpdateAssociatedWorkItems>
+    <!-- Title for the work item created on build failure -->
+    <WorkItemTitle>Build failure in build:</WorkItemTitle>
+    <!-- Description for the work item created on build failure -->
+    <DescriptionText>This work item was created by Team Build on a build failure.</DescriptionText>
+    <!-- Text pointing to log file location on build failure -->
+    <BuildlogText>The build log file is at:</BuildlogText>
+    <!-- Text pointing to error/warnings file location on build failure -->
+    <ErrorWarningLogText>The errors/warnings log file is at:</ErrorWarningLogText>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--  SOLUTIONS
+     The path of the solutions to build. To add/delete solutions, edit this
+     value. For example, to add a solution MySolution.sln, add following line -
+         <SolutionToBuild Include="$(SolutionRoot)\path\MySolution.sln" />
+
+     To change the order in which the solutions are build, modify the order in
+     which the solutions appear below.
+    -->
+    <SolutionToBuild Include="$(SolutionRoot)\Framework\SolucionFramework.sln" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--  CONFIGURATIONS
+     The list of configurations to build. To add/delete configurations, edit
+     this value. For example, to add a new configuration, add following lines -
+         <ConfigurationToBuild Include="Debug|x86">
+             <FlavorToBuild>Debug</FlavorToBuild>
+             <PlatformToBuild>x86</PlatformToBuild>
+         </ConfigurationToBuild>
+
+     The Include attribute value should be unique for each ConfigurationToBuild node.
+    -->
+    <ConfigurationToBuild Include="Release|Any CPU">
+      <FlavorToBuild>Release</FlavorToBuild>
+      <PlatformToBuild>Any CPU</PlatformToBuild>
+    </ConfigurationToBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <!--  TEST ARGUMENTS
+     If the RunTest is set to true then the following test arguments will be
+     used to run tests.
+
+     To add/delete new testlist or to choose a metadata file (.vsmdi) file, edit this value.
+     For e.g. to run BVT1 and BVT2 type tests mentioned in the Helloworld.vsmdi file, add the following -
+
+     <MetaDataFile Include="$(SolutionRoot)\HelloWorld\HelloWorld.vsmdi">
+         <TestList>BVT1;BVT2</TestList>
+     </MetaDataFile>
+
+     Where BVT1 and BVT2 are valid test types defined in the HelloWorld.vsmdi file.
+     MetaDataFile - Full path to test metadata file.
+     TestList - The test list in the selected metadata file to run.
+
+     Please note that you need to specify the vsmdi file relative to $(SolutionRoot)
+    -->
+    <MetaDataFile Include=" ">
+      <TestList> </TestList>
+    </MetaDataFile>
+  </ItemGroup>
+  <ItemGroup>
+    <!--  ADDITIONAL REFERENCE PATH
+     The list of additional reference paths to use while resolving references.
+     For example,
+         <AdditionalReferencePath Include="C:\MyFolder\" />
+         <AdditionalReferencePath Include="C:\MyFolder2\" />
+    -->
+  </ItemGroup>
+</Project>
