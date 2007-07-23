@@ -387,6 +387,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 	ProjectSection(SolutionItems) = preProject
 		localtestrun.testrunconfig = localtestrun.testrunconfig
+		SolucionFramework.vsmdi = SolucionFramework.vsmdi
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OperacionesMod", "OperacionesMod", "{F20F277A-6278-4431-A2BB-C6C421B759A6}"
@@ -1417,6 +1418,9 @@ Global
 		SccProjectTopLevelParentUniqueName125 = SolucionFramework.sln
 		SccProjectName125 = WS/WSHelper
 		SccLocalPath125 = WS\\WSHelper
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = SolucionFramework.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
