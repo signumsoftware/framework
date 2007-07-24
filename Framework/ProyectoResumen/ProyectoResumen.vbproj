@@ -142,35 +142,35 @@
       <Project>{E6D64057-ECED-4407-ABFB-1DAE05F3B2E9}</Project>
       <Name>FicherosLN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\AdaptadorInformesQueryBuildingFS\AdaptadorInformesQueryBuildingFS.vbproj">
+    <ProjectReference Include="..\GestorInformesMod\AdaptadorInformesQueryBuildingFS\AdaptadorInformesQueryBuildingFS.vbproj">
       <Project>{ADB78198-3C02-41D2-B661-8AE3A43C4678}</Project>
       <Name>AdaptadorInformesQueryBuildingFS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\AdaptadorInformesQueryBuildingGBD\AdaptadorInformesQueryBuildingAD.vbproj">
+    <ProjectReference Include="..\GestorInformesMod\AdaptadorInformesQueryBuildingGBD\AdaptadorInformesQueryBuildingAD.vbproj">
       <Project>{F5CEBE6F-0C5C-42EE-A02E-19F7E0F941A6}</Project>
       <Name>AdaptadorInformesQueryBuildingAD</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\AdaptadorInformesQueryBuildingLN\AdaptadorInformesQueryBuildingLN.vbproj">
+    <ProjectReference Include="..\GestorInformesMod\AdaptadorInformesQueryBuildingLN\AdaptadorInformesQueryBuildingLN.vbproj">
       <Project>{37165889-91C5-4A41-9DFC-1FC74CE69E67}</Project>
       <Name>AdaptadorInformesQueryBuildingLN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\AdaptadorInformesQueryBuilding\AdaptadorInformesQueryBuildingDN.vbproj">
+    <ProjectReference Include="..\GestorInformesMod\AdaptadorInformesQueryBuilding\AdaptadorInformesQueryBuildingDN.vbproj">
       <Project>{C4766DA6-9E43-478F-975C-66C610803D7D}</Project>
       <Name>AdaptadorInformesQueryBuildingDN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\ContenedorPlantillaAD\ContenedorPlantillaAD.csproj">
+    <ProjectReference Include="..\GestorInformesMod\ContenedorPlantillaAD\ContenedorPlantillaAD.csproj">
       <Project>{02194AC0-69D3-451A-B4D5-9245041423AE}</Project>
       <Name>ContenedorPlantillaAD</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\ContenedorPlantillaDN\ContenedorPlantillaDN.csproj">
+    <ProjectReference Include="..\GestorInformesMod\ContenedorPlantillaDN\ContenedorPlantillaDN.csproj">
       <Project>{9A918AA8-717F-4A12-92B6-0D2AEB2611E8}</Project>
       <Name>ContenedorPlantillaDN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\ContenedorPlantillaLN\ContenedorPlantillaLN.csproj">
+    <ProjectReference Include="..\GestorInformesMod\ContenedorPlantillaLN\ContenedorPlantillaLN.csproj">
       <Project>{A4813472-BE1F-467F-A66A-0C18C24AC8E2}</Project>
       <Name>ContenedorPlantillaLN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\GestorInformes\GestorInformes.csproj">
+    <ProjectReference Include="..\GestorInformesMod\GestorInformes\GestorInformes.csproj">
       <Project>{5C602A84-EE36-417E-8529-90D8A9B25D87}</Project>
       <Name>GestorInformes %28GestorInformes\GestorInformes%29</Name>
     </ProjectReference>
@@ -369,6 +369,10 @@
     <ProjectReference Include="..\ProcesosMod\ProcesosLN\ProcesosLN.vbproj">
       <Project>{D2EA0193-124C-4580-BADD-4A0FEF253164}</Project>
       <Name>ProcesosLN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SerializadorTexto\SerializadorTexto\SerializadorTexto.csproj">
+      <Project>{48396CED-0B58-4C59-BED8-4D5FCCA5847C}</Project>
+      <Name>SerializadorTexto</Name>
     </ProjectReference>
     <ProjectReference Include="..\TiposYReflexionAD\TiposYReflexionAD.vbproj">
       <Project>{EF08A1B6-51CC-43D8-B6E6-3CBA4AB750A9}</Project>

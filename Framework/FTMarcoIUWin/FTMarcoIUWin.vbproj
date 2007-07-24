@@ -251,7 +251,7 @@
     </ProjectReference>
     <ProjectReference Include="..\IUWIN\IUComun\IUComun.vbproj">
       <Project>{EBAA3074-697C-4638-84C5-AC502B37280D}</Project>
-      <Name>IUComun %28IU\IUComun\IUComun%29</Name>
+      <Name>IUComun</Name>
     </ProjectReference>
     <ProjectReference Include="..\MotorBusqueda\MotorBusquedaIuWin\MotorBusquedaIuWin.vbproj">
       <Project>{DD711274-EDAC-434C-AB9E-B095A8E2765F}</Project>
