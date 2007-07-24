@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Este archivo contiene los parámetros necesarios para configurar el
+	   Adaptador de Informes QueryBuilding.-->
+<configuracion xmlns="http://signumsoftware.com/2007/AdaptadorInformesQueryBuilding">
+
+	<!-- Especifica el directorio en el que se generan los arhivos temporales de informes -->
+	<propiedad nombre="DirectorioTemporalInformes" valor="D:\Temp" />
+	
+	<!-- Especifica el directorio en el que se encuentran las plantillas de los documentos -->
+	<propiedad nombre="DirectorioPlantillas" valor="D:\empresa\AMV\Modelo Informes\Plantillas Finales" />
+
+</configuracion>

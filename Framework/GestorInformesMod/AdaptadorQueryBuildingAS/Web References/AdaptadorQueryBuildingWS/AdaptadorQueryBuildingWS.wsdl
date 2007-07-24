@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="GenerarInforme">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AdaptadorIQB" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GenerarInformeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GenerarInformeResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GenerarEsquemaXMLEnArchivo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AdaptadorIQB" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GenerarEsquemaXMLEnArchivoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GenerarEsquemaXMLEnArchivoResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GenerarEsquemaXML">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AdaptadorIQB" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GenerarEsquemaXMLResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GenerarEsquemaXMLResult" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GenerarInformeSoapIn">
+    <wsdl:part name="parameters" element="tns:GenerarInforme" />
+  </wsdl:message>
+  <wsdl:message name="GenerarInformeSoapOut">
+    <wsdl:part name="parameters" element="tns:GenerarInformeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GenerarEsquemaXMLEnArchivoSoapIn">
+    <wsdl:part name="parameters" element="tns:GenerarEsquemaXMLEnArchivo" />
+  </wsdl:message>
+  <wsdl:message name="GenerarEsquemaXMLEnArchivoSoapOut">
+    <wsdl:part name="parameters" element="tns:GenerarEsquemaXMLEnArchivoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GenerarEsquemaXMLSoapIn">
+    <wsdl:part name="parameters" element="tns:GenerarEsquemaXML" />
+  </wsdl:message>
+  <wsdl:message name="GenerarEsquemaXMLSoapOut">
+    <wsdl:part name="parameters" element="tns:GenerarEsquemaXMLResponse" />
+  </wsdl:message>
+  <wsdl:portType name="AdaptadorQueryBuildingWSSoap">
+    <wsdl:operation name="GenerarInforme">
+      <wsdl:input message="tns:GenerarInformeSoapIn" />
+      <wsdl:output message="tns:GenerarInformeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEsquemaXMLEnArchivo">
+      <wsdl:input message="tns:GenerarEsquemaXMLEnArchivoSoapIn" />
+      <wsdl:output message="tns:GenerarEsquemaXMLEnArchivoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEsquemaXML">
+      <wsdl:input message="tns:GenerarEsquemaXMLSoapIn" />
+      <wsdl:output message="tns:GenerarEsquemaXMLSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="AdaptadorQueryBuildingWSSoap" type="tns:AdaptadorQueryBuildingWSSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GenerarInforme">
+      <soap:operation soapAction="http://tempuri.org/GenerarInforme" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEsquemaXMLEnArchivo">
+      <soap:operation soapAction="http://tempuri.org/GenerarEsquemaXMLEnArchivo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEsquemaXML">
+      <soap:operation soapAction="http://tempuri.org/GenerarEsquemaXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="AdaptadorQueryBuildingWSSoap12" type="tns:AdaptadorQueryBuildingWSSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GenerarInforme">
+      <soap12:operation soapAction="http://tempuri.org/GenerarInforme" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEsquemaXMLEnArchivo">
+      <soap12:operation soapAction="http://tempuri.org/GenerarEsquemaXMLEnArchivo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarEsquemaXML">
+      <soap12:operation soapAction="http://tempuri.org/GenerarEsquemaXML" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="AdaptadorQueryBuildingWS">
+    <wsdl:port name="AdaptadorQueryBuildingWSSoap" binding="tns:AdaptadorQueryBuildingWSSoap">
+      <soap:address location="http://localhost:3002/SolucionFrameworkWS/AdaptadorQueryBuildingWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="AdaptadorQueryBuildingWSSoap12" binding="tns:AdaptadorQueryBuildingWSSoap12">
+      <soap12:address location="http://localhost:3002/SolucionFrameworkWS/AdaptadorQueryBuildingWS.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
