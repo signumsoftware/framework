@@ -34,7 +34,7 @@
   <ItemGroup>
     <Reference Include="AgenteImpresion, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Olmo\Desktop\CompiladosDependencias\AgenteImpresion.dll</HintPath>
+      <HintPath>..\..\CompiladosDependencias\AgenteImpresion.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
