@@ -179,6 +179,14 @@ FROM         dbo.tlModeloDN INNER JOIN
                       dbo.tlCategoriaModDatosDN.ID = dbo.trtlCategoriaModDatosDNColModelosDatosXtlModeloDatosDN.idttlCategoriaModDatosDN AND 
                       dbo.tlModeloDatosDN.ID = dbo.trtlCategoriaModDatosDNColModelosDatosXtlModeloDatosDN.idptlModeloDatosDN</value>
   </data>
+  <data name="vwCDxTarifa" xml:space="preserve">
+    <value>create view vwCDxTarifa as SELECT     dbo.tlCajonDocumentoDN.ID, dbo.tlCajonDocumentoDN.FechaVerificacon, dbo.tlCajonDocumentoDN.idDocumento, dbo.tlTarifaDN.ID AS idTarifa
+FROM         dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN INNER JOIN
+                      dbo.tlCajonDocumentoDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idttlCajonDocumentoDN = dbo.tlCajonDocumentoDN.ID INNER JOIN
+                      dbo.tlTarifaDN ON 
+                      dbo.trtlCajonDocumentoDNHuellasEntidadesReferidasXtlHuellaEntidadReferidaCajonDocumentoDN.idptlHuellaEntidadReferidaCajonDocumentoDN = dbo.tlTarifaDN.GUID</value>
+  </data>
   <data name="vwDatosPolizaVehiculosXPago" xml:space="preserve">
     <value>create view  vwDatosPolizaVehiculosXPago as
 

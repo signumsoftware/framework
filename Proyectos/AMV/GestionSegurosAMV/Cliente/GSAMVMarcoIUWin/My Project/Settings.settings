@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
   <Profiles />
   <Settings>
-    <Setting Name="LocalizacionServidorReemplazar" Type="System.String" Scope="User">
-      <Value Profile="(Default)">localhost:3001/GDocEntrantesWS*localhost:3002/SolucionFrameworkWS*localhost:3001/SolucionFrameworkWS*localhost:3001/SolucionFNWS</Value>
-    </Setting>
     <Setting Name="RutaCargaMapVis" Type="System.String" Scope="User">
       <Value Profile="(Default)">D:\Signum\Signum\Proyectos\AMV\GestionSegurosAMV\Cliente\GSAMVMarcoIUWin\Mapeados</Value>
     </Setting>
@@ -14,11 +11,17 @@
     <Setting Name="cifNifEmpresa" Type="System.String" Scope="User">
       <Value Profile="(Default)">B83204586</Value>
     </Setting>
-    <Setting Name="LocalizacionServidor" Type="System.String" Scope="User">
-      <Value Profile="(Default)">localhost:3004/GestionSegurosAMVWS/</Value>
-    </Setting>
     <Setting Name="nombreRolCliente" Type="System.String" Scope="User">
       <Value Profile="(Default)">RolClienteGSAMV</Value>
+    </Setting>
+    <Setting Name="LocalizacionServidorReemplazar" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost:3001/GDocEntrantesWS*localhost:3002/SolucionFrameworkWS*localhost:3001/SolucionFrameworkWS*localhost:3002/SolucionFNWS*localhost:3004/GestionSegurosAMVWS</Value>
+    </Setting>
+    <Setting Name="LocalizacionServidor" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost:3003/SolucionFNWS</Value>
+    </Setting>
+    <Setting Name="GSAMVMarcoIUWin_RiesgosVehiculosWS_RiesgosVehiculosWS" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://localhost:3003/SolucionFNWS/RiesgosVehiculosWS.asmx</Value>
     </Setting>
   </Settings>
 </SettingsFile>

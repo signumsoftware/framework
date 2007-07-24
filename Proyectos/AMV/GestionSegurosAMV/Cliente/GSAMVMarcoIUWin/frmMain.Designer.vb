@@ -135,6 +135,7 @@ Partial Class frmMain
         Me.CrearDocumentosPruebaToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
         Me.GestiónToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
         Me.ProductosTiposDpcumentosRequeridosToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
+        Me.CrearPresupuestoPruebasToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
         Me.SiniestrosToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem
         Me.PruebasSGToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
         Me.MapeadosVis2ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
@@ -142,7 +143,7 @@ Partial Class frmMain
         Me.VentanasToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
         Me.AcercaDeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
         Me.AcercaDeGestiónDeDocumentosToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
-        Me.CrearPresupuestoPruebasToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
+        Me.CargarArchivoDeInternetToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -239,7 +240,7 @@ Partial Class frmMain
         '
         'PrincipalesToolStripMenuItem
         '
-        Me.PrincipalesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PolizasToolStripMenuItem, Me.RiesgosToolStripMenuItem, Me.TarifasToolStripMenuItem, Me.TarificaciónToolStripMenuItem, Me.PresupuestosToolStripMenuItem, Me.PresupuestosActivosToolStripMenuItem, Me.PeriodoDeRenovaciónToolStripMenuItem, Me.PolizasPagosIncidentadosToolStripMenuItem, Me.PeriodosRenovacionActivosToolStripMenuItem, Me.CargarTarifiadorToolStripMenuItem, Me.DescargarTarificadorToolStripMenuItem})
+        Me.PrincipalesToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.PolizasToolStripMenuItem, Me.RiesgosToolStripMenuItem, Me.TarifasToolStripMenuItem, Me.TarificaciónToolStripMenuItem, Me.PresupuestosToolStripMenuItem, Me.PresupuestosActivosToolStripMenuItem, Me.PeriodoDeRenovaciónToolStripMenuItem, Me.PolizasPagosIncidentadosToolStripMenuItem, Me.PeriodosRenovacionActivosToolStripMenuItem, Me.CargarTarifiadorToolStripMenuItem, Me.DescargarTarificadorToolStripMenuItem, Me.CargarArchivoDeInternetToolStripMenuItem})
         Me.PrincipalesToolStripMenuItem.Name = "PrincipalesToolStripMenuItem"
         Me.PrincipalesToolStripMenuItem.Size = New System.Drawing.Size(59, 20)
         Me.PrincipalesToolStripMenuItem.Text = "Gestión"
@@ -879,6 +880,12 @@ Partial Class frmMain
         Me.ProductosTiposDpcumentosRequeridosToolStripMenuItem.Size = New System.Drawing.Size(293, 22)
         Me.ProductosTiposDpcumentosRequeridosToolStripMenuItem.Text = "Productos Tipos Dpcumentos Requeridos"
         '
+        'CrearPresupuestoPruebasToolStripMenuItem
+        '
+        Me.CrearPresupuestoPruebasToolStripMenuItem.Name = "CrearPresupuestoPruebasToolStripMenuItem"
+        Me.CrearPresupuestoPruebasToolStripMenuItem.Size = New System.Drawing.Size(293, 22)
+        Me.CrearPresupuestoPruebasToolStripMenuItem.Text = "Crear presupuesto Pruebas"
+        '
         'SiniestrosToolStripMenuItem1
         '
         Me.SiniestrosToolStripMenuItem1.Name = "SiniestrosToolStripMenuItem1"
@@ -924,11 +931,11 @@ Partial Class frmMain
         Me.AcercaDeGestiónDeDocumentosToolStripMenuItem.Size = New System.Drawing.Size(230, 22)
         Me.AcercaDeGestiónDeDocumentosToolStripMenuItem.Text = "Acerca de Gestión de Seguros"
         '
-        'CrearPresupuestoPruebasToolStripMenuItem
+        'CargarArchivoDeInternetToolStripMenuItem
         '
-        Me.CrearPresupuestoPruebasToolStripMenuItem.Name = "CrearPresupuestoPruebasToolStripMenuItem"
-        Me.CrearPresupuestoPruebasToolStripMenuItem.Size = New System.Drawing.Size(293, 22)
-        Me.CrearPresupuestoPruebasToolStripMenuItem.Text = "Crear presupuesto Pruebas"
+        Me.CargarArchivoDeInternetToolStripMenuItem.Name = "CargarArchivoDeInternetToolStripMenuItem"
+        Me.CargarArchivoDeInternetToolStripMenuItem.Size = New System.Drawing.Size(291, 22)
+        Me.CargarArchivoDeInternetToolStripMenuItem.Text = "Cargar Archivo de Internet"
         '
         'frmMain
         '
@@ -1071,4 +1078,5 @@ Partial Class frmMain
     Friend WithEvents ProductosTiposDpcumentosRequeridosToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents CrearDocumentosPruebaToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents CrearPresupuestoPruebasToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents CargarArchivoDeInternetToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
 End Class

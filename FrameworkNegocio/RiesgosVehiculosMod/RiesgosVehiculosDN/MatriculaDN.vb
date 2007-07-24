@@ -22,8 +22,8 @@ Public Class MatriculaDN
             Return mTipoMatricula
         End Get
         Set(ByVal value As TipoMatricula)
-            If Not String.IsNullOrEmpty(Me.ID) Then
-                Throw New ApplicationExceptionDN("Una vez creada, la matrícula no puede modificada")
+            If Not String.IsNullOrEmpty(Me.ID) AndAlso value <> mTipoMatricula Then
+                Throw (New ApplicationExceptionDN("Una vez creada, la matrícula no puede modificada"))
             End If
             CambiarValorVal(Of TipoMatricula)(value, mTipoMatricula)
             mMatriculaTipoCorrecta = ComprobarMatriculaxTipo(mValorMatricula, mTipoMatricula)

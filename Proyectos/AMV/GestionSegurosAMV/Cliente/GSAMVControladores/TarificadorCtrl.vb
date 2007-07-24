@@ -110,10 +110,11 @@ Public Class TarificadorCtrl
 
         Dim paquete As New Hashtable()
         paquete.Add("CuestionarioResuelto", cuestionarioR)
-
+        paquete.Add("SoloCuestionario", True)
         paquete.Add("TipoDevuelto", GetType(Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN).FullName)
 
         fp.cMarco.Navegar("Cuestionario1", fp, CType(fp, System.Windows.Forms.Form).ParentForm, MotorIU.Motor.TipoNavegacion.Modal, paquete)
+
 
         cuestionarioR = paquete.Item("DN")
 

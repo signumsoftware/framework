@@ -131,6 +131,14 @@
       <Project>{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}</Project>
       <Name>PolizasDN</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosDN\RiesgosVehiculosDN.vbproj">
+      <Project>{BB2EB0EF-4C2D-4526-9F54-73DFA311F74D}</Project>
+      <Name>RiesgosVehiculosDN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RiesgosVehiculosIUControladores\RiesgosVehiculosIUControladores.vbproj">
+      <Project>{7C5724D2-792D-49A3-BE8B-AD8BC95D7D44}</Project>
+      <Name>RiesgosVehiculosIUControladores</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RiesgosVehiculosIUControles\RiesgosVehiculosIUControles.vbproj">
       <Project>{2DB7705E-DF8C-4C28-87DC-ED62E9C8E065}</Project>
       <Name>RiesgosVehiculosIUControles</Name>

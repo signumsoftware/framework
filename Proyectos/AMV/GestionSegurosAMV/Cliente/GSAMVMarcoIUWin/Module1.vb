@@ -39,6 +39,9 @@ Module Module1
         'formulario de presupuesto
         tablanavegacion.Add("Presupuesto", New MotorIU.Motor.Destino(GetType(FN.RiesgosVehiculos.IU.Formularios.frmPresupuesto), Nothing))
 
+        'formulario de tarifiación prueba
+        tablanavegacion.Add("TarificarPrueba", New MotorIU.Motor.Destino(GetType(FN.RiesgosVehiculos.IU.Formularios.frmTarifa), Nothing))
+
 
 
         Dim mimarco As New Marco(tablanavegacion)

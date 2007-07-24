@@ -38,8 +38,13 @@ Public Class ConductorDN
 #Region "Validaciones"
 
     Private Function ValidarPersona(ByRef mensaje As String, ByVal persona As PersonaDN) As Boolean
-        If persona Is Nothing OrElse persona.NIF Is Nothing OrElse String.IsNullOrEmpty(persona.NIF.Codigo) Then
-            mensaje = "Un conductor debe tener a una persona con un NIF válido"
+        'If persona Is Nothing OrElse persona.NIF Is Nothing OrElse String.IsNullOrEmpty(persona.NIF.Codigo) Then
+        '    mensaje = "Un conductor debe tener a una persona con un NIF válido"
+        '    Return False
+        'End If
+
+        If persona Is Nothing Then
+            mensaje = "Un conductor debe tener a una persona"
             Return False
         End If
 

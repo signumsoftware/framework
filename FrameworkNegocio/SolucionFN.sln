@@ -600,9 +600,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RiesgosVehiculosAIQBAD", "R
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicherosWebDF", "..\Proyectos\AMV\GestionSegurosAMV\Servidor\FicherosWeb\FicherosWebDF\FicherosWebDF.csproj", "{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 74
+		SccNumberOfProjects = 75
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
@@ -898,6 +904,10 @@ Global
 		SccProjectTopLevelParentUniqueName73 = SolucionFN.sln
 		SccProjectName73 = ../Proyectos/AMV/GestionSegurosAMV/Servidor/InformesTemporal
 		SccLocalPath73 = ..\\Proyectos\\AMV\\GestionSegurosAMV\\Servidor\\InformesTemporal
+		SccProjectUniqueName74 = ..\\Proyectos\\AMV\\GestionSegurosAMV\\Servidor\\FicherosWeb\\FicherosWebDF\\FicherosWebDF.csproj
+		SccProjectTopLevelParentUniqueName74 = SolucionFN.sln
+		SccProjectName74 = ../Proyectos/AMV/GestionSegurosAMV/Servidor/FicherosWeb/FicherosWebDF
+		SccLocalPath74 = ..\\Proyectos\\AMV\\GestionSegurosAMV\\Servidor\\FicherosWeb\\FicherosWebDF
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -2374,6 +2384,26 @@ Global
 		{FF05E160-B610-4677-B470-C653C85FBE10}.Web1|Any CPU.Build.0 = Release|Any CPU
 		{FF05E160-B610-4677-B470-C653C85FBE10}.Web1|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{FF05E160-B610-4677-B470-C653C85FBE10}.Web1|Mixed Platforms.Build.0 = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Release|.NET.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Servidor|.NET.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Servidor|Any CPU.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Servidor|Any CPU.Build.0 = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Servidor|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Servidor|Mixed Platforms.Build.0 = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Web1|.NET.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Web1|Any CPU.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Web1|Any CPU.Build.0 = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Web1|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}.Web1|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2450,6 +2480,7 @@ Global
 		{77EB6384-B6C5-468C-8615-7FD0EA3A7E4A} = {CD544897-A7BB-4091-A777-2C582E116100}
 		{F5CFAC79-48D1-40FF-9398-EE71561DD054} = {CD544897-A7BB-4091-A777-2C582E116100}
 		{1DDCB77A-A687-49CA-B0A9-ADF183278EFF} = {CD544897-A7BB-4091-A777-2C582E116100}
+		{67FD4466-7BA6-4CE7-A72B-8B9EA939989E} = {CD544897-A7BB-4091-A777-2C582E116100}
 		{9A8BBBAA-566C-47C6-A1B3-EBE6CBE07ACF} = {E0F7B66B-7C0C-4BAB-8E3F-9F812183D8D5}
 		{87558B6D-3F45-46FB-8124-4CDEE250A20E} = {E0F7B66B-7C0C-4BAB-8E3F-9F812183D8D5}
 		{E2948BC1-CFD0-451D-86D3-E97DB7AC2AE0} = {E0F7B66B-7C0C-4BAB-8E3F-9F812183D8D5}

@@ -61,6 +61,32 @@ namespace FN.RiesgosVehiculos.AD.QueryBuilding.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CREATE FUNCTION [dbo].[FormatShortDate] 
+        ///(
+        ///	-- Add the parameters for the function here
+        ///	@fecha datetime
+        ///)
+        ///RETURNS varchar(10)
+        ///AS
+        ///BEGIN
+        ///	-- Declare the return variable here
+        ///	DECLARE @Result varchar(10)
+        ///
+        ///	-- Add the T-SQL statements to compute the return value here
+        ///	SELECT @Result = convert(varchar(10), @fecha, 105)
+        ///
+        ///	-- Return the result of the function
+        ///	RETURN @Result
+        ///
+        ///END.
+        /// </summary>
+        internal static string FormatShortDate {
+            get {
+                return ResourceManager.GetString("FormatShortDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE VIEW [dbo].[vwiPresupuesto]
         ///AS
         ///SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.FormatShortDate(dbo.tlPresupuestoDN.Periodo_FInicio) AS FechaCreacion, 
@@ -75,18 +101,50 @@ namespace FN.RiesgosVehiculos.AD.QueryBuilding.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoPagos]
+        ///   Looks up a localized string similar to CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoAnual]
         ///AS
-        ///SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto,         ///
-        ///dbo.tlFraccionamientoDN.Nombre AS Fraccionamiento, 
-        ///                      dbo.tlPagoFraccionadoDN.NumOrdenPago, dbo.tlPagoFraccionadoDN.Importe
+        ///SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlPagoFraccionadoDN.NumOrdenPago, 
+        ///                      ROUND(dbo.tlPagoFraccionadoDN.Importe, 2) AS Importe
         ///FROM         dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN INNER JOIN
         ///                      dbo.tlTarifaDN INNER JOIN
-        ///                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.i [rest of string was truncated]&quot;;.
+        ///                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa INNER JOIN
+        ///              [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string vwiPresupuestoFraccionamientoPagos {
+        internal static string vwiPresupuestoFraccionamientoAnual {
             get {
-                return ResourceManager.GetString("vwiPresupuestoFraccionamientoPagos", resourceCulture);
+                return ResourceManager.GetString("vwiPresupuestoFraccionamientoAnual", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoSemestral]
+        ///AS
+        ///SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlPagoFraccionadoDN.NumOrdenPago, 
+        ///                      ROUND(dbo.tlPagoFraccionadoDN.Importe, 2) AS Importe
+        ///FROM         dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN INNER JOIN
+        ///                      dbo.tlTarifaDN INNER JOIN
+        ///                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa INNER JOIN
+        ///          [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string vwiPresupuestoFraccionamientoSemestral {
+            get {
+                return ResourceManager.GetString("vwiPresupuestoFraccionamientoSemestral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoTrimestral]
+        ///AS
+        ///SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlPagoFraccionadoDN.NumOrdenPago, 
+        ///                      ROUND(dbo.tlPagoFraccionadoDN.Importe, 2) AS Importe
+        ///FROM         dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN INNER JOIN
+        ///                      dbo.tlTarifaDN INNER JOIN
+        ///                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa INNER JOIN
+        ///         [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string vwiPresupuestoFraccionamientoTrimestral {
+            get {
+                return ResourceManager.GetString("vwiPresupuestoFraccionamientoTrimestral", resourceCulture);
             }
         }
         
@@ -95,12 +153,10 @@ namespace FN.RiesgosVehiculos.AD.QueryBuilding.Properties {
         ///AS
         ///SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlProductoDN.Nombre
         ///FROM         dbo.tlPresupuestoDN INNER JOIN
-        ///                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER         ///
-        ///JOIN
+        ///                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER JOIN
         ///                      dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN ON 
-        ///                      dbo.tlTarifaDN.ID =         ///
-        ///dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
-        ///    [rest of string was truncated]&quot;;.
+        ///                      dbo.tlTarifaDN.ID = dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
+        ///          [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string vwiPresupuestoLineasProductoAlcanzables {
             get {
@@ -113,12 +169,10 @@ namespace FN.RiesgosVehiculos.AD.QueryBuilding.Properties {
         ///AS
         ///SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlProductoDN.Nombre
         ///FROM         dbo.tlPresupuestoDN INNER JOIN
-        ///                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER         ///
-        ///JOIN
+        ///                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER JOIN
         ///                      dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN ON 
-        ///                      dbo.tlTarifaDN.ID =         ///
-        ///dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
-        ///   [rest of string was truncated]&quot;;.
+        ///                      dbo.tlTarifaDN.ID = dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
+        ///         [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string vwiPresupuestoLineasProductoEstablecidas {
             get {

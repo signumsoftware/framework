@@ -12,6 +12,18 @@ Imports Framework.Usuarios.DN
 Public Class RiesgosVehiculosWS
      Inherits System.Web.Services.WebService
 
+
+
+    <WebMethod(True)> _
+    Public Function CargarFicheroweb(ByVal fichero As Byte()) As String()
+
+        Dim actor As PrincipalDN = WSHelper.ControladorSesionLN.ComprobarUsuario(Me)
+        Dim recurso As Framework.LogicaNegocios.Transacciones.IRecursoLN = CType(Me.Application.Item("recurso"), Framework.LogicaNegocios.Transacciones.RecursoLN)
+        Dim fs As New FN.RiesgosVehiculos.FS.RiesgosVehículosFS(Nothing, recurso)
+        fs.CargarFicheroWeb(Me.Session.SessionID, actor, fichero)
+
+    End Function
+
     <WebMethod(True)> _
     Public Sub CargarGrafoTarificacion()
 
@@ -146,7 +158,7 @@ Public Class RiesgosVehiculosWS
     End Function
 
     <WebMethod(True)> _
-        Public Function RecuperarProductosModelo(ByVal modelo As Byte(), ByVal matriculada As Boolean, ByVal fecha As Date) As Byte()
+    Public Function RecuperarProductosModelo(ByVal modelo As Byte(), ByVal matriculada As Boolean, ByVal fecha As Date) As Byte()
         Dim actor As PrincipalDN = WSHelper.ControladorSesionLN.ComprobarUsuario(Me)
         Dim recurso As Framework.LogicaNegocios.Transacciones.IRecursoLN = CType(Me.Application.Item("recurso"), Framework.LogicaNegocios.Transacciones.RecursoLN)
         Dim fachada As New FN.RiesgosVehiculos.FS.RiesgosVehículosFS(Nothing, recurso)
@@ -157,6 +169,22 @@ Public Class RiesgosVehiculosWS
 
         colProductos = fachada.RecuperarProductosModelo(modeloObj, matriculada, fecha, Me.Session.SessionID, actor)
         respuesta = Framework.Utilidades.Serializador.Serializar(colProductos)
+
+        Return respuesta
+
+    End Function
+
+    <WebMethod(True)> _
+    Public Function CalcularNivelBonificacion(ByVal valorBonificacion As Double, ByVal categoria As Byte(), ByVal bonificacion As Byte(), ByVal fecha As Date) As String
+        Dim actor As PrincipalDN = WSHelper.ControladorSesionLN.ComprobarUsuario(Me)
+        Dim recurso As Framework.LogicaNegocios.Transacciones.IRecursoLN = CType(Me.Application.Item("recurso"), Framework.LogicaNegocios.Transacciones.RecursoLN)
+        Dim fachada As New FN.RiesgosVehiculos.FS.RiesgosVehículosFS(Nothing, recurso)
+        Dim respuesta As String
+
+        Dim categoriaObj As FN.RiesgosVehiculos.DN.CategoriaDN = Framework.Utilidades.Serializador.DesSerializar(categoria)
+        Dim bonificacionObj As FN.RiesgosVehiculos.DN.BonificacionDN = Framework.Utilidades.Serializador.DesSerializar(bonificacion)
+
+        respuesta = fachada.CalcularNivelBonificacion(valorBonificacion, categoriaObj, bonificacionObj, fecha, Me.Session.SessionID, actor)
 
         Return respuesta
 

@@ -160,4 +160,21 @@ Public Class RiesgosVehículosAS
 
     End Function
 
+    Public Function CalcularNivelBonificacion(ByVal valorBonificacion As Double, ByVal categoria As CategoriaDN, ByVal bonificacion As BonificacionDN, ByVal fecha As Date) As String
+        Dim servicio As New RiesgosVehiculosWS.RiesgosVehiculosWS()
+        Dim respuesta As String
+        Dim categoriaByte As Byte()
+        Dim bonificacionByte As Byte()
+
+        servicio.Url = RedireccionURL(servicio.Url)
+        servicio.CookieContainer = ContenedorSessionAS.contenedorSessionC()
+
+        categoriaByte = Framework.Utilidades.Serializador.Serializar(categoria)
+        bonificacionByte = Framework.Utilidades.Serializador.Serializar(bonificacion)
+
+        respuesta = servicio.CalcularNivelBonificacion(valorBonificacion, categoriaByte, bonificacionByte, fecha)
+
+        Return respuesta
+    End Function
+
 End Class

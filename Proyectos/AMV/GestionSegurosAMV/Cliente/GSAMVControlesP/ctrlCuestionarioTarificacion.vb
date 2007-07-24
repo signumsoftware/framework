@@ -244,6 +244,12 @@ Public Class ctrlCuestionarioTarificacion
         pregunta = pCuestionario.ColPreguntaDN.RecuperarPrimeroXNombre("IDCliente")
         Me.lblIDCliente.Text = pregunta.TextoPregunta
 
+        pregunta = pCuestionario.ColPreguntaDN.RecuperarPrimeroXNombre("FechaEfecto")
+        Me.lblFechaTarificacion.Text = pregunta.TextoPregunta
+
+        pregunta = pCuestionario.ColPreguntaDN.RecuperarPrimeroXNombre("TarificacionPrueba")
+        Me.lblTarificacionPrueba.Text = pregunta.TextoPregunta
+
         pregunta = pCuestionario.ColPreguntaDN.RecuperarPrimeroXNombre("Nombre")
         Me.lblNombre.Text = pregunta.TextoPregunta
 
@@ -368,7 +374,8 @@ Public Class ctrlCuestionarioTarificacion
         'para formar las preguntas
         responder(cr, "CodigoConcesionario", New ValorTextoCaracteristicaDN(), Me.txtConcesionario.Text, mFechaEfecto)
         responder(cr, "CodigoVendedor", New ValorTextoCaracteristicaDN(), Me.txtVendedor.Text, mFechaEfecto)
-        responder(cr, "FechaEfecto", New ValorCaracteristicaFechaDN(), mFechaEfecto, mFechaEfecto)
+        responder(cr, "FechaEfecto", New ValorCaracteristicaFechaDN(), Me.dtpFechaTarificacion.Value, mFechaEfecto)
+        responder(cr, "TarificacionPrueba", New ValorBooleanoCaracterisitcaDN(), Me.chkTarificacionPrueba.Checked, mFechaEfecto)
         responder(cr, "EsCliente", New ValorBooleanoCaracterisitcaDN(), Me.chkEsCliente.Checked,mFechaEfecto)
         responder(cr, "IDCliente", New ValorTextoCaracteristicaDN(), Me.lblIDClienteValor.Text, mFechaEfecto)
         responder(cr, "Nombre", New ValorTextoCaracteristicaDN(), Me.txtNombre.Text, mFechaEfecto)
@@ -395,6 +402,7 @@ Public Class ctrlCuestionarioTarificacion
         If Me.chkTieneCarne.Checked Then
             responder(cr, "FechaCarnet", New ValorCaracteristicaFechaDN, Me.dtpFechaCarne.Value, mFechaEfecto)
             responder(cr, "TipoCarnet", New ValorNumericoCaracteristicaDN, Me.cboTipoCarne.SelectedItem, mFechaEfecto)
+            responder(cr, "CARN", New ValorNumericoCaracteristicaDN(), AnyosMesesDias.CalcularDirAMD(mFechaEfecto, Me.dtpFechaCarne.Value).Anyos, mFechaEfecto)
         Else
             responder(cr, "CARN", New ValorNumericoCaracteristicaDN(), 0, mFechaEfecto)
         End If
@@ -520,6 +528,10 @@ Public Class ctrlCuestionarioTarificacion
                         Me.chkEsCliente.Checked = CBool(respuesta.IValorCaracteristicaDN.Valor)
                     Case "IDCliente"
                         Me.lblIDClienteValor.Text = respuesta.IValorCaracteristicaDN.Valor
+                    Case "FechaEfecto"
+                        Me.dtpFechaTarificacion.Value = respuesta.IValorCaracteristicaDN.Valor
+                    Case "TarificacionPrueba"
+                        Me.chkTarificacionPrueba.Checked = respuesta.IValorCaracteristicaDN.Valor
                     Case "Nombre"
                         Me.txtNombre.Text = respuesta.IValorCaracteristicaDN.Valor
                     Case "Apellido1"
@@ -1480,6 +1492,14 @@ Public Class ctrlCuestionarioTarificacion
             End If
         Catch ex As Exception
             MostrarError(ex, sender)
+        End Try
+    End Sub
+
+    Private Sub dtpFechaTarificacion_ValueChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles dtpFechaTarificacion.ValueChanged
+        Try
+            mFechaEfecto = dtpFechaTarificacion.Value
+        Catch ex As Exception
+            MostrarError(ex, Me)
         End Try
     End Sub
 End Class

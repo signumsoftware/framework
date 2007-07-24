@@ -46,7 +46,13 @@ namespace FN.RiesgosVehiculos.AD.QueryBuilding
             ej.EjecutarNoConsulta(Resources.vwiTomadorPresupuesto);
 
             ej = new Framework.AccesoDatos.Ejecutor(null, mRecurso);
-            ej.EjecutarNoConsulta(Resources.vwiPresupuestoFraccionamientoPagos );
+            ej.EjecutarNoConsulta(Resources.vwiPresupuestoFraccionamientoAnual);
+
+            ej = new Framework.AccesoDatos.Ejecutor(null, mRecurso);
+            ej.EjecutarNoConsulta(Resources.vwiPresupuestoFraccionamientoTrimestral);
+
+            ej = new Framework.AccesoDatos.Ejecutor(null, mRecurso);
+            ej.EjecutarNoConsulta(Resources.vwiPresupuestoFraccionamientoSemestral);
 
             ej = new Framework.AccesoDatos.Ejecutor(null, mRecurso);
             ej.EjecutarNoConsulta(Resources.vwiPresupuestoMulticonductoresCuestionarioPresupuesto );
@@ -62,6 +68,10 @@ namespace FN.RiesgosVehiculos.AD.QueryBuilding
         {
             //llamamos al gbd de AIQBGBD (framework)
             new AdaptadorInformesQueryBuildingGBD(mRecurso).CrearTablas();
+
+            //creamos la función de formateo
+            Framework.AccesoDatos.Ejecutor ej = new Framework.AccesoDatos.Ejecutor(null, mRecurso);
+            ej.EjecutarNoConsulta(Resources.FormatShortDate);
         }
 
         public void CargarDatosBasicos(string rutaPlantillas)

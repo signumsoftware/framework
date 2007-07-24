@@ -51,6 +51,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.lblSiniestrosSinResponsabilidad = New System.Windows.Forms.Label
         Me.lblSiniestrosResponsabilidad = New System.Windows.Forms.Label
         Me.grpBonificaciones = New System.Windows.Forms.GroupBox
+        Me.cboAñosSinSiniestro = New System.Windows.Forms.ComboBox
         Me.optJustCertifRecibo = New System.Windows.Forms.RadioButton
         Me.optJustCertif = New System.Windows.Forms.RadioButton
         Me.optJustNinguno = New System.Windows.Forms.RadioButton
@@ -91,6 +92,10 @@ Partial Class ctrlCuestionarioTarificacion
         Me.lblMarca = New System.Windows.Forms.Label
         Me.lblCirculacionHabitual = New System.Windows.Forms.Label
         Me.grpDatosIniciales = New System.Windows.Forms.GroupBox
+        Me.lblTarificacionPrueba = New System.Windows.Forms.Label
+        Me.lblFechaTarificacion = New System.Windows.Forms.Label
+        Me.dtpFechaTarificacion = New System.Windows.Forms.DateTimePicker
+        Me.chkTarificacionPrueba = New ControlesPBase.CheckBoxP
         Me.lblIDClienteValor = New System.Windows.Forms.Label
         Me.lblIDCliente = New System.Windows.Forms.Label
         Me.cmdBuscar = New ControlesPBase.BotonP
@@ -126,7 +131,6 @@ Partial Class ctrlCuestionarioTarificacion
         Me.dtpFechaNacimiento = New System.Windows.Forms.DateTimePicker
         Me.lblApellidos = New System.Windows.Forms.Label
         Me.lblNombre = New System.Windows.Forms.Label
-        Me.cboAñosSinSiniestro = New System.Windows.Forms.ComboBox
         Me.grpConductoresAdicionales.SuspendLayout()
         Me.grpAntecedentes.SuspendLayout()
         Me.grpBonificaciones.SuspendLayout()
@@ -488,6 +492,16 @@ Partial Class ctrlCuestionarioTarificacion
         Me.grpBonificaciones.TabIndex = 6
         Me.grpBonificaciones.TabStop = False
         Me.grpBonificaciones.Text = "Bonificaciones"
+        '
+        'cboAñosSinSiniestro
+        '
+        Me.cboAñosSinSiniestro.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cboAñosSinSiniestro.FormattingEnabled = True
+        Me.cboAñosSinSiniestro.Items.AddRange(New Object() {"0", "1", "2", "3", "4 ó más"})
+        Me.cboAñosSinSiniestro.Location = New System.Drawing.Point(352, 101)
+        Me.cboAñosSinSiniestro.Name = "cboAñosSinSiniestro"
+        Me.cboAñosSinSiniestro.Size = New System.Drawing.Size(90, 21)
+        Me.cboAñosSinSiniestro.TabIndex = 22
         '
         'optJustCertifRecibo
         '
@@ -933,6 +947,10 @@ Partial Class ctrlCuestionarioTarificacion
         '
         Me.grpDatosIniciales.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
                     Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.grpDatosIniciales.Controls.Add(Me.lblTarificacionPrueba)
+        Me.grpDatosIniciales.Controls.Add(Me.lblFechaTarificacion)
+        Me.grpDatosIniciales.Controls.Add(Me.dtpFechaTarificacion)
+        Me.grpDatosIniciales.Controls.Add(Me.chkTarificacionPrueba)
         Me.grpDatosIniciales.Controls.Add(Me.lblIDClienteValor)
         Me.grpDatosIniciales.Controls.Add(Me.lblIDCliente)
         Me.grpDatosIniciales.Controls.Add(Me.cmdBuscar)
@@ -948,6 +966,44 @@ Partial Class ctrlCuestionarioTarificacion
         Me.grpDatosIniciales.TabIndex = 0
         Me.grpDatosIniciales.TabStop = False
         Me.grpDatosIniciales.Text = "Datos Iniciales"
+        '
+        'lblTarificacionPrueba
+        '
+        Me.lblTarificacionPrueba.AutoSize = True
+        Me.lblTarificacionPrueba.Location = New System.Drawing.Point(132, 192)
+        Me.lblTarificacionPrueba.Name = "lblTarificacionPrueba"
+        Me.lblTarificacionPrueba.Size = New System.Drawing.Size(98, 13)
+        Me.lblTarificacionPrueba.TabIndex = 19
+        Me.lblTarificacionPrueba.Text = "Tarificación prueba"
+        '
+        'lblFechaTarificacion
+        '
+        Me.lblFechaTarificacion.AutoSize = True
+        Me.lblFechaTarificacion.Location = New System.Drawing.Point(139, 149)
+        Me.lblFechaTarificacion.Name = "lblFechaTarificacion"
+        Me.lblFechaTarificacion.Size = New System.Drawing.Size(91, 13)
+        Me.lblFechaTarificacion.TabIndex = 18
+        Me.lblFechaTarificacion.Text = "Fecha tarificación"
+        '
+        'dtpFechaTarificacion
+        '
+        Me.dtpFechaTarificacion.Format = System.Windows.Forms.DateTimePickerFormat.[Short]
+        Me.dtpFechaTarificacion.Location = New System.Drawing.Point(258, 149)
+        Me.dtpFechaTarificacion.Name = "dtpFechaTarificacion"
+        Me.dtpFechaTarificacion.Size = New System.Drawing.Size(100, 20)
+        Me.dtpFechaTarificacion.TabIndex = 16
+        '
+        'chkTarificacionPrueba
+        '
+        Me.chkTarificacionPrueba.AutoSize = True
+        Me.chkTarificacionPrueba.ColorBaseIluminacion = System.Drawing.Color.Orange
+        Me.chkEstaMatriculado.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.chkTarificacionPrueba.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(165, Byte), Integer), CType(CType(0, Byte), Integer))
+        Me.chkTarificacionPrueba.Location = New System.Drawing.Point(258, 191)
+        Me.chkTarificacionPrueba.Name = "chkTarificacionPrueba"
+        Me.chkTarificacionPrueba.Size = New System.Drawing.Size(15, 14)
+        Me.chkTarificacionPrueba.TabIndex = 17
+        Me.chkTarificacionPrueba.UseVisualStyleBackColor = True
         '
         'lblIDClienteValor
         '
@@ -1331,16 +1387,6 @@ Partial Class ctrlCuestionarioTarificacion
         Me.lblNombre.TabIndex = 0
         Me.lblNombre.Text = "Nombre"
         '
-        'cboAñosSinSiniestro
-        '
-        Me.cboAñosSinSiniestro.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.cboAñosSinSiniestro.FormattingEnabled = True
-        Me.cboAñosSinSiniestro.Items.AddRange(New Object() {"0", "1", "2", "3", "4 ó más"})
-        Me.cboAñosSinSiniestro.Location = New System.Drawing.Point(352, 101)
-        Me.cboAñosSinSiniestro.Name = "cboAñosSinSiniestro"
-        Me.cboAñosSinSiniestro.Size = New System.Drawing.Size(90, 21)
-        Me.cboAñosSinSiniestro.TabIndex = 22
-        '
         'ctrlCuestionarioTarificacion
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -1349,13 +1395,13 @@ Partial Class ctrlCuestionarioTarificacion
         Me.Controls.Add(Me.cmdAnterior)
         Me.Controls.Add(Me.cmdSiguiente)
         Me.Controls.Add(Me.cmdTerminarCuestionario)
-        Me.Controls.Add(Me.grpBonificaciones)
-        Me.Controls.Add(Me.grpCarnetConducir)
-        Me.Controls.Add(Me.grpDatosVehiculo)
         Me.Controls.Add(Me.grpDatosIniciales)
         Me.Controls.Add(Me.grpDatosCliente)
         Me.Controls.Add(Me.grpConductoresAdicionales)
         Me.Controls.Add(Me.grpAntecedentes)
+        Me.Controls.Add(Me.grpBonificaciones)
+        Me.Controls.Add(Me.grpCarnetConducir)
+        Me.Controls.Add(Me.grpDatosVehiculo)
         Me.Name = "ctrlCuestionarioTarificacion"
         Me.Size = New System.Drawing.Size(679, 447)
         Me.grpConductoresAdicionales.ResumeLayout(False)
@@ -1482,5 +1528,9 @@ Partial Class ctrlCuestionarioTarificacion
     Friend WithEvents lblConduccionEbrio As System.Windows.Forms.Label
     Friend WithEvents chkConduccionEbrio As ControlesPBase.CheckBoxP
     Friend WithEvents cboAñosSinSiniestro As System.Windows.Forms.ComboBox
+    Friend WithEvents dtpFechaTarificacion As System.Windows.Forms.DateTimePicker
+    Friend WithEvents chkTarificacionPrueba As ControlesPBase.CheckBoxP
+    Friend WithEvents lblTarificacionPrueba As System.Windows.Forms.Label
+    Friend WithEvents lblFechaTarificacion As System.Windows.Forms.Label
 
 End Class

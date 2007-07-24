@@ -317,11 +317,16 @@ FROM         dbo.trtlAlertaDNColHEntidadXtlHEDN INNER JOIN
                       dbo.tlPeriodoRenovacionPolizaDN ON dbo.tlPolizaDN.ID = dbo.tlPeriodoRenovacionPolizaDN.idPoliza ON dbo.tlHEDN.GUID = dbo.tlPolizaDN.GUID</value>
   </data>
   <data name="vwPresupActivoPositSel" xml:space="preserve">
-    <value>create view vwPresupActivoPositSel as SELECT     ID
+    <value>create view vwPresupActivoPositSel as  
+SELECT     ID
 FROM         dbo.vwPresupuestosAlertados
 UNION
 SELECT     ID
-FROM         dbo.vwPresupuestosxCDVerificable</value>
+FROM         dbo.vwPresupuestosxCDVerificable
+
+UNION
+SELECT     ID
+FROM         vwPresupuestosAlcanzaPoliza</value>
   </data>
   <data name="vwPresupuestos2" xml:space="preserve">
     <value>create view vwPresupuestos2 as SELECT     dbo.tlPresupuestoDN.ID, dbo.tlMarcaDN.Nombre AS Marca, dbo.tlModeloDN.Nombre AS Modelo, dbo.tlRiesgoMotorDN.Cilindrada, 
@@ -334,6 +339,12 @@ FROM         dbo.tlPresupuestoDN INNER JOIN
                       dbo.tlModeloDN ON dbo.tlRiesgoMotorDN.idModelo = dbo.tlModeloDN.ID INNER JOIN
                       dbo.tlMarcaDN ON dbo.tlModeloDN.idMarca = dbo.tlMarcaDN.ID INNER JOIN
                       dbo.tlFuturoTomadorDN ON dbo.tlPresupuestoDN.idFuturoTomador = dbo.tlFuturoTomadorDN.ID</value>
+  </data>
+  <data name="vwPresupuestosAlcanzaPoliza" xml:space="preserve">
+    <value>create view vwPresupuestosAlcanzaPoliza as SELECT     dbo.tlPresupuestoDN.ID
+FROM         dbo.tlPresupuestoDN LEFT OUTER JOIN
+                      dbo.tlPeriodoCoberturaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlPeriodoCoberturaDN.idTarifa
+WHERE     (dbo.tlPeriodoCoberturaDN.ID IS NULL) AND (dbo.tlPresupuestoDN.FechaAnulacion IS NULL) AND (dbo.tlPresupuestoDN.AlcanzaEstadoPoliza = 1)</value>
   </data>
   <data name="vwPresupuestosAlertados" xml:space="preserve">
     <value>create view vwPresupuestosAlertados as SELECT   DISTINCT  dbo.tlPresupuestoDN.ID

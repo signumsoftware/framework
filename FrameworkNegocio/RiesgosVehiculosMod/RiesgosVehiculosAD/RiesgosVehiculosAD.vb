@@ -7,7 +7,49 @@ Public Class RiesgosVehiculosAD
 
 
 
+    Public Function RecuperarTarifasRefierenCDs(ByVal pColCajonDocumento As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN) As FN.Seguros.Polizas.DN.ColTarifaDN
 
+        Dim ej As Framework.AccesoDatos.Ejecutor
+        Dim sql As String
+        Dim RiesgoMotor As FN.RiesgosVehiculos.DN.RiesgoMotorDN = Nothing
+        Dim parametros As List(Of System.Data.IDataParameter)
+        Dim dts As Data.DataSet
+        Dim gi As Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN
+
+        ' construir la sql y los parametros
+
+        Using tr As New Transaccion()
+
+            Dim condiciones As String
+
+            sql = "select idTarifa from vwCDxTarifa where  "
+
+            parametros = New List(Of System.Data.IDataParameter)
+            Framework.AccesoDatos.ParametrosHelperAD.ProcesarColEntidadesBase(pColCajonDocumento, "id", condiciones, 1, parametros)
+
+            sql += condiciones.Substring(0, condiciones.Length - 4)
+
+
+
+            ej = New Framework.AccesoDatos.Ejecutor(Transaccion.Actual, Recurso.Actual)
+            dts = ej.EjecutarDataSet(sql, parametros)
+
+
+
+            Dim col As New FN.Seguros.Polizas.DN.ColTarifaDN
+
+            For Each dr As DataRow In dts.Tables(0).Rows
+                gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Transaccion.Actual, Recurso.Actual)
+                col.Add(gi.Recuperar(dr.Item(0).ToString(), GetType(FN.Seguros.Polizas.DN.TarifaDN)))
+            Next
+
+            tr.Confirmar()
+
+            Return col
+
+        End Using
+
+    End Function
 
     Public Function RecuperarPagos(ByVal idPeridoRenovacionOrigenImporte As FN.RiesgosVehiculos.DN.PeriodoRenovacionPolizaOidDN, ByVal identidadfiscalAcreedora As String) As FN.GestionPagos.DN.ColPagoDN
         Dim ej As Framework.AccesoDatos.Ejecutor
@@ -324,6 +366,41 @@ Public Class RiesgosVehiculosAD
             tr.Confirmar()
 
             Return colProducto
+        End Using
+
+    End Function
+
+    Public Function CalcularNivelBonificacion(ByVal valorBonificacion As Double, ByVal categoria As CategoriaDN, ByVal bonificacion As BonificacionDN, ByVal fecha As Date) As String
+        Dim ej As Framework.AccesoDatos.Ejecutor
+        Dim sql As String
+        Dim dts As DataSet
+        Dim parametros As List(Of System.Data.IDataParameter)
+        Dim nivelBonificacion As String = String.Empty
+
+        Using tr As New Transaccion()
+            sql = "select Nombre from tlBonificacionRVDN where IntervaloNumerico_ValInf<=@ValorBonificacion and IntervaloNumerico_ValSup>=@ValorBonificacion " & _
+                    "and idCategoria=@idCategoria and idBonificacion=@idBonificacion and periodo_FInicio<=@Fecha and (periodo_FFinal>=@Fecha or periodo_FFinal is null)"
+
+            parametros = New List(Of System.Data.IDataParameter)
+            parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroFecha("Fecha", fecha))
+            parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroID("idCategoria", categoria.ID))
+            parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroID("idBonificacion", bonificacion.ID))
+            parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroDouble("ValorBonificacion", valorBonificacion))
+
+            ej = New Framework.AccesoDatos.Ejecutor(Transaccion.Actual, Recurso.Actual)
+            dts = ej.EjecutarDataSet(sql, parametros)
+
+
+            If dts.Tables(0).Rows.Count > 1 Then
+                Throw New ApplicationExceptionAD("Error de integridad de la base de datos, no puede existir más de un nivel de bonificación para los datos aportados")
+            ElseIf dts.Tables(0).Rows.Count = 1 Then
+                nivelBonificacion = dts.Tables(0).Rows(0)("Nombre")
+            End If
+
+            tr.Confirmar()
+
+            Return nivelBonificacion
+
         End Using
 
     End Function

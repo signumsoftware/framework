@@ -5,6 +5,7 @@ Imports Framework.Cuestionario.CuestionarioDN
 
 Imports FN.Seguros.Polizas.DN
 Imports FN.RiesgosVehiculos.DN
+Imports FicherosWebDF
 
 Public Class RiesgosVehículosFS
     Inherits BaseFachadaFL
@@ -14,6 +15,24 @@ Public Class RiesgosVehículosFS
     End Sub
 
 
+    Public Function CargarFicheroWeb(ByVal pIdSession As String, ByVal pActor As PrincipalDN, ByVal pFichero As Byte()) As String()
+
+
+        Using New CajonHiloLN(mRec)
+            Dim mfh As MetodoFachadaHelper = New MetodoFachadaHelper()
+            Try
+                mfh.EntradaMetodo(pIdSession, pActor, mRec)
+
+                Return CargadorWebLN.CargadorFichero(pFichero)
+
+                mfh.SalidaMetodo(pIdSession, pActor, mRec)
+            Catch ex As Exception
+                mfh.SalidaMetodoExcepcional(pIdSession, pActor, ex, "", mRec)
+                Throw
+            End Try
+        End Using
+
+    End Function
 
 
     Public Function RecuperarRiesgoMotor(ByVal pMatricula As String, ByVal pNumeroBastidor As String, ByVal pIdSession As String, ByVal pActor As PrincipalDN) As FN.RiesgosVehiculos.DN.RiesgoMotorDN
@@ -139,7 +158,7 @@ Public Class RiesgosVehículosFS
             Try
                 mfh.EntradaMetodo(pIdSession, pActor, mRec)
                 Dim mln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
-                TarificarTarifa = mln.TarificarTarifa(pTarifa, Nothing, Nothing, True)
+                TarificarTarifa = mln.TarificarTarifa(pTarifa, Nothing, Nothing, True, True)
                 mfh.SalidaMetodo(pIdSession, Nothing, mRec)
             Catch ex As Exception
                 mfh.SalidaMetodoExcepcional(pIdSession, pActor, ex, "", mRec)
@@ -156,7 +175,7 @@ Public Class RiesgosVehículosFS
 
             Try
                 mfh.EntradaMetodo(pIdSession, pActor, mRec)
-                Dim mln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizasOperLN
+                Dim mln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizaRvLcLN
                 mln.ModificarPoliza(periodoR, tarifa, cuestionarioR, fechaInicioPC)
                 mfh.SalidaMetodo(pIdSession, Nothing, mRec)
             Catch ex As Exception
@@ -201,4 +220,20 @@ Public Class RiesgosVehículosFS
         End Using
     End Function
 
+    Public Function CalcularNivelBonificacion(ByVal valorBonificacion As Double, ByVal categoria As CategoriaDN, ByVal bonificacion As BonificacionDN, ByVal fecha As Date, ByVal pIdSession As String, ByVal pActor As PrincipalDN) As String
+        Using New CajonHiloLN(mRec)
+            Dim mfh As MetodoFachadaHelper = New MetodoFachadaHelper()
+
+            Try
+                mfh.EntradaMetodo(pIdSession, pActor, mRec)
+                Dim mln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
+                CalcularNivelBonificacion = mln.CalcularNivelBonificacion(valorBonificacion, categoria, bonificacion, fecha)
+                mfh.SalidaMetodo(pIdSession, Nothing, mRec)
+            Catch ex As Exception
+                mfh.SalidaMetodoExcepcional(pIdSession, pActor, ex, "", mRec)
+                Throw
+            End Try
+
+        End Using
+    End Function
 End Class

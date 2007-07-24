@@ -117,6 +117,26 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="FormatShortDate" xml:space="preserve">
+    <value>CREATE FUNCTION [dbo].[FormatShortDate] 
+(
+	-- Add the parameters for the function here
+	@fecha datetime
+)
+RETURNS varchar(10)
+AS
+BEGIN
+	-- Declare the return variable here
+	DECLARE @Result varchar(10)
+
+	-- Add the T-SQL statements to compute the return value here
+	SELECT @Result = convert(varchar(10), @fecha, 105)
+
+	-- Return the result of the function
+	RETURN @Result
+
+END</value>
+  </data>
   <data name="vwiPresupuesto" xml:space="preserve">
     <value>CREATE VIEW [dbo].[vwiPresupuesto]
 AS
@@ -125,35 +145,73 @@ SELECT     dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.FormatShortDate(dbo.tlPr
 FROM         dbo.tlPresupuestoDN INNER JOIN
                       dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID</value>
   </data>
-  <data name="vwiPresupuestoFraccionamientoPagos" xml:space="preserve">
-    <value>CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoPagos]
+  <data name="vwiPresupuestoFraccionamientoAnual" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoAnual]
 AS
-SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, 
-dbo.tlFraccionamientoDN.Nombre AS Fraccionamiento, 
-                      dbo.tlPagoFraccionadoDN.NumOrdenPago, dbo.tlPagoFraccionadoDN.Importe
+SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlPagoFraccionadoDN.NumOrdenPago, 
+                      ROUND(dbo.tlPagoFraccionadoDN.Importe, 2) AS Importe
 FROM         dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN INNER JOIN
                       dbo.tlTarifaDN INNER JOIN
-                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa 
-INNER JOIN
-                      dbo.tlGrupoFraccionamientosDN ON dbo.tlTarifaDN.idGrupoFraccionamientos = 
-dbo.tlGrupoFraccionamientosDN.ID ON 
-                      
-dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idttlGrupoFraccionamientosDN = dbo.tlGrupoFraccionamientosDN.ID INNER
+                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa INNER JOIN
+                      dbo.tlGrupoFraccionamientosDN ON dbo.tlTarifaDN.idGrupoFraccionamientos = dbo.tlGrupoFraccionamientosDN.ID ON 
+                      dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idttlGrupoFraccionamientosDN = dbo.tlGrupoFraccionamientosDN.ID INNER
                        JOIN
                       dbo.tlFraccionamientoDN INNER JOIN
-                      dbo.tlGrupoPagosFraccionadosDN ON dbo.tlFraccionamientoDN.ID = 
-dbo.tlGrupoPagosFraccionadosDN.idTipoFraccionamiento ON 
-                      
-dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idptlGrupoPagosFraccionadosDN = dbo.tlGrupoPagosFraccionadosDN.ID
+                      dbo.tlGrupoPagosFraccionadosDN ON dbo.tlFraccionamientoDN.ID = dbo.tlGrupoPagosFraccionadosDN.idTipoFraccionamiento ON 
+                      dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idptlGrupoPagosFraccionadosDN = dbo.tlGrupoPagosFraccionadosDN.ID
                        INNER JOIN
                       dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN ON 
-                      dbo.tlGrupoPagosFraccionadosDN.ID = 
-dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idttlGrupoPagosFraccionadosDN
+                      dbo.tlGrupoPagosFraccionadosDN.ID = dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idttlGrupoPagosFraccionadosDN
                        INNER JOIN
                       dbo.tlPagoFraccionadoDN ON 
-                      
-dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idptlPagoFraccionadoDN = 
-dbo.tlPagoFraccionadoDN.ID
+                      dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idptlPagoFraccionadoDN = dbo.tlPagoFraccionadoDN.ID
+WHERE     (dbo.tlFraccionamientoDN.Nombre = N'Anual')
+ORDER BY dbo.tlFraccionamientoDN.ID, dbo.tlPagoFraccionadoDN.NumOrdenPago</value>
+  </data>
+  <data name="vwiPresupuestoFraccionamientoSemestral" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoSemestral]
+AS
+SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlPagoFraccionadoDN.NumOrdenPago, 
+                      ROUND(dbo.tlPagoFraccionadoDN.Importe, 2) AS Importe
+FROM         dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN INNER JOIN
+                      dbo.tlTarifaDN INNER JOIN
+                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa INNER JOIN
+                      dbo.tlGrupoFraccionamientosDN ON dbo.tlTarifaDN.idGrupoFraccionamientos = dbo.tlGrupoFraccionamientosDN.ID ON 
+                      dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idttlGrupoFraccionamientosDN = dbo.tlGrupoFraccionamientosDN.ID INNER
+                       JOIN
+                      dbo.tlFraccionamientoDN INNER JOIN
+                      dbo.tlGrupoPagosFraccionadosDN ON dbo.tlFraccionamientoDN.ID = dbo.tlGrupoPagosFraccionadosDN.idTipoFraccionamiento ON 
+                      dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idptlGrupoPagosFraccionadosDN = dbo.tlGrupoPagosFraccionadosDN.ID
+                       INNER JOIN
+                      dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN ON 
+                      dbo.tlGrupoPagosFraccionadosDN.ID = dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idttlGrupoPagosFraccionadosDN
+                       INNER JOIN
+                      dbo.tlPagoFraccionadoDN ON 
+                      dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idptlPagoFraccionadoDN = dbo.tlPagoFraccionadoDN.ID
+WHERE     (dbo.tlFraccionamientoDN.Nombre = N'Semestral')
+ORDER BY dbo.tlFraccionamientoDN.ID, dbo.tlPagoFraccionadoDN.NumOrdenPago</value>
+  </data>
+  <data name="vwiPresupuestoFraccionamientoTrimestral" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwiPresupuestoFraccionamientoTrimestral]
+AS
+SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlPagoFraccionadoDN.NumOrdenPago, 
+                      ROUND(dbo.tlPagoFraccionadoDN.Importe, 2) AS Importe
+FROM         dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN INNER JOIN
+                      dbo.tlTarifaDN INNER JOIN
+                      dbo.tlPresupuestoDN ON dbo.tlTarifaDN.ID = dbo.tlPresupuestoDN.idTarifa INNER JOIN
+                      dbo.tlGrupoFraccionamientosDN ON dbo.tlTarifaDN.idGrupoFraccionamientos = dbo.tlGrupoFraccionamientosDN.ID ON 
+                      dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idttlGrupoFraccionamientosDN = dbo.tlGrupoFraccionamientosDN.ID INNER
+                       JOIN
+                      dbo.tlFraccionamientoDN INNER JOIN
+                      dbo.tlGrupoPagosFraccionadosDN ON dbo.tlFraccionamientoDN.ID = dbo.tlGrupoPagosFraccionadosDN.idTipoFraccionamiento ON 
+                      dbo.trtlGrupoFraccionamientosDNColGrupoPagosFXtlGrupoPagosFraccionadosDN.idptlGrupoPagosFraccionadosDN = dbo.tlGrupoPagosFraccionadosDN.ID
+                       INNER JOIN
+                      dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN ON 
+                      dbo.tlGrupoPagosFraccionadosDN.ID = dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idttlGrupoPagosFraccionadosDN
+                       INNER JOIN
+                      dbo.tlPagoFraccionadoDN ON 
+                      dbo.trtlGrupoPagosFraccionadosDNColPagoFraccionadoDNXtlPagoFraccionadoDN.idptlPagoFraccionadoDN = dbo.tlPagoFraccionadoDN.ID
+WHERE     (dbo.tlFraccionamientoDN.Nombre = N'Trimestral')
 ORDER BY dbo.tlFraccionamientoDN.ID, dbo.tlPagoFraccionadoDN.NumOrdenPago</value>
   </data>
   <data name="vwiPresupuestoLineasProductoAlcanzables" xml:space="preserve">
@@ -161,16 +219,12 @@ ORDER BY dbo.tlFraccionamientoDN.ID, dbo.tlPagoFraccionadoDN.NumOrdenPago</value
 AS
 SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlProductoDN.Nombre
 FROM         dbo.tlPresupuestoDN INNER JOIN
-                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER 
-JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER JOIN
                       dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN ON 
-                      dbo.tlTarifaDN.ID = 
-dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
-                      dbo.tlLineaProductoDN ON 
-dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idptlLineaProductoDN = 
-dbo.tlLineaProductoDN.ID INNER JOIN
+                      dbo.tlTarifaDN.ID = dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
+                      dbo.tlLineaProductoDN ON dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idptlLineaProductoDN = dbo.tlLineaProductoDN.ID INNER JOIN
                       dbo.tlProductoDN ON dbo.tlLineaProductoDN.idProducto = dbo.tlProductoDN.ID
-WHERE     (dbo.tlLineaProductoDN.Alcanzable = 1)
+WHERE     (dbo.tlLineaProductoDN.Alcanzable = 1) AND (dbo.tlLineaProductoDN.Ofertado = 0)
 ORDER BY dbo.tlProductoDN.Orden</value>
   </data>
   <data name="vwiPresupuestoLineasProductoEstablecidas" xml:space="preserve">
@@ -178,16 +232,12 @@ ORDER BY dbo.tlProductoDN.Orden</value>
 AS
 SELECT     TOP (100) PERCENT dbo.tlPresupuestoDN.ID AS IDPresupuesto, dbo.tlProductoDN.Nombre
 FROM         dbo.tlPresupuestoDN INNER JOIN
-                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER 
-JOIN
+                      dbo.tlTarifaDN ON dbo.tlPresupuestoDN.idTarifa = dbo.tlTarifaDN.ID INNER JOIN
                       dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN ON 
-                      dbo.tlTarifaDN.ID = 
-dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
-                      dbo.tlLineaProductoDN ON 
-dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idptlLineaProductoDN = 
-dbo.tlLineaProductoDN.ID INNER JOIN
+                      dbo.tlTarifaDN.ID = dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idttlTarifaDN INNER JOIN
+                      dbo.tlLineaProductoDN ON dbo.trtlTarifaDNColLineaProductoXtlLineaProductoDN.idptlLineaProductoDN = dbo.tlLineaProductoDN.ID INNER JOIN
                       dbo.tlProductoDN ON dbo.tlLineaProductoDN.idProducto = dbo.tlProductoDN.ID
-WHERE     (dbo.tlLineaProductoDN.Establecido = 1)
+WHERE     (dbo.tlLineaProductoDN.Ofertado = 1)
 ORDER BY dbo.tlProductoDN.Orden</value>
   </data>
   <data name="vwiPresupuestoMulticonductoresCuestionarioPresupuesto" xml:space="preserve">

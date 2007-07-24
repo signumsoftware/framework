@@ -7,6 +7,29 @@ Public Class PolizaRvLcLN
     Inherits Framework.ClaseBaseLN.BaseTransaccionConcretaLN
 
 
+
+
+
+    Public Sub ModificarPoliza(ByVal periodoR As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN, ByVal tarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal cuestionarioR As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal fechaInicioPC As Date)
+
+        Using tr As New Transaccion()
+
+            If Not periodoR.Contiene(fechaInicioPC) Then
+                Throw New Framework.LogicaNegocios.ApplicationExceptionLN("La fecha del nuevo periodo de cobertura debe estar contenida dentro del periodo de renovación vigente")
+            End If
+
+            Dim ln As New PolizaRvLcLN()
+            If Date.Compare(fechaInicioPC, Now()) < 0 Then
+                ln.ModificarCondicionesCoberturaRetroactiva(periodoR, tarifa, cuestionarioR, fechaInicioPC, 10)
+            Else
+                ln.ModificarCondicionesCoberturaRetroactiva(periodoR, tarifa, cuestionarioR, fechaInicioPC, 10)
+            End If
+
+            tr.Confirmar()
+        End Using
+
+    End Sub
+
     ''' <summary>
     ''' este metodo no debe permitir modificar elemenetos de la poliza que intervengan en los datos de tarificacion
     ''' </summary>
@@ -118,7 +141,7 @@ Public Class PolizaRvLcLN
             '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             ' CUERPO
             '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+            Dim colClones As Framework.DatosNegocio.ColIEntidadDN
 
             ' establecer las fechas 
             pPR.FCreacion = Now
@@ -128,19 +151,28 @@ Public Class PolizaRvLcLN
 
 
             ' ++ solicitar el nuemro de poliza
-
-
-
+            colClones = Nothing
+            pPR.ToHtGUIDs(Nothing, colClones)
+            If colClones.Count > 0 Then
+                Beep()
+            End If
 
             ' ++ guardar
             Me.GuardarGenerico(pPR)
+
+
+
 
 
             ' ++ coleccion de pagos e importes debidos
             Dim colpagos As FN.GestionPagos.DN.ColPagoDN
             colpagos = GenerarCargosPara(Nothing, pPR, pPR.PeridoCoberturaActivo, 100)
 
-
+            colClones = Nothing
+            pPR.ToHtGUIDs(Nothing, colClones)
+            If colClones.Count > 0 Then
+                Beep()
+            End If
 
             ' ++ Crear Revincular los cajones documento del presupuesto
             VincularCajonesDocumento(pPR)
@@ -148,7 +180,11 @@ Public Class PolizaRvLcLN
 
 
 
-
+            colClones = Nothing
+            pPR.ToHtGUIDs(Nothing, colClones)
+            If colClones.Count > 0 Then
+                Beep()
+            End If
 
 
             ' ++ Crear el documento apra la emisión de poliza
@@ -187,7 +223,7 @@ Public Class PolizaRvLcLN
         Using tr As New Transaccion
 
 
-
+            Dim colClones As Framework.DatosNegocio.ColIEntidadDN
 
             ' helementos a referir por los cd
 
@@ -197,7 +233,12 @@ Public Class PolizaRvLcLN
 
 
             ' guid de los elementos que pueden requerir un cd
-            Dim colguid As List(Of String) = Framework.TiposYReflexion.LN.ListHelper(Of String).Convertir(pPResupuesto.Tarifa.ToHtGUIDs(Nothing).Keys)
+            Dim colguid As List(Of String) = Framework.TiposYReflexion.LN.ListHelper(Of String).Convertir(pPResupuesto.Tarifa.ToHtGUIDs(Nothing, colClones).Keys)
+            If colClones.Count <> 0 Then
+                Throw New Framework.LogicaNegocios.ApplicationExceptionLN(" Exiten " & colguid.Count & " clones para " & pPResupuesto.ToString)
+            End If
+
+
 
             ' el guid de la categoria
             Dim rvln As New RiesgosVehiculosLN
@@ -215,7 +256,7 @@ Public Class PolizaRvLcLN
             IdentificacionCD(pPResupuesto, colCDVinculados)
 
             Dim DatosTarifa As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN = pPResupuesto.Tarifa.DatosTarifa
-            DatosTarifa.ColCajonDocumento = colCDVinculados
+            ' DatosTarifa.ColCajonDocumento = colCDVinculados
             DatosTarifa.ColTipoDocumentoRequerido = ColTipoDocumentoRequerido
 
 
@@ -271,6 +312,11 @@ Public Class PolizaRvLcLN
         Using tr As New Transaccion
 
 
+            ' 
+
+            Dim colclones As Framework.DatosNegocio.ColIEntidadDN
+
+
             ' helementos a referir por los cd
 
             Dim tarifa As FN.Seguros.Polizas.DN.TarifaDN = pPR.PeridoCoberturaActivo.Tarifa
@@ -282,9 +328,12 @@ Public Class PolizaRvLcLN
 
 
             ' guid de los elementos que pueden requerir un cd
-            Dim colguid As List(Of String) = Framework.TiposYReflexion.LN.ListHelper(Of String).Convertir(pPR.PeridoCoberturaActivo.Tarifa.ColLineaProducto.RecuperarColProductos.ToHtGUIDs(Nothing).Keys)
-            ' el guid de la categoria
+            Dim colguid As List(Of String) = Framework.TiposYReflexion.LN.ListHelper(Of String).Convertir(pPR.PeridoCoberturaActivo.Tarifa.ColLineaProducto.RecuperarColProductos.ToHtGUIDs(Nothing, colclones).Keys)
+            If colclones.Count <> 0 Then
+                Throw New Framework.LogicaNegocios.ApplicationExceptionLN("se recuperaron clones " & colguid.Count & " para " & pPR.ToString)
+            End If
 
+            ' el guid de la categoria
             Dim rvln As New RiesgosVehiculosLN
             Dim rv As FN.RiesgosVehiculos.DN.RiesgoMotorDN = tarifa.Riesgo
             Dim h As Framework.DatosNegocio.HEDN = rvln.RecuperarHuellaCategoria(rv.Modelo, rv.Matriculado)
@@ -296,13 +345,10 @@ Public Class PolizaRvLcLN
             colCDVinculados = VincularCajonesDocumento(New Framework.DatosNegocio.HEDN(pPR.PeridoCoberturaActivo.Tarifa, Framework.DatosNegocio.HuellaEntidadDNIntegridadRelacional.relacionDebeExixtir), colguid, colhe, ColTipoDocumentoRequerido)
 
             Dim DatosTarifa As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN = tarifa.DatosTarifa
-            DatosTarifa.ColCajonDocumento = colCDVinculados
+            '  DatosTarifa.ColCajonDocumento = colCDVinculados
             DatosTarifa.ColTipoDocumentoRequerido = ColTipoDocumentoRequerido
 
             Me.GuardarGenerico(colCDVinculados)
-
-
-
 
 
             tr.Confirmar()
@@ -554,7 +600,7 @@ Public Class PolizaRvLcLN
 
 
     '    Public Function AltaDePolizap(ByVal ptomador As FN.Seguros.Polizas.DN.TomadorDN, ByVal pEmisora As FN.Seguros.Polizas.DN.EmisoraPolizasDN, ByVal ptarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal fi As Date, ByVal ff As Date) As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN
-    Public Function AltaDePolizap(ByVal pPresupuesto As FN.Seguros.Polizas.DN.PresupuestoDN, ByVal pFechaAlta As Date) As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN
+    Public Function AltaDePolizap(ByVal pPresupuesto As FN.Seguros.Polizas.DN.PresupuestoDN) As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN
 
 
         Using tr As New Transaccion
@@ -570,8 +616,8 @@ Public Class PolizaRvLcLN
                 Throw New ApplicationException(mensaje)
             End If
 
-            ' la fecha de alta del perido de renivación debe estar contenida en el perido de validad del presupuesto
-            If Not pPresupuesto.PeridoValidez.Contiene(pFechaAlta) Then
+            '' la fecha de alta del perido de renivación debe estar contenida en el perido de validad del presupuesto
+            If Not pPresupuesto.PeridoValidez.Contiene(pPresupuesto.FechaAltaSolicitada) Then
                 Throw New ApplicationException("la fecha de inicio del perido de renovación debe estar contenida en el perido de validez del presupuesto")
             End If
 
@@ -598,7 +644,7 @@ Public Class PolizaRvLcLN
 
             ' creacion de los objetos
             Dim prp As New FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN()
-            prp.FI = pFechaAlta 'la pone el usuario en la pantalla
+            prp.FI = pPresupuesto.FechaAltaSolicitada  'la pone el usuario en la pantalla
             prp.FF = pPresupuesto.Tarifa.AMD.IncrementarFecha(prp.FI)
 
 
@@ -651,6 +697,7 @@ Public Class PolizaRvLcLN
 
             Me.AltaDePolizapp(prp, True)
             Me.GuardarGenerico(colalertas)
+            Me.GuardarGenerico(pPresupuesto)
 
             AltaDePolizap = prp
 
@@ -824,7 +871,7 @@ Public Class PolizaRvLcLN
 
             Dim cr As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN = hecr.EntidadReferida
             Dim trln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.TarificadorRVLN
-            trln.TarificarTarifa(pr.Poliza.Tomador.ValorBonificacion, tarifa, cr, pr.PeridoCoberturaActivo.Tarifa.CalcualrImporteDia)
+            trln.TarificarTarifa(pr.Poliza.Tomador.ValorBonificacion, tarifa, cr, pr.PeridoCoberturaActivo.Tarifa.CalcualrImporteDia, False)
 
 
 
@@ -1072,7 +1119,7 @@ Public Class PolizaRvLcLN
             ' la tarifa anteriro no se tarifica dado que es la msiama solo que su periodo de cobertura ha cambiado su aplitud temporal
 
             Dim miTarificadorRVLN As New TarificadorRVLN
-            miTarificadorRVLN.TarificarTarifa(pPeriodoRenovacionPoliza.Poliza.Tomador.ValorBonificacion, pTarifa, pCuestionarioResuelto)
+            miTarificadorRVLN.TarificarTarifa(pPeriodoRenovacionPoliza.Poliza.Tomador.ValorBonificacion, pTarifa, pCuestionarioResuelto, True)
             PeriodoCoberturaAModificar.AsignarNuevaTarifa(pTarifa)
             GenerarCargosPara(Nothing, pPeriodoRenovacionPoliza, PeriodoCoberturaAModificar, 100)
 
@@ -1151,7 +1198,7 @@ Public Class PolizaRvLcLN
 
 
             Dim miTarificadorRVLN As New TarificadorRVLN
-            miTarificadorRVLN.TarificarTarifa(pPeriodoRenovacionPoliza.Poliza.Tomador.ValorBonificacion, pTarifa, pCuestionarioResuelto, 0)
+            miTarificadorRVLN.TarificarTarifa(pPeriodoRenovacionPoliza.Poliza.Tomador.ValorBonificacion, pTarifa, pCuestionarioResuelto, 0, True)
 
             'GenerarCargosPara(pPeriodoRenovacionPolizaOidPrevio, pPeriodoRenovacionPoliza, NuevoPeriodoCobertura)
             GenerarCargosPara(Nothing, pPeriodoRenovacionPoliza, NuevoPeriodoCobertura, pNumeroMaximoPagos)

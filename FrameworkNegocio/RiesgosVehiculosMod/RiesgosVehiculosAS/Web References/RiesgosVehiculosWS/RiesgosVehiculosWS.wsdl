@@ -2,6 +2,25 @@
 <wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:types>
     <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="CargarFicheroweb">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="fichero" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CargarFicherowebResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CargarFicherowebResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
       <s:element name="CargarGrafoTarificacion">
         <s:complexType />
       </s:element>
@@ -148,8 +167,31 @@
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:element name="CalcularNivelBonificacion">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="valorBonificacion" type="s:double" />
+            <s:element minOccurs="0" maxOccurs="1" name="categoria" type="s:base64Binary" />
+            <s:element minOccurs="0" maxOccurs="1" name="bonificacion" type="s:base64Binary" />
+            <s:element minOccurs="1" maxOccurs="1" name="fecha" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CalcularNivelBonificacionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CalcularNivelBonificacionResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
     </s:schema>
   </wsdl:types>
+  <wsdl:message name="CargarFicherowebSoapIn">
+    <wsdl:part name="parameters" element="tns:CargarFicheroweb" />
+  </wsdl:message>
+  <wsdl:message name="CargarFicherowebSoapOut">
+    <wsdl:part name="parameters" element="tns:CargarFicherowebResponse" />
+  </wsdl:message>
   <wsdl:message name="CargarGrafoTarificacionSoapIn">
     <wsdl:part name="parameters" element="tns:CargarGrafoTarificacion" />
   </wsdl:message>
@@ -216,7 +258,17 @@
   <wsdl:message name="RecuperarProductosModeloSoapOut">
     <wsdl:part name="parameters" element="tns:RecuperarProductosModeloResponse" />
   </wsdl:message>
+  <wsdl:message name="CalcularNivelBonificacionSoapIn">
+    <wsdl:part name="parameters" element="tns:CalcularNivelBonificacion" />
+  </wsdl:message>
+  <wsdl:message name="CalcularNivelBonificacionSoapOut">
+    <wsdl:part name="parameters" element="tns:CalcularNivelBonificacionResponse" />
+  </wsdl:message>
   <wsdl:portType name="RiesgosVehiculosWSSoap">
+    <wsdl:operation name="CargarFicheroweb">
+      <wsdl:input message="tns:CargarFicherowebSoapIn" />
+      <wsdl:output message="tns:CargarFicherowebSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="CargarGrafoTarificacion">
       <wsdl:input message="tns:CargarGrafoTarificacionSoapIn" />
       <wsdl:output message="tns:CargarGrafoTarificacionSoapOut" />
@@ -261,9 +313,22 @@
       <wsdl:input message="tns:RecuperarProductosModeloSoapIn" />
       <wsdl:output message="tns:RecuperarProductosModeloSoapOut" />
     </wsdl:operation>
+    <wsdl:operation name="CalcularNivelBonificacion">
+      <wsdl:input message="tns:CalcularNivelBonificacionSoapIn" />
+      <wsdl:output message="tns:CalcularNivelBonificacionSoapOut" />
+    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="RiesgosVehiculosWSSoap" type="tns:RiesgosVehiculosWSSoap">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CargarFicheroweb">
+      <soap:operation soapAction="http://tempuri.org/CargarFicheroweb" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="CargarGrafoTarificacion">
       <soap:operation soapAction="http://tempuri.org/CargarGrafoTarificacion" style="document" />
       <wsdl:input>
@@ -363,9 +428,27 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="CalcularNivelBonificacion">
+      <soap:operation soapAction="http://tempuri.org/CalcularNivelBonificacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:binding name="RiesgosVehiculosWSSoap12" type="tns:RiesgosVehiculosWSSoap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CargarFicheroweb">
+      <soap12:operation soapAction="http://tempuri.org/CargarFicheroweb" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="CargarGrafoTarificacion">
       <soap12:operation soapAction="http://tempuri.org/CargarGrafoTarificacion" style="document" />
       <wsdl:input>
@@ -458,6 +541,15 @@
     </wsdl:operation>
     <wsdl:operation name="RecuperarProductosModelo">
       <soap12:operation soapAction="http://tempuri.org/RecuperarProductosModelo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CalcularNivelBonificacion">
+      <soap12:operation soapAction="http://tempuri.org/CalcularNivelBonificacion" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

@@ -36,6 +36,7 @@ Public Class PolizaLN
                     Throw New ApplicationException("No se recuperó ninguna entidad fiscal generica")
                 Else
                     tomador = New FN.Seguros.Polizas.DN.TomadorDN
+                    tomador.ValorBonificacion = 1
                     tomador.EntidadFiscalGenerica = efg
                     RecuperarCrearTomador = tomador
                 End If

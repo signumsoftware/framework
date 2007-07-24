@@ -80,7 +80,8 @@ Imports Framework.Cuestionario.CuestionarioDN
             'creaMos las caracteristicas y las preguntas asociadas a ellas
             CrearPregunta(c, "CodigoConcesionario", TipoCaracteristica.Texto, "Código Concesionario", colCaracteristicas)
             CrearPregunta(c, "CodigoVendedor", TipoCaracteristica.Texto, "Código Vendedor", colCaracteristicas)
-            CrearPregunta(c, "FechaEfecto", TipoCaracteristica.Fecha, "Fecha efecto", colCaracteristicas)
+            CrearPregunta(c, "FechaEfecto", TipoCaracteristica.Fecha, "Fecha tarificación", colCaracteristicas)
+            CrearPregunta(c, "TarificacionPrueba", TipoCaracteristica.Booleano, "Tarificación prueba", colCaracteristicas)
             CrearPregunta(c, "EsCliente", TipoCaracteristica.Booleano, "¿Está usted asegurado en AMV?", colCaracteristicas)
             CrearPregunta(c, "IDCliente", TipoCaracteristica.Texto, "", colCaracteristicas)
             CrearPregunta(c, "Nombre", TipoCaracteristica.Texto, "Nombre", colCaracteristicas)

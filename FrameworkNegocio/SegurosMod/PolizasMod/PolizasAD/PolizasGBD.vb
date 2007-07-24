@@ -91,6 +91,11 @@ Public Class PolizasGBD
         ej.EjecutarNoConsulta(My.Resources.vwPresupuestosAlertados)
 
         ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
+        ej.EjecutarNoConsulta(My.Resources.vwPresupuestosAlcanzaPoliza)
+
+
+
+        ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
         ej.EjecutarNoConsulta(My.Resources.vwPresupActivoPositSel)
 
         ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)

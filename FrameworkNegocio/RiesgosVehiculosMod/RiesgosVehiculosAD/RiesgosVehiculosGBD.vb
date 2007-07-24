@@ -229,6 +229,9 @@ Public Class RiesgosVehiculosGBD
         ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
         ej.EjecutarNoConsulta(My.Resources.vwLiquidacionxCausaxAIDxPago)
 
+        ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
+        ej.EjecutarNoConsulta(My.Resources.vwCDxTarifa)
+
 
     End Sub
 

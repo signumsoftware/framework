@@ -33,11 +33,11 @@ Public Class TarificadorRVLN
 
 
 
-    Private Sub TarificarComparandoTarifasConModelosMArcas(ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal PosibleModeloDatosParaPoliza As FN.RiesgosVehiculos.DN.ModeloDatosDN)
+    Private Sub TarificarComparandoTarifasConModelosMArcas(ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal PosibleModeloDatosParaPoliza As FN.RiesgosVehiculos.DN.ModeloDatosDN, ByVal verificarProductosAplicables As Boolean)
         Dim importe1, importe2 As Double
 
 
-        TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto)
+        TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto, verificarProductosAplicables)
         importe1 = pTarifa.Importe
 
         ' cambiar el modelodatos y prober nueva tarificacion
@@ -46,7 +46,7 @@ Public Class TarificadorRVLN
         rm.ModeloDatos = PosibleModeloDatosParaPoliza
 
 
-        TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto)
+        TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto, verificarProductosAplicables)
         importe2 = pTarifa.Importe
 
         If importe2 <= importe1 Then
@@ -55,14 +55,14 @@ Public Class TarificadorRVLN
         Else
             ' nos quedamos con el anterior
             rm.ModeloDatos = modelodatosPrevio
-            TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto)
+            TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto, verificarProductosAplicables)
 
         End If
 
     End Sub
 
 
-    Private Sub TarificarComparandoImporteConPrimaAnteriro(ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal PosibleModeloDatosParaPoliza As FN.RiesgosVehiculos.DN.ModeloDatosDN, ByVal pCosteDiarioAnteriroPC As Double)
+    Private Sub TarificarComparandoImporteConPrimaAnteriro(ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal PosibleModeloDatosParaPoliza As FN.RiesgosVehiculos.DN.ModeloDatosDN, ByVal pCosteDiarioAnteriroPC As Double, ByVal verificarProductosAplicables As Boolean)
 
 
 
@@ -73,7 +73,7 @@ Public Class TarificadorRVLN
         rm.ModeloDatos = PosibleModeloDatosParaPoliza
 
 
-        TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto)
+        TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto, verificarProductosAplicables)
 
         If pTarifa.CalcualrImporteDia <= pCosteDiarioAnteriroPC Then
             ' vale el modelos de datos nuevo
@@ -81,17 +81,17 @@ Public Class TarificadorRVLN
         Else
             ' nos quedamos con el anterior
             rm.ModeloDatos = modelodatosPrevio
-            TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto)
+            TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto, verificarProductosAplicables)
 
         End If
 
     End Sub
 
-    Public Sub TarificarTarifa(ByVal pValorBonificacion As Double, ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN)
-        TarificarTarifa(pValorBonificacion, pTarifa, pCuestionarioResuelto, 0)
+    Public Sub TarificarTarifa(ByVal pValorBonificacion As Double, ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal verificarProductosAplicables As Boolean)
+        TarificarTarifa(pValorBonificacion, pTarifa, pCuestionarioResuelto, 0, verificarProductosAplicables)
     End Sub
 
-    Public Sub TarificarTarifa(ByVal pValorBonificacion As Double, ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal pCosteDiarioAnteriroPC As Double)
+    Public Sub TarificarTarifa(ByVal pValorBonificacion As Double, ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal pCosteDiarioAnteriroPC As Double, ByVal verificarProductosAplicables As Boolean)
 
         Using tr As New Transaccion
 
@@ -102,12 +102,12 @@ Public Class TarificadorRVLN
 
             If PosibleModeloDatosParaPoliza Is Nothing Then
                 ' una sola tarificacion con el modelodatos de la poliza
-                TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto)
+                TarificarTarifaPrivado(pTarifa, pCuestionarioResuelto, verificarProductosAplicables)
 
             Else
                 ' tarificar con el modelodatos que tenga el menor coeficiente
                 ' modo A
-                TarificarComparandoTarifasConModelosMArcas(pTarifa, pCuestionarioResuelto, PosibleModeloDatosParaPoliza)
+                TarificarComparandoTarifasConModelosMArcas(pTarifa, pCuestionarioResuelto, PosibleModeloDatosParaPoliza, verificarProductosAplicables)
 
 
                 ' activar si se decide que vale con compara con el precio anteriro
@@ -129,7 +129,7 @@ Public Class TarificadorRVLN
 
 
 
-    Private Sub TarificarTarifaPrivado(ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN)
+    Private Sub TarificarTarifaPrivado(ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal pVerificarProductosAplicables As Boolean)
 
         Using tr As New Transaccion
 
@@ -149,9 +149,12 @@ Public Class TarificadorRVLN
             irec.DataSoucers.Add(rvm.ModeloDatos)
 
 
-            ' verificar los productos alcanzables 
-            Dim dt As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN = pTarifa.DatosTarifa
-            dt.ActualizarProdutosAplicables()
+            ' verificar los productos alcanzables
+            If pVerificarProductosAplicables Then
+                VerificarProductosAplicables(pTarifa)
+            End If
+
+
 
             ' asiganar el recuperador de valor a la operacion principal del grafo
             Dim opc As Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN = RecuperarGrafo(pTarifa.FEfecto)
@@ -173,7 +176,28 @@ Public Class TarificadorRVLN
         End Using
 
     End Sub
+    Public Shared Sub VerificarProductosAplicables(ByVal tarifa As FN.Seguros.Polizas.DN.TarifaDN)
 
+        Using tr As New Transaccion
+
+            ' verificar los productos alcanzables
+
+            Dim dt As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN = tarifa.DatosTarifa
+            Dim docln As New Framework.Ficheros.FicherosLN.CajonDocumentoLN
+            ' recuperar col cajonesdocumentos
+            Dim colCdVinculadosaProductos As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN = docln.RecuperarCajonesParaEntidadReferida(tarifa.GUID)
+            dt.ActualizarProdutosAplicables(colCdVinculadosaProductos)
+
+
+
+
+            tr.Confirmar()
+
+        End Using
+
+
+
+    End Sub
     Public Function RecuperarGrafo(ByVal pFechaEfecto As Date) As Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN
         'TODO: implementar un control de vigencia del grafo
         If mOperacionConfiguradaDN Is Nothing Then

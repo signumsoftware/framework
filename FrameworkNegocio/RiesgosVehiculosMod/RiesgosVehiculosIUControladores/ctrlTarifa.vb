@@ -30,4 +30,10 @@ Public Class ctrlTarifa
         Dim mias As New FN.RiesgosVehiculos.AS.RiesgosVehículosAS()
         Return mias.TarificarTarifa(Tarifa)
     End Function
+
+    Public Function TarificarRenovacion(ByVal Tarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal numSiniestros As Integer) As FN.Seguros.Polizas.DN.TarifaDN
+        Dim mias As New FN.RiesgosVehiculos.AS.RiesgosVehículosAS()
+        Return mias.TarificarTarifa(Tarifa)
+    End Function
+
 End Class

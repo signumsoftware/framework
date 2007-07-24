@@ -80,7 +80,10 @@ Public Class ctrlCuestionarioTarificacion
 
         If modeloDatos Is Nothing Then
             admiteNoMatric = False
-            modeloDatos = miAS.RecuperarModeloDatos(modelo.Nombre, modelo.Marca.Nombre, True, fecha)
+        End If
+
+        If matriculado Then
+            modeloDatos = miAS.RecuperarModeloDatos(modelo.Nombre, modelo.Marca.Nombre, matriculado, fecha)
         End If
 
         GSAMV.DN.RestriccionesAMV.RecuperarRequisitosTarificar(modeloDatos, cilindrada, AnosMinEdad, AnosMinCarnet, matriculado, tiposCarnetNecesarios)

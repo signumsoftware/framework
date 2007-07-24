@@ -272,12 +272,14 @@ Public Class GestorMapPersistenciaCamposGSAMV
             alentidades.Add(New VinculoClaseDN(GetType(FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN)))
             alentidades.Add(New VinculoClaseDN(GetType(FN.Seguros.Polizas.DN.TarifaDN)))
             alentidades.Add(New VinculoClaseDN(GetType(FN.Seguros.Polizas.DN.PresupuestoDN)))
+            alentidades.Add(New VinculoClaseDN(GetType(Framework.Ficheros.FicherosDN.CajonDocumentoDN)))
             mapSubInst.ItemDatoMapeado(TiposDatosMapInstClaseDN.InterfaceImplementadaPor) = alentidades
 
             campodatos = New InfoDatosMapInstCampoDN
             campodatos.InfoDatosMapInstClase = mapinst
             campodatos.NombreCampo = "mObjetoIndirectoOperacion"
             campodatos.ColCampoAtributo.Add(CampoAtributoDN.InterfaceImplementadaPor)
+            campodatos.ColCampoAtributo.Add(CampoAtributoDN.SoloGuardarYNoReferido)
             campodatos.MapSubEntidad = mapSubInst
 
 

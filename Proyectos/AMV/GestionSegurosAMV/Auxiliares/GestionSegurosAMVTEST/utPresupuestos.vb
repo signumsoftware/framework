@@ -110,6 +110,7 @@ Imports GestionSegurosAMV.AD
 
 
 
+
         Using tr As New Transaccion
 
             Dim presu As FN.Seguros.Polizas.DN.PresupuestoDN = CrearPresupuestoP()
@@ -173,6 +174,8 @@ Imports GestionSegurosAMV.AD
 
             ' trr.OperacionRealizadaOrigen = oprDes
             trr.OperacionRealizadaOrigen = oprOrg
+            trr.OperacionRealizadaOrigen.ObjetoIndirectoOperacion = presu
+
 
             Dim ejOPR As New Framework.Procesos.ProcesosLN.GestorOPRLN()
             ejOPR.EjecutarOperacion(presu, Nothing, prin, trr)

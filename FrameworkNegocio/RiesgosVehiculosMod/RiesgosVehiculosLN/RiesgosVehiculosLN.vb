@@ -7,6 +7,37 @@ Public Class RiesgosVehiculosLN
     Inherits Framework.ClaseBaseLN.BaseTransaccionConcretaLN
 
 
+    Public Sub VerificarCajonDocumento(ByVal pCajonDocumento As Framework.Ficheros.FicherosDN.CajonDocumentoDN)
+
+
+
+
+        Using tr As New Transaccion
+
+
+            pCajonDocumento.VerificarDocumentoEnlazado()
+
+
+            Dim colcd As New Framework.Ficheros.FicherosDN.ColCajonDocumentoDN
+            colcd.Add(pCajonDocumento)
+
+            Dim ad As New FN.RiesgosVehiculos.AD.RiesgosVehiculosAD
+            Dim colt As FN.Seguros.Polizas.DN.ColTarifaDN = ad.RecuperarTarifasRefierenCDs(colcd)
+
+
+            For Each tarifa As FN.Seguros.Polizas.DN.TarifaDN In colt
+                TarificadorRVLN.VerificarProductosAplicables(tarifa)
+                Me.GuardarGenerico(tarifa)
+            Next
+
+            tr.Confirmar()
+
+        End Using
+
+
+
+
+    End Sub
 
     Public Function RecuperarRiesgoMotorActivo(ByVal pMatricula As String, ByVal pNumeroBastidor As String) As FN.RiesgosVehiculos.DN.RiesgoMotorDN
         Dim RiesgoMotor As FN.RiesgosVehiculos.DN.RiesgoMotorDN
@@ -70,7 +101,7 @@ Public Class RiesgosVehiculosLN
     Public Function TarificarPresupuesto(ByVal presupuesto As PresupuestoDN) As PresupuestoDN
 
         Using tr As New Transaccion()
-            Dim tarifaP As TarifaDN = Me.TarificarTarifa(presupuesto.Tarifa, Nothing, presupuesto.FuturoTomador, True)
+            Dim tarifaP As TarifaDN = Me.TarificarTarifa(presupuesto.Tarifa, Nothing, presupuesto.FuturoTomador, True, True)
 
             presupuesto.Tarifa = tarifaP
 
@@ -94,7 +125,7 @@ Public Class RiesgosVehiculosLN
 
     End Function
 
-    Public Function TarificarTarifa(ByVal tarifa As TarifaDN, ByVal tipoFraccionamiento As FN.GestionPagos.DN.FraccionamientoDN, ByVal tomador As FN.Seguros.Polizas.DN.ITomador, ByVal tarificarporOferttados As Boolean) As TarifaDN
+    Public Function TarificarTarifa(ByVal tarifa As TarifaDN, ByVal tipoFraccionamiento As FN.GestionPagos.DN.FraccionamientoDN, ByVal tomador As FN.Seguros.Polizas.DN.ITomador, ByVal tarificarporOferttados As Boolean, ByVal pVerificarProductosAplicables As Boolean) As TarifaDN
         Using tr As New Transaccion()
             Dim btLN As Framework.ClaseBaseLN.BaseTransaccionConcretaLN
             Dim colLPEliminadas As New ColLineaProductoDN()
@@ -124,10 +155,10 @@ Public Class RiesgosVehiculosLN
 
             tarifa.CompletarProductosDependientes()
 
-            Dim mensaje As String = String.Empty
-            If tarifa.EstadoIntegridad(mensaje) <> Framework.DatosNegocio.EstadoIntegridadDN.Consistente Then
-                Throw New Framework.LogicaNegocios.ApplicationExceptionLN(mensaje)
-            End If
+            'Dim mensaje As String = String.Empty
+            'If tarifa.EstadoIntegridad(mensaje) <> Framework.DatosNegocio.EstadoIntegridadDN.Consistente Then
+            '    Throw New Framework.LogicaNegocios.ApplicationExceptionLN(mensaje)
+            'End If
 
 
 
@@ -217,6 +248,11 @@ Public Class RiesgosVehiculosLN
             irec.ClearAll()
 
             tarifa.ColLineaProducto.AddRange(colLPEliminadas)
+
+            If pVerificarProductosAplicables Then
+                TarificadorRVLN.VerificarProductosAplicables(tarifa)
+            End If
+
 
             Me.GuardarGenerico(tarifa)
 
@@ -356,6 +392,28 @@ Public Class RiesgosVehiculosLN
         End Using
 
 
+    End Function
+
+    Public Function CalcularNivelBonificacion(ByVal valorBonificacion As Double, ByVal categoria As CategoriaDN, ByVal bonificacion As BonificacionDN, ByVal fecha As Date) As String
+        Dim rvAD As FN.RiesgosVehiculos.AD.RiesgosVehiculosAD
+
+        Using tr As New Transaccion()
+            rvAD = New FN.RiesgosVehiculos.AD.RiesgosVehiculosAD()
+
+            If bonificacion Is Nothing Then
+                Dim lista As IList = Me.RecuperarLista(GetType(BonificacionDN))
+
+                If lista IsNot Nothing Then
+                    'TODO: la bonificación no debería ser nula, de momento se recupera puesto que solo existe una bonificación posible
+                    bonificacion = lista.Item(0)
+                End If
+            End If
+
+            CalcularNivelBonificacion = rvAD.CalcularNivelBonificacion(valorBonificacion, categoria, bonificacion, fecha)
+
+            tr.Confirmar()
+
+        End Using
     End Function
 
     'Public Function ClonarPresupuesto(ByVal presupuesto As PresupuestoDN, ByVal cuestionarioR As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal fechaE As Date) As PresupuestoDN

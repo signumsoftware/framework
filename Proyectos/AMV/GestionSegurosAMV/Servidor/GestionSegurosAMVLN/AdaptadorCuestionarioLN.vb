@@ -16,33 +16,10 @@ Public Class AdaptadorCuestionarioLN
         Dim presupuesto As PresupuestoDN
         Dim futuroTomador As FuturoTomadorDN
         Dim emisoraP As EmisoraPolizasDN
-        Dim anyosSinSiniestro As Integer
-        
+
         Using tr As New Transaccion()
+            futuroTomador = GenerarFuturoTomadorxCuestionarioResuelto(cuestionarioR)
 
-            'Datos de la persona - futuro tomador
-            futuroTomador = New FuturoTomadorDN()
-            futuroTomador.Nombre = RecuperarValorxPregunta(cuestionarioR, "Nombre")
-            futuroTomador.Apellido1FuturoTomador = RecuperarValorxPregunta(cuestionarioR, "Apellido1")
-            futuroTomador.Apellido2FuturoTomador = RecuperarValorxPregunta(cuestionarioR, "Apellido2")
-            futuroTomador.NIFCIFFuturoTomador = RecuperarValorxPregunta(cuestionarioR, "NIF")
-            futuroTomador.Periodo.FI = RecuperarValorxPregunta(cuestionarioR, "FechaNacimiento")
-            futuroTomador.Direccion = RecuperarValorxPregunta(cuestionarioR, "DireccionEnvio")
-            anyosSinSiniestro = RecuperarValorxPregunta(cuestionarioR, "AñosSinSiniestro")
-            Dim justificante As FN.RiesgosVehiculos.DN.Justificantes = RecuperarValorxPregunta(cuestionarioR, "Justificantes")
-            futuroTomador.ValorBonificacion = 1
-
-            If justificante = FN.RiesgosVehiculos.DN.Justificantes.ninguno Then
-                anyosSinSiniestro = 0
-            ElseIf justificante = FN.RiesgosVehiculos.DN.Justificantes.certificado_y_recibo Then
-                anyosSinSiniestro -= 1
-            ElseIf justificante = FN.RiesgosVehiculos.DN.Justificantes.certificado Then
-                anyosSinSiniestro -= 2
-            End If
-
-            For cont As Integer = 0 To anyosSinSiniestro - 1
-                futuroTomador.ValorBonificacion *= 0.95
-            Next
 
             'Datos de contacto del futuro tomador
             Dim dc As New FN.Localizaciones.DN.ContactoDN()
@@ -90,16 +67,8 @@ Public Class AdaptadorCuestionarioLN
 
             'Se completan los datos del presupuesto
             presupuesto = New PresupuestoDN()
-            presupuesto.Tarifa = Me.GenerarTarifaxCuestionarioRes(cuestionarioR, amd)
-            presupuesto.Tarifa.DatosTarifa.ValorBonificacion = futuroTomador.ValorBonificacion
-
-
-            Dim mibln As New Framework.ClaseBaseLN.BaseTransaccionConcretaLN
-            Dim colfrac As New FN.GestionPagos.DN.ColFraccionamientoDN
-            colfrac.AddRangeObject(mibln.RecuperarLista(GetType(FN.GestionPagos.DN.FraccionamientoDN)))
-
-            presupuesto.Tarifa.Fraccionamiento = colfrac.Item(1)
-
+            presupuesto.Tarifa = Me.GenerarTarifaxCuestionarioRes(cuestionarioR, amd, futuroTomador, False)
+            'presupuesto.Tarifa.DatosTarifa.ValorBonificacion = futuroTomador.ValorBonificacion
 
             'Se recupera la entidad emisora de la póliza
             emisoraP = Framework.Configuracion.AppConfiguracion.DatosConfig(GetType(FN.RiesgosVehiculos.DN.AcreedoraTarifasConf).FullName)
@@ -130,7 +99,7 @@ Public Class AdaptadorCuestionarioLN
 
     End Function
 
-    Public Function GenerarTarifaxCuestionarioRes(ByVal cuestionarioR As CuestionarioResueltoDN, ByVal tiempoTarificado As AnyosMesesDias) As TarifaDN
+    Public Function GenerarTarifaxCuestionarioRes(ByVal cuestionarioR As CuestionarioResueltoDN, ByVal tiempoTarificado As AnyosMesesDias, ByVal tomador As FuturoTomadorDN, ByVal debeTarificar As Boolean) As TarifaDN
         Dim tarifa As TarifaDN
         Dim riesgo As FN.RiesgosVehiculos.DN.RiesgoMotorDN
         Dim colLineaProductos As ColLineaProductoDN
@@ -139,21 +108,23 @@ Public Class AdaptadorCuestionarioLN
 
         Using tr As New Transaccion()
 
+            If tomador Is Nothing Then
+                tomador = GenerarFuturoTomadorxCuestionarioResuelto(cuestionarioR)
+            End If
+
             'Datos de la tarifa
             riesgo = New FN.RiesgosVehiculos.DN.RiesgoMotorDN()
             riesgo.Cilindrada = RecuperarValorxPregunta(cuestionarioR, "CYLD")
             riesgo.Matriculado = RecuperarValorxPregunta(cuestionarioR, "EstaMatriculado")
             riesgo.FechaMatriculacion = RecuperarValorxPregunta(cuestionarioR, "FechaMatriculacion")
-
             riesgo.Modelo = CType(RecuperarValorxPregunta(cuestionarioR, "Modelo"), FN.RiesgosVehiculos.DN.ModeloDN)
 
             fechaEfecto = RecuperarValorxPregunta(cuestionarioR, "FechaEfecto")
 
-            Dim RiesgosVehiculos As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN
-            riesgo.ModeloDatos = RiesgosVehiculos.RecuperarModeloDatos(riesgo.Modelo.Nombre, riesgo.Modelo.Marca.Nombre, riesgo.Matriculado, fechaEfecto)
-
-
             Dim rvLN As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
+            riesgo.ModeloDatos = rvLN.RecuperarModeloDatos(riesgo.Modelo.Nombre, riesgo.Modelo.Marca.Nombre, riesgo.Matriculado, fechaEfecto)
+
+
             Dim colProductos As ColProductoDN = rvLN.RecuperarProductosModelo(riesgo.Modelo, riesgo.Matriculado, fechaEfecto)
 
             'colProductos = RecuperarLista(Of ProductoDN)()
@@ -187,18 +158,60 @@ Public Class AdaptadorCuestionarioLN
 
             tarifa.Riesgo = riesgo
             tarifa.DatosTarifa = datosTarifa
-            tarifa.FEfecto = RecuperarValorxPregunta(cuestionarioR, "FechaEfecto")
+            tarifa.DatosTarifa.ValorBonificacion = tomador.ValorBonificacion
+            tarifa.FEfecto = fechaEfecto
             tarifa.AMD = New Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias()
             tarifa.AMD.Anyos = 1
 
-            'Dim rvLN As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
-            'tarifa = rvLN.TarificarTarifa(tarifa, Nothing)
+            If debeTarificar Then
+                rvLN = New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
+                tarifa = rvLN.TarificarTarifa(tarifa, Nothing, Nothing, True, True)
+
+                Me.GuardarGenerico(tarifa)
+            End If
+
 
             tr.Confirmar()
 
             Return tarifa
 
         End Using
+    End Function
+
+    Public Function GenerarFuturoTomadorxCuestionarioResuelto(ByVal cuestionarioR As CuestionarioResueltoDN) As FuturoTomadorDN
+        Dim futuroTomador As FuturoTomadorDN
+        Dim anyosSinSiniestro As Integer
+
+        Using tr As New Transaccion()
+            'Datos de la persona - futuro tomador
+            futuroTomador = New FuturoTomadorDN()
+            futuroTomador.Nombre = RecuperarValorxPregunta(cuestionarioR, "Nombre")
+            futuroTomador.Apellido1FuturoTomador = RecuperarValorxPregunta(cuestionarioR, "Apellido1")
+            futuroTomador.Apellido2FuturoTomador = RecuperarValorxPregunta(cuestionarioR, "Apellido2")
+            futuroTomador.NIFCIFFuturoTomador = RecuperarValorxPregunta(cuestionarioR, "NIF")
+            futuroTomador.Periodo.FI = RecuperarValorxPregunta(cuestionarioR, "FechaNacimiento")
+            futuroTomador.Direccion = RecuperarValorxPregunta(cuestionarioR, "DireccionEnvio")
+            anyosSinSiniestro = RecuperarValorxPregunta(cuestionarioR, "AñosSinSiniestro")
+            Dim justificante As FN.RiesgosVehiculos.DN.Justificantes = RecuperarValorxPregunta(cuestionarioR, "Justificantes")
+            futuroTomador.ValorBonificacion = 1
+
+            If justificante = FN.RiesgosVehiculos.DN.Justificantes.ninguno Then
+                anyosSinSiniestro = 0
+            ElseIf justificante = FN.RiesgosVehiculos.DN.Justificantes.certificado_y_recibo Then
+                anyosSinSiniestro -= 1
+            ElseIf justificante = FN.RiesgosVehiculos.DN.Justificantes.certificado Then
+                anyosSinSiniestro -= 2
+            End If
+
+            For cont As Integer = 0 To anyosSinSiniestro - 1
+                futuroTomador.ValorBonificacion *= 0.95
+            Next
+
+            tr.Confirmar()
+
+            Return futuroTomador
+        End Using
+
     End Function
 
     Public Function GenerarCuestionarioResxPoliza() As CuestionarioResueltoDN

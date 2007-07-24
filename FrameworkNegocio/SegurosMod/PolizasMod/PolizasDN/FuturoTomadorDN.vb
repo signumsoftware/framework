@@ -127,7 +127,7 @@ Public Class FuturoTomadorDN
             pMensaje = "La dirección del futuro tomador no puede ser nul"
             Return EstadoIntegridadDN.Inconsistente
         End If
-
+    
         mToSt = Me.ToString()
 
         Return MyBase.EstadoIntegridad(pMensaje)
@@ -137,12 +137,17 @@ Public Class FuturoTomadorDN
         If mTomador Is Nothing OrElse mTomador.EntidadFiscalGenerica Is Nothing OrElse mTomador.EntidadFiscalGenerica.IentidadFiscal Is Nothing Then
             Return False
         End If
-
+        Dim mensaje As String = String.Empty
         If String.IsNullOrEmpty(mNIFCIFFuturoTomador) Then
             Return False
         End If
 
-        Dim mensaje As String = String.Empty
+        If Me.mValorBonificacion <> Me.Tomador.ValorBonificacion Then
+            mensaje = "los ValorBonificacion no coinciden"
+            Return False
+        End If
+
+
         If FN.Localizaciones.DN.NifDN.ValidaNif(mNIFCIFFuturoTomador, mensaje) Then
             Dim personaFiscal As FN.Personas.DN.PersonaFiscalDN
             personaFiscal = CType(mTomador.EntidadFiscalGenerica.IentidadFiscal, FN.Personas.DN.PersonaFiscalDN)

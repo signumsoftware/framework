@@ -1,3 +1,5 @@
+Imports FN.RiesgosVehiculos.DN
+
 Public Class ctrlTarifa
     Inherits MotorIU.ControlesP.BaseControlP
     Implements Framework.IU.IUComun.IctrlBasicoDN
@@ -13,7 +15,18 @@ Public Class ctrlTarifa
 
     Private mColProductosAplicables As FN.Seguros.Polizas.DN.ColProductoDN
 
+    Private mTarifaRenovacion As Boolean
+    Private mNumeroSiniestros As Integer
+
     'private mCuestionario as 
+
+#Region "Eventos"
+    ''' <summary>
+    ''' Se produce cuando el usuario hace click en "Tarificar"
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Event EventoTarificar()
+#End Region
 
     Public Overrides Sub Inicializar()
         MyBase.Inicializar()
@@ -25,6 +38,7 @@ Public Class ctrlTarifa
     End Sub
 
 #Region "propiedades"
+
     <System.ComponentModel.ReadOnly(True), System.ComponentModel.Browsable(False)> _
     Public WriteOnly Property CuestionarioResuelto() As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN
         Set(ByVal value As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN)
@@ -47,6 +61,25 @@ Public Class ctrlTarifa
             Me.DNaIU(value)
         End Set
     End Property
+
+    Public Property TarifaRenovacion() As Boolean
+        Get
+            Return mTarifaRenovacion
+        End Get
+        Set(ByVal value As Boolean)
+            mTarifaRenovacion = value
+        End Set
+    End Property
+
+    Public Property NumeroSiniestros() As Integer
+        Get
+            Return mNumeroSiniestros
+        End Get
+        Set(ByVal value As Integer)
+            mNumeroSiniestros = value
+        End Set
+    End Property
+
 #End Region
 
 
@@ -109,6 +142,12 @@ Public Class ctrlTarifa
             Next
             'establecemos la fecha de efecto de la tarifa
             Me.mTarifa.FEfecto = Me.dtpFechaEfecto.Value
+
+            'se establece el fraccionamiento seleccionado
+            If Me.dtgPagos.SelectedRows.Count > 0 Then
+                Me.mTarifa.Fraccionamiento = CType(Me.dtgPagos.SelectedRows.Item(0).Cells("GrupoPagosFraccionadosDN").Value, FN.GestionPagos.DN.GrupoPagosFraccionadosDN).TipoFraccionamiento
+            End If
+
             Return True
         Catch ex As Exception
             Me.MensajeError = ex.Message
@@ -345,12 +384,21 @@ Public Class ctrlTarifa
     Private Sub cmdTarificar_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdTarificar.Click
         Try
             Using New AuxIU.CursorScope()
+                RaiseEvent EventoTarificar()
+
                 Dim tarifa As FN.Seguros.Polizas.DN.TarifaDN = Me.Tarifa
                 If tarifa Is Nothing Then
                     MessageBox.Show(Me.MensajeError, "Tarificar", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
                     Exit Sub
                 End If
-                Me.Tarifa = Me.mControlador.Tarificar(tarifa)
+
+                If mTarifaRenovacion Then
+                    Me.Tarifa = Me.mControlador.Tarificar(tarifa)
+                Else
+                    Me.Tarifa = Me.mControlador.Tarificar(tarifa)
+                End If
+
+
                 Me.cmdTarificar.Enabled = False
             End Using
         Catch ex As Exception
@@ -406,6 +454,8 @@ Public Class ctrlTarifa
         If Me.cmdTarificar.Enabled = True AndAlso Not Me.mTarifa Is Nothing Then
             Me.cmdTarificar_Click(Nothing, Nothing)
         End If
+        Me.IUaDN()
+        Me.SetDN(Me.mTarifa)
     End Sub
 
     Public Sub Poblar() Implements Framework.IU.IUComun.IctrlBasicoDN.Poblar
@@ -427,7 +477,7 @@ Public Class ctrlTarifa
         Me.DNaIUgd()
 
     End Sub
-    
+
     Private Sub cmdConductoresAdicionales_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdConductoresAdicionales.Click
         Try
             Dim dtv As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN = CType(mTarifa.DatosTarifa, FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN)
@@ -450,4 +500,25 @@ Public Class ctrlTarifa
             MostrarError(ex)
         End Try
     End Sub
+    
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
+        Dim padre As Framework.IU.IUComun.IctrlBasicoDN = RecuperarPrimerPadreDinamico(Me.Parent)
+        padre.SetDN(entidad)
+    End Sub
+
+
+    Private Function RecuperarPrimerPadreDinamico(ByVal control As System.Windows.Forms.Control) As Framework.IU.IUComun.IctrlBasicoDN
+
+        If control Is Nothing Then
+            Return Nothing
+        End If
+
+
+        If TypeOf control Is Framework.IU.IUComun.IctrlBasicoDN Then
+            Return control
+        Else
+            Return RecuperarPrimerPadreDinamico(control.Parent)
+        End If
+
+    End Function
 End Class

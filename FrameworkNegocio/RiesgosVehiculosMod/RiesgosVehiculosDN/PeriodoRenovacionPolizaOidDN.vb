@@ -212,6 +212,7 @@ Public Class PeriodoRenovacionPolizaOidDN
             Throw New Framework.DatosNegocio.ApplicationExceptionDN("los importes debidos no estan sicronizados")
         End If
 
+        ' todo provisional QUITARRRRR
         If Me.mFAnulacion <> Me.mOrigenImporteDebido.FAnulacion OrElse Me.mFAnulacion <> Me.mOrigenImporteDebido.IImporteDebidoDN.FAnulacion Then
             Throw New Framework.DatosNegocio.ApplicationExceptionDN("las fechas de anulacion estan desincronizadas")
         End If
@@ -246,6 +247,7 @@ Public Class PeriodoRenovacionPolizaOidDN
 
 
         Me.FAnulacion = fAnulacion
+        mOrigenImporteDebido.Anular(fAnulacion)
         Me.mIImporteDebido.FAnulacion = fAnulacion
         Return mIImporteDebido
     End Function

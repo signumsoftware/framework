@@ -36,7 +36,7 @@ Public Class GestionSegurosAMVFS
             Try
                 mfh.EntradaMetodo(pIdSession, pActor, mRec)
                 Dim mln As New GSAMV.LN.AdaptadorCuestionarioLN()
-                GenerarTarifaxCuestionarioRes = mln.GenerarTarifaxCuestionarioRes(cuestionarioR, tiempoTarificado)
+                GenerarTarifaxCuestionarioRes = mln.GenerarTarifaxCuestionarioRes(cuestionarioR, tiempoTarificado, Nothing, True)
                 mfh.SalidaMetodo(pIdSession, pActor, mRec)
             Catch ex As Exception
                 mfh.SalidaMetodoExcepcional(pIdSession, pActor, ex, "", mRec)

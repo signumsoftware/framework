@@ -31,6 +31,7 @@ Public Class PresupuestoDN
 #Region "Constructores"
 
     Public Sub New()
+        CambiarValorRef(Of FN.GestionPagos.DN.CondicionesPagoDN)(New FN.GestionPagos.DN.CondicionesPagoDN, mCondicionesPago)
         CambiarValorRef(Of Framework.DatosNegocio.Localizaciones.Temporales.IntervaloFechasDN)(New Framework.DatosNegocio.Localizaciones.Temporales.IntervaloFechasDN, mPeriodo)
         Me.modificarEstado = EstadoDatosDN.SinModificar
     End Sub
@@ -59,6 +60,9 @@ Public Class PresupuestoDN
         End Get
 
         Set(ByVal value As String)
+            If value = "0" Then
+                value = Nothing
+            End If
             CambiarValorVal(Of String)(value, mCodColaborador)
 
         End Set
@@ -211,7 +215,11 @@ Public Class PresupuestoDN
         If mCondicionesPago Is Nothing Then
             pMensaje = "No se han vinculado condiciones de pago al presuopuesto"
             mAlcanzaEstadoPoliza = False
-        ElseIf mCondicionesPago.NumeroRecibos < 1 Then
+        End If
+
+        mCondicionesPago.NumeroRecibos = Me.Tarifa.Fraccionamiento.NumeroPagos
+
+        If mCondicionesPago.NumeroRecibos < 1 Then
             pMensaje = "Al menos debe establecerse la posibilidad de emitir un recibo"
             mAlcanzaEstadoPoliza = False
         Else
@@ -229,6 +237,7 @@ Public Class PresupuestoDN
         '    pMensaje = "La entidad del futuro tomador no puede ser nula"
         '    Return EstadoIntegridadDN.Inconsistente
         'End If
+        AlcanzaestadoPoliza(Nothing)
 
         If mTarifa Is Nothing Then
             pMensaje = "Debe existir una entidad tarifa del presupuesto con un cuestionario resuelto"
@@ -246,9 +255,15 @@ Public Class PresupuestoDN
             Return EstadoIntegridadDN.Inconsistente
         End If
 
-
+        Me.mToSt = Me.ToString
 
         Return MyBase.EstadoIntegridad(pMensaje)
+    End Function
+
+
+
+    Public Overrides Function ToString() As String
+        Return Me.mPeriodo.ToString & " " & Me.mFuturoTomador.ToString
     End Function
 
 #End Region

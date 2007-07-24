@@ -180,6 +180,12 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmAutorizacionctrl.vb" />
+    <Compile Include="frmCargadorFicherosWeb.Designer.vb">
+      <DependentUpon>frmCargadorFicherosWeb.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmCargadorFicherosWeb.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmCuestionario1.Designer.vb">
       <DependentUpon>frmCuestionario1.vb</DependentUpon>
     </Compile>
@@ -222,6 +228,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmAutorizacion.resx">
       <DependentUpon>frmAutorizacion.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCargadorFicherosWeb.resx">
+      <DependentUpon>frmCargadorFicherosWeb.vb</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="frmCuestionario1.resx">

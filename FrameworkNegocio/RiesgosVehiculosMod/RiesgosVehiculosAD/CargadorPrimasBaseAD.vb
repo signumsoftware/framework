@@ -1084,6 +1084,7 @@ Public Class CargadorPrimasBaseAD
                     bonifRV.Bonificacion = bonif
                     bonifRV.Categoria = categoria
                     bonifRV.CategoriaModDatos = catMD
+                    bonifRV.Nombre = bonRVAux.Nombre
                     bonifRV.IntervaloNumerico = New Framework.DatosNegocio.IntvaloNumericoDN()
                     bonifRV.IntervaloNumerico.ValInf = bonRVAux.IntervaloNumerico.ValInf
                     bonifRV.IntervaloNumerico.ValSup = bonRVAux.IntervaloNumerico.ValSup

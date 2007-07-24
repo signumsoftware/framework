@@ -8,11 +8,7 @@ Public Class RecNivelBonificacionLN
     Inherits Framework.ClaseBaseLN.BaseTransaccionConcretaLN
     Implements IRecuperadorNivelBonificacion
 
-
-
-
     Public Tomador As Seguros.Polizas.DN.ITomador
-
 
 
     Public Function CalcularValorBonificacion(ByVal pTomador As IEntidadDN) As Double Implements DN.IRecuperadorNivelBonificacion.CalcularValorBonificacion

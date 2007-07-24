@@ -41,14 +41,6 @@ namespace FN.RiesgosVehiculos.LN.QueryBuilding
                 tpr.NombreTablaBD = "vwiPresupuesto";
                 tpr.TablasRelacionadas = new ColTablaRelacionadaAIQB();
 
-                TablaRelacionadaAIQB tr1 = new TablaRelacionadaAIQB();
-                tr1.fkPadre = "IDPresupuesto";
-                tr1.fkPropio = "IDPresupuesto";
-                tr1.NombreTablaBD = "vwiPresupuestoFraccionamientoPagos";
-                tr1.NombreTabla = "FraccionamientoPagos";
-                tr1.NombreRelacion = "Fraccionamiento";
-                tr1.TablaPadre = tpr;
-
                 TablaRelacionadaAIQB tr2 = new TablaRelacionadaAIQB();
                 tr2.fkPadre = "IDPresupuesto";
                 tr2.fkPropio = "IDPresupuesto";
@@ -129,6 +121,31 @@ namespace FN.RiesgosVehiculos.LN.QueryBuilding
                 tr11.NombreRelacion = "Tomador";
                 tr11.TablaPadre = tpr;
 
+                TablaRelacionadaAIQB tr12 = new TablaRelacionadaAIQB();
+                tr12.fkPadre = "IDPresupuesto";
+                tr12.fkPropio = "IDPresupuesto";
+                tr12.NombreTablaBD = "vwiPresupuestoFraccionamientoAnual";
+                tr12.NombreTabla = "FraccAnual";
+                tr12.NombreRelacion = "FraccionamientoAnual";
+                tr12.TablaPadre = tpr;
+
+                TablaRelacionadaAIQB tr13 = new TablaRelacionadaAIQB();
+                tr13.fkPadre = "IDPresupuesto";
+                tr13.fkPropio = "IDPresupuesto";
+                tr13.NombreTablaBD = "vwiPresupuestoFraccionamientoTrimestral";
+                tr13.NombreTabla = "FraccTrimestral";
+                tr13.NombreRelacion = "FraccionamientoTrimestral";
+                tr13.TablaPadre = tpr;
+
+                TablaRelacionadaAIQB tr14 = new TablaRelacionadaAIQB();
+                tr14.fkPadre = "IDPresupuesto";
+                tr14.fkPropio = "IDPresupuesto";
+                tr14.NombreTablaBD = "vwiPresupuestoFraccionamientoSemestral";
+                tr14.NombreTabla = "FraccSemestral";
+                tr14.NombreRelacion = "FraccionamientoSemestral";
+                tr14.TablaPadre = tpr;
+
+
                 ai.TablasPrincipales.Add(tpr);
 
                 gi = new GestorInstanciacionLN(Transaccion.Actual, Recurso.Actual);
@@ -163,8 +180,9 @@ namespace FN.RiesgosVehiculos.LN.QueryBuilding
                 AdaptadorInformesQueryBuildingDN ai = (AdaptadorInformesQueryBuildingDN)lista[0];
                 ai.TablasPrincipales[0].CargarDatosSelect("IDPresupuesto", sql, null);
                 System.IO.FileInfo fi = new AdaptadorInformesQueryBuildingLN().GenerarInforme(ai);
-                string fs = @"D:\empresa\AMV\Modelo Informes\Plantillas Finales\" + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + "-" + DateTime.Now.Millisecond.ToString() + ".docx";
-                fi.CopyTo(fs, true); 
+                string fs = AdaptadorInformesQueryBuildingLN.ObtenerRutaTemporal() + DateTime.Now.Minute.ToString() + DateTime.Now.Second.ToString() + "-" + DateTime.Now.Millisecond.ToString() + ".docx";
+                fi.CopyTo(fs, true);
+                System.Diagnostics.Process.Start(fi.FullName);
             }
         }
     }

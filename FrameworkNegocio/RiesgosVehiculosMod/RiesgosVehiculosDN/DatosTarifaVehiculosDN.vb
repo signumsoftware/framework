@@ -9,8 +9,8 @@ Public Class DatosTarifaVehiculosDN
     Implements IDatosTarifaDN
 
 #Region "Atributos"
-    Protected mColTipoDocumentoRequerido As Framework.Ficheros.FicherosDN.ColTipoDocumentoRequeridoDN
-    Protected mColCajonDocumento As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN
+    Protected mColTipoDocumentoRequerido As Framework.Ficheros.FicherosDN.ColTipoDocumentoRequeridoDN ' los documentos requeridos en ese momento
+    'Protected mColCajonDocumento As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN
 
     Protected mColConductores As ColConductorDN
     Protected mColOperacionPrimaBaseRVCache As ColOperacionPrimaBaseRVCacheDN
@@ -32,7 +32,7 @@ Public Class DatosTarifaVehiculosDN
 
     Public Sub New()
         MyBase.New()
-        Me.CambiarValorCol(Of Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)(New Framework.Ficheros.FicherosDN.ColCajonDocumentoDN(), mColCajonDocumento)
+        '   Me.CambiarValorCol(Of Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)(New Framework.Ficheros.FicherosDN.ColCajonDocumentoDN(), mColCajonDocumento)
         Me.CambiarValorCol(Of ColOperacionPrimaBaseRVCacheDN)(New ColOperacionPrimaBaseRVCacheDN(), mColOperacionPrimaBaseRVCache)
         Me.CambiarValorCol(Of ColOperacionModuladorRVCacheDN)(New ColOperacionModuladorRVCacheDN(), mColOperacionModuladorRVCache)
         Me.CambiarValorCol(Of ColOperacionImpuestoRVCacheDN)(New ColOperacionImpuestoRVCacheDN(), mColOperacionImpuestoRVCache)
@@ -70,15 +70,15 @@ Public Class DatosTarifaVehiculosDN
 
 
 
-    <RelacionPropCampoAtribute("mColCajonDocumento")> _
-    Public Property ColCajonDocumento() As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN
-        Get
-            Return mColCajonDocumento
-        End Get
-        Set(ByVal value As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)
-            CambiarValorRef(Of Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)(value, mColCajonDocumento)
-        End Set
-    End Property
+    '<RelacionPropCampoAtribute("mColCajonDocumento")> _
+    'Public Property ColCajonDocumento() As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN
+    '    Get
+    '        Return mColCajonDocumento
+    '    End Get
+    '    Set(ByVal value As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)
+    '        CambiarValorRef(Of Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)(value, mColCajonDocumento)
+    '    End Set
+    'End Property
 
 
 
@@ -509,7 +509,7 @@ Public Class DatosTarifaVehiculosDN
 
         AsignarImportesLineasProducto()
 
-        ActualizarProdutosAplicables()
+        ' ActualizarProdutosAplicables()
 
 
 
@@ -520,8 +520,8 @@ Public Class DatosTarifaVehiculosDN
 
 
 
-    Public Sub ActualizarProdutosAplicables()
-        ActualizarProdutosAplicables(Me.mTarifa, Me.mColTipoDocumentoRequerido, Me.mColCajonDocumento)
+    Public Sub ActualizarProdutosAplicables(ByVal pColCajonDocumento As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)
+        ActualizarProdutosAplicables(Me.mTarifa, Me.mColTipoDocumentoRequerido, pColCajonDocumento)
 
     End Sub
 

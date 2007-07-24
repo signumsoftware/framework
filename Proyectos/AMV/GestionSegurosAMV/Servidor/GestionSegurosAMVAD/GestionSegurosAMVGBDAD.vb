@@ -431,8 +431,8 @@ Public Class GestionSegurosAMVGBDAD
 
 
 
-
-        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Verificar Cajon Documento", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS)))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Gestion CajonDocumento", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS)))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Verificar Cajon Documento", RecuperarVinculoMetodo("VerificarCajonDocumento", GetType(FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizasOperLN)), ejClienteS)))
         ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Rechazar Documento en Cajon Documento", RecuperarVinculoMetodo("CajonDocumentoRechazarVinculacion", GetType(GDocEntrantesLN.GDocsLN)), ejClienteS)))
         ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Rechazar Documento y reidentificar en  Cajon Documento", RecuperarVinculoMetodo("CajonDocumentoRechazarVinculacionyReVincular", GetType(GDocEntrantesLN.GDocsLN)), ejClienteS)))
 

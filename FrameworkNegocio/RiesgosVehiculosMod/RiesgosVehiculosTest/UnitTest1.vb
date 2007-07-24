@@ -158,33 +158,33 @@ Imports Framework.TiposYReflexion.LN
                 Dim ln As New Framework.ClaseBaseLN.BaseTransaccionConcretaLN
                 Dim presup As FN.Seguros.Polizas.DN.PresupuestoDN
                 presup = ln.RecuperarLista(GetType(FN.Seguros.Polizas.DN.PresupuestoDN))(0)
-
+                presup.FechaAltaSolicitada = presup.PeridoValidez.FInicio.AddDays(2)
+                presup.CodColaborador = Nothing
 
                 Dim pr As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN
-                Dim lnc As New FN.Seguros.Polizas.PolizasLNC.PolizasLNC
-                ' pr = lnc.AltaDePolizaDesdePresupuesto(presup, presup.FuturoTomador.ValorCifNif, "0000ccc")
-                ' pr = lnc.A
+                Dim lnc As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizaRvLcLN
+                pr = lnc.AltaDePolizap(presup)
 
 
-                ' el usuario introduce los datos de fecha de alta
-                pr.FI = pr.PeridoCoberturaActivo.Tarifa.FEfecto.Date.AddDays(5)
+                '' el usuario introduce los datos de fecha de alta
+                'pr.FI = pr.PeridoCoberturaActivo.Tarifa.FEfecto.Date.AddDays(5)
 
-                ' el usuqario introduce las condiciones de pago
-                pr.PeridoCoberturaActivo.CondicionesPago = New GestionPagos.DN.CondicionesPagoDN
-                pr.PeridoCoberturaActivo.CondicionesPago.ModalidadDePago = GestionPagos.DN.ModalidadPago.IngresoEnCuenta
-                pr.PeridoCoberturaActivo.CondicionesPago.NumeroRecibos = 4
-                pr.PeridoCoberturaActivo.CondicionesPago.PlazoEjecucion.Dias = 7
-
-
-                ' el usuario crea o busca un tomador
-                Dim tm As New FN.Seguros.Polizas.DN.TomadorDN
-                Dim pf As FN.Personas.DN.PersonaFiscalDN = ln.RecuperarLista(GetType(FN.Personas.DN.PersonaFiscalDN))(0)
-                tm.EntidadFiscalGenerica = pf.EntidadFiscalGenerica
-                pr.Poliza.Tomador = tm
+                '' el usuqario introduce las condiciones de pago
+                'pr.PeridoCoberturaActivo.CondicionesPago = New GestionPagos.DN.CondicionesPagoDN
+                'pr.PeridoCoberturaActivo.CondicionesPago.ModalidadDePago = GestionPagos.DN.ModalidadPago.IngresoEnCuenta
+                'pr.PeridoCoberturaActivo.CondicionesPago.NumeroRecibos = 4
+                'pr.PeridoCoberturaActivo.CondicionesPago.PlazoEjecucion.Dias = 7
 
 
-                Dim polln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizaRvLcLN
-                polln.AltaDePolizapp(pr, True)
+                '' el usuario crea o busca un tomador
+                'Dim tm As New FN.Seguros.Polizas.DN.TomadorDN
+                'Dim pf As FN.Personas.DN.PersonaFiscalDN = ln.RecuperarLista(GetType(FN.Personas.DN.PersonaFiscalDN))(0)
+                'tm.EntidadFiscalGenerica = pf.EntidadFiscalGenerica
+                'pr.Poliza.Tomador = tm
+
+
+                'Dim polln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizaRvLcLN
+                'polln.AltaDePolizapp(pr, True)
 
 
                 tr.Confirmar()
@@ -1566,7 +1566,7 @@ Imports Framework.TiposYReflexion.LN
             Dim colCaract As New Framework.Cuestionario.CuestionarioDN.ColCaracteristicaDN
 
             colCaract.AddRangeObject(ln.RecuperarLista(GetType(Framework.Cuestionario.CuestionarioDN.CaracteristicaDN)))
-            trln.TarificarTarifa(prp.Poliza.Tomador.ValorBonificacion, prp.ColPeriodosCobertura.Item(0).Tarifa, Me.GenerarCuestionarioResuelto20(colCaract))
+            trln.TarificarTarifa(prp.Poliza.Tomador.ValorBonificacion, prp.ColPeriodosCobertura.Item(0).Tarifa, Me.GenerarCuestionarioResuelto20(colCaract), True)
 
 
             Dim miPolizaRvLcLN As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizaRvLcLN
@@ -1635,7 +1635,7 @@ Imports Framework.TiposYReflexion.LN
             ' Me.GuardarDatos(prp)
 
             Dim trln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.TarificadorRVLN
-            trln.TarificarTarifa(prp.Poliza.Tomador.ValorBonificacion, prp.ColPeriodosCobertura.Item(0).Tarifa, cr)
+            trln.TarificarTarifa(prp.Poliza.Tomador.ValorBonificacion, prp.ColPeriodosCobertura.Item(0).Tarifa, cr, True)
 
 
             Dim polln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizaRvLcLN
@@ -1749,7 +1749,7 @@ Imports Framework.TiposYReflexion.LN
 
 
             Dim trln As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.TarificadorRVLN
-            trln.TarificarTarifa(futuroTomador.ValorBonificacion, tarifa, cuestionario)
+            trln.TarificarTarifa(futuroTomador.ValorBonificacion, tarifa, cuestionario, True)
 
 
             ' perido de validez del presupuesto

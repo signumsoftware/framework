@@ -2,29 +2,63 @@ Imports Framework.LogicaNegocios.Transacciones
 
 Public Class PolizasOperLN
 
-    Public Sub ModificarPoliza(ByVal periodoR As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN, ByVal tarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal cuestionarioR As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal fechaInicioPC As Date)
 
-        Using tr As New Transaccion()
 
-            If Not periodoR.Contiene(fechaInicioPC) Then
-                Throw New Framework.LogicaNegocios.ApplicationExceptionLN("La fecha del nuevo periodo de cobertura debe estar contenida dentro del periodo de renovación vigente")
-            End If
 
-            Dim ln As New PolizaRvLcLN()
-            If Date.Compare(fechaInicioPC, Now()) < 0 Then
-                ln.ModificarCondicionesCoberturaRetroactiva(periodoR, tarifa, cuestionarioR, fechaInicioPC, 10)
-            Else
-                ln.ModificarCondicionesCoberturaRetroactiva(periodoR, tarifa, cuestionarioR, fechaInicioPC, 10)
-            End If
+    Public Sub VerificarCajonDocumento(ByVal objeto As Object, ByVal pTransicionRealizada As Framework.Procesos.ProcesosDN.TransicionRealizadaDN, ByVal pParametros As Object)
+
+        Dim pPR As Framework.Ficheros.FicherosDN.CajonDocumentoDN
+
+        Using tr As New Transaccion
+
+            pPR = pTransicionRealizada.OperacionRealizadaDestino.ObjetoIndirectoOperacion
+
+
+            '''''''''
+            ' CUERPO
+            ''''''''''
+            Dim ln As New RiesgosVehiculosLN
+            ln.VerificarCajonDocumento(pPR)
 
             tr.Confirmar()
-        End Using
 
+        End Using
     End Sub
 
     Public Sub EmitirPoliza(ByVal objeto As Object, ByVal pTransicionRealizada As Framework.Procesos.ProcesosDN.TransicionRealizadaDN, ByVal pParametros As Object)
-
+        Throw New NotImplementedException
     End Sub
+
+
+    Public Sub ModificarPoliza(ByVal objeto As Object, ByVal pTransicionRealizada As Framework.Procesos.ProcesosDN.TransicionRealizadaDN, ByVal pParametros As Object)
+
+        Dim pPR As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN
+
+        Using tr As New Transaccion
+
+            pPR = pTransicionRealizada.OperacionRealizadaDestino.ObjetoIndirectoOperacion
+
+
+            '''''''''
+            ' CUERPO
+            ''''''''''
+
+            Dim fechaRenovacion As Date = pParametros
+
+            Dim ln As New PolizaRvLcLN
+            '  ln.ModificarPoliza(pPR,pPR.PeridoCoberturaActivo.Tarifa ,
+            Throw New NotImplementedException
+
+
+
+            tr.Confirmar()
+
+        End Using
+    End Sub
+
+
+
+
 
     'Public Sub RenovarPoliza(ByVal objeto As Object, ByVal pTransicionRealizada As Framework.Procesos.ProcesosDN.TransicionRealizadaDN, ByVal sender As Object)
     Public Sub RenovarPoliza(ByVal objeto As Object, ByVal pTransicionRealizada As Framework.Procesos.ProcesosDN.TransicionRealizadaDN, ByVal pParametros As Object)
@@ -178,7 +212,7 @@ Public Class PolizasOperLN
             If TypeOf dn Is FN.Seguros.Polizas.DN.PresupuestoDN Then
                 'dn = ln.VerificarDatosPresupuesto(dn)
                 Dim presupuesto As FN.Seguros.Polizas.DN.PresupuestoDN = dn
-                Dim pPR As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN = ln.AltaDePolizap(presupuesto, presupuesto.FechaAltaSolicitada)
+                Dim pPR As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN = ln.AltaDePolizap(presupuesto)
                 pTransicionRealizada.OperacionRealizadaDestino.ObjetoDirectoOperacion = pPR ' dado que vino un presupuesto hay que asignar el nuevo perido de renovación creado
                 AltaDePoliza = pPR
             ElseIf TypeOf dn Is FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN Then

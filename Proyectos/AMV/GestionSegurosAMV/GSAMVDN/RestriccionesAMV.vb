@@ -55,7 +55,7 @@ Public Class RestriccionesAMV
             tiposCarnet.Add(TipoCarnet.A)
         End If
 
-        If categoria.Nombre.ToUpper() <> "SPORT" AndAlso cilindrada <= 125 Then
+        If (categoria.Nombre.ToUpper() <> "SPORT" AndAlso cilindrada <= 125) OrElse (categoria.Nombre.ToUpper() = "QUAD" OrElse categoria.Nombre.ToUpper() = "QUAD MATRICULADO") Then
             tiposCarnet.Add(TipoCarnet.B)
         End If
 

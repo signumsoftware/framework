@@ -894,4 +894,13 @@ Public Class frmMain
 
         gdoctest.CrearPresupuesto()
     End Sub
+
+    Private Sub CargarArchivoDeInternetToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CargarArchivoDeInternetToolStripMenuItem.Click
+        Try
+            Dim frm As New frmCargadorFicherosWeb
+            frm.ShowDialog()
+        Catch ex As Exception
+
+        End Try
+    End Sub
 End Class

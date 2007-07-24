@@ -141,7 +141,7 @@ Public Class PolizasCtrl
 
         Dim he As Framework.DatosNegocio.HEDN = New Framework.DatosNegocio.HEDN(miBajaPolizaPr.pr)
         he.EliminarEntidadReferida()
-        '  pTransicionRealizada.OperacionRealizadaDestino.ObjetoIndirectoOperacion = he
+        'pTransicionRealizada.OperacionRealizadaDestino.ObjetoIndirectoOperacion = he
         pTransicionRealizada.OperacionRealizadaOrigen.AsignarOIenGrafo(he)
         'pTransicionRealizada.OperacionRealizadaOrigen.OperacionPadre.ObjetoIndirectoOperacion = he
         Return miProcesoLNC.EjecutarOperacionEnServidor(fp.cMarco.Principal, pTransicionRealizada, Nothing, miBajaPolizaPr.FechaBajaPropuesta)
