@@ -453,7 +453,7 @@ Imports System.Diagnostics
                 colh.AddHuellaPara(lista(0))
                 Dim edn As IEntidadDN = lista(0)
 
-                Dim ht As Hashtable = edn.ToHtGUIDs(Nothing) ' obtener los ides de los elementos
+                Dim ht As Hashtable = edn.ToHtGUIDs(Nothing, Nothing) ' obtener los ides de los elementos
 
 
                 Dim coldr As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN

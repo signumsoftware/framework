@@ -59,6 +59,19 @@ Public Class UsuariosGBDAD
         gi.GenerarTablas2(GetType(Framework.Usuarios.DN.PrincipalDN), Nothing)
 
 
+        gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
+        gi.GenerarTablas2(GetType(Framework.Usuarios.DN.PrincipalDN), Nothing)
+
+
+
+
+        ' POrueba de combos -------------------------
+        gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
+        gi.GenerarTablas2(GetType(PruebaTipoaCombo), Nothing)
+        gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
+        gi.GenerarTablas2(GetType(ContenedorPruebaTipoaCombo), Nothing)
+
+
 
     End Sub
 
@@ -95,3 +108,69 @@ Public Class UsuariosGBDAD
 
     End Sub
 End Class
+
+<Serializable()> Public Class ContenedorPruebaTipoaCombo
+    Inherits Framework.DatosNegocio.EntidadDN
+    Protected mPruebaTipoaComboj As PruebaTipoaCombo
+    Public Property PruebaTipoaComboj() As PruebaTipoaCombo
+        Get
+            Return mPruebaTipoaComboj
+        End Get
+        Set(ByVal value As PruebaTipoaCombo)
+            CambiarValorRef(Of PruebaTipoaCombo)(value, mPruebaTipoaComboj)
+        End Set
+    End Property
+
+End Class
+
+<Serializable()> Public Class PruebaTipoaCombo
+
+    Inherits Framework.DatosNegocio.EntidadDN
+
+
+
+    Protected mPruebaTipoaComboj As PruebaTipoaCombo
+    Protected mEnumaracionPrueba As EnumaracionPruebaEnum
+
+    Public Property EnumaracionPrueba() As EnumaracionPruebaEnum
+
+        Get
+            Return mEnumaracionPrueba
+        End Get
+
+        Set(ByVal value As EnumaracionPruebaEnum)
+            CambiarValorVal(Of EnumaracionPruebaEnum)(value, mEnumaracionPrueba)
+
+        End Set
+    End Property
+
+
+
+    Public Property PruebaTipoaComboj() As PruebaTipoaCombo
+        Get
+            Return mPruebaTipoaComboj
+        End Get
+        Set(ByVal value As PruebaTipoaCombo)
+            CambiarValorRef(Of PruebaTipoaCombo)(value, mPruebaTipoaComboj)
+        End Set
+    End Property
+
+
+
+
+
+
+
+
+End Class
+
+
+
+
+
+Public Enum EnumaracionPruebaEnum
+    uno
+    dos
+    tres
+    cuatro
+End Enum

@@ -134,8 +134,8 @@ namespace Framework.GestorInformes
             //convertimos los nodos de referencia a IteracionOXML en nodos compatibles con el 
             //espacio de nombres del documento original
             doc.InnerXml = doc.InnerXml.Replace(@"<IteracionOXML", @"<w:IteracionOXML");
-            doc.InnerXml = doc.InnerXml.Replace("GUID=", "w:GUID=");
-            doc.InnerXml = doc.InnerXml.Replace("ElementoAsociado=", "w:ElementoAsociado=");
+            doc.InnerXml = doc.InnerXml.Replace(" GUID=", "w:GUID=");
+            doc.InnerXml = doc.InnerXml.Replace(" ElementoAsociado=", "w:ElementoAsociado=");
 
             return listaIteraciones;
         }
@@ -174,9 +174,9 @@ namespace Framework.GestorInformes
 
             //convertimos los nodos de referencia a IteracionOXML en nodos compatibles con el 
             //espacio de nombres del documento original
-            iteracion.FragmentoXML.InnerXml = iteracion.FragmentoXML.InnerXml.Replace(@"<IteracionOXML", @"<w:IteracionOXML");
-            iteracion.FragmentoXML.InnerXml = iteracion.FragmentoXML.InnerXml.Replace("GUID=", "w:GUID=");
-            iteracion.FragmentoXML.InnerXml = iteracion.FragmentoXML.InnerXml.Replace("ElementoAsociado=", "w:ElementoAsociado=");
+            //iteracion.FragmentoXML.InnerXml = iteracion.FragmentoXML.InnerXml.Replace(@"<IteracionOXML", @"<w:IteracionOXML");
+            //iteracion.FragmentoXML.InnerXml = iteracion.FragmentoXML.InnerXml.Replace(" GUID=", "w:GUID=");
+            //iteracion.FragmentoXML.InnerXml = iteracion.FragmentoXML.InnerXml.Replace(" ElementoAsociado=", "w:ElementoAsociado=");
 
             //ahora invocamos recursivamente este mismo método para generar las subiteraciones por cada una de las
             //iteraciones que contiene la actual
@@ -198,6 +198,7 @@ namespace Framework.GestorInformes
         {
             //definimos la asociación con la que estamos trabajando en este momento
             string asociacionActual = nodoInicioIteracion.SelectSingleNode(".//w:tag", nsManager).Attributes[0].Value;
+            System.Diagnostics.Debug.WriteLine("->" + asociacionActual);
 
             //creamos el objeto iteración en el que vamos  a guardar la iteración
             IteracionOXML miIteracion = new IteracionOXML(documentoOrigen, nsManager, asociacionActual);
@@ -227,32 +228,43 @@ namespace Framework.GestorInformes
             while (continuar)
             {
                 XmlNode nodoSiguiente = null;
-                switch (ExaminarNodoIteracion(nodoActual, nsManager, asociacionActual))
+                XmlNode nodoDefinidor;
+                System.Diagnostics.Debug.WriteLine("-" + nodoActual.InnerText + "//" + nodoActual.Name);
+                switch (ExaminarNodoIteracion(nodoActual, nsManager, asociacionActual, out nodoDefinidor))
                 {
                     case OperarEnIteracion.Agregar:
                     case OperarEnIteracion.GenerarSubIteracion:
-                        //agregamos el nodo copiado al Fragmento de Iteración
-                        XmlNode nodoClon = nodoActual.CloneNode(true);
-                        if (miIteracion.FragmentoXML.HasChildNodes)
-                        {
-                            miIteracion.FragmentoXML.InsertAfter(nodoClon, miIteracion.FragmentoXML.LastChild);
-                        }
-                        else
-                        {
-                            miIteracion.FragmentoXML.AppendChild(nodoClon);
-                        }
-                        //eliminamos el nodo original del documento origen
+                        AgregarNodoAIteracion(miIteracion, nodoActual);
                         nodoSiguiente = nodoActual.NextSibling;
                         nodoActual.ParentNode.RemoveChild(nodoActual);
                         break;
 
+                    case OperarEnIteracion.AgregarYTerminar:
+                        continuar = false;
+                        //eliminamos el nodoDefinicion del nodo que lo contenga
+                        nodoDefinidor.ParentNode.RemoveChild(nodoDefinidor);
+                        AgregarNodoAIteracion(miIteracion, nodoActual);
+                        nodoSiguiente = null;
+                        nodoActual.ParentNode.RemoveChild(nodoActual);
+                        break;
+
+                    case OperarEnIteracion.TerminarHastaAqui:
+                        throw new ApplicationException("No se puede operar con la disposición actual de los nodos en el esquema OXML del documento: asociación actual: " + asociacionActual);
+                        continuar = false;
+                        break;
+
+                    case OperarEnIteracion.TerminarSinEliminar:
+                        continuar = false;
+                        //eliminamos el nodoDefinición del nodo que lo contenga
+                        nodoDefinidor.ParentNode.RemoveChild(nodoDefinidor);
+                        nodoSiguiente = null;
+                        break;
+
                     case OperarEnIteracion.Terminar:
-                        //apuntamos que salimos
                         continuar = false;
                         //eliminamos el nodo de definición del fin de iteración
-                        nodoSiguiente = null; // nodoActual.NextSibling;
+                        nodoSiguiente = null;
                         nodoActual.ParentNode.RemoveChild(nodoActual);
-                        //documentoOrigen.RemoveChild(nodoActual);
                         break;
                 }
 
@@ -265,11 +277,28 @@ namespace Framework.GestorInformes
             //o el fragmento xml correspondiente) el nodo que definía 
             //el comienzo de la iteración (sdt) por el nodo que referencia a la iteraciónOXML
             nodoSdtControladorIteracion.ParentNode.ReplaceChild(miIteracion.GenerarNodoReferencia(), nodoSdtControladorIteracion);
-            //documentoOrigen.ReplaceChild(miIteracion.GenerarNodoReferencia(), nodoSdtControladorIteracion);
+            System.Diagnostics.Debug.WriteLine("-" + nodoSdtControladorIteracion.InnerText + "//" + nodoSdtControladorIteracion.Name);
 
             //devolvemos la iteraciónOXML
             return miIteracion;
         }
+
+
+        private static void AgregarNodoAIteracion(IteracionOXML miIteracion, XmlNode nodoActual)
+        {
+            //agregamos el nodo copiado al Fragmento de Iteración
+            XmlNode nodoClon = nodoActual.CloneNode(true);
+            if (miIteracion.FragmentoXML.HasChildNodes)
+            {
+                miIteracion.FragmentoXML.InsertAfter(nodoClon, miIteracion.FragmentoXML.LastChild);
+            }
+            else
+            {
+                miIteracion.FragmentoXML.AppendChild(nodoClon);
+            }
+            //eliminamos el nodo original del documento origen
+        }
+
 
 
         /// <summary>
@@ -278,10 +307,38 @@ namespace Framework.GestorInformes
         /// </summary>
         /// <param name="nodo">El nodo que se quiere examinar</param>
         /// <param name="xmlManager">El NameSpaceManager necesario para ejecutar xpaths sobre el nodo</param>
+        /// <param name="asociacionActual">La asociación de la iteración actual</param>
+        /// <param name="nodoDefinicion">El nodo que se debe eliminar si el resultado es AgregarYTerminar</param>
         /// <returns>Lo que hay que hacer respecto al fragmento de iteración (agregarlo a la iteración en curso, 
         /// terminar la operación en curso o iniciar una subiteración dentro de la que está en curso)</returns>
-        private OperarEnIteracion ExaminarNodoIteracion(XmlNode nodo, XmlNamespaceManager xmlManager, string asociacionActual)
+        private OperarEnIteracion ExaminarNodoIteracion(XmlNode nodo, XmlNamespaceManager xmlManager, string asociacionActual, out XmlNode nodoDefinicion)
         {
+            nodoDefinicion = null;
+            //comprobamos si contiene varios nodos, y entre ellos
+            //el de fin de iteración
+            XmlNodeList nodosTag = nodo.SelectNodes(".//w:tag", xmlManager);
+            if (nodosTag.Count > 1)
+            {
+                XmlNode nodoID = nodo.SelectSingleNode(".//w:tag[starts-with(@w:val,'/" + asociacionActual + "')]", xmlManager);
+                if (nodoID != null)
+                {
+                    nodoDefinicion = nodoID.ParentNode.ParentNode; //para devolver el w:sdt
+                    for (int i = 0; i < nodosTag.Count; i++)
+                    {
+                        if (nodosTag[i] == nodoID)
+                        {
+                            if (i == 0)
+                                return OperarEnIteracion.TerminarSinEliminar;
+                            if (i < nodosTag.Count)
+                                return OperarEnIteracion.TerminarHastaAqui;
+                            if (i == nodosTag.Count)
+                                return OperarEnIteracion.AgregarYTerminar;
+                        }
+                    }
+                }
+            }
+
+            //Operamos con el nodo único (opción por defecto)
             XmlNode tag = nodo.SelectSingleNode(".//w:tag", xmlManager);
             if (tag != null && tag.Attributes.Count > 0)
             {
@@ -306,6 +363,9 @@ namespace Framework.GestorInformes
         {
             Agregar,
             Terminar,
+            AgregarYTerminar,
+            TerminarHastaAqui,
+            TerminarSinEliminar,
             GenerarSubIteracion
         };
 
@@ -622,8 +682,13 @@ namespace Framework.GestorInformes
         //para saber si hay que saltar el siguiente nodo a procesar (debido a un
         //insertafter), esta lista contiene la firma (innerxml) del nodo que se ha
         //procesado
-        List<string> mListaNodosCombinados = new List<string>();
-        //bool mSaltarSiguiente = false;
+        private List<string> mListaNodosCombinados = new List<string>();
+        //apuntamos los nodos que se deben eliminar en una iteración cuando éstos
+        //no se pueden reemplazar en caliente, porque saldría el bucle foreach de la 
+        //iteración, dejando sin procesar los nodos que le continúan
+        private Dictionary<XmlNode, List<XmlNode>> mNodosAEliminar = new Dictionary<XmlNode, List<XmlNode>>();
+
+
 
 
         /// <summary>
@@ -643,204 +708,258 @@ namespace Framework.GestorInformes
      ref XmlNamespaceManager nsManagerDataSource, List<IteracionOXML> listaIteraciones,
      IteracionOXML iteracionPadre, int numeroAsociacionesIncorrectas)
         {
-            //buscamos nodos asociados y de referencia a IteracionOXML en cualquier nivel de profundidad dentro del nodo actual
-            //para podarlo si no tiene ningún elemento que combinar
-            if (nodoPadrePlantilla.HasChildNodes && nodoPadrePlantilla.SelectNodes(@".//w:tag[starts-with(@w:val,'@')]|.//w:IteracionOXML", nsManagerOriginal).Count != 0)
+            System.Diagnostics.Debug.WriteLine(nodoPadrePlantilla.Name);
+            //comprobamos si el nodo actual es directamente un elemento que haya que combinar. En ese caso, 
+            //lo ejecutamos como corresponda
+            if (nodoPadrePlantilla.Name == "w:IteracionOXML")
             {
-                //si se ha anotado que hay que saltar este nodo no lo procesamos 
-                if (!(mListaNodosCombinados.Contains(nodoPadrePlantilla.InnerXml)))
+                EjecutarNodo(ref doc, ref docDataSource, ref nsManagerOriginal, ref nsManagerDataSource, listaIteraciones, iteracionPadre, ref numeroAsociacionesIncorrectas, mUltimoNodoDataSource, nodoPadrePlantilla);
+            }
+            else
+            {
+                //buscamos nodos asociados y de referencia a IteracionOXML en cualquier nivel de profundidad dentro del nodo actual
+                //para podarlo si no tiene ningún elemento que combinar
+                if (nodoPadrePlantilla.HasChildNodes && nodoPadrePlantilla.SelectNodes(@".//w:tag[starts-with(@w:val,'@')]|.//w:IteracionOXML", nsManagerOriginal).Count != 0)
                 {
-                    //apuntamos el último nodo referenciado para este nodo
-                    XmlNode ultimoNodoDataSourceLocal = mUltimoNodoDataSource;
-
-                    //recorremos todos los nodos que contiene directamente el nodo padre 
-                    foreach (XmlNode nodoACombinar in nodoPadrePlantilla.ChildNodes)
+                    //si se ha anotado que hay que saltar este nodo no lo procesamos 
+                    if (!(mListaNodosCombinados.Contains(nodoPadrePlantilla.InnerXml)))
                     {
+                        //apuntamos el último nodo referenciado para este nodo
+                        XmlNode ultimoNodoDataSourceLocal = mUltimoNodoDataSource;
 
-                        //volvemos a determinar el nodo al que está asociado este nodo padre
-                        mUltimoNodoDataSource = ultimoNodoDataSourceLocal;
-
-                        //si es un nodo de referencia a iteración
-                        if (nodoACombinar.Name == "w:IteracionOXML")
+                        //recorremos todos los nodos que contiene directamente el nodo padre 
+                        foreach (XmlNode nodoACombinar in nodoPadrePlantilla.ChildNodes)
                         {
-                            //guardamos el valor del último nodoDatasource para poder
-                            //Restablecerlo después de salir de la iteración
-                            XmlNode nodoDataSourceOld = mUltimoNodoDataSource;
-
-                            //obtenemos la iteración a la que está asociada
-                            IteracionOXML iteracionActual = ObtenerIteracionAsociada(listaIteraciones, iteracionPadre, nodoACombinar);
-
-                            //realizamos el proceso de asociación de la iteración
-                            string asociacion = nodoACombinar.Attributes.GetNamedItem("w:ElementoAsociado").Value;
-                            string asociacionSinSimbolos = asociacion.Replace("#", string.Empty);
-                            //comprobamos si hay un objeto padre
-                            string ObjetoPadre = string.Empty;
-                            if (asociacionSinSimbolos.Contains("."))
-                            {
-                                ObjetoPadre = asociacionSinSimbolos.Substring(0, asociacionSinSimbolos.IndexOf("."));
-                            }
-
-                            //inicializamos la expresión de consulta
-                            string XPExpression = string.Concat("m:", asociacion.Replace(".", "/m:").Replace("@", string.Empty).Replace("¬", string.Empty).Replace("#", string.Empty));
-
-                            //ajustamos el Xpath para que busque en el root o a partir del objeto que contiene la propiedad
-                            if (iteracionPadre == null || mUltimoNodoDataSource == null || string.IsNullOrEmpty(ObjetoPadre)) //mUltimoNodoDataSource.ParentNode.Name == ObjetoPadre)
-                            {
-                                //hay que buscar desde el root del documento datasource
-                                XPExpression = string.Concat("/m:mapa/", XPExpression);
-                            }
-                            else
-                            {
-                                //hay que buscar a partir del último nodo datasource (representa el objeto que contiene la iteración)
-                                XPExpression = XPExpression.Replace("m:" + ObjetoPadre + "/", @"./");
-                            }
-
-
-                            //obtenemos el "elemento asociado" a la iteración
-                            //p ej: <deudas> -> el contenedor de la colección
-                            //(el nodo que contiene los elementos de iteración 
-                            //p ej: <deudas><items><deuda1/>...<deudan/><items/><deudas/>
-                            XmlNode nodoContenedorIteracionDataSource = null;
-                            if (iteracionPadre != null)
-                            {
-                                //hay que buscar dentro a partir del elemento de la iteración anterior
-                                nodoContenedorIteracionDataSource = mUltimoNodoDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
-                            }
-                            else
-                            {
-                                //hay que buscar en el documento
-                                nodoContenedorIteracionDataSource = docDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
-                            }
-                            if (nodoContenedorIteracionDataSource != null)
-                            {
-                                //establecemos el nodoDataSource de la colección a la iteración con la que estamos trabajando
-                                iteracionActual.nodoAsociadoDataSource = nodoContenedorIteracionDataSource;
-
-                                //obtenemos todos los elementos que se encuentren dentro del nodo items de la iteracion
-                                XmlNodeList nodosItemsIteracion = nodoContenedorIteracionDataSource.SelectNodes("./m:items/*", nsManagerDataSource);
-
-                                if (nodosItemsIteracion.Count != 0)
-                                {
-                                    foreach (XmlNode nodoItemDataSource in nodosItemsIteracion)
-                                    {
-                                        XmlNode nodoItemACombinar = iteracionActual.FragmentoXML.CloneNode(true);
-                                        //asociamos el contenido del nodo que acabamos de insertar con su elemento correspondiente
-                                        foreach (XmlNode nodo in nodoItemACombinar.ChildNodes)
-                                        {
-                                            //establecemos el último nodo datasource con el que se ha trabajado
-                                            mUltimoNodoDataSource = nodoItemDataSource;
-                                            AsociarYCombinar(nodo, ref doc, ref docDataSource, ref nsManagerOriginal, ref nsManagerDataSource, listaIteraciones, iteracionActual, numeroAsociacionesIncorrectas);
-                                        }
-                                        //insertamos el nodo que se debe combinar en el lugar que le corresponda
-                                        //(no se puede encadenar un párrafo dentro de otro)
-                                        InsertarContenidoIteracionCombinado(nsManagerOriginal, nsManagerDataSource, nodoACombinar, nodoItemACombinar);
-                                    }
-                                }
-                            }
-
-                            //ahora eliminamos el nodo de referencia de la iteraciónOXML
-                            nodoACombinar.ParentNode.RemoveChild(nodoACombinar);
-
-                            //restablecemos el ultimo nodo datasource al salir de la iteración
-                            mUltimoNodoDataSource = nodoDataSourceOld;
-
-                        }//fin 'es una iteración'
-                        else
-                        {
-                            XmlNode nodoACombinarDataSource = null;
-                            //si es un tag de un content control que define una asociación a un elemento
-                            if (nodoACombinar.Name == "w:tag" && nodoACombinar.Attributes[0].Value.StartsWith("@"))
-                            {
-                                string asociacion, ObjetoPadre, XPExpression;
-
-                                //obtenemos el tipo de asociación y definimos los objetos necesarios para el XPath
-                                TipoAsociacion tasoc = GenerarObjetosXPath(nodoACombinar, mUltimoNodoDataSource, iteracionPadre, out asociacion, out ObjetoPadre, out XPExpression);
-
-
-                                if (tasoc == TipoAsociacion.Incorrecto)
-                                {
-                                    //si estaba mal definida la asociación lo apuntamos y dejamos de trabajar con el nodo
-                                    numeroAsociacionesIncorrectas++;
-                                }
-                                else
-                                {
-                                    //seleccionamos el nodo al que se debe asociar el nodo del doc original
-
-                                    if (mUltimoNodoDataSource == null)
-                                    {
-                                        nodoACombinarDataSource = docDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
-                                    }
-                                    else
-                                    {
-                                        nodoACombinarDataSource = mUltimoNodoDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
-                                    }
-                                    if (nodoACombinarDataSource != null)
-                                    {
-                                        //establecemos cuál es el último nodo DataSource con el que se ha trabajado
-                                        mUltimoNodoDataSource = nodoACombinarDataSource;
-
-                                        //obtenemos el ContentControl al que pertenece el tag
-                                        XmlNode ContentControl = nodoACombinar.ParentNode;
-
-                                        //obtenemos el nodo que detalla la asociación con el elemento correspondiente
-                                        //del DataSource
-                                        XmlNode nodoDataBinding = ContentControl.SelectSingleNode("w:dataBinding", nsManagerOriginal);
-
-                                        //si no exite el nodo de asociación con el elemento, lo creamos
-                                        if (nodoDataBinding == null)
-                                        {
-                                            nodoDataBinding = doc.CreateElement("w:dataBinding");
-                                            nodoDataBinding.Attributes.Append(doc.CreateAttribute("w:prefixMappings"));
-                                            nodoDataBinding.Attributes.Append(doc.CreateAttribute("w:xpath"));
-                                            nodoDataBinding.Attributes.Append(doc.CreateAttribute("w:storeItemID"));
-                                            ContentControl.AppendChild(nodoDataBinding);
-                                        }
-
-                                        //enlazamos el nodo de asociación con el elemento que corresponde: el xmlns del mapa del datasource,
-                                        //la ruta xPath del elemento en el datasource, y el GUID que tiene asociado el datasource en sus "props"
-                                        nodoDataBinding.Attributes["w:prefixMappings"].Value = "xmlns:ns0='http://signumsoftware.com/2007/pruebas'";
-                                        nodoDataBinding.Attributes["w:xpath"].Value = ObtenerPrefijoXPath(nodoACombinarDataSource, docDataSource, nsManagerDataSource);
-                                        nodoDataBinding.Attributes["w:storeItemID"].Value = @"{28DAF809-0C14-44E3-8E79-B0949F72CA1C}";
-
-                                        //cambiamos, si es necesario, los valores id y Placeholder del ContentControl
-                                        XmlNode nodoID = ContentControl.SelectSingleNode("./w:id", nsManagerOriginal);
-                                        XmlNode nodoPlaceHolder = ContentControl.SelectSingleNode("./w:placeholder", nsManagerOriginal);
-                                        XmlNode nododocPart = nodoPlaceHolder.SelectSingleNode("./w:docPart", nsManagerOriginal);
-
-                                        //comprobamos si existe más de un nodo con estos valores en el documento
-                                        //if (doc.SelectNodes("//w:id[@w:val='" + nodoID.Attributes["w:val"].Value + "']", nsManagerOriginal).Count > 1)
-                                        //{
-                                        //hay que asignar un nuevo valor
-                                        nodoID.Attributes["w:val"].Value = GenerarIDUnico(doc, nsManagerOriginal).ToString();
-                                        //}
-
-                                        //if (doc.SelectNodes("//w:placeholder/w:docPart[@w:val='" + nododocPart.Attributes[0].Value + "']", nsManagerOriginal).Count > 1)
-                                        //{
-                                        //hay que asignar un nuevo valor
-                                        nododocPart.Attributes["w:val"].Value = System.Guid.NewGuid().ToString().Replace("-", string.Empty);
-                                        //}
-
-                                        //formateamos correctamente los valores XML para que se encuentren dentro del localnamespace
-                                        FormatearXMLContentControlAsociado(ContentControl);
-
-                                    }
-                                }
-                            }//fin 'es un tag asociación'
-                            //ahora llamamos recursivamente a esta misma función para que se revisen cada uno de los nodos hijos
-                            //del nodo actual
-                            if (nodoACombinar.HasChildNodes)
-                            {
-                                AsociarYCombinar(nodoACombinar, ref doc, ref docDataSource, ref nsManagerOriginal, ref nsManagerDataSource, listaIteraciones, iteracionPadre, numeroAsociacionesIncorrectas);
-                            }//fin llamada recursiva a este método
-
-                        }//fin else 'no es una iteración'
-
-                    }//fin recorrer todos los nodos del nodopadreplantilla
-
-                }//fin comprobar si hay que saltar el nodopadreplantilla
-
-            }//fin buscar nodos asociados y de iteración en nodopadreplantilla
+                            if (!mListaNodosCombinados.Contains(nodoACombinar.InnerXml)) //si se ha anotado que hay que saltar este nodo no lo procesamos
+                                EjecutarNodo(ref doc, ref docDataSource, ref nsManagerOriginal, ref nsManagerDataSource, listaIteraciones, iteracionPadre, ref numeroAsociacionesIncorrectas, ultimoNodoDataSourceLocal, nodoACombinar);
+                        }
+                    }
+                }
+            }
+            System.Diagnostics.Debug.WriteLine("/" + nodoPadrePlantilla.Name);
         }
+
+        private void EjecutarNodo(ref XmlDocument doc, ref XmlDocument docDataSource, ref XmlNamespaceManager nsManagerOriginal, ref XmlNamespaceManager nsManagerDataSource, List<IteracionOXML> listaIteraciones, IteracionOXML iteracionPadre, ref int numeroAsociacionesIncorrectas, XmlNode ultimoNodoDataSourceLocal, XmlNode nodoACombinar)
+        {
+            //volvemos a determinar el nodo al que está asociado este nodo padre
+            mUltimoNodoDataSource = ultimoNodoDataSourceLocal;
+
+            //si es un nodo de referencia a iteración
+            if (nodoACombinar.Name == "w:IteracionOXML")
+            {
+                EjecutarIteracion(ref doc, ref docDataSource, ref nsManagerOriginal, ref nsManagerDataSource, listaIteraciones, iteracionPadre, numeroAsociacionesIncorrectas, nodoACombinar);
+            }//fin 'es una iteración'
+            else
+            {
+                //si es un tag de un content control que define una asociación a un elemento
+                if (nodoACombinar.Name == "w:tag" && nodoACombinar.Attributes[0].Value.StartsWith("@"))
+                {
+                    EjecutarAsociacion(doc, docDataSource, nsManagerOriginal, nsManagerDataSource, iteracionPadre, ref numeroAsociacionesIncorrectas, nodoACombinar);
+                }
+
+                //ahora llamamos recursivamente a esta misma función para que se revisen cada uno de los nodos hijos
+                //del nodo actual
+                if (nodoACombinar.HasChildNodes)
+                {
+                    System.Diagnostics.Debug.Indent();
+                    AsociarYCombinar(nodoACombinar, ref doc, ref docDataSource, ref nsManagerOriginal, ref nsManagerDataSource, listaIteraciones, iteracionPadre, numeroAsociacionesIncorrectas);
+                    System.Diagnostics.Debug.Unindent();
+                }
+            }//fin else 'no es una iteración'
+        }
+
+
+        private void EjecutarAsociacion(XmlDocument doc, XmlDocument docDataSource, XmlNamespaceManager nsManagerOriginal, XmlNamespaceManager nsManagerDataSource, IteracionOXML iteracionPadre, ref int numeroAsociacionesIncorrectas, XmlNode nodoACombinar)
+        {
+            XmlNode nodoACombinarDataSource = null;
+            string asociacion, ObjetoPadre, XPExpression;
+
+            //obtenemos el tipo de asociación y definimos los objetos necesarios para el XPath
+            TipoAsociacion tasoc = GenerarObjetosXPath(nodoACombinar, mUltimoNodoDataSource, iteracionPadre, out asociacion, out ObjetoPadre, out XPExpression);
+
+            System.Diagnostics.Debug.WriteLine("asoc -> " + asociacion);
+
+            if (tasoc == TipoAsociacion.Incorrecto)
+            {
+                //si estaba mal definida la asociación lo apuntamos y dejamos de trabajar con el nodo
+                numeroAsociacionesIncorrectas++;
+            }
+            else
+            {
+                //seleccionamos el nodo al que se debe asociar el nodo del doc original
+
+                if (mUltimoNodoDataSource == null)
+                {
+                    nodoACombinarDataSource = docDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
+                }
+                else
+                {
+                    nodoACombinarDataSource = mUltimoNodoDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
+                }
+                if (nodoACombinarDataSource != null)
+                {
+                    //establecemos cuál es el último nodo DataSource con el que se ha trabajado
+                    mUltimoNodoDataSource = nodoACombinarDataSource;
+
+                    //obtenemos el ContentControl al que pertenece el tag
+                    XmlNode ContentControl = nodoACombinar.ParentNode;
+
+                    //obtenemos el nodo que detalla la asociación con el elemento correspondiente
+                    //del DataSource
+                    XmlNode nodoDataBinding = ContentControl.SelectSingleNode("w:dataBinding", nsManagerOriginal);
+
+                    //si no exite el nodo de asociación con el elemento, lo creamos
+                    if (nodoDataBinding == null)
+                    {
+                        nodoDataBinding = doc.CreateElement("w", "dataBinding", nsManagerOriginal.LookupNamespace("w"));
+                        nodoDataBinding.Attributes.Append(doc.CreateAttribute("w", "prefixMappings", nsManagerOriginal.LookupNamespace("w")));
+                        nodoDataBinding.Attributes.Append(doc.CreateAttribute("w", "xpath", nsManagerOriginal.LookupNamespace("w")));
+                        nodoDataBinding.Attributes.Append(doc.CreateAttribute("w", "storeItemID", nsManagerOriginal.LookupNamespace("w")));
+                        ContentControl.AppendChild(nodoDataBinding);
+                    }
+
+                    //enlazamos el nodo de asociación con el elemento que corresponde: el xmlns del mapa del datasource,
+                    //la ruta xPath del elemento en el datasource, y el GUID que tiene asociado el datasource en sus "props"
+                    nodoDataBinding.Attributes["w:prefixMappings"].Value = "xmlns:ns0='http://signumsoftware.com/2007/pruebas'";
+                    nodoDataBinding.Attributes["w:xpath"].Value = ObtenerPrefijoXPath(nodoACombinarDataSource, docDataSource, nsManagerDataSource);
+                    nodoDataBinding.Attributes["w:storeItemID"].Value = @"{28DAF809-0C14-44E3-8E79-B0949F72CA1C}";
+
+                    //cambiamos, si es necesario, los valores id y Placeholder del ContentControl
+                    XmlNode nodoID = ContentControl.SelectSingleNode("./w:id", nsManagerOriginal);
+                    XmlNode nodoPlaceHolder = ContentControl.SelectSingleNode("./w:placeholder", nsManagerOriginal);
+                    XmlNode nododocPart = nodoPlaceHolder.SelectSingleNode("./w:docPart", nsManagerOriginal);
+
+                    //hay que asignar un nuevo valor
+                    nodoID.Attributes["w:val"].Value = GenerarIDUnico(doc, nsManagerOriginal).ToString();
+
+                    //hay que asignar un nuevo valor
+                    nododocPart.Attributes["w:val"].Value = System.Guid.NewGuid().ToString().Replace("-", string.Empty);
+
+                    //formateamos correctamente los valores XML para que se encuentren dentro del localnamespace
+                    FormatearXMLContentControlAsociado(ContentControl);
+
+                }
+            }
+        }
+
+        private void EjecutarIteracion(ref XmlDocument doc, ref XmlDocument docDataSource, ref XmlNamespaceManager nsManagerOriginal, ref XmlNamespaceManager nsManagerDataSource, List<IteracionOXML> listaIteraciones, IteracionOXML iteracionPadre, int numeroAsociacionesIncorrectas, XmlNode nodoACombinar)
+        {
+            //guardamos el valor del último nodoDatasource para poder
+            //Restablecerlo después de salir de la iteración
+            XmlNode nodoDataSourceOld = mUltimoNodoDataSource;
+
+            //obtenemos la iteración a la que está asociada
+            IteracionOXML iteracionActual = ObtenerIteracionAsociada(listaIteraciones, iteracionPadre, nodoACombinar);
+            System.Diagnostics.Debug.WriteLine("iter -> " + iteracionActual.ElementoAsociado);
+
+            //realizamos el proceso de asociación de la iteración
+            string asociacion = nodoACombinar.Attributes.GetNamedItem("w:ElementoAsociado").Value;
+            string asociacionSinSimbolos = asociacion.Replace("#", string.Empty);
+            //comprobamos si hay un objeto padre
+            string ObjetoPadre = string.Empty;
+            if (asociacionSinSimbolos.Contains("."))
+            {
+                ObjetoPadre = asociacionSinSimbolos.Substring(0, asociacionSinSimbolos.IndexOf("."));
+            }
+
+            //inicializamos la expresión de consulta
+            string XPExpression = string.Concat("m:", asociacion.Replace(".", "/m:").Replace("@", string.Empty).Replace("¬", string.Empty).Replace("#", string.Empty));
+
+            //ajustamos el Xpath para que busque en el root o a partir del objeto que contiene la propiedad
+            if (iteracionPadre == null || mUltimoNodoDataSource == null || string.IsNullOrEmpty(ObjetoPadre)) //mUltimoNodoDataSource.ParentNode.Name == ObjetoPadre)
+            {
+                //hay que buscar desde el root del documento datasource
+                XPExpression = string.Concat("/m:mapa/", XPExpression);
+            }
+            else
+            {
+                //hay que buscar a partir del último nodo datasource (representa el objeto que contiene la iteración)
+                XPExpression = XPExpression.Replace("m:" + ObjetoPadre + "/", @"./");
+            }
+
+
+            //obtenemos el "elemento asociado" a la iteración
+            //p ej: <deudas> -> el contenedor de la colección
+            //(el nodo que contiene los elementos de iteración 
+            //p ej: <deudas><items><deuda1/>...<deudan/><items/><deudas/>
+            XmlNode nodoContenedorIteracionDataSource = null;
+            if (iteracionPadre != null)
+            {
+                //hay que buscar dentro a partir del elemento de la iteración anterior
+                nodoContenedorIteracionDataSource = mUltimoNodoDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
+            }
+            else
+            {
+                //hay que buscar en el documento
+                nodoContenedorIteracionDataSource = docDataSource.SelectSingleNode(XPExpression, nsManagerDataSource);
+            }
+
+            bool eliminarNodoTrasInsercion = true;
+            if (nodoContenedorIteracionDataSource != null)
+            {
+                //establecemos el nodoDataSource de la colección a la iteración con la que estamos trabajando
+                iteracionActual.nodoAsociadoDataSource = nodoContenedorIteracionDataSource;
+
+                //obtenemos todos los elementos que se encuentren dentro del nodo items de la iteracion
+                XmlNodeList nodosItemsIteracion = nodoContenedorIteracionDataSource.SelectNodes("./m:items/*", nsManagerDataSource);
+
+                if (nodosItemsIteracion.Count != 0)
+                {
+                    foreach (XmlNode nodoItemDataSource in nodosItemsIteracion)
+                    {
+                        XmlNode nodoItemACombinar = iteracionActual.FragmentoXML.CloneNode(true);
+                        //asociamos el contenido del nodo que acabamos de insertar con su elemento correspondiente
+                        foreach (XmlNode nodo in nodoItemACombinar.ChildNodes)
+                        {
+                            //establecemos el último nodo datasource con el que se ha trabajado
+                            mUltimoNodoDataSource = nodoItemDataSource;
+                            System.Diagnostics.Debug.Indent();
+                            AsociarYCombinar(nodo, ref doc, ref docDataSource, ref nsManagerOriginal, ref nsManagerDataSource, listaIteraciones, iteracionActual, numeroAsociacionesIncorrectas);
+                            System.Diagnostics.Debug.Unindent();
+                        }
+                        //eliminamos los nodos que se hayan indicado para esta iteración
+                        //al insertar el contenido combinado
+                        if (mNodosAEliminar.ContainsKey(nodoItemACombinar))
+                        {
+                            foreach (XmlNode ne in mNodosAEliminar[nodoItemACombinar])
+                            {
+                                if (ne.ParentNode != null)
+                                    nodoItemACombinar.RemoveChild(ne);
+                            }
+                        }
+
+                        //insertamos el nodo que se debe combinar en el lugar que le corresponda
+                        //(no se puede encadenar un párrafo dentro de otro)
+                        eliminarNodoTrasInsercion = InsertarContenidoIteracionCombinado(nsManagerOriginal, nsManagerDataSource, nodoACombinar, nodoItemACombinar);
+                    }
+                }
+                else
+                {
+                    if (nodoACombinar.ParentNode.Name == "#document-fragment")
+                    {
+                        //depende directamente del fragmento de la iteración padre, 
+                        //apuntamos el nodo en la lista de nodos a eliminar, ya que si lo eliminamos
+                        //directamente saldría del bucle en curso en la iteración padre de esta
+                        if (!mNodosAEliminar.ContainsKey(nodoACombinar.ParentNode))
+                            mNodosAEliminar.Add(nodoACombinar.ParentNode, new List<XmlNode>());
+                        mNodosAEliminar[nodoACombinar.ParentNode].Add(nodoACombinar);
+                        eliminarNodoTrasInsercion = false;
+                    }
+                }
+            }
+
+            if (eliminarNodoTrasInsercion) //sólo si no se ha idicado que no debe eliminarse
+            {
+                //ahora eliminamos el nodo de referencia de la iteraciónOXML
+                nodoACombinar.ParentNode.RemoveChild(nodoACombinar);
+            }
+
+            //restablecemos el ultimo nodo datasource al salir de la iteración
+            mUltimoNodoDataSource = nodoDataSourceOld;
+
+            System.Diagnostics.Debug.WriteLine("/iter -> " + iteracionActual.ElementoAsociado);
+        }
+
 
         /// <summary>
         /// Inserta el contenido ya asociado y combinado de una iteración en el lugar correspondiente
@@ -852,7 +971,8 @@ namespace Framework.GestorInformes
         /// <param name="nsManagerDataSource">El NameSpaceManager para ejecutar xpath en el documento DataSource</param>
         /// <param name="nodoACombinar">El nodo del documento plantilla en el que se va a insertar el contenido asociado de la iteración</param>
         /// <param name="nodoItemACombinar">El nodo XMLDocumentFragment que contiene la iteración asoicada y combinada</param>
-        private void InsertarContenidoIteracionCombinado(XmlNamespaceManager nsManagerOriginal, XmlNamespaceManager nsManagerDataSource, XmlNode nodoACombinar, XmlNode nodoItemACombinar)
+        /// <returns>False si no se debe eliminar el nodo del documento plantilla, True para eliminarlo tras la inserción</returns>
+        private bool InsertarContenidoIteracionCombinado(XmlNamespaceManager nsManagerOriginal, XmlNamespaceManager nsManagerDataSource, XmlNode nodoACombinar, XmlNode nodoItemACombinar)
         {
             //---> lo hacemos con todo el contenido del fragmentoXML?? o sólo a partir del primer
             //párrafo que encontremos??
@@ -862,43 +982,56 @@ namespace Framework.GestorInformes
             {
                 //insertamos el nodo que se tiene que combinar antes del nodo de referencia de la iteración
                 nodoACombinar.ParentNode.InsertBefore(nodoItemACombinar, nodoACombinar);
+                return true;
             }
-            else
+            if (nodoACombinar.ParentNode.Name == "#document-fragment")
             {
-                if (nodoItemACombinar.SelectNodes("//w:p", nsManagerOriginal).Count != 0)
+                //depende directamente del fragmento de la iteración padre, 
+                //lo insertamos antes del actual
+                nodoACombinar.ParentNode.InsertBefore(nodoItemACombinar, nodoACombinar);
+                //apuntamos el nodo en la lista de nodos a eliminar, ya que si lo eliminamos
+                //directamente saldría del bucle en curso en la iteración padre de esta
+                if (!mNodosAEliminar.ContainsKey(nodoACombinar.ParentNode))
+                    mNodosAEliminar.Add(nodoACombinar.ParentNode, new List<XmlNode>());
+                mNodosAEliminar[nodoACombinar.ParentNode].Add(nodoACombinar);
+                return false;
+            }
+            if (nodoItemACombinar.SelectNodes("//w:p", nsManagerOriginal).Count != 0)
+            {
+                //dentro del FragmentoXML hay un párrafo
+                if (nodoACombinar.SelectNodes("./ancestor::w:p", nsManagerOriginal).Count != 0)
                 {
-                    //dentro del FragmentoXML hay un párrafo
-                    if (nodoACombinar.SelectNodes("./ancestor::w:p", nsManagerOriginal).Count != 0)
-                    {
-                        //alguno de sus padres es un párrafo, así que no se puede embeber en él
-                        //insertamos el nodo antes del primer párrafo que haya
+                    //alguno de sus padres es un párrafo, así que no se puede embeber en él
+                    //insertamos el nodo antes del primer párrafo que haya
 
-                        //1º apuntamos en la lista la firma-innerxml de los nodos sdt
-                        //como lo hemos añadido a continuación del párrafo de la iteración,
-                        //apuntamos que hay que saltar el nodo que acabamos de combinar
-                        XmlNodeList nodosContentControl = nodoItemACombinar.SelectNodes("//w:sdt", nsManagerOriginal);
-                        foreach (XmlNode nodoSdt in nodosContentControl)
-                        {
-                            mListaNodosCombinados.Add(nodoSdt.InnerXml);
-                        }
-                        //mListaNodosCombinados.Add(nodoItemACombinar.InnerXml);
-
-                        XmlNode nodoPrimerParrafo = nodoACombinar.SelectSingleNode("./ancestor::w:p[1]", nsManagerOriginal);
-                        nodoPrimerParrafo.ParentNode.InsertAfter(nodoItemACombinar, nodoPrimerParrafo);
-                        //mSaltarSiguiente = true;
-                    }
-                    else
+                    //1º apuntamos en la lista la firma-innerxml de los nodos sdt
+                    //como lo hemos añadido a continuación del párrafo de la iteración,
+                    //apuntamos que hay que saltar el nodo que acabamos de combinar
+                    XmlNodeList nodosContentControl = nodoItemACombinar.SelectNodes("//w:sdt", nsManagerOriginal);
+                    foreach (XmlNode nodoSdt in nodosContentControl)
                     {
-                        //no hay ningún párrafo que vaya a contener el FragmentoXML
-                        //insertamos el nodo que se tiene que combinar antes del nodo de referencia de la iteración
-                        nodoACombinar.ParentNode.InsertBefore(nodoItemACombinar, nodoACombinar);
+                        mListaNodosCombinados.Add(nodoSdt.InnerXml);
                     }
+                    //mListaNodosCombinados.Add(nodoItemACombinar.InnerXml);
+
+                    XmlNode nodoPrimerParrafo = nodoACombinar.SelectSingleNode("./ancestor::w:p[1]", nsManagerOriginal);
+                    nodoPrimerParrafo.ParentNode.InsertAfter(nodoItemACombinar, nodoPrimerParrafo);
+                    //mSaltarSiguiente = true;
+                    return true;
                 }
                 else
                 {
+                    //no hay ningún párrafo que vaya a contener el FragmentoXML
                     //insertamos el nodo que se tiene que combinar antes del nodo de referencia de la iteración
                     nodoACombinar.ParentNode.InsertBefore(nodoItemACombinar, nodoACombinar);
+                    return true;
                 }
+            }
+            else
+            {
+                //insertamos el nodo que se tiene que combinar antes del nodo de referencia de la iteración
+                nodoACombinar.ParentNode.InsertBefore(nodoItemACombinar, nodoACombinar);
+                return true;
             }
         }
 
@@ -1053,17 +1186,17 @@ namespace Framework.GestorInformes
         /// <param name="ContentControl"></param>
         private static void FormatearXMLContentControlAsociado(XmlNode ContentControl)
         {
-            //los elementos del databinding
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace("<dataBinding", "<w:dataBinding");
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace(" prefixMappings", " w:prefixMappings");
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace(" xpath", " w:xpath");
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace(" storeItemID", " w:storeItemID");
-            //los elementos del id
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace("<id", "<w:id");
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace(" val", " w:val");
-            //los elementos del placeholder
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace("<placeholder", "<w:placeholder");
-            ContentControl.InnerXml = ContentControl.InnerXml.Replace("<docPart", "<w:docPart");
+            ////los elementos del databinding
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace("<dataBinding", "<w:dataBinding");
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace(" prefixMappings", " w:prefixMappings");
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace(" xpath", " w:xpath");
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace(" storeItemID", " w:storeItemID");
+            ////los elementos del id
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace("<id", "<w:id");
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace(" val", " w:val");
+            ////los elementos del placeholder
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace("<placeholder", "<w:placeholder");
+            //ContentControl.InnerXml = ContentControl.InnerXml.Replace("<docPart", "<w:docPart");
         }
 
 

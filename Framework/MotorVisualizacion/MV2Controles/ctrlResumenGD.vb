@@ -6,6 +6,7 @@ Public Class ctrlResumenGD
 
 
 
+
 #Region "eventos"
     Public Event ControlSeleccionado(ByVal sender As Object, ByVal e As ControlSeleccioandoEventArgs) Implements IctrlDinamico.ControlSeleccionado
 
@@ -248,43 +249,45 @@ Public Class ctrlResumenGD
                     End If
 
 
-                    If Me.mPropVinc.Vinculada Then
+                    If Me.mPropVinc.TipoPropiedad.IsEnum Then
+                        Me.mComboBox.SelectedItem = Me.mPropVinc.Value
+                    Else
 
-                        If Me.mPropVinc.TipoPropiedad.IsEnum Then
-                            Me.mComboBox.SelectedItem = Me.mPropVinc.Value
+                        If Me.mPropVinc.Vinculada Then
+
+                            If Not Me.mPropVinc.TipoPropiedad.IsEnum Then
+
+
+
+
+
+                                If Me.mPropVinc.EsPropiedadEncadenada Then
+
+                                    Dim objetovalor As Framework.DatosNegocio.IEntidadBaseDN = Me.mPropVinc.ValueTipoRepresentado
+                                    If objetovalor IsNot Nothing Then
+                                        For Each objetoenumerado As Framework.DatosNegocio.IEntidadBaseDN In Me.mComboBox.Items
+                                            If objetoenumerado.ID = objetovalor.ID Then
+                                                Me.mComboBox.SelectedItem = objetoenumerado
+                                            End If
+                                        Next
+                                    End If
+                                Else
+                                    If Me.mPropVinc.Value Is Nothing Then
+                                        Me.mComboBox.SelectedItem = Nothing
+                                    End If
+                                End If
+
+                            End If
 
 
                         Else
-
-                            If Me.mPropVinc.EsPropiedadEncadenada Then
-
-                                Dim objetovalor As Framework.DatosNegocio.IEntidadBaseDN = Me.mPropVinc.ValueTipoRepresentado
-                                If objetovalor IsNot Nothing Then
-                                    For Each objetoenumerado As Framework.DatosNegocio.IEntidadBaseDN In Me.mComboBox.Items
-                                        If objetoenumerado.ID = objetovalor.ID Then
-                                            Me.mComboBox.SelectedItem = objetoenumerado
-                                        End If
-                                    Next
-                                End If
-                            Else
-                                If Me.mPropVinc.Value Is Nothing Then
-                                    Me.mComboBox.SelectedItem = Nothing
-                                End If
-                            End If
-
+                            Me.mComboBox.DataSource = Nothing
+                            Me.mComboBox.Items.Clear()
                         End If
 
-
-
-
-
-
-
-
-                    Else
-                        Me.mComboBox.DataSource = Nothing
-                        Me.mComboBox.Items.Clear()
                     End If
+
+
 
 
                 Case TipoTrabajado.T_Fecha
@@ -1236,5 +1239,9 @@ Public Class ctrlResumenGD
 
         End Set
     End Property
+
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
+        Me.mPropVinc.Value = entidad
+    End Sub
 End Class
 

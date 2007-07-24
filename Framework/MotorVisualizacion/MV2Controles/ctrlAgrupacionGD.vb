@@ -4,6 +4,7 @@ Public Class ctrlAgrupacionGD
     Implements MV2DN.IRecuperadorInstanciaMap
     Implements IctrlDinamico
 
+
     Shared clasecolor As Int64
 
     Dim WithEvents mTableLayoutPanel As TableLayoutPanel
@@ -87,7 +88,6 @@ Public Class ctrlAgrupacionGD
 
     Public Sub IUaDNgd() Implements IctrlDinamico.IUaDNgd
         For Each micontrol As Framework.IU.IUComun.IctrlBasicoDN In Me.mListaIctrlBasicoDN
-
 
             micontrol.IUaDNgd()
 
@@ -386,7 +386,7 @@ Public Class ctrlAgrupacionGD
             Else
                 mhtPropVincaControlesBasicos.Add(icb, pPropVinc)
             End If
-   
+
 
             If TypeOf icb Is CtrlBusquedaGD Then
                 Dim cb As CtrlBusquedaGD = icb
@@ -604,4 +604,25 @@ Public Class ctrlAgrupacionGD
             Me.BuscarPadreIctrlDinamico().DN = value
         End Set
     End Property
+
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
+        Dim padre As Framework.IU.IUComun.IctrlBasicoDN = RecuperarPrimerPadreDinamico(Me.Parent)
+        padre.SetDN(entidad)
+
+    End Sub
+
+    Private Function RecuperarPrimerPadreDinamico(ByVal control As System.Windows.Forms.Control) As Framework.IU.IUComun.IctrlBasicoDN
+
+        If control Is Nothing Then
+            Return Nothing
+        End If
+
+
+        If TypeOf control Is Framework.IU.IUComun.IctrlBasicoDN Then
+            Return control
+        Else
+            Return RecuperarPrimerPadreDinamico(control.Parent)
+        End If
+
+    End Function
 End Class

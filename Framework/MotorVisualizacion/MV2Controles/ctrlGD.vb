@@ -6,6 +6,7 @@ Public Class ctrlGD
 
 
 
+
     Public Event DNaIUgdFInalizado(ByVal sender As Object, ByVal e As EventArgs)
 
 
@@ -591,6 +592,11 @@ Public Class ctrlGD
     End Function
 
 
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
+        Dim pi As Reflection.PropertyInfo = Me.InstanciaVinc.DN.GetType.GetProperty("Tarifa")
+
+        pi.SetValue(Me.InstanciaVinc.DN, entidad, Nothing)
+    End Sub
 End Class
 
 

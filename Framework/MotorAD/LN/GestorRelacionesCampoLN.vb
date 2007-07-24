@@ -69,14 +69,14 @@ Namespace LN
 
                         Else
                             ColRelacionUnoUno = New List(Of RelacionUnoUnoSQLsDN)
-                            Dim al As ArrayList
+                            Dim al As New ArrayList
                             Dim VinculoClase As VinculoClaseDN
 
                             If Not DatoMApeadoClaseHeredada Is Nothing OrElse InfoDatosMapInstCampo.Datos.Count = 0 Then
                                 If InfoDatosMapInstCampo Is Nothing Then
-                                    al = DatoMApeadoClaseHeredada
+                                    al.AddRange(DatoMApeadoClaseHeredada)
                                 Else
-                                    al = InfoDatosMapInstCampo.MapSubEntidad.ItemDatoMapeado(TiposDatosMapInstClaseDN.InterfaceImplementadaPor)
+                                    al.AddRange(InfoDatosMapInstCampo.MapSubEntidad.ItemDatoMapeado(TiposDatosMapInstClaseDN.InterfaceImplementadaPor))
                                 End If
 
                                 For Each VinculoClase In al

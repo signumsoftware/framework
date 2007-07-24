@@ -334,6 +334,16 @@ Public Class frmFormularioGenerico
                     tsB.DisplayStyle = ToolStripItemDisplayStyle.Image
                     Me.ToolStrip1.Items.Add(tsB)
 
+                    If transicion.OperacionRealizadaOrigen IsNot Nothing AndAlso transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion IsNot Nothing Then
+                        If transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion.GUID = pDN.GUID Then
+                            transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion = pDN
+                        Else
+                            Throw New Framework.DatosNegocio.ApplicationExceptionDN("No coincide la entidad pasada con el objeto indirecto de la operacion")
+                        End If
+
+                    End If
+
+
                     ' End If
                 Next
 
@@ -608,9 +618,7 @@ Public Class frmFormularioGenerico
     End Sub
 
 
-    Private Sub ctrlArbolNavD21_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ctrlArbolNavD21.Load
 
-    End Sub
 End Class
 
 

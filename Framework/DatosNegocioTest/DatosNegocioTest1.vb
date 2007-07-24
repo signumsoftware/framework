@@ -27,7 +27,38 @@ Imports Framework.DatosNegocio
     '
 #End Region
 
+    <TestMethod()> Public Sub probarToHtGUIDs()
+        Dim ca1, ca2, ca3, ca4 As ClaseB
+        ca1 = New ClaseB
+        ca2 = New ClaseB
+        ca3 = ca1.Clone
+        ca4 = ca1.Clone
 
+        ca1.Col.Add(ca2)
+        ca1.Col.Add(ca3)
+        ca1.Col.Add(ca4)
+
+
+        Dim colclones As New Framework.DatosNegocio.ColIEntidadDN
+        ca1.ToHtGUIDs(Nothing, colclones)
+
+        If colclones.Count <> 3 Then
+            Throw New ApplicationException("nuemro de clones incorrectos debieran ser 3" & colclones.Count)
+        End If
+
+
+
+
+        ca1.Col.Remove(ca3)
+        colclones = New Framework.DatosNegocio.ColIEntidadDN
+        ca1.ToHtGUIDs(Nothing, colclones)
+
+        If colclones.Count <> 2 Then
+            Throw New ApplicationException("nuemro de clones incorrectos debieran ser dos" & colclones.Count)
+        End If
+
+
+    End Sub
 
     <TestMethod()> Public Sub ProbarHuellaDeT()
 
@@ -433,7 +464,42 @@ End Class
     End Property
 End Class
 
-Public Class htClaseA
+<Serializable()> Public Class htClaseA
     Inherits Framework.DatosNegocio.HuellaEntidadTipadaDN(Of ClaseA)
 
+End Class
+
+
+<Serializable()> Public Class ClaseB
+
+    Inherits Framework.DatosNegocio.EntidadDN
+
+
+
+    Protected mCol As colClaseB
+
+
+
+
+    Public Sub New()
+        CambiarValorRef(Of colClaseB)(New colClaseB, mCol)
+    End Sub
+
+    <RelacionPropCampoAtribute("mCol")> _
+    Public Property Col() As colClaseB
+        Get
+            Return mCol
+        End Get
+        Set(ByVal value As colClaseB)
+            CambiarValorRef(Of colClaseB)(value, mCol)
+        End Set
+    End Property
+
+
+
+
+End Class
+
+<Serializable()> Public Class colClaseB
+    Inherits ArrayListValidable(Of ClaseB)
 End Class

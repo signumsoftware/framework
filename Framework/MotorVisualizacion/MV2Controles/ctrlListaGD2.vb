@@ -8,6 +8,7 @@ Public Class ctrlListaGD2
 
 
 
+
     Implements MV2DN.IRecuperadorInstanciaMap
 
 
@@ -318,7 +319,7 @@ Public Class ctrlListaGD2
 
 
 
-                   
+
 
 
                         Next
@@ -906,6 +907,10 @@ Public Class ctrlListaGD2
     End Property
 
     Private Sub DataGridView1_CellContentClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.DataGridViewCellEventArgs) Handles DataGridView1.CellContentClick
+
+    End Sub
+
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
 
     End Sub
 End Class

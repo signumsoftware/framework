@@ -6,6 +6,7 @@ Public Class CtrlBusquedaGD
 
 
 
+
     Protected mMap As MV2DN.PropMapDN
 
 
@@ -176,4 +177,7 @@ Public Class CtrlBusquedaGD
 
     End Sub
 
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
+
+    End Sub
 End Class

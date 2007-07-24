@@ -13,12 +13,34 @@ Imports Framework.TiposYReflexion.DN
     Protected mColDNAceptadas As ColVinculoClaseDN
     Protected mObjetoIndirectoNoModificable As Boolean
 
+    ' Protected mEjecutaMetodo As Boolean
 
     Public Sub New()
+        ' CambiarValorVal(Of Boolean)(True, mEjecutaMetodo)
 
         Me.CambiarValorRef(Of ColVinculoClaseDN)(New ColVinculoClaseDN, mColDNAceptadas)
         Me.modificarEstado = EstadoDatosDN.Inconsistente
     End Sub
+
+
+
+
+
+
+    'Public Property EjecutaMetodo() As Boolean
+
+    '    Get
+    '        Return mEjecutaMetodo
+    '    End Get
+
+    '    Set(ByVal value As Boolean)
+    '        CambiarValorVal(Of Boolean)(value, mEjecutaMetodo)
+
+    '    End Set
+    'End Property
+
+
+
 
 
     ''' <summary>

@@ -2,6 +2,7 @@ Public Class PruebaControlBasico
 
     Implements Framework.IU.IUComun.IctrlBasicoDN
 
+
     Dim mdn As Framework.DatosNegocio.EntidadDN
 
 
@@ -33,5 +34,9 @@ Public Class PruebaControlBasico
 
     Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
         Me.Label1.Text = Me.TextBox1.Text
+    End Sub
+
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
+
     End Sub
 End Class

@@ -297,6 +297,10 @@
       <Project>{38B44E67-F841-4169-A43E-39A591B30E74}</Project>
       <Name>ProcesosDN</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TestFTBasico\MotorADTest.vbproj">
+      <Project>{5AA4221F-BB26-42B3-B66E-0A1CD4E1BCA4}</Project>
+      <Name>MotorADTest</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UsuariosMod\IU\AS\UsrAS.vbproj">
       <Project>{634BB19D-032C-4428-9305-AFB92E64DBA5}</Project>
       <Name>UsrAS</Name>
@@ -304,6 +308,10 @@
     <ProjectReference Include="..\UsuariosMod\IU\UsrControladores\UsrControladores.vbproj">
       <Project>{5383FEAE-544B-4559-A83B-C892D9410705}</Project>
       <Name>UsrControladores</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UsuariosMod\UsuariosAD\UsuariosAD.vbproj">
+      <Project>{BC50006B-89F3-4A01-8E24-7600C4D1EB1D}</Project>
+      <Name>UsuariosAD</Name>
     </ProjectReference>
     <ProjectReference Include="..\UsuariosMod\UsuariosDN\UsuariosDN.vbproj">
       <Project>{DC27C3D3-C8D7-49AE-AF82-C21682FDCFCD}</Project>

@@ -7,6 +7,7 @@ Public Class ctrlListaGD
 
 
 
+
     Implements MV2DN.IRecuperadorInstanciaMap
 
 
@@ -682,4 +683,8 @@ Public Class ctrlListaGD
 
         End Set
     End Property
+
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
+
+    End Sub
 End Class

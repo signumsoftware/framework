@@ -17,6 +17,7 @@ Public Class frmFiltro
 
 
 
+
     Private mipaqueteconfig As MotorBusquedaDN.PaqueteFormularioBusqueda
     Private WithEvents miBarraComandos As New MV2ControlesBasico.ctrlBarraBotonesGD
 
@@ -184,7 +185,7 @@ Public Class frmFiltro
         EjecutarCoamndo(miBarraComandos.ComandoAccioando.Map)
     End Sub
 
-    Public Function RecuperarEntidad() As object
+    Public Function RecuperarEntidad() As Object
 
         Dim col As Framework.DatosNegocio.ColHEDN = RecuperarColHEDNFilaSeleccioanda()
         Select Case col.Count
@@ -282,6 +283,10 @@ Public Class frmFiltro
     End Sub
 
     Public Sub Poblar() Implements Framework.IU.IUComun.IctrlBasicoDN.Poblar
+
+    End Sub
+
+    Public Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN) Implements Framework.IU.IUComun.IctrlBasicoDN.SetDN
 
     End Sub
 End Class

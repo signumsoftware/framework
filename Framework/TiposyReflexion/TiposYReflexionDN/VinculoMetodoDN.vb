@@ -33,7 +33,7 @@
 
         Public Sub New(ByVal nombreMetodo As String, ByVal vinculoClase As VinculoClaseDN)
             If vinculoClase.TipoClase.GetMethod(nombreMetodo) Is Nothing Then
-                Throw New Framework.DatosNegocio.ApplicationExceptionDN("El nombre del método y el vínculo clase no coinciden")
+                Throw New Framework.DatosNegocio.ApplicationExceptionDN("El nombre del método y el vínculo clase no coinciden nm:" & nombreMetodo & "vc:" & vinculoClase.ToString)
             End If
 
             mNombreMetodo = nombreMetodo
