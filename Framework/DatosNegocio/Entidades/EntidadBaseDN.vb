@@ -330,22 +330,47 @@ Public MustInherit Class EntidadBaseDN
         Return Me.GetType()
     End Function
 
-    Public Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable) As System.Collections.Hashtable Implements IEntidadBaseDN.ToHtGUIDs
+
+    Public Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable, ByRef clones As ColIEntidadDN) As System.Collections.Hashtable Implements IEntidadBaseDN.ToHtGUIDs
+
+
+        If clones Is Nothing Then
+            clones = New ColIEntidadDN
+        End If
+
         If phtGUIDEntidades Is Nothing Then
             phtGUIDEntidades = New System.Collections.Hashtable
         Else
             ' si ya estoy procesado  o procensando no continuo
+
             If phtGUIDEntidades.ContainsKey(Me.mGUID) Then
+                Dim entidad As IEntidadDN = phtGUIDEntidades.Item(Me.mGUID)
+
+                ' si no soy yo es que soy un clon
+                If Not entidad Is Me Then
+
+                    If Not clones.Contains(Me) Then
+                        clones.Add(Me)
+                    End If
+                    If Not clones.Contains(entidad) Then
+                        clones.Add(entidad)
+                    End If
+                End If
                 Return phtGUIDEntidades
             End If
         End If
-
         ' me añado ami y luego a mis referecnias
+
         phtGUIDEntidades.Add(Me.mGUID, Me)
 
 
- 
+        'For Each entidad As IEntidadDN In Me.mColPartes
+        '    entidad.ToHtGUIDs(phtGUIDEntidades, clones)
+        'Next
+
         Return phtGUIDEntidades
+
+
     End Function
 End Class
 

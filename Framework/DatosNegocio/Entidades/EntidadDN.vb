@@ -908,6 +908,9 @@ Public MustInherit Class EntidadDN
         Dim parte As IDatoPersistenteDN
         Dim modificable As IModificable
 
+        Me.mToSt = Me.ToString
+
+
         'Si estamos en medio de una validacion lo indicamos
         If (validando = True) Then
             Return EstadoIntegridadDN.EnProcesoValidacion
@@ -931,7 +934,7 @@ Public MustInherit Class EntidadDN
 
         validando = False
 
-        Me.mToSt = Me.ToString
+
 
         Return EstadoIntegridadDN.Consistente
     End Function
@@ -1024,13 +1027,31 @@ Public MustInherit Class EntidadDN
     ''' <returns></returns>
     ''' <remarks></remarks>
 
-    Public Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable) As System.Collections.Hashtable Implements IEntidadDN.ToHtGUIDs
+    Public Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable, ByRef clones As ColIEntidadDN) As System.Collections.Hashtable Implements IEntidadDN.ToHtGUIDs
+
+
+        If clones Is Nothing Then
+            clones = New ColIEntidadDN
+        End If
 
         If phtGUIDEntidades Is Nothing Then
             phtGUIDEntidades = New System.Collections.Hashtable
         Else
             ' si ya estoy procesado  o procensando no continuo
+
             If phtGUIDEntidades.ContainsKey(Me.mGUID) Then
+                Dim entidad As IEntidadDN = phtGUIDEntidades.Item(Me.mGUID)
+
+                ' si no soy yo es que soy un clon
+                If Not entidad Is Me Then
+
+                    If Not clones.Contains(Me) Then
+                        clones.Add(Me)
+                    End If
+                    If Not clones.Contains(entidad) Then
+                        clones.Add(entidad)
+                    End If
+                End If
                 Return phtGUIDEntidades
             End If
         End If
@@ -1040,7 +1061,7 @@ Public MustInherit Class EntidadDN
 
 
         For Each entidad As IEntidadDN In Me.mColPartes
-            entidad.ToHtGUIDs(phtGUIDEntidades)
+            entidad.ToHtGUIDs(phtGUIDEntidades, clones)
         Next
 
         Return phtGUIDEntidades

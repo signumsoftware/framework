@@ -27,7 +27,7 @@ Public Interface IEntidadBaseDN
     ''' <returns>true si representa a la msima entidad, esta función deberá ser sobre escrita incluyendo los campos clave de la entidad, si no es seguro que estos campos clave solo puedan estar asoociados a un guid</returns>
     ''' <remarks></remarks>
     Function RepresentaMismaEntidad(ByVal pEntidad As IEntidadBaseDN, ByRef mensaje As String, ByRef pMismaRef As Boolean) As Boolean
-    Function ToHtGUIDs(ByVal phtGUIDEntidades As Hashtable) As Hashtable
+    Function ToHtGUIDs(ByVal phtGUIDEntidades As Hashtable, ByRef clones As ColIEntidadDN) As Hashtable
 
 #End Region
 

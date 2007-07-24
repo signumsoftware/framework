@@ -18,7 +18,8 @@ Public Interface IArrayListValidable(Of T)
     '   Function UpCasting(Of K As {T inherits K})() As IArrayListValidable(Of K)
     Function ToListOFt() As List(Of T)
     Function ContieneAlguno(ByVal pCol As IList(Of T), ByVal pCoincidencia As CoincidenciaBusquedaEntidadDN) As Boolean
-    Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable) As System.Collections.Hashtable
+    ' Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable) As System.Collections.Hashtable
+    Function ToHtGUIDs(ByVal phtGUIDEntidades As Hashtable, ByRef clones As ColIEntidadDN) As Hashtable
 
 End Interface
 
@@ -1187,18 +1188,20 @@ Public Class ArrayListValidable(Of T As {IEntidadBaseDN, Class})
         Return stb.ToString
     End Function
 
-    Public Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable) As System.Collections.Hashtable Implements IArrayListValidable(Of T).ToHtGUIDs
+    Public Function ToHtGUIDs(ByVal phtGUIDEntidades As System.Collections.Hashtable, ByRef clones As ColIEntidadDN) As System.Collections.Hashtable Implements IArrayListValidable(Of T).ToHtGUIDs
         If phtGUIDEntidades Is Nothing Then
             phtGUIDEntidades = New System.Collections.Hashtable
 
 
         End If
-
+        If clones Is Nothing Then
+            clones = New ColIEntidadDN
+        End If
 
 
         For Each mit As T In Me
 
-            mit.ToHtGUIDs(phtGUIDEntidades)
+            mit.ToHtGUIDs(phtGUIDEntidades, clones)
 
         Next
 

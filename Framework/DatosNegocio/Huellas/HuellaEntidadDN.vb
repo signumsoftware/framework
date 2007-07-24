@@ -218,7 +218,9 @@ Public Class HEDN
 
 
     Public Sub AsignarDatosBasicos(ByVal pTipo As System.Type, ByVal pID As String, ByVal pGuid As String) Implements IHuellaEntidadDN.AsignarDatosBasicos
-        mIdEntidadReferida = pID
+        Dim valor As Integer = 0
+        Integer.TryParse(pID, valor)
+        mIdEntidadReferida = valor
         mGUIDReferida = pGuid
         AsignarDatosTipo(pTipo)
     End Sub
