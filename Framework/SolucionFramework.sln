@@ -912,9 +912,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Colecciones", "Colecciones\
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializadorTexto", "SerializadorTexto\SerializadorTexto\SerializadorTexto.csproj", "{48396CED-0B58-4C59-BED8-4D5FCCA5847C}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 126
+		SccNumberOfProjects = 127
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
@@ -1418,6 +1424,10 @@ Global
 		SccProjectTopLevelParentUniqueName125 = SolucionFramework.sln
 		SccProjectName125 = WS/WSHelper
 		SccLocalPath125 = WS\\WSHelper
+		SccProjectUniqueName126 = SerializadorTexto\\SerializadorTexto\\SerializadorTexto.csproj
+		SccProjectTopLevelParentUniqueName126 = SolucionFramework.sln
+		SccProjectName126 = SerializadorTexto/SerializadorTexto
+		SccLocalPath126 = SerializadorTexto\\SerializadorTexto
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = SolucionFramework.vsmdi
@@ -5187,6 +5197,36 @@ Global
 		{140C25AB-5E35-473A-9EC4-019755A1BA81}.Web1|Any CPU.Build.0 = Release|Any CPU
 		{140C25AB-5E35-473A-9EC4-019755A1BA81}.Web1|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{140C25AB-5E35-473A-9EC4-019755A1BA81}.Web1|Mixed Platforms.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.ligera|.NET.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.ligera|Any CPU.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.ligera|Any CPU.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.ligera|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.ligera|Mixed Platforms.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.RapidaWeb|.NET.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.RapidaWeb|Any CPU.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.RapidaWeb|Any CPU.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.RapidaWeb|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.RapidaWeb|Mixed Platforms.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Release|.NET.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Servidor|.NET.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Servidor|Any CPU.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Servidor|Any CPU.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Servidor|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Servidor|Mixed Platforms.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Web1|.NET.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Web1|Any CPU.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Web1|Any CPU.Build.0 = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Web1|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C}.Web1|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -5208,6 +5248,7 @@ Global
 		{DBBBADC0-C07A-412C-9345-6564C25A588D} = {0B8D3531-0F69-47BD-90C3-697ED6C18A7D}
 		{C8B487EE-2E44-4896-A7C8-6465A37DACA1} = {0B8D3531-0F69-47BD-90C3-697ED6C18A7D}
 		{9EFF47D7-69CF-4577-B836-50A07971AA47} = {0B8D3531-0F69-47BD-90C3-697ED6C18A7D}
+		{48396CED-0B58-4C59-BED8-4D5FCCA5847C} = {0B8D3531-0F69-47BD-90C3-697ED6C18A7D}
 		{4B329258-A2CD-4434-AFB8-93313C02D836} = {FE549FBF-4E0A-4C7A-BA07-7623CAFD0BB8}
 		{46E0AF56-A68E-48BA-957F-BF2D8C48B446} = {FE549FBF-4E0A-4C7A-BA07-7623CAFD0BB8}
 		{761B684A-6080-4E66-A49D-CFABE8A8E177} = {FE549FBF-4E0A-4C7A-BA07-7623CAFD0BB8}
