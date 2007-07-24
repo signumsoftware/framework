@@ -6,4 +6,6 @@ Public Interface IctrlBasicoDN
     Sub IUaDNgd()
     Sub DNaIUgd()
 
+    Sub SetDN(ByVal entidad As Framework.DatosNegocio.IEntidadDN)
+
 End Interface
