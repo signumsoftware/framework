@@ -1,0 +1,126 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{48396CED-0B58-4C59-BED8-4D5FCCA5847C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SerializadorTexto</RootNamespace>
+    <AssemblyName>SerializadorTexto</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Atributos\ArchivoTextoAttribute.cs" />
+    <Compile Include="Atributos\Incontextual\ArchivoTextoIncontextualAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Atributos\Incontextual\OpcionalAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Atributos\Incontextual\LineaTextoIncontextualAttribute.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Atributos\SerializarComoStringAttribute.cs" />
+    <Compile Include="Atributos\OrdenAttribute.cs" />
+    <Compile Include="Atributos\LineaTextoAttribute.cs" />
+    <Compile Include="Atributos\CampoTextoAttribute.cs" />
+    <Compile Include="Atributos\ValorStringAttribute.cs" />
+    <Compile Include="ReflectorBloques.cs" />
+    <Compile Include="IIDProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Reflector.cs" />
+    <Compile Include="ReflectorEnums.cs" />
+    <Compile Include="ReflectorLineas.cs" />
+    <Compile Include="Serializador.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializadorAPila\AutomataDeserializador.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\DictionarioIdentidadFila.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\GeneradorGramatica.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\GeneradorNombres.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\LenguajeIncontextual\Automata.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\LenguajeIncontextual\ConjuntoReglas.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\LenguajeIncontextual\Gramatica.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\LenguajeIncontextual\Regla.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\LenguajeIncontextual\TablaPrediccion.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\Reglas\ReglaClase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\Reglas\ReglaLista.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorAPila\Reglas\ReglaPrimerCampo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorIncontextual.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SerializadorLineas.cs" />
+    <Compile Include="SerializadorRegular.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
