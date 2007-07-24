@@ -46,6 +46,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\CompiladosFT\FicherosDN.dll</HintPath>
     </Reference>
+    <Reference Include="LogicaNegocios, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\CompiladosFT\LogicaNegocios.dll</HintPath>
+    </Reference>
     <Reference Include="MNavegacionDatosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\CompiladosFT\MNavegacionDatosDN.dll</HintPath>

@@ -56,7 +56,7 @@
     </Reference>
     <Reference Include="FicherosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Proyectos\AMV\GestionSegurosAMV\Compilados\FicherosDN.dll</HintPath>
+      <HintPath>..\..\CompiladosFT\FicherosDN.dll</HintPath>
     </Reference>
     <Reference Include="FicherosLN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -64,7 +64,7 @@
     </Reference>
     <Reference Include="LogicaNegocios, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Proyectos\AMV\GestionSegurosAMV\Compilados\LogicaNegocios.dll</HintPath>
+      <HintPath>..\..\CompiladosFT\LogicaNegocios.dll</HintPath>
     </Reference>
     <Reference Include="NotasDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
