@@ -2732,7 +2732,7 @@ Imports System.Collections
 
         Dim integrationServices As New Application()
         Dim miPaquete As Package
-        Dim rutaPaquete As String = "D:\Signum\Signum\FrameworkNegocio\LocalizacionesMod\LocalizacionesAD\CargaDatos\Package.dtsx"
+        Dim rutaPaquete As String = "D:\Signum\FrameworkNegocio\LocalizacionesMod\LocalizacionesAD\CargaDatos\Package.dtsx"
 
         If System.IO.File.Exists(rutaPaquete) Then
             miPaquete = integrationServices.LoadPackage(rutaPaquete, True, Nothing)
