@@ -2,7 +2,7 @@ Imports Framework.Cuestionario.CuestionarioDN
 
 
 
-
+<Serializable()> _
 Public Class ValorModMapDN
     Inherits Framework.DatosNegocio.EntidadDN
     '  Implements IValorCaracteristicaDN
@@ -100,6 +100,7 @@ Public Class ValorModMapDN
     End Property
 End Class
 
+<Serializable()> _
 Public Class ColValorModMapDN
     Inherits Framework.DatosNegocio.ArrayListValidable(Of ValorModMapDN)
 End Class

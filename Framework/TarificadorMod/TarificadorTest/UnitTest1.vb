@@ -334,6 +334,10 @@ Imports System.Collections
     Private Sub CrearEntornoPruebasAMV()
 
 
+        Dim ht As Hashtable = Nothing
+        Dim clones As Framework.DatosNegocio.ColIEntidadDN = Nothing
+
+
         ' crear las tablas
         Dim gi As Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN
         Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN.VaciarCacheTablasGeneradasParaTipos()
@@ -435,6 +439,12 @@ Imports System.Collections
 
         Dim cuestioRes As New Cuestionario.CuestionarioDN.CuestionarioResueltoDN
         cuestioRes = CrearCuestionario(colValoresDeRespuesta)
+        longitud(cuestioRes)
+        ht = Nothing
+        ht = cuestioRes.ToHtGUIDs(Nothing, clones)
+        System.Diagnostics.Debug.WriteLine(ht.Keys.Count)
+
+
 
         ' creamos el suministrador de valor y se lo pasamos a ala operacion principal
 
@@ -446,8 +456,34 @@ Imports System.Collections
         opprog.IOperacionDN.IRecSumiValorLN = reg
         System.Diagnostics.Debug.WriteLine("valor:" & opprog.IOperacionDN.GetValor.ToString)
 
+
+        Try
+            longitud(cuestioRes)
+            Throw New ApplicationException("debio producirse una excepcion")
+        Catch ex As Exception
+
+        End Try
+
+
+        opprog.IOperacionDN.Limpiar()
+        '  longitud(cuestioRes)
+
+        ht = Nothing
+        ht = cuestioRes.ToHtGUIDs(Nothing, clones)
+        System.Diagnostics.Debug.WriteLine(ht.Keys.Count)
+
     End Sub
 
+    Public Function longitud(ByVal objeto As Object) As Double
+        Dim serializador As New System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+        Dim ms As New System.IO.MemoryStream
+        serializador.Serialize(ms, objeto)
+        longitud = ms.Length
+        System.Diagnostics.Debug.WriteLine(longitud)
+
+
+
+    End Function
 
     Private Function CrearValoresNumerico(ByVal numinicio As Integer, ByVal numfinal As Integer, ByVal caract As Framework.Cuestionario.CuestionarioDN.CaracteristicaDN) As Framework.Cuestionario.CuestionarioDN.ColValorNumericoCaracteristicaDN
 
@@ -676,6 +712,7 @@ Public Class GestorMapPersistenciaCamposTaficDTest
             campodatos.InfoDatosMapInstClase = mapinst
             campodatos.NombreCampo = "mIRecSumiValorLN"
             campodatos.ColCampoAtributo.Add(CampoAtributoDN.NoProcesar)
+            Me.MapearCampoSimple(mapinst, "mValorCacheado", CampoAtributoDN.NoProcesar)
 
             Return mapinst
 
@@ -690,6 +727,9 @@ Public Class GestorMapPersistenciaCamposTaficDTest
             campodatos.InfoDatosMapInstClase = mapinst
             campodatos.NombreCampo = "mIRecSumiValorLN"
             campodatos.ColCampoAtributo.Add(CampoAtributoDN.NoProcesar)
+
+
+            Me.MapearCampoSimple(mapinst, "mValorCacheado", CampoAtributoDN.NoProcesar)
 
             Return mapinst
 
@@ -746,10 +786,11 @@ Public Class GestorMapPersistenciaCamposTaficDTest
 End Class
 
 
-
+<Serializable()> _
 Public Class SumiValFijoDN
     Inherits Framework.DatosNegocio.EntidadDN
     Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN
+
 
     Private mvalor As Double
 
@@ -796,4 +837,7 @@ Public Class SumiValFijoDN
         Throw New NotImplementedException("Recuperar orden no está implementado para esta clase")
     End Function
 
+    Public Sub Limpiar() Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN.Limpiar
+
+    End Sub
 End Class

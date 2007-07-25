@@ -3,6 +3,7 @@ Public Class SumiValFijoDN
     Inherits Framework.DatosNegocio.EntidadDN
     Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN
 
+
     Private mvalor As Double
 
 
@@ -48,4 +49,7 @@ Public Class SumiValFijoDN
         Throw New NotImplementedException("Recuperar orden no está implementado para esta clase")
     End Function
 
+    Public Sub Limpiar() Implements ISuministradorValorDN.Limpiar
+
+    End Sub
 End Class

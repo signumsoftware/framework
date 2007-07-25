@@ -6,6 +6,7 @@ Public Class OperacionSimpleBaseDN
 
     Implements IOperacionSimpleDN
 
+
     Protected mOperadorDN As IOperadorDN
     Protected mIRecSumiValorLN As IRecSumiValorLN 'este campo no dee guardarse en la base de datos
     Protected mOperando1 As ISuministradorValorDN
@@ -236,6 +237,17 @@ Public Class OperacionSimpleBaseDN
         Return MyBase.EstadoIntegridad(pMensaje)
     End Function
 
+    Public Sub Limpiar() Implements ISuministradorValorDN.Limpiar
+        '  mOperadorDN
+        mIRecSumiValorLN = Nothing
+        mOperando1.Limpiar()
+        mOperando2.Limpiar()
+        '  mDebeCachear As Boolean
+
+        ' permite recuperar el ultimo valor calculado
+        ' mValorCacheado As Object
+        ' mOrdenOperacion As Integer
+    End Sub
 End Class
 
 

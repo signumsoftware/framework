@@ -1,8 +1,10 @@
 Imports Framework.Cuestionario.CuestionarioDN
 Imports Framework.Operaciones.OperacionesDN
+<Serializable()> _
 Public Class SumiValCaracteristicaDN
     Inherits Framework.DatosNegocio.EntidadDN
     Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN
+
 
     Protected mCaracteristica As CaracteristicaDN
     Protected mITraductor As ITraductorDN
@@ -30,8 +32,8 @@ Public Class SumiValCaracteristicaDN
 
         Dim respuesta As RespuestaDN = respuestasCuest.ColRespuestaDN.RecuperarxCaracteristica(Me.mCaracteristica)
 
-
-        Dim mivalor As Object = mITraductor.TraducirValor(respuesta.IValorCaracteristicaDN.Valor)
+        '   Dim mivalor As Object = mITraductor.TraducirValor(respuesta.IValorCaracteristicaDN.Valor) ' todo cambio alex
+        Dim mivalor As Object = mITraductor.TraducirValor(respuesta.IValorCaracteristicaDN)
 
         Return mivalor
     End Function
@@ -75,8 +77,18 @@ Public Class SumiValCaracteristicaDN
         Throw New NotImplementedException("Recuperar orden no está implementado para esta clase")
     End Function
 
-End Class
+    Public Sub Limpiar() Implements Operaciones.OperacionesDN.ISuministradorValorDN.Limpiar
 
+        ' mCaracteristica As CaracteristicaDN
+        ' mITraductor As ITraductorDN
+        mIRecSumiValorLN = Nothing
+        mValorCacheado = Nothing
+
+
+
+    End Sub
+End Class
+<Serializable()> _
 Public Class ColSumiValCaracteristicaDN
     Inherits Framework.DatosNegocio.ArrayListValidable(Of SumiValCaracteristicaDN)
 End Class

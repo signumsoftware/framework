@@ -1,4 +1,4 @@
-
+<Serializable()> _
 Public Class TraductorxMapMemoriaDN
     Inherits Framework.DatosNegocio.EntidadDN
     Implements ITraductorDN

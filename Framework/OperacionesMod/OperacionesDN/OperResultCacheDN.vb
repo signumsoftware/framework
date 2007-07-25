@@ -5,8 +5,6 @@ Public Class OperResultCacheDN
 
     Implements ISuministradorValorDN
 
-
-
     Protected mValor As String
 
 
@@ -48,6 +46,10 @@ Public Class OperResultCacheDN
         Throw New NotImplementedException("Recuperar orden no está implementado para esta clase")
     End Function
 
+    Public Sub Limpiar() Implements ISuministradorValorDN.Limpiar
+        'mValor = Nothing
+        'Nombre = Nothing
+    End Sub
 End Class
 
 Public Class ColOperResultCacheDN

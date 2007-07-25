@@ -36,7 +36,7 @@ Public Class SumValOperMapDN
     End Property
 End Class
 
-
+<Serializable()> _
 Public Class ColSumValOperMapDN
     Inherits Framework.DatosNegocio.ArrayListValidable(Of SumValOperMapDN)
 End Class

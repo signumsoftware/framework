@@ -1036,27 +1036,26 @@ Public MustInherit Class EntidadDN
 
         If phtGUIDEntidades Is Nothing Then
             phtGUIDEntidades = New System.Collections.Hashtable
-        Else
-            ' si ya estoy procesado  o procensando no continuo
-
-            If phtGUIDEntidades.ContainsKey(Me.mGUID) Then
-                Dim entidad As IEntidadDN = phtGUIDEntidades.Item(Me.mGUID)
-
-                ' si no soy yo es que soy un clon
-                If Not entidad Is Me Then
-
-                    If Not clones.Contains(Me) Then
-                        clones.Add(Me)
-                    End If
-                    If Not clones.Contains(entidad) Then
-                        clones.Add(entidad)
-                    End If
-                End If
-                Return phtGUIDEntidades
-            End If
         End If
-        ' me añado ami y luego a mis referecnias
 
+        ' si ya estoy procesado  o procensando no continuo
+        If phtGUIDEntidades.ContainsKey(Me.mGUID) Then
+            Dim entidad As IEntidadDN = phtGUIDEntidades.Item(Me.mGUID)
+
+            ' si no soy yo es que soy un clon
+            If Not entidad Is Me Then
+                If Not clones.Contains(Me) Then
+                    clones.Add(Me)
+                End If
+                If Not clones.Contains(entidad) Then
+                    clones.Add(entidad)
+                End If
+            End If
+
+            Return phtGUIDEntidades
+        End If
+
+        ' me añado ami y luego a mis referecnias
         phtGUIDEntidades.Add(Me.mGUID, Me)
 
 
