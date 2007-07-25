@@ -76,7 +76,39 @@ Imports Framework.Operaciones.OperacionesDN
         End Using
 
     End Sub
+    <TestMethod()> Public Sub TarificarPresupuesto()
+        ObtenerRecurso()
 
+        Using New CajonHiloLN(mRecurso)
+
+
+
+
+            Using tr As New Transaccion
+                Dim ln As New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
+                Dim opc As Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN = ln.RecuperarLista(GetType(Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN))(0)
+                Framework.Configuracion.AppConfiguracion.DatosConfig.Item(GetType(Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN).Name) = opc
+
+                Dim presup, presu2 As FN.Seguros.Polizas.DN.PresupuestoDN
+                presup = ln.RecuperarLista(GetType(FN.Seguros.Polizas.DN.PresupuestoDN))(0)
+                presup.FechaAltaSolicitada = presup.PeridoValidez.FInicio.AddDays(2)
+                presup.CodColaborador = Nothing
+
+                Dim lnc As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN
+                presu2 = lnc.TarificarPresupuesto(presup)
+
+
+
+
+                tr.Confirmar()
+
+
+            End Using
+
+
+        End Using
+
+    End Sub
     Public Sub CargarPrimasBaseP()
         Dim colprimas As FN.RiesgosVehiculos.DN.ColPrimabaseRVSVDN
         Dim ad As New FN.RiesgosVehiculos.AD.CargadorPrimasBaseAD

@@ -8,6 +8,7 @@ Public Class FraccionamientoRVSVDN
     Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN
 
 
+
 #Region "Atributos"
 
     Protected mIRecSumiValorLN As Framework.Operaciones.OperacionesDN.IRecSumiValorLN ' este no debe guardarse en base de datos
@@ -176,6 +177,15 @@ Public Class FraccionamientoRVSVDN
 #End Region
 
 
+    Public Sub Limpiar() Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN.Limpiar
+        mIRecSumiValorLN = Nothing
+        ' mColFraccionamientoRV As ColFraccionamientoRVDN
+        ' mCobertura As FN.Seguros.Polizas.DN.CoberturaDN
+        'Protected mFraccionamiento As FraccionamientoDN
+        ' mOperadoraplicable As String
+        ' mValorCacheado As FraccionamientoRVDN ' este valor no debe guardarse en base de datos
+
+    End Sub
 End Class
 
 

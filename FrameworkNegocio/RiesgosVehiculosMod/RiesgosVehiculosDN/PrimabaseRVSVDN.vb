@@ -6,6 +6,7 @@ Public Class PrimabaseRVSVDN
     Inherits Framework.DatosNegocio.EntidadDN
     Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN
 
+
     Protected mIRecSumiValorLN As Framework.Operaciones.OperacionesDN.IRecSumiValorLN ' este no debe guardarse en base de datos
     Protected mColPrimasBase As ColPrimaBaseRVDN
 
@@ -160,6 +161,9 @@ Public Class PrimabaseRVSVDN
         Throw New NotImplementedException("Recuperar orden no está implementado para esta clase")
     End Function
 
+    Public Sub Limpiar() Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN.Limpiar
+        mIRecSumiValorLN = Nothing
+    End Sub
 End Class
 
 

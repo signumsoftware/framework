@@ -28,583 +28,200 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "D:\...\SolucionFNWS\", "Sol
 	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ProyectoResumen", "ProyectoResumen\ProyectoResumen.vbproj", "{082E26BF-0D66-42E7-BEE6-0F155515C4E3}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SegurosMod", "SegurosMod", "{5B228187-6CCE-4936-8320-593127834405}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PolizasMod", "PolizasMod", "{089D2C13-51C7-4902-97A0-5A11A1FD4694}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TrabajosMod", "TrabajosMod", "{9F55A9BD-6DC1-4065-A766-F2D43F8EBB64}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TrabajosDN", "TrabajosMod\TrabajosDN\TrabajosDN.vbproj", "{8060BBA6-86E6-4EF6-9166-9D4127679FAD}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RiesgosVehiculosMod", "RiesgosVehiculosMod", "{038FB904-2636-46B3-B7BC-9E3E82A31D86}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosDN", "RiesgosVehiculosMod\RiesgosVehiculosDN\RiesgosVehiculosDN.vbproj", "{BB2EB0EF-4C2D-4526-9F54-73DFA311F74D}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasDN", "SegurosMod\PolizasMod\PolizasDN\PolizasDN.vbproj", "{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmpresasMod", "EmpresasMod", "{E39D3CE8-1A61-4B92-8B7D-DA522D0D3CC0}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PersonasMod", "PersonasMod", "{C50A759F-611E-4A4F-BF9E-3844F57BD05C}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EmpresasDN", "EmpresasMod\EmpresaDN\EmpresasDN.vbproj", "{29535641-5F2F-49B4-8CAF-E70ADCA463A9}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EmpresasAD", "EmpresasMod\EmpresaAD\EmpresasAD.vbproj", "{DE3F5623-7953-43CC-8AF5-42DC44F56F03}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EmpresasLN", "EmpresasMod\EmpresaLN\EmpresasLN.vbproj", "{33E22B2C-8D23-4F03-A587-BA7E282123D0}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EmpresasFS", "EmpresasMod\EmpresaFS\EmpresasFS.vbproj", "{80681C54-4BD1-4D97-977B-622DFF7EDF99}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EmpresasAS", "EmpresasMod\EmpresaAS\EmpresasAS.vbproj", "{8A15EA66-70F3-43F1-9451-7872D8ADFC00}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LocalizacionesMod", "LocalizacionesMod", "{8F709EFE-2218-4A9D-8E35-4D2776C4AB9B}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FinancieroMod", "FinancieroMod", "{E67ADD61-CFA4-408A-AC24-EA4C5DBFB95C}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PersonasAD", "PersonasMod\PersonasAD\PersonasAD.vbproj", "{C485C991-F770-4A6C-ACF5-B205E3C6279B}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PersonasLN", "PersonasMod\PersonasLN\PersonasLN.vbproj", "{250783A8-F3A6-4997-97AD-51A3933F7F4F}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FinancieroDN", "FinancieroMod\FinancieroDN\FinancieroDN.vbproj", "{E7D4E839-6DAE-4C43-B1C9-55C2E7FE16AE}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LocalizacionesDN", "LocalizacionesMod\LocalizacionesDN\LocalizacionesDN.vbproj", "{3D8EC4BB-F0F1-40B3-94A8-A972FD0AB140}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PersonasDN", "PersonasMod\PersonasDN\PersonasDN.vbproj", "{5C3E9247-029F-47FC-9396-E270FF57B0B4}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GestionPagosMod", "GestionPagosMod", "{2475D6B8-DEE1-432E-8E80-D7D34958A5D2}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosDN", "GestionPagosMod\GestionPagosDN\GestionPagosDN.vbproj", "{72D64925-7C1F-4225-942E-8F49439128A4}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosAD", "GestionPagosMod\GestionPagosAD\GestionPagosAD.vbproj", "{F7CA0895-99C6-494E-BC51-F402DD177215}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosLN", "GestionPagosMod\GestionPagosLN\GestionPagosLN.vbproj", "{3E74E77B-8FF8-45DE-818A-A7DF70659AAB}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosFS", "GestionPagosMod\GestionPagosFS\GestionPagosFS.vbproj", "{ADF22D11-3A4D-4E65-BEC9-AB3C9A3FFD4A}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosAS", "GestionPagosMod\GestionPagosAS\GestionPagosAS.vbproj", "{D071424C-E2B8-4223-B636-F596D050CB14}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosIU", "GestionPagosMod\GestionPagosIU\GestionPagosIU.vbproj", "{D3CFC3AF-98CA-46F9-A278-AFB57500F908}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosLNC", "GestionPagosMod\GestionPagosLNC\GestionPagosLNC.vbproj", "{5F4A81D8-A3F4-4EF1-A878-8888A51FF92C}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasAD", "SegurosMod\PolizasMod\PolizasAD\PolizasAD.vbproj", "{6C892444-C723-4740-871A-3CF6BF2959E4}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TrabajosAD", "TrabajosMod\TrabajosAD\TrabajosAD.vbproj", "{0A8DCB09-B13F-4727-9739-A551B83B170B}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosAD", "RiesgosVehiculosMod\RiesgosVehiculosAD\RiesgosVehiculosAD.vbproj", "{D1E69286-73B7-4F6C-AC39-C74D5BF25C07}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosTest", "RiesgosVehiculosMod\RiesgosVehiculosTest\RiesgosVehiculosTest.vbproj", "{A12A4522-B191-4DD4-AE28-0258E4B99423}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{06B9F0EC-DEBD-40C8-9D1E-5FDC3C47EECE}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 	ProjectSection(SolutionItems) = preProject
 		localtestrun.testrunconfig = localtestrun.testrunconfig
+		SolucionFN1.vsmdi = SolucionFN1.vsmdi
 	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasTest", "SegurosMod\PolizasMod\PolizasTest\PolizasTest.vbproj", "{F0F61F25-2DAA-4C83-86CA-D0C455AE2482}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TrabajosTest", "TrabajosMod\TrabajosTest\TrabajosTest.vbproj", "{50CAC6C7-6DB3-4B18-BF9E-DF563D8799AD}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionPagosLNTest", "GestionPagosMod\GestionPagosLNTest\GestionPagosLNTest.vbproj", "{C7F934E0-1876-49CA-8F1C-2E02FAABE3D1}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosLN", "RiesgosVehiculosMod\RiesgosVehiculosLN\RiesgosVehiculosLN.vbproj", "{384E6C78-9842-4C44-83CA-0507E32B03AD}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MarcoIUWinMod", "MarcoIUWinMod", "{373B0400-5379-4F29-B6B9-1B0699002EC7}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FNMarcoIUWin", "MarcoIUWinMod\FNMarcoIUWin\FNMarcoIUWin.vbproj", "{D5AB286D-0E34-493F-AE3C-9583A6442EF3}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosTest2", "RiesgosVehiculosMod\RiesgosVehiculosTest2\RiesgosVehiculosTest2.vbproj", "{709D8066-BCC1-4188-A352-ADF3D1CB2865}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LocalizacionesAD", "LocalizacionesMod\LocalizacionesAD\LocalizacionesAD.vbproj", "{9BA6EA03-B25C-44AC-A3A4-7376AA61A72D}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LocalizacionesFS", "LocalizacionesMod\LocalizacionesFS\LocalizacionesFS.vbproj", "{8C482FFC-36E9-4923-AEF1-561EBF6F6A24}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LocalizacionesLN", "LocalizacionesMod\LocalizacionesLN\LocalizacionesLN.vbproj", "{E76F9E7F-E80E-4150-B295-364D22E28E66}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "LocalizacionesAS", "LocalizacionesMod\LocalizacionesAS\LocalizacionesAS.vbproj", "{65ECE918-5E5B-4921-ADD2-ECAA4CD802AD}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasIU", "SegurosMod\PolizasMod\PolizasIU\PolizasIU.vbproj", "{35C9F4FF-98E3-4B93-9BD4-488FECE7B5E2}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasLN", "SegurosMod\PolizasMod\PolizasLN\PolizasLN.vbproj", "{823CA5CC-C8EE-4EF2-ABFE-4E76A5FEE8F2}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehículosFS", "RiesgosVehiculosMod\RiesgosVehículosFS\RiesgosVehículosFS.vbproj", "{5A078767-766E-497B-8DAE-A09A7C6958B7}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosAS", "RiesgosVehiculosMod\RiesgosVehiculosAS\RiesgosVehiculosAS.vbproj", "{6946790A-2329-4922-A129-68C7DBDB9E9A}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasLNC", "SegurosMod\PolizasMod\PolizasLNC\PolizasLNC.vbproj", "{876CAF76-D4FD-4DB9-B9C4-B343F5930541}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosIUForms", "RiesgosVehiculosMod\RiesgosVehiculosIU\RiesgosVehiculosIUForms.vbproj", "{C4C6EECD-70C5-46E3-86E5-5CBE0CAD33E6}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosIUControles", "RiesgosVehiculosMod\RiesgosVehiculosIUControles\RiesgosVehiculosIUControles.vbproj", "{2DB7705E-DF8C-4C28-87DC-ED62E9C8E065}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosIUControladores", "RiesgosVehiculosMod\RiesgosVehiculosIUControladores\RiesgosVehiculosIUControladores.vbproj", "{7C5724D2-792D-49A3-BE8B-AD8BC95D7D44}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasFS", "SegurosMod\PolizasMod\PolizasFS\PolizasFS.vbproj", "{28EF22B9-893E-4D3A-B66A-F9FAD913ED39}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PolizasAS", "SegurosMod\PolizasMod\PolizasAS\PolizasAS.vbproj", "{8928373C-4DD2-4C23-BAE4-F82F3C439F14}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RiesgosVehiculosLNC", "RiesgosVehiculosMod\RiesgosVehiculosLNC\RiesgosVehiculosLNC.vbproj", "{DE71BB7A-9198-4430-97A2-F5EAEAB24FBB}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVDN", "..\Proyectos\AMV\GestionSegurosAMV\GSAMVDN\GSAMVDN.vbproj", "{16660E87-32B1-447B-B0AF-3C9C9F5156D9}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVAD", "..\Proyectos\AMV\GestionSegurosAMV\Servidor\GestionSegurosAMVAD\GSAMVAD.vbproj", "{324BA0D5-8E64-44BA-A28E-5C4DA059D701}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVLN", "..\Proyectos\AMV\GestionSegurosAMV\Servidor\GestionSegurosAMVLN\GSAMVLN.vbproj", "{A4A37217-3B4A-4268-B5E8-60B911CAD302}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVFS", "..\Proyectos\AMV\GestionSegurosAMV\Servidor\GSAMVFS\GSAMVFS.vbproj", "{C2B57ECA-35B9-4E0D-AB13-430E198EF279}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "InformesTemporal", "..\Proyectos\AMV\GestionSegurosAMV\Servidor\InformesTemporal\InformesTemporal.vbproj", "{AEBAFE2B-AC5B-44F1-BA47-21A3908D8D61}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GestionSegurosAMVTEST", "..\Proyectos\AMV\GestionSegurosAMV\Auxiliares\GestionSegurosAMVTEST\GestionSegurosAMVTEST.vbproj", "{B0F4EA14-6258-460B-A8C3-EF73F223F8A3}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVAS", "..\Proyectos\AMV\GestionSegurosAMV\Cliente\GSAMVAS\GSAMVAS.vbproj", "{375A32D1-884E-414D-B354-A4A5138E2874}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVControladores", "..\Proyectos\AMV\GestionSegurosAMV\Cliente\GSAMVControladores\GSAMVControladores.vbproj", "{8DEDD927-6104-4448-93AA-ACBAB04F5CE9}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVControlesP", "..\Proyectos\AMV\GestionSegurosAMV\Cliente\GSAMVControlesP\GSAMVControlesP.vbproj", "{81490743-D485-482D-AADD-8436C937F539}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GSAMVMarcoIUWin", "..\Proyectos\AMV\GestionSegurosAMV\Cliente\GSAMVMarcoIUWin\GSAMVMarcoIUWin.vbproj", "{CD4A3ADF-FB88-45B4-8DF0-777EE1CB0C88}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AMVAplicacion", "AMVAplicacion", "{9707A7DC-4D87-4119-864B-A0BB713A6E79}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cliente", "Cliente", "{72BE0CE1-409F-4BFE-9043-51411DE9114C}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Servidor", "Servidor", "{3D2DE46B-286C-490B-B82C-DAE0B4D2FBE5}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mixto", "Mixto", "{FBFF3FF7-2E8E-4D9E-8CB7-B89DFF32A75B}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auxiliares", "Auxiliares", "{44E88D27-C0DC-42A9-9236-9EA3CA0C5A9A}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AplicacionGDE", "AplicacionGDE", "{8CA61EFF-E359-4F14-BFC0-3D282722FA2C}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "AmvDocumentosDN", "..\Proyectos\AMV\GDocEntrantes\MixtosDir\AmvDocumentosDN\AmvDocumentosDN.vbproj", "{ACBA2D27-2BEA-4ADB-B57F-B3145B0D6265}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Mixtos", "Mixtos", "{89C3A26C-968F-4A6E-A605-78F4BA139EFB}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Servidor", "Servidor", "{CD544897-A7BB-4091-A777-2C582E116100}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GDocEntrantesAD", "..\Proyectos\AMV\GDocEntrantes\ServidorDir\GDocEntrantesAD\GDocEntrantesAD.vbproj", "{6E7A3CED-4A85-4722-80C1-8F68E1F7A49A}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GDocEntrantesLN", "..\Proyectos\AMV\GDocEntrantes\ServidorDir\GDocEntrantesLN\GDocEntrantesLN.vbproj", "{B1906E3C-FD79-406A-A599-F66182D4EC26}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GDocEntrantesFS", "..\Proyectos\AMV\GDocEntrantes\ServidorDir\GDocEntrantesFS\GDocEntrantesFS.vbproj", "{77EB6384-B6C5-468C-8615-7FD0EA3A7E4A}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GDocEntrantesFSTest", "..\Proyectos\AMV\GDocEntrantes\ServidorDir\GDocEntrantesFSTest\GDocEntrantesFSTest.vbproj", "{F5CFAC79-48D1-40FF-9398-EE71561DD054}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GDocEntrantesGBDLN", "..\Proyectos\AMV\GDocEntrantes\ServidorDir\GDocEntrantesGBDLN\GDocEntrantesGBDLN.vbproj", "{1DDCB77A-A687-49CA-B0A9-ADF183278EFF}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clientes", "Clientes", "{E0F7B66B-7C0C-4BAB-8E3F-9F812183D8D5}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClienteSonda", "ClienteSonda", "{9A8BBBAA-566C-47C6-A1B3-EBE6CBE07ACF}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClienteMarco", "ClienteMarco", "{87558B6D-3F45-46FB-8124-4CDEE250A20E}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ClienteAdminAS", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteMarcoDir\ClienteAdminAS\ClienteAdminAS.vbproj", "{AB1E075A-0EB4-437D-A217-D85A87DD32F5}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ClienteAdminLNC", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteMarcoDir\ClienteAdminLNC\ClienteAdminLNC.vbproj", "{2355A368-B5B2-48AF-A6F0-BBCE29CE1B35}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClienteDocEntrantesDir", "ClienteDocEntrantesDir", "{E2948BC1-CFD0-451D-86D3-E97DB7AC2AE0}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ClienteAS", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteDocEntrantesDir\ClienteAS\ClienteAS.vbproj", "{336BE66C-C007-474B-B042-DCC20FCD4BA3}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Controladores", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteDocEntrantesDir\Controladores\Controladores.vbproj", "{E8BBF757-F76A-4D13-891A-811A579123CF}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GDocEntrantes", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteDocEntrantesDir\GDocEntrantes\GDocEntrantes.vbproj", "{B102BBB6-F658-4A44-B55E-A34D118F9C6C}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ClienteAdmin", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteMarcoDir\ClienteAdmin\ClienteAdmin.vbproj", "{1FB96093-BDCE-426D-B835-5206871B1188}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ClienteSonda", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteSondaDir\ClienteSonda\ClienteSonda.vbproj", "{F598C57E-C4F0-4D0C-A206-EA34BC1A12DC}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ClienteSondaAS", "..\Proyectos\AMV\GDocEntrantes\ClientesDir\ClienteSondaDir\ClienteSondaAS\ClienteSondaAS.vbproj", "{E7EEE9CE-D6BB-4EC6-A651-8B21166E8AA4}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RiesgosVehiculosAIQBLN", "RiesgosVehiculosMod\RiesgosVehiculosAIQBLN\RiesgosVehiculosAIQBLN.csproj", "{753A7ED8-DA83-4A59-BC1B-0F94A6E39572}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RiesgosVehiculosAIQBAD", "RiesgosVehiculosMod\RiesgosVehiculosAIQBAD\RiesgosVehiculosAIQBAD.csproj", "{FF05E160-B610-4677-B470-C653C85FBE10}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FicherosWebDF", "..\Proyectos\AMV\GestionSegurosAMV\Servidor\FicherosWeb\FicherosWebDF\FicherosWebDF.csproj", "{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
@@ -908,6 +525,9 @@ Global
 		SccProjectTopLevelParentUniqueName74 = SolucionFN.sln
 		SccProjectName74 = ../Proyectos/AMV/GestionSegurosAMV/Servidor/FicherosWeb/FicherosWebDF
 		SccLocalPath74 = ..\\Proyectos\\AMV\\GestionSegurosAMV\\Servidor\\FicherosWeb\\FicherosWebDF
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = SolucionFN1.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET

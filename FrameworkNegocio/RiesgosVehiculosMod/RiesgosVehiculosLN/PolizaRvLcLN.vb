@@ -234,8 +234,8 @@ Public Class PolizaRvLcLN
 
             ' guid de los elementos que pueden requerir un cd
             Dim colguid As List(Of String) = Framework.TiposYReflexion.LN.ListHelper(Of String).Convertir(pPResupuesto.Tarifa.ToHtGUIDs(Nothing, colClones).Keys)
-            If colClones.Count <> 0 Then
-                Throw New Framework.LogicaNegocios.ApplicationExceptionLN(" Exiten " & colguid.Count & " clones para " & pPResupuesto.ToString)
+            If colClones.Count > 4 Then
+                Throw New Framework.LogicaNegocios.ApplicationExceptionLN(" Exiten " & colClones.Count & " clones para " & pPResupuesto.ToString)
             End If
 
 

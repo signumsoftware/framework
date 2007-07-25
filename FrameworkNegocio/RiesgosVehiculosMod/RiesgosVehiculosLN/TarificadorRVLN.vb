@@ -127,11 +127,25 @@ Public Class TarificadorRVLN
 
 
 
+    Public Function longitud(ByVal objeto As Object) As Double
+        Dim serializador As New System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+        Dim ms As New System.IO.MemoryStream
+        serializador.Serialize(ms, objeto)
+        longitud = ms.Length
+        System.Diagnostics.Debug.WriteLine(longitud)
 
+
+
+    End Function
 
     Private Sub TarificarTarifaPrivado(ByVal pTarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal pCuestionarioResuelto As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal pVerificarProductosAplicables As Boolean)
 
         Using tr As New Transaccion
+
+
+
+            Debug.WriteLine(longitud(pTarifa))
+
 
 
             Dim rvm As RiesgosVehiculos.DN.RiesgoMotorDN = pTarifa.Riesgo
@@ -141,6 +155,9 @@ Public Class TarificadorRVLN
             irec = New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RVIRecSumiValorLN
 
             Dim ln As New Framework.ClaseBaseLN.BaseTransaccionConcretaLN
+
+
+
 
             'cargar los datos al irecuperador de valor
             irec.Tarifa = pTarifa
@@ -163,6 +180,10 @@ Public Class TarificadorRVLN
             ' solicitar la tarificacion
             Dim datosTa As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN = pTarifa.DatosTarifa
             pTarifa.Importe = opc.IOperacionDN.GetValor()
+
+
+            Debug.WriteLine(longitud(pTarifa))
+
 
             ' cargar los datos cache generados en la tarificacion
             datosTa.ColOperacionImpuestoRVCache.AddRangeObject(irec.RecuperarResultados(GetType(FN.RiesgosVehiculos.DN.OperacionImpuestoRVCacheDN)))

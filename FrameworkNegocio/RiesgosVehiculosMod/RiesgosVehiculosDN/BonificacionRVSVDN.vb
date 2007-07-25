@@ -6,6 +6,7 @@ Public Class BonificacionRVSVDN
     Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN
 
 
+
 #Region "Atributos"
 
     Protected mIRecSumiValorLN As Framework.Operaciones.OperacionesDN.IRecSumiValorLN ' este no debe guardarse en base de datos
@@ -187,6 +188,14 @@ Public Class BonificacionRVSVDN
 
 #End Region
 
+    Public Sub Limpiar() Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN.Limpiar
+        mIRecSumiValorLN = Nothing
+        ' mColBonificacionRV As ColBonificacionRVDN
+        ' mBonificacion As BonificacionDN
+        ' mOperadoraplicable As String
+        ' mValorCacheado As BonificacionRVDN ' este valor no debe guardarse en base de datos
+
+    End Sub
 End Class
 
 

@@ -472,6 +472,8 @@ Public Class DatosTarifaVehiculosDN
                                         ByVal colOpFrac As ColOperacionFracRVCacheDN, ByVal colOpComisiones As ColOperacionComisionRVCacheDN, _
                                         ByVal colOpBonif As ColOperacionBonificacionRVCacheDN)
 
+
+
         mColOperacionImpuestoRVCache = colOpImp
         mColOperacionModuladorRVCache = colOpMod
         mColOperacionPrimaBaseRVCache = colOpPB
@@ -482,6 +484,7 @@ Public Class DatosTarifaVehiculosDN
 
         AsignarImportesLineasProducto()
 
+        EliminarEntidadesOReferidasOpCache()
     End Sub
 
     Public Sub EliminarEntidadesOReferidasOpCache()

@@ -145,6 +145,8 @@ Public Class RiesgosVehiculosLN
                 irec = opc.IOperacionDN.IRecSumiValorLN
             End If
 
+
+
             irec.DataSoucers.Clear()
             irec.DataResults.Clear()
             '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -188,29 +190,44 @@ Public Class RiesgosVehiculosLN
             irec.DataSoucers.Add(irec.Tarifa)
             irec.DataSoucers.Add(recNivelBonif)
 
+
+
+
             Dim rm As FN.RiesgosVehiculos.DN.RiesgoMotorDN = irec.Tarifa.Riesgo
             irec.DataSoucers.Add(rm.ModeloDatos)
 
+
+
             Dim dTarifaV As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN
             dTarifaV = CType((tarifa).DatosTarifa, FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN) '.Clone()
+
+
 
             If dTarifaV.HeCuestionarioResuelto.EntidadReferida Is Nothing Then
                 btLN = New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
                 dTarifaV.HeCuestionarioResuelto.EntidadReferida = btLN.RecuperarGenerico(dTarifaV.HeCuestionarioResuelto)
             End If
 
+
             irec.DataSoucers.Add(dTarifaV.HeCuestionarioResuelto.EntidadReferida)
 
             opc.IOperacionDN.IRecSumiValorLN = irec
+
+
+
 
             Dim gf As New FN.GestionPagos.DN.GrupoFraccionamientosDN()
             Dim colGPF As New FN.GestionPagos.DN.ColGrupoPagosFraccionadosDN()
             Dim gpf As FN.GestionPagos.DN.GrupoPagosFraccionadosDN
 
+
+
+
             If tipoFraccionamiento Is Nothing Then
                 btLN = New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
                 Dim colFrac As New FN.GestionPagos.DN.ColFraccionamientoDN
                 colFrac.AddRangeObjectUnico(btLN.RecuperarLista(GetType(FN.GestionPagos.DN.FraccionamientoDN)))
+
 
                 For Each fr As FN.GestionPagos.DN.FraccionamientoDN In colFrac.ListaOrdenada()
                     tarifa.Fraccionamiento = fr
@@ -219,10 +236,12 @@ Public Class RiesgosVehiculosLN
                         tipoFraccionamiento = fr
                     Else
                         irec.DataResults.Clear()
+                        Dim fecha As Date = Now
                         tarifa.Importe = opc.IOperacionDN.GetValor()
-
+                        Debug.WriteLine(Now.Subtract(fecha).TotalSeconds)
                         gpf = ObtenerGrupoPagosFraccionados(irec, fr)
                         colGPF.Add(gpf)
+
                     End If
 
                 Next
@@ -232,6 +251,9 @@ Public Class RiesgosVehiculosLN
             tarifa.Fraccionamiento = tipoFraccionamiento
             irec.DataResults.Clear()
             tarifa.Importe = opc.IOperacionDN.GetValor()
+            opc.IOperacionDN.Limpiar()
+
+
             gpf = ObtenerGrupoPagosFraccionados(irec, tipoFraccionamiento)
 
             btLN = New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
@@ -246,6 +268,7 @@ Public Class RiesgosVehiculosLN
 
             'se guarda y se recupera el presupuesto para garantizar que no tiene referenciadas más entidades de las necesarias
             irec.ClearAll()
+            opc.IOperacionDN.Limpiar()
 
             tarifa.ColLineaProducto.AddRange(colLPEliminadas)
 
@@ -254,20 +277,32 @@ Public Class RiesgosVehiculosLN
             End If
 
 
-            Me.GuardarGenerico(tarifa)
+            'Me.GuardarGenerico(tarifa)
+            'Dim miLN As New PolizaRvLcLN()
+            'Dim tarifaBD As TarifaDN
+            'tarifaBD = Me.RecuperarGenerico(tarifa.ID, GetType(TarifaDN))
 
-            Dim miLN As New PolizaRvLcLN()
 
-            Dim tarifaBD As TarifaDN
-            tarifaBD = Me.RecuperarGenerico(tarifa.ID, GetType(TarifaDN))
 
             tr.Confirmar()
 
-            Return tarifaBD
-
+            ' Return tarifaBD
+            Return tarifa
         End Using
 
     End Function
+
+
+    'Public Function longitud(ByVal objeto As Object) As Double
+    '    Dim serializador As New System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+    '    Dim ms As New System.IO.MemoryStream
+    '    serializador.Serialize(ms, objeto)
+    '    longitud = ms.Length
+    '    System.Diagnostics.Debug.WriteLine(longitud)
+
+
+
+    'End Function
 
     Public Sub DesCargarGrafoTarificacion()
         Using tr As New Transaccion()

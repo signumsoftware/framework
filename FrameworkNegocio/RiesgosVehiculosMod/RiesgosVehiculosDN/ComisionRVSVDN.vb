@@ -5,6 +5,7 @@ Public Class ComisionRVSVDN
     Inherits EntidadDN
     Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN
 
+
 #Region "Atributos"
 
     Protected mIRecSumiValorLN As Framework.Operaciones.OperacionesDN.IRecSumiValorLN ' este no debe guardarse en base de datos
@@ -166,6 +167,15 @@ Public Class ComisionRVSVDN
 #End Region
 
 
+    Public Sub Limpiar() Implements Framework.Operaciones.OperacionesDN.ISuministradorValorDN.Limpiar
+        mIRecSumiValorLN = Nothing
+        '  mColComisionRV As ColComisionRVDN
+        '    mCobertura As FN.Seguros.Polizas.DN.CoberturaDN
+        '   mComision As ComisionDN
+        '  mOperadoraplicable As String
+        '    mValorCacheado As ComisionRVDN ' este valor no debe guardarse en base de datos
+
+    End Sub
 End Class
 
 <Serializable()> _
