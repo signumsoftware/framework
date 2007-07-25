@@ -1,4 +1,4 @@
-Public Class Class1
+Public Class Class2
     Dim luisEsFeo As String
     Dim alexEsGaller As String
 
