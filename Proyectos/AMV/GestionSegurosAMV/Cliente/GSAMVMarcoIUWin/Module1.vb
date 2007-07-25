@@ -40,7 +40,7 @@ Module Module1
         tablanavegacion.Add("Presupuesto", New MotorIU.Motor.Destino(GetType(FN.RiesgosVehiculos.IU.Formularios.frmPresupuesto), Nothing))
 
         'formulario de tarifiación prueba
-        tablanavegacion.Add("TarificarPrueba", New MotorIU.Motor.Destino(GetType(FN.RiesgosVehiculos.IU.Formularios.frmTarifa), Nothing))
+        tablanavegacion.Add("TarificarPrueba", New MotorIU.Motor.Destino(GetType(FN.RiesgosVehiculos.IU.Formularios.frmTarifa), GetType(FN.RiesgosVehiculos.IU.Controladores.frmTarifaCtrl)))
 
 
 

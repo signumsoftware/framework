@@ -59,12 +59,15 @@ Public Class ctrlDireccionNoUnica
                 Next
                 Me.tXTVia.Text = direccion.Via
                 Me.txtCodPostal.Text = direccion.CodPostal
-                For Each localidad As FN.Localizaciones.DN.LocalidadDN In Me.cboLocalidad.Items
-                    If localidad.ID = direccion.Localidad.ID Then
-                        Me.cboLocalidad.SelectedItem = localidad
-                        Exit For
-                    End If
-                Next
+
+                ActualizarLocalidad()
+
+                'For Each localidad As FN.Localizaciones.DN.LocalidadDN In Me.cboLocalidad.Items
+                '    If localidad.ID = direccion.Localidad.ID Then
+                '        Me.cboLocalidad.SelectedItem = localidad
+                '        Exit For
+                '    End If
+                'Next
             End If
 
         Catch ex As Exception
@@ -103,28 +106,33 @@ Public Class ctrlDireccionNoUnica
 
     Private Sub txtCodPostal_LostFocus(ByVal sender As Object, ByVal e As System.EventArgs) Handles txtCodPostal.LostFocus
         Try
-            If Not String.IsNullOrEmpty(Me.txtCodPostal.Text.Trim()) Then
-                'formatear a 5 dígitos el cp completando con 0 por la izq
-                While Me.txtCodPostal.Text.Length < 5
-                    Me.txtCodPostal.Text = "0" & Me.txtCodPostal.Text
-                End While
-
-                Me.cboLocalidad.Enabled = True
-
-                'obtener las localidades que le corresponden
-                Me.mColLocalidadesFiltradasporCP = Me.mControlador.ObtenerLocalidadPorCodigoPostal(Me.txtCodPostal.Text.Trim())
-                Me.cboLocalidad.Items.Clear()
-                Me.cboLocalidad.Items.AddRange(Me.mColLocalidadesFiltradasporCP.ToArray())
-                'seleccionamos el 1er elemento por defecto
-                If Me.cboLocalidad.Items.Count <> 0 Then
-                    Me.cboLocalidad.SelectedItem = Me.cboLocalidad.Items(0)
-                End If
-            Else
-                Me.cboLocalidad.Items.Clear()
-                Me.cboLocalidad.Items.AddRange(Me.mColLocalidadesTodas.ToArray())
-            End If
+            ActualizarLocalidad()
         Catch ex As Exception
             MostrarError(ex, "Determinar Localidad por CP")
         End Try
     End Sub
+
+    Private Sub ActualizarLocalidad()
+        If Not String.IsNullOrEmpty(Me.txtCodPostal.Text.Trim()) Then
+            'formatear a 5 dígitos el cp completando con 0 por la izq
+            While Me.txtCodPostal.Text.Length < 5
+                Me.txtCodPostal.Text = "0" & Me.txtCodPostal.Text
+            End While
+
+            Me.cboLocalidad.Enabled = True
+
+            'obtener las localidades que le corresponden
+            Me.mColLocalidadesFiltradasporCP = Me.mControlador.ObtenerLocalidadPorCodigoPostal(Me.txtCodPostal.Text.Trim())
+            Me.cboLocalidad.Items.Clear()
+            Me.cboLocalidad.Items.AddRange(Me.mColLocalidadesFiltradasporCP.ToArray())
+            'seleccionamos el 1er elemento por defecto
+            If Me.cboLocalidad.Items.Count <> 0 Then
+                Me.cboLocalidad.SelectedItem = Me.cboLocalidad.Items(0)
+            End If
+        Else
+            Me.cboLocalidad.Items.Clear()
+            Me.cboLocalidad.Items.AddRange(Me.mColLocalidadesTodas.ToArray())
+        End If
+    End Sub
+
 End Class

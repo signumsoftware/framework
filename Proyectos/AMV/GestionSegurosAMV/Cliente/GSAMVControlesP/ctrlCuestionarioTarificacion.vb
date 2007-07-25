@@ -307,6 +307,9 @@ Public Class ctrlCuestionarioTarificacion
         pregunta = pCuestionario.ColPreguntaDN.RecuperarPrimeroXNombre("TipoCarnet")
         Me.lblTipoCarne.Text = pregunta.TextoPregunta
 
+        pregunta = pCuestionario.ColPreguntaDN.RecuperarPrimeroXNombre("EsUnicoConductor")
+        Me.lblEsConductorUnico.Text = pregunta.TextoPregunta
+
         pregunta = pCuestionario.ColPreguntaDN.RecuperarPrimeroXNombre("MCND")
         Me.lblConductoresAdicionales.Text = pregunta.TextoPregunta
 
@@ -389,6 +392,7 @@ Public Class ctrlCuestionarioTarificacion
         responder(cr, "Email", New ValorTextoCaracteristicaDN(), Me.txtEmail.Text, mFechaEfecto)
         responder(cr, "DireccionEnvio", New FN.RiesgosVehiculos.DN.ValorDireccionNoUnicaCaracteristicaDN(), Me.CtrlDireccionEnvio.DireccionNoUnica, mFechaEfecto)
         responder(cr, "ZONA", New ValorNumericoCaracteristicaDN(), Me.txtCPCondHabitual.Text, mFechaEfecto)
+        responder(cr, "EsUnicoConductor", New ValorBooleanoCaracterisitcaDN(), Me.chkEsUnicoConductor.Checked, mFechaEfecto)
         responder(cr, "Circulacion-Localidad", New FN.RiesgosVehiculos.DN.ValorLocalidadCaracteristicaDN, Me.cboLocalidadCondHabitual.SelectedItem, mFechaEfecto)
         responder(cr, "Marca", New FN.RiesgosVehiculos.DN.ValorMarcaCaracterisitcaDN(), Me.cboMarca.SelectedItem, mFechaEfecto)
         responder(cr, "Modelo", New FN.RiesgosVehiculos.DN.ValorModeloCaracteristicaDN(), Me.cboModelo.SelectedItem, mFechaEfecto)
@@ -447,9 +451,13 @@ Public Class ctrlCuestionarioTarificacion
 
     End Sub
 
-    Private Function AñosSinSiniestro()
+    Private Function AñosSinSiniestro() As Integer
+        Return AñosSinSiniestro(CStr(cboAñosSinSiniestro.SelectedItem))
+    End Function
+
+    Private Function AñosSinSiniestro(ByVal cadena As String) As Integer
         Dim res As Integer = 0
-        If Not Integer.TryParse(CStr(cboAñosSinSiniestro.SelectedItem), res) Then
+        If Not Integer.TryParse(cadena, res) Then
             res = 4
         End If
         Return res
@@ -558,6 +566,7 @@ Public Class ctrlCuestionarioTarificacion
                         Me.CtrlDireccionEnvio.DireccionNoUnica = respuesta.IValorCaracteristicaDN.Valor
                     Case "ZONA"
                         Me.txtCPCondHabitual.Text = respuesta.IValorCaracteristicaDN.Valor.ToString
+                        CargarLocalidadxCP()
                     Case "Circulacion-Localidad"
                         Dim mil As FN.Localizaciones.DN.LocalidadDN = respuesta.IValorCaracteristicaDN.Valor
                         For Each localidad As FN.Localizaciones.DN.LocalidadDN In Me.cboLocalidadCondHabitual.Items
@@ -604,6 +613,8 @@ Public Class ctrlCuestionarioTarificacion
                     Case "MCND"
                         Me.ctrlMulticonductor1.ColDatosConductorAdicional = respuesta.IValorCaracteristicaDN.Valor
                         Me.cboNumeroConductoresAdic.SelectedItem = Me.ctrlMulticonductor1.NumeroConductores
+                    Case "EsUnicoConductor"
+                        Me.chkEsUnicoConductor.Checked = respuesta.IValorCaracteristicaDN.Valor
                     Case "ConductoresAdicionalesConCarnet"
                         Me.chkConductoresAdicTienenCarne.Checked = respuesta.IValorCaracteristicaDN.Valor
                     Case "SiniestroResponsable3años"
@@ -628,7 +639,7 @@ Public Class ctrlCuestionarioTarificacion
                         Me.dtpVencimientoSeguro.Value = respuesta.IValorCaracteristicaDN.Valor
                     Case "AñosSinSiniestro"
                         For Each res As String In Me.cboAñosSinSiniestro.Items
-                            If res = respuesta.IValorCaracteristicaDN.Valor Then
+                            If AñosSinSiniestro(res) = respuesta.IValorCaracteristicaDN.Valor Then
                                 Me.cboAñosSinSiniestro.SelectedItem = res
                                 Exit For
                             End If
@@ -855,11 +866,11 @@ Public Class ctrlCuestionarioTarificacion
 
     Private Sub chkAseguradoVehiculo_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles chkAseguradoVehiculo.CheckedChanged
         Try
-            Me.dtpVencimientoSeguro.Enabled = Me.chkAseguradoVehiculo.Checked
-            Me.cboAñosSinSiniestro.Enabled = Not Me.chkAseguradoVehiculo.Checked
-            Me.optJustCertif.Enabled = Not Me.chkAseguradoVehiculo.Checked
-            Me.optJustCertifRecibo.Enabled = Not Me.chkAseguradoVehiculo.Checked
-            Me.optJustNinguno.Enabled = Not Me.chkAseguradoVehiculo.Checked
+            'Me.dtpVencimientoSeguro.Enabled = Me.chkAseguradoVehiculo.Checked
+            'Me.cboAñosSinSiniestro.Enabled = Not Me.chkAseguradoVehiculo.Checked
+            'Me.optJustCertif.Enabled = Not Me.chkAseguradoVehiculo.Checked
+            'Me.optJustCertifRecibo.Enabled = Not Me.chkAseguradoVehiculo.Checked
+            'Me.optJustNinguno.Enabled = Not Me.chkAseguradoVehiculo.Checked
         Catch ex As Exception
             MostrarError(ex)
         End Try

@@ -1,12 +1,20 @@
+Imports FN.Seguros.Polizas.DN
+Imports FN.RiesgosVehiculos.DN
+
 Public Class frmTarifa
     Inherits MotorIU.FormulariosP.FormularioBase
 
+    Private mControlador As FN.RiesgosVehiculos.IU.Controladores.frmTarifaCtrl
 
     Public Overrides Sub Inicializar()
         MyBase.Inicializar()
+        mControlador = Me.Controlador()
+
         If Not Me.Paquete Is Nothing AndAlso Me.Paquete.Contains("DN") Then
             Dim tarifa As FN.Seguros.Polizas.DN.TarifaDN = Me.Paquete("DN")
             Me.ctrlTarifa1.Tarifa = tarifa
+            ActualizarValoresRenovacion(tarifa)
+
             Me.Text = "Tarifa " & tarifa.ID
 
         End If
@@ -16,20 +24,30 @@ Public Class frmTarifa
 
     Private Sub tsbGuardar_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles tsbGuardar.Click
         Try
-
+            mControlador.GuardarTarifa(ctrlTarifa1.Tarifa)
         Catch ex As Exception
             MostrarError(ex, sender)
         End Try
     End Sub
 
     Private Sub tsbNavegarCuestionario_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles tsbNavegarCuestionario.Click
-        Dim tarifa As FN.Seguros.Polizas.DN.TarifaDN
+        Dim cr As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN
+        Dim datosT As DatosTarifaVehiculosDN
 
         Try
-            tarifa = ctrlTarifa1.Tarifa
+            datosT = CType(ctrlTarifa1.Tarifa.DatosTarifa, DatosTarifaVehiculosDN)
+            cr = mControlador.RecuperarCuestionarioR(datosT.HeCuestionarioResuelto)
+
+            If Me.Paquete.ContainsKey("CuestionarioResuelto") Then
+                Me.Paquete.Item("CuestionarioResuelto") = cr
+            Else
+                Me.Paquete.Add("CuestionarioResuelto", cr)
+            End If
+
+            Me.cMarco.Navegar("Cuestionario1", Me, Me.MdiParent, MotorIU.Motor.TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
 
         Catch ex As Exception
-            MostrarError(ex, sender)
+            MostrarError(ex)
         End Try
     End Sub
 
@@ -82,10 +100,12 @@ Public Class frmTarifa
         Dim valorB As Double
 
         Try
-            valorB = CalcularValorBonificacion()
-            txtBonificacionActual.Text = valorB
-            Me.ctrlTarifa1.Tarifa.DatosTarifa.ValorBonificacion = valorB
-            ActualizacionNivelBonificacion(Me.ctrlTarifa1.Tarifa)
+            If Me.chkTarifaRenovacion.Checked Then
+                valorB = CalcularValorBonificacion()
+                txtBonificacionActual.Text = valorB
+                Me.ctrlTarifa1.Tarifa.DatosTarifa.ValorBonificacion = valorB
+                ActualizacionNivelBonificacion(Me.ctrlTarifa1.Tarifa)
+            End If
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -151,6 +171,12 @@ Public Class frmTarifa
         Return resultado
 
     End Function
+
+    Private Sub ActualizarValoresRenovacion(ByVal tarifa As TarifaDN)
+        Me.txtNumSiniestros.Text = 0
+        Me.txtBonificacionActual.Text = tarifa.DatosTarifa.ValorBonificacion
+        ActualizacionNivelBonificacion(tarifa)
+    End Sub
 
 #End Region
 

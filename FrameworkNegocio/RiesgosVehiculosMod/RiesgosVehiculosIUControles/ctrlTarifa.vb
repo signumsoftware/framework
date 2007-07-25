@@ -330,6 +330,7 @@ Public Class ctrlTarifa
         Me.dtgProductos.Columns("Descuento").Width = 100
         Me.dtgProductos.Columns("Descuento").ReadOnly = True
         Me.dtgProductos.ResumeLayout()
+
     End Sub
 
     Private Sub RellenarTodosProductos()

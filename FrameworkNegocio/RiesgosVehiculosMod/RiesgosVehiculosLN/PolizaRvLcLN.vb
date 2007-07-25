@@ -154,7 +154,7 @@ Public Class PolizaRvLcLN
             colClones = Nothing
             pPR.ToHtGUIDs(Nothing, colClones)
             If colClones.Count > 0 Then
-                Beep()
+                'Beep()
             End If
 
             ' ++ guardar
@@ -171,7 +171,7 @@ Public Class PolizaRvLcLN
             colClones = Nothing
             pPR.ToHtGUIDs(Nothing, colClones)
             If colClones.Count > 0 Then
-                Beep()
+                'Beep()
             End If
 
             ' ++ Crear Revincular los cajones documento del presupuesto
@@ -183,7 +183,7 @@ Public Class PolizaRvLcLN
             colClones = Nothing
             pPR.ToHtGUIDs(Nothing, colClones)
             If colClones.Count > 0 Then
-                Beep()
+                'Beep()
             End If
 
 
@@ -1384,11 +1384,11 @@ Public Class PolizaRvLcLN
         ImportePrimerPago = importeCompensadoTarifa - (ImportePagosSucesivos * (numerodePagos - 1))
 
         If Not (ImportePagosSucesivos * (numerodePagos - 1)) + ImportePrimerPago = importeCompensadoTarifa Then
-            Throw (New ApplicationException("error en el claculo valores no cuaran "))
+            Throw (New ApplicationException("error en el cálculo, valores no cuadran"))
         End If
 
         If ImportePrimerPago < 0 OrElse ImportePrimerPago < 0 Then
-            Throw (New ApplicationException("error en el claculo generacion de importe negativo"))
+            Throw (New ApplicationException("error en el cálculo generación de importe negativo"))
         End If
 
         Dim colp As New FN.GestionPagos.DN.ColPagoDN
@@ -1422,7 +1422,7 @@ Public Class PolizaRvLcLN
                 Me.Guardar(Of FN.GestionPagos.DN.PagoDN)(pago)
             Else
                 ' generacion de un pago con importe 0
-                Beep()
+                'Beep()
             End If
 
 

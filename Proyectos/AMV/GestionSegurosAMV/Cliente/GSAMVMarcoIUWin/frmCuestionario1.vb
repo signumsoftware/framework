@@ -41,7 +41,12 @@ Public Class frmCuestionario1
                 Dim cr As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN = Me.CtrlCuestionarioTarificacion1.CuestionarioResuelto
 
                 If Me.Paquete.ContainsKey("SoloCuestionario") AndAlso Me.Paquete.Item("SoloCuestionario") Then
-                    Me.Paquete.Add("DN", cr)
+                    If Paquete.ContainsKey("DN") Then
+                        Paquete.Item("DN") = cr
+                    Else
+                        Me.Paquete.Add("DN", cr)
+                    End If
+
                     Me.Close()
                 Else
                     If cr.ColRespuestaDN.RecuperarRespuestaaxPregunta("TarificacionPrueba").IValorCaracteristicaDN.Valor Then
@@ -49,12 +54,22 @@ Public Class frmCuestionario1
                         tiempoTarificado.Anyos = 1
                         tarifa = mControlador.GenerarTarifaxCuestionarioRes(cr, tiempoTarificado)
 
-                        Me.Paquete.Add("DN", tarifa)
+                        If Paquete.ContainsKey("DN") Then
+                            Paquete.Item("DN") = tarifa
+                        Else
+                            Me.Paquete.Add("DN", tarifa)
+                        End If
+
                         Me.cMarco.Navegar("TarificarPrueba", Me, Me.MdiParent, MotorIU.Motor.TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
                     Else
                         pr = mControlador.GenerarPresupuestoxCuestionarioRes(cr)
 
-                        Me.Paquete.Add("DN", pr)
+                        If Paquete.ContainsKey("DN") Then
+                            Paquete.Item("DN") = pr
+                        Else
+                            Me.Paquete.Add("DN", pr)
+                        End If
+
                         Me.cMarco.Navegar("FG", Me, Me.MdiParent, MotorIU.Motor.TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
                     End If
                 End If

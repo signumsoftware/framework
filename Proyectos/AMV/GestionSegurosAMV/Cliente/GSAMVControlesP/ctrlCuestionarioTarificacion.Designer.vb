@@ -107,7 +107,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.lblVendedor = New System.Windows.Forms.Label
         Me.grpDatosCliente = New System.Windows.Forms.GroupBox
         Me.chkEsUnicoConductor = New ControlesPBase.CheckBoxP
-        Me.Label1 = New System.Windows.Forms.Label
+        Me.lblEsConductorUnico = New System.Windows.Forms.Label
         Me.cmdMasdirecciones = New ControlesPBase.BotonP
         Me.cmdMasEmail = New ControlesPBase.BotonP
         Me.cmdMasFax = New ControlesPBase.BotonP
@@ -340,7 +340,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.chkTitularPermisoCirculacion.Location = New System.Drawing.Point(352, 341)
         Me.chkTitularPermisoCirculacion.Name = "chkTitularPermisoCirculacion"
         Me.chkTitularPermisoCirculacion.Size = New System.Drawing.Size(12, 11)
-        Me.chkTitularPermisoCirculacion.TabIndex = 6
+        Me.chkTitularPermisoCirculacion.TabIndex = 7
         Me.chkTitularPermisoCirculacion.UseVisualStyleBackColor = True
         '
         'lblTitularPermisoCirculacion
@@ -362,7 +362,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.chkPermisoCirculacion.Location = New System.Drawing.Point(352, 296)
         Me.chkPermisoCirculacion.Name = "chkPermisoCirculacion"
         Me.chkPermisoCirculacion.Size = New System.Drawing.Size(12, 11)
-        Me.chkPermisoCirculacion.TabIndex = 5
+        Me.chkPermisoCirculacion.TabIndex = 6
         Me.chkPermisoCirculacion.UseVisualStyleBackColor = True
         '
         'lblPermisoCirculacion
@@ -384,7 +384,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.chkSeguroCancelado.Location = New System.Drawing.Point(352, 253)
         Me.chkSeguroCancelado.Name = "chkSeguroCancelado"
         Me.chkSeguroCancelado.Size = New System.Drawing.Size(12, 11)
-        Me.chkSeguroCancelado.TabIndex = 4
+        Me.chkSeguroCancelado.TabIndex = 5
         Me.chkSeguroCancelado.UseVisualStyleBackColor = True
         '
         'lblSeguroCancelado
@@ -405,7 +405,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.chkTransporte.Location = New System.Drawing.Point(352, 204)
         Me.chkTransporte.Name = "chkTransporte"
         Me.chkTransporte.Size = New System.Drawing.Size(12, 11)
-        Me.chkTransporte.TabIndex = 3
+        Me.chkTransporte.TabIndex = 4
         Me.chkTransporte.UseVisualStyleBackColor = True
         '
         'lblTransporte
@@ -427,7 +427,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.chkConduccionEbrio.Location = New System.Drawing.Point(352, 163)
         Me.chkConduccionEbrio.Name = "chkConduccionEbrio"
         Me.chkConduccionEbrio.Size = New System.Drawing.Size(12, 11)
-        Me.chkConduccionEbrio.TabIndex = 2
+        Me.chkConduccionEbrio.TabIndex = 3
         Me.chkConduccionEbrio.UseVisualStyleBackColor = True
         '
         'chkInfraccionRetirada
@@ -997,7 +997,6 @@ Partial Class ctrlCuestionarioTarificacion
         '
         Me.chkTarificacionPrueba.AutoSize = True
         Me.chkTarificacionPrueba.ColorBaseIluminacion = System.Drawing.Color.Orange
-        Me.chkEstaMatriculado.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.chkTarificacionPrueba.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(165, Byte), Integer), CType(CType(0, Byte), Integer))
         Me.chkTarificacionPrueba.Location = New System.Drawing.Point(258, 191)
         Me.chkTarificacionPrueba.Name = "chkTarificacionPrueba"
@@ -1105,7 +1104,7 @@ Partial Class ctrlCuestionarioTarificacion
         Me.grpDatosCliente.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
                     Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.grpDatosCliente.Controls.Add(Me.chkEsUnicoConductor)
-        Me.grpDatosCliente.Controls.Add(Me.Label1)
+        Me.grpDatosCliente.Controls.Add(Me.lblEsConductorUnico)
         Me.grpDatosCliente.Controls.Add(Me.cmdMasdirecciones)
         Me.grpDatosCliente.Controls.Add(Me.cmdMasEmail)
         Me.grpDatosCliente.Controls.Add(Me.cmdMasFax)
@@ -1148,14 +1147,14 @@ Partial Class ctrlCuestionarioTarificacion
         Me.chkEsUnicoConductor.TabIndex = 27
         Me.chkEsUnicoConductor.UseVisualStyleBackColor = True
         '
-        'Label1
+        'lblEsConductorUnico
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(17, 309)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(213, 13)
-        Me.Label1.TabIndex = 26
-        Me.Label1.Text = "¿Es usted el único conductor del vehículo?"
+        Me.lblEsConductorUnico.AutoSize = True
+        Me.lblEsConductorUnico.Location = New System.Drawing.Point(17, 309)
+        Me.lblEsConductorUnico.Name = "lblEsConductorUnico"
+        Me.lblEsConductorUnico.Size = New System.Drawing.Size(213, 13)
+        Me.lblEsConductorUnico.TabIndex = 26
+        Me.lblEsConductorUnico.Text = "¿Es usted el único conductor del vehículo?"
         '
         'cmdMasdirecciones
         '
@@ -1395,13 +1394,13 @@ Partial Class ctrlCuestionarioTarificacion
         Me.Controls.Add(Me.cmdAnterior)
         Me.Controls.Add(Me.cmdSiguiente)
         Me.Controls.Add(Me.cmdTerminarCuestionario)
+        Me.Controls.Add(Me.grpDatosVehiculo)
         Me.Controls.Add(Me.grpDatosIniciales)
         Me.Controls.Add(Me.grpDatosCliente)
         Me.Controls.Add(Me.grpConductoresAdicionales)
         Me.Controls.Add(Me.grpAntecedentes)
         Me.Controls.Add(Me.grpBonificaciones)
         Me.Controls.Add(Me.grpCarnetConducir)
-        Me.Controls.Add(Me.grpDatosVehiculo)
         Me.Name = "ctrlCuestionarioTarificacion"
         Me.Size = New System.Drawing.Size(679, 447)
         Me.grpConductoresAdicionales.ResumeLayout(False)
@@ -1524,7 +1523,7 @@ Partial Class ctrlCuestionarioTarificacion
     Friend WithEvents cmdSiguiente As ControlesPBase.BotonP
     Friend WithEvents cmdAnterior As ControlesPBase.BotonP
     Friend WithEvents chkEsUnicoConductor As ControlesPBase.CheckBoxP
-    Friend WithEvents Label1 As System.Windows.Forms.Label
+    Friend WithEvents lblEsConductorUnico As System.Windows.Forms.Label
     Friend WithEvents lblConduccionEbrio As System.Windows.Forms.Label
     Friend WithEvents chkConduccionEbrio As ControlesPBase.CheckBoxP
     Friend WithEvents cboAñosSinSiniestro As System.Windows.Forms.ComboBox

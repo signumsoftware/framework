@@ -80,7 +80,7 @@ Public Class CargadorPrimasBaseAD
                         ColImpuestoRV.Remove(ColImpuestoRVInconsistentes.Item(0))
 
                     Case Framework.DatosNegocio.IntSolapadosOContenido.Solapados
-                        Beep()
+                        'Beep()
 
                 End Select
 
@@ -181,8 +181,8 @@ Public Class CargadorPrimasBaseAD
             ' la caracteristica y el modu van en relacion 1 -1
 
             If dr("ValorCoeficiente") = 0 Then
-                Beep()
-                Debug.WriteLine(dr("TipoCoeficiente") & dr("InicioIntervalo") & "-" & dr("FinalIntervalo") & "-" & ConvertirFecha(dr("fi")) & "-" & ConvertirFecha(dr("ff")))
+                'Beep()
+                'Debug.WriteLine(dr("TipoCoeficiente") & dr("InicioIntervalo") & "-" & dr("FinalIntervalo") & "-" & ConvertirFecha(dr("fi")) & "-" & ConvertirFecha(dr("ff")))
             Else
 
 
@@ -362,8 +362,8 @@ Public Class CargadorPrimasBaseAD
             ' la caracteristica y el modu van en relacion 1 -1
 
             If dr("ValorCoeficiente") = 0 Then
-                Beep()
-                Debug.WriteLine(dr("TipoCoeficiente") & dr("InicioIntervalo") & "-" & dr("FinalIntervalo") & "-" & ConvertirFecha(dr("fi")) & "-" & ConvertirFecha(dr("ff")))
+                'Beep()
+                'Debug.WriteLine(dr("TipoCoeficiente") & dr("InicioIntervalo") & "-" & dr("FinalIntervalo") & "-" & ConvertirFecha(dr("fi")) & "-" & ConvertirFecha(dr("ff")))
             Else
 
                 Dim modu As FN.RiesgosVehiculos.DN.ModuladorDN = ColModulador.RecuperarPrimeroXNombre(dr("TipoCoeficiente"))
@@ -652,7 +652,7 @@ Public Class CargadorPrimasBaseAD
                         colComisionesRV.Remove(colComisionesRVInconsistentes.Item(0))
 
                     Case Framework.DatosNegocio.IntSolapadosOContenido.Solapados
-                        Beep()
+                        'Beep()
 
                 End Select
 
@@ -960,7 +960,7 @@ Public Class CargadorPrimasBaseAD
                     Case Framework.DatosNegocio.IntSolapadosOContenido.Iguales
                         colFrcRV.Remove(colFracRVInconsistentes.Item(0))
                     Case Framework.DatosNegocio.IntSolapadosOContenido.Solapados
-                        Beep()
+                        'Beep()
                 End Select
 
             End If
@@ -1031,8 +1031,8 @@ Public Class CargadorPrimasBaseAD
             ' la caracteristica y el modu van en relacion 1 -1
 
             If dr("ValorCoeficiente") = 0 Then
-                Beep()
-                Debug.WriteLine(dr("TipoCoeficiente") & " - " & dr("InicioIntervalo") & "-" & dr("FinalIntervalo") & "-" & ConvertirFecha(dr("fi")) & "-" & ConvertirFecha(dr("ff")))
+                'Beep()
+                'Debug.WriteLine(dr("TipoCoeficiente") & " - " & dr("InicioIntervalo") & "-" & dr("FinalIntervalo") & "-" & ConvertirFecha(dr("fi")) & "-" & ConvertirFecha(dr("ff")))
             Else
 
                 bonif = ColBonif.RecuperarPrimeroXNombre(dr("TipoCoeficiente"))

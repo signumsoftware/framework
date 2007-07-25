@@ -108,6 +108,7 @@ Imports Framework.Cuestionario.CuestionarioDN
             CrearPregunta(c, "FechaCarnet", TipoCaracteristica.Fecha, "Fecha del carné", colCaracteristicas)
             CrearPregunta(c, "CARN", TipoCaracteristica.Numerica, "Años de carné", colCaracteristicas)
             CrearPregunta(c, "TipoCarnet", TipoCaracteristica.Numerica, "Tipo de carné", colCaracteristicas)
+            CrearPregunta(c, "EsUnicoConductor", TipoCaracteristica.Booleano, "¿Es usted el único conductor del vehículo?", colCaracteristicas)
             CrearPregunta(c, "ColConductoresAdicionales", TipoCaracteristica.Objeto, "Puede designar de 1 a 4 conductor(es) ocasional(es)." & Chr(10) & Chr(13) & "Estos conductores deben ser miembros de su familia y disponer del carné necesario para el vehículo a asegurar", colCaracteristicas)
             CrearPregunta(c, "MCND", TipoCaracteristica.Numerica, "EdadMCND", colCaracteristicas)
             CrearPregunta(c, "ConductoresAdicionalesConCarnet", TipoCaracteristica.Booleano, "¿Los conductores adicionales son titulares del carné B desde hace más de 3 años o del carné A o A1?", colCaracteristicas)
