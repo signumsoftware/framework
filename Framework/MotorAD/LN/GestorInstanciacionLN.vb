@@ -1678,12 +1678,12 @@ Namespace LN
                             ' la huella fue actualizada luego no requiere ser guardad denuevo
                             mColIntanciasGuardadas.Add(pObjeto)
                             oIEntidadDN = pObjeto
-                            Debug.WriteLine("huella actualizada tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
+                            'Debug.WriteLine("huella actualizada tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
                             Return OperacionGuardarLN.Modificar
                         Else
                             ' la huella no se actualizo y debe de continuar con el codigo habitual
                             'mColIntanciasGuardadas.Add(pObjeto)
-                            Beep()
+                            'Beep()
                         End If
                     Else
                         mColIntanciasGuardadas.Add(pObjeto)
@@ -1869,10 +1869,10 @@ Namespace LN
                 If TypeOf pObjeto Is EntidadDN Then
                     Dim edn As EntidadDN
                     edn = pObjeto
-                    Debug.WriteLine("ERROR: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & " er:" & ex.ToString)
+                    'Debug.WriteLine("ERROR: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & " er:" & ex.ToString)
                     Throw New NingunaFilaAfectadaException("ERROR: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & " er:" & ex.ToString)
                 Else
-                    Debug.WriteLine("ERROR: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & " er:" & ex.ToString)
+                    'Debug.WriteLine("ERROR: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & " er:" & ex.ToString)
                     Throw New NingunaFilaAfectadaException("ERROR: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & " er:" & ex.ToString)
                 End If
                 Throw

@@ -98,7 +98,7 @@ Public Class MNavDatosAD
 
 
             If infoReferidora.CamposRef.Count > 1 Then
-                Beep() ' de momento soolo soporta una entidad en la col
+                'Beep() ' de momento soolo soporta una entidad en la col
             End If
 
             For Each camporef In infoReferidora.CamposRef

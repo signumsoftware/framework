@@ -147,7 +147,7 @@ Public Class ctrlGD
                 Catch ex2 As Exception
                     System.Windows.Forms.MessageBox.Show(ex2.Message)
 
-                    Debug.WriteLine("Error: tipo no encontrado")
+                    'Debug.WriteLine("Error: tipo no encontrado")
                 End Try
             End Try
 
@@ -345,7 +345,7 @@ Public Class ctrlGD
                 tamaño += cag.Height
                 'cag.BackColor = Color.Yellow
             Next
-            Debug.WriteLine(tamaño)
+            'Debug.WriteLine(tamaño)
             ControlDeDimension(tamaño)
 
             mTamañoResultanteVinculacionDN = tamaño

@@ -28,7 +28,7 @@ Namespace Framework.AS
                 If Not mLocalizacionServicioGeneral Is Nothing AndAlso mLocalizacionServicioGeneral <> "" Then
                     For Each cadena As String In mLocalizacionServidorReemplazar
                         str = str.Replace(cadena, mLocalizacionServicioGeneral)
-                        Debug.WriteLine(str)
+                        'Debug.WriteLine(str)
                     Next
 
                     Return str
@@ -36,7 +36,7 @@ Namespace Framework.AS
                 End If
             End If
 
-            Debug.WriteLine(url)
+            'Debug.WriteLine(url)
 
             Return url
 

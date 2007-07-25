@@ -387,14 +387,14 @@ Namespace Arboles
 
 
             For Each nh In Me.mHijos
-                Debug.WriteLine(nh.Nombre)
+                'Debug.WriteLine(nh.Nombre)
 
                 Dim nodoSalvado As Boolean = False
 
 
 
                 For Each nhb In phijos
-                    Debug.WriteLine(nhb.Nombre)
+                    'Debug.WriteLine(nhb.Nombre)
 
                     If nh.GUID = nhb.GUID Then
                         nodoSalvado = True

@@ -136,9 +136,9 @@ Public MustInherit Class GBDBase
                     ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
                     Try
                         sqlElim = "ALTER TABLE " & nombretabla & " DROP CONSTRAINT  " & NombreRelacion
-                        Debug.WriteLine(sqlElim)
+                        'Debug.WriteLine(sqlElim)
                         ej.EjecutarNoConsulta(sqlElim)
-                        Debug.WriteLine("OK")
+                        'Debug.WriteLine("OK")
                     Catch ex As Exception
                         Debug.WriteLine("FALLO")
                     End Try

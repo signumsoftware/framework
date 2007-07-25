@@ -77,7 +77,7 @@ Imports System.Collections
                 gi = New GestorInstanciacionLN(Transaccion.Actual, Recurso.Actual)
                 Dim entidad As EntidadDN = gi.Recuperar(CType(il(0), HEDN))
 
-                System.Diagnostics.Debug.WriteLine(entidad)
+                'System.Diagnostics.Debug.WriteLine(entidad)
 
 
 

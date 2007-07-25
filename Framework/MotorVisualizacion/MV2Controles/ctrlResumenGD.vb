@@ -156,7 +156,7 @@ Public Class ctrlResumenGD
                         End If
                     Else
                         If Me.mPropVinc.RepresentarSubEntidad Then
-                            Debug.WriteLine(Me.mPropVinc.Map.NombreVis)
+                            'Debug.WriteLine(Me.mPropVinc.Map.NombreVis)
 
                         Else
                             Me.mPropVinc.Value = Me.mTextBoxValidable.Text.Trim
@@ -765,7 +765,7 @@ Public Class ctrlResumenGD
                 FijarColumStile(medidas(2).Split("*"), Me.TableLayoutPanel1.ColumnStyles(2))
                 FijarColumStile(medidas(3).Split("*"), Me.TableLayoutPanel1.ColumnStyles(3))
             Catch ex As Exception
-                Debug.WriteLine("Error en el formato MedidasIcoLabText")
+                'Debug.WriteLine("Error en el formato MedidasIcoLabText")
             End Try
 
         End If

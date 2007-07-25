@@ -740,7 +740,7 @@ Public Class Form1
             misPares = xmlf.Deserialize(filest)
 
         Catch ex As Exception
-            Beep()
+            'Beep()
         Finally
             If filest IsNot Nothing Then
                 filest.Close()
@@ -770,7 +770,7 @@ Public Class Form1
             xmlf.Serialize(filest, misPares)
 
         Catch ex As Exception
-            Beep()
+            'Beep()
         Finally
             If filest IsNot Nothing Then
                 filest.Close()

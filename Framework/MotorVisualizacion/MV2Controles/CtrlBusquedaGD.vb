@@ -99,8 +99,8 @@ Public Class CtrlBusquedaGD
                 Me.ctrlBuscadorGenerico.buscar()
             End If
         Catch ex As Exception
-            Beep()
-            Debug.WriteLine(ex.Message)
+            'Beep()
+            'Debug.WriteLine(ex.Message)
         End Try
 
 

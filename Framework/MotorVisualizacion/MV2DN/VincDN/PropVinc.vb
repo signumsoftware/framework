@@ -75,7 +75,7 @@ Public Class PropVinc
         mInstanciaVinc = pInstanciaVinc
         mPi = obtenerLaPropiedad(mInstanciaVinc.Tipo, pMap)
         If mPi Is Nothing Then
-            Debug.WriteLine(mPi)
+            'Debug.WriteLine(mPi)
         End If
         If mInstanciaVinc.Tipo Is Nothing Then
             mPiTipoRepresentado = Nothing
@@ -270,7 +270,7 @@ Public Class PropVinc
         Set(ByVal value As Object)
 
             If ValorAsignable(value) Then
-                Debug.WriteLine(mPi.Name)
+                'Debug.WriteLine(mPi.Name)
                 Dim miobjeto As Object = obtenerLaInstanciaContenedoraDeProp(Me.mInstanciaVinc.DN, Me.mMap.NombreProp)
                 If mPi.PropertyType Is GetType(DateTime) Then
 
@@ -280,7 +280,7 @@ Public Class PropVinc
 
                 Else
                     If Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsRef(mPi.PropertyType) AndAlso Not (value Is Nothing OrElse Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsRef(value.GetType)) Then
-                        Debug.WriteLine("no sasignar tipo por valor a tipo por referencia")
+                        'Debug.WriteLine("no sasignar tipo por valor a tipo por referencia")
                     Else
 
 

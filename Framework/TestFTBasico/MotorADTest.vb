@@ -1069,12 +1069,12 @@ Public Class Persona
     End Property
 
     Private Sub mcabeza_abrirojo() Handles mcabeza.abrirojo
-        Beep()
+        'Beep()
         mparpadeos += 1
     End Sub
 
     Private Sub mcabeza_cerrarojo() Handles mcabeza.cerrarojo
-        Beep()
+        'Beep()
         mparpadeos += 1
     End Sub
 End Class

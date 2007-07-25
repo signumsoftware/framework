@@ -87,13 +87,13 @@ Public Class GTDRGenericoBDAD
             If (Me.mHTTransacciones.ContainsKey(pTR.ID)) Then
                 Try
                     dt = pTR.DatosTransaccion()
-                    Debug.WriteLine("Transaccion Cancelando:" & dt.GetHashCode)
+                    'Debug.WriteLine("Transaccion Cancelando:" & dt.GetHashCode)
 
                     dt.Transaccion.Rollback()
-                    Debug.WriteLine("Transaccion cancelada:" & dt.GetHashCode)
+                    'Debug.WriteLine("Transaccion cancelada:" & dt.GetHashCode)
 
                 Catch ex As Exception
-                    Debug.WriteLine("Transaccion Cancelando error:" & dt.GetHashCode)
+                    'Debug.WriteLine("Transaccion Cancelando error:" & dt.GetHashCode)
 
                     Throw ex
 
@@ -124,15 +124,15 @@ Public Class GTDRGenericoBDAD
             '  If dt IsNot Nothing AndAlso dt.Conexion IsNot Nothing AndAlso dt.Conexion.State <> ConnectionState.Closed Then
             If dt.Conexion IsNot Nothing AndAlso dt.Conexion.State <> ConnectionState.Closed Then
 
-                Debug.WriteLine("Conexión Cerrando:" & dt.GetHashCode & " conexion: " & conexion.GetHashCode)
+                'Debug.WriteLine("Conexión Cerrando:" & dt.GetHashCode & " conexion: " & conexion.GetHashCode)
                 dt.Conexion.Close()
                 dt.Conexion.Dispose()
                 dt.Conexion = Nothing
-                Debug.WriteLine("Conexión cerrada:" & dt.GetHashCode & " conexion: " & conexion.GetHashCode)
+                'Debug.WriteLine("Conexión cerrada:" & dt.GetHashCode & " conexion: " & conexion.GetHashCode)
 
             Else
 
-                Debug.WriteLine("Conexión no Cerrada:" & dt.GetHashCode & " conexion: " & conexion.GetHashCode)
+                'Debug.WriteLine("Conexión no Cerrada:" & dt.GetHashCode & " conexion: " & conexion.GetHashCode)
 
 
 
@@ -156,12 +156,12 @@ Public Class GTDRGenericoBDAD
                 Try
                     dt = pTR.DatosTransaccion()
 
-                    Debug.WriteLine("transaccion confirmando:" & dt.GetHashCode)
+                    'Debug.WriteLine("transaccion confirmando:" & dt.GetHashCode)
                     dt.Transaccion.Commit()
-                    Debug.WriteLine("transaccion confirmada:" & dt.GetHashCode)
+                    'Debug.WriteLine("transaccion confirmada:" & dt.GetHashCode)
 
                 Catch ex As Exception
-                    Debug.WriteLine("transaccion confirmando error:" & dt.GetHashCode)
+                    'Debug.WriteLine("transaccion confirmando error:" & dt.GetHashCode)
                     Dim nex As ApplicationException = New ApplicationExceptionAD("Posible error en la gestión de transacciones para un meto LN " & ex.Message, ex)
 
                     Throw nex
@@ -220,7 +220,7 @@ Public Class GTDRGenericoBDAD
                     mHTTransacciones.Add(trbd.ID, trbd)
 
                     Dim conexion As Object = cn
-                    Debug.WriteLine("Conexión abierta:" & dtr.GetHashCode & " conexion: " & conexion.GetHashCode)
+                    'Debug.WriteLine("Conexión abierta:" & dtr.GetHashCode & " conexion: " & conexion.GetHashCode)
 
 
                     Return trbd
@@ -233,7 +233,7 @@ Public Class GTDRGenericoBDAD
                     If (cn IsNot Nothing) AndAlso cn.State = ConnectionState.Open Then
                         cn.Close()
                         Dim conexion As Object = cn
-                        Debug.WriteLine("Conexión Cerrando:" & conexion.GetHashCode)
+                        'Debug.WriteLine("Conexión Cerrando:" & conexion.GetHashCode)
 
                     End If
 

@@ -408,7 +408,7 @@ Public Class NavegadorHelper
 
             Return pb
         Catch ex As Exception
-            Beep()
+            'Beep()
         End Try
 
 

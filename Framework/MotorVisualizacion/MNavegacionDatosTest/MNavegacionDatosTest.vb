@@ -77,7 +77,7 @@ Imports Framework.LogicaNegocios.Transacciones
         Dim col As MNavegacionDatosDN.ColRelacionEntidadesNavDN
         col = ln.RecuperarRelaciones(GetType(Persona))
 
-        System.Diagnostics.Debug.WriteLine(col.Count)
+        'System.Diagnostics.Debug.WriteLine(col.Count)
         If col.Count < 1 Then
             Throw New ApplicationException
         End If
@@ -86,7 +86,7 @@ Imports Framework.LogicaNegocios.Transacciones
         ln = New MNavegacionDatosLN.MNavDatosLN(Nothing, Me.mRecurso)
         col = ln.RecuperarRelaciones(GetType(Concurso))
 
-        System.Diagnostics.Debug.WriteLine(col.Count)
+        'System.Diagnostics.Debug.WriteLine(col.Count)
         If col.Count < 1 Then
             Throw New ApplicationException
         End If
@@ -1077,12 +1077,12 @@ Public Class Persona
     End Property
 
     Private Sub mcabeza_abrirojo() Handles mcabeza.abrirojo
-        Beep()
+        'Beep()
 
     End Sub
 
     Private Sub mcabeza_cerrarojo() Handles mcabeza.cerrarojo
-        Beep()
+        'Beep()
     End Sub
 End Class
 

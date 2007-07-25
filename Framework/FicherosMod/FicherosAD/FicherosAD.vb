@@ -44,7 +44,7 @@ Public Class FicherosAD
             End If
 
         Catch ex As System.IO.IOException
-            Debug.WriteLine(ex.Message)
+            'Debug.WriteLine(ex.Message)
 
             Dim miex As ApplicationExceptionIOAD
 
@@ -113,7 +113,7 @@ Public Class FicherosAD
             Return arbytes
 
         Catch ex As System.IO.IOException
-            Debug.WriteLine(ex.Message)
+            'Debug.WriteLine(ex.Message)
 
             Dim miex As ApplicationExceptionIOAD
 
@@ -161,7 +161,7 @@ Public Class FicherosAD
                 Throw New ApplicationException("El directorio no existe")
             End If
 
-            Debug.WriteLine("creado nuevo directorio")
+            'Debug.WriteLine("creado nuevo directorio")
         End If
 
 

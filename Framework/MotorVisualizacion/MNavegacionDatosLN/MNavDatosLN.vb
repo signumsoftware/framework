@@ -111,7 +111,7 @@ Public Class MNavDatosLN
 
         Try
 
-            Debug.WriteLine(pTipo.FullName)
+            'Debug.WriteLine(pTipo.FullName)
 
 
             Dim entidadNavOrigen As MNavegacionDatosDN.EntidadNavDN = RecuperarEntidadNavDNoNueva(pTipo)
@@ -119,7 +119,7 @@ Public Class MNavDatosLN
 
             For Each prop As Reflection.PropertyInfo In pTipo.GetProperties
 
-                Debug.WriteLine(prop.Name)
+                'Debug.WriteLine(prop.Name)
 
                 Dim tipoDestino As System.Type = prop.PropertyType
                 If (Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.Implementa(tipoDestino, GetType(Framework.DatosNegocio.IEntidadDN)) OrElse tipoDestino.IsInterface) AndAlso Not tipoDestino Is GetType(Framework.DatosNegocio.ICampoUsuario) AndAlso Not tipoDestino Is GetType(Framework.DatosNegocio.IValidador) Then
@@ -335,7 +335,7 @@ Public Class MNavDatosLN
 
 
             ' convertir las relaciones de juellas tipadas a relaciones con el tipo referido
-            Beep()
+            'Beep()
 
             Dim referidosPorHuellas As New ColRelacionEntidadesNavDN
 

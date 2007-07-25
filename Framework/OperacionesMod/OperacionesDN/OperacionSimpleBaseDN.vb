@@ -103,20 +103,20 @@ Public Class OperacionSimpleBaseDN
         valOp1 = mOperando1.GetValor
         valOp2 = mOperando2.GetValor
 
-        Debug.Indent()
-        Debug.WriteLine("")
-        Debug.WriteLine("")
-        Debug.WriteLine("OPERACION inic id " & Me.ID)
+        'Debug.Indent()
+        'Debug.WriteLine("")
+        'Debug.WriteLine("")
+        'Debug.WriteLine("OPERACION inic id " & Me.ID)
 
         mivalor = Me.mOperadorDN.Ejecutar(valOp1, valOp2)
 
-        Debug.WriteLine("OPERACION id " & Me.ID & " N:" & Me.Nombre)
-        Debug.WriteLine("op1 " & valOp1 & " N:" & CType(mOperando1, Object).ToString)
-        Debug.WriteLine("operador  N:" & CType(Me.mOperadorDN, IEntidadDN).Nombre)
-        Debug.WriteLine("op2  " & valOp2 & " N:" & CType(mOperando2, Object).ToString)
-        Debug.WriteLine("valor Operacion " & mivalor)
-        Debug.WriteLine("FIN OPERACION id " & Me.ID)
-        Debug.Unindent()
+        'Debug.WriteLine("OPERACION id " & Me.ID & " N:" & Me.Nombre)
+        'Debug.WriteLine("op1 " & valOp1 & " N:" & CType(mOperando1, Object).ToString)
+        'Debug.WriteLine("operador  N:" & CType(Me.mOperadorDN, IEntidadDN).Nombre)
+        'Debug.WriteLine("op2  " & valOp2 & " N:" & CType(mOperando2, Object).ToString)
+        'Debug.WriteLine("valor Operacion " & mivalor)
+        'Debug.WriteLine("FIN OPERACION id " & Me.ID)
+        'Debug.Unindent()
 
 
 

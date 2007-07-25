@@ -57,8 +57,8 @@ Public Class ctrlArbolNavD2
         Try
             miEntNavVincDN = ln.RecuperarEntNavVincDN(pEntidad, mRecuperadorMap)
         Catch ex As Exception
-            Debug.WriteLine(ex.Message)
-            Beep()
+            'Debug.WriteLine(ex.Message)
+            'Beep()
             Exit Sub
         End Try
 

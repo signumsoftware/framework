@@ -357,7 +357,7 @@ Public Class ctrlListaGDZoom
 
         ' rellenar las columnas
         For Each mipropvinc As MV2DN.PropVinc In colpv
-            Debug.WriteLine(mipropvinc.Map.NombreVis & "--" & mir(mipropvinc.Map.NombreVis).ToString)
+            'Debug.WriteLine(mipropvinc.Map.NombreVis & "--" & mir(mipropvinc.Map.NombreVis).ToString)
             If mipropvinc.EsTipoPorReferencia Then
 
             Else
@@ -549,7 +549,7 @@ Public Class ctrlListaGDZoom
                     micolCom.Add(MV2DN.ComandoInstancia.CrearComandoBasico(MV2DN.ComandosMapBasicos.Crear))
                 End If
             Else
-                Debug.WriteLine(mPropertyVincPrincipal.Map.EsReadOnly)
+                'Debug.WriteLine(mPropertyVincPrincipal.Map.EsReadOnly)
             End If
             Return micolCom
 
