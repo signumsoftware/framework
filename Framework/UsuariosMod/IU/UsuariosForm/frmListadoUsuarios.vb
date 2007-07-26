@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class frmListadoUsuarios
 
 #Region "Atributos"
@@ -108,7 +110,7 @@ Public Class frmListadoUsuarios
         End If
 
         miPaquete.Add("Modo", modo)
-        Me.cMarco.Navegar("AdminUsuarios", Me, Me, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga(), miPaquete)
+        Me.cMarco.Navegar("AdminUsuarios", Me, Me, TipoNavegacion.Modal, Me.GenerarDatosCarga(), miPaquete)
     End Sub
 
     Private Function RecuperarIdUsuarioSeleccionado() As String

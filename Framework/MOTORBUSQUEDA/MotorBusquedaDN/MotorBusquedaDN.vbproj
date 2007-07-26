@@ -74,7 +74,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -133,9 +132,9 @@
       <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
       <Name>DatosNegocio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\IUWIN\MotorIU\MotorIU.vbproj">
-      <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
-      <Name>MotorIU</Name>
+    <ProjectReference Include="..\..\IUWIN\IUComun\IUComun.vbproj">
+      <Project>{EBAA3074-697C-4638-84C5-AC502B37280D}</Project>
+      <Name>IUComun</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\MotorVisualizacion\MV2DN\MV2DN.vbproj">
       <Project>{0BD7920F-A01B-4F3E-BF28-B26C4D2AD6EA}</Project>

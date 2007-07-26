@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using Framework.GestorSalida.DN;
 using MotorIU.Motor;
+using Framework.IU.IUComun;
 
 namespace Framework.GestorSalida.ClienteIU
 {

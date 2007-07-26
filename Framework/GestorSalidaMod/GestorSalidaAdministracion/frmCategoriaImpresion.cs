@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Framework.GestorSalida.DN;
 using Framework.GestorSalida.Administracion.Controladores;
 using System.Collections;
+using Framework.IU.IUComun;
 
 namespace Framework.GestorSalida.Administracion
 {
@@ -142,7 +143,7 @@ namespace Framework.GestorSalida.Administracion
                 using (new AuxIU.CursorScope())
                 {
                     Hashtable ht = new Hashtable();
-                    cMarco.Navegar("SeleccionarImpresoras", this, MotorIU.Motor.TipoNavegacion.Modal, ref ht);
+                    cMarco.Navegar("SeleccionarImpresoras", this, TipoNavegacion.Modal, ref ht);
                     PaquetefrmSeleccionarImpresoras mip = (ht != null && ht.Contains("Paquete")) ? (PaquetefrmSeleccionarImpresoras)ht["Paquete"] : null;
                     if (mip != null)
                     {

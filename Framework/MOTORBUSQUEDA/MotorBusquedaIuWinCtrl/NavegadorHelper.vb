@@ -1,27 +1,28 @@
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
 
 Public Class NavegadorHelper
 
 #Region "Métodos"
 
     'Public Shared Sub NavegarABuscador(ByVal pControl As MotorIU.ControlesP.IControlP, ByVal pTipo As System.Type, ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN)
-    '    NavegarABuscador(pControl, pTipo, Nothing, MotorIU.Motor.TipoNavegacion.Normal, PropiedadDeInstancia)
+    '    NavegarABuscador(pControl, pTipo, Nothing, TipoNavegacion.Normal, PropiedadDeInstancia)
     'End Sub
 
-    'Public Shared Sub NavegarABuscador(ByVal pControl As MotorIU.ControlesP.IControlP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As MotorIU.Motor.TipoNavegacion, ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN)
+    'Public Shared Sub NavegarABuscador(ByVal pControl As MotorIU.ControlesP.IControlP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As TipoNavegacion, ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN)
     '    Dim formPadre As MotorIU.FormulariosP.IFormularioP
     '    formPadre = ControlesPBase.ControlHelper.ObtenerFormularioPadre(pControl)
     '    NavegarABuscador(formPadre, pTipo, paquete, tipoNavegacion, PropiedadDeInstancia)
     'End Sub
 
     Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByVal pColOperacionDN As Framework.Procesos.ProcesosDN.ColOperacionDN, ByVal pColvalores As List(Of ValorCampo), ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN) As Hashtable
-        Return NavegarABuscador(pFormulario, pTipo, Nothing, MotorIU.Motor.TipoNavegacion.Normal, pColOperacionDN, pColvalores, PropiedadDeInstancia)
+        Return NavegarABuscador(pFormulario, pTipo, Nothing, TipoNavegacion.Normal, pColOperacionDN, pColvalores, PropiedadDeInstancia)
     End Function
 
     Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type)
-        Return NavegarABuscador(pFormulario, pTipo, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Nothing, Nothing)
+        Return NavegarABuscador(pFormulario, pTipo, Nothing, TipoNavegacion.Normal, Nothing, Nothing)
     End Function
-    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByVal tipoNavegacion As MotorIU.Motor.TipoNavegacion, ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN) As Hashtable
+    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByVal tipoNavegacion As TipoNavegacion, ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN) As Hashtable
         Dim paquete As New Hashtable
 
         Return NavegarABuscador(pFormulario, pTipo, paquete, tipoNavegacion, Nothing, False, Nothing, Nothing, PropiedadDeInstancia, Nothing)
@@ -30,13 +31,13 @@ Public Class NavegadorHelper
     Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByVal destino As String, ByVal PasarDtsResultados As Boolean, ByVal pColOperacionDN As Framework.Procesos.ProcesosDN.ColOperacionDN, ByVal pColvalores As List(Of ValorCampo)) As Hashtable
 
 
-        Return NavegarABuscador(pFormulario, pTipo, Nothing, MotorIU.Motor.TipoNavegacion.Normal, pColOperacionDN, pColvalores, Nothing)
+        Return NavegarABuscador(pFormulario, pTipo, Nothing, TipoNavegacion.Normal, pColOperacionDN, pColvalores, Nothing)
     End Function
 
 
 
     Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pColvalores As List(Of ValorCampo), ByVal paramCargaEstruct As ParametroCargaEstructuraDN) As Hashtable
-        Return NavegarABuscador(pFormulario, Nothing, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Nothing, False, Nothing, pColvalores, Nothing, paramCargaEstruct)
+        Return NavegarABuscador(pFormulario, Nothing, Nothing, TipoNavegacion.Normal, Nothing, False, Nothing, pColvalores, Nothing, paramCargaEstruct)
     End Function
 
 
@@ -63,7 +64,7 @@ Public Class NavegadorHelper
         'End If
 
 
-   
+
 
 
         miPaqueteFormularioBusqueda = New MotorBusquedaDN.PaqueteFormularioBusqueda()
@@ -110,7 +111,7 @@ Public Class NavegadorHelper
 
 
 
-        marco.Navegar("Filtro", pFormulario, f, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+        marco.Navegar("Filtro", pFormulario, f, TipoNavegacion.Normal, paquete)
 
         Return paquete
 
@@ -119,7 +120,7 @@ Public Class NavegadorHelper
 
 
 
-    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As MotorIU.Motor.TipoNavegacion, ByVal destino As String, ByVal pasarDtsResultdos As Boolean, ByVal pColOperacionDN As Framework.Procesos.ProcesosDN.ColOperacionDN, ByVal pColvalores As List(Of ValorCampo), ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN, ByVal paramCargaEstruct As ParametroCargaEstructuraDN) As Hashtable
+    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As TipoNavegacion, ByVal destino As String, ByVal pasarDtsResultdos As Boolean, ByVal pColOperacionDN As Framework.Procesos.ProcesosDN.ColOperacionDN, ByVal pColvalores As List(Of ValorCampo), ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN, ByVal paramCargaEstruct As ParametroCargaEstructuraDN) As Hashtable
         Dim marco As MotorIU.Motor.INavegador
 
         If paquete Is Nothing Then
@@ -196,14 +197,14 @@ Public Class NavegadorHelper
 
 
 
-    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As MotorIU.Motor.TipoNavegacion, ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN) As Hashtable
+    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As TipoNavegacion, ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN) As Hashtable
 
         Return NavegarABuscador(pFormulario, pTipo, paquete, tipoNavegacion, Nothing, False, Nothing, Nothing, PropiedadDeInstancia, Nothing)
 
     End Function
 
 
-    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As MotorIU.Motor.TipoNavegacion, ByVal pColOperacionDN As Framework.Procesos.ProcesosDN.ColOperacionDN, ByVal pColvalores As List(Of ValorCampo), ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN) As Hashtable
+    Public Shared Function NavegarABuscador(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal pTipo As System.Type, ByRef paquete As Hashtable, ByVal tipoNavegacion As TipoNavegacion, ByVal pColOperacionDN As Framework.Procesos.ProcesosDN.ColOperacionDN, ByVal pColvalores As List(Of ValorCampo), ByVal PropiedadDeInstancia As Framework.TiposYReflexion.DN.PropiedadDeInstanciaDN) As Hashtable
 
         Return NavegarABuscador(pFormulario, pTipo, paquete, tipoNavegacion, Nothing, False, pColOperacionDN, pColvalores, PropiedadDeInstancia, Nothing)
 
@@ -218,7 +219,7 @@ Public Class NavegadorHelper
 
 
 
-    Public Shared Function NavegarFormulario(ByVal pControl As MotorIU.ControlesP.IControlP, ByRef paquete As Hashtable, ByVal tipoNav As MotorIU.Motor.TipoNavegacion) As Hashtable
+    Public Shared Function NavegarFormulario(ByVal pControl As MotorIU.ControlesP.IControlP, ByRef paquete As Hashtable, ByVal tipoNav As TipoNavegacion) As Hashtable
         Dim formPadre As MotorIU.FormulariosP.IFormularioP
         formPadre = ControlesPBase.ControlHelper.ObtenerFormularioPadre(pControl)
         Return NavegarFormulario(formPadre, paquete, tipoNav)
@@ -231,7 +232,7 @@ Public Class NavegadorHelper
         Return NavegarFormulario(pControl, tipo)
 
     End Function
-    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal entidad As Framework.DatosNegocio.IEntidadBaseDN, ByVal pTipoNavegacion As MotorIU.Motor.TipoNavegacion, ByVal pNombreMapeadoVisualizacion As String) As Hashtable
+    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal entidad As Framework.DatosNegocio.IEntidadBaseDN, ByVal pTipoNavegacion As TipoNavegacion, ByVal pNombreMapeadoVisualizacion As String) As Hashtable
         Dim paquete As New Hashtable
         paquete.Add("DN", entidad)
         paquete.Add("NombreInstanciaMapVis", pNombreMapeadoVisualizacion)
@@ -239,7 +240,7 @@ Public Class NavegadorHelper
         Return NavegarFormulario(pFormulario, paquete, pTipoNavegacion)
 
     End Function
-    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal entidad As Framework.DatosNegocio.IEntidadBaseDN, ByVal pTipoNavegacion As MotorIU.Motor.TipoNavegacion) As Hashtable
+    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal entidad As Framework.DatosNegocio.IEntidadBaseDN, ByVal pTipoNavegacion As TipoNavegacion) As Hashtable
         Dim paquete As New Hashtable
         paquete.Add("DN", entidad)
         Return NavegarFormulario(pFormulario, paquete, pTipoNavegacion)
@@ -248,11 +249,11 @@ Public Class NavegadorHelper
     Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal entidad As Framework.DatosNegocio.IEntidadBaseDN) As Hashtable
         Dim paquete As New Hashtable
         paquete.Add("DN", entidad)
-        Return NavegarFormulario(pFormulario, paquete, MotorIU.Motor.TipoNavegacion.Normal)
+        Return NavegarFormulario(pFormulario, paquete, TipoNavegacion.Normal)
 
     End Function
 
-    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal tipo As System.Type, ByVal tipoNavegacion As MotorIU.Motor.TipoNavegacion) As Hashtable
+    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByVal tipo As System.Type, ByVal tipoNavegacion As TipoNavegacion) As Hashtable
         Dim paquete As New Hashtable
 
         paquete.Add("TipoEntidad", tipo)
@@ -266,11 +267,11 @@ Public Class NavegadorHelper
 
         paquete.Add("TipoEntidad", tipo)
 
-        Return NavegarFormulario(pFormulario, paquete, MotorIU.Motor.TipoNavegacion.Normal)
+        Return NavegarFormulario(pFormulario, paquete, TipoNavegacion.Normal)
 
     End Function
 
-    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByRef paquete As Hashtable, ByVal tipoNav As MotorIU.Motor.TipoNavegacion) As Hashtable
+    Public Shared Function NavegarFormulario(ByVal pFormulario As MotorIU.FormulariosP.IFormularioP, ByRef paquete As Hashtable, ByVal tipoNav As TipoNavegacion) As Hashtable
         Dim marco As MotorIU.Motor.INavegador
         marco = pFormulario.cMarco
         Dim f As Windows.Forms.Form = pFormulario

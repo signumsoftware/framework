@@ -91,6 +91,10 @@
       <Project>{81A93BDE-4E4E-461B-831B-3A30D149C4CD}</Project>
       <Name>ControlesPGenericos</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\IUWIN\IUComun\IUComun.vbproj">
+      <Project>{EBAA3074-697C-4638-84C5-AC502B37280D}</Project>
+      <Name>IUComun</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\IUWIN\MotorIU\MotorIU.vbproj">
       <Project>{1271C153-162E-41C2-B1D6-65823F2D78E1}</Project>
       <Name>MotorIU</Name>

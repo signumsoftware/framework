@@ -36,7 +36,7 @@ Partial Class ctrlBuscadorGD
         Me.ctrlBuscadorGenerico21.Navegable = False
         Me.ctrlBuscadorGenerico21.Size = New System.Drawing.Size(904, 429)
         Me.ctrlBuscadorGenerico21.TabIndex = 1
-        Me.ctrlBuscadorGenerico21.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+        Me.ctrlBuscadorGenerico21.TipoNavegacion = Framework.IU.IUComun.TipoNavegacion.Normal
         Me.ctrlBuscadorGenerico21.ToolTipText = Nothing
         '
         'ctrlBuscadorGD

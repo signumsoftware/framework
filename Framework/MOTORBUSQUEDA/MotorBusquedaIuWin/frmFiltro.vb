@@ -1,10 +1,11 @@
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
 ''' <summary>
 ''' PAQUETE:
 '''   "Filtro" as MotorBusquedaDN.FiltroDN
 '''   "ParametroCargaEstructura" as ParametroCargaEstructuraDN
 '''   "MultiSelect" as Boolean
-'''   "TipoNavegacion" as MotorIU.Motor.TipoNavegacion
+'''   "TipoNavegacion" as TipoNavegacion
 '''   "Agregable" as Boolean
 '''   "EnviarDatatableAlNavegar" as Boolean
 '''   "Titulo" as String
@@ -41,8 +42,8 @@ Public Class frmFiltro
                 Me.ctrlBuscarGenerico.TipoNavegacion = mipaqueteconfig.TipoNavegacion
                 Me.ctrlBuscarGenerico.Agregable = mipaqueteconfig.Agregable
                 Me.ctrlBuscarGenerico.EnviarDatatableAlNavegar = mipaqueteconfig.EnviarDatatableAlNavegar
-                Me.ctrlBuscarGenerico.AlternatingBackcolorResultados = mipaqueteconfig.AlternatingBackcolorResultados
-                Me.ctrlBuscarGenerico.AlternatingBackcolorFiltro = mipaqueteconfig.AlternatingBackcolorFiltro
+                'Me.ctrlBuscarGenerico.AlternatingBackcolorResultados = mipaqueteconfig.AlternatingBackcolorResultados
+                'Me.ctrlBuscarGenerico.AlternatingBackcolorFiltro = mipaqueteconfig.AlternatingBackcolorFiltro
                 Me.ctrlBuscarGenerico.Navegable = mipaqueteconfig.Navegable
                 Me.ctrlBuscarGenerico.FiltroVisible = mipaqueteconfig.FiltroVisible
                 Me.ctrlBuscarGenerico.Filtrable = mipaqueteconfig.Filtrable
@@ -107,7 +108,7 @@ Public Class frmFiltro
 
                 'comprobamos si hay TipoNavegacion
                 If Me.Paquete.Contains("TipoNavegacion") Then
-                    Me.ctrlBuscarGenerico.TipoNavegacion = CType(Me.Paquete("TipoNavegacion"), MotorIU.Motor.TipoNavegacion)
+                    Me.ctrlBuscarGenerico.TipoNavegacion = CType(Me.Paquete("TipoNavegacion"), TipoNavegacion)
                 End If
 
                 'comprobamos si hay Agregable

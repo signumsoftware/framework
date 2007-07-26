@@ -20,7 +20,7 @@ Public Class NotasCtrl
         paquete.Add("DN", nota)
 
         ' navegar al formaulario que permite editar la nota
-        fp.cMarco.Navegar("FG", fp, Nothing, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+        fp.cMarco.Navegar("FG", fp, Nothing, TipoNavegacion.Normal, paquete)
 
     End Sub
 

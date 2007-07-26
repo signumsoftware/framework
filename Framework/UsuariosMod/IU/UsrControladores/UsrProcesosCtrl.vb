@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class UsrProcesosCtrl
 
     Public Function BajaPrincipal(ByVal objeto As Object, ByVal pTransicionRealizada As Framework.Procesos.ProcesosDN.TransicionRealizadaDN, ByVal pParametros As Object) As Framework.DatosNegocio.IEntidadBaseDN
@@ -6,7 +8,7 @@ Public Class UsrProcesosCtrl
 
         Dim fp As MotorIU.FormulariosP.FormularioBase = pParametros
 
-        fp.cMarco.Navegar("Acercade", fp, fp, MotorIU.Motor.TipoNavegacion.Modal, Nothing, Nothing, Nothing)
+        fp.cMarco.Navegar("Acercade", fp, fp, TipoNavegacion.Modal, Nothing, Nothing, Nothing)
 
 
         Dim plnc As New Framework.Procesos.ProcesosLNC.ProcesoLNC

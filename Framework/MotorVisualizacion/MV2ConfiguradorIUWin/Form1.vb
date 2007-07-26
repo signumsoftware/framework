@@ -1,5 +1,7 @@
 Imports System.Reflection
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
+
 Public Class Form1
 
     Dim lsitaxmlDesHacer As New List(Of String)
@@ -834,7 +836,7 @@ Public Class Form1
         ''End If
 
         'paquete.Add("tipo", Me.CtrlGD1.TipoEntidad)
-        'Me.cMarco.Navegar("Filtro", Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
+        'Me.cMarco.Navegar("Filtro", Me.ParentForm, Nothing, TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
 
 
         Dim paquete As New Hashtable
@@ -858,7 +860,7 @@ Public Class Form1
             paquete.Add("PaqueteFormularioBusqueda", miPaqueteFormularioBusqueda)
 
 
-            cMarco.Navegar("Filtro", Me, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
+            cMarco.Navegar("Filtro", Me, Nothing, TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
 
         Catch ex As Exception
             Me.MostrarError(ex)
@@ -881,7 +883,7 @@ Public Class Form1
             paquete.Add("DN", Me.CtrlGD1.DN)
         End If
 
-        Me.cMarco.Navegar("FG", Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
+        Me.cMarco.Navegar("FG", Me.ParentForm, Nothing, TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
 
     End Sub
 

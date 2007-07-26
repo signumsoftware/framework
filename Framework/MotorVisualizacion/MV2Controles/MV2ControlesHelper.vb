@@ -1,4 +1,5 @@
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
 
 Public Class MV2ControlesHelper
 
@@ -60,7 +61,7 @@ Public Class MV2ControlesHelper
         If miControlP.ParentForm IsNot Nothing Then
             fmid = miControlP.ParentForm.MdiParent
         End If
-        miControlP.Marco.Navegar("Filtro", miControlP.ParentForm, fmid, MotorIU.Motor.TipoNavegacion.Modal, miControlP.GenerarDatosCarga, paquete)
+        miControlP.Marco.Navegar("Filtro", miControlP.ParentForm, fmid, TipoNavegacion.Modal, miControlP.GenerarDatosCarga, paquete)
 
         If Not paquete Is Nothing Then
             If paquete.Contains("ID") Then
@@ -318,7 +319,7 @@ Public Class MV2ControlesHelper
 
 
                 mipaquete1.Add("LsitaTipoYMapVisAsociadoDN", milistaTipoYMapVisAsociadoDN)
-                controlp.Marco.Navegar("SeleccionarTipo", controlp.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, controlp.GenerarDatosCarga, mipaquete1)
+                controlp.Marco.Navegar("SeleccionarTipo", controlp.ParentForm, Nothing, TipoNavegacion.Modal, controlp.GenerarDatosCarga, mipaquete1)
                 Dim miTipoYMapVisAsociadoDNSelecioando As MV2DN.TipoYMapVisAsociadoDN = mipaquete1.Item("TipoYMapVisAsociadoDNSeleccioando")
                 tipoSeleccioando = miTipoYMapVisAsociadoDNSelecioando.Tipo
 
@@ -371,7 +372,7 @@ Public Class MV2ControlesHelper
         paquete.Add("PaqueteFormularioBusqueda", miPaqueteFormularioBusqueda)
 
         Try
-            BaseControlP.Marco.Navegar("Filtro", BaseControlP.FormularioPadre, BaseControlP.FormularioPadre.ParentForm, MotorIU.Motor.TipoNavegacion.Modal, BaseControlP.GenerarDatosCarga, paquete)
+            BaseControlP.Marco.Navegar("Filtro", BaseControlP.FormularioPadre, BaseControlP.FormularioPadre.ParentForm, TipoNavegacion.Modal, BaseControlP.GenerarDatosCarga, paquete)
 
         Catch ex As Exception
             Return Nothing

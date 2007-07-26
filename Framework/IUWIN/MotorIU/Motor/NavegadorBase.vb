@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Namespace Motor
 
     ''' <summary>
@@ -8,7 +10,6 @@ Namespace Motor
     '''Antes de ella sólo debe existir el Sub Main(), que debe construir o cargar la Tabla de Navegación
     '''y pasársela en el constructor</remarks>
     Public Class NavegadorBase
-
         Implements Motor.INavegador
 
 
@@ -213,7 +214,7 @@ Namespace Motor
         ''' <param name="TipoNavegacion">Tipo de navegación a realizar</param>
         ''' <param name="Paquete">Hashtable que contiene los datos para inicializar en el formulario de destino</param>
         ''' <param name="Padre">El nombre del formulario MDI que contandrá al formulario al que se navega</param>
-        Public Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal Padre As Form, ByVal TipoNavegacion As Motor.TipoNavegacion, ByRef Paquete As Hashtable) Implements INavegador.Navegar
+        Public Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal Padre As Form, ByVal TipoNavegacion As TipoNavegacion, ByRef Paquete As Hashtable) Implements INavegador.Navegar
             Navegar(Funcion, Sender, Padre, TipoNavegacion, CType(Sender, FormulariosP.FormularioBase).GenerarDatosCarga, Paquete)
         End Sub
 
@@ -224,7 +225,7 @@ Namespace Motor
         ''' <param name="Sender">El formulario desde el que se navega</param>
         ''' <param name="TipoNavegacion">Tipo de navegación a realizar</param>
         ''' <param name="Paquete">Hashtable que contiene los datos para inicializar en el formulario de destino</param>
-        Public Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal TipoNavegacion As Motor.TipoNavegacion, ByRef Paquete As Hashtable) Implements INavegador.Navegar
+        Public Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal TipoNavegacion As TipoNavegacion, ByRef Paquete As Hashtable) Implements INavegador.Navegar
             Navegar(Funcion, Sender, Nothing, TipoNavegacion, CType(Sender, FormulariosP.FormularioBase).GenerarDatosCarga, Paquete)
         End Sub
 
@@ -238,7 +239,7 @@ Namespace Motor
         ''' <param name="Datos">Los datos de carga que contienen los Formatos de aspecto y comportamiento</param>
         ''' <param name="paquete">Contiene los datos que se le quieren pasar al formulario</param>
         ''' <remarks></remarks>
-        Public Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Object, ByVal Padre As Form, ByVal pTipoNavegacion As Motor.TipoNavegacion, ByVal Datos As Hashtable, ByRef paquete As Hashtable) Implements Motor.INavegador.Navegar
+        Public Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Object, ByVal Padre As Form, ByVal pTipoNavegacion As TipoNavegacion, ByVal Datos As Hashtable, ByRef paquete As Hashtable) Implements Motor.INavegador.Navegar
             Navegacion(Funcion, Sender, Padre, pTipoNavegacion, Datos, paquete)
         End Sub
 
@@ -269,7 +270,7 @@ Namespace Motor
         ''' <param name="paquete">Contiene los datos que se le quieren pasar al formulario</param>
         ''' <returns>El formulario que se ha creado en la navegación</returns>
         ''' <remarks></remarks>
-        Private Function Navegacion(ByVal Funcion As String, ByVal Sender As Object, ByVal Padre As Form, ByVal pTipoNavegacion As Motor.TipoNavegacion, ByVal Datos As Hashtable, ByRef paquete As Hashtable) As System.Windows.Forms.Form
+        Private Function Navegacion(ByVal Funcion As String, ByVal Sender As Object, ByVal Padre As Form, ByVal pTipoNavegacion As TipoNavegacion, ByVal Datos As Hashtable, ByRef paquete As Hashtable) As System.Windows.Forms.Form
             'cogemos la función que nos pasan, buscamos en el navegador el formulario que 
             'se corresponde y lo cargamos con todas las propiedades que sean
             Dim midestino As Motor.Destino = Nothing
@@ -364,28 +365,28 @@ Namespace Motor
         ''' <remarks></remarks>
         Private Sub CargarFormularioPorTipoNavegacion(ByVal pFormulario As Form, ByVal pSender As Form, ByVal pPadre As Form, ByVal pTipoNavegacion As TipoNavegacion)
             Select Case pTipoNavegacion
-                Case Motor.TipoNavegacion.Normal
+                Case TipoNavegacion.Normal
                     'cargar normal (multiinstancia)
                     CargarForm(pFormulario, False, pSender, pPadre, False)
 
-                Case Motor.TipoNavegacion.Poseido
+                Case TipoNavegacion.Poseido
                     'cargar form poseido
                     'TODO: luis - MOTOR - cargar form poseido: No implementado
                     Throw New NotImplementedException("Formulario poseído no implementado")
 
-                Case Motor.TipoNavegacion.Modal
+                Case TipoNavegacion.Modal
                     'cargar modal
                     CargarForm(pFormulario, False, pSender, pPadre, True)
 
-                Case Motor.TipoNavegacion.MonoInstancia
+                Case TipoNavegacion.MonoInstancia
                     'cargar una sóla vez
                     CargarFormUnico(pFormulario, False, pSender, pPadre)
 
-                Case Motor.TipoNavegacion.CerrarLanzador
+                Case TipoNavegacion.CerrarLanzador
                     'cargar y cerrar el sender
                     CargarForm(pFormulario, True, pSender, pPadre, False)
 
-                Case Motor.TipoNavegacion.CerrarLanzador_y_MonoInstancia
+                Case TipoNavegacion.CerrarLanzador_y_MonoInstancia
                     'cerrar el sender y cargar una sóla vez
                     CargarFormUnico(pFormulario, True, pSender, pPadre)
 

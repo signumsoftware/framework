@@ -1,4 +1,5 @@
 Imports Framework.LogicaNegocios.Transacciones
+Imports Framework.IU.IUComun
 
 Public Class ctrlArbolNavD2
 
@@ -359,7 +360,7 @@ Public Class ctrlArbolNavD2
 
 
             If RelEntNavVinc.DireccionLectura = MNavegacionDatosDN.DireccionesLectura.Reversa Then
-                ' paquete = MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(formulariop, pr.Propiedad.ReflectedType, MotorIU.Motor.TipoNavegacion.Modal, pr)
+                ' paquete = MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(formulariop, pr.Propiedad.ReflectedType, TipoNavegacion.Modal, pr)
                 tiporeferido = pr.Propiedad.ReflectedType
             Else
                 tiporeferido = pr.Propiedad.PropertyType
@@ -374,7 +375,7 @@ Public Class ctrlArbolNavD2
 
 
 
-            paquete = MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(formulariop, tiporeferido, MotorIU.Motor.TipoNavegacion.Modal, pr)
+            paquete = MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(formulariop, tiporeferido, TipoNavegacion.Modal, pr)
 
             Dim misIds As IList(Of String)
             If paquete.ContainsKey("IDMultiple") Then

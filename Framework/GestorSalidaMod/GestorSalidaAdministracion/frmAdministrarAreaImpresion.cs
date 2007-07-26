@@ -9,6 +9,8 @@ using Framework.GestorSalida.Administracion.Controladores;
 using Framework.GestorSalida.DN;
 using System.Collections;
 using Framework.AgenteImpresion;
+using Framework.IU.IUComun;
+using MotorIU.Motor;
 
 namespace Framework.GestorSalida.Administracion
 {
@@ -83,7 +85,7 @@ namespace Framework.GestorSalida.Administracion
         private void AgregarFuncionImpresion()
         {
             Hashtable miPaquete = new Hashtable();
-            cMarco.Navegar("FuncionImpresion", this, MotorIU.Motor.TipoNavegacion.Modal, ref miPaquete);
+            cMarco.Navegar("FuncionImpresion", this, TipoNavegacion.Modal, ref miPaquete);
             if (miPaquete != null && miPaquete.Contains("Paquete"))
             {
                 PaquetefrmFuncionImpresion p = (PaquetefrmFuncionImpresion)miPaquete["Paquete"];
@@ -108,7 +110,7 @@ namespace Framework.GestorSalida.Administracion
                 PaquetefrmFuncionImpresion p = new PaquetefrmFuncionImpresion();
                 p.FuncionImpresora = fi;
                 Hashtable ht = p.GenerarPaquete();
-                cMarco.Navegar("FuncionImpresion", this, MotorIU.Motor.TipoNavegacion.Modal, ref ht);
+                cMarco.Navegar("FuncionImpresion", this, TipoNavegacion.Modal, ref ht);
                 if (ht != null && ht.Contains("Paquete"))
                 {
                     p = (PaquetefrmFuncionImpresion)ht["Paquete"];
@@ -247,7 +249,7 @@ namespace Framework.GestorSalida.Administracion
                 PaquetefrmCategoriaImpresion mip = new PaquetefrmCategoriaImpresion();
                 mip.CategoriaImpresoras = (CategoriaImpresoras)dgvCategorias.SelectedRows[0].Cells["CategoriaImpresion"].Value;
                 Hashtable ht = mip.GenerarPaquete();
-                cMarco.Navegar("CategoriaImpresoras", this, MotorIU.Motor.TipoNavegacion.Modal, ref ht);
+                cMarco.Navegar("CategoriaImpresoras", this, TipoNavegacion.Modal, ref ht);
                 mip = (ht != null && ht.Contains("Paquete")) ? (PaquetefrmCategoriaImpresion)ht["Paquete"] : null;
                 if (mip != null && mip.CategoriaImpresoras.Estado == Framework.DatosNegocio.EstadoDatosDN.Modificado)
                 {
@@ -265,7 +267,7 @@ namespace Framework.GestorSalida.Administracion
             try
             {
                 Hashtable ht = new Hashtable();
-                cMarco.Navegar("CategoriaImpresoras", this, MotorIU.Motor.TipoNavegacion.Modal, ref ht);
+                cMarco.Navegar("CategoriaImpresoras", this, TipoNavegacion.Modal, ref ht);
                 using (new AuxIU.CursorScope())
                 {
                     PaquetefrmCategoriaImpresion miPaquete = (ht != null && ht.Contains("Paquete")) ? (PaquetefrmCategoriaImpresion)ht["Paquete"] : null;

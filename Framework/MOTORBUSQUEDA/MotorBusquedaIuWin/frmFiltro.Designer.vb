@@ -32,7 +32,7 @@ Partial Class frmFiltro
         Me.ctrlBuscarGenerico.Name = "ctrlBuscarGenerico"
         Me.ctrlBuscarGenerico.Size = New System.Drawing.Size(742, 481)
         Me.ctrlBuscarGenerico.TabIndex = 0
-        Me.ctrlBuscarGenerico.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+        Me.ctrlBuscarGenerico.TipoNavegacion = Framework.IU.IUComun.TipoNavegacion.Normal
         Me.ctrlBuscarGenerico.ToolTipText = Nothing
         '
         'frmFiltro

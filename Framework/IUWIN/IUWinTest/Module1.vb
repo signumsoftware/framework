@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Module Module1
 
     Public Sub main()
@@ -21,7 +23,7 @@ Public Class navegador
     Public Sub New(ByVal ptabla As Hashtable)
         MyBase.New(ptabla)
 
-        Me.Navegar("prueba", Me, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosIniciales, Nothing)
+        Me.Navegar("prueba", Me, Nothing, TipoNavegacion.Normal, Me.GenerarDatosIniciales, Nothing)
     End Sub
 End Class
 

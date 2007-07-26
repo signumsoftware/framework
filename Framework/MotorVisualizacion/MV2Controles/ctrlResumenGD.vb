@@ -1042,7 +1042,7 @@ Public Class ctrlResumenGD
                 End If
 
 
-                Me.Marco.Navegar(funcionNavegacion, Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
+                Me.Marco.Navegar(funcionNavegacion, Me.ParentForm, Nothing, TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
 
 
 

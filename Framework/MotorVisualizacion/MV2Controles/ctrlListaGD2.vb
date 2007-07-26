@@ -144,7 +144,7 @@ Public Class ctrlListaGD2
                                     paquete.Add("NombreInstanciaMapVis", Me.mPropertyVincPrincipal.Map.DatosNavegacion)
                                     paquete.Add("DN", midnSelecioand)
 
-                                    Me.Marco.Navegar("FG", Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
+                                    Me.Marco.Navegar("FG", Me.ParentForm, Nothing, TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
                                     'si la entidad contenida se trata de una huella habria que pedir que referecara sus datos
                                     If Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(CType(midnSelecioand, Object).GetType) AndAlso paquete IsNot Nothing AndAlso paquete.Contains("DN") AndAlso paquete.Item("DN") IsNot Nothing Then
                                         Dim h As Framework.DatosNegocio.IHuellaEntidadDN = midnSelecioand
@@ -190,7 +190,7 @@ Public Class ctrlListaGD2
                         Dim autorizado As Boolean = True
                         RaiseEvent ComandoSolicitado(Me, autorizado)
                         If autorizado Then
-                            'Me.Marco.Navegar("", Me.ParentForm, Me.ParentForm, MotorIU.Motor.TipoNavegacion.Modal, CType(Me.ParentForm, MotorIU.FormulariosP.IFormularioP).Datos, Nothing)
+                            'Me.Marco.Navegar("", Me.ParentForm, Me.ParentForm, TipoNavegacion.Modal, CType(Me.ParentForm, MotorIU.FormulariosP.IFormularioP).Datos, Nothing)
 
                             Dim colEntidad As New Framework.DatosNegocio.ArrayListValidable(Of Framework.DatosNegocio.IEntidadBaseDN)
                             colEntidad.AddRange(MV2ControlesHelper.BuscarCol(Me))

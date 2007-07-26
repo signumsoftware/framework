@@ -251,7 +251,7 @@ Public Class CtrlUsuario
 
         '    miPaquete.Add("ID", idEntidadUser)
 
-        '    Me.Marco.Navegar("EntidadUsuario", Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.mControlador.ControladorForm.FormularioContenedor.GenerarDatosCarga(), miPaquete)
+        '    Me.Marco.Navegar("EntidadUsuario", Me.ParentForm, Nothing, TipoNavegacion.Modal, Me.mControlador.ControladorForm.FormularioContenedor.GenerarDatosCarga(), miPaquete)
         'Else
         '    Dim miParametroCargaEst As New ParametroCargaEstructuraDN()
 
@@ -262,7 +262,7 @@ Public Class CtrlUsuario
         '    miPaquete.Add("ParametroCargaEstructura", miParametroCargaEst)
 
         '    miPaquete.Add("MultiSelect", False)
-        '    miPaquete.Add("TipoNavegacion", MotorIU.Motor.TipoNavegacion.Modal)
+        '    miPaquete.Add("TipoNavegacion", TipoNavegacion.Modal)
         '    miPaquete.Add("Agregable", True)
         '    miPaquete.Add("EnviarDatatableAlNavegar", False)
         '    miPaquete.Add("Navegable", True)
@@ -273,7 +273,7 @@ Public Class CtrlUsuario
         '    miPaquete.Add("Titulo", My.Settings.TituloDestinoNavegacion)
 
 
-        '    Me.Marco.Navegar(My.Settings.FormularioNavegacion, Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.mControlador.ControladorForm.FormularioContenedor.GenerarDatosCarga(), miPaquete)
+        '    Me.Marco.Navegar(My.Settings.FormularioNavegacion, Me.ParentForm, Nothing, TipoNavegacion.Modal, Me.mControlador.ControladorForm.FormularioContenedor.GenerarDatosCarga(), miPaquete)
         'End If
 
         'If miPaquete IsNot Nothing AndAlso miPaquete.Contains("HuellaEntidadUser") AndAlso miPaquete("HuellaEntidadUser") IsNot Nothing Then

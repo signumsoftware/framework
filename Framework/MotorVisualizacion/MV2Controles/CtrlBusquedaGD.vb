@@ -1,6 +1,8 @@
 Imports Framework.DatosNegocio
 Imports MotorBusquedaDN
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
+
 Public Class CtrlBusquedaGD
     Implements Framework.IU.IUComun.IctrlBasicoDN
 
@@ -72,7 +74,7 @@ Public Class CtrlBusquedaGD
             ' Me.ctrlBuscadorGenerico.ListaValores = Me.mMap.ListaValores
             Me.ctrlBuscadorGenerico.ParametroCargaEstructura = pce
             Me.ctrlBuscadorGenerico.MultiSelect = False
-            Me.ctrlBuscadorGenerico.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+            Me.ctrlBuscadorGenerico.TipoNavegacion = TipoNavegacion.Normal
             Me.ctrlBuscadorGenerico.Agregable = False
             Me.ctrlBuscadorGenerico.EnviarDatatableAlNavegar = False
             Me.ctrlBuscadorGenerico.AlternatingBackcolorResultados = Color.AliceBlue

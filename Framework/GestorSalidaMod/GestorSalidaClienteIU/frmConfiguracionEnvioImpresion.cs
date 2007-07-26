@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Framework.GestorSalida.ClienteIU.controladoresForm;
 using MotorIU.Motor;
 using Framework.GestorSalida.DN;
+using Framework.IU.IUComun;
 
 namespace Framework.GestorSalida.ClienteIU
 {

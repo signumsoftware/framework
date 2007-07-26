@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Namespace Motor
     Public Interface INavegador 'Interface que deben implementar los navegadores (Marcos)
         Property DatosMarco() As Hashtable
@@ -31,7 +33,7 @@ Namespace Motor
         ''' <param name="TipoNavegacion">Tipo de navegación a realizar</param>
         ''' <param name="Paquete">Hashtable que contiene los datos para inicializar en el formulario de destino</param>
         ''' <param name="Padre">El nombre del formulario MDI que contandrá al formulario al que se navega</param>
-        Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal Padre As Form, ByVal TipoNavegacion As Motor.TipoNavegacion, ByRef Paquete As Hashtable)
+        Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal Padre As Form, ByVal TipoNavegacion As TipoNavegacion, ByRef Paquete As Hashtable)
 
         ''' <summary>
         ''' Navega a un formulario sin un MDI padre
@@ -40,7 +42,7 @@ Namespace Motor
         ''' <param name="Sender">El formulario desde el que se navega</param>
         ''' <param name="TipoNavegacion">Tipo de navegación a realizar</param>
         ''' <param name="Paquete">Hashtable que contiene los datos que se le quieren pasar al formulario de destino</param>
-        Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal TipoNavegacion As Motor.TipoNavegacion, ByRef Paquete As Hashtable)
+        Overloads Sub Navegar(ByVal Funcion As String, ByVal Sender As Form, ByVal TipoNavegacion As TipoNavegacion, ByRef Paquete As Hashtable)
 
         ''' <summary>
         ''' Navegación Completa

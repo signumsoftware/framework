@@ -123,7 +123,7 @@ Public Class ctrlListaGD
                                     paquete.Add("NombreInstanciaMapVis", Me.mPropertyVincPrincipal.Map.DatosNavegacion)
                                     paquete.Add("DN", midnSelecioand)
 
-                                    Me.Marco.Navegar("FG", Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
+                                    Me.Marco.Navegar("FG", Me.ParentForm, Nothing, TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
 
                                     Me.Poblar()
                                     Me.DNaIUgd()
@@ -161,7 +161,7 @@ Public Class ctrlListaGD
                         Dim autorizado As Boolean = True
                         RaiseEvent ComandoSolicitado(Me, autorizado)
                         If autorizado Then
-                            'Me.Marco.Navegar("", Me.ParentForm, Me.ParentForm, MotorIU.Motor.TipoNavegacion.Modal, CType(Me.ParentForm, MotorIU.FormulariosP.IFormularioP).Datos, Nothing)
+                            'Me.Marco.Navegar("", Me.ParentForm, Me.ParentForm, TipoNavegacion.Modal, CType(Me.ParentForm, MotorIU.FormulariosP.IFormularioP).Datos, Nothing)
 
                             Dim colEntidad As New Framework.DatosNegocio.ArrayListValidable(Of Framework.DatosNegocio.IEntidadBaseDN)
                             colEntidad.AddRange(MV2ControlesHelper.BuscarCol(Me))

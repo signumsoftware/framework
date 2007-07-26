@@ -2,12 +2,14 @@ Imports System.Windows.Forms
 Imports AuxIU
 Imports MotorBusquedaDN
 Imports MotorBusquedabasicasDN
+Imports Framework.IU.IUComun
+
 Public Class ctrlBuscadorGenerico2
 
 #Region "atributos"
     Private mParametroCargaEstructura As ParametroCargaEstructuraDN
     Private mControlador As ctrlBuscadorGenerico2ctrl
-    Private mTipoNavegacion As MotorIU.Motor.TipoNavegacion
+    Private mTipoNavegacion As TipoNavegacion
     Private mEnviarDatatableAlNavegar As Boolean
     Private mEjecutarOperacion As Boolean = False
     '  Private mFiltroVisible As Boolean = True
@@ -193,12 +195,12 @@ Public Class ctrlBuscadorGenerico2
         End Set
     End Property
 
-    <System.ComponentModel.DefaultValue(MotorIU.Motor.TipoNavegacion.Modal)> _
-    Public Property TipoNavegacion() As MotorIU.Motor.TipoNavegacion
+    <System.ComponentModel.DefaultValue(TipoNavegacion.Modal)> _
+    Public Property TipoNavegacion() As TipoNavegacion
         Get
             Return Me.mTipoNavegacion
         End Get
-        Set(ByVal value As MotorIU.Motor.TipoNavegacion)
+        Set(ByVal value As TipoNavegacion)
             Me.mTipoNavegacion = value
         End Set
     End Property
@@ -351,7 +353,7 @@ Public Class ctrlBuscadorGenerico2
             mipaquete.TipoObjeto = Nothing 'TODO: luis - 777 falta por poner el Tipo
 
             'TODO: luis - 777 falta por definir el nombre de la función
-            Me.Marco.Navegar("", Me.ParentForm, Me.ParentForm.MdiParent, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, mipaquete.GenerarPaquete, Me.mFormularioEjecucion)
+            Me.Marco.Navegar("", Me.ParentForm, Me.ParentForm.MdiParent, TipoNavegacion.Normal, Me.GenerarDatosCarga, mipaquete.GenerarPaquete, Me.mFormularioEjecucion)
 
             'asociamos el evento de operacion finalizada a nuestro método
             AddHandler Me.mFormularioEjecucion.OperacionTerminada, AddressOf EscucharResultado
@@ -468,7 +470,7 @@ Public Class ctrlBuscadorGenerico2
                 'hacemos la navegación para agregar
 
                 If Me.ParentForm.Modal Then
-                    Me.Marco.Navegar(destino, Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
+                    Me.Marco.Navegar(destino, Me.ParentForm, Nothing, TipoNavegacion.Modal, Me.GenerarDatosCarga, paquete)
                     If Not paquete Is Nothing AndAlso paquete.Contains("DN") Then
                         'metemos el resultado en el paquete de nuestro padre
                         Dim mipadre As MotorIU.FormulariosP.FormularioBase = Me.ParentForm
@@ -478,7 +480,7 @@ Public Class ctrlBuscadorGenerico2
                         mipadre.Close()
                     End If
                 Else
-                    Me.Marco.Navegar(destino, Me.ParentForm, Me.ParentForm.MdiParent, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
+                    Me.Marco.Navegar(destino, Me.ParentForm, Me.ParentForm.MdiParent, TipoNavegacion.Normal, Me.GenerarDatosCarga, paquete)
                 End If
             End If
         End If

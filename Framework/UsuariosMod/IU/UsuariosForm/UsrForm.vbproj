@@ -138,6 +138,10 @@
       <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
       <Name>DatosNegocio</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\IUWIN\IUComun\IUComun.vbproj">
+      <Project>{EBAA3074-697C-4638-84C5-AC502B37280D}</Project>
+      <Name>IUComun</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\IUWIN\PropiedadesControles\PropiedadesControles.vbproj">
       <Project>{2C2BCAE2-0C76-4477-97B7-EFECD9FF19A1}</Project>
       <Name>PropiedadesControles</Name>

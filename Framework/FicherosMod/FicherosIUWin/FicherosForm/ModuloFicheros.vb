@@ -1,4 +1,5 @@
 Imports MotorIU.Motor
+Imports Framework.IU.IUComun
 Imports PropiedadesControles
 
 Public Class ModuloFicheros

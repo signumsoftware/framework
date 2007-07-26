@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Module ModuloNavegacion
 
     Public Sub main()
@@ -20,6 +22,6 @@ Public Class Navegador
         MyBase.New(pTablanavegacion)
 
         'navegar al inicial
-        Me.Navegar("NAV1", Me, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosIniciales, Nothing)
+        Me.Navegar("NAV1", Me, Nothing, TipoNavegacion.Normal, Me.GenerarDatosIniciales, Nothing)
     End Sub
 End Class

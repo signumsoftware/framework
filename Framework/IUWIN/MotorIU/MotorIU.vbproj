@@ -188,6 +188,10 @@
       <Project>{4BCFA092-06B6-4DFF-85FA-5C743B16EA03}</Project>
       <Name>ControlesPBase</Name>
     </ProjectReference>
+    <ProjectReference Include="..\IUComun\IUComun.vbproj">
+      <Project>{EBAA3074-697C-4638-84C5-AC502B37280D}</Project>
+      <Name>IUComun</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropiedadesControles\PropiedadesControles.vbproj">
       <Project>{2C2BCAE2-0C76-4477-97B7-EFECD9FF19A1}</Project>
       <Name>PropiedadesControles</Name>

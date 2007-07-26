@@ -1,11 +1,13 @@
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
+
 <Serializable()> _
 Public Class PaqueteFormularioBusqueda
     ''' PAQUETE:
     '''   "Filtro" as MotorBusquedaDN.FiltroDN
     '''   "ParametroCargaEstructura" as ParametroCargaEstructuraDN
     '''   "MultiSelect" as Boolean
-    '''   "TipoNavegacion" as MotorIU.Motor.TipoNavegacion
+    '''   "TipoNavegacion" as TipoNavegacion
     '''   "Agregable" as Boolean
     '''   "EnviarDatatableAlNavegar" as Boolean
     '''   "Titulo" as String
@@ -15,12 +17,12 @@ Public Class PaqueteFormularioBusqueda
     Private mFiltro As MotorBusquedaDN.FiltroDN
     Private mParametroCargaEstructura As ParametroCargaEstructuraDN
     Private mMultiSelect As Boolean = False
-    Private mTipoNavegacion As MotorIU.Motor.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+    Private mTipoNavegacion As TipoNavegacion = TipoNavegacion.Normal
     Private mAgregable As Boolean = False
     Private mEnviarDatatableAlNavegar As Boolean = False
     Private mTitulo As String
-    Private mAlternatingBackcolorResultados As System.Drawing.Color
-    Private mAlternatingBackcolorFiltro As System.Drawing.Color
+    'Private mAlternatingBackcolorResultados As System.Drawing.Color
+    'Private mAlternatingBackcolorFiltro As System.Drawing.Color
     Private mNavegable As Boolean = True
     Private mListaValores As New List(Of ValorCampo)
     Public EjecutarOperacion As Boolean = False
@@ -128,11 +130,11 @@ Public Class PaqueteFormularioBusqueda
     ''' de al botón de navegar (no se tiene en cuenta si el buscador se abre
     ''' modalmente, ya que al navegar se cerrará)
     ''' </summary>
-    Public Property TipoNavegacion() As MotorIU.Motor.TipoNavegacion
+    Public Property TipoNavegacion() As TipoNavegacion
         Get
             Return Me.mTipoNavegacion
         End Get
-        Set(ByVal value As MotorIU.Motor.TipoNavegacion)
+        Set(ByVal value As TipoNavegacion)
             Me.mTipoNavegacion = value
         End Set
     End Property
@@ -174,23 +176,23 @@ Public Class PaqueteFormularioBusqueda
         End Set
     End Property
 
-    Public Property AlternatingBackcolorResultados() As System.Drawing.Color
-        Get
-            Return Me.mAlternatingBackcolorResultados
-        End Get
-        Set(ByVal value As System.Drawing.Color)
-            Me.mAlternatingBackcolorResultados = value
-        End Set
-    End Property
+    'Public Property AlternatingBackcolorResultados() As System.Drawing.Color
+    '    Get
+    '        Return Me.mAlternatingBackcolorResultados
+    '    End Get
+    '    Set(ByVal value As System.Drawing.Color)
+    '        Me.mAlternatingBackcolorResultados = value
+    '    End Set
+    'End Property
 
-    Public Property AlternatingBackcolorFiltro() As System.Drawing.Color
-        Get
-            Return Me.mAlternatingBackcolorFiltro
-        End Get
-        Set(ByVal value As System.Drawing.Color)
-            Me.mAlternatingBackcolorFiltro = value
-        End Set
-    End Property
+    'Public Property AlternatingBackcolorFiltro() As System.Drawing.Color
+    '    Get
+    '        Return Me.mAlternatingBackcolorFiltro
+    '    End Get
+    '    Set(ByVal value As System.Drawing.Color)
+    '        Me.mAlternatingBackcolorFiltro = value
+    '    End Set
+    'End Property
 
     ''' <summary>
     ''' Si los botones guardar y aceptar genéricos son ocultados

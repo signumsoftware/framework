@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using Framework.GestorSalida.ClienteIU.controladoresForm;
 using Framework.GestorSalida.DN;
 using System.Collections;
+using Framework.IU.IUComun;
+using MotorIU.Motor;
 
 namespace Framework.GestorSalida.ClienteIU
 {
@@ -92,7 +94,7 @@ namespace Framework.GestorSalida.ClienteIU
             {
                 MostrarError(ex);
                 Hashtable ht = miPaquete.GenerarPaquete();
-                cMarco.Navegar("EnvioConfiguracionImpresion", this, MotorIU.Motor.TipoNavegacion.CerrarLanzador, ref ht);
+                cMarco.Navegar("EnvioConfiguracionImpresion", this, TipoNavegacion.CerrarLanzador, ref ht);
             }
         }
 
