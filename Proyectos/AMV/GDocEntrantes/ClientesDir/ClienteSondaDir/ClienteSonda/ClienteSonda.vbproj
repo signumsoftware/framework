@@ -61,6 +61,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\FicherosDN.dll</HintPath>
     </Reference>
+    <Reference Include="IUComun, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\IUComun.dll</HintPath>
+    </Reference>
     <Reference Include="MotorIU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorIU.dll</HintPath>

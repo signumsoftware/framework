@@ -3,6 +3,9 @@ Imports Framework.DatosNegocio.Localizaciones.Temporales
 Imports Framework.LogicaNegocios.Transacciones
 Imports Framework.FachadaLogica
 Imports Framework.Usuarios.DN
+Imports GSAMV.DF
+
+
 
 Public Class GestionSegurosAMVFS
     Inherits BaseFachadaFL
@@ -10,6 +13,26 @@ Public Class GestionSegurosAMVFS
     Public Sub New(ByVal tl As ITransaccionLogicaLN, ByVal rec As IRecursoLN)
         MyBase.New(tl, rec)
     End Sub
+
+
+    Public Function CargarFicheroWeb(ByVal pFichero As Byte(), ByVal pIdSession As String, ByVal pActor As PrincipalDN) As String()
+
+        Using New CajonHiloLN(mRec)
+            Dim mfh As MetodoFachadaHelper = New MetodoFachadaHelper()
+            Try
+                mfh.EntradaMetodo(pIdSession, pActor, mRec)
+
+                Return CargadorWebLN.CargadorFichero(pFichero)
+
+                mfh.SalidaMetodo(pIdSession, pActor, mRec)
+            Catch ex As Exception
+                mfh.SalidaMetodoExcepcional(pIdSession, pActor, ex, "", mRec)
+                Throw
+            End Try
+        End Using
+
+    End Function
+
 
     Public Function GenerarPresupuestoxCuestionarioRes(ByVal cuestionarioR As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN, ByVal pIdSession As String, ByVal pActor As PrincipalDN) As FN.Seguros.Polizas.DN.PresupuestoDN
         Using New CajonHiloLN(mRec)

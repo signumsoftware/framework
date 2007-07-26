@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Module Module1
 
     Public Sub Main()
@@ -56,7 +58,7 @@ Public Class Marco
         'agregamos el color de fondo para los títulos
         Me.DatosMarco.Add("ColorTituloGD", Color.Lavender)
 
-        Me.Navegar("Autorizacion", Me, Nothing, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosIniciales(), Nothing)
+        Me.Navegar("Autorizacion", Me, Nothing, TipoNavegacion.Normal, Me.GenerarDatosIniciales(), Nothing)
     End Sub
 End Class
 

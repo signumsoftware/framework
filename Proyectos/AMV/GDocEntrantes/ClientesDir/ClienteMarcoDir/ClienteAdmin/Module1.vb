@@ -1,7 +1,7 @@
 Imports MotorIU
 Imports MotorIU.Motor
 Imports PropiedadesControles
-
+Imports Framework.IU.IUComun
 
 Module Module1
 

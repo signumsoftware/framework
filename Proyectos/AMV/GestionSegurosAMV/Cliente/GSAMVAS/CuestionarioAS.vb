@@ -1,9 +1,21 @@
 Imports Framework.DatosNegocio
 Imports Framework.DatosNegocio.Localizaciones.Temporales
 Imports FN.RiesgosVehiculos.DN
+Imports System
 
 Public Class CuestionarioAS
     Inherits Framework.AS.BaseAS
+
+
+    Public Function CargarFicheroWeb(ByVal fichero As Byte()) As String()
+        Dim servicio As New GSAMVWS.GSAMVWS()
+        servicio.Url = RedireccionURL(servicio.Url)
+        servicio.CookieContainer = ContenedorSessionAS.contenedorSessionC()
+
+        Return servicio.CargarFicheroweb(fichero)
+
+    End Function
+
 
     Public Function GenerarPresupuestoxCuestionarioRes(ByVal cuestionarioR As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN) As FN.Seguros.Polizas.DN.PresupuestoDN
         Dim servicio As New GSAMVWS.GSAMVWS()

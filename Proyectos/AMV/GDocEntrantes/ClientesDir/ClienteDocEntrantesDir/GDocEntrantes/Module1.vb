@@ -1,5 +1,6 @@
 Imports MotorIU.Motor
 Imports PropiedadesControles
+Imports Framework.IU.IUComun
 
 Public Class modMarco
 

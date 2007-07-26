@@ -30,7 +30,7 @@ Public Class PolizasCtrl
         paquete.Add("DN", Alerta)
 
         ' navegar al formaulario que permite editar la nota
-        fp.cMarco.Navegar("FG", fp, Nothing, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+        fp.cMarco.Navegar("FG", fp, Nothing, TipoNavegacion.Normal, paquete)
 
 
         Return control.DN
@@ -65,7 +65,7 @@ Public Class PolizasCtrl
         paquete.Add("DN", nota)
 
         ' navegar al formaulario que permite editar la nota
-        fp.cMarco.Navegar("FG", fp, Nothing, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+        fp.cMarco.Navegar("FG", fp, Nothing, TipoNavegacion.Normal, paquete)
 
 
         Return control.DN
@@ -105,7 +105,7 @@ Public Class PolizasCtrl
         paquete.Add("DN", nota)
 
         ' navegar al formaulario que permite editar la nota
-        fp.cMarco.Navegar("FG", fp, Nothing, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+        fp.cMarco.Navegar("FG", fp, Nothing, TipoNavegacion.Normal, paquete)
 
 
         Return control.DN
@@ -132,7 +132,7 @@ Public Class PolizasCtrl
         paquete.Add("DN", miBajaPolizaPr)
 
         ' navegar al formaulario que permite establecer la fecha de baja
-        fp.cMarco.Navegar("FG", fp, CType(fp, System.Windows.Forms.Form).ParentForm, MotorIU.Motor.TipoNavegacion.Modal, paquete)
+        fp.cMarco.Navegar("FG", fp, CType(fp, System.Windows.Forms.Form).ParentForm, TipoNavegacion.Modal, paquete)
 
 
         ' solicita la ejecución de la operacion

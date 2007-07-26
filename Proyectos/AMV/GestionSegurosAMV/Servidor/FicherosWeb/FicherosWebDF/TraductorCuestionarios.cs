@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Framework.Cuestionario.CuestionarioDN;
-using FicherosWebAD;
 using FN.RiesgosVehiculos.DN;
 using Framework.LogicaNegocios.Transacciones;
 using System.Collections;
@@ -14,13 +13,15 @@ using Framework.ClaseBaseLN;
 using FN.RiesgosVehiculos.LN.RiesgosVehiculosLN;
 using FN.Localizaciones.LN;
 
-namespace FicherosWebDF
+namespace GSAMV.DF
 {
+
+
     public static class TraductorCuestionarios
     {
-
         public static CuestionarioResueltoDN Traducir(LineaWeb linea, CuestionarioDN cuestionario)
         {
+
             CuestionarioResueltoDN cr = new CuestionarioResueltoDN();
             cr.ColRespuestaDN = new ColRespuestaDN();
             cr.CuestionarioDN = cuestionario;
@@ -46,15 +47,12 @@ namespace FicherosWebDF
             Responder(cr, "TieneCarnet", new ValorBooleanoCaracterisitcaDN(), linea.Permiso, now);
             Responder(cr, "FechaFabricacion", new ValorCaracteristicaFechaDN(), linea.FechaFabricacion, now);
 
-            DireccionNoUnicaDN dir = new DireccionNoUnicaDN();
-            dir.Nombre = linea.InformacionPresupuesto.Cliente.Calle; 
-            dir.CodPostal = linea.CodigoPostal;
-            Responder(cr, "DireccionEnvio", new ValorDireccionNoUnicaCaracteristicaDN(), dir, now); 
-
             Responder(cr, "Sexo", new ValorSexoCaracteristicaDN(), RecuperarSexo(linea.Sexo), now);
             
             Responder(cr, "ZONA", new ValorNumericoCaracteristicaDN(), linea.CodigoPostal.ToString().Substring(0,2), now);
-            Responder(cr, "Circulacion-Localidad", new ValorLocalidadCaracteristicaDN(), RecuperarLocalidad(linea.CodigoPostal, linea.Localidad), now);
+            
+            LocalidadDN localidad = RecuperarLocalidad(linea.CodigoPostal, linea.Localidad);
+            Responder(cr, "Circulacion-Localidad", new ValorLocalidadCaracteristicaDN(), localidad, now);
 
             RiesgosVehiculosLN rln = new RiesgosVehiculosLN();
             ModeloDN modelo = rln.RecuperarModeloDatos(linea.Modelo, linea.Marca, linea.Matriculado, now).Modelo;
@@ -65,8 +63,8 @@ namespace FicherosWebDF
             Responder(cr, "TarificacionPrueba", new ValorBooleanoCaracterisitcaDN(), pres == null, now);
             if (pres != null)
             {
-                Concesionario conc = pres.Concesionario;
 
+                Concesionario conc = pres.Concesionario;
                 if (conc != null)
                     Responder(cr, "CodigoVendedor", new ValorTextoCaracteristicaDN(), conc.Vendedor, now);
 
@@ -78,6 +76,12 @@ namespace FicherosWebDF
                     Responder(cr, "Apellido2", new ValorTextoCaracteristicaDN(), cliente.Apellido2, now);
                     Responder(cr, "Telefono", new ValorTextoCaracteristicaDN(), cliente.Telefono, now);
                     Responder(cr, "Fax", new ValorTextoCaracteristicaDN(), cliente.Fax, now);
+
+
+                    DireccionNoUnicaDN dir = new DireccionNoUnicaDN();
+                    dir.Nombre = cliente.Calle;
+                    dir.CodPostal = linea.CodigoPostal;
+                    Responder(cr, "DireccionEnvio", new ValorDireccionNoUnicaCaracteristicaDN(), dir, now);
                 }
 
                 ClienteInfoAdicional clienteInfoAdic = pres.ClienteInfoAdicional;
@@ -86,7 +90,7 @@ namespace FicherosWebDF
                     Responder(cr, "Email", new ValorTextoCaracteristicaDN(), clienteInfoAdic.EMail, now);
                 }
             }
-
+         
             if (linea.Permiso)
             {
                 Responder(cr, "FechaCarnet", new ValorCaracteristicaFechaDN(), linea.FechaPermiso.Value, now);
@@ -97,15 +101,17 @@ namespace FicherosWebDF
             {
                 Responder(cr, "CARN", new ValorNumericoCaracteristicaDN(), 0, now);
             }
-            ConductoresDesignados condDesignados = linea.ConductoresDesignados; 
-            if (condDesignados != null && condDesignados.NumeroConductoresAdicionales > 0)
+            ConductoresDesignados condDesignados = linea.ConductoresDesignados;
+            bool hayConductoresDesignados = condDesignados != null && condDesignados.NumeroConductoresAdicionales > 0;
+            Responder(cr, "ConductoresAdicionalesConCarnet", new ValorBooleanoCaracterisitcaDN(), hayConductoresDesignados, now);
+            if (hayConductoresDesignados)
             {
                 DateTime? joven;
                 ColDatosMCND colDatos = GenerarColDatos(condDesignados, out joven);
                 Responder(cr, "MCND", new ValorNumericoCaracteristicaDN(), AnyosMesesDias.CalcularDirAMD(now, joven.Value).Anyos, now);
-                Responder(cr, "ConductoresAdicionalesConCarnet", new ValorBooleanoCaracterisitcaDN(), colDatos.Count, now);
                 Responder(cr, "ColConductoresAdicionales", new ValorMCNDCaracteristicaDN(), colDatos, now);
             }
+   
            
             Preguntas p = linea.Preguntas; 
             Respuestas r = linea.Respuestas;
@@ -118,8 +124,17 @@ namespace FicherosWebDF
                 Responder(cr, "ConduccionEbrio3años", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.InfraccionPorConducirEbrio, p.Pregunta4, r.Respuesta4), now);
                 Responder(cr, "VehículoTransporteRemunerado", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.UtilizaVehiculoParaTransporteRemunerado, p.Pregunta5, r.Respuesta5), now);
                 Responder(cr, "CanceladoSeguro3años", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.SeguroCancelado, p.Pregunta6, r.Respuesta6), now);
-                Responder(cr, "PermisoCirculacionEspañol", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.DisponesPermisoCirculacionEspañol, p.Pregunta7, r.Respuesta7), now);
-                Responder(cr, "TitularPermisoCirculación", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.TitularPermisoCirculacion, p.Pregunta8, r.Respuesta8), now);
+                //unico conductor del vehiculo no se usa
+                if (p.Pregunta7.HasValue && TraductorPreguntas.TraducirPregunta(p.Pregunta7.Value) == Pregunta.UnicoConductorDelVehiculo)
+                {
+                    Responder(cr, "PermisoCirculacionEspañol", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.DisponesPermisoCirculacionEspañol, p.Pregunta8, r.Respuesta8), now);
+                    Responder(cr, "TitularPermisoCirculación", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.TitularPermisoCirculacion, p.Pregunta9, r.Respuesta9), now);
+                }
+                else
+                {
+                    Responder(cr, "PermisoCirculacionEspañol", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.DisponesPermisoCirculacionEspañol, p.Pregunta7, r.Respuesta7), now);
+                    Responder(cr, "TitularPermisoCirculación", new ValorBooleanoCaracterisitcaDN(), TestBool(Pregunta.TitularPermisoCirculacion, p.Pregunta7, r.Respuesta7), now);
+                }
             }
 
             Responder(cr, "AseguradoActualmente", new ValorBooleanoCaracterisitcaDN(), linea.SeguroAccidentes, now);

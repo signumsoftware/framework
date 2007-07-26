@@ -7,11 +7,8 @@ Public Class frmCargadorFicherosWeb
     Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
 
         If OpenFileDialog1.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
-
             mBytes = File.ReadAllBytes(OpenFileDialog1.FileName)
-
-            Label1.Text = mBytes.Length
-
+            Label1.Text = Path.GetFileName(OpenFileDialog1.FileName)
         End If
 
     End Sub
@@ -20,14 +17,13 @@ Public Class frmCargadorFicherosWeb
 
         If mBytes IsNot Nothing Then
 
-            'Dim ws As New RiesgosVehiculosWS.RiesgosVehiculosWS
+            Dim gsamvas As New GSAMVAS.CuestionarioAS()
+            Dim errores As String() = gsamvas.CargarFicheroWeb(mBytes)
 
-            'Dim errores As String() = ws.CargarFicheroweb(mBytes)
+            ListBox1.Items.Clear()
+            ListBox1.Items.AddRange(errores)
 
-            'ListBox1.Items.Clear()
-            'ListBox1.Items.AddRange(errores)
-
-            'mBytes = Nothing
+            mBytes = Nothing
 
         End If
 

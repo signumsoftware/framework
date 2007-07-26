@@ -12,18 +12,6 @@ Imports Framework.Usuarios.DN
 Public Class RiesgosVehiculosWS
      Inherits System.Web.Services.WebService
 
-
-
-    <WebMethod(True)> _
-    Public Function CargarFicheroweb(ByVal fichero As Byte()) As String()
-
-        Dim actor As PrincipalDN = WSHelper.ControladorSesionLN.ComprobarUsuario(Me)
-        Dim recurso As Framework.LogicaNegocios.Transacciones.IRecursoLN = CType(Me.Application.Item("recurso"), Framework.LogicaNegocios.Transacciones.RecursoLN)
-        Dim fs As New FN.RiesgosVehiculos.FS.RiesgosVehículosFS(Nothing, recurso)
-        fs.CargarFicheroWeb(Me.Session.SessionID, actor, fichero)
-
-    End Function
-
     <WebMethod(True)> _
     Public Sub CargarGrafoTarificacion()
 

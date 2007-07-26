@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class ctrlConfiguracionPuntosImpresion
 
 #Region "atributos"
@@ -289,7 +291,7 @@ Public Class ctrlConfiguracionPuntosImpresion
     Private Sub cmdAgregarImagen_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdAgregarImagen.Click
         Try
             Dim mipaquete As New PaqueteImagen
-            Me.Marco.Navegar("ImagenEmbebida", Me.FormularioPadre, Nothing, MotorIU.Motor.TipoNavegacion.Modal, mipaquete.GenerarPaquete)
+            Me.Marco.Navegar("ImagenEmbebida", Me.FormularioPadre, Nothing, TipoNavegacion.Modal, mipaquete.GenerarPaquete)
             If Not mipaquete Is Nothing AndAlso Not mipaquete.ContenedorImagen Is Nothing Then
                 If Me.mColImagenes Is Nothing Then
                     Me.mColImagenes = New FN.GestionPagos.DN.ColContenedorImagenDN
@@ -324,7 +326,7 @@ Public Class ctrlConfiguracionPuntosImpresion
                 Dim ci As FN.GestionPagos.DN.ContenedorImagenDN = Me.DataGridView1.SelectedRows(0).Cells(0).Value
                 Dim mipaquete As New PaqueteImagen
                 mipaquete.ContenedorImagen = ci
-                Me.Marco.Navegar("ImagenEmbebida", Me.FormularioPadre, Nothing, MotorIU.Motor.TipoNavegacion.Modal, mipaquete.GenerarPaquete)
+                Me.Marco.Navegar("ImagenEmbebida", Me.FormularioPadre, Nothing, TipoNavegacion.Modal, mipaquete.GenerarPaquete)
                 Me.CargarImagenes(Me.mColImagenes)
             End If
         Catch ex As Exception

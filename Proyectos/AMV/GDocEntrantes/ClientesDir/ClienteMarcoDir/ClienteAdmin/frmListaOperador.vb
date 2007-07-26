@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class frmListaOperador
 
 #Region "Atributos"
@@ -126,7 +128,7 @@ Public Class frmListaOperador
             miPaquete.Add("ID", idUsuario)
         End If
         miPaquete.Add("Modo", modo)
-        Me.cMarco.Navegar("EntidadUsuario", Me, Me, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga(), miPaquete)
+        Me.cMarco.Navegar("EntidadUsuario", Me, Me, TipoNavegacion.Modal, Me.GenerarDatosCarga(), miPaquete)
     End Sub
 
     Private Function RecuperarIdSeleccionado() As String

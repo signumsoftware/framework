@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class frmAutorizacion
 
     Private mControlador As frmAutorizacionctrl
@@ -12,7 +14,7 @@ Public Class frmAutorizacion
         Try
             Using New AuxIU.CursorScope(Cursors.WaitCursor)
                 If Me.mControlador.LogarseEnSistema(Me.txtNick.Text.Trim(), Me.txtClave.Text.Trim()) Then
-                    Me.cMarco.Navegar("Main", Me, Nothing, MotorIU.Motor.TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Nothing)
+                    Me.cMarco.Navegar("Main", Me, Nothing, TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Nothing)
                 Else
                     MessageBox.Show("No se ha podido logar en el sistema." & Chr(13) & Chr(13) & "Compruebe su nombre de usuario y contraseña", "Login", MessageBoxButtons.OK, MessageBoxIcon.Exclamation)
                 End If

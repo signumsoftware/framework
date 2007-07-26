@@ -1,4 +1,5 @@
 Imports FN.Empresas.DN
+Imports Framework.IU.IUComun
 
 Public Class EmpresasControlador
 
@@ -35,7 +36,7 @@ Public Class EmpresasControlador
         'Navegar al formulario de usuarios pasando la DN del usuario
         Dim paquete As New Hashtable()
         paquete.Add("DN", principal)
-        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(CType(control, MotorIU.ControlesP.IControlP), paquete, MotorIU.Motor.TipoNavegacion.CerrarLanzador)
+        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(CType(control, MotorIU.ControlesP.IControlP), paquete, TipoNavegacion.CerrarLanzador)
 
         Return empPuestoR
 
@@ -70,7 +71,7 @@ Public Class EmpresasControlador
             paquete.Add("PaqueteFormularioBusqueda", miPaqueteFormularioBusqueda)
         End If
 
-        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(CType(control, MotorIU.ControlesP.IControlP), GetType(PuestoDN), paquete, MotorIU.Motor.TipoNavegacion.Modal, Nothing)
+        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(CType(control, MotorIU.ControlesP.IControlP), GetType(PuestoDN), paquete, TipoNavegacion.Modal, Nothing)
 
         'TODO: Pasar a un método en EmpresasLNC
         If paquete IsNot Nothing AndAlso paquete.Contains("ID") AndAlso Not String.IsNullOrEmpty(paquete.Item("ID")) Then

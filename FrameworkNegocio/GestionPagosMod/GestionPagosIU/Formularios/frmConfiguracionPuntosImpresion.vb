@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class frmConfiguracionPuntosImpresion
 
     Public Overrides Sub Inicializar()
@@ -75,7 +77,7 @@ Public Class frmConfiguracionPuntosImpresion
             mipaquete.Prueba = True
 
 
-            Me.cMarco.Navegar("ImpresionTalon", Me, Me, MotorIU.Motor.TipoNavegacion.Modal, mipaquete.GenerarPaquete())
+            Me.cMarco.Navegar("ImpresionTalon", Me, Me, TipoNavegacion.Modal, mipaquete.GenerarPaquete())
 
         Catch ex As Exception
             MostrarError(ex)

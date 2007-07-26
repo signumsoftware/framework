@@ -116,10 +116,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Proyectos\AMV\GestionSegurosAMV\Servidor\FicherosWeb\FicherosWebDF\FicherosWebDF.csproj">
-      <Project>{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}</Project>
-      <Name>FicherosWebDF</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\GestionPagosMod\GestionPagosDN\GestionPagosDN.vbproj">
       <Project>{72D64925-7C1F-4225-942E-8F49439128A4}</Project>
       <Name>GestionPagosDN</Name>

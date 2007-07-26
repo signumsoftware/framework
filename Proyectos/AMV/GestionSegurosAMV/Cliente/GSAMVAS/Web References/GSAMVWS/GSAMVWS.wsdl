@@ -2,6 +2,25 @@
 <wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:types>
     <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="CargarFicheroweb">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="fichero" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CargarFicherowebResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CargarFicherowebResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
       <s:element name="GenerarPresupuestoxCuestionarioRes">
         <s:complexType>
           <s:sequence>
@@ -33,6 +52,12 @@
       </s:element>
     </s:schema>
   </wsdl:types>
+  <wsdl:message name="CargarFicherowebSoapIn">
+    <wsdl:part name="parameters" element="tns:CargarFicheroweb" />
+  </wsdl:message>
+  <wsdl:message name="CargarFicherowebSoapOut">
+    <wsdl:part name="parameters" element="tns:CargarFicherowebResponse" />
+  </wsdl:message>
   <wsdl:message name="GenerarPresupuestoxCuestionarioResSoapIn">
     <wsdl:part name="parameters" element="tns:GenerarPresupuestoxCuestionarioRes" />
   </wsdl:message>
@@ -46,6 +71,10 @@
     <wsdl:part name="parameters" element="tns:GenerarTarifaxCuestionarioResResponse" />
   </wsdl:message>
   <wsdl:portType name="GSAMVWSSoap">
+    <wsdl:operation name="CargarFicheroweb">
+      <wsdl:input message="tns:CargarFicherowebSoapIn" />
+      <wsdl:output message="tns:CargarFicherowebSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="GenerarPresupuestoxCuestionarioRes">
       <wsdl:input message="tns:GenerarPresupuestoxCuestionarioResSoapIn" />
       <wsdl:output message="tns:GenerarPresupuestoxCuestionarioResSoapOut" />
@@ -57,6 +86,15 @@
   </wsdl:portType>
   <wsdl:binding name="GSAMVWSSoap" type="tns:GSAMVWSSoap">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CargarFicheroweb">
+      <soap:operation soapAction="http://tempuri.org/CargarFicheroweb" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GenerarPresupuestoxCuestionarioRes">
       <soap:operation soapAction="http://tempuri.org/GenerarPresupuestoxCuestionarioRes" style="document" />
       <wsdl:input>
@@ -78,6 +116,15 @@
   </wsdl:binding>
   <wsdl:binding name="GSAMVWSSoap12" type="tns:GSAMVWSSoap">
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CargarFicheroweb">
+      <soap12:operation soapAction="http://tempuri.org/CargarFicheroweb" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GenerarPresupuestoxCuestionarioRes">
       <soap12:operation soapAction="http://tempuri.org/GenerarPresupuestoxCuestionarioRes" style="document" />
       <wsdl:input>

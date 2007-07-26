@@ -1,4 +1,5 @@
 Imports FN.RiesgosVehiculos.DN
+Imports Framework.IU.IUComun
 
 Public Class ctrlTarifa
     Inherits MotorIU.ControlesP.BaseControlP
@@ -468,7 +469,7 @@ Public Class ctrlTarifa
     Private Sub btnNavegarRiesgo_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdNavegarRiesgo.Click
         Dim mipaquete As New Hashtable()
         mipaquete.Add("DN", mTarifa.Riesgo)
-        Me.Marco.Navegar("FG", Me.FormularioPadre, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga, mipaquete, Nothing)
+        Me.Marco.Navegar("FG", Me.FormularioPadre, Nothing, TipoNavegacion.Modal, Me.GenerarDatosCarga, mipaquete, Nothing)
 
         If mipaquete IsNot Nothing AndAlso mipaquete.Contains("DN") Then
             mTarifa.Riesgo = mipaquete("DN")

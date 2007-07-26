@@ -62,7 +62,7 @@ Public Class TarificadorCtrl
     '    paquete.Add("Presupuesto", presupuestoClon)
 
     '    ' navegar al formaulario que permite editar la nota
-    '    fp.cMarco.Navegar("FG", fp, CType(fp, System.Windows.Forms.Form).ParentForm, MotorIU.Motor.TipoNavegacion.CerrarLanzador, paquete)
+    '    fp.cMarco.Navegar("FG", fp, CType(fp, System.Windows.Forms.Form).ParentForm, TipoNavegacion.CerrarLanzador, paquete)
 
     '    Return datos
 
@@ -88,7 +88,7 @@ Public Class TarificadorCtrl
 
         ' navegar al formaulario para tarificar
         fp = CType(control, System.Windows.Forms.ContainerControl).ParentForm
-        fp.cMarco.Navegar("Cuestionario1", fp, CType(fp, System.Windows.Forms.Form).ParentForm, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+        fp.cMarco.Navegar("Cuestionario1", fp, CType(fp, System.Windows.Forms.Form).ParentForm, TipoNavegacion.Normal, paquete)
 
         Return datos
 
@@ -113,7 +113,7 @@ Public Class TarificadorCtrl
         paquete.Add("SoloCuestionario", True)
         paquete.Add("TipoDevuelto", GetType(Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN).FullName)
 
-        fp.cMarco.Navegar("Cuestionario1", fp, CType(fp, System.Windows.Forms.Form).ParentForm, MotorIU.Motor.TipoNavegacion.Modal, paquete)
+        fp.cMarco.Navegar("Cuestionario1", fp, CType(fp, System.Windows.Forms.Form).ParentForm, TipoNavegacion.Modal, paquete)
 
 
         cuestionarioR = paquete.Item("DN")
@@ -123,7 +123,7 @@ Public Class TarificadorCtrl
         Dim tiempoTarificado As New Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias()
         tiempoTarificado = AnyosMesesDias.CalcularDirAMD(periodoR.FF, fechaEfectoPC)
 
-        Dim tarifaNueva As FN.Seguros.Polizas.DN.TarifaDN = miAS.GenerarTarifaxCuestionarioRes(cuestionarior, tiempoTarificado)
+        Dim tarifaNueva As FN.Seguros.Polizas.DN.TarifaDN = miAS.GenerarTarifaxCuestionarioRes(cuestionarioR, tiempoTarificado)
 
 
         '4 Realizo la modificación de la póliza pasando PR, CR, T, 

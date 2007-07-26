@@ -1,4 +1,5 @@
 Imports Framework.Usuarios.DN
+Imports Framework.IU.IUComun
 Imports AuxIU
 
 Public Class ctrlPostClasificar
@@ -636,7 +637,7 @@ Public Class ctrlPostClasificar
     Private Sub cmdSeleccionarArbol_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdSeleccionarArbol.Click
         Try
             Dim mipaquete As New Hashtable
-            Me.Marco.Navegar("SeleccionArbol", Me.ParentForm, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.mControlador.ControladorForm.FormularioContenedor.GenerarDatosCarga, mipaquete)
+            Me.Marco.Navegar("SeleccionArbol", Me.ParentForm, Nothing, TipoNavegacion.Modal, Me.mControlador.ControladorForm.FormularioContenedor.GenerarDatosCarga, mipaquete)
             If Not mipaquete Is Nothing Then
                 If mipaquete.Contains("TipoEntidadNegocio") AndAlso Not mipaquete("TipoEntidadNegocio") Is Nothing Then
                     Dim mientnegocio As AmvDocumentosDN.TipoEntNegoioDN = CType(mipaquete("TipoEntidadNegocio"), AmvDocumentosDN.TipoEntNegoioDN)

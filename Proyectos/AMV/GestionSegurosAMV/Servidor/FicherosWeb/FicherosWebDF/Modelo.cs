@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using SerializadorTexto.Atributos;
 
-namespace FicherosWebAD
+namespace GSAMV.DF
 {
     [ArchivoTexto(1871, RetornoCarro = true, AlinearDerecha = AlinearDerecha.Ninguno)]
     public class FicheroWeb
@@ -121,7 +121,7 @@ namespace FicherosWebAD
         public DateTime? FechaTarificacion;
 
         [CampoTexto(34, 9)]
-        public double TotalBasica;
+        public decimal TotalBasica;
 
         [CampoTexto(35, 672)]
         public InfoPresupuesto InformacionPresupuesto;
@@ -238,7 +238,7 @@ namespace FicherosWebAD
     public class InfoFraccionamiento
     {
         [CampoTexto(1, 9)]
-        public double PrimaNetaTotalAnual;
+        public decimal PrimaNetaTotalAnual;
 
         [CampoTexto(2, 20, Format = "dd/MM/yyyyHH:mm:ss")]
         public DateTime? FechaYHoraEfecto;

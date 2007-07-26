@@ -1,4 +1,5 @@
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
 
 Public Class AdaptadorImpresion
     Public Sub New()
@@ -49,7 +50,7 @@ Public Class AdaptadorImpresion
                 vc.Valor = pago.ID
                 colValores.Add(vc)
 
-                MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(f, GetType(FN.GestionPagos.DN.PagoDN), Nothing, MotorIU.Motor.TipoNavegacion.CerrarLanzador, "PreImpresionTalones", True, colop, colValores, Nothing, Nothing)
+                MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(f, GetType(FN.GestionPagos.DN.PagoDN), Nothing, TipoNavegacion.CerrarLanzador, "PreImpresionTalones", True, colop, colValores, Nothing, Nothing)
 
             Else
 

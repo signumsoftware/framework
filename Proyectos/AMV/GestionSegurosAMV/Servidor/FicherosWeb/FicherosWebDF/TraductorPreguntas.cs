@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FicherosWebAD
+namespace GSAMV.DF
 {
     public static class TraductorPreguntas
     {

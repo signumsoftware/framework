@@ -4,6 +4,7 @@ Imports Framework.LogicaNegocios.Transacciones
 Imports Framework.Cuestionario.CuestionarioDN
 
 Imports FN.Seguros.Polizas.DN
+Imports System
 
 Public Class AdaptadorCuestionarioLN
     Inherits Framework.ClaseBaseLN.BaseTransaccionConcretaLN
@@ -99,6 +100,13 @@ Public Class AdaptadorCuestionarioLN
 
     End Function
 
+    Public Function GenerarTarifaxCuestionarioRes(ByVal cuestionarioR As CuestionarioResueltoDN) As TarifaDN
+        Dim tiempoTarificado As New AnyosMesesDias
+        tiempoTarificado.Anyos = 1
+        Return GenerarTarifaxCuestionarioRes(cuestionarioR, tiempoTarificado, Nothing, True)
+    End Function
+
+
     Public Function GenerarTarifaxCuestionarioRes(ByVal cuestionarioR As CuestionarioResueltoDN, ByVal tiempoTarificado As AnyosMesesDias, ByVal tomador As FuturoTomadorDN, ByVal debeTarificar As Boolean) As TarifaDN
         Dim tarifa As TarifaDN
         Dim riesgo As FN.RiesgosVehiculos.DN.RiesgoMotorDN
@@ -160,8 +168,7 @@ Public Class AdaptadorCuestionarioLN
             tarifa.DatosTarifa = datosTarifa
             tarifa.DatosTarifa.ValorBonificacion = tomador.ValorBonificacion
             tarifa.FEfecto = fechaEfecto
-            tarifa.AMD = New Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias()
-            tarifa.AMD.Anyos = 1
+            tarifa.AMD = tiempoTarificado
 
             If debeTarificar Then
                 rvLN = New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()

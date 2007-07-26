@@ -7,8 +7,8 @@
     <ProjectGuid>{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FicherosWebDF</RootNamespace>
-    <AssemblyName>FicherosWebDF</AssemblyName>
+    <RootNamespace>GSAMV.DF</RootNamespace>
+    <AssemblyName>GSAMV.DF</AssemblyName>
     <StartupObject>
     </StartupObject>
     <SccProjectName>SAK</SccProjectName>

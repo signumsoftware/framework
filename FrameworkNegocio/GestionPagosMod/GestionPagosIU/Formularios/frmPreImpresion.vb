@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class frmPreImpresion
 
     Private mconfiguracionimpresion As FN.GestionPagos.DN.ConfiguracionImpresionTalonDN
@@ -236,7 +238,7 @@ Public Class frmPreImpresion
     ''' </summary>
     ''' <remarks></remarks>
     Private Function LanzarFormImpresion(ByVal mipaquete As Hashtable) As Hashtable
-        Me.cMarco.Navegar("ImpresionTalon", Me, Me.MdiParent, MotorIU.Motor.TipoNavegacion.Modal, mipaquete)
+        Me.cMarco.Navegar("ImpresionTalon", Me, Me.MdiParent, TipoNavegacion.Modal, mipaquete)
         Return mipaquete
     End Function
 
@@ -267,7 +269,7 @@ Public Class frmPreImpresion
         'advertimos que vamos a navegar
         Me.mEstadoImpresion = EstadoImpresion.navegandoapostimpresion
 
-        Me.cMarco.Navegar("PostImpresionTalones", Me, Me.ParentForm, MotorIU.Motor.TipoNavegacion.CerrarLanzador, ppi.GenerarPaquete)
+        Me.cMarco.Navegar("PostImpresionTalones", Me, Me.ParentForm, TipoNavegacion.CerrarLanzador, ppi.GenerarPaquete)
     End Sub
 
     Private mPrinterSettings As System.Drawing.Printing.PrinterSettings

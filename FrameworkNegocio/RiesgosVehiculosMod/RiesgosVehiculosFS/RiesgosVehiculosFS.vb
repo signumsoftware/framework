@@ -15,26 +15,6 @@ Public Class RiesgosVehículosFS
     End Sub
 
 
-    Public Function CargarFicheroWeb(ByVal pIdSession As String, ByVal pActor As PrincipalDN, ByVal pFichero As Byte()) As String()
-
-
-        Using New CajonHiloLN(mRec)
-            Dim mfh As MetodoFachadaHelper = New MetodoFachadaHelper()
-            Try
-                mfh.EntradaMetodo(pIdSession, pActor, mRec)
-
-                Return CargadorWebLN.CargadorFichero(pFichero)
-
-                mfh.SalidaMetodo(pIdSession, pActor, mRec)
-            Catch ex As Exception
-                mfh.SalidaMetodoExcepcional(pIdSession, pActor, ex, "", mRec)
-                Throw
-            End Try
-        End Using
-
-    End Function
-
-
     Public Function RecuperarRiesgoMotor(ByVal pMatricula As String, ByVal pNumeroBastidor As String, ByVal pIdSession As String, ByVal pActor As PrincipalDN) As FN.RiesgosVehiculos.DN.RiesgoMotorDN
         Using New CajonHiloLN(mRec)
             Dim mfh As MetodoFachadaHelper = New MetodoFachadaHelper()

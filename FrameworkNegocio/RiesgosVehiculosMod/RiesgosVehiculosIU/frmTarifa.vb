@@ -1,5 +1,6 @@
 Imports FN.Seguros.Polizas.DN
 Imports FN.RiesgosVehiculos.DN
+Imports Framework.IU.IUComun
 
 Public Class frmTarifa
     Inherits MotorIU.FormulariosP.FormularioBase
@@ -44,7 +45,7 @@ Public Class frmTarifa
                 Me.Paquete.Add("CuestionarioResuelto", cr)
             End If
 
-            Me.cMarco.Navegar("Cuestionario1", Me, Me.MdiParent, MotorIU.Motor.TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
+            Me.cMarco.Navegar("Cuestionario1", Me, Me.MdiParent, TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
 
         Catch ex As Exception
             MostrarError(ex)

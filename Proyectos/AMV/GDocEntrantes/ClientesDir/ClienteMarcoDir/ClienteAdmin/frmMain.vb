@@ -1,6 +1,8 @@
 Imports AuxIU
 Imports FN.Personas.DN
 Imports FN.Localizaciones.DN
+Imports Framework.IU.IUComun
+
 Public Class frmMain
 
     Private Sub frmMain_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
@@ -43,7 +45,7 @@ Public Class frmMain
 
     Private Sub ÁrbolDeEntidadesToolStripMenuItem_Click(ByVal sender As Object, ByVal e As System.EventArgs)
         Try
-            Me.cMarco.Navegar("AdministracionArbol", Me, Me, MotorIU.Motor.TipoNavegacion.MonoInstancia, Me.GenerarDatosCarga, Nothing)
+            Me.cMarco.Navegar("AdministracionArbol", Me, Me, TipoNavegacion.MonoInstancia, Me.GenerarDatosCarga, Nothing)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -51,7 +53,7 @@ Public Class frmMain
 
     Private Sub RutasAlmacenamientoToolStripMenuItem_Click(ByVal sender As Object, ByVal e As System.EventArgs)
         Try
-            Me.cMarco.Navegar("AdminRutaAlmacenamiento", Me, Me, MotorIU.Motor.TipoNavegacion.MonoInstancia, Me.GenerarDatosCarga, Nothing)
+            Me.cMarco.Navegar("AdminRutaAlmacenamiento", Me, Me, TipoNavegacion.MonoInstancia, Me.GenerarDatosCarga, Nothing)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -76,7 +78,7 @@ Public Class frmMain
             miPaquete.Add("ParametroCargaEstructura", miParametroCargaEst)
 
             miPaquete.Add("MultiSelect", False)
-            miPaquete.Add("TipoNavegacion", MotorIU.Motor.TipoNavegacion.Modal)
+            miPaquete.Add("TipoNavegacion", TipoNavegacion.Modal)
             miPaquete.Add("Agregable", True)
             miPaquete.Add("EnviarDatatableAlNavegar", False)
             miPaquete.Add("Navegable", True)
@@ -85,7 +87,7 @@ Public Class frmMain
 
             miPaquete.Add("Titulo", "Administración de Usuarios")
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -93,7 +95,7 @@ Public Class frmMain
 
     Private Sub PermisosToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PermisosToolStripMenuItem.Click
         Try
-            Me.cMarco.Navegar("AdminPermisosUsuarios", Me, Me, MotorIU.Motor.TipoNavegacion.MonoInstancia, Me.GenerarDatosCarga, Nothing)
+            Me.cMarco.Navegar("AdminPermisosUsuarios", Me, Me, TipoNavegacion.MonoInstancia, Me.GenerarDatosCarga, Nothing)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -111,7 +113,7 @@ Public Class frmMain
             miPaquete.Add("ParametroCargaEstructura", miParametroCargaEst)
 
             miPaquete.Add("MultiSelect", False)
-            miPaquete.Add("TipoNavegacion", MotorIU.Motor.TipoNavegacion.Modal)
+            miPaquete.Add("TipoNavegacion", TipoNavegacion.Modal)
             miPaquete.Add("Agregable", True)
             miPaquete.Add("EnviarDatatableAlNavegar", False)
             miPaquete.Add("Navegable", True)
@@ -120,7 +122,7 @@ Public Class frmMain
 
             miPaquete.Add("Titulo", "Administración de Operadores")
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -135,7 +137,7 @@ Public Class frmMain
             miPaquete.Add("TipoEntidad", GetType(AmvDocumentosDN.TipoCanalDN))
             miPaquete.Add("NombreForm", "Administración del tipo de canales")
 
-            Me.cMarco.Navegar("AdminTipos", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("AdminTipos", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -157,7 +159,7 @@ Public Class frmMain
             miPaquete.Add("ParametroCargaEstructura", miParametroCargaEst)
 
             miPaquete.Add("MultiSelect", True)
-            miPaquete.Add("TipoNavegacion", MotorIU.Motor.TipoNavegacion.Modal)
+            miPaquete.Add("TipoNavegacion", TipoNavegacion.Modal)
             miPaquete.Add("Navegable", True)
             miPaquete.Add("EnviarDatatableAlNavegar", True)
             miPaquete.Add("AlternatingBackcolorFiltro", System.Drawing.Color.LightBlue)
@@ -165,7 +167,7 @@ Public Class frmMain
 
             miPaquete.Add("Titulo", "Selección de Documentos")
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -173,7 +175,7 @@ Public Class frmMain
 
     Private Sub AcercaDeGestiónDeDocumentosToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AcercaDeGestiónDeDocumentosToolStripMenuItem.Click
         Try
-            Me.cMarco.Navegar("Acercade", Me, Me, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga, Nothing)
+            Me.cMarco.Navegar("Acercade", Me, Me, TipoNavegacion.Modal, Me.GenerarDatosCarga, Nothing)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -197,7 +199,7 @@ Public Class frmMain
             miPaquete.Add("ParametroCargaEstructura", miParametroCargaEst)
 
             miPaquete.Add("MultiSelect", False)
-            miPaquete.Add("TipoNavegacion", MotorIU.Motor.TipoNavegacion.Modal)
+            miPaquete.Add("TipoNavegacion", TipoNavegacion.Modal)
             miPaquete.Add("Navegable", True)
             miPaquete.Add("EnviarDatatableAlNavegar", False)
             miPaquete.Add("AlternatingBackcolorFiltro", System.Drawing.Color.LightBlue)
@@ -205,7 +207,7 @@ Public Class frmMain
 
             miPaquete.Add("Titulo", "Consulta de las operaciones realizadas")
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -239,7 +241,7 @@ Public Class frmMain
 
 
 
-            Me.cMarco.Navegar("FG", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, Nothing)
+            Me.cMarco.Navegar("FG", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, Nothing)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -271,14 +273,14 @@ Public Class frmMain
 
             Dim mipaquetecarga As New MotorBusquedaDN.PaqueteFormularioBusqueda
             mipaquetecarga.ParametroCargaEstructura = miParametroCargaEst
-            mipaquetecarga.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+            mipaquetecarga.TipoNavegacion = TipoNavegacion.Normal
             mipaquetecarga.Agregable = True
-            mipaquetecarga.AlternatingBackcolorFiltro = System.Drawing.Color.LightBlue
-            mipaquetecarga.AlternatingBackcolorResultados = System.Drawing.Color.LightBlue
+            'mipaquetecarga.AlternatingBackcolorFiltro = System.Drawing.Color.LightBlue
+            'mipaquetecarga.AlternatingBackcolorResultados = System.Drawing.Color.LightBlue
             mipaquetecarga.Titulo = "Buscador GENERICO"
             miPaquete.Add("PaqueteFormularioBusqueda", mipaquetecarga)
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -287,7 +289,7 @@ Public Class frmMain
     Private Sub MapeadosVis2ToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MapeadosVis2ToolStripMenuItem.Click
 
         Try
-            Me.cMarco.Navegar("AdminMapVis", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, Nothing)
+            Me.cMarco.Navegar("AdminMapVis", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, Nothing)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -302,7 +304,7 @@ Public Class frmMain
     Private Sub CartasModeloToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CartasModeloToolStripMenuItem.Click
         Try
             'TODO: luis - aquí debería ir al buscador para seleccionar las plantillas que se quieran
-            Me.cMarco.Navegar("PlantillaCartaModelo", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Nothing)
+            Me.cMarco.Navegar("PlantillaCartaModelo", Me, Me, TipoNavegacion.Normal, Nothing)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -332,8 +334,8 @@ Public Class frmMain
 
                 Dim colop As New Framework.Procesos.ProcesosDN.ColOperacionDN
                 colop.Add(op)
-                '      MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(Me, GetType(FN.GestionPagos.DN.PagoDN), Nothing, MotorIU.Motor.TipoNavegacion.Normal, "PreImpresionTalones", True, colop, Nothing)
-                MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(Me, GetType(FN.GestionPagos.DN.PagoDN), Nothing, MotorIU.Motor.TipoNavegacion.Normal, "PreImpresionTalones", True, colop, Nothing, Nothing, Nothing)
+                '      MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(Me, GetType(FN.GestionPagos.DN.PagoDN), Nothing, TipoNavegacion.Normal, "PreImpresionTalones", True, colop, Nothing)
+                MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(Me, GetType(FN.GestionPagos.DN.PagoDN), Nothing, TipoNavegacion.Normal, "PreImpresionTalones", True, colop, Nothing, Nothing, Nothing)
 
             Else
                 MessageBox.Show("El usuario actual no tiene autorizada la operación")
@@ -392,7 +394,7 @@ Public Class frmMain
         Try
             Dim paquete As New Hashtable()
             paquete.Add("tipoImportacion", "Proveedores")
-            Me.cMarco.Navegar("ImportacionFicheros", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+            Me.cMarco.Navegar("ImportacionFicheros", Me, Me, TipoNavegacion.Normal, paquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -402,7 +404,7 @@ Public Class frmMain
         Try
             Dim paquete As New Hashtable()
             paquete.Add("tipoImportacion", "Pagos")
-            Me.cMarco.Navegar("ImportacionFicheros", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+            Me.cMarco.Navegar("ImportacionFicheros", Me, Me, TipoNavegacion.Normal, paquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try
@@ -492,14 +494,14 @@ Public Class frmMain
             mipaqueteconf.Agregable = True
             mipaqueteconf.EnviarDatatableAlNavegar = False
             mipaqueteconf.MultiSelect = False
-            mipaqueteconf.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+            mipaqueteconf.TipoNavegacion = TipoNavegacion.Normal
             mipaqueteconf.Titulo = "Plantillas de Cartas Modelo"
             mipaqueteconf.Navegable = True
             mipaqueteconf.ParametroCargaEstructura = miParametroCargaEst
 
             miPaquete.Add("PaqueteFormularioBusqueda", mipaqueteconf)
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
 
         Catch ex As Exception
             MostrarError(ex)
@@ -530,14 +532,14 @@ Public Class frmMain
             mipaqueteconf.Agregable = True
             mipaqueteconf.EnviarDatatableAlNavegar = False
             mipaqueteconf.MultiSelect = False
-            mipaqueteconf.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+            mipaqueteconf.TipoNavegacion = TipoNavegacion.Normal
             mipaqueteconf.Titulo = "Configuración de Impresión de Talones"
             mipaqueteconf.Navegable = True
             mipaqueteconf.ParametroCargaEstructura = miParametroCargaEst
 
             miPaquete.Add("PaqueteFormularioBusqueda", mipaqueteconf)
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
 
         Catch ex As Exception
             MostrarError(ex)
@@ -583,7 +585,7 @@ Public Class frmMain
                 If op IsNot Nothing Then
                     Dim colop As New Framework.Procesos.ProcesosDN.ColOperacionDN
                     colop.Add(op)
-                    MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(Me, GetType(FN.GestionPagos.DN.PagoDN), Nothing, MotorIU.Motor.TipoNavegacion.Normal, "AdjuntarPagoFT", True, colop, Nothing, Nothing, Nothing)
+                    MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(Me, GetType(FN.GestionPagos.DN.PagoDN), Nothing, TipoNavegacion.Normal, "AdjuntarPagoFT", True, colop, Nothing, Nothing, Nothing)
                 Else
                     MessageBox.Show("El usuario actual no tiene autorizada la operación")
                 End If
@@ -618,14 +620,14 @@ Public Class frmMain
             mipaqueteconf.Agregable = False
             mipaqueteconf.EnviarDatatableAlNavegar = False
             mipaqueteconf.MultiSelect = False
-            mipaqueteconf.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Normal
+            mipaqueteconf.TipoNavegacion = TipoNavegacion.Normal
             mipaqueteconf.Titulo = "Traza de los ficheros de transferencias"
             mipaqueteconf.Navegable = True
             mipaqueteconf.ParametroCargaEstructura = miParametroCargaEst
 
             miPaquete.Add("PaqueteFormularioBusqueda", mipaqueteconf)
 
-            Me.cMarco.Navegar("Filtro", Me, Me, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+            Me.cMarco.Navegar("Filtro", Me, Me, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
 
         Catch ex As Exception
             MostrarError(ex)

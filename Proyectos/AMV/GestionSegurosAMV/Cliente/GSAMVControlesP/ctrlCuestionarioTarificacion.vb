@@ -1,6 +1,7 @@
 Imports Framework.DatosNegocio.Localizaciones.Temporales
 Imports Framework.Cuestionario.CuestionarioDN
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
 
 Public Class ctrlCuestionarioTarificacion
     Inherits MotorIU.ControlesP.BaseControlP
@@ -798,14 +799,14 @@ Public Class ctrlCuestionarioTarificacion
         mipaqueteconf.Agregable = False
         mipaqueteconf.EnviarDatatableAlNavegar = False
         mipaqueteconf.MultiSelect = False
-        mipaqueteconf.TipoNavegacion = MotorIU.Motor.TipoNavegacion.Modal
+        mipaqueteconf.TipoNavegacion = TipoNavegacion.Modal
         mipaqueteconf.Titulo = "Buscar Cliente"
         mipaqueteconf.Navegable = False
         mipaqueteconf.ParametroCargaEstructura = miParametroCargaEst
 
         miPaquete.Add("PaqueteFormularioBusqueda", mipaqueteconf)
 
-        Me.Marco.Navegar("Filtro", Me, Me.FormularioPadre, MotorIU.Motor.TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
+        Me.Marco.Navegar("Filtro", Me, Me.FormularioPadre, TipoNavegacion.Normal, Me.GenerarDatosCarga, miPaquete)
 
         Dim tomador As FN.Seguros.Polizas.DN.TomadorDN = Nothing
         If miPaquete.Contains("ID") Then

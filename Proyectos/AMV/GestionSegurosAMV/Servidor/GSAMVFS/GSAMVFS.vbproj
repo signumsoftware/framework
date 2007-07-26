@@ -112,6 +112,10 @@
       <Project>{77A6DAEC-2A5B-4EBB-ABBD-64A709D4DEF7}</Project>
       <Name>PolizasDN</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FicherosWeb\FicherosWebDF\GSAMVDF.csproj">
+      <Project>{67FD4466-7BA6-4CE7-A72B-8B9EA939989E}</Project>
+      <Name>GSAMVDF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GestionSegurosAMVLN\GSAMVLN.vbproj">
       <Project>{A4A37217-3B4A-4268-B5E8-60B911CAD302}</Project>
       <Name>GSAMVLN</Name>

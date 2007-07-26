@@ -8,9 +8,9 @@ using FN.RiesgosVehiculos.LN.RiesgosVehiculosLN;
 using GSAMV.LN;
 using FN.Seguros.Polizas.DN;
 using SerializadorTexto;
-using FicherosWebAD;
+using System.Drawing;
 
-namespace FicherosWebDF
+namespace GSAMV.DF
 {
     public static class CargadorWebLN
     {
@@ -19,7 +19,7 @@ namespace FicherosWebDF
             List<string> errores = new List<string>();
             BaseTransaccionConcretaLN btln = new BaseTransaccionConcretaLN();
             CuestionarioDN cuestionario = btln.RecuperarLista(typeof(CuestionarioDN))[0] as CuestionarioDN;
-
+            
             FicheroWeb ficheroWeb = Serializador.AbrirBytes<FicheroWeb>(fichero);
             for (int i = 0; i < ficheroWeb.Lineas.Count; i++)
             {
@@ -27,10 +27,26 @@ namespace FicherosWebDF
                 {
                     using (Transaccion tr = new Transaccion())
                     {
-                        CuestionarioResueltoDN resuelto = TraductorCuestionarios.Traducir(ficheroWeb.Lineas[0], cuestionario);
+                        LineaWeb linea = ficheroWeb.Lineas[i];
+                        CuestionarioResueltoDN resuelto = TraductorCuestionarios.Traducir(linea, cuestionario);
                         AdaptadorCuestionarioLN ln = new AdaptadorCuestionarioLN();
-                        PresupuestoDN presupuesto = ln.GenerarPresupuestoxCuestionarioRes(resuelto);
-                        btln.GuardarGenerico(cuestionario); 
+
+                        switch (linea.TipoProyecto)
+                        {
+                            case TipoProyecto.Tarificado:
+                                TarifaDN tarifa = ln.GenerarTarifaxCuestionarioRes(resuelto);
+                                btln.GuardarGenerico(tarifa);
+                                break;
+                            case TipoProyecto.Presupuestado:
+                                PresupuestoDN presupuesto = ln.GenerarPresupuestoxCuestionarioRes(resuelto);
+                                btln.GuardarGenerico(presupuesto);
+                                break;
+                            case TipoProyecto.Contratado:
+                                break;
+                            default:
+                                break;
+                        }
+
                         tr.Confirmar();
                     }
                 }

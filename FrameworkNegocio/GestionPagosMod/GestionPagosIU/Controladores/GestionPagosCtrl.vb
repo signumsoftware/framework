@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class GestionPagosCtrl
 
     Public Function CargarAgrupacionID(ByVal sender As Object, ByVal datos As Object, ByVal vm As Framework.TiposYReflexion.DN.VinculoMetodoDN) As Framework.DatosNegocio.IEntidadDN
@@ -38,7 +40,7 @@ Public Class GestionPagosCtrl
         Dim miias As New FN.GestionPagos.AS.GestionPagosAS
         ParEntFiscalGenericaParam = miias.CrearAgrupacionID(ParEntFiscalGenericaParam)
 
-  
+
         control.DN = ParEntFiscalGenericaParam
         control.DNaIUgd()
 
@@ -57,7 +59,7 @@ Public Class GestionPagosCtrl
         Dim pagoOriginal As FN.GestionPagos.DN.PagoDN = control.DN
 
         '' solicitar al usuario los datos para efctuar el pago
-        'MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoOriginal, MotorIU.Motor.TipoNavegacion.Modal)
+        'MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoOriginal, TipoNavegacion.Modal)
 
 
 
@@ -95,7 +97,7 @@ Public Class GestionPagosCtrl
         Dim pagoOriginal As FN.GestionPagos.DN.PagoDN = control.DN
 
         '' solicitar al usuario los datos para efctuar el pago
-        'MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoOriginal, MotorIU.Motor.TipoNavegacion.Modal)
+        'MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoOriginal, TipoNavegacion.Modal)
 
 
 
@@ -124,7 +126,7 @@ Public Class GestionPagosCtrl
         Dim pagoOriginal As FN.GestionPagos.DN.PagoDN = control.DN
 
         '' solicitar al usuario los datos para efctuar el pago
-        'MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoOriginal, MotorIU.Motor.TipoNavegacion.Modal)
+        'MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoOriginal, TipoNavegacion.Modal)
 
 
 
@@ -153,7 +155,7 @@ Public Class GestionPagosCtrl
 
         ' crear el pago compensado
         Dim param As FN.GestionPagos.DN.PagoDN = pagoOriginal.CrearPagoCompensador
-        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, param, MotorIU.Motor.TipoNavegacion.Modal)
+        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, param, TipoNavegacion.Modal)
 
         ' invocamos la funcionalidad en el servidor
         Dim miias As New FN.GestionPagos.AS.GestionPagosAS
@@ -223,7 +225,7 @@ Public Class GestionPagosCtrl
         Dim pagoAgrupador As FN.GestionPagos.DN.PagoDN = miias.CrearPagoAgrupadorProvisional(unPagoDelImporteDebido)
 
         ' mostramos el apgo para que sea complimentado por el usuario
-        Dim paquete As Hashtable = MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoAgrupador, MotorIU.Motor.TipoNavegacion.Modal)
+        Dim paquete As Hashtable = MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, pagoAgrupador, TipoNavegacion.Modal)
 
 
         ' verificamos si el usuario a haceptado para continuar con la anulacion

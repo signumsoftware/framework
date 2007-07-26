@@ -1,5 +1,5 @@
 Imports AuxIU
-
+Imports Framework.IU.IUComun
 Imports MotorBusquedaBasicasDN
 
 Public Class frmDocsEntrantes
@@ -381,7 +381,7 @@ Public Class frmDocsEntrantes
             mipaquete.Add("ParametroCargaEstructura", miParametroCargaEst)
 
             mipaquete.Add("MultiSelect", False)
-            mipaquete.Add("TipoNavegacion", MotorIU.Motor.TipoNavegacion.Modal)
+            mipaquete.Add("TipoNavegacion", TipoNavegacion.Modal)
             mipaquete.Add("Agregable", False)
             mipaquete.Add("EnviarDatatableAlNavegar", False)
             mipaquete.Add("Navegable", True)
@@ -391,7 +391,7 @@ Public Class frmDocsEntrantes
             mipaquete.Add("Titulo", "Búsqueda de Documentos")
 
 
-            Me.cMarco.Navegar("Filtro", Me, Nothing, MotorIU.Motor.TipoNavegacion.Modal, Me.GenerarDatosCarga(), mipaquete)
+            Me.cMarco.Navegar("Filtro", Me, Nothing, TipoNavegacion.Modal, Me.GenerarDatosCarga(), mipaquete)
         Catch ex As Exception
             MostrarError(ex)
         End Try

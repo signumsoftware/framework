@@ -1,3 +1,6 @@
+Imports Framework.IU.IUComun
+
+
 Public Class frmAdjuntarPagoFT
 
 #Region "Atributos"
@@ -50,7 +53,7 @@ Public Class frmAdjuntarPagoFT
             'Se navega al formulario de nuevo fichero de transferencias
             Dim paquete As New Hashtable()
             paquete.Add("TipoEntidad", GetType(GestionPagos.DN.FicheroTransferenciaDN))
-            MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(CType(Me, MotorIU.FormulariosP.IFormularioP), paquete, MotorIU.Motor.TipoNavegacion.Normal)
+            MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(CType(Me, MotorIU.FormulariosP.IFormularioP), paquete, TipoNavegacion.Normal)
 
         Catch ex As Exception
             MostrarError(ex)
@@ -110,7 +113,7 @@ Public Class frmAdjuntarPagoFT
 
             Dim paquete As New Hashtable()
             paquete.Add("DN", ft)
-            MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(CType(Me, MotorIU.FormulariosP.IFormularioP), paquete, MotorIU.Motor.TipoNavegacion.Modal)
+            MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(CType(Me, MotorIU.FormulariosP.IFormularioP), paquete, TipoNavegacion.Modal)
 
             'Después de la navegación se actualiza el list box de ficheros de transferencias activos
             CargarListaFT()

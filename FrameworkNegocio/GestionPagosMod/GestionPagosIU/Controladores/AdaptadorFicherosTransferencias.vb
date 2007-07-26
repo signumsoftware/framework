@@ -1,4 +1,6 @@
 Imports MotorBusquedaBasicasDN
+Imports Framework.IU.IUComun
+
 Public Class AdaptadorFicherosTransferencias
 
 #Region "Constructor"
@@ -60,7 +62,7 @@ Public Class AdaptadorFicherosTransferencias
                 vc2.Valor = principal.ID
                 colValores.Add(vc2)
 
-                MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(f, GetType(FN.GestionPagos.DN.PagoDN), Nothing, MotorIU.Motor.TipoNavegacion.CerrarLanzador, "AdjuntarPagoFT", True, colop, colValores, Nothing, Nothing)
+                MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarABuscador(f, GetType(FN.GestionPagos.DN.PagoDN), Nothing, TipoNavegacion.CerrarLanzador, "AdjuntarPagoFT", True, colop, colValores, Nothing, Nothing)
 
             Else
                 MessageBox.Show("El principal actual no tiene autorizada la operación")

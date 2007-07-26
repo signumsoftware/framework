@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class frmCuestionario1
 
 #Region "Atributos"
@@ -60,7 +62,7 @@ Public Class frmCuestionario1
                             Me.Paquete.Add("DN", tarifa)
                         End If
 
-                        Me.cMarco.Navegar("TarificarPrueba", Me, Me.MdiParent, MotorIU.Motor.TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
+                        Me.cMarco.Navegar("TarificarPrueba", Me, Me.MdiParent, TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
                     Else
                         pr = mControlador.GenerarPresupuestoxCuestionarioRes(cr)
 
@@ -70,7 +72,7 @@ Public Class frmCuestionario1
                             Me.Paquete.Add("DN", pr)
                         End If
 
-                        Me.cMarco.Navegar("FG", Me, Me.MdiParent, MotorIU.Motor.TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
+                        Me.cMarco.Navegar("FG", Me, Me.MdiParent, TipoNavegacion.CerrarLanzador, Me.GenerarDatosCarga, Me.Paquete, Nothing)
                     End If
                 End If
 

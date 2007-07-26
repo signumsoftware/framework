@@ -542,6 +542,10 @@
       <Project>{B0F4EA14-6258-460B-A8C3-EF73F223F8A3}</Project>
       <Name>GestionSegurosAMVTEST</Name>
     </ProjectReference>
+    <ProjectReference Include="..\GSAMVAS\GSAMVAS.vbproj">
+      <Project>{375A32D1-884E-414D-B354-A4A5138E2874}</Project>
+      <Name>GSAMVAS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GSAMVControladores\GSAMVControladores.vbproj">
       <Project>{8DEDD927-6104-4448-93AA-ACBAB04F5CE9}</Project>
       <Name>GSAMVControladores</Name>

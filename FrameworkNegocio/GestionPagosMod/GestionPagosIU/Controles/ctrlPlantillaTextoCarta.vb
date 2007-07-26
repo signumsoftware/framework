@@ -1,3 +1,5 @@
+Imports Framework.IU.IUComun
+
 Public Class ctrlPlantillaTextoCarta
 
 #Region "Atributos"
@@ -95,7 +97,7 @@ Public Class ctrlPlantillaTextoCarta
 
             Dim mipaquete As New Hashtable
             mipaquete.Add("Texto", Me.RichTextBox1.Rtf)
-            Me.Marco.Navegar("PruebaPlantillaCarta", Me.ParentForm, MotorIU.Motor.TipoNavegacion.Modal, mipaquete)
+            Me.Marco.Navegar("PruebaPlantillaCarta", Me.ParentForm, TipoNavegacion.Modal, mipaquete)
 
         Catch ex As Exception
             MostrarError(ex)

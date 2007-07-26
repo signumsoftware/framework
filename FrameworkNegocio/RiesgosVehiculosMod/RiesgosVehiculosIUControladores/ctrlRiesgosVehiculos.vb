@@ -27,7 +27,7 @@ Public Class ctrlRiesgosVehiculos
 
 
         Dim pr As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN = objeto
-        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(pParametros, pr.Poliza, MotorIU.Motor.TipoNavegacion.Normal, "FN.Seguros.Polizas.DN.PolizaDN-poliza-resumen-conta")
+        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(pParametros, pr.Poliza, TipoNavegacion.Normal, "FN.Seguros.Polizas.DN.PolizaDN-poliza-resumen-conta")
         Return objeto
 
     End Function
@@ -56,7 +56,7 @@ Public Class ctrlRiesgosVehiculos
         'paquete.Add("DN", nota)
 
         '' navegar al formaulario que permite editar la nota
-        'fp.cMarco.Navegar("FG", fp, Nothing, MotorIU.Motor.TipoNavegacion.Normal, paquete)
+        'fp.cMarco.Navegar("FG", fp, Nothing, TipoNavegacion.Normal, paquete)
 
 
         Return presupuesto
@@ -88,7 +88,7 @@ Public Class ctrlRiesgosVehiculos
 
         ' solicitamos los datos adicionales
         Dim param As New FN.Seguros.Polizas.DN.AltaPolizaPr
-        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, param, MotorIU.Motor.TipoNavegacion.Modal)
+        MotorBusquedaIuWinCtrl.NavegadorHelper.NavegarFormulario(fp, param, TipoNavegacion.Modal)
 
 
 
@@ -103,7 +103,7 @@ Public Class ctrlRiesgosVehiculos
         'paquete.Add("DN", pr)
 
         '' navegar al formaulario que permite editar la nota
-        'fp.cMarco.Navegar("FG", fp, CType(fp, System.Windows.Forms.Form).ParentForm, MotorIU.Motor.TipoNavegacion.CerrarLanzador, paquete)
+        'fp.cMarco.Navegar("FG", fp, CType(fp, System.Windows.Forms.Form).ParentForm, TipoNavegacion.CerrarLanzador, paquete)
 
 
 
