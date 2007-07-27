@@ -225,7 +225,7 @@ Public Class PeriodoRenovacionPolizaDN
 
         Dim colpc As ColPeriodoCoberturaDN = Me.ColPeriodosCobertura.RecuperarActivos()
 
-        If Me.mFechaBaja = Date.MinValue OrElse mFechaBaja <> Now() Then
+        If Me.mFechaBaja = Date.MinValue OrElse mFechaBaja <= Now() Then
 
             If colpc.Count <> 1 Then
                 pMensaje = "debe existir un periodo de cobertura activo y solo uno"
