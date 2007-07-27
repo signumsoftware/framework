@@ -212,6 +212,9 @@ Public Class PresupuestoDN
 
     Public Function AlcanzaestadoPoliza(ByRef pMensaje As String) As Boolean
 
+
+        mAlcanzaEstadoPoliza = True
+
         If mCondicionesPago Is Nothing Then
             pMensaje = "No se han vinculado condiciones de pago al presuopuesto"
             mAlcanzaEstadoPoliza = False
@@ -223,7 +226,65 @@ Public Class PresupuestoDN
             pMensaje = "Al menos debe establecerse la posibilidad de emitir un recibo"
             mAlcanzaEstadoPoliza = False
         Else
-            mAlcanzaEstadoPoliza = True
+
+            If Not mCondicionesPago.EstadoIntegridad(pMensaje) = EstadoIntegridadDN.Consistente Then
+                mAlcanzaEstadoPoliza = False
+            End If
+        End If
+
+
+        ' debo tener el cif del tomador
+        If Me.FuturoTomador Is Nothing Then
+            pMensaje = "FuturoTomador no puede ser nothing"
+            mAlcanzaEstadoPoliza = False
+
+
+        Else
+            If String.IsNullOrEmpty(Me.FuturoTomador.NIFCIFFuturoTomador) Then
+                pMensaje = "NIFCIFFuturoTomador no puede ser nulo"
+                mAlcanzaEstadoPoliza = False
+            Else
+                If Not FuturoTomador.EstadoIntegridad(pMensaje) = EstadoIntegridadDN.Consistente Then
+                    mAlcanzaEstadoPoliza = False
+                End If
+            End If
+
+        End If
+
+
+
+
+        If Me.mFechaAltaSolicitada = Date.MinValue Then
+            pMensaje = "se debe establecer una fecha de alta"
+            mAlcanzaEstadoPoliza = False
+        End If
+
+
+        If Me.mEmisora Is Nothing Then
+            pMensaje = "la emisora no puede ser nothing"
+            mAlcanzaEstadoPoliza = False
+        End If
+
+
+
+
+        ' almenos debo de tener algun producto ofertado en la tarida
+
+        If Me.mPeriodo Is Nothing Then
+            pMensaje = "la mPeriodo no puede ser nothing"
+            mAlcanzaEstadoPoliza = False
+        End If
+
+
+        If Me.mTarifa Is Nothing Then
+            pMensaje = "la mTarifa no puede ser nothing"
+            mAlcanzaEstadoPoliza = False
+        End If
+
+
+        If Not Me.mTarifa.Riesgo.RiesgoValidoPoliza Then
+            pMensaje = "la Riesgo no puede ser nothing"
+            mAlcanzaEstadoPoliza = False
         End If
 
 

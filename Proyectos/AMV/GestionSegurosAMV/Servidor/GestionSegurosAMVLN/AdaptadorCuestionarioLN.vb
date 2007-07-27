@@ -67,8 +67,11 @@ Public Class AdaptadorCuestionarioLN
             End If
 
             'Se completan los datos del presupuesto
+            Dim amdTarifa As New Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias
+            amdTarifa.Anyos = 1
+
             presupuesto = New PresupuestoDN()
-            presupuesto.Tarifa = Me.GenerarTarifaxCuestionarioRes(cuestionarioR, amd, futuroTomador, False)
+            presupuesto.Tarifa = Me.GenerarTarifaxCuestionarioRes(cuestionarioR, amdTarifa, futuroTomador, False)
             'presupuesto.Tarifa.DatosTarifa.ValorBonificacion = futuroTomador.ValorBonificacion
 
             'Se recupera la entidad emisora de la póliza

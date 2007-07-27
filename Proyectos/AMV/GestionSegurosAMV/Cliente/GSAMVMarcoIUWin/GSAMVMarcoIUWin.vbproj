@@ -83,6 +83,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\LogicaNegocios.dll</HintPath>
     </Reference>
+    <Reference Include="MNavegacionDatosIUWin, Version=1.0.2763.22003, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MNavegacionDatosIUWin.dll</HintPath>
+    </Reference>
     <Reference Include="MotorBusquedaBasicasDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\FrameworkNegocio\CompiladosFT\MotorBusquedaBasicasDN.dll</HintPath>

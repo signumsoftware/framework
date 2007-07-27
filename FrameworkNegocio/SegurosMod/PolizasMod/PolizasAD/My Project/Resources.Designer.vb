@@ -65,7 +65,7 @@ Namespace My.Resources
         '''
         '''SELECT     ID, Nombre, Comentario, FEjecProgramada, Atendida, Usuario, GUIDReferida
         '''FROM         dbo.vwAlertasyUsuario
-        '''WHERE     (FEjecProgramada &lt; GETDATE() - 1) AND (Atendida = 0).
+        '''WHERE     (FEjecProgramada &lt; GETDATE() ) AND (Atendida = 0).
         '''</summary>
         Friend ReadOnly Property vwAlertasProximasVencimiento() As String
             Get
@@ -224,13 +224,12 @@ Namespace My.Resources
         
         '''<summary>
         '''  Looks up a localized string similar to create view vwPeridosRenovacionAlertados as
-        '''
         '''SELECT DISTINCT 
         '''                      dbo.tlPeriodoRenovacionPolizaDN.ID, dbo.tlPeriodoRenovacionPolizaDN.idPoliza, dbo.tlPeriodoRenovacionPolizaDN.idPeriodoCoberturaActivo, 
-        '''                      dbo.tlAlertaDN.ID AS idAlerta
+        '''                      dbo.tlAlertaDN.ID AS idAlerta, dbo.tlAlertaDN.Atendida
         '''FROM         dbo.trtlAlertaDNColHEntidadXtlHEDN INNER JOIN
         '''                      dbo.tlAlertaDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idttlAlertaDN = dbo.tlAlertaDN.ID INNER JOIN
-        '''                      dbo.tlHEDN ON dbo.trtlAlertaDNC [rest of string was truncated]&quot;;.
+        '''                      dbo.tlHE [rest of string was truncated]&quot;;.
         '''</summary>
         Friend ReadOnly Property vwPeridosRenovacionAlertados() As String
             Get

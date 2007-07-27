@@ -58,7 +58,7 @@ Public Class PolizasCtrl
         Dim nota As Framework.Notas.NotasDN.NotaDN = lnc.CrearNotaPara(prin.UsuarioDN, col)
 
 
-
+        Debug.WriteLine(prin.UsuarioDN.Estado)
 
 
         Dim paquete As New Hashtable

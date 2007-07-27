@@ -124,7 +124,12 @@ Public Class RiesgoMotorDN
 
 
     Public Function RiesgoValidoPoliza() As Boolean Implements Seguros.Polizas.DN.IRiesgoDN.RiesgoValidoPoliza
-        Return mMatricula.MatriculaTipoCorrecta
+        If mMatricula Is Nothing Then
+            Return False
+        Else
+            Return mMatricula.MatriculaTipoCorrecta
+        End If
+
     End Function
 
     Public Overrides Function EstadoIntegridad(ByRef pMensaje As String) As Framework.DatosNegocio.EstadoIntegridadDN

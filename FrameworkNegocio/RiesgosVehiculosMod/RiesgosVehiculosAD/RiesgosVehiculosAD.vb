@@ -172,17 +172,33 @@ Public Class RiesgosVehiculosAD
         Dim modeloDatos As ModeloDatosDN = Nothing
         Dim parametros As List(Of System.Data.IDataParameter)
         Dim dts As Data.DataSet
-        Dim gi As Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN
+
 
         ' construir la sql y los parametros
 
         Using tr As New Transaccion()
 
-            sql = "select idpr,guidPR  from vwRiesgoMotorXPeridorenovacion  where valorMatricula=@valorMatricula or NumeroBastidor=@NumeroBastidor and Baja=@Baja"
-
+            Dim wqlw As String = ""
             parametros = New List(Of System.Data.IDataParameter)
-            parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("valorMatricula", pNumeroMatricula))
-            parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("NumeroBastidor", pNumeroBastidor))
+
+            If String.IsNullOrEmpty(pNumeroMatricula) Then
+                wqlw = " or valorMatricula=@valorMatricula "
+                parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("valorMatricula", pNumeroMatricula))
+            End If
+
+            If String.IsNullOrEmpty(pNumeroBastidor) Then
+                wqlw += " or NumeroBastidor=@NumeroBastidor  "
+                parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("NumeroBastidor", pNumeroBastidor))
+            End If
+
+            If String.IsNullOrEmpty(wqlw) Then
+                Throw New ApplicationExceptionAD("si pNumeroMatricula y pNumeroBastidor son ambos nulos no es posible recuperar informacion")
+            Else
+                sql = "select idpr,guidPR  from vwRiesgoMotorXPeridorenovacion  where Baja=@Baja  and (" & wqlw.Substring(4) & ")"
+            End If
+
+
+
             parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroBoolean("Baja", False))
 
             ej = New Framework.AccesoDatos.Ejecutor(Transaccion.Actual, Recurso.Actual)

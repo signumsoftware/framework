@@ -101,7 +101,14 @@ Public Class RiesgosVehiculosLN
     Public Function TarificarPresupuesto(ByVal presupuesto As PresupuestoDN) As PresupuestoDN
 
         Using tr As New Transaccion()
+
+
+            Dim fecha As Date = Now
             Dim tarifaP As TarifaDN = Me.TarificarTarifa(presupuesto.Tarifa, Nothing, presupuesto.FuturoTomador, True, True)
+            Debug.WriteLine("todoEl MEtodo" & Now.Subtract(fecha).TotalSeconds)
+
+
+
 
             presupuesto.Tarifa = tarifaP
 
@@ -210,6 +217,9 @@ Public Class RiesgosVehiculosLN
             Dim colGPF As New FN.GestionPagos.DN.ColGrupoPagosFraccionadosDN()
             Dim gpf As FN.GestionPagos.DN.GrupoPagosFraccionadosDN
 
+
+            Dim fecha As Date
+
             If tipoFraccionamiento Is Nothing Then
                 btLN = New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
                 Dim colFrac As New FN.GestionPagos.DN.ColFraccionamientoDN
@@ -222,7 +232,7 @@ Public Class RiesgosVehiculosLN
                         tipoFraccionamiento = fr
                     Else
                         irec.DataResults.Clear()
-                        Dim fecha As Date = Now
+                        fecha = Now
                         tarifa.Importe = opc.IOperacionDN.GetValor()
                         Debug.WriteLine(Now.Subtract(fecha).TotalSeconds)
                         gpf = ObtenerGrupoPagosFraccionados(irec, fr)
@@ -236,7 +246,12 @@ Public Class RiesgosVehiculosLN
 
             tarifa.Fraccionamiento = tipoFraccionamiento
             irec.DataResults.Clear()
+
+            fecha = Now
             tarifa.Importe = opc.IOperacionDN.GetValor()
+            Debug.WriteLine(Now.Subtract(fecha).TotalSeconds)
+
+
             opc.IOperacionDN.Limpiar()
 
             tarifa.ColLineaProducto.AddRange(colLPEliminadas)

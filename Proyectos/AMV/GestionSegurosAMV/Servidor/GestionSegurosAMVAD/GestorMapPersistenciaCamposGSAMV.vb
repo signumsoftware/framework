@@ -242,6 +242,12 @@ Public Class GestorMapPersistenciaCamposGSAMV
         Dim campodatos As InfoDatosMapInstCampoDN = Nothing
 
 
+
+        If (pTipo Is GetType(Framework.Procesos.ProcesosDN.TransicionRealizadaDN)) Then
+            mapinst.TablaHistoria = "thTransicionRealizadaDN"
+            Return mapinst
+        End If
+
         If (pTipo Is GetType(Framework.Procesos.ProcesosDN.OperacionRealizadaDN)) Then
             Dim alentidades As ArrayList
             Dim mapSubInst As InfoDatosMapInstClaseDN
@@ -282,6 +288,7 @@ Public Class GestorMapPersistenciaCamposGSAMV
             campodatos.ColCampoAtributo.Add(CampoAtributoDN.SoloGuardarYNoReferido)
             campodatos.MapSubEntidad = mapSubInst
 
+            mapinst.TablaHistoria = "thOperacionRealizadaDN"
 
             Return mapinst
         End If

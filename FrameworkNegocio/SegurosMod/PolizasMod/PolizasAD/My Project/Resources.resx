@@ -122,7 +122,7 @@
 
 SELECT     ID, Nombre, Comentario, FEjecProgramada, Atendida, Usuario, GUIDReferida
 FROM         dbo.vwAlertasyUsuario
-WHERE     (FEjecProgramada &lt; GETDATE() - 1) AND (Atendida = 0)</value>
+WHERE     (FEjecProgramada &lt; GETDATE() ) AND (Atendida = 0)</value>
   </data>
   <data name="vwAlertasxPresupuesto" xml:space="preserve">
     <value>create view vwAlertasxPresupuesto as SELECT     dbo.tlAlertaDN.ID, dbo.tlAlertaDN.Nombre, dbo.tlAlertaDN.Comentario, dbo.tlAlertaDN.FEjecProgramada, dbo.tlAlertaDN.Atendida, 
@@ -247,15 +247,14 @@ FROM         dbo.tlApunteImpDDN INNER JOIN
   </data>
   <data name="vwPeridosRenovacionAlertados" xml:space="preserve">
     <value>create view vwPeridosRenovacionAlertados as
-
 SELECT DISTINCT 
                       dbo.tlPeriodoRenovacionPolizaDN.ID, dbo.tlPeriodoRenovacionPolizaDN.idPoliza, dbo.tlPeriodoRenovacionPolizaDN.idPeriodoCoberturaActivo, 
-                      dbo.tlAlertaDN.ID AS idAlerta
+                      dbo.tlAlertaDN.ID AS idAlerta, dbo.tlAlertaDN.Atendida
 FROM         dbo.trtlAlertaDNColHEntidadXtlHEDN INNER JOIN
                       dbo.tlAlertaDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idttlAlertaDN = dbo.tlAlertaDN.ID INNER JOIN
                       dbo.tlHEDN ON dbo.trtlAlertaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlHEDN.GUID INNER JOIN
                       dbo.tlPeriodoRenovacionPolizaDN ON dbo.tlHEDN.GUIDReferida = dbo.tlPeriodoRenovacionPolizaDN.GUID
-WHERE     (dbo.tlAlertaDN.FEjecProgramada &lt; GETDATE())</value>
+WHERE     (dbo.tlAlertaDN.FEjecProgramada &lt; GETDATE()) AND (dbo.tlAlertaDN.Atendida = 0)</value>
   </data>
   <data name="vwPeridosRenovacionImpDebIncidentados" xml:space="preserve">
     <value>create view vwPeridosRenovacionImpDebIncidentados as
