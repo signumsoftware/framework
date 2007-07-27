@@ -21,9 +21,9 @@ Public Class frmTarifaCtrl
         Return cr
     End Function
 
-    Public Sub GuardarTarifa(ByVal tarifa As TarifaDN)
+    Public Function GuardarTarifa(ByVal tarifa As TarifaDN) As TarifaDN
         Dim basicoAS As New Framework.AS.DatosBasicosAS()
-        basicoAS.GuardarDNGenerico(tarifa)
-    End Sub
+        Return basicoAS.GuardarDNGenerico(tarifa)
+    End Function
 
 End Class

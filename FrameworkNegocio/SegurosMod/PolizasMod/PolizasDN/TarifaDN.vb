@@ -33,16 +33,6 @@ Public Class TarifaDN
 
 #Region "Propiedades"
 
-
-
-
-
-
-
-
-
-
-
     <RelacionPropCampoAtribute("mFraccionamiento")> _
     Public Property Fraccionamiento() As FN.GestionPagos.DN.FraccionamientoDN
         Get
@@ -54,20 +44,10 @@ Public Class TarifaDN
         End Set
     End Property
 
-
-
-
-
-
-
-
-
-
-
-
     Public Function CalcualrImporteDia() As Double
         Return Me.mImporte / mAMD.IncrementarFecha(mFEfecto).Subtract(mFEfecto).TotalDays
     End Function
+
     Public Property AMD() As Framework.DatosNegocio.Localizaciones.Temporales.AnyosMesesDias
         Get
             Return mAMD
@@ -78,7 +58,6 @@ Public Class TarifaDN
     End Property
 
     Public Property FEfecto() As Date
-
         Get
             Return mFEfecto
         End Get
@@ -148,18 +127,13 @@ Public Class TarifaDN
 
     End Property
 
-
     Public ReadOnly Property ColProductos() As FN.Seguros.Polizas.DN.ColProductoDN
-
         Get
             ColProductos = New FN.Seguros.Polizas.DN.ColProductoDN
-
 
             For Each lp As FN.Seguros.Polizas.DN.LineaProductoDN In Me.ColLineaProducto
                 ColProductos.Add(lp.Producto)
             Next
-
-
         End Get
     End Property
 

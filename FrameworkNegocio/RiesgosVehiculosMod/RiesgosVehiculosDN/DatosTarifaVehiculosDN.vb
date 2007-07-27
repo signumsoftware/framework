@@ -257,28 +257,21 @@ Public Class DatosTarifaVehiculosDN
 #End Region
 
 #Region "Métodos"
-    Public Sub ActualizarProdutosAplicables(ByVal tarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal colFicherosRequeridos As Framework.Ficheros.FicherosDN.ColTipoDocumentoRequeridoDN, ByVal colCdVinculadosaProductos As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)
 
+    Public Sub ActualizarProdutosAplicables(ByVal tarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal colFicherosRequeridos As Framework.Ficheros.FicherosDN.ColTipoDocumentoRequeridoDN, ByVal colCdVinculadosaProductos As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)
 
         'Precondiciones()
         '1º  verificar que los cajones documentos lo son para prodcutos 
 
-
         'Cuerpo()
         '2º verificamos que todos los documentos requeridos necesarios tiene su correspondoente cajon de doc verificado para cada  producto
-
-
 
         If colFicherosRequeridos Is Nothing OrElse colFicherosRequeridos.Count = 0 Then
             For Each lpropucto As FN.Seguros.Polizas.DN.LineaProductoDN In tarifa.ColLineaProducto
                 lpropucto.Alcanzable = True
             Next
 
-
-
-
         Else
-
 
             For Each lpropucto As FN.Seguros.Polizas.DN.LineaProductoDN In tarifa.ColLineaProducto
 
@@ -314,18 +307,10 @@ Public Class DatosTarifaVehiculosDN
 
             Next
 
-
-
-
-
         End If
 
-
-
-
-
-
     End Sub
+
     Public Function RecuperarCausas() As Framework.DatosNegocio.ColHEDN
 
 
@@ -473,7 +458,6 @@ Public Class DatosTarifaVehiculosDN
                                         ByVal colOpBonif As ColOperacionBonificacionRVCacheDN)
 
 
-
         mColOperacionImpuestoRVCache = colOpImp
         mColOperacionModuladorRVCache = colOpMod
         mColOperacionPrimaBaseRVCache = colOpPB
@@ -514,14 +498,10 @@ Public Class DatosTarifaVehiculosDN
 
         ' ActualizarProdutosAplicables()
 
-
-
+        mToSt = Me.ToString()
 
         Return MyBase.EstadoIntegridad(pMensaje)
     End Function
-
-
-
 
     Public Sub ActualizarProdutosAplicables(ByVal pColCajonDocumento As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN)
         ActualizarProdutosAplicables(Me.mTarifa, Me.mColTipoDocumentoRequerido, pColCajonDocumento)
@@ -545,13 +525,15 @@ Public Class DatosTarifaVehiculosDN
         End If
     End Sub
 
-    Private Sub AsignarImportesLineasProducto()
+    Public Sub AsignarImportesLineasProducto()
         If mTarifa IsNot Nothing AndAlso mTarifa.ColLineaProducto IsNot Nothing Then
             For Each lp As LineaProductoDN In mTarifa.ColLineaProducto
                 lp.ImporteLP = 0
-                For Each cob As CoberturaDN In lp.Producto.ColCoberturas
-                    lp.ImporteLP = lp.ImporteLP + RecuperarImporteCobertura(cob)
-                Next
+                If lp.Ofertado OrElse lp.Establecido Then
+                    For Each cob As CoberturaDN In lp.Producto.ColCoberturas
+                        lp.ImporteLP = lp.ImporteLP + RecuperarImporteCobertura(cob)
+                    Next
+                End If
             Next
         End If
     End Sub
@@ -575,7 +557,8 @@ Public Class DatosTarifaVehiculosDN
         Me.ImporteFinaciablesImpuestos(impAux1, impAux2)
         impNoFrac += impAux2
 
-        restoPagos = Math.Round((Me.Tarifa.Importe - impNoFrac) / numeroPagos, 2)
+        'restoPagos = Math.Round((Me.Tarifa.Importe - impNoFrac) / numeroPagos, 2)
+        restoPagos = Math.Round(Math.Round(Me.Tarifa.Importe - impNoFrac, 2) / numeroPagos, 2)
 
         primerPago = Math.Round(Me.Tarifa.Importe - restoPagos * (numeroPagos - 1), 2)
 
@@ -583,6 +566,7 @@ Public Class DatosTarifaVehiculosDN
 
 #End Region
 
+    
 End Class
 
 

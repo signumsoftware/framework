@@ -24,8 +24,11 @@ Public Class frmTarifa
 #Region "Eventos formulario"
 
     Private Sub tsbGuardar_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles tsbGuardar.Click
+        Dim tarifa As TarifaDN = Nothing
+
         Try
-            mControlador.GuardarTarifa(ctrlTarifa1.Tarifa)
+            tarifa = mControlador.GuardarTarifa(ctrlTarifa1.Tarifa)
+            ctrlTarifa1.Tarifa = tarifa
         Catch ex As Exception
             MostrarError(ex, sender)
         End Try

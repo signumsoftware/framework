@@ -215,7 +215,7 @@ Public Class ctrlTarifa
 #Region "RellenarProductos"
     Private Sub RellenarLineasProducto(ByVal pColProductos As FN.Seguros.Polizas.DN.ColLineaProductoDN)
         LimpiarTablaProductos()
-        If Not pColProductos Is Nothing Then
+        If pColProductos IsNot Nothing Then
             Dim f As New AuxIU.FormateadorMonedaEurosConSimbolo(2)
             For Each lp As FN.Seguros.Polizas.DN.LineaProductoDN In pColProductos
                 'obtenemos la fila a la que pertenece el producto al que se asocia la línea de producto

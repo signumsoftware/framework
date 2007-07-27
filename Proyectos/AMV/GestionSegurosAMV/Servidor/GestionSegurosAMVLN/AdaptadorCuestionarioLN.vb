@@ -174,7 +174,7 @@ Public Class AdaptadorCuestionarioLN
                 rvLN = New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
                 tarifa = rvLN.TarificarTarifa(tarifa, Nothing, Nothing, True, True)
 
-                Me.GuardarGenerico(tarifa)
+                'Me.GuardarGenerico(tarifa)
             End If
 
 

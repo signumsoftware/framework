@@ -16,14 +16,6 @@ Public Class LineaProductoDN
 
 #Region "Propiedades"
 
-
-
-
-
-
-
-
-
     Public Property Ofertado() As Boolean
         Get
             Return mOfertado

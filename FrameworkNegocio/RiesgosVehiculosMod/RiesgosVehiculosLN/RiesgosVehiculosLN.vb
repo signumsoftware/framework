@@ -190,18 +190,11 @@ Public Class RiesgosVehiculosLN
             irec.DataSoucers.Add(irec.Tarifa)
             irec.DataSoucers.Add(recNivelBonif)
 
-
-
-
             Dim rm As FN.RiesgosVehiculos.DN.RiesgoMotorDN = irec.Tarifa.Riesgo
             irec.DataSoucers.Add(rm.ModeloDatos)
 
-
-
             Dim dTarifaV As FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN
             dTarifaV = CType((tarifa).DatosTarifa, FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN) '.Clone()
-
-
 
             If dTarifaV.HeCuestionarioResuelto.EntidadReferida Is Nothing Then
                 btLN = New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
@@ -213,21 +206,14 @@ Public Class RiesgosVehiculosLN
 
             opc.IOperacionDN.IRecSumiValorLN = irec
 
-
-
-
             Dim gf As New FN.GestionPagos.DN.GrupoFraccionamientosDN()
             Dim colGPF As New FN.GestionPagos.DN.ColGrupoPagosFraccionadosDN()
             Dim gpf As FN.GestionPagos.DN.GrupoPagosFraccionadosDN
-
-
-
 
             If tipoFraccionamiento Is Nothing Then
                 btLN = New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
                 Dim colFrac As New FN.GestionPagos.DN.ColFraccionamientoDN
                 colFrac.AddRangeObjectUnico(btLN.RecuperarLista(GetType(FN.GestionPagos.DN.FraccionamientoDN)))
-
 
                 For Each fr As FN.GestionPagos.DN.FraccionamientoDN In colFrac.ListaOrdenada()
                     tarifa.Fraccionamiento = fr
@@ -253,6 +239,7 @@ Public Class RiesgosVehiculosLN
             tarifa.Importe = opc.IOperacionDN.GetValor()
             opc.IOperacionDN.Limpiar()
 
+            tarifa.ColLineaProducto.AddRange(colLPEliminadas)
 
             gpf = ObtenerGrupoPagosFraccionados(irec, tipoFraccionamiento)
 
@@ -270,19 +257,14 @@ Public Class RiesgosVehiculosLN
             irec.ClearAll()
             opc.IOperacionDN.Limpiar()
 
-            tarifa.ColLineaProducto.AddRange(colLPEliminadas)
-
             If pVerificarProductosAplicables Then
                 TarificadorRVLN.VerificarProductosAplicables(tarifa)
             End If
-
 
             'Me.GuardarGenerico(tarifa)
             'Dim miLN As New PolizaRvLcLN()
             'Dim tarifaBD As TarifaDN
             'tarifaBD = Me.RecuperarGenerico(tarifa.ID, GetType(TarifaDN))
-
-
 
             tr.Confirmar()
 

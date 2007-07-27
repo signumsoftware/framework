@@ -125,8 +125,10 @@ Partial Class frmTarifa
         Me.ctrlTarifa1.Location = New System.Drawing.Point(12, 86)
         Me.ctrlTarifa1.MensajeError = ""
         Me.ctrlTarifa1.Name = "ctrlTarifa1"
+        Me.ctrlTarifa1.NumeroSiniestros = 0
         Me.ctrlTarifa1.Size = New System.Drawing.Size(810, 559)
         Me.ctrlTarifa1.TabIndex = 0
+        Me.ctrlTarifa1.TarifaRenovacion = False
         Me.ctrlTarifa1.ToolTipText = Nothing
         '
         'Label4
@@ -164,7 +166,6 @@ Partial Class frmTarifa
         Me.Controls.Add(Me.ctrlTarifa1)
         Me.Name = "frmTarifa"
         Me.Text = "Tarificador"
-        Me.WindowState = System.Windows.Forms.FormWindowState.Maximized
         Me.ToolStrip1.ResumeLayout(False)
         Me.ToolStrip1.PerformLayout()
         Me.ResumeLayout(False)

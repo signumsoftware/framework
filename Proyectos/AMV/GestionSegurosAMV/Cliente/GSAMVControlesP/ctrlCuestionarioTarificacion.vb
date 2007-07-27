@@ -867,6 +867,7 @@ Public Class ctrlCuestionarioTarificacion
 
     Private Sub chkAseguradoVehiculo_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles chkAseguradoVehiculo.CheckedChanged
         Try
+            Me.dtpVencimientoSeguro.Enabled = Me.chkAseguradoVehiculo.Checked
             'Me.dtpVencimientoSeguro.Enabled = Me.chkAseguradoVehiculo.Checked
             'Me.cboAñosSinSiniestro.Enabled = Not Me.chkAseguradoVehiculo.Checked
             'Me.optJustCertif.Enabled = Not Me.chkAseguradoVehiculo.Checked
