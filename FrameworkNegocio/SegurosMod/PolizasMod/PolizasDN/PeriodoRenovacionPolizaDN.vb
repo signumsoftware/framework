@@ -202,22 +202,14 @@ Public Class PeriodoRenovacionPolizaDN
 
     Public Overrides Function EstadoIntegridad(ByRef pMensaje As String) As Framework.DatosNegocio.EstadoIntegridadDN
 
-
         ' si no esta dado de alta no puede tener fecha de baja
-
-
-
-
         If Me.mFechaBaja > Date.MinValue AndAlso (String.IsNullOrEmpty(Me.mID)) Then
-            pMensaje = "un perido de renovacion que no hasido dado de alta no peude disponer de un valor para fecha de baja"
+            pMensaje = "un periodo de renovación que no ha sido dado de alta no puede disponer de un valor para fecha de baja"
             Return EstadoIntegridadDN.Inconsistente
         End If
 
-
-
-
         If Not Me.mPeriodo.FInicio.AddYears(1) = Me.mPeriodo.FFinal Then
-            pMensaje = "La aplitud del perido debe estar fijada a un año"
+            pMensaje = "La amplitud del periodo debe estar fijada a un año"
             Return EstadoIntegridadDN.Inconsistente
         End If
 
@@ -231,26 +223,27 @@ Public Class PeriodoRenovacionPolizaDN
             Return EstadoIntegridadDN.Inconsistente
         End If
 
-        Dim colpc As ColPeriodoCoberturaDN = Me.ColPeriodosCobertura.RecuperarActivos
+        Dim colpc As ColPeriodoCoberturaDN = Me.ColPeriodosCobertura.RecuperarActivos()
 
-        If Me.mFechaBaja = Date.MinValue Then
+        If Me.mFechaBaja = Date.MinValue OrElse mFechaBaja <> Now() Then
 
             If colpc.Count <> 1 Then
                 pMensaje = "debe existir un periodo de cobertura activo y solo uno"
                 Return EstadoIntegridadDN.Inconsistente
-
             End If
+
+            mPeriodoCoberturaActivo = colpc.Item(0)
 
         Else
             If colpc.Count <> 0 Then
-                pMensaje = "No debe exisitir ningún periodo de cobertua activo dado que el periodo de renovación está en baja"
+                pMensaje = "No debe existir ningún periodo de cobertua activo dado que el periodo de renovación está en baja"
                 Return EstadoIntegridadDN.Inconsistente
 
             End If
 
-        End If
+            mPeriodoCoberturaActivo = Nothing
 
-        Me.mPeriodoCoberturaActivo = Me.PeridoCoberturaActivo
+        End If
 
         Return MyBase.EstadoIntegridad(pMensaje)
 

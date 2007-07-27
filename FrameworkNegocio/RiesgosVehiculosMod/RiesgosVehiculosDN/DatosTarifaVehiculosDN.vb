@@ -575,9 +575,9 @@ Public Class DatosTarifaVehiculosDN
         Me.ImporteFinaciablesImpuestos(impAux1, impAux2)
         impNoFrac += impAux2
 
-        restoPagos = (Me.Tarifa.Importe - impNoFrac) / numeroPagos
+        restoPagos = Math.Round((Me.Tarifa.Importe - impNoFrac) / numeroPagos, 2)
 
-        primerPago = restoPagos + impNoFrac
+        primerPago = Math.Round(Me.Tarifa.Importe - restoPagos * (numeroPagos - 1), 2)
 
     End Sub
 

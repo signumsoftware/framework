@@ -376,6 +376,11 @@ Imports Framework.Operaciones.OperacionesDN
                     Throw New ApplicationException("Los operandos de la operación no pueden ser nulos (MCND)")
                 End If
 
+                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                '  Operación truncar a 5 decimales
+                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                op = GenerarOperacionTruncar(op, 5, False)
+
                 If nombreCobertura <> "AV" AndAlso nombreCobertura <> "AC" Then
                     op = GenerarOperacionBonificion(colBonifRVSV, op, "Bonificación Siniestralidad", True)
                     If op.Operando1 Is Nothing OrElse op.Operando2 Is Nothing Then
@@ -384,12 +389,20 @@ Imports Framework.Operaciones.OperacionesDN
                 End If
 
 
+                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                '  Operación de redondeo a 2 decimales
+                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                op = GenerarOperacionRedondear(op, 2, False)
+
                 ' op = GenerarOperacionModulador(pColModuladores, op, nombreCobertura, "PROM", False)
 
+
+
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                '  Operación truncar a 5 decimales
+                '  fraccionamiento
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                op = GenerarOperacionTruncar(op, 5, False)
+
+                op = GenerarOperacionFraccionamiento(colFracRVSV, op, nombreCobertura, True)
 
 
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -412,10 +425,9 @@ Imports Framework.Operaciones.OperacionesDN
 
 
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                '  fraccionamiento
+                '  Operación de redondeo a 2 decimales
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-                opComisionCob = GenerarOperacionFraccionamiento(colFracRVSV, opComisionCob, nombreCobertura, True)
+                opComisionCob = GenerarOperacionRedondear(opComisionCob, 2, False)
 
 
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

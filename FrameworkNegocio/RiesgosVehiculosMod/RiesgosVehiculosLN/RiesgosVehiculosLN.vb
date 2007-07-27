@@ -110,16 +110,16 @@ Public Class RiesgosVehiculosLN
             Dim miLN As New PolizaRvLcLN()
             Dim colcd As Framework.Ficheros.FicherosDN.ColCajonDocumentoDN = miLN.VincularCajonesDocumento(presupuesto)
             '     miLN.ActualizarProdutosAplicables(presupuesto.Tarifa, colcd)
-            Me.GuardarGenerico(presupuesto)
 
-            Dim presupuestoBD As PresupuestoDN
-            presupuestoBD = Me.RecuperarGenerico(presupuesto.ID, GetType(PresupuestoDN))
+            'Me.GuardarGenerico(presupuesto)
+            'Dim presupuestoBD As PresupuestoDN
+            'presupuestoBD = Me.RecuperarGenerico(presupuesto.ID, GetType(PresupuestoDN))
 
             tr.Confirmar()
 
-            Return presupuestoBD
+            'Return presupuestoBD
 
-            'Return presupuesto
+            Return presupuesto
 
         End Using
 

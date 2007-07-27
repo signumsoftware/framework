@@ -237,12 +237,12 @@ Public Class TarifaDN
         End If
         
 
-
-
         Me.mNombreFraccionaminento = Me.mFraccionamiento.Nombre
         'mFraccionamientosXML = AsignarFraccionamientoXML()
 
         AsignarmeDatosTarifa()
+
+        mToSt = Me.ToString()
 
         Return MyBase.EstadoIntegridad(pMensaje)
     End Function
@@ -273,8 +273,6 @@ Public Class TarifaDN
 
         Return True
     End Function
-
-
 
     Public Function CompletarProductosDependientes() As FN.Seguros.Polizas.DN.ColLineaProductoDN
 
@@ -348,6 +346,20 @@ Public Class TarifaDN
 
         Return String.Empty
 
+    End Function
+
+    Public Overrides Function ToString() As String
+        Dim cadena As String = String.Empty
+
+        If mDatosTarifa IsNot Nothing Then
+            cadena = mDatosTarifa.ToString()
+        End If
+
+        If mRiesgo IsNot Nothing Then
+            cadena &= mRiesgo.ToString()
+        End If
+
+        Return MyBase.ToString()
     End Function
 
     'Private Function AsignarFraccionamientoFromXML() As GrupoFraccionamientosDN
