@@ -95,7 +95,7 @@ Public Class GestorMapPeristenciaCampos
             campodatos.MapSubEntidad = mapSubInst
 
 
-            mapinst.TablaHistoria = "thOperacionRealizadaDN"
+
 
             Return mapinst
         End If

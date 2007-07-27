@@ -117,7 +117,9 @@ Public Class UsuariosLN
                 gi.Recuperar(pPrincipal.UsuarioDN.HuellaEntidadUserDN)
             End If
 
-            Dim idp As Framework.DatosNegocio.IDatoPersistenteDN = pPrincipal
+            Dim idp As Framework.DatosNegocio.IDatoPersistenteDN = pPrincipal.UsuarioDN
+            idp.EstadoDatos = DatosNegocio.EstadoDatosDN.SinModificar
+            idp = pPrincipal
             idp.EstadoDatos = DatosNegocio.EstadoDatosDN.SinModificar
 
 

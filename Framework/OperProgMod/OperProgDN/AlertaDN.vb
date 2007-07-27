@@ -131,7 +131,10 @@ Public Class AlertaDN
         If Not ValOperacionDns(pMensaje, Me.mOperacion, Me.mColHEntidad) Then
             Return Framework.DatosNegocio.EstadoIntegridadDN.Inconsistente
         End If
-
+        If Me.mFEjecProgramada = Date.MinValue Then
+            pMensaje = "Una alerta debe de tenr su fecha de ejecucion programada establecida"
+            Return Framework.DatosNegocio.EstadoIntegridadDN.Inconsistente
+        End If
 
         Return MyBase.EstadoIntegridad(pMensaje)
     End Function
