@@ -257,6 +257,10 @@
       <Project>{DD711274-EDAC-434C-AB9E-B095A8E2765F}</Project>
       <Name>MotorBusquedaIuWin</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MotorVisualizacion\MNavegacionDatosIUWin\MNavegacionDatosIUWin.vbproj">
+      <Project>{AAD0742C-27FF-4EEE-9F12-100A21A06093}</Project>
+      <Name>MNavegacionDatosIUWin</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MotorVisualizacion\MotorVisualizacionTest2\MotorVisualizacionTest2.vbproj">
       <Project>{F75CF97C-AC3A-4785-B02D-05C612DB5D4C}</Project>
       <Name>MotorVisualizacionTest2</Name>

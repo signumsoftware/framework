@@ -91,6 +91,8 @@ Public Class OperacionesGBDAD
         ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
         ej.EjecutarNoConsulta(My.Resources.vwUltimasOperacionesTotales)
 
+        ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
+        ej.EjecutarNoConsulta(My.Resources.vwTransicionesHistoricas)
 
 
     End Sub

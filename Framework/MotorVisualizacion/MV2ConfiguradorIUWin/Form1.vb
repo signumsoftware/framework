@@ -38,31 +38,36 @@ Public Class Form1
     Private Sub FromXML()
 
  
+        Try
+            Dim miInstanciaMapDN As New MV2DN.InstanciaMapDN
+            Dim tr As New IO.StringReader(Me.txtbMapXml.Text)
+            miInstanciaMapDN.FromXML(tr)
+            Me.CtrlGD1.Clear()
+            Me.CtrlGD1.TipoEntidad = mtipo
+            Me.CtrlGD1.InstanciaMap = miInstanciaMapDN
+            Me.CtrlGD1.Poblar()
+            Me.Inicializar()
 
 
-        Dim miInstanciaMapDN As New MV2DN.InstanciaMapDN
-        Dim tr As New IO.StringReader(Me.txtbMapXml.Text)
-        miInstanciaMapDN.FromXML(tr)
-        Me.CtrlGD1.Clear()
-        Me.CtrlGD1.TipoEntidad = mtipo
-        Me.CtrlGD1.InstanciaMap = miInstanciaMapDN
-        Me.CtrlGD1.Poblar()
-        Me.Inicializar()
+            ' refrescar los controles pg
+            Me.PropertyGrid1.SelectedObject = Nothing
+            Me.PropertyGrid2.SelectedObject = miInstanciaMapDN
+
+            ' refrescar el lsitado de operaciones
 
 
-        ' refrescar los controles pg
-        Me.PropertyGrid1.SelectedObject = Nothing
-        Me.PropertyGrid2.SelectedObject = miInstanciaMapDN
+            Me.ListBox1.DataSource = Nothing
+            Me.ListBox1.Items.Clear()
+            Me.ListBox1.DisplayMember = "NombreVis"
+            Me.ListBox1.DataSource = miInstanciaMapDN.ColComandoMap
 
-        ' refrescar el lsitado de operaciones
+            ReflejarEstructuraIElemtoMapContenedor2()
 
 
-        Me.ListBox1.DataSource = Nothing
-        Me.ListBox1.Items.Clear()
-        Me.ListBox1.DisplayMember = "NombreVis"
-        Me.ListBox1.DataSource = miInstanciaMapDN.ColComandoMap
+        Catch ex As Exception
+            MessageBox.Show(ex.Message)
 
-        ReflejarEstructuraIElemtoMapContenedor2()
+        End Try
 
 
 
@@ -564,6 +569,7 @@ Public Class Form1
 
     Public Sub CargarEnsambladoControlador()
         Me.OpenFileDialog1.InitialDirectory = TextBox2.Text
+        Me.OpenFileDialog1.Filter = "*.dll"
         Me.OpenFileDialog1.ShowDialog()
         Me.TextBox2.Text = Me.OpenFileDialog1.FileName
         ' cargar el ensambblado y todos los tipos de las clases que se declaran
@@ -736,13 +742,13 @@ Public Class Form1
         Dim filest As IO.FileStream
         Try
 
-            filest = New IO.FileStream(Application.StartupPath & "\colParesTipoMapeado.xml", IO.FileMode.OpenOrCreate)
+            filest = New IO.FileStream(Application.StartupPath & "\colParesTipoMapeado.xml", IO.FileMode.Open)
             Dim xmlf As System.Xml.Serialization.XmlSerializer
             xmlf = New System.Xml.Serialization.XmlSerializer(GetType(List(Of ParTipoMapeado)))
             misPares = xmlf.Deserialize(filest)
 
         Catch ex As Exception
-            'Beep()
+            Beep()
         Finally
             If filest IsNot Nothing Then
                 filest.Close()
@@ -772,7 +778,7 @@ Public Class Form1
             xmlf.Serialize(filest, misPares)
 
         Catch ex As Exception
-            'Beep()
+            Beep()
         Finally
             If filest IsNot Nothing Then
                 filest.Close()
@@ -1138,15 +1144,21 @@ Public Class Form1
   
  
     Private Sub Button26_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button26.Click
+        Try
+            Dim pt As ParTipoMapeado = ListBox3.SelectedItem
+            Me.misPares.Remove(pt)
+            Me.ListBox3.DataSource = Nothing
+        Catch ex As Exception
 
-        Dim pt As ParTipoMapeado = ListBox3.SelectedItem
-        Me.misPares.Remove(pt)
+        End Try
 
-        Me.ListBox3.DataSource = Nothing
+
+        Me.GuardarPares()
+
         Me.ListBox3.DisplayMember = "Mapeado"
         Me.ListBox3.DataSource = misPares
         Me.ListBox3.Refresh()
-        Me.GuardarPares()
+
     End Sub
 
     Private Sub ListBox3_MouseDoubleClick(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles ListBox3.MouseDoubleClick

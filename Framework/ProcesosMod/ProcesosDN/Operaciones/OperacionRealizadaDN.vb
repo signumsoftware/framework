@@ -587,6 +587,9 @@ Imports Framework.DatosNegocio
 
         Me.ActualizarRutaSubordinada(Me.mOperacionRealizadaPadre)
 
+
+        Me.mNombre = Me.Operacion.Nombre
+
         Return MyBase.EstadoIntegridad(pMensaje)
 
     End Function

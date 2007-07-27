@@ -326,3 +326,8 @@ Public Class PrincipalDN
 
 
 End Class
+
+<Serializable()> _
+Public Class PrincipalDNhet
+    Inherits Framework.DatosNegocio.HuellaEntidadTipadaDN(Of PrincipalDN)
+End Class

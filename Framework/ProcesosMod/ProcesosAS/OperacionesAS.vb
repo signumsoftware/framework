@@ -77,8 +77,11 @@ Public Class OperacionesAS
         servicio.Url = RedireccionURL(servicio.Url)
         servicio.CookieContainer = ContenedorSessionAS.contenedorSessionC()
 
-
-
+        Dim colclones As Framework.DatosNegocio.ColIEntidadDN
+        Dim ht As Hashtable = pOperacionRealizadaDN.ToHtGUIDs(Nothing, colclones)
+        Debug.WriteLine(colclones.Count)
+        Dim al As New ArrayList
+        al.Add(pOperacionRealizadaDN)
 
         respuesta = servicio.EjecutarOperacion(parametros)
         EjecutarOperacionOpr = Framework.Utilidades.Serializador.DesSerializar(respuesta)
@@ -117,6 +120,12 @@ Public Class OperacionesAS
         ' pr.IEntidadDN = objeto
         parametros = Framework.Utilidades.Serializador.Serializar(pr)
 
+
+        Dim colclones As Framework.DatosNegocio.ColIEntidadDN
+        Dim ht As Hashtable = pTransicionRealizada.ToHtGUIDs(Nothing, colclones)
+        Debug.WriteLine(colclones.Count)
+        Dim al As New ArrayList
+        al.Add(pTransicionRealizada)
 
 
         respuesta = servicio.EjecutarOperacion(parametros)
@@ -164,7 +173,11 @@ Public Class OperacionesAS
         servicio.Url = RedireccionURL(servicio.Url)
         servicio.CookieContainer = ContenedorSessionAS.contenedorSessionC()
 
-
+        Dim colclones As Framework.DatosNegocio.ColIEntidadDN
+        Dim ht As Hashtable = pTransicionRealizada.ToHtGUIDs(Nothing, colclones)
+        Debug.WriteLine(colclones.Count)
+        Dim al As New ArrayList
+        al.Add(pTransicionRealizada)
         respuesta = servicio.EjecutarOperacion(parametros)
         EjecutarOperacionModificarObjeto = Framework.Utilidades.Serializador.DesSerializar(respuesta)
 

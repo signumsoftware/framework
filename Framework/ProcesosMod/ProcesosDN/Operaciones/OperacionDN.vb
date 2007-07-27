@@ -64,6 +64,11 @@ Imports Framework.TiposYReflexion.DN
         End Get
         Set(ByVal value As VerboDN)
             CambiarValorRef(Of VerboDN)(value, mVerboOperacion)
+
+            If mVerboOperacion IsNot Nothing AndAlso String.IsNullOrEmpty(Me.mNombre) Then
+                Me.mNombre = Me.mVerboOperacion.Nombre
+            End If
+
         End Set
     End Property
 
@@ -123,6 +128,11 @@ Imports Framework.TiposYReflexion.DN
     Public Overrides Function EstadoIntegridad(ByRef pMensaje As String) As Framework.DatosNegocio.EstadoIntegridadDN
         If Not ValVerboOperacion(pMensaje, mVerboOperacion) Then
             Return EstadoIntegridadDN.Inconsistente
+        End If
+
+
+        If String.IsNullOrEmpty(Me.mNombre) Then
+            Me.mNombre = Me.mVerboOperacion.Nombre
         End If
 
         Return MyBase.EstadoIntegridad(pMensaje)

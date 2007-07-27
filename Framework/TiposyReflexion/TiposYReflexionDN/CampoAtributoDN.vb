@@ -6,5 +6,6 @@
         PersistenciaContenidaSerializada
         SoloGuardarYNoReferido
         UnicoEnFuenteDatosoNulo
+        NoRecuperar
     End Enum
 End Namespace

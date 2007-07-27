@@ -131,13 +131,12 @@ FROM         dbo.tlVcEjecutorDeVerboEnClienteDN INNER JOIN
                       dbo.tlVinculoClaseDN ON dbo.tlVinculoMetodoDN.idVinculoClase = dbo.tlVinculoClaseDN.ID</value>
   </data>
   <data name="vwOperacionesRealizadasActivas" xml:space="preserve">
-    <value>CREATE VIEW    vwOperacionesRealizadasActivas as SELECT     dbo.tlOperacionRealizadaDN.ID AS idOperacionRealizadaDestino, dbo.vwTransicionesxTipoDN.NombreClaseOrigen, 
-                      dbo.vwTransicionesxTipoDN.TipoTransicion, dbo.tlOperacionRealizadaDN.Baja, dbo.tlHEDN.IdEntidadReferida, dbo.tlOperacionDN.Nombre, 
-                      dbo.tlHEDN.GUIDReferida
+    <value>CREATE VIEW    vwOperacionesRealizadasActivas as SELECT     dbo.tlOperacionRealizadaDN.ID AS idOperacionRealizadaDestino, dbo.vwTransicionesxTipoDN.NombreClaseOrigen, dbo.vwTransicionesxTipoDN.TipoTransicion, 
+                      dbo.tlOperacionRealizadaDN.Baja, dbo.tlHEDN.IdEntidadReferida, dbo.tlOperacionDN.Nombre, dbo.tlHEDN.GUIDReferida, 
+                      dbo.tlHEDN.TipoEntidadReferidaFullName
 FROM         dbo.tlTransicionRealizadaDN INNER JOIN
                       dbo.vwTransicionesxTipoDN INNER JOIN
-                      dbo.tlTransicionDN ON dbo.vwTransicionesxTipoDN.ID = dbo.tlTransicionDN.ID ON 
-                      dbo.tlTransicionRealizadaDN.idTransicion = dbo.tlTransicionDN.ID INNER JOIN
+                      dbo.tlTransicionDN ON dbo.vwTransicionesxTipoDN.ID = dbo.tlTransicionDN.ID ON dbo.tlTransicionRealizadaDN.idTransicion = dbo.tlTransicionDN.ID INNER JOIN
                       dbo.tlOperacionDN INNER JOIN
                       dbo.tlOperacionRealizadaDN ON dbo.tlOperacionDN.ID = dbo.tlOperacionRealizadaDN.idOperacion ON 
                       dbo.tlTransicionRealizadaDN.idOperacionRealizadaOrigen = dbo.tlOperacionRealizadaDN.ID INNER JOIN
@@ -163,6 +162,20 @@ FROM         dbo.tlOperacionRealizadaDN INNER JOIN
                       dbo.tlTransicionRealizadaDN ON dbo.tlOperacionRealizadaDN.ID = dbo.tlTransicionRealizadaDN.idOperacionRealizadaOrigen INNER JOIN
                       dbo.tlOperacionRealizadaDN AS tlOperacionRealizadaDN_1 ON 
                       dbo.tlTransicionRealizadaDN.idOperacionRealizadaDestino = tlOperacionRealizadaDN_1.ID</value>
+  </data>
+  <data name="vwTransicionesHistoricas" xml:space="preserve">
+    <value>create view vwTransicionesHistoricas as SELECT     dbo.thTransicionRealizadaDN.idOperacionRealizadaOrigen, dbo.thOperacionRealizadaDN.Nombre AS nOPOrigen, 
+                      dbo.thOperacionRealizadaDN.Periodo_FInicio AS fiOPO, dbo.thOperacionRealizadaDN.Periodo_FFinal AS ffOPO, dbo.thOperacionRealizadaDN.ToSt AS TostOPO, 
+                      dbo.thOperacionRealizadaDN.idSujetoOperacionPrincipalDN AS idsOPO, dbo.tlPrincipalDN.Nombre AS nsOPO, 
+                      dbo.thTransicionRealizadaDN.idOperacionRealizadaDestino, thOperacionRealizadaDN_1.Nombre AS nOPDestino, 
+                      thOperacionRealizadaDN_1.Periodo_FInicio AS fiOPD, thOperacionRealizadaDN_1.Periodo_FFinal AS ffOPD, thOperacionRealizadaDN_1.ToSt AS TostOPD, 
+                      thOperacionRealizadaDN_1.idSujetoOperacionPrincipalDN AS idsOPD, tlPrincipalDN_1.Nombre AS nsOPD
+FROM         dbo.thTransicionRealizadaDN INNER JOIN
+                      dbo.thOperacionRealizadaDN ON dbo.thTransicionRealizadaDN.idOperacionRealizadaOrigen = dbo.thOperacionRealizadaDN.ID INNER JOIN
+                      dbo.thOperacionRealizadaDN AS thOperacionRealizadaDN_1 ON 
+                      dbo.thTransicionRealizadaDN.idOperacionRealizadaDestino = thOperacionRealizadaDN_1.ID INNER JOIN
+                      dbo.tlPrincipalDN ON dbo.thOperacionRealizadaDN.idSujetoOperacionPrincipalDN = dbo.tlPrincipalDN.ID INNER JOIN
+                      dbo.tlPrincipalDN AS tlPrincipalDN_1 ON thOperacionRealizadaDN_1.idSujetoOperacionPrincipalDN = tlPrincipalDN_1.ID</value>
   </data>
   <data name="vwTransicionesxTipoDN" xml:space="preserve">
     <value>CREATE VIEW    vwTransicionesxTipoDN as  SELECT     dbo.tlTransicionDN.ID, dbo.tlTransicionDN.TipoTransicion, dbo.tlTransicionDN.Baja, dbo.tlTransicionDN.idOperacionOrigen, 

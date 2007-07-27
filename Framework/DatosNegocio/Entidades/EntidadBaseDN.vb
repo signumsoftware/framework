@@ -5,10 +5,6 @@ Public MustInherit Class EntidadBaseDN
     Implements IEntidadBaseDN
 
 
-
-
-
-
 #Region "Atributos"
     'El id del objeto
     Protected mID As String
@@ -372,6 +368,12 @@ Public MustInherit Class EntidadBaseDN
 
 
     End Function
+
+    Public ReadOnly Property IdentificacionTexto() As Object Implements IEntidadBaseDN.IdentificacionTexto
+        Get
+            Return Me.mGUID & "/" & Me.mID & "/" & Me.GetType.Name
+        End Get
+    End Property
 End Class
 
 

@@ -1607,252 +1607,281 @@ Namespace LN
 
 
         Private Function Guardarp(ByVal pObjeto As Object) As LogicaNegocios.OperacionGuardarLN
-            If pObjeto Is Nothing Then
-                Exit Function
-            End If
-            'Dim ednee As EntidadDN
-            'ednee = pObjeto
-            'If ednee.FechaModificacion.Ticks = "632609229430312500" Then
-            '    Beep()
-            'End If
-
-            Dim operacionRealizada As New OperacionRealizada
-            Dim coordinador As CTDLN
-            Dim transProc As ITransaccionLogicaLN = Nothing
-            Dim registrosAfectados As Int16
-            Dim mensaje As String = String.Empty
-
-            'Entidad princpal
-            Dim accesor As IBaseAD
-
-            'Entidades de logica para los campos por referencia del objeto
-            Dim operacion As Framework.LogicaNegocios.OperacionGuardarLN
-
-            Dim mapInst As InfoTypeInstClaseDN
-            Dim enumerador As IEnumerable
-            Dim idp As Framework.DatosNegocio.IDatoPersistenteDN
-
-            Dim cref As InfoTypeInstCampoRefDN
-            Dim objetoContenido As Framework.DatosNegocio.IEntidadBaseDN
-
-            Dim oa As Object
-            Dim contrM As ConstructorSQLSQLsAD
-            Dim contrucor As ConstructorAdapterAD
-            Dim eper As IDatoPersistenteDN
-
-            Dim parametros As List(Of IDataParameter)
-            Dim regAfectados As Integer
-            Dim ej As Ejecutor
-            Dim sqltr As String
-            Dim oIEntidadDN As IEntidadBaseDN
 
 
-            coordinador = New CTDLN
-            'Debug.Indent()
-            'Debug.WriteLine("")
 
-            'Debug.WriteLine("1Guardando:(" & pObjeto.GetType.FullName & ") " & pObjeto.ToString)
 
             Try
-                coordinador.IniciarTransaccion(mTL, transProc)
 
-                'No procesar si la instancia ya fue procesada
-                If mColIntanciasGuardadas.Contains(pObjeto) Then
+                Debug.Indent()
+
+
+
+                If pObjeto Is Nothing Then
+                    Exit Function
+                End If
+
+                Dim operacionRealizada As New OperacionRealizada
+                Dim coordinador As CTDLN
+                Dim transProc As ITransaccionLogicaLN = Nothing
+                Dim registrosAfectados As Int16
+                Dim mensaje As String = String.Empty
+
+                'Entidad princpal
+                Dim accesor As IBaseAD
+
+                'Entidades de logica para los campos por referencia del objeto
+                Dim operacion As Framework.LogicaNegocios.OperacionGuardarLN
+
+                Dim mapInst As InfoTypeInstClaseDN
+                Dim enumerador As IEnumerable
+                Dim idp As Framework.DatosNegocio.IDatoPersistenteDN
+
+                Dim cref As InfoTypeInstCampoRefDN
+                Dim objetoContenido As Framework.DatosNegocio.IEntidadBaseDN
+
+                Dim oa As Object
+                Dim contrM As ConstructorSQLSQLsAD
+                Dim contrucor As ConstructorAdapterAD
+                Dim eper As IDatoPersistenteDN
+
+                Dim parametros As List(Of IDataParameter)
+                Dim regAfectados As Integer
+                Dim ej As Ejecutor
+
+                Dim oIEntidadDN As IEntidadBaseDN
+
+
+                coordinador = New CTDLN
+                'Debug.Indent()
+                'Debug.WriteLine("")
+
+                Debug.WriteLine("1Guardando:(" & pObjeto.GetType.FullName & ") " & pObjeto.ToString)
+
+                Try
+                    coordinador.IniciarTransaccion(mTL, transProc)
+
+                    'No procesar si la instancia ya fue procesada
+                    If mColIntanciasGuardadas.Contains(pObjeto) Then
+                        If TypeOf pObjeto Is Framework.DatosNegocio.IEntidadBaseDN Then
+                            oIEntidadDN = pObjeto
+                            If String.IsNullOrEmpty(oIEntidadDN.ID) AndAlso pObjeto.GetType IsNot GetType(Framework.DatosNegocio.HEDN) Then
+                                Debug.WriteLine("referencia circualr para el tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
+                                ' post guardas
+                                operacionRealizada.Operacion = LogicaNegocios.OperacionGuardarLN.EnProceso
+                                Return operacionRealizada.Operacion
+                            End If
+
+                        End If
+
+
+                        Return LogicaNegocios.OperacionGuardarLN.YaProcesado
+
+                    Else
+
+                        ' si se trata de una huella cache puede que un clon suyo ya exista en la col de entidades guardadas y se debe adsorver de los datos actualizados
+                        If TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuellaCacheable(pObjeto.GetType) Then
+                            If ActualizarHuellaPorClonActual(pObjeto) Then
+                                ' la huella fue actualizada luego no requiere ser guardad denuevo
+                                mColIntanciasGuardadas.Add(pObjeto)
+                                oIEntidadDN = pObjeto
+                                Debug.WriteLine("huella actualizada tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
+                                Return OperacionGuardarLN.Modificar
+                            Else
+                                ' la huella no se actualizo y debe de continuar con el codigo habitual
+                                'mColIntanciasGuardadas.Add(pObjeto)
+                                'Beep()
+                            End If
+                        Else
+                            mColIntanciasGuardadas.Add(pObjeto)
+                        End If
+
+
+                    End If
+
+
+
+
+                    'No procesar si no es una entidadDN
                     If TypeOf pObjeto Is Framework.DatosNegocio.IEntidadBaseDN Then
                         oIEntidadDN = pObjeto
-                        If String.IsNullOrEmpty(oIEntidadDN.ID) AndAlso pObjeto.GetType IsNot GetType(Framework.DatosNegocio.HEDN) Then
-                            Debug.WriteLine("referencia circualr para el tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
-                            ' post guardas
-                            operacionRealizada.Operacion = LogicaNegocios.OperacionGuardarLN.EnProceso
-                            Return operacionRealizada.Operacion
-                        End If
-
-                    End If
-
-                    Return LogicaNegocios.OperacionGuardarLN.YaProcesado
-                Else
-
-                    ' si se trata de una huella cache puede que un clon suyo ya exista en la col de entidades guardadas y se debe adsorver de los datos actualizados
-                    If TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuellaCacheable(pObjeto.GetType) Then
-                        If ActualizarHuellaPorClonActual(pObjeto) Then
-                            ' la huella fue actualizada luego no requiere ser guardad denuevo
-                            mColIntanciasGuardadas.Add(pObjeto)
-                            oIEntidadDN = pObjeto
-                            'Debug.WriteLine("huella actualizada tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
-                            Return OperacionGuardarLN.Modificar
-                        Else
-                            ' la huella no se actualizo y debe de continuar con el codigo habitual
-                            'mColIntanciasGuardadas.Add(pObjeto)
-                            'Beep()
-                        End If
+                        Debug.WriteLine("2Guardando:" & pObjeto.ToString & " id:" & oIEntidadDN.ID & " GUID: " & oIEntidadDN.GUID & " fm:" & CType(oIEntidadDN, Framework.DatosNegocio.IDatoPersistenteDN).FechaModificacion)
                     Else
-                        mColIntanciasGuardadas.Add(pObjeto)
+                        Return LogicaNegocios.OperacionGuardarLN.Ninguna
+                    End If
+
+                    'No trabajar si no es para insertar o modificar
+                    operacion = OperacionARealizar(pObjeto)
+                    Debug.WriteLine("OPERACION: " & operacion.GetName(operacion.GetType, operacion))
+                    If (operacion = LogicaNegocios.OperacionGuardarLN.Ninguna) Then
+                        Return operacion
+                    End If
+                    ' verificar permiso para guardar la entidad si se asigno un delegado
+
+                    If Not mDelegadoAutorizacion Is Nothing Then
+                        Dim autorizacion As Boolean
+                        Me.mDelegadoAutorizacion.Invoke(pObjeto, operacion, autorizacion)
+                        If Not autorizacion Then
+                            Throw New ApplicationException("el delegado denogo la operacion")
+                        End If
+
                     End If
 
 
-                End If
+                    'Obtener el mapeado de composicion de la entidad
+                    mapInst = GestorCacheInfoTypeInstLN.RecuperarMapInstanciacion(pObjeto.GetType)
 
+                    'Vincular el mapeado con la instacia en concreto
+                    mapInst.InstanciaPrincipal = pObjeto
 
+                    'Verificar que el estado de integridad es consistente
+                    If (TypeOf pObjeto Is Framework.DatosNegocio.IDatoPersistenteDN) Then
+                        idp = pObjeto
 
-
-                'No procesar si no es una entidadDN
-                If TypeOf pObjeto Is Framework.DatosNegocio.IEntidadBaseDN Then
-                    oIEntidadDN = pObjeto
-                    'Debug.WriteLine("2Guardando:" & pObjeto.ToString & " id:" & oIEntidadDN.ID & " GUID: " & oIEntidadDN.GUID & " fm:" & CType(oIEntidadDN, Framework.DatosNegocio.IDatoPersistenteDN).FechaModificacion)
-                Else
-                    Return LogicaNegocios.OperacionGuardarLN.Ninguna
-                End If
-
-                'No trabajar si no es para insertar o modificar
-                operacion = OperacionARealizar(pObjeto)
-                If (operacion = LogicaNegocios.OperacionGuardarLN.Ninguna) Then
-                    Return operacion
-                End If
-                ' verificar permiso para guardar la entidad si se asigno un delegado
-
-                If Not mDelegadoAutorizacion Is Nothing Then
-                    Dim autorizacion As Boolean
-                    Me.mDelegadoAutorizacion.Invoke(pObjeto, operacion, autorizacion)
-                    If Not autorizacion Then
-                        Throw New ApplicationException("el delegado denogo la operacion")
+                        If (Not idp.EstadoIntegridad(mensaje) = EstadoIntegridadDN.Consistente) Then
+                            Throw New ApplicationException(mensaje)
+                        End If
                     End If
 
-                End If
+                    'Guardar las partes
+                    Try
+                        Debug.Indent()
 
+                        For Each cref In mapInst.CamposRefExteriores
 
-                'Obtener el mapeado de composicion de la entidad
-                mapInst = GestorCacheInfoTypeInstLN.RecuperarMapInstanciacion(pObjeto.GetType)
+                            Debug.Write("-->" & cref.NombreMap)
+                            If (cref.Instancia IsNot Nothing) Then
+                                Dim operacionrealizadEnLaParte As OperacionGuardarLN
 
-                'Vincular el mapeado con la instacia en concreto
-                mapInst.InstanciaPrincipal = pObjeto
+                                If TypeOf cref.Instancia Is IEnumerable Then
+                                    enumerador = cref.Instancia
+                                    Debug.WriteLine("-col- " & CType(cref.Instancia, Object).GetType.Name)
+                                    Debug.Indent()
+                                    For Each objetoContenido In enumerador
+                                        If objetoContenido IsNot Nothing Then
+                                            Debug.Write(" -- " & objetoContenido.IdentificacionTexto & " - " & objetoContenido.ToString)
+                                            operacionrealizadEnLaParte = Me.Guardarp(objetoContenido)
+                                            If operacionrealizadEnLaParte = OperacionGuardarLN.EnProceso OrElse operacionrealizadEnLaParte = OperacionGuardarLN.AñadidoColPostGuarda Then
+                                                mColIntanciasPostGuarda.Add(pObjeto)
+                                                operacionRealizada.Operacion = OperacionGuardarLN.AñadidoColPostGuarda
+                                            End If
+                                        End If
 
-                'Verificar que el estado de integridad es consistente
-                If (TypeOf pObjeto Is Framework.DatosNegocio.IDatoPersistenteDN) Then
-                    idp = pObjeto
-
-                    If (Not idp.EstadoIntegridad(mensaje) = EstadoIntegridadDN.Consistente) Then
-                        Throw New ApplicationException(mensaje)
-                    End If
-                End If
-
-                'Guardar las partes
-                For Each cref In mapInst.CamposRefExteriores
-                    If (cref.Instancia IsNot Nothing) Then
-                        Dim operacionrealizadEnLaParte As OperacionGuardarLN
-
-                        If TypeOf cref.Instancia Is IEnumerable Then
-                            enumerador = cref.Instancia
-
-                            For Each objetoContenido In enumerador
-                                If objetoContenido IsNot Nothing Then
-                                    operacionrealizadEnLaParte = Me.Guardarp(objetoContenido)
-                                    If operacionrealizadEnLaParte = OperacionGuardarLN.EnProceso OrElse operacionrealizadEnLaParte = OperacionGuardarLN.AñadidoColPostGuarda Then
+                                    Next
+                                    Debug.Unindent()
+                                Else
+                                    Debug.Write("-- " & CType(cref.Instancia, IEntidadBaseDN).IdentificacionTexto)
+                                    operacionrealizadEnLaParte = Me.Guardarp(cref.Instancia)
+                                    If operacionrealizadEnLaParte = LogicaNegocios.OperacionGuardarLN.EnProceso OrElse operacionrealizadEnLaParte = OperacionGuardarLN.AñadidoColPostGuarda Then
                                         mColIntanciasPostGuarda.Add(pObjeto)
                                         operacionRealizada.Operacion = OperacionGuardarLN.AñadidoColPostGuarda
                                     End If
                                 End If
 
-                            Next
-
-                        Else
-                            operacionrealizadEnLaParte = Me.Guardarp(cref.Instancia)
-                            If operacionrealizadEnLaParte = LogicaNegocios.OperacionGuardarLN.EnProceso OrElse operacionrealizadEnLaParte = OperacionGuardarLN.AñadidoColPostGuarda Then
-                                mColIntanciasPostGuarda.Add(pObjeto)
-                                operacionRealizada.Operacion = OperacionGuardarLN.AñadidoColPostGuarda
-                            End If
-                        End If
-                    End If
-                Next
-
-
-                '''''''''''''''''''''''''''''''''
-                'Guardar la entidad principal
-                '''''''''''''''''''''''''''''''''
-
-                contrM = New ConstructorSQLSQLsAD
-                contrucor = New ConstructorAdapterAD(contrM, mapInst)
-                oa = New BaseTransaccionV2AD(transProc, Me.mRec, contrucor)
-                accesor = oa
-
-                If TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(pObjeto.GetType) Then
-                    ' comportamiento especial si se trata de una huella:
-                    ' 1º llamar a asignar el id de la entidad referida
-                    ' 2º procedemos a updatar la entidad
-                    ' 3º si los registros a fectados por el update son 0 procedemos a su inserción
-                    Dim operacionrealizadaEnHuella As OperacionGuardarLN
-
-                    operacionrealizadaEnHuella = GuardarEntidadPrincipalHuella(transProc, pObjeto, mapInst, operacion)
-                    operacionRealizada.Operacion = operacionrealizadaEnHuella
-
-                Else
-
-
-
-
-
-
-                    'Insertar
-                    If (operacion = OperacionGuardarLN.Insertar) Then
-                        accesor.Insertar(pObjeto)
-                        operacionRealizada.Operacion = OperacionGuardarLN.Insertar
-
-                        'Modificar
-                    Else
-                        registrosAfectados = accesor.Modificar(pObjeto)
-                        operacionRealizada.Operacion = OperacionGuardarLN.Modificar
-
-                        If (registrosAfectados <> 1 AndAlso registrosAfectados <> 2) Then
-                            Dim st As New StackTrace()
-                            If TypeOf pObjeto Is EntidadDN Then
-                                Dim edn As EntidadDN
-                                edn = pObjeto
-
-                                'Debug.WriteLine("Error: no se modifico ningun registro: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & ", Traza" & st.ToString())
-
-                                Throw New NingunaFilaAfectadaException("Error: no se modifico ningun registro --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", Estado=" & edn.Estado.ToString & ", tipo=" & pObjeto.GetType.FullName & ", Traza" & st.ToString())
                             Else
-                                'Debug.WriteLine("Error: no se modifico ningun registro: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & ", Traza" & st.ToString())
+                                Debug.Write("-- nothing")
+                            End If
+                            Debug.WriteLine(" ")
 
-                                Throw New NingunaFilaAfectadaException("Error: no se modifico ningun registro --> " & pObjeto & " ; tipo: " & pObjeto.GetType.ToString)
+                        Next
+
+
+
+
+
+                    Finally
+                        Debug.Unindent()
+
+                    End Try
+
+                    '''''''''''''''''''''''''''''''''
+                    'Guardar la entidad principal
+                    '''''''''''''''''''''''''''''''''
+
+                    contrM = New ConstructorSQLSQLsAD
+                    contrucor = New ConstructorAdapterAD(contrM, mapInst)
+                    oa = New BaseTransaccionV2AD(transProc, Me.mRec, contrucor)
+                    accesor = oa
+
+                    If TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(pObjeto.GetType) Then
+                        ' comportamiento especial si se trata de una huella:
+                        ' 1º llamar a asignar el id de la entidad referida
+                        ' 2º procedemos a updatar la entidad
+                        ' 3º si los registros a fectados por el update son 0 procedemos a su inserción
+                        Dim operacionrealizadaEnHuella As OperacionGuardarLN
+
+                        operacionrealizadaEnHuella = GuardarEntidadPrincipalHuella(transProc, pObjeto, mapInst, operacion)
+                        operacionRealizada.Operacion = operacionrealizadaEnHuella
+
+                    Else
+
+
+
+
+
+
+                        'Insertar
+                        If (operacion = OperacionGuardarLN.Insertar) Then
+                            accesor.Insertar(pObjeto)
+                            operacionRealizada.Operacion = OperacionGuardarLN.Insertar
+
+                            'Modificar
+                        Else
+                            registrosAfectados = accesor.Modificar(pObjeto)
+                            operacionRealizada.Operacion = OperacionGuardarLN.Modificar
+
+                            If (registrosAfectados <> 1 AndAlso registrosAfectados <> 2) Then
+                                Dim st As New StackTrace()
+                                If TypeOf pObjeto Is EntidadDN Then
+                                    Dim edn As EntidadDN
+                                    edn = pObjeto
+
+                                    'Debug.WriteLine("Error: no se modifico ningun registro: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & ", Traza" & st.ToString())
+
+                                    Throw New NingunaFilaAfectadaException("Error: no se modifico ningun registro --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", Estado=" & edn.Estado.ToString & ", tipo=" & pObjeto.GetType.FullName & ", Traza" & st.ToString())
+                                Else
+                                    'Debug.WriteLine("Error: no se modifico ningun registro: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & ", Traza" & st.ToString())
+
+                                    Throw New NingunaFilaAfectadaException("Error: no se modifico ningun registro --> " & pObjeto & " ; tipo: " & pObjeto.GetType.ToString)
+                                End If
                             End If
                         End If
+
+                        'Si la entidad tenia entidades de persitencia contenida registrar el estado como sin cambios
+                        For Each cref In mapInst.CamposRefContenidos
+                            If (TypeOf cref.Instancia Is IDatoPersistenteDN) Then
+                                eper = cref.Instancia
+                                eper.EstadoDatos = EstadoDatosDN.SinModificar
+                            End If      'tipo.GetMethods(BindingFlags.Default)	'tipo.GetMethods' is not declared or the module containing it is not loaded in the debugging session.	
+
+                        Next
+
+
+
+                        ' Actualizar las huellas Cacheables
+                        ActualizarHuellas(mapInst, pObjeto)
+
                     End If
 
-                    'Si la entidad tenia entidades de persitencia contenida registrar el estado como sin cambios
-                    For Each cref In mapInst.CamposRefContenidos
-                        If (TypeOf cref.Instancia Is IDatoPersistenteDN) Then
-                            eper = cref.Instancia
-                            eper.EstadoDatos = EstadoDatosDN.SinModificar
-                        End If      'tipo.GetMethods(BindingFlags.Default)	'tipo.GetMethods' is not declared or the module containing it is not loaded in the debugging session.	
 
-                    Next
+                    'Guardar las entradas en las tablas realcionales on las entidades 1-*
+                    If Not mColIntanciasPostGuarda.Contains(pObjeto) Then
+                        ej = New Ejecutor(transProc, Me.mRec)
 
-
-
-                    ' Actualizar las huellas Cacheables
-                    ActualizarHuellas(mapInst, pObjeto)
-
-                End If
-
-
-                'Guardar las entradas en las tablas realcionales on las entidades 1-*
-                If Not mColIntanciasPostGuarda.Contains(pObjeto) Then
-                    ej = New Ejecutor(transProc, Me.mRec)
-
-                    For Each cref In mapInst.CamposRefExteriores
-                        If (cref.Campo.FieldType.GetInterface("IEnumerable", True) IsNot Nothing) Then
-                            parametros = New List(Of IDataParameter)
-                            'Ejecutamos la sql para insertar los datos en bloques
-                            For Each sqlparam As SqlParametros In contrM.ConstSqlRelacionUnoN(mapInst, cref, parametros, transProc.FechaCreacion, "")
-                                regAfectados += ej.EjecutarNoConsulta(sqlparam.sql, sqlparam.Parametros)
-                            Next
+                        For Each cref In mapInst.CamposRefExteriores
+                            If (cref.Campo.FieldType.GetInterface("IEnumerable", True) IsNot Nothing) Then
+                                parametros = New List(Of IDataParameter)
+                                'Ejecutamos la sql para insertar los datos en bloques
+                                For Each sqlparam As SqlParametros In contrM.ConstSqlRelacionUnoN(mapInst, cref, parametros, transProc.FechaCreacion, "")
+                                    regAfectados += ej.EjecutarNoConsulta(sqlparam.sql, sqlparam.Parametros)
+                                Next
 
 
 
-                        End If
-                    Next
+                            End If
+                        Next
 
-                End If
+                    End If
 
 
 
@@ -1860,37 +1889,45 @@ Namespace LN
 
 
 
-                transProc.Confirmar()
+                    transProc.Confirmar()
 
-            Catch ex As Exception
-                If (mTL IsNot Nothing) Then
-                    transProc.Cancelar()
-                End If
-                If TypeOf pObjeto Is EntidadDN Then
-                    Dim edn As EntidadDN
-                    edn = pObjeto
-                    'Debug.WriteLine("ERROR: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & " er:" & ex.ToString)
-                    Throw New NingunaFilaAfectadaException("ERROR: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & " er:" & ex.ToString)
-                Else
-                    'Debug.WriteLine("ERROR: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & " er:" & ex.ToString)
-                    Throw New NingunaFilaAfectadaException("ERROR: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & " er:" & ex.ToString)
-                End If
-                Throw
+                Catch ex As Exception
+                    If (mTL IsNot Nothing) Then
+                        transProc.Cancelar()
+                    End If
+                    If TypeOf pObjeto Is EntidadDN Then
+                        Dim edn As EntidadDN
+                        edn = pObjeto
+                        'Debug.WriteLine("ERROR: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & " er:" & ex.ToString)
+                        Throw New NingunaFilaAfectadaException("ERROR: --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & " er:" & ex.ToString)
+                    Else
+                        'Debug.WriteLine("ERROR: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & " er:" & ex.ToString)
+                        Throw New NingunaFilaAfectadaException("ERROR: --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString & " er:" & ex.ToString)
+                    End If
+                    Throw
+                Finally
+                    Guardarp = operacionRealizada.Operacion ' lo queocurrio
+                    'Debug.WriteLine("(" & pObjeto.GetType.FullName & ")" & pObjeto.ToString & "-->" & operacionRealizada.Operacion.ToString)
+
+                    If TypeOf pObjeto Is EntidadDN Then
+                        Dim edn As EntidadDN
+                        edn = pObjeto
+
+                        'Debug.WriteLine("Operacion Realizada --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & "--->" & operacionRealizada.Operacion.ToString)
+                    Else
+                        'Debug.WriteLine("Operacion Realizada  --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString)
+                    End If
+
+                    ' Debug.Unindent()
+                End Try
+
+
+
             Finally
-                Guardarp = operacionRealizada.Operacion ' lo queocurrio
-                'Debug.WriteLine("(" & pObjeto.GetType.FullName & ")" & pObjeto.ToString & "-->" & operacionRealizada.Operacion.ToString)
-
-                If TypeOf pObjeto Is EntidadDN Then
-                    Dim edn As EntidadDN
-                    edn = pObjeto
-
-                    'Debug.WriteLine("Operacion Realizada --> id=" & edn.ID & " GUID:" & edn.GUID & " , fm=" & edn.FechaModificacion.Ticks.ToString & ", tipo=" & pObjeto.GetType.FullName & "--->" & operacionRealizada.Operacion.ToString)
-                Else
-                    'Debug.WriteLine("Operacion Realizada  --> " & pObjeto.ToString & " ; tipo: " & pObjeto.GetType.ToString & "--->" & operacionRealizada.Operacion.ToString)
-                End If
-
+                Debug.WriteLine("")
                 Debug.Unindent()
             End Try
+
         End Function
 
         Private Function GuardarEntidadPrincipalHuella(ByVal transProc As ITransaccionLogicaLN, ByVal pEntidad As Framework.DatosNegocio.HEDN, ByVal mapInst As InfoTypeInstClaseDN, ByVal operacion As Framework.LogicaNegocios.OperacionGuardarLN) As OperacionGuardarLN
@@ -2295,6 +2332,12 @@ Namespace LN
 
 
 
+
+                '' recuperar el mapeado de persistencia
+                'Dim mapinst As InfoDatosMapInstClaseDN = FactoriaGestorMapPersistenciaCamposLN.ObtenerGestor.RecuperarMapPersistenciaCampos(pTipo)
+             
+
+
                 'Paso 2º 
                 'Creamos el accesor y el constructor adecuados y recuperamos los datos de la fuente de datos
                 constructor = New ConstructorSQLSQLsAD
@@ -2309,6 +2352,8 @@ Namespace LN
                 ' Paso 3º 
                 'Contruccion de las entidades hijas para los casos de la HashTable que contengan IDs
                 For Each cr In info.CamposRefExteriores
+
+              
                     relaciones = GestorRelacionesCampo.GenerarRelacionesCampoRef(info, cr)
 
                     If (Not relaciones Is Nothing) Then

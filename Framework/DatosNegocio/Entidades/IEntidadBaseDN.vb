@@ -28,7 +28,7 @@ Public Interface IEntidadBaseDN
     ''' <remarks></remarks>
     Function RepresentaMismaEntidad(ByVal pEntidad As IEntidadBaseDN, ByRef mensaje As String, ByRef pMismaRef As Boolean) As Boolean
     Function ToHtGUIDs(ByVal phtGUIDEntidades As Hashtable, ByRef clones As ColIEntidadDN) As Hashtable
-
+    ReadOnly Property IdentificacionTexto()
 #End Region
 
 End Interface

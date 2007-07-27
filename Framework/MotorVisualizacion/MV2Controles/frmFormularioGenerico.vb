@@ -138,7 +138,7 @@ Public Class frmFormularioGenerico
     End Sub
 
 
-    Private Function ExtraerDatos() As Framework.DatosNegocio.IEntidadBaseDN
+    Private Function ExtraerDatosOld() As Framework.DatosNegocio.IEntidadBaseDN
         Dim tipo As System.Type = Nothing
         Dim entidad As Framework.DatosNegocio.IEntidadDN = Nothing
 
@@ -154,78 +154,252 @@ Public Class frmFormularioGenerico
             End If
 
 
-            If Me.Paquete.Contains("DN") Then
-                entidad = Me.Paquete("DN")
-                If entidad Is Nothing Then
-                    Throw New ApplicationException("el paquete contiene una entrada de dn nothing")
-                End If
-                If Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(CType(entidad, Object).GetType) Then
 
-                    Dim h As Framework.DatosNegocio.IHuellaEntidadDN = entidad
 
-                    If h.EntidadReferida Is Nothing Then
 
-                        Dim mias As New Framework.AS.MV2AS
-                        entidad = mias.RecuperarDNGenerico(h) ' TODO: homogenizar con lo de luis y tipar el paquete
-                    Else
-                        entidad = h.EntidadReferida
+            If entidad Is Nothing Then
+
+
+                If Me.Paquete.Contains("DN") Then
+                    entidad = Me.Paquete("DN")
+                    If entidad Is Nothing Then
+                        Throw New ApplicationException("el paquete contiene una entrada de dn nothing")
                     End If
+                    If Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(CType(entidad, Object).GetType) Then
 
-                Else
-                    tipo = CType(entidad, Object).GetType
+                        Dim h As Framework.DatosNegocio.IHuellaEntidadDN = entidad
 
-                End If
-            Else
+                        If h.EntidadReferida Is Nothing Then
 
-                If tipo Is Nothing Then
-                    Throw New ApplicationException("en el paquete tipo Is Nothing o no se paso una DN ")
-                Else
-
-                    If Me.Paquete.Contains("ID") Then
-                        Dim identidad As String = Me.Paquete("ID")
-                        ' se recupera la entidad del sistema 
-                        Dim mias As New Framework.AS.MV2AS
-                        entidad = mias.RecuperarDNGenerico(New Framework.DatosNegocio.HEDN(tipo, identidad, Nothing))
-
-                    ElseIf Me.Paquete.Contains("GUID") Then
-                        Dim guid As String = Me.Paquete("GUID")
-                        ' se recupera la entidad del sistema 
-                        Dim mias As New Framework.AS.MV2AS
-                        entidad = mias.RecuperarDNGenerico(New Framework.DatosNegocio.HEDN(tipo, Nothing, guid))
-
+                            Dim mias As New Framework.AS.MV2AS
+                            entidad = mias.RecuperarDNGenerico(h) ' TODO: homogenizar con lo de luis y tipar el paquete
+                        Else
+                            entidad = h.EntidadReferida
+                        End If
 
                     Else
+                        tipo = CType(entidad, Object).GetType
 
-                        ' verificar si la entidad referido sabe itnanciar su entidad referida
+                    End If
+                Else
 
-                        If Me.Paquete.Contains("EntidadReferidora") AndAlso Me.Paquete("EntidadReferidora") IsNot Nothing AndAlso TypeOf Me.Paquete("EntidadReferidora") Is Framework.DatosNegocio.IEntidadDN Then
-                            Dim entidadReferidora As Framework.DatosNegocio.IEntidadDN = Me.Paquete("EntidadReferidora")
+                    If tipo Is Nothing Then
+                        Throw New ApplicationException("en el paquete tipo Is Nothing o no se paso una DN ")
+                    Else
 
-                            If Me.Paquete.Contains("PropiedadReferidora") AndAlso Me.Paquete("PropiedadReferidora") IsNot Nothing AndAlso TypeOf Me.Paquete("PropiedadReferidora") Is Reflection.PropertyInfo Then
-                                entidad = entidadReferidora.InstanciarEntidad(tipo, Me.Paquete("PropiedadReferidora"))
-                            Else
-                                entidad = entidadReferidora.InstanciarEntidad(tipo)
+                        If Me.Paquete.Contains("ID") Then
+                            Dim identidad As String = Me.Paquete("ID")
+                            ' se recupera la entidad del sistema 
+                            Dim mias As New Framework.AS.MV2AS
+                            entidad = mias.RecuperarDNGenerico(New Framework.DatosNegocio.HEDN(tipo, identidad, Nothing))
+
+                        ElseIf Me.Paquete.Contains("GUID") Then
+                            Dim guid As String = Me.Paquete("GUID")
+                            ' se recupera la entidad del sistema 
+                            Dim mias As New Framework.AS.MV2AS
+                            entidad = mias.RecuperarDNGenerico(New Framework.DatosNegocio.HEDN(tipo, Nothing, guid))
+
+
+                        Else
+
+                            ' verificar si la entidad referido sabe itnanciar su entidad referida
+
+                            If Me.Paquete.Contains("EntidadReferidora") AndAlso Me.Paquete("EntidadReferidora") IsNot Nothing AndAlso TypeOf Me.Paquete("EntidadReferidora") Is Framework.DatosNegocio.IEntidadDN Then
+                                Dim entidadReferidora As Framework.DatosNegocio.IEntidadDN = Me.Paquete("EntidadReferidora")
+
+                                If Me.Paquete.Contains("PropiedadReferidora") AndAlso Me.Paquete("PropiedadReferidora") IsNot Nothing AndAlso TypeOf Me.Paquete("PropiedadReferidora") Is Reflection.PropertyInfo Then
+                                    entidad = entidadReferidora.InstanciarEntidad(tipo, Me.Paquete("PropiedadReferidora"))
+                                Else
+                                    entidad = entidadReferidora.InstanciarEntidad(tipo)
+                                End If
+
+                            End If
+
+                            ' si no sabe sera labor del usuario a sique la intaicoamos utilizando el contructuro vacio
+                            If entidad Is Nothing Then
+                                entidad = Activator.CreateInstance(tipo)
                             End If
 
                         End If
 
-                        ' si no sabe sera labor del usuario a sique la intaicoamos utilizando el contructuro vacio
-                        If entidad Is Nothing Then
-                            entidad = Activator.CreateInstance(tipo)
-                        End If
-
                     End If
-
                 End If
             End If
+
         End If
-
-
 
         Return entidad
 
     End Function
+    Private Function ExtraerDatos() As Framework.DatosNegocio.IEntidadBaseDN
 
+
+        Dim entoHuella As Framework.DatosNegocio.IEntidadDN = RecuperarEntidadOhuella()
+
+        ' recuperar la entidad relacioanda con las operaciones 
+        RecuperarOperacionesAutorizadas(entoHuella)
+        Dim entidad As Framework.DatosNegocio.IEntidadDN
+        If Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(CType(entoHuella, Object).GetType) Then
+            Dim h As Framework.DatosNegocio.IHuellaEntidadDN = entoHuella
+
+            If mColTransiciones.Count > 0 AndAlso Not mColTransiciones(0).OperacionRealizadaOrigen Is Nothing Then
+                entidad = mColTransiciones(0).OperacionRealizadaOrigen.ObjetoIndirectoOperacion
+                ' el tipo debe ser el mismo de exitir que la entidad recuperada
+                If Me.Paquete.Contains("TipoEntidad") Then
+                    If Not CType(entidad, Object).GetType Is h.TipoEntidadReferida Then
+                        Throw New ApplicationException("el tipo del paquequete no coincide con el tipo de la entidad recuperada por la operacion")
+                    End If
+                End If
+            Else
+                Dim mias As New Framework.AS.MV2AS
+                entidad = mias.RecuperarDNGenerico(h)
+
+            End If
+
+        Else
+
+            entidad = entoHuella
+        End If
+
+        Return entidad
+
+
+
+    End Function
+
+    Private Sub RecuperarOperacionesAutorizadas(ByVal entoHuella As Framework.DatosNegocio.IEntidadDN)
+        ' recuperar la entidad relacioanda con las operaciones 
+        Dim procLNC As New Framework.Procesos.ProcesosLNC.ProcesoLNC
+        mColTransiciones = procLNC.RecuperarOperacionesAutorizadasSobreLNC(entoHuella)
+
+
+
+        ' codigo para evitar la paricion de clones
+
+
+
+        If Not Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(CType(entoHuella, Object).GetType) Then
+            Dim pDN As Framework.DatosNegocio.IEntidadDN = entoHuella
+            For Each transicion As Framework.Procesos.ProcesosDN.TransicionRealizadaDN In mColTransiciones
+                If transicion.OperacionRealizadaOrigen IsNot Nothing AndAlso transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion IsNot Nothing Then
+                    If transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion.GUID = pDN.GUID Then
+                        transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion = pDN
+                    Else
+                        Throw New Framework.DatosNegocio.ApplicationExceptionDN("No coincide la entidad pasada con el objeto indirecto de la operacion")
+                    End If
+
+
+                    If transicion.OperacionRealizadaOrigen.OperacionPadre.ObjetoIndirectoOperacion.GUID = pDN.GUID Then
+                        transicion.OperacionRealizadaOrigen.OperacionPadre.ObjetoIndirectoOperacion = pDN
+                    Else
+                        Throw New Framework.DatosNegocio.ApplicationExceptionDN("No coincide la entidad pasada con el objeto indirecto de la operacion")
+                    End If
+
+
+                End If
+            Next
+        End If
+
+
+
+
+    End Sub
+    Public Function RecuperarEntidadOhuella() As Framework.DatosNegocio.IEntidadDN
+
+        Dim tipo As System.Type = Nothing
+        Dim entidad As Framework.DatosNegocio.IEntidadDN = Nothing
+
+        If Me.Paquete Is Nothing Then
+
+            Throw New ApplicationException("no se pasó ningún paquete desde el origen de navegación")
+
+        Else
+
+
+            If Me.Paquete.Contains("TipoEntidad") Then
+                tipo = Me.Paquete("TipoEntidad")
+            End If
+
+
+
+
+
+            If entidad Is Nothing Then
+
+
+                If Me.Paquete.Contains("DN") Then
+                    entidad = Me.Paquete("DN")
+                    If entidad Is Nothing Then
+                        Throw New ApplicationException("el paquete contiene una entrada de dn nothing")
+                    End If
+                    If Framework.TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(CType(entidad, Object).GetType) Then
+
+                        Dim h As Framework.DatosNegocio.IHuellaEntidadDN = entidad
+
+                        If h.EntidadReferida Is Nothing Then
+
+                            Dim mias As New Framework.AS.MV2AS
+                            Return h
+                        Else
+                            entidad = h.EntidadReferida
+                        End If
+
+                    Else
+                        tipo = CType(entidad, Object).GetType
+                        Return entidad
+                    End If
+
+
+
+                Else
+
+                    If tipo Is Nothing Then
+                        Throw New ApplicationException("en el paquete tipo Is Nothing o no se paso una DN ")
+                    Else
+
+                        If Me.Paquete.Contains("ID") Then
+                            Dim identidad As String = Me.Paquete("ID")
+                            ' se recupera la entidad del sistema 
+                            Dim mias As New Framework.AS.MV2AS
+                            Return New Framework.DatosNegocio.HEDN(tipo, identidad, Nothing)
+
+                        ElseIf Me.Paquete.Contains("GUID") Then
+                            Dim guid As String = Me.Paquete("GUID")
+                            ' se recupera la entidad del sistema 
+                            Dim mias As New Framework.AS.MV2AS
+                            Return New Framework.DatosNegocio.HEDN(tipo, Nothing, guid)
+
+
+                        Else
+
+                            ' verificar si la entidad referido sabe itnanciar su entidad referida
+
+                            If Me.Paquete.Contains("EntidadReferidora") AndAlso Me.Paquete("EntidadReferidora") IsNot Nothing AndAlso TypeOf Me.Paquete("EntidadReferidora") Is Framework.DatosNegocio.IEntidadDN Then
+                                Dim entidadReferidora As Framework.DatosNegocio.IEntidadDN = Me.Paquete("EntidadReferidora")
+
+                                If Me.Paquete.Contains("PropiedadReferidora") AndAlso Me.Paquete("PropiedadReferidora") IsNot Nothing AndAlso TypeOf Me.Paquete("PropiedadReferidora") Is Reflection.PropertyInfo Then
+                                    entidad = entidadReferidora.InstanciarEntidad(tipo, Me.Paquete("PropiedadReferidora"))
+                                Else
+                                    entidad = entidadReferidora.InstanciarEntidad(tipo)
+                                End If
+
+                            End If
+
+                            ' si no sabe sera labor del usuario a sique la intaicoamos utilizando el contructuro vacio
+                            If entidad Is Nothing Then
+                                entidad = Activator.CreateInstance(tipo)
+                            End If
+
+                        End If
+
+                    End If
+                End If
+            End If
+
+        End If
+
+        Return entidad
+    End Function
 
 
     Public Function CargarEntidad(ByVal entidad As Framework.DatosNegocio.IEntidadDN) As Framework.DatosNegocio.IEntidadDN
@@ -321,8 +495,8 @@ Public Class frmFormularioGenerico
             ' he = New Framework.DatosNegocio.HEDN(pDN)
             '  mColTransiciones = miOperacionesAS.RecuperarOperacionesAutorizadasSobre(he)
 
-            Dim procLNC As New Framework.Procesos.ProcesosLNC.ProcesoLNC
-            mColTransiciones = procLNC.RecuperarOperacionesAutorizadasSobreLNC(pDN)
+            'Dim procLNC As New Framework.Procesos.ProcesosLNC.ProcesoLNC
+            'mColTransiciones = procLNC.RecuperarOperacionesAutorizadasSobreLNC(pDN)
             If mColTransiciones Is Nothing Then
 
             Else
@@ -334,14 +508,7 @@ Public Class frmFormularioGenerico
                     tsB.DisplayStyle = ToolStripItemDisplayStyle.Image
                     Me.ToolStrip1.Items.Add(tsB)
 
-                    If transicion.OperacionRealizadaOrigen IsNot Nothing AndAlso transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion IsNot Nothing Then
-                        If transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion.GUID = pDN.GUID Then
-                            transicion.OperacionRealizadaOrigen.ObjetoIndirectoOperacion = pDN
-                        Else
-                            Throw New Framework.DatosNegocio.ApplicationExceptionDN("No coincide la entidad pasada con el objeto indirecto de la operacion")
-                        End If
 
-                    End If
 
 
                     ' End If
@@ -422,6 +589,8 @@ Public Class frmFormularioGenerico
 
 
                     EjecutarOperacion(boton)
+                    ' refrescar las operaciones posibles
+
                 End If
 
 
@@ -527,9 +696,14 @@ Public Class frmFormularioGenerico
             Dim entidad As Object = procLNC.EjecutarOperacionLNC(Me.cMarco.Principal, tranR, Me.CtrlGD1.DN, Me)
 
 
+
+            RecuperarOperacionesAutorizadas(entidad)
+
+            Me.CtrlGD1.DN = entidad
+
             PoblarBarraHerramientasFormulario(Me.CtrlGD1.InstanciaMap, entidad)
             'Me.CtrlGD1.Poblar()
-            Me.CtrlGD1.DN = entidad
+
 
         Catch ex As Exception
             If ex.InnerException Is Nothing Then

@@ -204,6 +204,7 @@ Imports Framework.Procesos.ProcesosLN
         ' Dim vc1DN As Framework.TiposYReflexion.DN.VinculoClaseDN = RecuperarVinculoClase(GetType(Framework.Usuarios.DN.PrincipalDN))
         Dim ColVc As New Framework.TiposYReflexion.DN.ColVinculoClaseDN
         ColVc.Add(RecuperarVinculoClase(GetType(Framework.Usuarios.DN.PrincipalDN)))
+        'ColVc.Add(RecuperarVinculoClase(GetType(Framework.Usuarios.DN.PrincipalDNhet)))
 
 
         '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -415,10 +416,11 @@ Public Class GestorMapPersistenciaCamposUsuariosTest
 
 
         If (pTipo Is GetType(Framework.Procesos.ProcesosDN.TransicionRealizadaDN)) Then
-
             mapinst.TablaHistoria = "thTransicionRealizadaDN"
             Return mapinst
         End If
+
+
 
         If (pTipo Is GetType(Framework.Procesos.ProcesosDN.OperacionRealizadaDN)) Then
             Dim alentidades As ArrayList
@@ -442,12 +444,14 @@ Public Class GestorMapPersistenciaCamposUsuariosTest
 
             alentidades.Add(New VinculoClaseDN(GetType(EntidadDePrueba)))
             alentidades.Add(New VinculoClaseDN(GetType(Usuarios.DN.PrincipalDN)))
+            'alentidades.Add(New VinculoClaseDN(GetType(Usuarios.DN.PrincipalDNhet)))
             mapSubInst.ItemDatoMapeado(TiposDatosMapInstClaseDN.InterfaceImplementadaPor) = alentidades
 
             campodatos = New InfoDatosMapInstCampoDN
             campodatos.InfoDatosMapInstClase = mapinst
             campodatos.NombreCampo = "mObjetoIndirectoOperacion"
             campodatos.ColCampoAtributo.Add(CampoAtributoDN.InterfaceImplementadaPor)
+            '  campodatos.ColCampoAtributo.Add(CampoAtributoDN.SoloGuardarYNoReferido)
             campodatos.MapSubEntidad = mapSubInst
 
             campodatos = New InfoDatosMapInstCampoDN

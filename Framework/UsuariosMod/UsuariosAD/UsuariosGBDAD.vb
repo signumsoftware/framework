@@ -61,6 +61,8 @@ Public Class UsuariosGBDAD
 
         gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
         gi.GenerarTablas2(GetType(Framework.Usuarios.DN.PrincipalDN), Nothing)
+        gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
+        gi.GenerarTablas2(GetType(Framework.Usuarios.DN.PrincipalDNhet), Nothing)
 
 
 

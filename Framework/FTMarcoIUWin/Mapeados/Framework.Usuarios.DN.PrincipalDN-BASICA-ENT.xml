@@ -36,17 +36,32 @@
       <ColComandoMap />
       <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
       <ColPropMap>
-        <PropMapXML Instanciable="false" NombreVis="UsuarioDN" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="UsuarioDN" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+        <PropMapXML Instanciable="false" NombreVis="Nombre" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Nombre" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
           <ColEntradaMapNavBuscador />
           <ColComandoMap />
           <ColNombresTiposComaptibles />
         </PropMapXML>
-        <PropMapXML Instanciable="false" NombreVis="UsuarioDN.HuellaEntidadUserDN" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="UsuarioDN.HuellaEntidadUserDN" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+        <PropMapXML Instanciable="false" NombreVis="ClavePropuesta" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="ClavePropuesta" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
           <ColEntradaMapNavBuscador />
           <ColComandoMap />
           <ColNombresTiposComaptibles />
         </PropMapXML>
-        <PropMapXML Instanciable="false" NombreVis="Nombre" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="100" NombreProp="Nombre" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+        <PropMapXML Instanciable="false" NombreVis="Entidad Asociada" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="UsuarioDN.HuellaEntidadUserDN" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="ColRoles" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="ColRoles" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="ColRolesPrincipal" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="ColRolesPrincipal" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="ColOperaciones" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="ColOperaciones" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
           <ColEntradaMapNavBuscador />
           <ColComandoMap />
           <ColNombresTiposComaptibles />
