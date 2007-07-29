@@ -2,8 +2,11 @@ Imports Framework.DatosNegocio
 Imports Framework.DatosNegocio.Localizaciones.Temporales
 Imports Framework.LogicaNegocios.Transacciones
 Imports Framework.Cuestionario.CuestionarioDN
+Imports Framework.Configuracion
+Imports Framework.LogicaNegocios
 
 Imports FN.Seguros.Polizas.DN
+Imports FN.RiesgosVehiculos.DN
 Imports System
 
 Public Class AdaptadorCuestionarioLN
@@ -20,7 +23,6 @@ Public Class AdaptadorCuestionarioLN
 
         Using tr As New Transaccion()
             futuroTomador = GenerarFuturoTomadorxCuestionarioResuelto(cuestionarioR)
-
 
             'Datos de contacto del futuro tomador
             Dim dc As New FN.Localizaciones.DN.ContactoDN()
@@ -72,7 +74,6 @@ Public Class AdaptadorCuestionarioLN
 
             presupuesto = New PresupuestoDN()
             presupuesto.Tarifa = Me.GenerarTarifaxCuestionarioRes(cuestionarioR, amdTarifa, futuroTomador, False)
-            'presupuesto.Tarifa.DatosTarifa.ValorBonificacion = futuroTomador.ValorBonificacion
 
             'Se recupera la entidad emisora de la póliza
             emisoraP = Framework.Configuracion.AppConfiguracion.DatosConfig(GetType(FN.RiesgosVehiculos.DN.AcreedoraTarifasConf).FullName)
@@ -119,10 +120,6 @@ Public Class AdaptadorCuestionarioLN
 
         Using tr As New Transaccion()
 
-            If tomador Is Nothing Then
-                tomador = GenerarFuturoTomadorxCuestionarioResuelto(cuestionarioR)
-            End If
-
             'Datos de la tarifa
             riesgo = New FN.RiesgosVehiculos.DN.RiesgoMotorDN()
             riesgo.Cilindrada = RecuperarValorxPregunta(cuestionarioR, "CYLD")
@@ -135,6 +132,9 @@ Public Class AdaptadorCuestionarioLN
             Dim rvLN As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
             riesgo.ModeloDatos = rvLN.RecuperarModeloDatos(riesgo.Modelo.Nombre, riesgo.Modelo.Marca.Nombre, riesgo.Matriculado, fechaEfecto)
 
+            If tomador Is Nothing Then
+                tomador = GenerarFuturoTomadorxCuestionarioResuelto(cuestionarioR)
+            End If
 
             Dim colProductos As ColProductoDN = rvLN.RecuperarProductosModelo(riesgo.Modelo, riesgo.Matriculado, fechaEfecto)
 
@@ -191,8 +191,11 @@ Public Class AdaptadorCuestionarioLN
     Public Function GenerarFuturoTomadorxCuestionarioResuelto(ByVal cuestionarioR As CuestionarioResueltoDN) As FuturoTomadorDN
         Dim futuroTomador As FuturoTomadorDN
         Dim anyosSinSiniestro As Integer
+        Dim fechaEfecto As Date
 
         Using tr As New Transaccion()
+            fechaEfecto = RecuperarValorxPregunta(cuestionarioR, "FechaEfecto")
+
             'Datos de la persona - futuro tomador
             futuroTomador = New FuturoTomadorDN()
             futuroTomador.Nombre = RecuperarValorxPregunta(cuestionarioR, "Nombre")
@@ -205,16 +208,39 @@ Public Class AdaptadorCuestionarioLN
             Dim justificante As FN.RiesgosVehiculos.DN.Justificantes = RecuperarValorxPregunta(cuestionarioR, "Justificantes")
             futuroTomador.ValorBonificacion = 1
 
-            If justificante = FN.RiesgosVehiculos.DN.Justificantes.ninguno Then
-                anyosSinSiniestro = 0
-            ElseIf justificante = FN.RiesgosVehiculos.DN.Justificantes.certificado_y_recibo Then
-                anyosSinSiniestro -= 1
-            ElseIf justificante = FN.RiesgosVehiculos.DN.Justificantes.certificado Then
-                anyosSinSiniestro -= 2
+            Dim colAntecedentes As FN.RiesgosVehiculos.DN.ColAntecedentesDN = Nothing
+            If AppConfiguracion.DatosConfig.Contains(GetType(ColAntecedentesDN).FullName) Then
+                colAntecedentes = AppConfiguracion.DatosConfig(GetType(ColAntecedentesDN).FullName)
+            End If
+
+            Dim modelo As ModeloDN = CType(RecuperarValorxPregunta(cuestionarioR, "Modelo"), FN.RiesgosVehiculos.DN.ModeloDN)
+            Dim rvLN As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
+            Dim categoria As CategoriaDN = rvLN.RecuperarModeloDatos(modelo.Nombre, modelo.Marca.Nombre, RecuperarValorxPregunta(cuestionarioR, "EstaMatriculado"), fechaEfecto).Categoria
+
+            If colAntecedentes IsNot Nothing Then
+                Dim colAntRec As ColAntecedentesDN = colAntecedentes.RecuperarAnyosSinSiniestro(categoria, justificante, anyosSinSiniestro, fechaEfecto)
+                If colAntRec IsNot Nothing AndAlso colAntRec.Count = 1 Then
+                    anyosSinSiniestro = colAntRec.Item(0).NivelBonificacion
+                End If
+            Else
+                Throw New ApplicationExceptionLN("Debería haberse recuperado la colección de antecedentes configurada")
+            End If
+
+            Dim valorBonif As Double = 1
+            If AppConfiguracion.DatosConfig.Contains(GetType(ColConstatesConfigurablesSegurosDN).FullName) Then
+                Dim colConstConf As ColConstatesConfigurablesSegurosDN = New ColConstatesConfigurablesSegurosDN()
+                colConstConf.AddRangeObject(CType(AppConfiguracion.DatosConfig(GetType(ColConstatesConfigurablesSegurosDN).FullName), ColConstatesConfigurablesSegurosDN).RecuperarContienenFecha(fechaEfecto))
+                If colConstConf.Count <> 1 Then
+                    Throw New ApplicationExceptionLN("Debería haberse recuperado un elemento de constantes configurables")
+                End If
+
+                valorBonif = colConstConf.Item(0).ValorBonificacionSiniestros
+            Else
+                Throw New ApplicationExceptionLN("Debería haberse recuperado un elemento de constantes configurables")
             End If
 
             For cont As Integer = 0 To anyosSinSiniestro - 1
-                futuroTomador.ValorBonificacion *= 0.95
+                futuroTomador.ValorBonificacion *= valorBonif
             Next
 
             tr.Confirmar()
