@@ -109,25 +109,23 @@ Public Class OperacionesAD
         Using tr As New Transaccion()
             parametros = New List(Of System.Data.IDataParameter)
 
-            'parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroID("idEntidadReferida", pHuellaEntidadDatos.IdEntidadReferida))
-            'parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("TipoDN", pHuellaEntidadDatos.TipoEntidadReferidaFullNme))
-            'parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroInteger("TipoTransicion", TipoTransicionDN.Inicio))
-            'parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroBoolean("Baja", True))
-            'sql = "Select idOperacionRealizadaDestino from vwOperacionesRealizadasActivas where HuellaOI_IdEntidadReferida=@idEntidadReferida and NombreClaseOrigen=@TipoDN and TipoTransicion=@TipoTransicion and Baja<>@Baja"
-            ''sql = "Select idOperacionRealizadaDestino from vwOperacionesRealizadasActivas where NombreClaseOrigen=@TipoDN and TipoTransicion=@TipoTransicion and Baja<>@Baja"
 
-
-
-
-            ' GUIDReferida()
-            parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("GUIDReferida", pHuellaEntidadDatos.GUIDReferida))
             parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroInteger("TipoTransicion1", TipoTransicionDN.Inicio))
             parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroInteger("TipoTransicion2", TipoTransicionDN.InicioDesde))
             parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroInteger("TipoTransicion3", TipoTransicionDN.InicioObjCreado))
             parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroBoolean("Baja", True))
-            sql = "Select distinct idOperacionRealizadaDestino from vwOperacionesRealizadasActivas where GUIDReferida=@GUIDReferida and  (TipoTransicion=@TipoTransicion1 or  TipoTransicion=@TipoTransicion2 or  TipoTransicion=@TipoTransicion3) and Baja<>@Baja"
 
 
+            If String.IsNullOrEmpty(pHuellaEntidadDatos.GUIDReferida) Then
+                parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroID("IdEntidadReferida", pHuellaEntidadDatos.IdEntidadReferida))
+                parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("TipoEntidadReferidaFullName", pHuellaEntidadDatos.TipoEntidadReferida.FullName))
+                sql = "Select distinct idOperacionRealizadaDestino from vwOperacionesRealizadasActivas where TipoEntidadReferidaFullName=@TipoEntidadReferidaFullName and IdEntidadReferida=@IdEntidadReferida and (TipoTransicion=@TipoTransicion1 or  TipoTransicion=@TipoTransicion2 or  TipoTransicion=@TipoTransicion3) and Baja<>@Baja"
+
+            Else
+                parametros.Add(Framework.AccesoDatos.ParametrosConstAD.ConstParametroString("GUIDReferida", pHuellaEntidadDatos.GUIDReferida))
+                sql = "Select distinct idOperacionRealizadaDestino from vwOperacionesRealizadasActivas where GUIDReferida=@GUIDReferida and  (TipoTransicion=@TipoTransicion1 or  TipoTransicion=@TipoTransicion2 or  TipoTransicion=@TipoTransicion3) and Baja<>@Baja"
+
+            End If
 
 
 

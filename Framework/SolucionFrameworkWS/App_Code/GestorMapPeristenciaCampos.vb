@@ -247,7 +247,8 @@ Public Class GestorMapPeristenciaCampos
         End If
 
         If pTipo Is GetType(Framework.Usuarios.DN.UsuarioDN) Then
-            Dim alentidades As New Generic.List(Of VinculoClaseDN)
+            ' Dim alentidades As New Generic.List(Of VinculoClaseDN)
+            Dim alentidades As New ArrayList
             alentidades.Add(New VinculoClaseDN(GetType(Usuarios.DN.TipoPermisoDN)))
 
             Me.MapearInterfaceEnCampo(mapinst, "mHuellaEntidadUserDN", alentidades)
