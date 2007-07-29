@@ -49,7 +49,8 @@ Namespace LN
         End Function
 
 
-        Protected Function MapearInterfaceEnCampo(ByRef pMapInst As InfoDatosMapInstClaseDN, ByVal pCampoAMapear As String, ByVal pLsitaInterfaces As IList(Of VinculoClaseDN)) As InfoDatosMapInstCampoDN
+        '  Protected Function MapearInterfaceEnCampo(ByRef pMapInst As InfoDatosMapInstClaseDN, ByVal pCampoAMapear As String, ByVal pLsitaInterfaces As IList(Of VinculoClaseDN)) As InfoDatosMapInstCampoDN
+        Protected Function MapearInterfaceEnCampo(ByRef pMapInst As InfoDatosMapInstClaseDN, ByVal pCampoAMapear As String, ByVal pLsitaInterfaces As ArrayList) As InfoDatosMapInstCampoDN
 
 
             Dim mapSubInst As InfoDatosMapInstClaseDN
