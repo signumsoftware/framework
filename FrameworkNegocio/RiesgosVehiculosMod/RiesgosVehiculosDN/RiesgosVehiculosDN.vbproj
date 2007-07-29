@@ -80,7 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcreedoraTarifasConf.vb" />
-    <Compile Include="AntecedentesDN.vb" />
+    <Compile Include="AntecedentesDN.vb">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="BonificacionDN.vb" />
     <Compile Include="BonificacionRVDN.vb" />
     <Compile Include="BonificacionRVSVDN.vb" />
