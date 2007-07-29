@@ -9,7 +9,7 @@ Public Class MultRedondeoOperadorDN
     End Sub
 
     Public Function Ejecutar(ByVal valor1 As Object, ByVal valor2 As Object) As Object Implements IOperadorDN.Ejecutar
-        Return Math.Round(valor1 * valor2, 2)
+        Return Math.Round(valor1 * valor2, 2, MidpointRounding.AwayFromZero)
     End Function
 
 End Class
