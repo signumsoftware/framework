@@ -57,6 +57,10 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="UsuariosDN, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\SignumSS\Signum\FrameworkNegocio\SolucionFN\CompiladosFT\UsuariosDN.dll</HintPath>
+    </Reference>
     <Reference Include="Utilidades, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\CompiladosFT\Utilidades.dll</HintPath>
@@ -87,7 +91,13 @@
     <Compile Include="PresupuestoAlertaDN.vb" />
     <Compile Include="PresupuestoDN.vb" />
     <Compile Include="ProductoDN.vb" />
+    <Compile Include="Siniestros\EstadoTramitacionDN.vb" />
+    <Compile Include="Siniestros\ImplicadoDN.vb" />
+    <Compile Include="Siniestros\ReclamacionDN.vb" />
     <Compile Include="Siniestros\SiniestroDN.vb" />
+    <Compile Include="Siniestros\TipoDañoDN.vb" />
+    <Compile Include="Siniestros\TipoImplicacionDN.vb" />
+    <Compile Include="Siniestros\TipoReclamacionDN.vb" />
     <Compile Include="TarifaDN.vb" />
     <Compile Include="PeriodoRenovacionPolizaDN.vb" />
     <Compile Include="PeriodoCoberturaDN.vb" />
@@ -132,6 +142,7 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
+    <None Include="Siniestros\cdSiniestros.cd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\EmpresasMod\EmpresaDN\EmpresasDN.vbproj">
