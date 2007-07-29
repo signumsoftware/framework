@@ -1599,8 +1599,8 @@ Namespace LN
                 Throw
             Finally
                 InsertarEntidadBase = operacionRealizada.Operacion ' lo queocurrio
-                Debug.WriteLine(pObjeto.ToString & "-->" & operacionRealizada.Operacion.ToString)
-                Debug.Unindent()
+                'Debug.WriteLine(pObjeto.ToString & "-->" & operacionRealizada.Operacion.ToString)
+                'Debug.Unindent()
             End Try
         End Function
 
@@ -1656,7 +1656,7 @@ Namespace LN
                 'Debug.Indent()
                 'Debug.WriteLine("")
 
-                Debug.WriteLine("1Guardando:(" & pObjeto.GetType.FullName & ") " & pObjeto.ToString)
+                'Debug.WriteLine("1Guardando:(" & pObjeto.GetType.FullName & ") " & pObjeto.ToString)
 
                 Try
                     coordinador.IniciarTransaccion(mTL, transProc)
@@ -1666,7 +1666,7 @@ Namespace LN
                         If TypeOf pObjeto Is Framework.DatosNegocio.IEntidadBaseDN Then
                             oIEntidadDN = pObjeto
                             If String.IsNullOrEmpty(oIEntidadDN.ID) AndAlso pObjeto.GetType IsNot GetType(Framework.DatosNegocio.HEDN) Then
-                                Debug.WriteLine("referencia circualr para el tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
+                                'Debug.WriteLine("referencia circualr para el tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
                                 ' post guardas
                                 operacionRealizada.Operacion = LogicaNegocios.OperacionGuardarLN.EnProceso
                                 Return operacionRealizada.Operacion
@@ -1685,7 +1685,7 @@ Namespace LN
                                 ' la huella fue actualizada luego no requiere ser guardad denuevo
                                 mColIntanciasGuardadas.Add(pObjeto)
                                 oIEntidadDN = pObjeto
-                                Debug.WriteLine("huella actualizada tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
+                                'Debug.WriteLine("huella actualizada tipo " & pObjeto.GetType.Name & " de id " & oIEntidadDN.ID)
                                 Return OperacionGuardarLN.Modificar
                             Else
                                 ' la huella no se actualizo y debe de continuar con el codigo habitual
@@ -1705,14 +1705,14 @@ Namespace LN
                     'No procesar si no es una entidadDN
                     If TypeOf pObjeto Is Framework.DatosNegocio.IEntidadBaseDN Then
                         oIEntidadDN = pObjeto
-                        Debug.WriteLine("2Guardando:" & pObjeto.ToString & " id:" & oIEntidadDN.ID & " GUID: " & oIEntidadDN.GUID & " fm:" & CType(oIEntidadDN, Framework.DatosNegocio.IDatoPersistenteDN).FechaModificacion)
+                        'Debug.WriteLine("2Guardando:" & pObjeto.ToString & " id:" & oIEntidadDN.ID & " GUID: " & oIEntidadDN.GUID & " fm:" & CType(oIEntidadDN, Framework.DatosNegocio.IDatoPersistenteDN).FechaModificacion)
                     Else
                         Return LogicaNegocios.OperacionGuardarLN.Ninguna
                     End If
 
                     'No trabajar si no es para insertar o modificar
                     operacion = OperacionARealizar(pObjeto)
-                    Debug.WriteLine("OPERACION: " & operacion.GetName(operacion.GetType, operacion))
+                    'Debug.WriteLine("OPERACION: " & operacion.GetName(operacion.GetType, operacion))
                     If (operacion = LogicaNegocios.OperacionGuardarLN.Ninguna) Then
                         Return operacion
                     End If
@@ -1755,11 +1755,11 @@ Namespace LN
 
                                 If TypeOf cref.Instancia Is IEnumerable Then
                                     enumerador = cref.Instancia
-                                    Debug.WriteLine("-col- " & CType(cref.Instancia, Object).GetType.Name)
-                                    Debug.Indent()
+                                    'Debug.WriteLine("-col- " & CType(cref.Instancia, Object).GetType.Name)
+                                    'Debug.Indent()
                                     For Each objetoContenido In enumerador
                                         If objetoContenido IsNot Nothing Then
-                                            Debug.Write(" -- " & objetoContenido.IdentificacionTexto & " - " & objetoContenido.ToString)
+                                            'Debug.Write(" -- " & objetoContenido.IdentificacionTexto & " - " & objetoContenido.ToString)
                                             operacionrealizadEnLaParte = Me.Guardarp(objetoContenido)
                                             If operacionrealizadEnLaParte = OperacionGuardarLN.EnProceso OrElse operacionrealizadEnLaParte = OperacionGuardarLN.AñadidoColPostGuarda Then
                                                 mColIntanciasPostGuarda.Add(pObjeto)
@@ -1768,9 +1768,9 @@ Namespace LN
                                         End If
 
                                     Next
-                                    Debug.Unindent()
+                                    'Debug.Unindent()
                                 Else
-                                    Debug.Write("-- " & CType(cref.Instancia, IEntidadBaseDN).IdentificacionTexto)
+                                    'Debug.Write("-- " & CType(cref.Instancia, IEntidadBaseDN).IdentificacionTexto)
                                     operacionrealizadEnLaParte = Me.Guardarp(cref.Instancia)
                                     If operacionrealizadEnLaParte = LogicaNegocios.OperacionGuardarLN.EnProceso OrElse operacionrealizadEnLaParte = OperacionGuardarLN.AñadidoColPostGuarda Then
                                         mColIntanciasPostGuarda.Add(pObjeto)
@@ -1779,9 +1779,9 @@ Namespace LN
                                 End If
 
                             Else
-                                Debug.Write("-- nothing")
+                                'Debug.Write("-- nothing")
                             End If
-                            Debug.WriteLine(" ")
+                            'Debug.WriteLine(" ")
 
                         Next
 
