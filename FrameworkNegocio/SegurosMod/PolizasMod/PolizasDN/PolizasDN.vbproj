@@ -91,13 +91,25 @@
     <Compile Include="PresupuestoAlertaDN.vb" />
     <Compile Include="PresupuestoDN.vb" />
     <Compile Include="ProductoDN.vb" />
-    <Compile Include="Siniestros\EstadoTramitacionDN.vb" />
-    <Compile Include="Siniestros\ImplicadoDN.vb" />
-    <Compile Include="Siniestros\ReclamacionDN.vb" />
+    <Compile Include="Siniestros\EstadoTramitacionDN.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Siniestros\ImplicadoDN.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Siniestros\ReclamacionDN.vb">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Siniestros\SiniestroDN.vb" />
-    <Compile Include="Siniestros\TipoDañoDN.vb" />
-    <Compile Include="Siniestros\TipoImplicacionDN.vb" />
-    <Compile Include="Siniestros\TipoReclamacionDN.vb" />
+    <Compile Include="Siniestros\TipoDañoDN.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Siniestros\TipoImplicacionDN.vb">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Siniestros\TipoReclamacionDN.vb">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TarifaDN.vb" />
     <Compile Include="PeriodoRenovacionPolizaDN.vb" />
     <Compile Include="PeriodoCoberturaDN.vb" />
