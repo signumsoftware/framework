@@ -268,6 +268,7 @@ Imports GestionSegurosAMV.AD
 
         End Using
     End Sub
+
     <TestMethod()> Public Sub CargarComisiones()
         ObtenerRecurso()
 
@@ -283,7 +284,6 @@ Imports GestionSegurosAMV.AD
 
         End Using
     End Sub
-
 
     <Timeout(3600000)> <TestMethod()> Public Sub CargarModuladores2Conductor()
         ObtenerRecurso()
@@ -313,6 +313,7 @@ Imports GestionSegurosAMV.AD
 
         End Using
     End Sub
+
     <TestMethod()> Public Sub CargarPrimasBase()
         ObtenerRecurso()
 
@@ -326,8 +327,6 @@ Imports GestionSegurosAMV.AD
 
         End Using
     End Sub
-
-
 
     <TestMethod()> Public Sub pe1v0CrearNOrigenImportedebidoManual()
 
@@ -391,6 +390,7 @@ Imports GestionSegurosAMV.AD
 
 
     End Sub
+
     Public Function CrearOrigenImportedebido(ByVal acreedora As EntidadFiscalGenericaDN, ByVal coldeudoras As ColEntidadFiscalGenericaDN) As FN.GestionPagos.DN.IOrigenIImporteDebidoDN
         Dim origen As FN.GestionPagos.DN.OrigenIdevBaseDN
         origen = New FN.GestionPagos.DN.OrigenIdevBaseDN
@@ -430,7 +430,6 @@ Imports GestionSegurosAMV.AD
         End Using
     End Sub
 
-
     <TestMethod(), Timeout(57000000)> Public Sub CargarDocumetosRequeridos()
         ObtenerRecurso()
 
@@ -438,7 +437,6 @@ Imports GestionSegurosAMV.AD
             CargarDocumetosRequeridosP()
         End Using
     End Sub
-
 
     <TestMethod()> Public Sub CrearEntidadColaboradora()
 
@@ -531,14 +529,12 @@ Imports GestionSegurosAMV.AD
 
     End Sub
 
-
-
-
     <TestMethod()> Public Sub CrearGrafoUsuarios()
 
         CrearGrafoUsuariosP()
 
     End Sub
+
     <TestMethod()> Public Sub CrearGrafoDocumentos()
 
         CrearGrafoDocumentosP()
@@ -554,6 +550,14 @@ Imports GestionSegurosAMV.AD
     <TestMethod()> Public Sub CrearPolizaEnGrafo()
         CrearPolizaEnGrafoP()
     End Sub
+
+    <TestMethod()> Public Sub CargarAntecedentes()
+        ObtenerRecurso()
+        Using New CajonHiloLN(mRecurso)
+            CargarAntecedentesP()
+        End Using
+    End Sub
+
 
     Public Sub PublicarReferencias()
         Dim ln As New MNavegacionDatosLN.MNavDatosLN(Nothing, Me.mRecurso)
@@ -980,6 +984,14 @@ Imports GestionSegurosAMV.AD
 
             tr.Confirmar()
 
+        End Using
+    End Sub
+
+    Private Sub CargarAntecedentesP()
+        Using tr As New Transaccion()
+            Dim CargaDatosTestRV As New FN.RiesgosVehiculos.Test.CargaDatosTest()
+            CargaDatosTestRV.CargarAntecedentes()
+            tr.Confirmar()
         End Using
     End Sub
 

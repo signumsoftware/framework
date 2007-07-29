@@ -1001,7 +1001,6 @@ Public Class CargadorPrimasBaseAD
         Return colFracRVSV
     End Function
 
-
     Public Function CargarBonificaciones(ByVal colCategoriasMD As FN.RiesgosVehiculos.DN.ColCategoriaModDatosDN) As FN.RiesgosVehiculos.DN.ColBonificacionRVSVDN
         ' recurso a la fuente de los datos de tarificacion
         Dim recFuente As Framework.LogicaNegocios.Transacciones.RecursoLN
@@ -1123,6 +1122,80 @@ Public Class CargadorPrimasBaseAD
 
     End Function
 
+    Public Function CargarAntecedentes(ByVal colCategorias As FN.RiesgosVehiculos.DN.ColCategoriaDN, ByVal colTipoDoc As Framework.Ficheros.FicherosDN.ColTipoFicheroDN) As ColAntecedentesDN
+        ' recurso a la fuente de los datos de tarificacion
+        Dim recFuente As Framework.LogicaNegocios.Transacciones.RecursoLN
+        Dim connectionstring As String
+        Dim htd As New Generic.Dictionary(Of String, Object)
+
+        connectionstring = "Data Source=localhost;Initial Catalog=DatosTarificador;Integrated Security=True"
+        htd.Add("connectionstring", connectionstring)
+        recFuente = New Framework.LogicaNegocios.Transacciones.RecursoLN("2", "Conexion a MND1", "sqls", htd)
+
+
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        ' creamos los antecedentes para cada coeficiente en la fuente de datos
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+        Dim colAntecedentes As New ColAntecedentesDN()
+        Dim antecedentes As AntecedentesDN = Nothing
+        Dim categoria As CategoriaDN = Nothing
+        Dim tipoDoc As Framework.Ficheros.FicherosDN.TipoFicheroDN = Nothing
+        Dim colTipoDocAux As Framework.Ficheros.FicherosDN.ColTipoFicheroDN = Nothing
+        Dim nombre As String = String.Empty
+
+        Dim dts As DataSet
+        Dim ej As Framework.AccesoDatos.Ejecutor
+        ej = New Framework.AccesoDatos.Ejecutor(Nothing, recFuente)
+        dts = ej.EjecutarDataSet("select * from signumantecedentes", Nothing, False)
+
+        For Each dr As Data.DataRow In dts.Tables(0).Rows
+            categoria = colCategorias.RecuperarxID(dr("fkCategoria"))
+            colTipoDocAux = New Framework.Ficheros.FicherosDN.ColTipoFicheroDN()
+            nombre = "Ninguno"
+
+            If dr("TipoDocumento") > Justificantes.ninguno Then
+                tipoDoc = colTipoDoc.RecuperarPrimeroXNombre("Certificado no Siniestralidad")
+                If tipoDoc Is Nothing Then
+                    tipoDoc = New Framework.Ficheros.FicherosDN.TipoFicheroDN()
+                    tipoDoc.Nombre = "Certificado no Siniestralidad"
+                End If
+
+                colTipoDocAux.Add(tipoDoc)
+                nombre = "Certificado"
+            End If
+
+            If dr("TipoDocumento") = Justificantes.certificado_y_recibo Then
+                tipoDoc = colTipoDoc.RecuperarPrimeroXNombre("Recibo en curso compañía actual")
+                If tipoDoc Is Nothing Then
+                    tipoDoc = New Framework.Ficheros.FicherosDN.TipoFicheroDN()
+                    tipoDoc.Nombre = "Recibo en curso compañía actual"
+                End If
+
+                colTipoDocAux.Add(tipoDoc)
+                nombre = "Certificado+Recibo"
+            End If
+
+            For cont As Integer = 0 To 4
+                antecedentes = New AntecedentesDN()
+                antecedentes.Nombre = nombre
+                antecedentes.Categoria = categoria
+                antecedentes.ColTipoDocRequerido.AddRange(colTipoDocAux)
+                antecedentes.AnyosSinSiniestro = cont
+                antecedentes.NivelBonificacion = dr("valorN" & cont.ToString())
+                antecedentes.FI = ConvertirFecha(dr("FechaEfecto"))
+                antecedentes.FF = ConvertirFecha(dr("FechaBaja"))
+
+                colAntecedentes.Add(antecedentes)
+            Next
+
+        Next
+
+        Me.GuardarDatos(colAntecedentes)
+
+        Return colAntecedentes
+
+    End Function
 
     Private Function ConvertirFecha(ByVal valor As Object) As Date
 

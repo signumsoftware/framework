@@ -517,6 +517,14 @@ Imports Framework.Operaciones.OperacionesDN
             tipoDoc.Nombre = "Presupuesto firmado"
             coltdoc.Add(tipoDoc)
 
+            tipoDoc = New Framework.Ficheros.FicherosDN.TipoFicheroDN
+            tipoDoc.Nombre = "Certificado no Siniestralidad"
+            coltdoc.Add(tipoDoc)
+
+            tipoDoc = New Framework.Ficheros.FicherosDN.TipoFicheroDN
+            tipoDoc.Nombre = "Recibo en curso compañía actual"
+            coltdoc.Add(tipoDoc)
+
             Me.GuardarDatos(coltdoc)
 
 
@@ -623,6 +631,31 @@ Imports Framework.Operaciones.OperacionesDN
 
         End Using
     End Sub
+
+    Public Sub CargarAntecedentes()
+        Dim colCat As FN.RiesgosVehiculos.DN.ColCategoriaDN
+        Dim colTipoDoc As Framework.Ficheros.FicherosDN.ColTipoFicheroDN
+        Dim lng As Framework.ClaseBaseLN.BaseTransaccionConcretaLN
+        Dim colAntecedentes As FN.RiesgosVehiculos.DN.ColAntecedentesDN
+        Dim ad As FN.RiesgosVehiculos.AD.CargadorPrimasBaseAD
+
+        Using tr As New Transaccion()
+            colCat = New FN.RiesgosVehiculos.DN.ColCategoriaDN()
+            colAntecedentes = New FN.RiesgosVehiculos.DN.ColAntecedentesDN()
+            colTipoDoc = New Framework.Ficheros.FicherosDN.ColTipoFicheroDN()
+
+            lng = New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
+            colCat.AddRangeObjectUnico(lng.RecuperarLista(GetType(FN.RiesgosVehiculos.DN.CategoriaDN)))
+            colTipoDoc.AddRangeObjectUnico(lng.RecuperarLista(GetType(Framework.Ficheros.FicherosDN.TipoFicheroDN)))
+
+            ad = New FN.RiesgosVehiculos.AD.CargadorPrimasBaseAD()
+            colAntecedentes = ad.CargarAntecedentes(colCat, colTipoDoc)
+
+            tr.Confirmar()
+
+        End Using
+    End Sub
+
 
 #End Region
 

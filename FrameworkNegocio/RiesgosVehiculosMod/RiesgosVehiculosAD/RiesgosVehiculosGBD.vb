@@ -103,11 +103,11 @@ Public Class RiesgosVehiculosGBD
         gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
         gi.GenerarTablas2(GetType(FN.RiesgosVehiculos.DN.OperacionBonificacionRVCacheDN), Nothing)
 
-
         gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
         gi.GenerarTablas2(GetType(FN.RiesgosVehiculos.DN.PeriodoRenovacionPolizaOidDN), Nothing)
 
-
+        gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
+        gi.GenerarTablas2(GetType(FN.RiesgosVehiculos.DN.AntecedentesDN), Nothing)
 
 
     End Sub

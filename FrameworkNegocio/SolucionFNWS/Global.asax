@@ -104,6 +104,10 @@
             colCosntatesConfigurablesSeguros.AddRangeObject(bdln.RecuperarLista(GetType(FN.Seguros.Polizas.DN.ConstatesConfigurablesSegurosDN)))
             Framework.Configuracion.AppConfiguracion.DatosConfig.Item(GetType(FN.Seguros.Polizas.DN.ColConstatesConfigurablesSegurosDN).FullName) = colCosntatesConfigurablesSeguros
             
+            Dim colAntecedentes As New FN.RiesgosVehiculos.DN.ColAntecedentesDN()
+            colAntecedentes.AddRangeObject(bdln.RecuperarLista(GetType(FN.RiesgosVehiculos.DN.AntecedentesDN)))
+            Framework.Configuracion.AppConfiguracion.DatosConfig.Item(GetType(FN.RiesgosVehiculos.DN.ColAntecedentesDN).FullName) = colAntecedentes
+            
             
         End Using
         

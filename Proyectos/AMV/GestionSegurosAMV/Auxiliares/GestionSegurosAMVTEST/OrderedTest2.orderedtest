@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tests>
-  <edtdocversion branch="retail" build="50727" revision="832" />
+  <edtdocversion branch="retail" build="50727" revision="312" />
   <AutoSuite type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <m_continueAfterFailure type="System.Boolean">False</m_continueAfterFailure>
     <links type="System.Collections.ArrayList">
@@ -61,6 +61,13 @@
         <enabled type="System.Boolean">True</enabled>
       </element>
       <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">8f78ddfc-a016-c8c4-be3b-cd2f7939dc25</id>
+        <name type="System.String">CargarAntecedentes</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
         <id type="System.Guid">07c7f615-88cc-fdaa-95de-0e795390b81c</id>
         <name type="System.String">GenerarCuestionarioPlantilla</name>
         <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
@@ -88,7 +95,7 @@
     <id type="Microsoft.VisualStudio.TestTools.Common.TestId">
       <id type="System.Guid">d9540a1a-c9fc-498a-8983-4233758c150f</id>
     </id>
-    <name type="System.String">OrderedTest2</name>
+    <name type="System.String">orderedtest2</name>
     <description type="System.String">Place your description here</description>
     <enabled type="System.Boolean">True</enabled>
     <owner type="System.String" />
@@ -101,12 +108,12 @@
     </parentExecutId>
     <deploymentItems type="Microsoft.VisualStudio.TestTools.Common.DeploymentItemCollection" />
     <agentAttributes type="System.Collections.Specialized.StringDictionary, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-    <storage type="System.String">d:\signum\signum\proyectos\amv\gestionsegurosamv\auxiliares\gestionsegurosamvtest\orderedtest2.orderedtest</storage>
+    <storage type="System.String">d:\signum\proyectos\amv\gestionsegurosamv\auxiliares\gestionsegurosamvtest\orderedtest2.orderedtest</storage>
     <projectData type="Microsoft.VisualStudio.TestTools.Common.ProjectData">
       <id type="System.Guid">b0f4ea14-6258-460b-a8c3-ef73f223f8a3</id>
       <projectName type="System.String">GestionSegurosAMVTEST</projectName>
       <solutionName type="System.String">SolucionFN</solutionName>
-      <projectRelativePath type="System.String">..\..\Proyectos\AMV\GestionSegurosAMV\Auxiliares\GestionSegurosAMVTEST\GestionSegurosAMVTEST.vbproj</projectRelativePath>
+      <projectRelativePath type="System.String">..\Proyectos\AMV\GestionSegurosAMV\Auxiliares\GestionSegurosAMVTEST\GestionSegurosAMVTEST.vbproj</projectRelativePath>
     </projectData>
     <m_nonRunnableReason type="System.String" />
   </AutoSuite>

@@ -1,1 +1,99 @@
-﻿<?xml version="1.0" encoding="utf-8"?><Tests><edtdocversion branch="retail" build="50727" revision="1318" /><AutoSuite type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"><m_continueAfterFailure type="System.Boolean">False</m_continueAfterFailure><links type="System.Collections.ArrayList"><element type="Microsoft.VisualStudio.TestTools.Common.Link"><id type="System.Guid">cbbd4ad9-e997-f62a-84eb-bf57ef32913d</id><name type="System.String">CrearEntorno</name><storage type="System.String">bin\gestionsegurosamv.test.dll</storage><type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type><enabled type="System.Boolean">True</enabled></element><element type="Microsoft.VisualStudio.TestTools.Common.Link"><id type="System.Guid">f81c6c9e-09ce-199f-84e4-047c36fb4d61</id><name type="System.String">CrearGrafoDocumentos</name><storage type="System.String">bin\gestionsegurosamv.test.dll</storage><type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type><enabled type="System.Boolean">True</enabled></element><element type="Microsoft.VisualStudio.TestTools.Common.Link"><id type="System.Guid">f28cb43c-b4d3-e7a1-6796-d9d4f5405d1c</id><name type="System.String">CrearGrafoPolizas</name><storage type="System.String">bin\gestionsegurosamv.test.dll</storage><type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type><enabled type="System.Boolean">True</enabled></element><element type="Microsoft.VisualStudio.TestTools.Common.Link"><id type="System.Guid">f97809da-0f98-df98-e86a-3aed7b5a903e</id><name type="System.String">CrearGrafoUsuarios</name><storage type="System.String">bin\gestionsegurosamv.test.dll</storage><type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type><enabled type="System.Boolean">True</enabled></element></links><cssProjectStructure type="System.String" /><isRunOnRestart type="System.Boolean">False</isRunOnRestart><timeOut type="System.Int32">2147483647</timeOut><isGroupable type="System.Boolean">True</isGroupable><abortRunOnAgentFailure type="System.Boolean">False</abortRunOnAgentFailure><cssIteration type="System.String" /><workItemIds type="System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]"><_size type="System.Int32">0</_size><_version type="System.Int32">1</_version></workItemIds><id type="Microsoft.VisualStudio.TestTools.Common.TestId"><id type="System.Guid">bfe2f1d8-b04b-4c84-a3f4-07e83c65f138</id></id><name type="System.String">orderedtestpruebavigente</name><description type="System.String">Place your description here</description><enabled type="System.Boolean">True</enabled><owner type="System.String" /><priority type="System.Int32">0</priority><executionId type="Microsoft.VisualStudio.TestTools.Common.TestExecId"><id type="System.Guid">00000000-0000-0000-0000-000000000000</id></executionId><parentExecutId type="Microsoft.VisualStudio.TestTools.Common.TestExecId"><id type="System.Guid">00000000-0000-0000-0000-000000000000</id></parentExecutId><deploymentItems type="Microsoft.VisualStudio.TestTools.Common.DeploymentItemCollection" /><agentAttributes type="System.Collections.Specialized.StringDictionary, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" /><storage type="System.String">d:\signum\signum\proyectos\amv\gestionsegurosamv\auxiliares\gestionsegurosamvtest\orderedtestpruebavigente.orderedtest</storage><projectData type="Microsoft.VisualStudio.TestTools.Common.ProjectData"><id type="System.Guid">b0f4ea14-6258-460b-a8c3-ef73f223f8a3</id><projectName type="System.String">GestionSegurosAMVTEST</projectName><solutionName type="System.String">SolucionFN</solutionName><projectRelativePath type="System.String">..\..\Proyectos\AMV\GestionSegurosAMV\Auxiliares\GestionSegurosAMVTEST\GestionSegurosAMVTEST.vbproj</projectRelativePath></projectData><m_nonRunnableReason type="System.String" /></AutoSuite></Tests>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tests>
+  <edtdocversion branch="retail" build="50727" revision="312" />
+  <AutoSuite type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <m_continueAfterFailure type="System.Boolean">False</m_continueAfterFailure>
+    <links type="System.Collections.ArrayList">
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">cbbd4ad9-e997-f62a-84eb-bf57ef32913d</id>
+        <name type="System.String">CrearEntorno</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">f81c6c9e-09ce-199f-84e4-047c36fb4d61</id>
+        <name type="System.String">CrearGrafoDocumentos</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">f28cb43c-b4d3-e7a1-6796-d9d4f5405d1c</id>
+        <name type="System.String">CrearGrafoPolizas</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">f97809da-0f98-df98-e86a-3aed7b5a903e</id>
+        <name type="System.String">CrearGrafoUsuarios</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">4b14336a-1f1c-13c7-616c-a6d49f42930b</id>
+        <name type="System.String">CargarDatosBasicos</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">b8bc3724-a1c7-0150-7dbd-aafcbcbf4760</id>
+        <name type="System.String">CargarDatosTarificador</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">20b47a02-b49f-3a3e-4ecc-77960ccac5dc</id>
+        <name type="System.String">CargarDatosProductosAMV</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">7a44c7fd-1645-c7da-e87c-df36e0a22e83</id>
+        <name type="System.String">CargarDocumetosRequeridos</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+    </links>
+    <cssProjectStructure type="System.String" />
+    <isRunOnRestart type="System.Boolean">False</isRunOnRestart>
+    <timeOut type="System.Int32">2147483647</timeOut>
+    <isGroupable type="System.Boolean">True</isGroupable>
+    <abortRunOnAgentFailure type="System.Boolean">False</abortRunOnAgentFailure>
+    <cssIteration type="System.String" />
+    <workItemIds type="System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]">
+      <_size type="System.Int32">0</_size>
+      <_version type="System.Int32">1</_version>
+    </workItemIds>
+    <id type="Microsoft.VisualStudio.TestTools.Common.TestId">
+      <id type="System.Guid">bfe2f1d8-b04b-4c84-a3f4-07e83c65f138</id>
+    </id>
+    <name type="System.String">orderedtestpruebavigente</name>
+    <description type="System.String">Place your description here</description>
+    <enabled type="System.Boolean">True</enabled>
+    <owner type="System.String" />
+    <priority type="System.Int32">0</priority>
+    <executionId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </executionId>
+    <parentExecutId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+      <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+    </parentExecutId>
+    <deploymentItems type="Microsoft.VisualStudio.TestTools.Common.DeploymentItemCollection" />
+    <agentAttributes type="System.Collections.Specialized.StringDictionary, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <storage type="System.String">d:\signum\proyectos\amv\gestionsegurosamv\auxiliares\gestionsegurosamvtest\orderedtestpruebavigente.orderedtest</storage>
+    <projectData type="Microsoft.VisualStudio.TestTools.Common.ProjectData">
+      <id type="System.Guid">b0f4ea14-6258-460b-a8c3-ef73f223f8a3</id>
+      <projectName type="System.String">GestionSegurosAMVTEST</projectName>
+      <solutionName type="System.String">SolucionFN</solutionName>
+      <projectRelativePath type="System.String">..\Proyectos\AMV\GestionSegurosAMV\Auxiliares\GestionSegurosAMVTEST\GestionSegurosAMVTEST.vbproj</projectRelativePath>
+    </projectData>
+    <m_nonRunnableReason type="System.String" />
+  </AutoSuite>
+</Tests>
