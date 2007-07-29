@@ -247,7 +247,7 @@ Namespace LN
             ' afin de cuentas a qui yo solo quiero recuperar una coleccion de tipos que implementan la interface
 
 
-            Debug.WriteLine(pTipo.FullName)
+            'Debug.WriteLine(pTipo.FullName)
 
 
 
