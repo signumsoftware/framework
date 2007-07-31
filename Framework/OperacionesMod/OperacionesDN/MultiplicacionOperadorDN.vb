@@ -1,4 +1,3 @@
-
 <Serializable()> _
 Public Class MultiplicacionOperadorDN
     Inherits Framework.DatosNegocio.EntidadDN
@@ -7,7 +6,10 @@ Public Class MultiplicacionOperadorDN
         Me.mNombre = "Multiplicar"
     End Sub
     Public Function Ejecutar(ByVal valor1 As Object, ByVal valor2 As Object) As Object Implements IOperadorDN.Ejecutar
-        Return valor1 * valor2
+        Dim op1 As Decimal = valor1
+        Dim op2 As Decimal = valor2
+        Dim resultado As Decimal = op1 * op2
 
+        Return resultado
     End Function
 End Class
