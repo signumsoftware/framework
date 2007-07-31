@@ -504,7 +504,7 @@ Public Class Form1
 
 
 
-        'IO.File.WriteAllText(ruta, Me.txtbMapXml.Text, New System.Text.UTF8Encoding)
+        '   IO.File.WriteAllText(ruta, Me.txtbMapXml.Text, System.Text.Encoding.)
         IO.File.WriteAllText(ruta, Me.txtbMapXml.Text)
 
     End Sub

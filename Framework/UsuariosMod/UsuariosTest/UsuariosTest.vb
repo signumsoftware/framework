@@ -39,6 +39,194 @@ Imports Framework.Procesos.ProcesosLN
 
     Dim mRecurso As Framework.LogicaNegocios.Transacciones.IRecursoLN
 
+
+
+
+
+
+
+
+
+    Public Sub PublicarGrafoPruebasProcesos()
+        ' flujo de talones
+
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        ' 1º 
+        ' dn o dns a las cuales se vincula el flujo
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+        ' Dim vc1DN As Framework.TiposYReflexion.DN.VinculoClaseDN = RecuperarVinculoClase(GetType(Framework.Usuarios.DN.PrincipalDN))
+        Dim ColVc As New Framework.TiposYReflexion.DN.ColVinculoClaseDN
+        ColVc.Add(RecuperarVinculoClase(GetType(EntidadDePruebaDN)))
+        ColVc.Add(RecuperarVinculoClase(GetType(ContenedoraEntidadDePruebaDN)))
+
+
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        ' 2º 
+        '  creacion de las operaciones
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        Dim colop As New Framework.Procesos.ProcesosDN.ColOperacionDN
+
+        ' operacion que engloba todo el flujo
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Gestion de ContenedoraEntidadDePruebaDN", ColVc, "element_into.ico", True)))
+
+
+        '' operacion de pueba
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Alta ContenedoraEntidadDePruebaDN desde EntidadDePruebaDN", ColVc, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Alta ContenedoraEntidadDePruebaDN", ColVc, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Modificar ContenedoraEntidadDePruebaDN", ColVc, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Baja ContenedoraEntidadDePruebaDN", ColVc, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Reactivar ContenedoraEntidadDePruebaDN", ColVc, "element_into.ico", True)))
+
+
+        '' FIN operacion de pueba
+
+
+
+        ''''''''''''''''''''''''''''''''''''''''''''
+        ' 3º
+        ' creacion de las Transiciones
+        ''''''''''''''''''''''''''''''''''''''''''''
+
+
+        Dim colVM As New ColVinculoMetodoDN()
+
+
+        '' prueba subordiandas ''''''''''''''''''''''''''''''''''''''
+
+        ' transicion de inicio
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Gestion de ContenedoraEntidadDePruebaDN", "Alta ContenedoraEntidadDePruebaDN desde EntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.InicioDesde, False, Nothing, True))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Gestion de ContenedoraEntidadDePruebaDN", "Alta ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Inicio, False, Nothing, True))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Gestion de ContenedoraEntidadDePruebaDN", "Reactivar ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Reactivacion, False, Nothing, True))
+
+        ' transiciones corrientes
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Alta ContenedoraEntidadDePruebaDN desde EntidadDePruebaDN", "Modificar ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Alta ContenedoraEntidadDePruebaDN", "Modificar ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Reactivar ContenedoraEntidadDePruebaDN", "Modificar ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Modificar ContenedoraEntidadDePruebaDN", "Modificar ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, False, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Modificar ContenedoraEntidadDePruebaDN", "Baja ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, False, Nothing, False))
+
+
+
+        ' transiciones de fin
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Baja ContenedoraEntidadDePruebaDN", "Gestion de ContenedoraEntidadDePruebaDN", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+
+
+
+        '''''''''''''''''''''''''''''''
+        ' publicar los controladores ''
+        '''''''''''''''''''''''''''''''
+
+
+
+        If Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion") Is Nothing Then
+            Framework.Configuracion.AppConfiguracion.DatosConfig.Add("nombreRolAplicacion", "RolServidorPruebas")
+        End If
+        If Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolCliente") Is Nothing Then
+            Framework.Configuracion.AppConfiguracion.DatosConfig.Add("nombreRolCliente", "RolClientePruebas")
+        End If
+
+        Dim ejClienteS, ejClienteC As Framework.Procesos.ProcesosDN.EjecutoresDeClienteDN
+        Dim clienteS, clienteC As Framework.Procesos.ProcesosDN.ClientedeFachadaDN
+
+        'Se comprubea si ya existen los clientesFachada, y sino se crean
+        Dim opAD As New Framework.Procesos.ProcesosAD.OperacionesAD()
+
+        ejClienteS = opAD.RecuperarEjecutorCliente(CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion"), String))
+        ejClienteC = opAD.RecuperarEjecutorCliente(CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolCliente"), String))
+
+        If ejClienteS Is Nothing Then
+            clienteS = New Framework.Procesos.ProcesosDN.ClientedeFachadaDN()
+            clienteS.Nombre = CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion"), String)
+
+            ejClienteS = New Framework.Procesos.ProcesosDN.EjecutoresDeClienteDN()
+            ejClienteS.ClientedeFachada = clienteS
+        End If
+
+        If ejClienteC Is Nothing Then
+            clienteC = New Framework.Procesos.ProcesosDN.ClientedeFachadaDN()
+            clienteC.Nombre = CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolCliente"), String)
+
+            ejClienteC = New Framework.Procesos.ProcesosDN.EjecutoresDeClienteDN()
+            ejClienteC.ClientedeFachada = clienteC
+        End If
+
+
+        ' pruebas
+
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Alta ContenedoraEntidadDePruebaDN desde EntidadDePruebaDN", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Alta ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Reactivar ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Modificar ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Baja ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Gestion de ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS))
+
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Alta ContenedoraEntidadDePruebaDN desde EntidadDePruebaDN", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Alta ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Reactivar ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Modificar ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(ProcesosHelperLN.VinculacionVerbo(colop, "Baja ContenedoraEntidadDePruebaDN", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC))
+
+        ' finc pruebas
+
+
+
+
+
+
+
+
+
+
+        Me.GuardarDatos(ejClienteC)
+        Me.GuardarDatos(ejClienteS)
+
+    End Sub
+
+
+
+
+    <TestMethod()> Public Sub ProbarOperacionInicioDesde()
+        ObtenerRecurso()
+
+        Using New CajonHiloLN(mRecurso)
+
+
+
+
+
+            'Using tr As New Transaccion
+            '    Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion") = "RolServidorGSAMV"
+            '    Dim usln As New Framework.Usuarios.LN.UsuariosLN(Transaccion.Actual, Recurso.Actual)
+
+            '    Dim principal As Framework.Usuarios.DN.PrincipalDN = usln.RecuperarPrincipalxNick("ato")
+
+            '    Dim siniestro As New FN.Seguros.Polizas.DN.SiniestroDN
+            '    siniestro.Nombre = "siniestr " & Now
+
+            '    Me.GuardarDatos(siniestro)
+
+            '    Dim operln As New Framework.Procesos.ProcesosLN.OperacionesLN
+            '    Dim coltr As Framework.Procesos.ProcesosDN.ColTransicionRealizadaDN = operln.RecuperarTransicionesAutorizadasSobre(principal, New HEDN(siniestro))
+
+            '    Dim miln As New Framework.Procesos.ProcesosLN.GestorOPRLN
+
+            '    miln.EjecutarOperacion(siniestro, Nothing, principal, coltr(0))
+
+
+            '    tr.Confirmar()
+
+            'End Using
+
+
+
+
+        End Using
+
+    End Sub
+
+
     <TestMethod()> Public Sub ValidarRolDN()
 
         Dim cu As CasosUsoDN
@@ -165,6 +353,9 @@ Imports Framework.Procesos.ProcesosLN
             PublicarReferencias()
 
             PublicarGrafoPruebas()
+
+            PublicarGrafoPruebasProcesos()
+
             CrearAdministradorTotal()
 
         End Using
@@ -442,6 +633,7 @@ Public Class GestorMapPersistenciaCamposUsuariosTest
             mapSubInst = New InfoDatosMapInstClaseDN
             alentidades = New ArrayList
 
+            alentidades.Add(New VinculoClaseDN(GetType(ContenedoraEntidadDePruebaDN)))
             alentidades.Add(New VinculoClaseDN(GetType(EntidadDePrueba)))
             alentidades.Add(New VinculoClaseDN(GetType(Usuarios.DN.PrincipalDN)))
             'alentidades.Add(New VinculoClaseDN(GetType(Usuarios.DN.PrincipalDNhet)))
@@ -573,6 +765,20 @@ Public Class GestorMapPersistenciaCamposUsuariosTest
 
 
 
+
+
+        If pTipo Is GetType(Framework.TiposYReflexion.DN.VinculoMetodoDN) Then
+            Me.MapearCampoSimple(mapinst, "mNombre", CampoAtributoDN.UnicoEnFuenteDatosoNulo)
+            Return mapinst
+        End If
+
+        If pTipo Is GetType(Framework.TiposYReflexion.DN.VinculoClaseDN) Then
+            Me.MapearCampoSimple(mapinst, "mNombre", CampoAtributoDN.UnicoEnFuenteDatosoNulo)
+            Return mapinst
+        End If
+
+
+
         'If (pTipo Is GetType(Framework.Usuarios.DN.AutorizacionRelacionalDN)) Then
 
         '    Dim alentidades As ArrayList
@@ -627,4 +833,87 @@ End Class
         End Set
     End Property
 End Class
+
+
+
+
+<Serializable()> Public Class EntidadDePruebaDN
+    Inherits Framework.DatosNegocio.EntidadDN
+
+
+
+    Protected mImporte As Double
+
+
+    Public Property Importe() As Double
+        Get
+            Return Me.mImporte
+        End Get
+        Set(ByVal value As Double)
+            Me.CambiarValorVal(Of Double)(value, mImporte)
+        End Set
+    End Property
+End Class
+
+
+
+
+
+
+
+
+
+<Serializable()> _
+Public Class ContenedoraEntidadDePruebaDN
+    Inherits EntidadDN
+
+
+#Region "Atributos"
+    Protected mEntidadDePrueba As EntidadDePruebaDN
+#End Region
+
+
+#Region "Constructores"
+
+#End Region
+
+#Region "Propiedades"
+
+
+
+
+
+    <RelacionPropCampoAtribute("mEntidadDePrueba")> _
+    Public Property EntidadDePrueba() As EntidadDePruebaDN
+        Get
+            Return mEntidadDePrueba
+        End Get
+        Set(ByVal value As EntidadDePruebaDN)
+            CambiarValorRef(Of EntidadDePruebaDN)(value, mEntidadDePrueba)
+        End Set
+    End Property
+
+
+
+
+#End Region
+
+#Region "Metodos"
+
+#End Region
+
+
+
+End Class
+
+
+
+
+<Serializable()> _
+Public Class ColContenedoraEntidadDePruebaDN
+    Inherits ArrayListValidable(Of ContenedoraEntidadDePruebaDN)
+End Class
+
+
+
 

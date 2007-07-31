@@ -52,7 +52,7 @@ Public Class CtrlBusquedaGD
             Dim informacionMapeado As MV2DN.EntradaMapNavBuscadorDN = Me.mMap.ColEntradaMapNavBuscadorDN(0)
             Dim entida As IEntidadDN = CType(BuscarPadreIctrlDinamico(), Framework.IU.IUComun.IctrlBasicoDN).DN
 
-            If entida Is Nothing OrElse informacionMapeado Is Nothing Then
+            If entida Is Nothing OrElse informacionMapeado Is Nothing OrElse String.IsNullOrEmpty(entida.ID) Then
                 Exit Sub
             End If
 

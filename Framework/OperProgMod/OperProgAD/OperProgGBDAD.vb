@@ -30,6 +30,11 @@ Public Class OperProgGBDAD
         End If
         llamadoCrearTablas = True
 
+
+        Dim gbdBase As Framework.AccesoDatos.MotorAD.GBDBase
+        gbdBase = New Framework.Notas.NotasAD.NotasGBDAD(mRecurso)
+        gbdBase.CrearTablas()
+
         Dim gi As Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN
 
         gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Nothing, mRecurso)
@@ -42,6 +47,14 @@ Public Class OperProgGBDAD
             Return
         End If
         llamadoCrearVistas = True
+
+
+        Dim gbdBase As Framework.AccesoDatos.MotorAD.GBDBase
+
+
+
+        gbdBase = New Framework.Notas.NotasAD.NotasGBDAD(mRecurso)
+        gbdBase.CrearVistas()
 
 
         Dim ej As Framework.AccesoDatos.Ejecutor

@@ -62,7 +62,6 @@ Imports Framework.Usuarios.DN
     End Sub
 
 
-
     <TestMethod()> Public Sub PrimeraOperacion()
 
 
@@ -73,7 +72,7 @@ Imports Framework.Usuarios.DN
         Dim principal As Usuarios.DN.PrincipalDN = uas.IniciarSesion(New Framework.Usuarios.DN.DatosIdentidadDN("a", "a"))
 
 
-        Dim entidadPrueba As New EntidadDePrueba
+        Dim entidadPrueba As New EntidadDePruebaDN
         entidadPrueba.Nombre = "primera ent"
 
 
@@ -89,11 +88,9 @@ Imports Framework.Usuarios.DN
     End Sub
 
 
-
-
     Private Sub CrearEntornoPruebasProcesos()
 
- 
+
 
         Using New CajonHiloLN(mRecurso)
 
@@ -145,7 +142,7 @@ Imports Framework.Usuarios.DN
         ' dn o dns a las cuales se vincula el flujo
         '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-        Dim vc1DN As Framework.TiposYReflexion.DN.VinculoClaseDN = RecuperarVinculoClase(GetType(EntidadDePrueba))
+        Dim vc1DN As Framework.TiposYReflexion.DN.VinculoClaseDN = RecuperarVinculoClase(GetType(EntidadDePruebaDN))
         Dim ColVc As New Framework.TiposYReflexion.DN.ColVinculoClaseDN
         ColVc.Add(vc1DN)
 
@@ -302,7 +299,7 @@ Imports Framework.Usuarios.DN
 
         'recupero todos los metodos de sistema
         Dim rolat As RolDN
- 
+
         Dim usurios As Framework.Usuarios.LN.RolLN
         usurios = New Framework.Usuarios.LN.RolLN(Nothing, mRecurso)
         rolat = usurios.GeneraRolAutorizacionTotal("Administrador Total")
@@ -447,7 +444,42 @@ Imports Framework.Usuarios.DN
         gbd.CrearTablas()
         gbd.CrearVistas()
 
-        PublicarFachada()
+
+
+
+        Using New CajonHiloLN(mRecurso)
+
+            Using tr As New Transaccion(True)
+
+                PublicarFachada()
+
+
+                tr.Confirmar()
+
+            End Using
+
+
+
+
+            Using tr As New Transaccion(True)
+
+                ' PublicarGrafoPruebasProcesos()
+
+
+                tr.Confirmar()
+
+            End Using
+
+
+
+
+        End Using
+
+
+
+
+
+
 
         ' crear tablas y entidades de ejmeplo
 
@@ -529,7 +561,7 @@ End Class
 
 
 
-<Serializable()> Public Class EntidadDePrueba
+<Serializable()> Public Class EntidadDePruebaDN
     Inherits Framework.DatosNegocio.EntidadDN
 
 
@@ -550,26 +582,78 @@ End Class
 
 
 
+
+
+
+
+
+<Serializable()> _
+Public Class ContenedoraEntidadDePruebaDN
+    Inherits EntidadDN
+
+
+#Region "Atributos"
+    Protected mEntidadDePrueba As EntidadDePruebaDN
+#End Region
+
+
+#Region "Constructores"
+
+#End Region
+
+#Region "Propiedades"
+
+
+
+
+
+    <RelacionPropCampoAtribute("mEntidadDePrueba")> _
+    Public Property EntidadDePrueba() As EntidadDePruebaDN
+        Get
+            Return mEntidadDePrueba
+        End Get
+        Set(ByVal value As EntidadDePruebaDN)
+            CambiarValorRef(Of EntidadDePruebaDN)(value, mEntidadDePrueba)
+        End Set
+    End Property
+
+
+
+
+#End Region
+
+#Region "Metodos"
+
+#End Region
+
+
+
+End Class
+
+
+
+
+<Serializable()> _
+Public Class ColContenedoraEntidadDePruebaDN
+    Inherits ArrayListValidable(Of ContenedoraEntidadDePruebaDN)
+End Class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Public Class GestorMapPersistenciaCamposProcesosTest
     Inherits GestorMapPersistenciaCamposLN
 
-    'TODO: ALEX por implementar: recuperar el mapeado de instanciacion de la fuente de datos para el tipo a procesar
-    Public Overrides Function RecuperarMapPersistenciaCampos(ByVal pTipo As System.Type) As InfoDatosMapInstClaseDN
-        Dim mapinst As InfoDatosMapInstClaseDN = Nothing
-        Dim campodatos As InfoDatosMapInstCampoDN = Nothing
-
-        mapinst = RecuperarMapPersistenciaCamposPrivado(pTipo)
-
-        ' ojo esta modificación se debe aplicar siempre si el tipo hereda de una huella es decir en el metodo que lo llamo
-        If (TiposYReflexion.LN.InstanciacionReflexionHelperLN.EsHuella(pTipo)) Then
-            If mapinst Is Nothing Then
-                mapinst = New InfoDatosMapInstClaseDN
-            End If
-            Me.MapearCampoSimple(mapinst, "mEntidadReferidaHuella", CampoAtributoDN.SoloGuardarYNoReferido)
-        End If
-
-        Return mapinst
-    End Function
 
 
 
@@ -580,29 +664,6 @@ Public Class GestorMapPersistenciaCamposProcesosTest
 
 
 
-        ' Usuarios --------------------------------------------------------------------------------
-        If pTipo Is GetType(DatosIdentidadDN) Then
-
-            Me.MapearCampoSimple(mapinst, "mHashClave", CampoAtributoDN.PersistenciaContenidaSerializada)
-
-            Return mapinst
-        End If
-
-        If pTipo Is GetType(UsuarioDN) Then
-            Dim mapinstSub As New InfoDatosMapInstClaseDN
-            Dim alentidades As New ArrayList
-
-            'Me.VincularConClase("mHuellaEntidadUserDN", New ElementosDeEnsamblado("AmvDocumentosDN", "AmvDocumentosDN.HuellaOperadorDN"), CampoAtributoDN.InterfaceImplementadaPor, alentidades, campodatos, mapinst, mapinstSub)
-            'Me.VincularConClase("mEntidadUser", New ElementosDeEnsamblado("EmpresasDN", GetType(FN.Empresas.DN.HuellaCacheEmpleadoYPuestosRDN).FullName), CampoAtributoDN.InterfaceImplementadaPor, alentidades, campodatos, mapinst, mapinstSub)
-            campodatos = New InfoDatosMapInstCampoDN
-            campodatos.InfoDatosMapInstClase = mapinst
-            campodatos.NombreCampo = "mEntidadUser"
-            campodatos.ColCampoAtributo.Add(CampoAtributoDN.NoProcesar)
-
-
-
-            Return mapinst
-        End If
 
         If pTipo Is GetType(PrincipalDN) Then
             Me.MapearCampoSimple(mapinst, "mClavePropuesta", CampoAtributoDN.NoProcesar)
@@ -618,7 +679,34 @@ Public Class GestorMapPersistenciaCamposProcesosTest
             Me.MapearCampoSimple(mapinst, "mNombre", CampoAtributoDN.UnicoEnFuenteDatosoNulo)
             Return mapinst
         End If
+
+
+        If (pTipo Is GetType(Framework.Usuarios.DN.UsuarioDN)) Then
+            Dim mapinstSub As New InfoDatosMapInstClaseDN
+            Dim alentidades As New ArrayList
+
+            Me.MapearCampoSimple(mapinst, "mHuellaEntidadUserDN", CampoAtributoDN.NoProcesar)
+
+            Return mapinst
+        End If
+
+        If (pTipo Is GetType(Framework.Usuarios.DN.DatosIdentidadDN)) Then
+
+            Me.MapearCampoSimple(mapinst, "mHashClave", CampoAtributoDN.PersistenciaContenidaSerializada)
+            Return mapinst
+        End If
+
+
         'end  Usuarios --------------------------------------------------------------------------------
+
+
+
+        If (pTipo Is GetType(Framework.Procesos.ProcesosDN.TransicionRealizadaDN)) Then
+            mapinst.TablaHistoria = "thTransicionRealizadaDN"
+            Return mapinst
+        End If
+
+
 
         If (pTipo Is GetType(Framework.Procesos.ProcesosDN.OperacionRealizadaDN)) Then
             Dim alentidades As ArrayList
@@ -640,13 +728,17 @@ Public Class GestorMapPersistenciaCamposProcesosTest
             mapSubInst = New InfoDatosMapInstClaseDN
             alentidades = New ArrayList
 
-            alentidades.Add(New VinculoClaseDN(GetType(EntidadDePrueba)))
+            alentidades.Add(New VinculoClaseDN(GetType(ContenedoraEntidadDePruebaDN)))
+            alentidades.Add(New VinculoClaseDN(GetType(EntidadDePruebaDN)))
+            alentidades.Add(New VinculoClaseDN(GetType(Usuarios.DN.PrincipalDN)))
+            'alentidades.Add(New VinculoClaseDN(GetType(Usuarios.DN.PrincipalDNhet)))
             mapSubInst.ItemDatoMapeado(TiposDatosMapInstClaseDN.InterfaceImplementadaPor) = alentidades
 
             campodatos = New InfoDatosMapInstCampoDN
             campodatos.InfoDatosMapInstClase = mapinst
             campodatos.NombreCampo = "mObjetoIndirectoOperacion"
             campodatos.ColCampoAtributo.Add(CampoAtributoDN.InterfaceImplementadaPor)
+            '  campodatos.ColCampoAtributo.Add(CampoAtributoDN.SoloGuardarYNoReferido)
             campodatos.MapSubEntidad = mapSubInst
 
             campodatos = New InfoDatosMapInstCampoDN
@@ -656,9 +748,11 @@ Public Class GestorMapPersistenciaCamposProcesosTest
             campodatos.MapSubEntidad = mapSubInst
 
 
+            mapinst.TablaHistoria = "thOperacionRealizadaDN"
 
             Return mapinst
         End If
+
 
         Return Nothing
     End Function

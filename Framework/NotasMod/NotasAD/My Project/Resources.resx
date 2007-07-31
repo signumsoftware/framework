@@ -124,4 +124,11 @@ FROM         dbo.trtlNotaDNColHEntidadXtlHEDN INNER JOIN
                       dbo.tlHEDN ON dbo.trtlNotaDNColHEntidadXtlHEDN.idptlHEDN = dbo.tlHEDN.GUID</value>
     <comment>1</comment>
   </data>
+  <data name="vwNotasxEntidadReferida" xml:space="preserve">
+    <value>create view vwNotasxEntidadReferida as SELECT     dbo.tlNotaDN.ID, dbo.tlNotaDN.Nombre, dbo.tlNotaDN.Comentario, dbo.tlUsuarioDN.Nombre AS Usuario, dbo.tlNotaDN.FechaCreacion, 
+                      dbo.trtlNotaDNColHEntidadXtlHEDN.idptlHEDN AS GUIDReferida
+FROM         dbo.tlNotaDN INNER JOIN
+                      dbo.trtlNotaDNColHEntidadXtlHEDN ON dbo.tlNotaDN.ID = dbo.trtlNotaDNColHEntidadXtlHEDN.idttlNotaDN INNER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlNotaDN.idCreador = dbo.tlUsuarioDN.ID</value>
+  </data>
 </root>

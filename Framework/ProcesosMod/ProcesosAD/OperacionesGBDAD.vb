@@ -53,9 +53,9 @@ Public Class OperacionesGBDAD
 
         Dim gbdBase As Framework.AccesoDatos.MotorAD.GBDBase
 
-        'gbdBase = New Framework.TiposYReflexion.AD.tiposYReflexionGBDAD
-        'gbdBase.mRecurso = Me.mRecurso
-        'gbdBase.CrearVistas()
+        gbdBase = New Framework.TiposYReflexion.AD.tiposYReflexionGBDAD
+        gbdBase.mRecurso = Me.mRecurso
+        gbdBase.CrearVistas()
 
 
         'gbdBase = New Framework.Usuarios.AD.UsuariosGBDAD

@@ -165,12 +165,28 @@ Public MustInherit Class EntidadBaseDN
 
         Dim oxml As IXMLAdaptador
         Dim xmls As New Xml.Serialization.XmlSerializer(tipoIXMLAdaptador)
-        Dim tw As New IO.StringWriter
+
         oxml = xmls.Deserialize(ptr)
         oxml.XMLAdaptadorToObjeto(Me)
         Return Me
 
+        'Dim xmls As New Xml.Serialization.XmlSerializer(tipoIXMLAdaptador)
+        'Dim oxml As IXMLAdaptador
+        'Dim memoryStream As New System.IO.MemoryStream(StringToUTF8ByteArray(ptr.ToString))
+        'Dim xmlTextWriter As New System.Xml.XmlTextWriter(memoryStream, System.Text.Encoding.UTF8)
+        'oxml = xmls.Deserialize(memoryStream)
+        'oxml.XMLAdaptadorToObjeto(Me)
+        'Return Me
+
     End Function
+
+    Private Function StringToUTF8ByteArray(ByVal pXmlString As String) As Byte()
+
+        Dim encoding As New System.Text.UTF8Encoding()
+        Dim byteArray As Byte() = encoding.GetBytes(pXmlString)
+        Return byteArray
+    End Function
+
 
     Public Overridable Function ToXML() As String Implements IEntidadBaseDN.ToXML
         Throw New NotImplementedException
@@ -186,7 +202,28 @@ Public MustInherit Class EntidadBaseDN
 
         Return tw.ToString
 
+        'Dim ms As New System.IO.MemoryStream
+        'Dim xmltext As New System.Xml.XmlTextWriter(ms, System.Text.Encoding.UTF8)
 
+        'Dim oxml As IXMLAdaptador = Activator.CreateInstance(tipoIXMLAdaptador)
+        'Dim xmls As New Xml.Serialization.XmlSerializer(tipoIXMLAdaptador)
+
+
+        'oxml.ObjetoToXMLAdaptador(Me)
+        'xmls.Serialize(xmltext, oxml)
+
+        'Return UTF8ByteArrayToString(ms.ToArray)
+
+
+    End Function
+
+
+
+    Private Function UTF8ByteArrayToString(ByVal characters As Byte()) As String
+
+        Dim encoding As New System.Text.UTF8Encoding
+        Dim constructedString As String = encoding.GetString(characters)
+        Return constructedString
     End Function
 
 

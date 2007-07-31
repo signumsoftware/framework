@@ -101,6 +101,10 @@
       <Project>{301D1F5E-192A-4A3A-B56A-1247C81D8310}</Project>
       <Name>MotorAD</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\NotasMod\NotasAD\NotasAD.vbproj">
+      <Project>{7D3E0F3B-7D3A-4BFF-AF99-A29D586A3ABA}</Project>
+      <Name>NotasAD</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\TiposyReflexion\TiposYReflexion.vbproj">
       <Project>{45F3B925-470A-4095-8AEB-36FA6E533096}</Project>
       <Name>TiposYReflexion</Name>

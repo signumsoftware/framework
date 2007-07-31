@@ -83,7 +83,9 @@ Public Class FicherosGBD
         ej.EjecutarNoConsulta(My.Resources.vwHuellaFicheroIdentificadosVis)
         ej.EjecutarNoConsulta(My.Resources.vwCDyHFVinculables)
 
+        '        ej.EjecutarNoConsulta(My.Resources.vwHuellaFicheroVis)
 
+        ej.EjecutarNoConsulta(My.Resources.vwCajonDocVerificablesxEntidadRef)
 
 
 

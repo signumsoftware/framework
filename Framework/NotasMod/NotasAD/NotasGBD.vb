@@ -53,12 +53,12 @@ Public Class NotasGBDAD
 
 
         Dim ej As Framework.AccesoDatos.Ejecutor
+
         ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
-
-
         ej.EjecutarNoConsulta(My.Resources.vwNotasNotasGUIDentRef)
 
-
+        ej = New Framework.AccesoDatos.Ejecutor(Nothing, mRecurso)
+        ej.EjecutarNoConsulta(My.Resources.vwNotasxEntidadReferida)
 
 
 

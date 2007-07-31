@@ -103,6 +103,10 @@
       <Project>{634BB19D-032C-4428-9305-AFB92E64DBA5}</Project>
       <Name>UsrAS</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\UsuariosMod\UsuariosAD\UsuariosAD.vbproj">
+      <Project>{BC50006B-89F3-4A01-8E24-7600C4D1EB1D}</Project>
+      <Name>UsuariosAD</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\UsuariosMod\UsuariosDN\UsuariosDN.vbproj">
       <Project>{DC27C3D3-C8D7-49AE-AF82-C21682FDCFCD}</Project>
       <Name>UsuariosDN</Name>

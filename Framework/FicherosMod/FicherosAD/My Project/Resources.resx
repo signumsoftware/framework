@@ -159,6 +159,13 @@ FROM         dbo.tlCajonDocumentoDN INNER JOIN
                       dbo.tlIdentificacionDocumentoDN.idTipoFichero = dbo.tlTipoFicheroDN.ID LEFT OUTER JOIN
                       dbo.tlHuellaFicheroAlmacenadoIODN ON dbo.tlCajonDocumentoDN.idDocumento = dbo.tlHuellaFicheroAlmacenadoIODN.ID</value>
   </data>
+  <data name="vwCajonDocVerificablesxEntidadRef" xml:space="preserve">
+    <value>create view vwCajonDocVerificablesxEntidadRef as SELECT     dbo.tlNotaDN.ID, dbo.tlNotaDN.Nombre, dbo.tlNotaDN.Comentario, dbo.tlUsuarioDN.Nombre AS Usuario, dbo.tlNotaDN.FechaCreacion, 
+                      dbo.trtlNotaDNColHEntidadXtlHEDN.idptlHEDN AS GUIDReferida
+FROM         dbo.tlNotaDN INNER JOIN
+                      dbo.trtlNotaDNColHEntidadXtlHEDN ON dbo.tlNotaDN.ID = dbo.trtlNotaDNColHEntidadXtlHEDN.idttlNotaDN INNER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlNotaDN.idCreador = dbo.tlUsuarioDN.ID</value>
+  </data>
   <data name="vwCajonDocxIdentidadDoc" xml:space="preserve">
     <value>vwCajonDocxIdentidadDoc</value>
   </data>

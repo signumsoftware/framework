@@ -62,7 +62,7 @@ Public Class OperacionesAS
         Dim servicio As ProcesosWS.ProcesosWS
         Dim respuesta, parametros As Byte()
         Dim pr As New Framework.Procesos.ProcesosDN.ParametroOperacionPr
-        If pParametros.GetType.IsSerializable Then
+        If pParametros IsNot Nothing AndAlso pParametros.GetType.IsSerializable Then
             pr.Parametros = pParametros
         End If
         pr.OperacionRealizada = pOperacionRealizadaDN
@@ -113,7 +113,7 @@ Public Class OperacionesAS
 
         Dim respuesta, parametros As Byte()
         Dim pr As New Framework.Procesos.ProcesosDN.ParametroOperacionPr
-        If pParametros.GetType.IsSerializable Then
+        If pParametros IsNot Nothing AndAlso pParametros.GetType.IsSerializable Then
             pr.Parametros = pParametros
         End If
         pr.TransicionRealizada = pTransicionRealizada
@@ -157,7 +157,7 @@ Public Class OperacionesAS
         Dim respuesta, parametros As Byte()
         Dim pr As New Framework.Procesos.ProcesosDN.ParametroOperacionPr
         'no introducir el parametro si es serializable
-        If pParametros.GetType.IsSerializable Then
+        If pParametros IsNot Nothing AndAlso pParametros.GetType.IsSerializable Then
             pr.Parametros = pParametros
         End If
         pr.TransicionRealizada = pTransicionRealizada
