@@ -19,9 +19,14 @@ Public Class FactoriaTrazasLN
         'Obtener el mapeado de comportamiento de la entidad
         infoMapDatosInst = gdmi.RecuperarMapPersistenciaCampos(ptipo)
 
-        For Each tipo As System.Type In infoMapDatosInst.ColTiposTrazas
-            col.Add(Activator.CreateInstance(tipo))
-        Next
+        If infoMapDatosInst IsNot Nothing Then
+
+
+
+            For Each tipo As System.Type In infoMapDatosInst.ColTiposTrazas
+                col.Add(Activator.CreateInstance(tipo))
+            Next
+        End If
 
 
 

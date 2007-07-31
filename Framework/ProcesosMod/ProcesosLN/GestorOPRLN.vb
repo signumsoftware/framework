@@ -395,6 +395,12 @@ Public Class GestorOPRLN
 
             Dim colTrazas As Framework.Procesos.ProcesosDN.ColITrazaDN = fac.RecuperarTrazas(CType(popr.ObjetoIndirectoOperacion, Object).GetType)
 
+
+            If colTrazas Is Nothing OrElse colTrazas.Count = 0 Then
+                Throw New ApplicationException("no se ha especificado informacion de traza para el tipo " & CType(popr.ObjetoIndirectoOperacion, Object).GetType.ToString & " y la oepracion " & popr.Operacion.ToString & " esta marcada como debe trazar")
+
+            End If
+
             For Each traza As Framework.Procesos.ProcesosDN.ITrazaDN In colTrazas
                 traza.TrazarEntidad(popr)
 

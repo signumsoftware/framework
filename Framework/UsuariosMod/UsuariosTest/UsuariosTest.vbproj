@@ -47,6 +47,7 @@
     <Import Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControladorOperacionesEjemplo.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="UsuariosTest.vb" />
   </ItemGroup>
@@ -54,6 +55,10 @@
     <Content Include="AuthoringTests.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ClaseBaseLN\ClaseBaseLN.vbproj">
+      <Project>{0EF22784-347C-4707-A67A-BA7446B41B4D}</Project>
+      <Name>ClaseBaseLN</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\DatosNegocio\DatosNegocio.vbproj">
       <Project>{F6092417-AEEE-4C49-9040-7CFBDD3CD56B}</Project>
       <Name>DatosNegocio</Name>

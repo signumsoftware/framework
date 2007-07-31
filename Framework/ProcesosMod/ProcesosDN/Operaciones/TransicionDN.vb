@@ -112,6 +112,11 @@ Public Class TransicionDN
 
 #Region "Métodos"
 
+
+    Public Overrides Function ToString() As String
+        Return Me.mOperacionOrigen.Nombre & "-->" & Me.mOperacionDestino.Nombre
+    End Function
+
     Public Overrides Function EstadoIntegridad(ByRef pMensaje As String) As DatosNegocio.EstadoIntegridadDN
         'If Not ValidarOperacionOrigenPadre(pMensaje, mOperacionOrigen, mOperacionPadre) Then
         '    Return EstadoIntegridadDN.Inconsistente
@@ -270,6 +275,8 @@ Public Class ColTransicionDN
         Return colt
 
     End Function
+
+
 End Class
 
 
