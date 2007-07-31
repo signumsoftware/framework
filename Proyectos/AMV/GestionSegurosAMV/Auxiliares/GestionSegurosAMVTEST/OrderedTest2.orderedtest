@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tests>
-  <edtdocversion branch="retail" build="50727" revision="312" />
+  <edtdocversion branch="retail" build="50727" revision="1318" />
   <AutoSuite type="Microsoft.VisualStudio.TestTools.TestTypes.Ordered.AutoSuite, Microsoft.VisualStudio.QualityTools.Tips.OrderedTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <m_continueAfterFailure type="System.Boolean">False</m_continueAfterFailure>
     <links type="System.Collections.ArrayList">
@@ -21,6 +21,13 @@
       <element type="Microsoft.VisualStudio.TestTools.Common.Link">
         <id type="System.Guid">f28cb43c-b4d3-e7a1-6796-d9d4f5405d1c</id>
         <name type="System.String">CrearGrafoPolizas</name>
+        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
+        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
+        <enabled type="System.Boolean">True</enabled>
+      </element>
+      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
+        <id type="System.Guid">5a81cf3a-f90a-b3c6-f538-f139ca9a1426</id>
+        <name type="System.String">CrearGrafoReclamaciones</name>
         <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
         <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
         <enabled type="System.Boolean">True</enabled>

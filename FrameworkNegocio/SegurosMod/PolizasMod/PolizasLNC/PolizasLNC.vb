@@ -1,6 +1,8 @@
 Public Class PolizasLNC
 
 
+
+
     Public Function AltaDePoliza(ByVal ptomador As FN.Seguros.Polizas.DN.TomadorDN, ByVal pEmisora As FN.Seguros.Polizas.DN.EmisoraPolizasDN, ByVal ptarifa As FN.Seguros.Polizas.DN.TarifaDN, ByVal fiPR As Date) As FN.Seguros.Polizas.DN.PeriodoRenovacionPolizaDN
 
         ' creacion de los objetos

@@ -24,8 +24,83 @@ Imports GestionSegurosAMV.AD
 
 
     End Sub
+    <TestMethod()> Public Sub ProbarCrearReclamacionDesdeSiniestro()
+        ObtenerRecurso()
+
+        Using New CajonHiloLN(mRecurso)
 
 
+
+
+
+            Using tr As New Transaccion
+                Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion") = "RolServidorGSAMV"
+                Dim usln As New Framework.Usuarios.LN.UsuariosLN(Transaccion.Actual, Recurso.Actual)
+
+                Dim principal As Framework.Usuarios.DN.PrincipalDN = usln.RecuperarPrincipalxNick("ato")
+
+                Dim siniestro As New FN.Seguros.Polizas.DN.SiniestroDN
+                siniestro.Nombre = "siniestr " & Now
+
+                Me.GuardarDatos(siniestro)
+
+                Dim operln As New Framework.Procesos.ProcesosLN.OperacionesLN
+                Dim coltr As Framework.Procesos.ProcesosDN.ColTransicionRealizadaDN = operln.RecuperarTransicionesAutorizadasSobre(principal, New HEDN(siniestro))
+
+                Dim miln As New Framework.Procesos.ProcesosLN.GestorOPRLN
+
+                miln.EjecutarOperacion(siniestro, Nothing, principal, coltr(0))
+
+
+                tr.Confirmar()
+
+            End Using
+
+
+
+
+        End Using
+
+
+    End Sub
+
+    Private Sub GuardarDatos(ByVal objeto As Object)
+        Using tr As New Transaccion
+            Dim gi As Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN
+
+            gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Transaccion.Actual, Recurso.Actual)
+            gi.Guardar(objeto)
+
+            tr.Confirmar()
+
+        End Using
+    End Sub
+
+    Private Function GuardarDatos(ByVal col As System.Collections.IEnumerable, ByVal transaccionesIndividuales As Boolean) As System.Collections.ArrayList
+
+        Dim al As New System.Collections.ArrayList
+
+        For Each o As Object In col
+
+            Using tr As New Transaccion(transaccionesIndividuales)
+                Dim gi As Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN
+
+                Try
+                    gi = New Framework.AccesoDatos.MotorAD.LN.GestorInstanciacionLN(Transaccion.Actual, Recurso.Actual)
+                    gi.Guardar(o)
+                    tr.Confirmar()
+                Catch ex As Exception
+
+                    al.Add(o)
+                    tr.Cancelar()
+                End Try
+            End Using
+
+        Next
+
+        Return al
+
+    End Function
     <TestMethod()> Public Sub CrearPagosTarifa()
         ObtenerRecurso()
 

@@ -341,6 +341,7 @@ Public Class GestionSegurosAMVGBDAD
     End Sub
 
 
+
     Public Sub CrearGrafoDocumentosPp()
 
 
@@ -446,6 +447,138 @@ Public Class GestionSegurosAMVGBDAD
         Me.GuardarDatos(ejClienteS)
 
     End Sub
+
+
+    Public Sub CrearGrafoReclamacionesPp()
+
+
+
+        ' flujo de talones
+
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        ' 1º 
+        ' dn o dns a las cuales se vincula el flujo
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+        Dim ColVc As New Framework.TiposYReflexion.DN.ColVinculoClaseDN
+        ColVc.Add(RecuperarVinculoClase(GetType(FN.Seguros.Polizas.DN.ReclamacionDN)))
+
+        Dim ColVcOrigenes As New Framework.TiposYReflexion.DN.ColVinculoClaseDN
+        ColVcOrigenes.Add(RecuperarVinculoClase(GetType(FN.Seguros.Polizas.DN.SiniestroDN)))
+
+        Dim ColVctodas As New Framework.TiposYReflexion.DN.ColVinculoClaseDN
+        ColVctodas.AddRange(ColVcOrigenes)
+        ColVctodas.AddRange(ColVc)
+
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        ' 2º 
+        '  creacion de las operaciones
+        '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        Dim colop As New Framework.Procesos.ProcesosDN.ColOperacionDN
+
+        ' operacion que engloba todo el flujo
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Gestion Reclamaciones", ColVctodas, "element_into.ico", True)))
+
+
+        '' operaciones del flujo
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Alta Reclamacion Desde", ColVctodas, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Modificar reclamacion", ColVc, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Anular Reclamacion", ColVc, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Cerrar Reclamacion", ColVc, "element_into.ico", True)))
+        colop.Add(GuardarDatos(ProcesosHelperLN.AltaOperacion("Reabrir Reclamacion", ColVc, "element_into.ico", True)))
+
+
+        '' FIN operacion 
+
+
+        ''''''''''''''''''''''''''''''''''''''''''''
+        ' 3º
+        ' creacion de las Transiciones
+        ''''''''''''''''''''''''''''''''''''''''''''
+
+
+        Dim colVM As New Framework.TiposYReflexion.DN.ColVinculoMetodoDN()
+
+
+        '' prueba subordiandas ''''''''''''''''''''''''''''''''''''''
+
+        ' transicion de inicio 
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Gestion Reclamaciones", "Alta Reclamacion Desde", Framework.Procesos.ProcesosDN.TipoTransicionDN.InicioDesde, False, Nothing, True))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Gestion Reclamaciones", "Reabrir Reclamacion", Framework.Procesos.ProcesosDN.TipoTransicionDN.Reactivacion, False, Nothing, True))
+
+        ' transiciones Intermedias
+
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Alta Reclamacion Desde", "Modificar Reclamacion", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Reabrir Reclamacion", "Modificar Reclamacion", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Modificar Reclamacion", "Modificar Reclamacion", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, False, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Modificar Reclamacion", "Cerrar Reclamacion", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, False, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Modificar Reclamacion", "Anular Reclamacion", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, False, Nothing, False))
+
+
+        ' transiciones de fin
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Anular Reclamacion", "Gestion Reclamaciones", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+        GuardarDatos(ProcesosHelperLN.AltaTransicion(colop, "Cerrar Reclamacion", "Gestion Reclamaciones", Framework.Procesos.ProcesosDN.TipoTransicionDN.Normal, True, Nothing, False))
+
+
+        '''''''''''''''''''''''''''''''
+        ' publicar los controladores ''
+        '''''''''''''''''''''''''''''''
+
+
+        Dim ejClienteS, ejClienteC As Framework.Procesos.ProcesosDN.EjecutoresDeClienteDN
+        Dim clienteS, clienteC As Framework.Procesos.ProcesosDN.ClientedeFachadaDN
+
+        'Se comprubea si ya existen los clientesFachada, y sino se crean
+        Dim opAD As New Framework.Procesos.ProcesosAD.OperacionesAD()
+
+        ejClienteS = opAD.RecuperarEjecutorCliente(CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion"), String))
+        ejClienteC = opAD.RecuperarEjecutorCliente(CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolCliente"), String))
+
+        If ejClienteS Is Nothing Then
+            clienteS = New Framework.Procesos.ProcesosDN.ClientedeFachadaDN()
+            clienteS.Nombre = CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion"), String)
+
+            ejClienteS = New Framework.Procesos.ProcesosDN.EjecutoresDeClienteDN()
+            ejClienteS.ClientedeFachada = clienteS
+        End If
+
+        If ejClienteC Is Nothing Then
+            clienteC = New Framework.Procesos.ProcesosDN.ClientedeFachadaDN()
+            clienteC.Nombre = CType(Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolCliente"), String)
+
+            ejClienteC = New Framework.Procesos.ProcesosDN.EjecutoresDeClienteDN()
+            ejClienteC.ClientedeFachada = clienteC
+        End If
+
+
+
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Gestion Reclamaciones", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS)))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Alta Reclamacion", RecuperarVinculoMetodo("AltaDeReclamacion", GetType(FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.PolizasOperLN)), ejClienteS)))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Reabrir Reclamacion", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS)))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Modificar Reclamacion", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS)))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Cerrar Reclamacion", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS)))
+        ejClienteS.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Anular Reclamacion", RecuperarVinculoMetodo("GuardarGenerico", GetType(GestorEjecutoresLN)), ejClienteS)))
+
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Gestion Reclamaciones", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC)))
+        'ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Alta Reclamacion", RecuperarVinculoMetodo("AltaReclamacionDesdeSiniestro", GetType(FN.Seguros.Polizas.PolizasIU.PolizasCtrl)), ejClienteC)))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Alta Reclamacion", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC)))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Reabrir Reclamacion", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC)))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Modificar Reclamacion", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC)))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Cerrar Reclamacion", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC)))
+        ejClienteC.ColVcEjecutorDeVerboEnCliente.Add(GuardarDatos(ProcesosHelperLN.VinculacionVerbo(colop, "Anular Reclamacion", RecuperarVinculoMetodo("EjecutarOperacionModificarObjeto", GetType(Framework.Procesos.ProcesosAS.OperacionesAS)), ejClienteC)))
+
+        ' finc pruebas
+
+        Me.GuardarDatos(ejClienteC)
+        Me.GuardarDatos(ejClienteS)
+
+    End Sub
+
+
+
+
+
+
     Public Sub CrearGrafoUsuariosPp()
 
 

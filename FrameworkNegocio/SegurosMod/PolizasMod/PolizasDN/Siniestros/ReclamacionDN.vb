@@ -258,7 +258,16 @@ Public Class ReclamacionDN
 
 #Region "Metodos"
 
+    Public Sub AltaDesdeSiniestro(ByVal pSiniestro As SiniestroDN)
 
+
+        Me.Siniestro = pSiniestro
+        Me.FI = Me.mSiniestro.FI
+
+
+
+
+    End Sub
 
 
 

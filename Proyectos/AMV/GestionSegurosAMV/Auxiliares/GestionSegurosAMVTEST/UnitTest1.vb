@@ -551,6 +551,9 @@ Imports GestionSegurosAMV.AD
         CrearPolizaEnGrafoP()
     End Sub
 
+    <TestMethod()> Public Sub CrearGrafoReclamaciones()
+        CrearGrafoReclamacionesP()
+    End Sub
     <TestMethod()> Public Sub CargarAntecedentes()
         ObtenerRecurso()
         Using New CajonHiloLN(mRecurso)
@@ -693,7 +696,21 @@ Imports GestionSegurosAMV.AD
         End Using
     End Sub
 
+    Private Sub CrearGrafoReclamacionesP()
+        ObtenerRecurso()
 
+        Using New CajonHiloLN(mRecurso)
+            If Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolAplicacion") Is Nothing Then
+                Framework.Configuracion.AppConfiguracion.DatosConfig.Add("nombreRolAplicacion", "RolServidorGSAMV")
+            End If
+            If Framework.Configuracion.AppConfiguracion.DatosConfig.Item("nombreRolCliente") Is Nothing Then
+                Framework.Configuracion.AppConfiguracion.DatosConfig.Add("nombreRolCliente", "RolClienteGSAMV")
+            End If
+
+            Dim gbdAMV As New GSAMV.AD.GestionSegurosAMVGBDAD(mRecurso)
+            gbdAMV.CrearGrafoReclamacionesPp()
+        End Using
+    End Sub
     Private Sub CrearGrafoDocumentosP()
         ObtenerRecurso()
 

@@ -1,7 +1,35 @@
 Imports Framework.IU.IUComun
 
 Public Class PolizasCtrl
+    'Public Function CrearReclamacion(ByVal sender As Object, ByVal datos As Object, ByVal vm As Framework.TiposYReflexion.DN.VinculoMetodoDN) As FN.Seguros.Polizas.DN.PresupuestoDN
 
+    '    ' comando
+
+    '    Dim control As IctrlBasicoDN = sender
+    '    Dim fp As MotorIU.FormulariosP.IFormularioP = CType(control, System.Windows.Forms.ContainerControl).ParentForm
+
+    '    Dim siniestro As FN.Seguros.Polizas.DN.SiniestroDN = control.DN
+
+    '    Dim reclamacion As New FN.Seguros.Polizas.DN.ReclamacionDN
+    '    reclamacion.Siniestro = siniestro
+
+    '    ' obteneos el principal del marco
+    '    ' Dim prin As Framework.Usuarios.DN.PrincipalDN = fp.cMarco.Principal
+
+    '    presupuesto = lnc.VerificarDatosPresupuesto(presupuesto)
+
+
+
+    '    'Dim paquete As New Hashtable
+    '    'paquete.Add("DN", nota)
+
+    '    '' navegar al formaulario que permite editar la nota
+    '    'fp.cMarco.Navegar("FG", fp, Nothing, TipoNavegacion.Normal, paquete)
+
+
+    '    Return presupuesto
+
+    'End Function
 
 
     Public Function CrearAlertaGenerico(ByVal sender As Object, ByVal datos As Object, ByVal vm As Framework.TiposYReflexion.DN.VinculoMetodoDN) As Framework.DatosNegocio.IEntidadDN
@@ -150,6 +178,36 @@ Public Class PolizasCtrl
 
     End Function
 
+
+
+
+    Public Function AltaReclamacionDesdeSiniestro(ByVal objeto As Object, ByVal pTransicionRealizada As Framework.Procesos.ProcesosDN.TransicionRealizadaDN, ByVal pParametros As Object) As Framework.DatosNegocio.IEntidadBaseDN
+
+        ' operación
+
+
+
+        '' obtenemos el formulario
+        Dim fp As MotorIU.FormulariosP.IFormularioP = pParametros
+
+
+        Dim miSiniestro As New FN.Seguros.Polizas.DN.SiniestroDN
+        Dim miReclamacion As New FN.Seguros.Polizas.DN.ReclamacionDN
+        miReclamacion.AltaDesdeSiniestro(miSiniestro)
+
+        Dim paquete As New Hashtable
+        paquete.Add("DN", miReclamacion)
+
+        ' navegar al formaulario que permite establecer la fecha de baja
+        fp.cMarco.Navegar("FG", fp, CType(fp, System.Windows.Forms.Form).ParentForm, TipoNavegacion.Modal, paquete)
+
+
+        ' solicita la ejecución de la operacion
+        Dim miProcesoLNC As New Framework.Procesos.ProcesosLNC.ProcesoLNC
+        Return miProcesoLNC.EjecutarOperacionEnServidor(fp.cMarco.Principal, pTransicionRealizada, miReclamacion, Nothing)
+
+
+    End Function
 
 
 
