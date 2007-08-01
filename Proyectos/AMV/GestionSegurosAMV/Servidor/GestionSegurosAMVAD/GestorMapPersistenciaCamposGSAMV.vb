@@ -228,6 +228,7 @@ Public Class GestorMapPersistenciaCamposGSAMV
             Dim alentidades As New ArrayList
             alentidades.Add(New VinculoClaseDN(GetType(Framework.Operaciones.OperacionesDN.SumaOperadorDN)))
             alentidades.Add(New VinculoClaseDN(GetType(Framework.Operaciones.OperacionesDN.MultiplicacionOperadorDN)))
+            alentidades.Add(New VinculoClaseDN(GetType(Framework.Operaciones.OperacionesDN.MultRedondeoOperadorDN)))
             alentidades.Add(New VinculoClaseDN(GetType(Framework.Operaciones.OperacionesDN.TruncarOperadorDN)))
             alentidades.Add(New VinculoClaseDN(GetType(Framework.Operaciones.OperacionesDN.RedondeoOperadorDN)))
             mapinst.ItemDatoMapeado(TiposDatosMapInstClaseDN.InterfaceImplementadaPor) = alentidades
