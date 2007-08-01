@@ -26,9 +26,9 @@ Public Class ColIOperacionCausaRVCacheDN
 
 
 
-    Public Function CalcuarTotalValorresultadoOpr() As Double
+    Public Function CalcuarTotalValorresultadoOpr() As Decimal
 
-        Dim total As Double
+        Dim total As Decimal
         For Each entidad As IOperacionCausaRVCacheDN In Me
             total += entidad.ValorresultadoOpr
         Next

@@ -281,51 +281,64 @@ Imports Framework.LogicaNegocios.Transacciones
 
         Using New CajonHiloLN(mRecurso)
 
-            Dim ln As New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
-            Dim opc As Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN = ln.RecuperarLista(GetType(Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN))(0)
-            Dim irec As FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RVIRecSumiValorLN
-            irec = New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RVIRecSumiValorLN()
+            'Dim ln As New Framework.ClaseBaseLN.BaseTransaccionConcretaLN()
+            'Dim opc As Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN = ln.RecuperarLista(GetType(Framework.Operaciones.OperacionesDN.OperacionConfiguradaDN))(0)
+            'Dim irec As FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RVIRecSumiValorLN
+            'irec = New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RVIRecSumiValorLN()
 
 
-            irec.ClearAll()
 
-            listaCob = "RCO|RCV|DEF|RI|DAÑOS|AC|AV"
+            'irec.ClearAll()
+
+            listaCob = "RCO|RCV|DEF|RI|DAÑOS|AV"
             'listaCob = "RCO|RCV|DEF"
 
             'Obtenemos la fecha de efecto
             fechaEfecto = New Date(2007, 6, 13)
 
             'Datos del riesgo
-            Dim modelo As String = "AMERICA"
-            Dim marca As String = "TRIUMPH"
+            Dim modelo As String = "Deauville"
+            Dim marca As String = "HONDA"
             Dim esMatriculada As String = "1"
-            Dim cilindrada As String = "125"
+            Dim cilindrada As String = "700"
+            Dim valorBonificacion As Decimal = 0.9
 
             datosRiesgo = modelo & "|" & marca & "|" & esMatriculada & "|" & cilindrada
 
             'Se crea el objeto Tarifa
-            irec.Tarifa = Me.GenerarTarifa(listaCob, datosRiesgo, fechaEfecto)
-            irec.DataSoucers.Add(irec.Tarifa)
+            Dim tarifa As FN.Seguros.Polizas.DN.TarifaDN = Me.GenerarTarifa(listaCob, datosRiesgo, fechaEfecto)
+
+            'irec.Tarifa = Me.GenerarTarifa(listaCob, datosRiesgo, fechaEfecto)
+            'irec.DataSoucers.Add(irec.Tarifa)
 
             'Generamos el objeto cuestionario resuelto
 
-            Dim anyosCarnet As Long = 12
-            Dim edad As Long = 30
-            Dim antMoto As Long = 0
-            Dim edadMCND As Long = 25
-            Dim codPostal As String = "08001"
+            Dim anyosCarnet As Long = 33
+            Dim edad As Long = 51
+            Dim antMoto As Long = 1
+            Dim edadMCND As Long = 1
+            Dim codPostal As String = "50640"
 
             listaCaract = cilindrada & "|" & anyosCarnet.ToString() & "|" & _
                         edad.ToString() & "|" & codPostal & _
                         "|" & antMoto.ToString() & "|" & edadMCND.ToString()
 
-            irec.DataSoucers.Add(Me.GenerarCuestionarioResuelto(listaCaract, fechaEfecto))
+            'irec.DataSoucers.Add(Me.GenerarCuestionarioResuelto(listaCaract, fechaEfecto))
+            Dim cr As Framework.Cuestionario.CuestionarioDN.CuestionarioResueltoDN = Me.GenerarCuestionarioResuelto(listaCaract, fechaEfecto)
+            Dim dt As New FN.RiesgosVehiculos.DN.DatosTarifaVehiculosDN()
+            tarifa.DatosTarifa = dt
+            dt.Tarifa = tarifa
+            dt.HeCuestionarioResuelto = New Framework.Cuestionario.CuestionarioDN.HeCuestionarioResueltoDN(cr)
+
+            Dim rvLN As New FN.RiesgosVehiculos.LN.RiesgosVehiculosLN.RiesgosVehiculosLN()
+            rvLN.CargarGrafoTarificacion()
+            rvLN.TarificarTarifa(tarifa, Nothing, Nothing, True, True)
 
             'Se obtiene el valor de la tarifa
-            opc.IOperacionDN.IRecSumiValorLN = irec
-            Dim valor As Double = opc.IOperacionDN.GetValor()
+            'opc.IOperacionDN.IRecSumiValorLN = irec
+            'Dim valor As Double = opc.IOperacionDN.GetValor()
 
-            GuardarDatos(irec.DataResults)
+            'GuardarDatos(irec.DataResults)
 
         End Using
     End Sub

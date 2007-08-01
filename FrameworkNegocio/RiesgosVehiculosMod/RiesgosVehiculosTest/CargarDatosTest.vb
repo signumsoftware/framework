@@ -406,6 +406,12 @@ Imports Framework.Operaciones.OperacionesDN
 
 
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                '  Operación de redondeo a 2 decimales
+                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                op = GenerarOperacionRedondear(op, 2, False)
+
+
+                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 '  comisiones: Operaciones de comisiones (excepto comisión fija AMV por gestión)
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -421,13 +427,6 @@ Imports Framework.Operaciones.OperacionesDN
                 Else
                     opComisionCob = op
                 End If
-
-
-
-                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                '  Operación de redondeo a 2 decimales
-                '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-                opComisionCob = GenerarOperacionRedondear(opComisionCob, 2, False)
 
 
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -718,7 +717,7 @@ Imports Framework.Operaciones.OperacionesDN
 
         Dim col As New Framework.Operaciones.OperacionesDN.ColOperacionSimpleBaseDN
         Dim op As Framework.Operaciones.OperacionesDN.OperacionSimpleBaseDN
-        Dim opR As Framework.Operaciones.OperacionesDN.OperacionSimpleBaseDN
+        'Dim opR As Framework.Operaciones.OperacionesDN.OperacionSimpleBaseDN
 
         ' obtener la cobertura que es base en la rama
 
@@ -734,12 +733,12 @@ Imports Framework.Operaciones.OperacionesDN
 
                 Select Case imp.Operadoraplicable
                     Case "+"
-                        op.IOperadorDN = New Framework.Operaciones.OperacionesDN.SumaOperadorDN
+                        op.IOperadorDN = New Framework.Operaciones.OperacionesDN.SumaOperadorDN()
                         op.Operando1 = New SumiValFijoDN(0)
                         op.Nombre = CType(op.Operando1, Object).ToString & "-+-" & CType(op.Operando2, Object).ToString
 
                     Case "*"
-                        op.IOperadorDN = New Framework.Operaciones.OperacionesDN.MultiplicacionOperadorDN
+                        op.IOperadorDN = New Framework.Operaciones.OperacionesDN.MultRedondeoOperadorDN()
                         op.Operando1 = pOpPrimaNeta
                         op.Nombre = CType(op.Operando1, Object).ToString & "-*-" & CType(op.Operando2, Object).ToString
 
@@ -747,15 +746,17 @@ Imports Framework.Operaciones.OperacionesDN
                         Throw New ApplicationException("operador aplicable no reconocido")
                 End Select
 
-                opR = New Framework.Operaciones.OperacionesDN.OperacionSimpleBaseDN()
-                opR.DebeCachear = False
+                col.Add(op)
 
-                opR.IOperadorDN = New Framework.Operaciones.OperacionesDN.RedondeoOperadorDN()
-                opR.Operando1 = op
-                opR.Operando2 = New SumiValFijoDN(2)
-                opR.Nombre = CType(op.Operando1, Object).ToString & "-R2-"
+                'opR = New Framework.Operaciones.OperacionesDN.OperacionSimpleBaseDN()
+                'opR.DebeCachear = False
 
-                col.Add(opR)
+                'opR.IOperadorDN = New Framework.Operaciones.OperacionesDN.RedondeoOperadorDN()
+                'opR.Operando1 = op
+                'opR.Operando2 = New SumiValFijoDN(2)
+                'opR.Nombre = CType(op.Operando1, Object).ToString & "-R2-"
+
+                'col.Add(opr)
             End If
         Next
 

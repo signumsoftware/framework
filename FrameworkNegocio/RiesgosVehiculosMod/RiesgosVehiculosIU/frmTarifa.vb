@@ -40,7 +40,12 @@ Public Class frmTarifa
 
         Try
             datosT = CType(ctrlTarifa1.Tarifa.DatosTarifa, DatosTarifaVehiculosDN)
-            cr = mControlador.RecuperarCuestionarioR(datosT.HeCuestionarioResuelto)
+
+            If datosT.HeCuestionarioResuelto.EntidadReferida Is Nothing Then
+                cr = mControlador.RecuperarCuestionarioR(datosT.HeCuestionarioResuelto)
+            Else
+                cr = datosT.HeCuestionarioResuelto.EntidadReferidaTipada
+            End If
 
             If Me.Paquete.ContainsKey("CuestionarioResuelto") Then
                 Me.Paquete.Item("CuestionarioResuelto") = cr

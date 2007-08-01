@@ -168,11 +168,11 @@ Public Class OperacionComisionRVCacheDN
         End Set
     End Property
 
-    Public Property ValorResultadoISVprecedente()
+    Public Property ValorResultadoISVprecedente() As Double
         Get
             Return mValorResultadoISVprecedente
         End Get
-        Set(ByVal value)
+        Set(ByVal value As Double)
             CambiarValorVal(Of Double)(value, mValorResultadoISVprecedente)
         End Set
     End Property

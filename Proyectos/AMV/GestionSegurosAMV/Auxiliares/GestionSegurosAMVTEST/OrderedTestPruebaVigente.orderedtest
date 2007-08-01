@@ -46,20 +46,6 @@
         <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
         <enabled type="System.Boolean">True</enabled>
       </element>
-      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
-        <id type="System.Guid">20b47a02-b49f-3a3e-4ecc-77960ccac5dc</id>
-        <name type="System.String">CargarDatosProductosAMV</name>
-        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
-        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
-        <enabled type="System.Boolean">True</enabled>
-      </element>
-      <element type="Microsoft.VisualStudio.TestTools.Common.Link">
-        <id type="System.Guid">7a44c7fd-1645-c7da-e87c-df36e0a22e83</id>
-        <name type="System.String">CargarDocumetosRequeridos</name>
-        <storage type="System.String">bin\gestionsegurosamv.test.dll</storage>
-        <type type="System.Type, mscorlib">Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</type>
-        <enabled type="System.Boolean">True</enabled>
-      </element>
     </links>
     <cssProjectStructure type="System.String" />
     <isRunOnRestart type="System.Boolean">False</isRunOnRestart>

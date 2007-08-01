@@ -85,49 +85,49 @@ Public Class DatosTarifaVehiculosDN
 
 
 
-    Public ReadOnly Property TotalImporteFraccioanble() As Double
+    Public ReadOnly Property TotalImporteFraccioanble() As Decimal
         Get
             Return ImportePrimaModuladaFraccionable + ImporteImpuestosFraccionable + ImporteComisionesFraccionable
         End Get
     End Property
 
-    Public ReadOnly Property TotalImporteNoFraccioanble() As Double
+    Public ReadOnly Property TotalImporteNoFraccioanble() As Decimal
         Get
             Return ImportePrimaModuladaNoFraccioable + ImporteImpuestosNoFraccionable + ImporteComisionesNoFraccionable
         End Get
     End Property
 
-    Public ReadOnly Property ImportePrimaModuladaNoFraccioable() As Double
+    Public ReadOnly Property ImportePrimaModuladaNoFraccioable() As Decimal
         Get
             Return 0
         End Get
     End Property
 
-    Public ReadOnly Property ImportePrimaModuladaFraccionable() As Double
+    Public ReadOnly Property ImportePrimaModuladaFraccionable() As Decimal
         Get
             Return mColOperacionModuladorRVCache.RecuperarColUltimasOperaciones.CalcularImporteTotal
         End Get
     End Property
 
-    Public ReadOnly Property ImporteImpuestosFraccionable() As Double
+    Public ReadOnly Property ImporteImpuestosFraccionable() As Decimal
         Get
             Return mColOperacionImpuestoRVCache.CalcularImporteTotal(Fraccionable.SI)
         End Get
     End Property
 
-    Public ReadOnly Property ImporteImpuestosNoFraccionable() As Double
+    Public ReadOnly Property ImporteImpuestosNoFraccionable() As Decimal
         Get
             Return mColOperacionImpuestoRVCache.CalcularImporteTotal(Fraccionable.No)
         End Get
     End Property
 
-    Public ReadOnly Property ImporteComisionesFraccionable() As Double
+    Public ReadOnly Property ImporteComisionesFraccionable() As Decimal
         Get
             Return mColOperacionComisionRVCache.CalcularImporteTotal(Fraccionable.SI)
         End Get
     End Property
 
-    Public ReadOnly Property ImporteComisionesNoFraccionable() As Double
+    Public ReadOnly Property ImporteComisionesNoFraccionable() As Decimal
         Get
             Return mColOperacionComisionRVCache.CalcularImporteTotal(Fraccionable.No)
         End Get
@@ -404,7 +404,7 @@ Public Class DatosTarifaVehiculosDN
 
     End Function
 
-    Public Sub ImporteFinaciablesImpuestos(ByRef impImpuestosFraccionable As Double, ByRef impImpuestosNOFraccionable As Double)
+    Public Sub ImporteFinaciablesImpuestos(ByRef impImpuestosFraccionable As Decimal, ByRef impImpuestosNOFraccionable As Decimal)
         impImpuestosFraccionable = 0
         impImpuestosNOFraccionable = 0
 
@@ -420,7 +420,25 @@ Public Class DatosTarifaVehiculosDN
 
     End Sub
 
-    Public Sub ImportesFinanciablesFraccionamiento(ByRef importeFracFraccionable As Double, ByRef importeFracNoFraccionable As Double)
+    Public Sub ImporteFinaciablesImpuestos(ByRef impImpuestosFraccionable As Decimal, ByRef impImpuestosNOFraccionable As Decimal, ByVal cobertura As CoberturaDN)
+        impImpuestosFraccionable = 0
+        impImpuestosNOFraccionable = 0
+
+        If mColOperacionImpuestoRVCache IsNot Nothing Then
+            For Each op As OperacionImpuestoRVCacheDN In mColOperacionImpuestoRVCache
+                If op.GUIDCobertura = cobertura.GUID Then
+                    If op.Fraccionable Then
+                        impImpuestosFraccionable += op.ValorresultadoOpr
+                    Else
+                        impImpuestosNOFraccionable += op.ValorresultadoOpr
+                    End If
+                End If
+            Next
+        End If
+
+    End Sub
+
+    Public Sub ImportesFinanciablesFraccionamiento(ByRef importeFracFraccionable As Decimal, ByRef importeFracNoFraccionable As Decimal)
         importeFracFraccionable = 0
         importeFracNoFraccionable = 0
 
@@ -436,7 +454,25 @@ Public Class DatosTarifaVehiculosDN
 
     End Sub
 
-    Public Sub ImportesFinanciablesComisiones(ByRef importeComisionesFraccionable As Double, ByRef importeComisionesNoFraccionable As Double)
+    Public Sub ImportesFinanciablesFraccionamiento(ByRef importeFracFraccionable As Decimal, ByRef importeFracNoFraccionable As Decimal, ByVal cobertura As CoberturaDN)
+        importeFracFraccionable = 0
+        importeFracNoFraccionable = 0
+
+        If mColOperacionFracRVCache IsNot Nothing Then
+            For Each op As OperacionFracRVCacheDN In mColOperacionFracRVCache
+                If op.GUIDCobertura = cobertura.GUID Then
+                    If op.Fraccionable Then
+                        importeFracFraccionable += op.ValorresultadoOpr - op.ValorResultadoISVprecedente
+                    Else
+                        importeFracNoFraccionable += op.ValorresultadoOpr - op.ValorResultadoISVprecedente
+                    End If
+                End If
+            Next
+        End If
+
+    End Sub
+
+    Public Sub ImportesFinanciablesComisiones(ByRef importeComisionesFraccionable As Decimal, ByRef importeComisionesNoFraccionable As Decimal)
         importeComisionesFraccionable = 0
         importeComisionesNoFraccionable = 0
 
@@ -451,6 +487,36 @@ Public Class DatosTarifaVehiculosDN
         End If
 
     End Sub
+
+    Public Sub ImportesFinanciablesComisiones(ByRef importeComisionesFraccionable As Decimal, ByRef importeComisionesNoFraccionable As Decimal, ByVal cobertura As CoberturaDN)
+        importeComisionesFraccionable = 0
+        importeComisionesNoFraccionable = 0
+
+        If mColOperacionComisionRVCache IsNot Nothing Then
+            For Each op As OperacionComisionRVCacheDN In mColOperacionComisionRVCache
+                If op.GUIDCobertura = cobertura.GUID Then
+                    If op.Fraccionable Then
+                        importeComisionesFraccionable += op.ValorresultadoOpr - op.ValorResultadoISVprecedente
+                    Else
+                        importeComisionesNoFraccionable += op.ValorresultadoOpr - op.ValorResultadoISVprecedente
+                    End If
+                End If
+            Next
+        End If
+
+    End Sub
+
+    Public Function RecuperarPrimaNeta(ByVal cobertura As CoberturaDN) As Double
+        If mColOperacionImpuestoRVCache IsNot Nothing Then
+            For Each op As OperacionImpuestoRVCacheDN In mColOperacionImpuestoRVCache
+                If op.GUIDCobertura = cobertura.GUID AndAlso op.ValorPrimaneta > 0 Then
+                    Return op.ValorPrimaneta
+                End If
+            Next
+        End If
+
+        Return 0
+    End Function
 
     Public Sub AsignarResultadosTarifa(ByVal colOpImp As ColOperacionImpuestoRVCacheDN, ByVal colOpMod As ColOperacionModuladorRVCacheDN, _
                                         ByVal colOpPB As ColOperacionPrimaBaseRVCacheDN, ByVal colOpSuma As ColOperacionSumaRVCacheDN, _
@@ -547,26 +613,71 @@ Public Class DatosTarifaVehiculosDN
         Return valor
     End Function
 
-    Public Sub CalcularImportePagos(ByVal numeroPagos As Integer, ByRef primerPago As Double, ByRef restoPagos As Double)
-        Dim impNoFrac, impAux1, impAux2 As Double
+    Public Sub CalcularImportePagos(ByVal numeroPagos As Integer, ByRef primerPago As Decimal, ByRef restoPagos As Decimal)
+        Dim impAux1, impAux2 As Decimal
 
-        Me.ImportesFinanciablesComisiones(impAux1, impAux2)
-        impNoFrac += impAux2
-        Me.ImportesFinanciablesFraccionamiento(impAux1, impAux2)
-        impNoFrac += impAux2
-        Me.ImporteFinaciablesImpuestos(impAux1, impAux2)
-        impNoFrac += impAux2
+        If numeroPagos = 1 Then
+            restoPagos = 0
+            primerPago = Math.Round(Me.Tarifa.Importe, 2, MidpointRounding.AwayFromZero)
+        Else
 
-        'restoPagos = Math.Round((Me.Tarifa.Importe - impNoFrac) / numeroPagos, 2)
-        restoPagos = Math.Round(Math.Round(Me.Tarifa.Importe - impNoFrac, 2) / numeroPagos, 2)
+            For Each lp As LineaProductoDN In Me.Tarifa.ColLineaProducto
+                If lp.Ofertado OrElse lp.Establecido Then
+                    For Each cob As CoberturaDN In lp.Producto.ColCoberturas
+                        Me.CalcularImportePagosxCobertura(numeroPagos, impAux1, impAux2, cob)
+                        primerPago += impAux1
+                        restoPagos += impAux2
+                    Next
+                End If
+            Next
 
-        primerPago = Math.Round(Me.Tarifa.Importe - restoPagos * (numeroPagos - 1), 2)
+        End If
+
+    End Sub
+
+    Public Sub CalcularImportePagosxCobertura(ByVal numeroPagos As Integer, ByRef primerPago As Decimal, ByRef restoPagos As Decimal, ByVal cobertura As CoberturaDN)
+        Dim impuestosNoFrac, restoNoFrac, impAux1, impAux2, primaTotal, primaP2 As Decimal
+
+        '1º Se calculan la prima neta para cada cobertura
+        primaTotal = Me.RecuperarPrimaNeta(cobertura)
+
+        '2º Comisiones y fraccionamientos no fraccionables
+        Me.ImportesFinanciablesComisiones(impAux1, impAux2, cobertura)
+        restoNoFrac += impAux2
+        Me.ImportesFinanciablesFraccionamiento(impAux1, impAux2, cobertura)
+        restoNoFrac += impAux2
+        '3º Impuestos no fraccionables
+        Me.ImporteFinaciablesImpuestos(impAux1, impAux2, cobertura)
+        impuestosNoFrac = impAux2
+
+        '4º Prima neta por cobertura Resto pagos
+        restoPagos = Math.Round((primaTotal - restoNoFrac) / numeroPagos, 2, MidpointRounding.AwayFromZero)
+        primaP2 = restoPagos
+
+        '5º Prima neta por cobertura Primer pago
+        primerPago = primaTotal - primaP2 * (numeroPagos - 1)
+
+        '6º Impuestos fraccionables
+        For Each op As OperacionImpuestoRVCacheDN In mColOperacionImpuestoRVCache
+            If op.Fraccionable AndAlso op.ValorresultadoOpr > 0 AndAlso op.GUIDCobertura = cobertura.GUID Then
+                If op.ValorPrimaneta = 0 Then
+                    impAux2 = op.ValorImpuesto
+                Else
+                    impAux2 = Math.Round(op.ValorImpuesto * primaP2, 2, MidpointRounding.AwayFromZero)
+                End If
+                impAux1 = Math.Round(op.ValorresultadoOpr, 2, MidpointRounding.AwayFromZero) - impAux2 * (numeroPagos - 1)
+                restoPagos += impAux2
+                primerPago += impAux1
+            End If
+        Next
+
+        primerPago += impuestosNoFrac
 
     End Sub
 
 #End Region
 
-    
+
 End Class
 
 

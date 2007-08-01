@@ -385,7 +385,7 @@ Public Class RiesgosVehiculosLN
     End Function
 
     Private Function ObtenerGrupoPagosFraccionados(ByVal iRecRV As RVIRecSumiValorLN, ByVal fraccionamiento As FN.GestionPagos.DN.FraccionamientoDN) As FN.GestionPagos.DN.GrupoPagosFraccionadosDN
-        Dim valorP1, valorPX As Double
+        Dim valorP1, valorPX As Decimal
         Dim tarifa As TarifaDN
         Dim datosTarifaV As DatosTarifaVehiculosDN
         Dim gpf As FN.GestionPagos.DN.GrupoPagosFraccionadosDN
