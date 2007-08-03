@@ -95,6 +95,8 @@ Public Class ctrlCuestionarioTarificacion
         'inhabilitamos los datos de 'ya está asegurado'
         Me.dtpVencimientoSeguro.Enabled = False
 
+        Me.chkTarificacionPrueba.Enabled = False
+
         ''si estamos en ES, deshabilitamos los grps para que se rellene en orden
         'If Not Me.PropiedadesES Is Nothing Then
         '    If Me.PropiedadesES.TipoControl = PropiedadesControles.TipoControl.Entrada Then
@@ -380,7 +382,7 @@ Public Class ctrlCuestionarioTarificacion
         responder(cr, "CodigoVendedor", New ValorTextoCaracteristicaDN(), Me.txtVendedor.Text, mFechaEfecto)
         responder(cr, "FechaEfecto", New ValorCaracteristicaFechaDN(), Me.dtpFechaTarificacion.Value, mFechaEfecto)
         responder(cr, "TarificacionPrueba", New ValorBooleanoCaracterisitcaDN(), Me.chkTarificacionPrueba.Checked, mFechaEfecto)
-        responder(cr, "EsCliente", New ValorBooleanoCaracterisitcaDN(), Me.chkEsCliente.Checked,mFechaEfecto)
+        responder(cr, "EsCliente", New ValorBooleanoCaracterisitcaDN(), Me.chkEsCliente.Checked, mFechaEfecto)
         responder(cr, "IDCliente", New ValorTextoCaracteristicaDN(), Me.lblIDClienteValor.Text, mFechaEfecto)
         responder(cr, "Nombre", New ValorTextoCaracteristicaDN(), Me.txtNombre.Text, mFechaEfecto)
         responder(cr, "Apellido1", New ValorTextoCaracteristicaDN(), Me.txtApellido1.Text, mFechaEfecto)
@@ -611,7 +613,10 @@ Public Class ctrlCuestionarioTarificacion
                                 Exit For
                             End If
                         Next
-                    Case "MCND"
+                        'Case "MCND"
+                        '    Me.ctrlMulticonductor1.ColDatosConductorAdicional = respuesta.IValorCaracteristicaDN.Valor
+                        '    Me.cboNumeroConductoresAdic.SelectedItem = Me.ctrlMulticonductor1.NumeroConductores
+                    Case "ColConductoresAdicionales"
                         Me.ctrlMulticonductor1.ColDatosConductorAdicional = respuesta.IValorCaracteristicaDN.Valor
                         Me.cboNumeroConductoresAdic.SelectedItem = Me.ctrlMulticonductor1.NumeroConductores
                     Case "EsUnicoConductor"
@@ -1511,6 +1516,14 @@ Public Class ctrlCuestionarioTarificacion
     Private Sub dtpFechaTarificacion_ValueChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles dtpFechaTarificacion.ValueChanged
         Try
             mFechaEfecto = dtpFechaTarificacion.Value
+        Catch ex As Exception
+            MostrarError(ex, Me)
+        End Try
+    End Sub
+
+    Private Sub chkTarificacionPrueba_CheckedChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles chkTarificacionPrueba.CheckedChanged
+        Try
+            chkTarificacionPrueba.Checked = True
         Catch ex As Exception
             MostrarError(ex, Me)
         End Try
