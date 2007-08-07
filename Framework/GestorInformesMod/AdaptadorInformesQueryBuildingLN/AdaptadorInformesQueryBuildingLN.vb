@@ -9,7 +9,7 @@ Public Class AdaptadorInformesQueryBuildingLN
     Private Shared mRutaPlantillas As String
 
     Public Sub New()
-        If String.IsNullOrEmpty(mrutaconfiguracion) Then
+        If String.IsNullOrEmpty(mRutaConfiguracion) Then
             Dim ht As Dictionary(Of String, String) = Framework.Configuracion.LectorConfiguracionXML.LeerConfiguracion("AdaptadorInformesQueryBuildingLN.xml")
             If Not ht Is Nothing Then
                 mRutaConfiguracion = ht("DirectorioTemporalInformes")
@@ -112,7 +112,7 @@ Public Class AdaptadorInformesQueryBuildingLN
                 Dim dsHijo As DataSet = GenerarDataSetDesdeTabla(tablaHija)
                 dsTabla.Tables.Add(dsHijo.Tables(0).Copy)
                 'añadimos un datarelation con el nombre que se le quiere dar
-                dsTabla.Relations.Add(New DataRelation(tablaHija.NombreRelacion, dsTabla.Tables(tabla.NombreTabla).Columns(tablaHija.fkPadre), dsTabla.Tables(tablaHija.NombreTabla).Columns(tablaHija.fKPropio), False))
+                dsTabla.Relations.Add(New DataRelation(tablaHija.NombreRelacion, dsTabla.Tables(tabla.NombreTabla).Columns(tablaHija.fkPadre), dsTabla.Tables(tablaHija.NombreTabla).Columns(tablaHija.fkPropio), False))
             Next
         End If
 
