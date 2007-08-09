@@ -1,0 +1,113 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E423FC43-6762-436F-8FF4-F05E5E6C27B6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>VisualObject</RootNamespace>
+    <AssemblyName>VisualObject</AssemblyName>
+    <StartupObject>
+    </StartupObject>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <FxCopRules>
+    </FxCopRules>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.DebuggerVisualizers, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Dibujables\BoxedTypeDibujable.cs" />
+    <Compile Include="Dibujables\ClassDibujable.cs" />
+    <Compile Include="Dibujables\CollectionDibujable.cs" />
+    <Compile Include="ConjuntoDibujables.cs" />
+    <Compile Include="Dibujables\NullForcedDibujable.cs" />
+    <Compile Include="ExploradorClases\ClassNamespaceItem.cs" />
+    <Compile Include="VisualObjectFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VisualObjectFrm.Designer.cs">
+      <DependentUpon>VisualObjectFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Incluidos\FastTimer.cs" />
+    <Compile Include="Incluidos\Vector2F.cs" />
+    <Compile Include="MainLoop.cs" />
+    <Compile Include="Geometria.cs" />
+    <Compile Include="Dibujables\NullDibujable.cs" />
+    <Compile Include="Dibujables\PrimitivoDibujable.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Recursos.cs" />
+    <Compile Include="Dibujables\StructDibujable.cs" />
+    <Compile Include="Dibujables\TipoDibujable.cs" />
+    <Compile Include="Dibujables\TipoRefDibujable.cs" />
+    <Compile Include="Variable.cs" />
+    <Compile Include="VisualObjectEngine.cs" />
+    <Compile Include="VisualObjectCtrl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="VisualObjectCtrl.Designer.cs">
+      <DependentUpon>VisualObjectCtrl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VisualObjectVisualizer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Dibujables\_Diagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="VisualObjectFrm.resx">
+      <DependentUpon>VisualObjectFrm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VisualObjectCtrl.resx">
+      <DependentUpon>VisualObjectCtrl.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\porreferencia.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="Resources\porvalor.gif" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>
