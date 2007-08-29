@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Despliegue.Compartido.ArchivoAD">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoAD.vb</FileName>
+      <HashCode>IAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQQ=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.Compartido.ArchivoHashAD">
+    <Position X="0.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoHashAD.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.Compartido.ArchivoyZipAD">
+    <Position X="0.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoZipAD.vb</FileName>
+      <HashCode>AAAAAAAAAACAAAAAEAAAAIAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.Compartido.ComparadorArchivos">
+    <Position X="2.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ComparadorArchivos.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.Compartido.Empaquetador">
+    <Position X="4.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Empaquetador.vb</FileName>
+      <HashCode>AAAABAABAkAAAAAAAACAEAAAAAAAAAAAAAAAAEAAAAg=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.Compartido.GeneradorHashes">
+    <Position X="6.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>GeneradorHashes.vb</FileName>
+      <HashCode>AAAAAAAAAAAAIAAgAAgAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.Compartido.Serializador">
+    <Position X="6.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Serializador.vb</FileName>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Delegate Name="Despliegue.Compartido.DelProgressFile">
+    <Position X="2.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoZipAD.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Delegate>
+</ClassDiagram>

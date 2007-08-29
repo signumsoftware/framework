@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Despliegue.DN.ArchivoDirDN" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoDirDN.vb</FileName>
+      <HashCode>ABAAAAIAAAAAAASAAAAAAAAIAAAABAEAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.DN.ArchivoDN" Collapsed="true">
+    <Position X="1.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoDN.vb</FileName>
+      <HashCode>AAAAAAAAAARgAAQAAABAAAAAIAADAAAAAAAAAAAQAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Despliegue.DN.ArchivoGenDN" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoGenDN.vb</FileName>
+      <HashCode>ABAAAAIAAAAAAACAAAAAAAAIAAAABAEAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Despliegue.DN.ArchivoOrdenesDN" Collapsed="true">
+    <Position X="5.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoOrdenesDN.vb</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAACBAAAQEAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mArchivo" />
+      <Field Name="mOrden" />
+    </ShowAsAssociation>
+  </Class>
+  <Enum Name="Despliegue.DN.Orden" Collapsed="true">
+    <Position X="5.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ArchivoOrdenesDN.vb</FileName>
+      <HashCode>AAAQAAAAAAAAAAAAAAAAAAEAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>
