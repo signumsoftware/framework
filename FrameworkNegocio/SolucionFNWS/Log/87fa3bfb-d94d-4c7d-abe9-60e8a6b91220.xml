@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<SalidaExcepcionalEntradaLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <mActor>ato</mActor>
-  <mFecha>2007-07-21T20:18:36.543+02:00</mFecha>
-  <mComentario>id sesion:w5gdtp55jzgvu2rtpzfvq355</mComentario>
-  <mMensajeError>No exite respuesta para el modulador requerido: CARN</mMensajeError>
-</SalidaExcepcionalEntradaLog>
