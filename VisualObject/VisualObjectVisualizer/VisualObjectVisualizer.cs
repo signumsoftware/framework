@@ -5,12 +5,14 @@ using Microsoft.VisualStudio.DebuggerVisualizers;
 using System.Drawing;
 using System.Collections;
 using System.Runtime.Serialization;
+using VisualObjectVisualizer;
+using Framework.DatosNegocio;
 
 [assembly: System.Diagnostics.DebuggerVisualizer(
-typeof(VisualObject.VisualObjectVisualizer), typeof(VisualizerObjectSource),
- Target = typeof(ArrayList), Description = "VisualObject")]
+typeof(VisualObjectPlugin.VisualObjectVisualizer), typeof(VisualizerObjectSource),
+ Target = typeof(EntidadBaseDN), Description = "VisualObject")]
 
-namespace VisualObject
+namespace VisualObjectPlugin
 {
     // TODO: Add the following to SomeType's defintion to see this visualizer when debugging instances of SomeType:
     // 
@@ -28,18 +30,15 @@ namespace VisualObject
     {
         protected override void Show(IDialogVisualizerService windowService, IVisualizerObjectProvider objectProvider)
         {
-            
             object objeto = objectProvider.GetObject();
             if (objeto != null)
             {
-                using ( VisualObjectFrm displayform = new VisualObjectFrm())
+                using ( Dialogo displayform = new Dialogo())
                 {
-                    displayform.CurrentObject = objeto;
+                    displayform.MyStream = objectProvider.GetData();
                     displayform.ShowDialog();
                 }
             }
-            
-
         }
 
         // TODO: Add the following to your testing code to test the visualizer:
