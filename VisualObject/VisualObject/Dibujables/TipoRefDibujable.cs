@@ -77,8 +77,14 @@ namespace VisualObject
             rectangulo.Width = width;
             rectangulo.Height = height;
 
-            Posicion = new Vector2F(r.Next(width / 2, sizeTotal.Width - rectangulo.Width / 2),
-                                    r.Next(height  / 2, sizeTotal.Height - height/2));
+            int w2 = width / 2;
+            int h2 = height / 2;
+
+            int mw2 = sizeTotal.Width - w2;
+            int mh2 = sizeTotal.Height - h2;
+
+            Posicion = new Vector2F(r.Next(Math.Min(w2, mw2), Math.Max(w2, mw2)),
+                                    r.Next(Math.Min(h2, mh2), Math.Max(h2, mh2)));
         }
 
         #region Recursos dibujado

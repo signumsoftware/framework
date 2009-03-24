@@ -1,72 +1,80 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
-  <Font Name="Tahoma" Size="8.25" />
   <Class Name="VisualObject.TipoDibujable">
     <Position X="4" Y="0.5" Width="2.75" />
-    <TypeIdentifier>
-      <FileName>Dibujables\TipoDibujable.cs</FileName>
-      <HashCode>BAAQBAAAAAAAAAAAAgQAAAAEAEAABAAAAAQgAAAAAAQ=</HashCode>
-    </TypeIdentifier>
     <Compartments>
       <Compartment Name="Properties" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
+    <TypeIdentifier>
+      <HashCode>BAAQBAAAAAAAAAAAAgQAAAAEAEAABAAAAAQgAAAAAAQ=</HashCode>
+      <FileName>Dibujables\TipoDibujable.cs</FileName>
+    </TypeIdentifier>
   </Class>
   <Class Name="VisualObject.ClassDibujable">
-    <Position X="1" Y="7.75" Width="1.5" />
+    <Position X="1" Y="10.25" Width="1.5" />
     <TypeIdentifier>
-      <FileName>Dibujables\ClassDibujable.cs</FileName>
       <HashCode>AAAAAAAAAAAAAQAAAAEAEAAAAAAAASAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dibujables\ClassDibujable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="VisualObject.StructDibujable">
     <Position X="6.25" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <FileName>Dibujables\StructDibujable.cs</FileName>
       <HashCode>BAAQAAAAAAAAAQAAAAEAAAAAEAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Dibujables\StructDibujable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="VisualObject.PrimitivoDibujable">
     <Position X="8" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <FileName>Dibujables\PrimitivoDibujable.cs</FileName>
       <HashCode>BAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Dibujables\PrimitivoDibujable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="VisualObject.NullDibujable">
     <Position X="4.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <FileName>Dibujables\NullDibujable.cs</FileName>
       <HashCode>BAAQAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Dibujables\NullDibujable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="VisualObject.TipoRefDibujable">
     <Position X="2.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <FileName>Dibujables\TipoRefDibujable.cs</FileName>
       <HashCode>BAAQCAAAAAAAAAAABgAQEASAKCAAgSAggAQiJABEBEA=</HashCode>
+      <FileName>Dibujables\TipoRefDibujable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="VisualObject.BoxedValueType">
-    <Position X="4.5" Y="7.75" Width="1.5" />
+    <Position X="4.5" Y="10.25" Width="1.5" />
+    <InheritanceLine Type="VisualObject.TipoRefDibujable" FixedFromPoint="true">
+      <Path>
+        <Point X="3.5" Y="9.724" />
+        <Point X="3.5" Y="9.95" />
+        <Point X="5.25" Y="9.95" />
+        <Point X="5.25" Y="10.25" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
-      <FileName>Dibujables\BoxedTypeDibujable.cs</FileName>
       <HashCode>AAAAAAAAAAAAAQAAAAEAEAAAAAAAASAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dibujables\BoxedTypeDibujable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="VisualObject.CollectionDibujable">
-    <Position X="2.75" Y="7.75" Width="1.5" />
+    <Position X="2.75" Y="10.25" Width="1.5" />
     <TypeIdentifier>
-      <FileName>Dibujables\CollectionDibujable.cs</FileName>
       <HashCode>AAAABAAAAAQAAQAAAAEAEAAAAAAAASAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dibujables\CollectionDibujable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Struct Name="VisualObject.Variable">
-    <Position X="1.5" Y="1.5" Width="1.5" />
+    <Position X="0.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <FileName>Variable.cs</FileName>
       <HashCode>AAAABBAAAAAAAASEgAAAgAABAAAAAJAAAAAAAAAAAAQ=</HashCode>
+      <FileName>Variable.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Struct>
+  <Font Name="Tahoma" Size="8.25" />
 </ClassDiagram>

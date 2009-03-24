@@ -1,13 +1,15 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualObject", "VisualObject\VisualObject.csproj", "{E423FC43-6762-436F-8FF4-F05E5E6C27B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prueba1", "Prueba1\Prueba1.csproj", "{EA23B91B-B495-43C5-8B55-288E6B8D08EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualObjectPlugin", "VisualObjectVisualizer\VisualObjectPlugin.csproj", "{62BA02CF-4D60-4B87-8CF0-B719A07D040B}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
@@ -17,6 +19,9 @@ Global
 		SccProjectUniqueName2 = VisualObject\\VisualObject.csproj
 		SccProjectName2 = VisualObject
 		SccLocalPath2 = VisualObject
+		SccProjectUniqueName3 = VisualObjectVisualizer\\VisualObjectPlugin.csproj
+		SccProjectName3 = VisualObjectVisualizer
+		SccLocalPath3 = VisualObjectVisualizer
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +52,16 @@ Global
 		{EA23B91B-B495-43C5-8B55-288E6B8D08EB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{EA23B91B-B495-43C5-8B55-288E6B8D08EB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{EA23B91B-B495-43C5-8B55-288E6B8D08EB}.Release|Win32.ActiveCfg = Release|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{62BA02CF-4D60-4B87-8CF0-B719A07D040B}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

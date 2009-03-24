@@ -60,6 +60,7 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -71,6 +72,7 @@
               <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
@@ -88,6 +90,7 @@
               <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -122,7 +125,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj0yLjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAABC
-        DwAAAk1TRnQBSQFMAgEBAwEAAQQBAAEEAQABEAEAARABAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFA
+        DwAAAk1TRnQBSQFMAgEBAwEAAQQBAAEEAQABEAEAARABAAT/ASEBEAj/AUIBTQE2BwABNgMAASgDAAFA
         AwABEAMAAQEBAAEgBgABEP8AGwABMwEUAQEBYAEmAYMBGgHrAScBVAEBAcQBIwEHAQEBNDAAATYBIgEw
         AX8BFAF/AbsB7wENAX8BvAHyAQwBfgG+AfEBMwE4AU8BmAgAATQBOQFPAZoBEQGAAbwB8QENAX8BvAHy
         AQ0BegG8Ae8BNgEiATABfQwAATUBAQEiAWQBHAEBAb4B4QEYAQEB0QHnARcBAQHNAecBFAEBAcoB5wET
@@ -187,7 +190,7 @@
         AQECAAHAAf8BwAEDAYABAQIAAcABfwHAAQMBgAEBAgABwAEfAcABAwGAAQECAAHAAQcBwAEDAYABAQIA
         AcABAwHAAQMBgAEBAgABwAEDAcABAwGAAQECAAHAAQMBwAEDAYABAQIAAcABAwHAAQMBgAEBAgABwAEH
         AcABAwGAAQECAAHAAR8BwAEDAYABAQIAAcABfwHAAQMBgAEBAgABwAH/AcABAwGAAQECAAHDAf8BwQGD
-        AYABAQIABv8CAAs=
+        AYABAQIABv8YAAs=
 </value>
   </data>
 </root>

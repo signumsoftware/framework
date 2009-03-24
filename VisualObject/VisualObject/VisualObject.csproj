@@ -1,20 +1,39 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E423FC43-6762-436F-8FF4-F05E5E6C27B6}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VisualObject</RootNamespace>
     <AssemblyName>VisualObject</AssemblyName>
-    <StartupObject>
-    </StartupObject>
+    <StartupObject>VisualObject.Program</StartupObject>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,7 +56,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.DebuggerVisualizers, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -51,6 +69,12 @@
     <Compile Include="ConjuntoDibujables.cs" />
     <Compile Include="Dibujables\NullForcedDibujable.cs" />
     <Compile Include="ExploradorClases\ClassNamespaceItem.cs" />
+    <Compile Include="Manager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Manager.Designer.cs">
+      <DependentUpon>Manager.cs</DependentUpon>
+    </Compile>
     <Compile Include="VisualObjectFrm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -59,7 +83,6 @@
     </Compile>
     <Compile Include="Incluidos\FastTimer.cs" />
     <Compile Include="Incluidos\Vector2F.cs" />
-    <Compile Include="MainLoop.cs" />
     <Compile Include="Geometria.cs" />
     <Compile Include="Dibujables\NullDibujable.cs" />
     <Compile Include="Dibujables\PrimitivoDibujable.cs" />
@@ -82,12 +105,15 @@
     <Compile Include="VisualObjectCtrl.Designer.cs">
       <DependentUpon>VisualObjectCtrl.cs</DependentUpon>
     </Compile>
-    <Compile Include="VisualObjectVisualizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Dibujables\_Diagram1.cd" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Manager.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>Manager.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="VisualObjectFrm.resx">
       <DependentUpon>VisualObjectFrm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -108,6 +134,23 @@
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
     <None Include="Resources\porvalor.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

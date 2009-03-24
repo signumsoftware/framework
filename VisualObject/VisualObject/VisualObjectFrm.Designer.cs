@@ -41,32 +41,32 @@ namespace VisualObject
             this.label4 = new System.Windows.Forms.Label();
             this.tbGravedad = new System.Windows.Forms.TrackBar();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label9 = new System.Windows.Forms.Label();
+            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.nUDLimitObjts = new System.Windows.Forms.NumericUpDown();
+            this.cbLimitObjts = new System.Windows.Forms.CheckBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.nUDLimitDeep = new System.Windows.Forms.NumericUpDown();
+            this.cbLimitDeep = new System.Windows.Forms.CheckBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.label6 = new System.Windows.Forms.Label();
             this.tbDistMuelles = new System.Windows.Forms.TrackBar();
             this.label5 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.cbLimitDeep = new System.Windows.Forms.CheckBox();
-            this.nUDLimitDeep = new System.Windows.Forms.NumericUpDown();
-            this.label7 = new System.Windows.Forms.Label();
-            this.cbLimitObjts = new System.Windows.Forms.CheckBox();
-            this.nUDLimitObjts = new System.Windows.Forms.NumericUpDown();
-            this.label8 = new System.Windows.Forms.Label();
             this.visualObjectCtrl1 = new VisualObject.VisualObjectCtrl();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.treeView1 = new System.Windows.Forms.TreeView();
-            this.label9 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.tbViento)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbRepulsion)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbMuelles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbGravedad)).BeginInit();
             this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitObjts)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitDeep)).BeginInit();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbDistMuelles)).BeginInit();
-            this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitDeep)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitObjts)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -84,6 +84,7 @@ namespace VisualObject
             // imageList1
             // 
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
             this.imageList1.Images.SetKeyName(0, "media_play_green.png");
             this.imageList1.Images.SetKeyName(1, "media_pause.png");
             this.imageList1.Images.SetKeyName(2, "media_stop_red.png");
@@ -124,7 +125,7 @@ namespace VisualObject
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(15, 35);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(28, 13);
+            this.label1.Size = new System.Drawing.Size(32, 13);
             this.label1.TabIndex = 6;
             this.label1.Text = "Wind";
             // 
@@ -133,7 +134,7 @@ namespace VisualObject
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(15, 83);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(50, 13);
+            this.label2.Size = new System.Drawing.Size(54, 13);
             this.label2.TabIndex = 7;
             this.label2.Text = "Repulsion";
             // 
@@ -142,7 +143,7 @@ namespace VisualObject
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(14, 134);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(76, 13);
+            this.label3.Size = new System.Drawing.Size(80, 13);
             this.label3.TabIndex = 8;
             this.label3.Text = "Spring Strength";
             // 
@@ -151,7 +152,7 @@ namespace VisualObject
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(14, 254);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(37, 13);
+            this.label4.Size = new System.Drawing.Size(41, 13);
             this.label4.TabIndex = 10;
             this.label4.Text = "Friction";
             // 
@@ -178,6 +179,123 @@ namespace VisualObject
             this.tabControl1.Size = new System.Drawing.Size(159, 400);
             this.tabControl1.TabIndex = 11;
             // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.label9);
+            this.tabPage1.Controls.Add(this.treeView1);
+            this.tabPage1.Controls.Add(this.checkBox1);
+            this.tabPage1.Controls.Add(this.label8);
+            this.tabPage1.Controls.Add(this.nUDLimitObjts);
+            this.tabPage1.Controls.Add(this.cbLimitObjts);
+            this.tabPage1.Controls.Add(this.label7);
+            this.tabPage1.Controls.Add(this.nUDLimitDeep);
+            this.tabPage1.Controls.Add(this.cbLimitDeep);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(151, 374);
+            this.tabPage1.TabIndex = 1;
+            this.tabPage1.Text = "Build";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 124);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(122, 13);
+            this.label9.TabIndex = 9;
+            this.label9.Text = "Enable/Disable by Class";
+            // 
+            // treeView1
+            // 
+            this.treeView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.treeView1.CheckBoxes = true;
+            this.treeView1.Location = new System.Drawing.Point(6, 140);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(139, 228);
+            this.treeView1.TabIndex = 8;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(6, 104);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(108, 17);
+            this.checkBox1.TabIndex = 7;
+            this.checkBox1.Text = "Pack ICollections";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(77, 78);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(41, 13);
+            this.label8.TabIndex = 6;
+            this.label8.Text = "objects";
+            // 
+            // nUDLimitObjts
+            // 
+            this.nUDLimitObjts.Location = new System.Drawing.Point(27, 78);
+            this.nUDLimitObjts.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.nUDLimitObjts.Name = "nUDLimitObjts";
+            this.nUDLimitObjts.Size = new System.Drawing.Size(44, 20);
+            this.nUDLimitObjts.TabIndex = 5;
+            this.nUDLimitObjts.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
+            // cbLimitObjts
+            // 
+            this.cbLimitObjts.AutoSize = true;
+            this.cbLimitObjts.Location = new System.Drawing.Point(6, 55);
+            this.cbLimitObjts.Name = "cbLimitObjts";
+            this.cbLimitObjts.Size = new System.Drawing.Size(119, 17);
+            this.cbLimitObjts.TabIndex = 4;
+            this.cbLimitObjts.Text = "Limit total objects to";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(77, 29);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(32, 13);
+            this.label7.TabIndex = 3;
+            this.label7.Text = "steps";
+            // 
+            // nUDLimitDeep
+            // 
+            this.nUDLimitDeep.Location = new System.Drawing.Point(25, 29);
+            this.nUDLimitDeep.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.nUDLimitDeep.Name = "nUDLimitDeep";
+            this.nUDLimitDeep.Size = new System.Drawing.Size(46, 20);
+            this.nUDLimitDeep.TabIndex = 2;
+            this.nUDLimitDeep.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
+            // cbLimitDeep
+            // 
+            this.cbLimitDeep.AutoSize = true;
+            this.cbLimitDeep.Location = new System.Drawing.Point(6, 6);
+            this.cbLimitDeep.Name = "cbLimitDeep";
+            this.cbLimitDeep.Size = new System.Drawing.Size(140, 17);
+            this.cbLimitDeep.TabIndex = 1;
+            this.cbLimitDeep.Text = "Limit exploration deep to";
+            // 
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.label6);
@@ -195,14 +313,13 @@ namespace VisualObject
             this.tabPage3.Size = new System.Drawing.Size(151, 374);
             this.tabPage3.TabIndex = 0;
             this.tabPage3.Text = "Phisics";
-            this.tabPage3.UseVisualStyleBackColor = false;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(15, 197);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(78, 13);
+            this.label6.Size = new System.Drawing.Size(82, 13);
             this.label6.TabIndex = 12;
             this.label6.Text = "Spring Distance";
             // 
@@ -225,9 +342,9 @@ namespace VisualObject
             this.label5.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.label5.Location = new System.Drawing.Point(15, 436);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(128, 39);
+            this.label5.Size = new System.Drawing.Size(124, 39);
             this.label5.TabIndex = 12;
-            this.label5.Text = "Olmo del Corral\r\nolmobrutall@hotmail.com\r\nArkadel 21, Madrid (Spain)";
+            this.label5.Text = "Olmo del Corral\r\nolmobrutall@hotmail.com\r Signum Software";
             // 
             // button2
             // 
@@ -241,94 +358,6 @@ namespace VisualObject
             this.button2.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // tabPage1
-            // 
-            this.tabPage1.Controls.Add(this.label9);
-            this.tabPage1.Controls.Add(this.treeView1);
-            this.tabPage1.Controls.Add(this.checkBox1);
-            this.tabPage1.Controls.Add(this.label8);
-            this.tabPage1.Controls.Add(this.nUDLimitObjts);
-            this.tabPage1.Controls.Add(this.cbLimitObjts);
-            this.tabPage1.Controls.Add(this.label7);
-            this.tabPage1.Controls.Add(this.nUDLimitDeep);
-            this.tabPage1.Controls.Add(this.cbLimitDeep);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(151, 374);
-            this.tabPage1.TabIndex = 1;
-            this.tabPage1.Text = "Build";
-            // 
-            // cbLimitDeep
-            // 
-            this.cbLimitDeep.AutoSize = true;
-            this.cbLimitDeep.Location = new System.Drawing.Point(6, 6);
-            this.cbLimitDeep.Name = "cbLimitDeep";
-            this.cbLimitDeep.Size = new System.Drawing.Size(136, 17);
-            this.cbLimitDeep.TabIndex = 1;
-            this.cbLimitDeep.Text = "Limit exploration deep to";
-            // 
-            // nUDLimitDeep
-            // 
-            this.nUDLimitDeep.Location = new System.Drawing.Point(25, 29);
-            this.nUDLimitDeep.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.nUDLimitDeep.Name = "nUDLimitDeep";
-            this.nUDLimitDeep.Size = new System.Drawing.Size(46, 20);
-            this.nUDLimitDeep.TabIndex = 2;
-            this.nUDLimitDeep.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(77, 29);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(28, 13);
-            this.label7.TabIndex = 3;
-            this.label7.Text = "steps";
-            // 
-            // cbLimitObjts
-            // 
-            this.cbLimitObjts.AutoSize = true;
-            this.cbLimitObjts.Location = new System.Drawing.Point(6, 55);
-            this.cbLimitObjts.Name = "cbLimitObjts";
-            this.cbLimitObjts.Size = new System.Drawing.Size(115, 17);
-            this.cbLimitObjts.TabIndex = 4;
-            this.cbLimitObjts.Text = "Limit total objects to";
-            // 
-            // nUDLimitObjts
-            // 
-            this.nUDLimitObjts.Location = new System.Drawing.Point(27, 78);
-            this.nUDLimitObjts.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.nUDLimitObjts.Name = "nUDLimitObjts";
-            this.nUDLimitObjts.Size = new System.Drawing.Size(44, 20);
-            this.nUDLimitObjts.TabIndex = 5;
-            this.nUDLimitObjts.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(77, 78);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(37, 13);
-            this.label8.TabIndex = 6;
-            this.label8.Text = "objects";
-            // 
             // visualObjectCtrl1
             // 
             this.visualObjectCtrl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -340,35 +369,6 @@ namespace VisualObject
             this.visualObjectCtrl1.Size = new System.Drawing.Size(481, 479);
             this.visualObjectCtrl1.TabIndex = 1;
             this.visualObjectCtrl1.VisualObjectEngine = null;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(6, 104);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(104, 17);
-            this.checkBox1.TabIndex = 7;
-            this.checkBox1.Text = "Pack ICollections";
-            // 
-            // treeView1
-            // 
-            this.treeView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.treeView1.CheckBoxes = true;
-            this.treeView1.Location = new System.Drawing.Point(6, 140);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(139, 228);
-            this.treeView1.TabIndex = 8;
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 124);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(118, 13);
-            this.label9.TabIndex = 9;
-            this.label9.Text = "Enable/Disable by Class";
             // 
             // VisualObjectFrm
             // 
@@ -389,13 +389,13 @@ namespace VisualObject
             ((System.ComponentModel.ISupportInitialize)(this.tbMuelles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbGravedad)).EndInit();
             this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitObjts)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitDeep)).EndInit();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbDistMuelles)).EndInit();
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitDeep)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nUDLimitObjts)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

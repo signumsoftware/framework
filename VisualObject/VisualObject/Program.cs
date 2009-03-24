@@ -15,7 +15,7 @@ namespace VisualObject
         static void Main()
         {
             Application.EnableVisualStyles();
-            Application.Run(new VisualObjectFrm());
+            Application.Run(new Manager());
         }
     }
 }
