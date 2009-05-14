@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="DesktopBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="DesktopBuild" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <!-- TO EDIT BUILD TYPE DEFINITION
 
   To edit the build type, you will need to edit this file which was generated
@@ -29,7 +29,7 @@
   this build type will use the modified settings
   -->
   <!-- Do not edit this -->
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v8.0\TeamBuild\Microsoft.TeamFoundation.Build.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\TeamBuild\Microsoft.TeamFoundation.Build.targets" />
   <ProjectExtensions>
     <!--  DESCRIPTION
      The description is associated with a build type. Edit the value for making changes.
