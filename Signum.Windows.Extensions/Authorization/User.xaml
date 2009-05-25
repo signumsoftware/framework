@@ -1,0 +1,14 @@
+﻿<UserControl x:Class="Signum.Windows.Authorization.User"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
+    xmlns:auth="clr-namespace:Signum.Windows.Authorization"
+    m:Common.TypeContext="d:UserDN" MinWidth="300">
+    <StackPanel >
+    	<m:ValueLine LabelText="_UserName" m:Common.Route="UserName"/>
+    	<auth:DoublePassword PasswordHash="{Binding Path=PasswordHash}"/>
+        <m:EntityLine LabelText="_Role" m:Common.Route="Role"  />
+        <m:EntityLine LabelText="_Related" m:Common.Route="Related"/>
+    </StackPanel>
+</UserControl>

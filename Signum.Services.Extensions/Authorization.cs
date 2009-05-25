@@ -1,0 +1,86 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.ServiceModel;
+using Signum.Entities.Authorization;
+using Signum.Entities;
+
+namespace Signum.Services
+{
+    [ServiceContract]
+    public interface IUserServer
+    {
+        [OperationContract, NetDataContract]
+        UserDN GetCurrentUser(); 
+    }
+
+    [ServiceContract]
+    public interface ITypeAuthServer
+    {
+        [OperationContract, NetDataContract]
+        List<TypeAccessRule> GetTypesAccessRules(Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        void SetTypesAccessRules(List<TypeAccessRule> rules, Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        Dictionary<Type, TypeAccess> AuthorizedTypes(); 
+    }
+
+    [ServiceContract]
+    public interface IServiceOperationAuthServer
+    {
+        [OperationContract, NetDataContract]
+        List<AllowedRule> GetServiceOperationAllowedRules(Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        void SetServiceOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role); 
+    }
+
+    [ServiceContract]
+    public interface IPermissionAuthServer
+    {
+        [OperationContract, NetDataContract]
+        List<AllowedRule> GetPermissionAllowedRules(Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        void SetPermissionAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        bool IsAuthorizedFor(object permission);
+    }
+
+    [ServiceContract]
+    public interface IPropertyAuthServer
+    {
+        [OperationContract, NetDataContract]
+        List<AccessRule> GetPropertyAccessRules(Lazy<RoleDN> role, TypeDN typeDN);
+
+        [OperationContract, NetDataContract]
+        void SetPropertyAccessRules(List<AccessRule> rules, Lazy<RoleDN> role, TypeDN typeDN);
+
+        [OperationContract, NetDataContract]
+        Dictionary<Type, Dictionary<string, Access>> AuthorizedProperties(); 
+    }
+
+    [ServiceContract]
+    public interface IQueryAuthServer
+    {
+        [OperationContract, NetDataContract]
+        List<AllowedRule> GetQueryAllowedRules(Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        void SetQueryAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+    }
+
+    [ServiceContract]
+    public interface IActionAuthServer
+    {
+        [OperationContract, NetDataContract]
+        List<AllowedRule> GetActionAllowedRules(Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        void SetActionAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+    }
+}

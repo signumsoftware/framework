@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Signum.Windows.Extensions</RootNamespace>
+    <AssemblyName>Signum.Windows.Extensions</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c" />
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <ProjectReference Include="..\Signum.Windows\Signum.Windows.csproj">
+      <Project>{76278145-7CCD-4411-9B8A-078708128571}</Project>
+      <Name>Signum.Windows</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Authorization\AuthLogic.cs" />
+    <Compile Include="Authorization\ActionRules.xaml.cs">
+      <DependentUpon>ActionRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\PermissionRules.xaml.cs">
+      <DependentUpon>PermissionRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\PropertyRules.xaml.cs">
+      <DependentUpon>PropertyRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\TypeRules.xaml.cs">
+      <DependentUpon>TypeRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\ServiceOperationRules.xaml.cs">
+      <DependentUpon>ServiceOperationRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\Role.xaml.cs">
+      <DependentUpon>Role.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\DoublePassword.xaml.cs">
+      <DependentUpon>DoublePassword.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\Login.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\QueryRules.xaml.cs">
+      <DependentUpon>QueryRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\User.xaml.cs">
+      <DependentUpon>User.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStrip.cs" />
+    <Compile Include="Calendars\CalendarStripHeader.xaml.cs">
+      <DependentUpon>CalendarStripHeader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripList.xaml.cs">
+      <DependentUpon>CalendarStripList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripTreeView.xaml.cs">
+      <DependentUpon>CalendarStripTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripWallpaper.xaml.cs">
+      <DependentUpon>CalendarStripWallpaper.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripWithTitles.xaml.cs">
+      <DependentUpon>CalendarStripWithTitles.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\DatePanel.cs" />
+    <Compile Include="Converters.cs" />
+    <Compile Include="Excel\ExcelReport.xaml.cs">
+      <DependentUpon>ExcelReport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Excel\ExcelReportGenerator.cs" />
+    <Compile Include="Excel\ExcelReportMenuItem.cs" />
+    <Compile Include="Excel\ExcelReportPivotTableMenuItem.cs" />
+    <Compile Include="Excel\ExcelReportPivotTablesGenerator.cs" />
+    <Compile Include="Operations\ActionStyle.cs" />
+    <Compile Include="Panels\TreeMapPanel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.es.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.es.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Shapes\Arrow.cs" />
+    <Compile Include="ZoomViewer.cs" />
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Authorization\AuthResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Authorization\ActionRules.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\PermissionRules.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\PropertyRules.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\TypeRules.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\ServiceOperationRules.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\Role.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\DoublePassword.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Authorization\Login.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Authorization\QueryRules.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Authorization\User.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Calendars\CalendarStripHeader.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Calendars\CalendarStripList.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Calendars\CalendarStripTreeView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Calendars\CalendarStripWallpaper.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Calendars\CalendarStripWithTitles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Excel\ExcelReport.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ZoomViewer.generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
+      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
+      <Name>Signum.Entities.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
+      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Name>Signum.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Excel\Signum.Excel.csproj">
+      <Project>{7730FF46-3548-4E79-8028-22F4D33BFE86}</Project>
+      <Name>Signum.Excel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Services.Extensions\Signum.Services.Extensions.csproj">
+      <Project>{81988BE3-48CB-4E3D-A044-F7B60FEE2456}</Project>
+      <Name>Signum.Services.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Services\Signum.Services.csproj">
+      <Project>{B63C47DF-4EC3-4D80-863C-2B5A38D2C35B}</Project>
+      <Name>Signum.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
+      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Name>Signum.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\excelDoc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\excel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\folderedit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\keys.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\keysicon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\reload.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
