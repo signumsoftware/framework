@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" NombreVis="POLIZA (resumen contable)" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" Nombre="FN.Seguros.Polizas.DN.PolizaDN-BASICA-ENT" ArbolNavegacionVisible="true" NavegacionesAutomaticas="false">
+  <ColEntradaMapNavBuscador />
+  <ColComandoMap />
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1">
+      <ColEntradaMapNavBuscador />
+      <ColComandoMap />
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="ID" Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="true" NombreVis="Tomador" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="Tomador" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="COD Colab." Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="CocColaborador" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="NumeroPoliza" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreProp="NumeroPoliza" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="true" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="ImportesDebidos" Editable="true" ControlAsignado="MV2Controles, Version=1.0.2732.21871, Culture=neutral, PublicKeyToken=null/MV2Controles.CtrlBusquedaGD" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="150" NombreProp="" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="true">
+          <ColEntradaMapNavBuscador>
+            <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Importes debidos" Editable="false" DatosControlAsignado="" DatosBusqueda="vwAIDxPCxPR" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="GestionPagosDN/FN.GestionPagos.DN.ApunteImpDDN" NombreCampo="idPoliza" NombrePropiedad="ID" EsNavegable="true" MostrarComandosDelTipo="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+            </EntradaMapNavBuscadorXML>
+          </ColEntradaMapNavBuscador>
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Pagos" Editable="true" ControlAsignado="MV2Controles, Version=1.0.2732.21871, Culture=neutral, PublicKeyToken=null/MV2Controles.CtrlBusquedaGD" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="200" NombreProp="" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="true">
+          <ColEntradaMapNavBuscador>
+            <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Pagos" Editable="false" DatosControlAsignado="" DatosBusqueda="vwPagosxAIDXPCxPRxPol" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="GestionPagosDN/FN.GestionPagos.DN.PagoDN" NombreCampo="idPoliza" NombrePropiedad="ID" EsNavegable="true" MostrarComandosDelTipo="true">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+            </EntradaMapNavBuscadorXML>
+          </ColEntradaMapNavBuscador>
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Liquidaciones" Editable="true" ControlAsignado="MV2Controles, Version=1.0.2732.21871, Culture=neutral, PublicKeyToken=null/MV2Controles.CtrlBusquedaGD" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="300" NombreProp="" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="true">
+          <ColEntradaMapNavBuscador>
+            <EntradaMapNavBuscadorXML Instanciable="false" NombreVis="Liquidaciones y sus Pagos" Editable="false" DatosControlAsignado="" DatosBusqueda="vwLiquidacionxCausaxAIDxPago" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="true" OcultarAccionesxDefecto="false" Filtrable="false" FiltroVisible="false" Ancho="-1" Alto="-1" NombreEnsambladoyTipo="GestionPagosDN/FN.GestionPagos.DN.LiquidacionPagoDN" NombreCampo="idPoliza" NombrePropiedad="ID" EsNavegable="true" MostrarComandosDelTipo="false">
+              <ColEntradaMapNavBuscador />
+              <ColComandoMap />
+            </EntradaMapNavBuscadorXML>
+          </ColEntradaMapNavBuscador>
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="FechaAlta" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" DevolucionAutomatica="false" BusquedaAutomatica="false" OcultarAccionesxDefecto="false" Filtrable="true" FiltroVisible="true" Ancho="-1" Alto="-1" NombreProp="FechaAlta" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false" MedidasIcoLabText="-1*f/-1*f/-1*f/-1*f" Virtual="false">
+          <ColEntradaMapNavBuscador />
+          <ColComandoMap />
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColNombresTiposComaptibles />
+</InstanciaMapXml>

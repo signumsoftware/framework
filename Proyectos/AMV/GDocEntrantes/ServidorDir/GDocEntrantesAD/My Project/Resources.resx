@@ -1,0 +1,681 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="uwOpPostClasificarSinCanal" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[uwOpPostClasificarSinCanal]
+AS
+SELECT     dbo.vwRelacionesAPostClasificar.idOper, dbo.vwRelacionesAPostClasificar.idTipoOperacionREnFDN, dbo.vwRelacionesAPostClasificar.idTipoCanal, 
+                      dbo.vwRelacionesAPostClasificar.Cancelada, dbo.vwRelacionesAPostClasificar.FFOper, dbo.vwRelacionesAPostClasificar.Baja, 
+                      dbo.vwRelacionesAPostClasificar.idRel, dbo.tlOperacionEnRelacionENFicheroDN.idTipoCanal AS TipoCanalTL, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN AS TipoOpTL
+FROM         dbo.vwRelacionesAPostClasificar INNER JOIN
+                      dbo.tlOperacionEnRelacionENFicheroDN ON 
+                      dbo.vwRelacionesAPostClasificar.idRel = dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero
+WHERE     (dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN = 1) AND (dbo.vwRelacionesAPostClasificar.idTipoCanal IS NULL)</value>
+  </data>
+  <data name="uwOpRechazadasSinCanal" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[uwOpRechazadasSinCanal]
+AS
+SELECT     TOP 100 PERCENT dbo.vwRelacionesAClasificar.idOper, dbo.vwRelacionesAClasificar.idTipoOperacionREnFDN, 
+                      dbo.vwRelacionesAClasificar.idTipoCanal, dbo.vwRelacionesAClasificar.Cancelada, dbo.vwRelacionesAClasificar.Baja, 
+                      dbo.vwRelacionesAClasificar.FFOper, dbo.vwRelacionesAClasificar.idRel, dbo.vwRelacionesAClasificar.idRelPendiente, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.idTipoCanal AS TipoCanalTL, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN AS TipoOpTL
+FROM         dbo.vwRelacionesAClasificar INNER JOIN
+                      dbo.tlOperacionEnRelacionENFicheroDN ON 
+                      dbo.vwRelacionesAClasificar.idRel = dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero
+WHERE     (dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN = 1) AND (dbo.vwRelacionesAClasificar.idTipoCanal IS NULL)
+ORDER BY dbo.tlOperacionEnRelacionENFicheroDN.idTipoCanal</value>
+  </data>
+  <data name="vuOperaciones" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vuOperaciones]
+AS
+
+
+SELECT     dbo.tlOperacionEnRelacionENFicheroDN.ID, dbo.tlRelacionENFicheroDN.ID AS idRel, dbo.tlOperacionEnRelacionENFicheroDN.Cancelada, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FInicio, dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal, 
+                      dbo.tlTipoOperacionREnFDN.Nombre, dbo.tlOperacionEnRelacionENFicheroDN.Nombre AS EstadoFijado, dbo.tlOperadorDN.Nombre AS Operador, 
+                      dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero, dbo.tlRelacionENFicheroDN.Periodo_FInicio AS fiRel, 
+                      dbo.tlRelacionENFicheroDN.Periodo_FFinal AS ffRel, dbo.tlHuellaFicheroAlmacenadoIODN.NombreOriginalFichero, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.Nombre AS HuellaFichero, dbo.tlTipoEntNegoioDN.Nombre AS TipoEntidadNegocio
+FROM         dbo.tlOperacionEnRelacionENFicheroDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN ON dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero = dbo.tlRelacionENFicheroDN.ID INNER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON dbo.tlRelacionENFicheroDN.idHuellaFichero = dbo.tlHuellaFicheroAlmacenadoIODN.ID INNER JOIN
+                      dbo.tlTipoEntNegoioDN ON dbo.tlRelacionENFicheroDN.idTipoEntNegoio = dbo.tlTipoEntNegoioDN.ID LEFT OUTER JOIN
+                      dbo.tlOperadorDN ON dbo.tlOperacionEnRelacionENFicheroDN.idOperador = dbo.tlOperadorDN.ID LEFT OUTER JOIN
+                      dbo.tlTipoOperacionREnFDN ON dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN = dbo.tlTipoOperacionREnFDN.ID</value>
+  </data>
+  <data name="vuOperacionesAsignadasXOperador" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vuOperacionesAsignadasXOperador]
+AS
+SELECT     TOP 100 PERCENT dbo.tlOperadorDN.Nombre, COUNT(dbo.tlOperacionEnRelacionENFicheroDN.ID) AS Expr1, dbo.tlOperadorDN.ID
+FROM         dbo.tlOperacionEnRelacionENFicheroDN INNER JOIN
+                      dbo.tlOperadorDN ON dbo.tlOperacionEnRelacionENFicheroDN.idOperador = dbo.tlOperadorDN.ID
+WHERE     (dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal IS NULL)
+GROUP BY dbo.tlOperadorDN.Nombre, dbo.tlOperadorDN.ID
+ORDER BY COUNT(dbo.tlOperacionEnRelacionENFicheroDN.ID) DESC</value>
+  </data>
+  <data name="vuVerificacionOperacionesPostClasificar" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vuVerificacionOperacionesPostClasificar]
+AS
+SELECT     TOP 100 PERCENT idRel, COUNT(idRel) AS cantidad
+FROM         dbo.vwRelacionesAPostClasificarPrioridad
+GROUP BY idRel
+ORDER BY COUNT(idRel) DESC, idRel</value>
+  </data>
+  <data name="vwBuscarFicherosClienteVis" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwBuscarFicherosClienteVis]
+AS
+SELECT     dbo.tlRelacionENFicheroDN.ID, dbo.tlTipoEntNegoioDN.Nombre AS Tipo_Entidad, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.NombreOriginalFichero AS Nombre_Original_Fichero, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.Nombre AS Nombre_Actual, dbo.tlHuellaFicheroAlmacenadoIODN.RutaRelativa AS Ruta_Relativa, 
+                      dbo.tlTipoEntNegoioDN.ID AS TipoEntNegoioDNID, dbo.tlIdentificacionDocumentoDN.Identificacion
+FROM         dbo.tlHuellaFicheroAlmacenadoIODN INNER JOIN
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN ON 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.ID = dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idttlHuellaFicheroAlmacenadoIODN
+                       INNER JOIN
+                      dbo.tlIdentificacionDocumentoDN ON 
+                      dbo.trtlHuellaFicheroAlmacenadoIODNColIdentificacionesXtlIdentificacionDocumentoDN.idptlIdentificacionDocumentoDN = dbo.tlIdentificacionDocumentoDN.ID
+                       RIGHT OUTER JOIN
+                      dbo.tlRelacionENFicheroDN INNER JOIN
+                      dbo.tlTipoEntNegoioDN ON dbo.tlRelacionENFicheroDN.idTipoEntNegoio = dbo.tlTipoEntNegoioDN.ID ON 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.ID = dbo.tlRelacionENFicheroDN.idHuellaFichero
+WHERE     (NOT (dbo.tlIdentificacionDocumentoDN.Identificacion IS NULL))</value>
+  </data>
+  <data name="vwDatosIdentidad" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwDatosIdentidad]
+AS
+SELECT     dbo.tlDatosIdentidadDN.Nick, dbo.tlPrincipalDN.ID AS IDPrincipal, dbo.tlPrincipalDN.Baja
+FROM         dbo.tlPrincipalDN INNER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlPrincipalDN.idUsuarioDN = dbo.tlUsuarioDN.ID INNER JOIN
+                      dbo.tlDatosIdentidadDN ON dbo.tlUsuarioDN.Nombre = dbo.tlDatosIdentidadDN.Nick</value>
+  </data>
+  <data name="vwListaMailsAdmin" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwListaMailsAdmin]
+AS
+SELECT DISTINCT dbo.tlEmailDN.ID, dbo.tlRolDN.Nombre AS Rol
+FROM         dbo.tlUsuarioDN INNER JOIN
+                      dbo.tlPrincipalDN ON dbo.tlUsuarioDN.ID = dbo.tlPrincipalDN.idUsuarioDN INNER JOIN
+                      dbo.tlHuellaOperadorDN ON dbo.tlUsuarioDN.idHuellaEntidadUserDNHuellaOperadorDN = dbo.tlHuellaOperadorDN.ID INNER JOIN
+                      dbo.tlOperadorDN ON dbo.tlHuellaOperadorDN.IdEntidadReferida = dbo.tlOperadorDN.ID INNER JOIN
+                      dbo.trtlPrincipalDNColRolXtlRolDN INNER JOIN
+                      dbo.tlRolDN ON dbo.trtlPrincipalDNColRolXtlRolDN.idptlRolDN = dbo.tlRolDN.ID ON 
+                      dbo.tlPrincipalDN.ID = dbo.trtlPrincipalDNColRolXtlRolDN.idttlPrincipalDN INNER JOIN
+                      dbo.trtlOperadorDNColDestinosXtlDestinoMailDN ON 
+                      dbo.tlOperadorDN.ID = dbo.trtlOperadorDNColDestinosXtlDestinoMailDN.idttlOperadorDN INNER JOIN
+                      dbo.tlEmailDN INNER JOIN
+                      dbo.tlDestinoMailDN ON dbo.tlEmailDN.ID = dbo.tlDestinoMailDN.idEmail ON 
+                      dbo.trtlOperadorDNColDestinosXtlDestinoMailDN.idptlDestinoMailDN = dbo.tlDestinoMailDN.ID</value>
+  </data>
+  <data name="vwNumDocPendientesClasificacionXTipoCanal" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwNumDocPendientesClasificacionXTipoCanal]
+AS
+SELECT     dbo.tlTipoCanalDN.Nombre, dbo.tlTipoCanalDN.ID, COUNT(dbo.tlRelacionENFicheroDN.ID) AS Num, dbo.tlTipoCanalDN.GUID
+FROM         dbo.tlOperacionEnRelacionENFicheroDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN ON dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero = dbo.tlRelacionENFicheroDN.ID LEFT OUTER JOIN
+                      dbo.tlTipoCanalDN ON dbo.tlOperacionEnRelacionENFicheroDN.idTipoCanal = dbo.tlTipoCanalDN.ID
+WHERE     (dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN = 1) AND (dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero = 1)
+GROUP BY dbo.tlTipoCanalDN.Nombre, dbo.tlTipoCanalDN.ID, dbo.tlTipoCanalDN.GUID</value>
+  </data>
+  <data name="vwNumDocPendientesPostClasificacionXTipoEntidadNegocio" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwNumDocPendientesPostClasificacionXTipoEntidadNegocio]
+AS
+
+SELECT     dbo.tlTipoEntNegoioDN.ID, dbo.tlTipoEntNegoioDN.Nombre AS TipoEntidadNegocio, COUNT(dbo.tlRelacionENFicheroDN.ID) AS Num, 
+                      dbo.tlTipoEntNegoioDN.GUID
+FROM         dbo.tlRelacionENFicheroDN INNER JOIN
+                      dbo.tlTipoEntNegoioDN ON dbo.tlRelacionENFicheroDN.idTipoEntNegoio = dbo.tlTipoEntNegoioDN.ID
+WHERE     (dbo.tlRelacionENFicheroDN.Periodo_FFinal IS NULL) AND (dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero = 2)
+GROUP BY dbo.tlTipoEntNegoioDN.Nombre, dbo.tlTipoEntNegoioDN.GUID, dbo.tlTipoEntNegoioDN.ID</value>
+  </data>
+  <data name="vwOperacionesAsignadasOperador" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwOperacionesAsignadasOperador]
+AS
+SELECT     TOP 100 PERCENT dbo.tlOperacionEnRelacionENFicheroDN.ID AS IdOperacion, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero AS IdRelacionEnt, dbo.tlOperadorDN.ID AS IdOperador, dbo.tlOperadorDN.Nombre
+FROM         dbo.tlOperacionEnRelacionENFicheroDN LEFT OUTER JOIN
+                      dbo.tlOperadorDN ON dbo.tlOperacionEnRelacionENFicheroDN.idOperador = dbo.tlOperadorDN.ID
+WHERE     (dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal IS NULL) AND (dbo.tlOperacionEnRelacionENFicheroDN.Cancelada = 0)
+ORDER BY dbo.tlOperacionEnRelacionENFicheroDN.ID</value>
+  </data>
+  <data name="vwOperacionesEstadoCanal" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwOperacionesEstadoCanal]
+AS
+SELECT     dbo.tlOperacionEnRelacionENFicheroDN.ID AS idOper, dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.idTipoCanal, dbo.tlOperacionEnRelacionENFicheroDN.Cancelada, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FInicio AS FIOper, dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal AS FFOper, 
+                      dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero, dbo.tlRelacionENFicheroDN.ID AS idRel, 
+                      dbo.tlRelacionENFicheroDN.Periodo_FInicio AS FIRelacion, dbo.tlRelacionENFicheroDN.Baja, dbo.tlOperacionEnRelacionENFicheroDN.idOperador, 
+                      dbo.tlRelacionENFicheroDN.idTipoEntNegoio
+FROM         dbo.tlOperacionEnRelacionENFicheroDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN ON dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero = dbo.tlRelacionENFicheroDN.ID
+WHERE     (dbo.tlOperacionEnRelacionENFicheroDN.Cancelada = 0)</value>
+  </data>
+  <data name="vwOperacionesEstadoFicheroCerrado" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwOperacionesEstadoFicheroCerrado] as
+
+
+SELECT     dbo.tlOperacionEnRelacionENFicheroDN.ID, dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FInicio AS fi, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal AS ff, dbo.tlTipoOperacionREnFDN.ID AS idTipoOperacion, 
+                      dbo.tlTipoOperacionREnFDN.Nombre AS TipoOperacion, dbo.tlEstadosRelacionENFicheroDN.ID AS idEstadoFichero, 
+                      dbo.tlEstadosRelacionENFicheroDN.Nombre AS EstadoFichero, dbo.tlOperacionEnRelacionENFicheroDN.Cancelada
+FROM         dbo.tlOperacionEnRelacionENFicheroDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN ON dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero = dbo.tlRelacionENFicheroDN.ID INNER JOIN
+                      dbo.tlTipoOperacionREnFDN ON dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN = dbo.tlTipoOperacionREnFDN.ID INNER JOIN
+                      dbo.tlEstadosRelacionENFicheroDN ON dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero = dbo.tlEstadosRelacionENFicheroDN.ID
+WHERE     (dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal IS NULL) AND (dbo.tlOperacionEnRelacionENFicheroDN.Cancelada = 0) AND 
+                      (dbo.tlEstadosRelacionENFicheroDN.ID = 3 OR
+                      dbo.tlEstadosRelacionENFicheroDN.ID = 5)</value>
+  </data>
+  <data name="vwOperacionesNoCerradasTiempoExcedido" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwOperacionesNoCerradasTiempoExcedido] as
+
+SELECT     dbo.tlOperacionEnRelacionENFicheroDN.ID, dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FInicio AS fi, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal AS ff, dbo.tlTipoOperacionREnFDN.ID AS idTipoOperacion, 
+                      dbo.tlTipoOperacionREnFDN.Nombre AS TipoOperacion, dbo.tlEstadosRelacionENFicheroDN.ID AS idEstadoFichero, 
+                      dbo.tlEstadosRelacionENFicheroDN.Nombre AS EstadoFichero, dbo.tlOperacionEnRelacionENFicheroDN.Cancelada
+FROM         dbo.tlOperacionEnRelacionENFicheroDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN ON dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero = dbo.tlRelacionENFicheroDN.ID INNER JOIN
+                      dbo.tlTipoOperacionREnFDN ON dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN = dbo.tlTipoOperacionREnFDN.ID INNER JOIN
+                      dbo.tlEstadosRelacionENFicheroDN ON dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero = dbo.tlEstadosRelacionENFicheroDN.ID
+WHERE     (dbo.tlEstadosRelacionENFicheroDN.ID &lt;&gt; 3) AND (dbo.tlEstadosRelacionENFicheroDN.ID &lt;&gt; 5) AND 
+                      (dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal IS NULL) AND (dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FInicio &lt; DATEADD(Hour, - 6, 
+                      GETDATE())) AND (dbo.tlOperacionEnRelacionENFicheroDN.Cancelada = 0)</value>
+  </data>
+  <data name="vwOperacionesPendientes" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwOperacionesPendientes]
+AS
+SELECT     idOper, idOperador, FIOper, idRel, FIRelacion, idTipoOperacionREnFDN
+FROM         dbo.vwOperacionesEstadoCanal
+WHERE     (FFOper IS NULL) AND (NOT (Baja = 1)) AND (idEstadosRelacionENFichero = 1)</value>
+  </data>
+  <data name="vwOperacionesREN" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwOperacionesREN]
+AS
+SELECT     dbo.tlOperacionEnRelacionENFicheroDN.ID, dbo.tlOperacionEnRelacionENFicheroDN.Cancelada, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal, dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FInicio, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.idOperador, dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN, dbo.tlRelacionENFicheroDN.Periodo_FFinal AS Expr1, 
+                      dbo.tlRelacionENFicheroDN.Periodo_FInicio AS Expr2, dbo.tlRelacionENFicheroDN.GUID, dbo.tlRelacionENFicheroDN.idHuellaFichero, 
+                      dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero, dbo.tlRelacionENFicheroDN.idTipoEntNegoio
+FROM         dbo.tlOperacionEnRelacionENFicheroDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN ON dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero = dbo.tlRelacionENFicheroDN.ID</value>
+  </data>
+  <data name="vwOperadoresVis" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwOperadoresVis]
+AS
+SELECT     ID, Nombre, Periodo_FInicio AS fi, Periodo_FFinal AS ff, Baja
+FROM         dbo.tlOperadorDN</value>
+  </data>
+  <data name="vwPrincipalxEntidadUser" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwPrincipalxEntidadUser]
+AS
+SELECT     dbo.tlPrincipalDN.ID, dbo.tlPrincipalDN.GUID, dbo.tlOperadorDN.ID AS idEntidadUser, dbo.tlOperadorDN.GUID AS GUIDEntidadUser
+FROM         dbo.tlPrincipalDN INNER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlPrincipalDN.idUsuarioDN = dbo.tlUsuarioDN.ID INNER JOIN
+                      dbo.tlHuellaOperadorDN ON dbo.tlUsuarioDN.idHuellaEntidadUserDNHuellaOperadorDN = dbo.tlHuellaOperadorDN.ID INNER JOIN
+                      dbo.tlOperadorDN ON dbo.tlHuellaOperadorDN.IdEntidadReferida = dbo.tlOperadorDN.ID</value>
+  </data>
+  <data name="vwRelacionesAClasificar" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesAClasificar]
+AS
+SELECT     dbo.vwOperacionesEstadoCanal.idOper, dbo.vwOperacionesEstadoCanal.idTipoOperacionREnFDN, dbo.vwOperacionesEstadoCanal.idTipoCanal, 
+                      dbo.vwOperacionesEstadoCanal.Cancelada, dbo.vwOperacionesEstadoCanal.FFOper, dbo.vwOperacionesEstadoCanal.idEstadosRelacionENFichero, 
+                      dbo.vwOperacionesEstadoCanal.FIRelacion, dbo.vwOperacionesEstadoCanal.Baja, dbo.vwOperacionesEstadoCanal.idRel, 
+                      dbo.vwOperacionesPendientes.idRel AS idRelPendiente
+FROM         dbo.vwOperacionesEstadoCanal LEFT OUTER JOIN
+                      dbo.vwOperacionesPendientes ON dbo.vwOperacionesEstadoCanal.idRel = dbo.vwOperacionesPendientes.idRel
+WHERE     (NOT (dbo.vwOperacionesEstadoCanal.FFOper IS NULL)) AND (dbo.vwOperacionesPendientes.idRel IS NULL) AND 
+                      (dbo.vwOperacionesEstadoCanal.idEstadosRelacionENFichero = 1)</value>
+  </data>
+  <data name="vwRelacionesAPostClasificar" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesAPostClasificar]
+AS
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, idTipoEntNegoio, 
+                      idOperador, FIOper
+FROM         dbo.vwOperacionesEstadoCanal
+WHERE     (NOT (FFOper IS NULL)) AND (idEstadosRelacionENFichero = 2) AND (idRel NOT IN
+                          (SELECT     IdRelacionEnt
+                            FROM          dbo.vwOperacionesAsignadasOperador))</value>
+  </data>
+  <data name="vwRelacionesAPostClasificarPrioridad" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesAPostClasificarPrioridad]
+AS
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, FPrioridad, idOperador, 
+                      idTipoEntNegoio
+FROM         dbo.vwRelacionesAPostClasificarPrioridadNoR
+UNION
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, FPrioridad, idOperador, 
+                      idTipoEntNegoio
+FROM         dbo.vwRelacionesAPostClasificarPrioridadR AS vwRelacionesAPostClasificarPrioridadR_1</value>
+  </data>
+  <data name="vwRelacionesAPostClasificarPrioridadNoR" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesAPostClasificarPrioridadNoR]
+AS
+SELECT     vwRelacionesAPostClasificar_1.idOper, vwRelacionesAPostClasificar_1.idTipoOperacionREnFDN, vwRelacionesAPostClasificar_1.idTipoCanal, 
+                      vwRelacionesAPostClasificar_1.Cancelada, vwRelacionesAPostClasificar_1.FFOper, vwRelacionesAPostClasificar_1.idEstadosRelacionENFichero, 
+                      vwRelacionesAPostClasificar_1.idRel, vwRelacionesAPostClasificar_1.FIRelacion, vwRelacionesAPostClasificar_1.Baja, 
+                      vwRelacionesAPostClasificar_1.FIRelacion AS FPrioridad, vwRelacionesAPostClasificar_1.FIOper, vwRelacionesAPostClasificar_1.idOperador, 
+                      vwRelacionesAPostClasificar_1.idTipoEntNegoio
+FROM         dbo.vwRelacionesAPostClasificar AS vwRelacionesAPostClasificar_1 INNER JOIN
+                      dbo.vwUltimaOperacionPostClasificarNoRechazada ON 
+                      vwRelacionesAPostClasificar_1.idOper = dbo.vwUltimaOperacionPostClasificarNoRechazada.idOper
+WHERE     (vwRelacionesAPostClasificar_1.idTipoOperacionREnFDN &lt;&gt; 4) AND (vwRelacionesAPostClasificar_1.Cancelada = 0)</value>
+  </data>
+  <data name="vwRelacionesAPostClasificarPrioridadR" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesAPostClasificarPrioridadR]
+AS
+SELECT     vwRelacionesAPostClasificar_1.idOper, vwRelacionesAPostClasificar_1.idTipoOperacionREnFDN, vwRelacionesAPostClasificar_1.idTipoCanal, 
+                      vwRelacionesAPostClasificar_1.Cancelada, vwRelacionesAPostClasificar_1.FFOper, vwRelacionesAPostClasificar_1.idEstadosRelacionENFichero, 
+                      vwRelacionesAPostClasificar_1.idRel, vwRelacionesAPostClasificar_1.FIRelacion, vwRelacionesAPostClasificar_1.Baja, 
+                      vwRelacionesAPostClasificar_1.FFOper AS FPrioridad, vwRelacionesAPostClasificar_1.FIOper, vwRelacionesAPostClasificar_1.idOperador, 
+                      vwRelacionesAPostClasificar_1.idTipoEntNegoio
+FROM         dbo.vwRelacionesAPostClasificar AS vwRelacionesAPostClasificar_1 INNER JOIN
+                      dbo.vwUltimaOperacionPostClasificarRechazada ON 
+                      vwRelacionesAPostClasificar_1.idOper = dbo.vwUltimaOperacionPostClasificarRechazada.idOper
+WHERE     (vwRelacionesAPostClasificar_1.idTipoOperacionREnFDN = 4) AND (vwRelacionesAPostClasificar_1.Cancelada = 0)</value>
+  </data>
+  <data name="vwRelacionesENF" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesENF]
+AS
+SELECT DISTINCT 
+                      dbo.tlRelacionENFicheroDN.ID, dbo.tlTipoEntNegoioDN.Nombre AS TipoEntNegocio, dbo.tlOperadorDN.Nombre AS Operador, 
+                      dbo.tlEstadosRelacionENFicheroDN.Nombre AS Estado_Operacion, dbo.tlRelacionENFicheroDN.Periodo_FInicio AS Fecha_Alta, 
+                      dbo.tlRelacionENFicheroDN.Periodo_FFinal AS Fecha_Cierre, dbo.tlHuellaFicheroAlmacenadoIODN.NombreOriginalFichero AS Fichero_Original, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.Extension, dbo.tlHuellaFicheroAlmacenadoIODN.Nombre, dbo.tlRelacionENFicheroDN.idTipoEntNegoio
+FROM         dbo.tlTipoEntNegoioDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN INNER JOIN
+                      dbo.tlEstadosRelacionENFicheroDN ON dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero = dbo.tlEstadosRelacionENFicheroDN.ID INNER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON dbo.tlRelacionENFicheroDN.idHuellaFichero = dbo.tlHuellaFicheroAlmacenadoIODN.ID INNER JOIN
+                      dbo.tlOperacionEnRelacionENFicheroDN ON 
+                      dbo.tlRelacionENFicheroDN.ID = dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero INNER JOIN
+                      dbo.tlOperadorDN ON dbo.tlOperacionEnRelacionENFicheroDN.idOperador = dbo.tlOperadorDN.ID ON 
+                      dbo.tlTipoEntNegoioDN.ID = dbo.tlRelacionENFicheroDN.idTipoEntNegoio</value>
+  </data>
+  <data name="vwRelacionesENFSinOperador" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesENFSinOperador]
+AS
+SELECT DISTINCT 
+                      dbo.tlRelacionENFicheroDN.ID, dbo.tlEstadosRelacionENFicheroDN.Nombre AS Estado_Operacion, 
+                      dbo.tlRelacionENFicheroDN.Periodo_FInicio AS Fecha_Alta, dbo.tlRelacionENFicheroDN.Periodo_FFinal AS Fecha_Cierre, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.NombreOriginalFichero AS Fichero_Original, dbo.tlHuellaFicheroAlmacenadoIODN.Extension, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.Nombre, dbo.tlTipoEntNegoioDN.Nombre AS TipoEntidadNegocio
+FROM         dbo.tlRelacionENFicheroDN INNER JOIN
+                      dbo.tlEstadosRelacionENFicheroDN ON dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero = dbo.tlEstadosRelacionENFicheroDN.ID INNER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON dbo.tlRelacionENFicheroDN.idHuellaFichero = dbo.tlHuellaFicheroAlmacenadoIODN.ID INNER JOIN
+                      dbo.tlOperacionEnRelacionENFicheroDN ON 
+                      dbo.tlRelacionENFicheroDN.ID = dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero INNER JOIN
+                      dbo.tlOperadorDN ON dbo.tlOperacionEnRelacionENFicheroDN.idOperador = dbo.tlOperadorDN.ID INNER JOIN
+                      dbo.tlTipoEntNegoioDN ON dbo.tlRelacionENFicheroDN.idTipoEntNegoio = dbo.tlTipoEntNegoioDN.ID</value>
+  </data>
+  <data name="vwRelacionesxRecuperar" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperar]
+AS
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, 
+                      idTipoEntNegoio AS idTipoEntNegocioReferidora
+FROM         dbo.vwOperacionesEstadoCanal
+WHERE     (NOT (FFOper IS NULL)) AND (idRel NOT IN
+                          (SELECT     IdRelacionEnt
+                            FROM          dbo.vwOperacionesAsignadasOperador))</value>
+  </data>
+  <data name="vwRelacionesxRecuperarEntrada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperarEntrada]
+AS
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, 
+                      idTipoEntNegoio AS idTipoEntNegocioReferidora
+FROM         dbo.vwOperacionesEstadoCanal
+WHERE     (NOT (FFOper IS NULL)) AND (idRel NOT IN
+                          (SELECT     IdRelacionEnt
+                            FROM          dbo.vwOperacionesAsignadasOperador)) AND (idEstadosRelacionENFichero = 1)</value>
+  </data>
+  <data name="vwRelacionesxRecuperarPrioridad" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperarPrioridad]
+AS
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, idTipoEntNegocioReferidora, 
+                      FPrioridad
+FROM         dbo.vwRelacionesxRecuperarPrioridadNoR
+UNION
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, idTipoEntNegocioReferidora, 
+                      FPrioridad
+FROM         dbo.vwRelacionesxRecuperarPrioridadR</value>
+  </data>
+  <data name="vwRelacionesxRecuperarPrioridadEntrada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperarPrioridadEntrada]
+AS
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, idTipoEntNegocioReferidora, 
+                      FPrioridad
+FROM         dbo.vwRelacionesxRecuperarPrioridadNoREntrada
+UNION
+SELECT     idOper, idTipoOperacionREnFDN, idTipoCanal, Cancelada, FFOper, idEstadosRelacionENFichero, idRel, FIRelacion, Baja, idTipoEntNegocioReferidora, 
+                      FPrioridad
+FROM         dbo.vwRelacionesxRecuperarPrioridadREntrada</value>
+  </data>
+  <data name="vwRelacionesxRecuperarPrioridadNoR" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperarPrioridadNoR]
+AS
+SELECT     dbo.vwRelacionesxRecuperar.idOper, dbo.vwRelacionesxRecuperar.idTipoOperacionREnFDN, dbo.vwRelacionesxRecuperar.idTipoCanal, 
+                      dbo.vwRelacionesxRecuperar.Cancelada, dbo.vwRelacionesxRecuperar.FFOper, dbo.vwRelacionesxRecuperar.idEstadosRelacionENFichero, 
+                      dbo.vwRelacionesxRecuperar.idRel, dbo.vwRelacionesxRecuperar.FIRelacion, dbo.vwRelacionesxRecuperar.Baja, 
+                      dbo.vwRelacionesxRecuperar.idTipoEntNegocioReferidora, dbo.vwRelacionesxRecuperar.FIRelacion AS FPrioridad
+FROM         dbo.vwRelacionesxRecuperar INNER JOIN
+                      dbo.vwUltimaOperacionxRecuperarNoRechazada ON 
+                      dbo.vwRelacionesxRecuperar.idOper = dbo.vwUltimaOperacionxRecuperarNoRechazada.idOper
+WHERE     (dbo.vwRelacionesxRecuperar.idTipoOperacionREnFDN &lt;&gt; 4) AND (dbo.vwRelacionesxRecuperar.Cancelada = 0)</value>
+  </data>
+  <data name="vwRelacionesxRecuperarPrioridadNoREntrada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperarPrioridadNoREntrada]
+AS
+SELECT     dbo.vwRelacionesxRecuperarEntrada.idOper, dbo.vwRelacionesxRecuperarEntrada.idTipoOperacionREnFDN, 
+                      dbo.vwRelacionesxRecuperarEntrada.idTipoCanal, dbo.vwRelacionesxRecuperarEntrada.Cancelada, dbo.vwRelacionesxRecuperarEntrada.FFOper, 
+                      dbo.vwRelacionesxRecuperarEntrada.idEstadosRelacionENFichero, dbo.vwRelacionesxRecuperarEntrada.idRel, 
+                      dbo.vwRelacionesxRecuperarEntrada.FIRelacion, dbo.vwRelacionesxRecuperarEntrada.Baja, 
+                      dbo.vwRelacionesxRecuperarEntrada.idTipoEntNegocioReferidora, dbo.vwRelacionesxRecuperarEntrada.FIRelacion AS FPrioridad
+FROM         dbo.vwRelacionesxRecuperarEntrada INNER JOIN
+                      dbo.vwUltimaOperacionxRecuperarNoRechazadaEntrada ON 
+                      dbo.vwRelacionesxRecuperarEntrada.idOper = dbo.vwUltimaOperacionxRecuperarNoRechazadaEntrada.idOper
+WHERE     (dbo.vwRelacionesxRecuperarEntrada.idTipoOperacionREnFDN &lt;&gt; 4) AND (dbo.vwRelacionesxRecuperarEntrada.Cancelada = 0)</value>
+  </data>
+  <data name="vwRelacionesxRecuperarPrioridadR" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperarPrioridadR]
+AS
+SELECT     dbo.vwRelacionesxRecuperar.idOper, dbo.vwRelacionesxRecuperar.idTipoOperacionREnFDN, dbo.vwRelacionesxRecuperar.idTipoCanal, 
+                      dbo.vwRelacionesxRecuperar.Cancelada, dbo.vwRelacionesxRecuperar.FFOper, dbo.vwRelacionesxRecuperar.idEstadosRelacionENFichero, 
+                      dbo.vwRelacionesxRecuperar.idRel, dbo.vwRelacionesxRecuperar.FIRelacion, dbo.vwRelacionesxRecuperar.Baja, 
+                      dbo.vwRelacionesxRecuperar.idTipoEntNegocioReferidora, dbo.vwRelacionesxRecuperar.FFOper AS FPrioridad
+FROM         dbo.vwRelacionesxRecuperar INNER JOIN
+                      dbo.vwUltimaOperacionxRecuperarRechazada ON 
+                      dbo.vwRelacionesxRecuperar.idOper = dbo.vwUltimaOperacionxRecuperarRechazada.idOper
+WHERE     (dbo.vwRelacionesxRecuperar.idTipoOperacionREnFDN = 4) AND (dbo.vwRelacionesxRecuperar.Cancelada = 0)</value>
+  </data>
+  <data name="vwRelacionesxRecuperarPrioridadREntrada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelacionesxRecuperarPrioridadREntrada]
+AS
+SELECT     dbo.vwRelacionesxRecuperarEntrada.idOper, dbo.vwRelacionesxRecuperarEntrada.idTipoOperacionREnFDN, 
+                      dbo.vwRelacionesxRecuperarEntrada.idTipoCanal, dbo.vwRelacionesxRecuperarEntrada.Cancelada, dbo.vwRelacionesxRecuperarEntrada.FFOper, 
+                      dbo.vwRelacionesxRecuperarEntrada.idEstadosRelacionENFichero, dbo.vwRelacionesxRecuperarEntrada.idRel, 
+                      dbo.vwRelacionesxRecuperarEntrada.FIRelacion, dbo.vwRelacionesxRecuperarEntrada.Baja, 
+                      dbo.vwRelacionesxRecuperarEntrada.idTipoEntNegocioReferidora, dbo.vwRelacionesxRecuperarEntrada.FFOper AS FPrioridad
+FROM         dbo.vwRelacionesxRecuperarEntrada INNER JOIN
+                      dbo.vwUltimaOperacionxRecuperarRechazadaEntrada ON 
+                      dbo.vwRelacionesxRecuperarEntrada.idOper = dbo.vwUltimaOperacionxRecuperarRechazadaEntrada.idOper
+WHERE     (dbo.vwRelacionesxRecuperarEntrada.idTipoOperacionREnFDN = 4) AND (dbo.vwRelacionesxRecuperarEntrada.Cancelada = 0)</value>
+  </data>
+  <data name="vwRelEntFicheroSel" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwRelEntFicheroSel]
+AS
+SELECT     TOP (100) PERCENT dbo.tlRelacionENFicheroDN.ID, dbo.tlRelacionENFicheroDN.Baja, dbo.tlRelacionENFicheroDN.Periodo_FFinal, 
+                      dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero, dbo.tlRelacionENFicheroDN.FechaModificacion, 
+                      dbo.tlRelacionENFicheroDN.idHuellaFichero, dbo.tlOperacionEnRelacionENFicheroDN.ID AS OpID, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Baja AS OpBaja, dbo.tlOperacionEnRelacionENFicheroDN.idOperador, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal AS OPFf, dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN, 
+                      dbo.tlRelacionENFicheroDN.idTipoEntNegoio
+FROM         dbo.tlRelacionENFicheroDN LEFT OUTER JOIN
+                      dbo.tlOperacionEnRelacionENFicheroDN ON dbo.tlRelacionENFicheroDN.ID = dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero
+ORDER BY dbo.tlRelacionENFicheroDN.FechaModificacion DESC</value>
+  </data>
+  <data name="vwSiguienteCorreo" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwSiguienteCorreo]
+AS
+SELECT     ID
+FROM         dbo.tlSobreDN
+WHERE     (Enviado = 0) AND (Descartado = 0) AND (FechaReintento &lt;= GETDATE()) AND (FechaReintento =
+                          (SELECT     MIN(FechaReintento) AS Expr1
+                            FROM          dbo.tlSobreDN AS tlSobreDN_1
+                            WHERE      (Enviado = 0) AND (Descartado = 0)))</value>
+  </data>
+  <data name="vwTrazaOperacionesVis" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwTrazaOperacionesVis]
+AS
+SELECT     dbo.tlOperacionEnRelacionENFicheroDN.ID, dbo.tlTipoEntNegoioDN.Nombre AS Entidad_Negocio, dbo.tlOperadorDN.Nombre AS Operador, 
+                      dbo.tlTipoOperacionREnFDN.Nombre AS Tipo_Operacion, dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FInicio AS Fecha_Inicio, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Periodo_FFinal AS Fecha_Final, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Comentario AS Comentario_Operacion, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.NombreOriginalFichero AS Fichero_Original, dbo.tlEstadosRelacionENFicheroDN.Nombre AS Estado_Documento, 
+                      dbo.tlOperacionEnRelacionENFicheroDN.Cancelada, dbo.tlHuellaFicheroAlmacenadoIODN.Extension, 
+                      dbo.tlHuellaFicheroAlmacenadoIODN.Nombre
+FROM         dbo.tlEstadosRelacionENFicheroDN INNER JOIN
+                      dbo.tlRelacionENFicheroDN ON dbo.tlEstadosRelacionENFicheroDN.ID = dbo.tlRelacionENFicheroDN.idEstadosRelacionENFichero INNER JOIN
+                      dbo.tlHuellaFicheroAlmacenadoIODN ON dbo.tlRelacionENFicheroDN.idHuellaFichero = dbo.tlHuellaFicheroAlmacenadoIODN.ID INNER JOIN
+                      dbo.tlTipoEntNegoioDN ON dbo.tlRelacionENFicheroDN.idTipoEntNegoio = dbo.tlTipoEntNegoioDN.ID RIGHT OUTER JOIN
+                      dbo.tlOperacionEnRelacionENFicheroDN ON 
+                      dbo.tlRelacionENFicheroDN.ID = dbo.tlOperacionEnRelacionENFicheroDN.idRelacionENFichero LEFT OUTER JOIN
+                      dbo.tlTipoOperacionREnFDN ON dbo.tlOperacionEnRelacionENFicheroDN.idTipoOperacionREnFDN = dbo.tlTipoOperacionREnFDN.ID LEFT OUTER JOIN
+                      dbo.tlOperadorDN ON dbo.tlOperacionEnRelacionENFicheroDN.idOperador = dbo.tlOperadorDN.ID</value>
+  </data>
+  <data name="vwUltimaOperacionPostClasificarNoRechazada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionPostClasificarNoRechazada]
+AS
+SELECT DISTINCT MAX(dbo.vwUltimaOperacionPostClasificarxTipo.idOper) AS idOper, dbo.vwUltimaOperacionPostClasificarxTipo.idRel
+FROM         dbo.vwUltimaOperacionPostClasificarxTipo LEFT OUTER JOIN
+                      dbo.vwUltimaOperacionPostClasificarRechazada ON 
+                      dbo.vwUltimaOperacionPostClasificarxTipo.idRel = dbo.vwUltimaOperacionPostClasificarRechazada.idRel
+WHERE     (dbo.vwUltimaOperacionPostClasificarxTipo.idTipoOperacionREnFDN &lt;&gt; 4) AND (dbo.vwUltimaOperacionPostClasificarRechazada.idOper IS NULL)
+GROUP BY dbo.vwUltimaOperacionPostClasificarxTipo.idRel</value>
+  </data>
+  <data name="vwUltimaOperacionPostClasificarRechazada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionPostClasificarRechazada]
+AS
+SELECT DISTINCT MAX(idOper) AS idOper, idRel
+FROM         dbo.vwUltimaOperacionPostClasificarxTipo
+WHERE     (idTipoOperacionREnFDN = 4)
+GROUP BY idRel</value>
+  </data>
+  <data name="vwUltimaOperacionPostClasificarxTipo" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionPostClasificarxTipo]
+AS
+SELECT     MAX(idOper) AS idOper, idRel, idTipoOperacionREnFDN
+FROM         dbo.vwRelacionesAPostClasificar
+GROUP BY idRel, idTipoOperacionREnFDN</value>
+  </data>
+  <data name="vwUltimaOperacionxRecuperarNoRechazada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionxRecuperarNoRechazada]
+AS
+SELECT DISTINCT MAX(dbo.vwUltimaOperacionxRecuperarxTipo.idOper) AS idOper, dbo.vwUltimaOperacionxRecuperarxTipo.idRel
+FROM         dbo.vwUltimaOperacionxRecuperarxTipo LEFT OUTER JOIN
+                      dbo.vwUltimaOperacionxRecuperarRechazada ON 
+                      dbo.vwUltimaOperacionxRecuperarxTipo.idRel = dbo.vwUltimaOperacionxRecuperarRechazada.idRel
+WHERE     (dbo.vwUltimaOperacionxRecuperarxTipo.idTipoOperacionREnFDN &lt;&gt; 4) AND (dbo.vwUltimaOperacionxRecuperarRechazada.idOper IS NULL)
+GROUP BY dbo.vwUltimaOperacionxRecuperarxTipo.idRel</value>
+  </data>
+  <data name="vwUltimaOperacionxRecuperarNoRechazadaEntrada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionxRecuperarNoRechazadaEntrada]
+AS
+SELECT DISTINCT MAX(dbo.vwUltimaOperacionxRecuperarxTipoEntrada.idOper) AS idOper, dbo.vwUltimaOperacionxRecuperarxTipoEntrada.idRel
+FROM         dbo.vwUltimaOperacionxRecuperarxTipoEntrada LEFT OUTER JOIN
+                      dbo.vwUltimaOperacionxRecuperarRechazadaEntrada ON 
+                      dbo.vwUltimaOperacionxRecuperarxTipoEntrada.idRel = dbo.vwUltimaOperacionxRecuperarRechazadaEntrada.idRel
+WHERE     (dbo.vwUltimaOperacionxRecuperarxTipoEntrada.idTipoOperacionREnFDN &lt;&gt; 4) AND 
+                      (dbo.vwUltimaOperacionxRecuperarRechazadaEntrada.idOper IS NULL)
+GROUP BY dbo.vwUltimaOperacionxRecuperarxTipoEntrada.idRel</value>
+  </data>
+  <data name="vwUltimaOperacionxRecuperarRechazada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionxRecuperarRechazada]
+AS
+SELECT DISTINCT MAX(idOper) AS idOper, idRel
+FROM         dbo.vwUltimaOperacionxRecuperarxTipo
+WHERE     (idTipoOperacionREnFDN = 4)
+GROUP BY idRel</value>
+  </data>
+  <data name="vwUltimaOperacionxRecuperarRechazadaEntrada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionxRecuperarRechazadaEntrada]
+AS
+SELECT DISTINCT MAX(idOper) AS idOper, idRel
+FROM         dbo.vwUltimaOperacionxRecuperarxTipoEntrada
+WHERE     (idTipoOperacionREnFDN = 4)
+GROUP BY idRel</value>
+  </data>
+  <data name="vwUltimaOperacionxRecuperarxTipo" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionxRecuperarxTipo]
+AS
+SELECT     MAX(idOper) AS idOper, idRel, idTipoOperacionREnFDN
+FROM         dbo.vwRelacionesxRecuperar
+GROUP BY idRel, idTipoOperacionREnFDN</value>
+  </data>
+  <data name="vwUltimaOperacionxRecuperarxTipoEntrada" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUltimaOperacionxRecuperarxTipoEntrada]
+AS
+SELECT     MAX(idOper) AS idOper, idRel, idTipoOperacionREnFDN
+FROM         dbo.vwRelacionesxRecuperar
+GROUP BY idRel, idTipoOperacionREnFDN, idEstadosRelacionENFichero
+HAVING      (idEstadosRelacionENFichero = 1)</value>
+  </data>
+  <data name="vwUnificacionEstadoOperacionesFichero" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUnificacionEstadoOperacionesFichero]
+AS
+SELECT     dbo.vwOperacionesEstadoFicheroCerrado.ID, dbo.vwOperacionesEstadoFicheroCerrado.FI, dbo.vwOperacionesEstadoFicheroCerrado.FF, 
+                      dbo.vwOperacionesEstadoFicheroCerrado.idTipoOperacion, dbo.vwOperacionesEstadoFicheroCerrado.TipoOperacion, 
+                      dbo.vwOperacionesEstadoFicheroCerrado.idEstadoFichero, dbo.vwOperacionesEstadoFicheroCerrado.EstadoFichero, 
+                      dbo.vwOperacionesEstadoFicheroCerrado.Cancelada
+FROM         dbo.vwOperacionesEstadoFicheroCerrado
+UNION
+SELECT     dbo.vwOperacionesNoCerradasTiempoExcedido.ID, dbo.vwOperacionesNoCerradasTiempoExcedido.FI, 
+                      dbo.vwOperacionesNoCerradasTiempoExcedido.FF, dbo.vwOperacionesNoCerradasTiempoExcedido.idTipoOperacion, 
+                      dbo.vwOperacionesNoCerradasTiempoExcedido.TipoOperacion, dbo.vwOperacionesNoCerradasTiempoExcedido.idEstadoFichero, 
+                      dbo.vwOperacionesNoCerradasTiempoExcedido.EstadoFichero, dbo.vwOperacionesNoCerradasTiempoExcedido.Cancelada
+FROM         dbo.vwOperacionesNoCerradasTiempoExcedido</value>
+  </data>
+  <data name="vwUsuariosOperadores" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUsuariosOperadores]
+AS
+SELECT     dbo.tlUsuarioDN.ID, dbo.tlUsuarioDN.Nombre AS NombreUsuario, dbo.tlOperadorDN.ID AS idOperador, dbo.tlOperadorDN.Nombre AS nombreOperador, 
+                      dbo.tlOperadorDN.Periodo_FInicio, dbo.tlOperadorDN.Periodo_FFinal
+FROM         dbo.tlUsuarioDN INNER JOIN
+                      dbo.tlHuellaOperadorDN ON dbo.tlUsuarioDN.idHuellaEntidadUserDNHuellaOperadorDN = dbo.tlHuellaOperadorDN.ID INNER JOIN
+                      dbo.tlOperadorDN ON dbo.tlHuellaOperadorDN.IdEntidadReferida = dbo.tlOperadorDN.ID</value>
+  </data>
+  <data name="vwUsuariosxEntidadRef" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUsuariosxEntidadRef]
+AS
+SELECT     dbo.tlPrincipalDN.ID, dbo.tlHuellaOperadorDN.ToStringEntidadReferida AS Usuario, dbo.tlDatosIdentidadDN.Nick AS Login, 
+                      dbo.tlPrincipalDN.Baja
+FROM         dbo.tlPrincipalDN INNER JOIN
+                      dbo.tlUsuarioDN ON dbo.tlPrincipalDN.idUsuarioDN = dbo.tlUsuarioDN.ID LEFT OUTER JOIN
+                      dbo.tlDatosIdentidadDN ON dbo.tlUsuarioDN.Nombre = dbo.tlDatosIdentidadDN.Nick LEFT OUTER JOIN
+                      dbo.tlHuellaOperadorDN ON dbo.tlUsuarioDN.idHuellaEntidadUserDNHuellaOperadorDN = dbo.tlHuellaOperadorDN.ID</value>
+  </data>
+  <data name="vwUsuariosxEntidadRefSel" xml:space="preserve">
+    <value>CREATE VIEW [dbo].[vwUsuariosxEntidadRefSel]
+AS
+SELECT     dbo.vwUsuariosxEntidadRef.ID, dbo.vwUsuariosxEntidadRef.Usuario, dbo.vwUsuariosxEntidadRef.Login, dbo.vwUsuariosxEntidadRef.Baja, 
+                      dbo.tlRolDN.Nombre AS Rol
+FROM         dbo.trtlPrincipalDNColRolXtlRolDN INNER JOIN
+                      dbo.tlRolDN ON dbo.trtlPrincipalDNColRolXtlRolDN.idptlRolDN = dbo.tlRolDN.ID INNER JOIN
+                      dbo.vwUsuariosxEntidadRef ON dbo.trtlPrincipalDNColRolXtlRolDN.idttlPrincipalDN = dbo.vwUsuariosxEntidadRef.ID</value>
+  </data>
+</root>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="tlDatosContactoEntidadDN" Nombre="LocalizacionesDN.DatosContactoEntidadDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="ID" Editable="true" DatosControlAsignado="" DatosBusqueda="" NombreProp="ID" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="EntidadReferida" Editable="true" DatosControlAsignado="" DatosBusqueda="" NombreProp="EntidadReferida.Nombre" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true">
+          <ColNombresTiposComaptibles>
+            <VinculoClaseMapXml NombreEnsamblado="PersonasDN" NombreClase="PersonasDN.PersonaDN" />
+            <VinculoClaseMapXml NombreEnsamblado="EmpresasDN" NombreClase="EmpresasDN.EmpresaDN" />
+          </ColNombresTiposComaptibles>
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="ColContactos" Editable="true" DatosControlAsignado="" DatosBusqueda="" NombreProp="ColContactos" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true">
+          <ColNombresTiposComaptibles>
+            <VinculoClaseMapXml NombreEnsamblado="LocalizacionesDN" NombreClase="LocalizacionesDN.DireccionNoUnicaDN" />
+          </ColNombresTiposComaptibles>
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+</InstanciaMapXml>

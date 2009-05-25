@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-16"?>
+<InstanciaMapXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" Nombre="FN.Localizaciones.DN.IEntidadFiscalDN-BASICA-ENT">
+  <ColAgrupacionMap>
+    <AgrupacionMapXML Instanciable="false" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0">
+      <TipoAgrupacionMap id="1" Nombre="BASICA-ENT" />
+      <ColPropMap>
+        <PropMapXML Instanciable="false" NombreVis="Denominacion F." Editable="false" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="DenominacionFiscal" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Cif / Nif" Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="IdentificacionFiscal.Codigo" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+        <PropMapXML Instanciable="false" NombreVis="Domicilio F." Editable="true" DatosControlAsignado="" DatosBusqueda="" AnchoMaximo="0" NombreProp="DomicilioFiscal.ToCadena" CargarDatos="False" VisibleCabeceraResumen="false" EsReadOnly="false" EsEliminable="true" EsBuscable="true" EsNavegable="true" InvisibleSiNothing="false">
+          <ColNombresTiposComaptibles />
+        </PropMapXML>
+      </ColPropMap>
+      <ColAgrupacionMap />
+    </AgrupacionMapXML>
+  </ColAgrupacionMap>
+  <ColComandoMap />
+  <ColNombresTiposComaptibles>
+    <VinculoClaseMapXml NombreEnsamblado="EmpresasDN" NombreClase="EmpresasDN.EmpresaDN" />
+    <VinculoClaseMapXml NombreEnsamblado="PersonasDN" NombreClase="PersonasDN.PersonaFiscalDN" />
+  </ColNombresTiposComaptibles>
+</InstanciaMapXml>
