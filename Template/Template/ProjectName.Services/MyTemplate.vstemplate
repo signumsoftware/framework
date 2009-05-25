@@ -1,0 +1,28 @@
+<VSTemplate Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>ProjectName.Services</Name>
+    <Description>Contract betweem the client and server application</Description>
+    <ProjectType>CSharp</ProjectType>
+    <ProjectSubType>
+    </ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>ProjectName.Services</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <Icon>__TemplateIcon.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="$custommessage$.Services.csproj" File="ProjectName.Services.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="IServer$custommessage$.cs">IServerBugs.cs</ProjectItem>
+      <Folder Name="Properties" TargetFolderName="Properties">
+        <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+      </Folder>
+    </Project>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>WizardProjectName, Version=1.0.1.0, Culture=Neutral, PublicKeyToken=b6f529cd3458096d</Assembly>
+    <FullClassName>WizardProjectName.Wizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

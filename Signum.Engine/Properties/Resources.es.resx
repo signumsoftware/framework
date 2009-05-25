@@ -1,0 +1,477 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="__SqlKeywords__" xml:space="preserve">
+    <value>ADD
+ALL
+ALTER
+AND
+ANY
+AS
+ASC
+AUTHORIZATION
+AVG
+BACKUP
+BEGIN
+BETWEEN
+BREAK
+BROWSE
+BULK
+BY
+CASCADE
+CASE
+CHECK
+CHECKPOINT
+CLOSE
+CLUSTERED
+COALESCE
+COLUMN
+COMMIT
+COMMITTED
+COMPUTE
+CONFIRM
+CONSTRAINT
+CONTAINS
+CONTAINSTABLE
+CONTINUE
+CONTROLROW
+CONVERT
+COUNT
+CREATE
+CROSS
+CURRENT
+CURRENT_DATE
+CURRENT_TIME
+CURRENT_TIMESTAMP
+CURRENT_USER
+CURSOR
+DATABASE
+DBCC
+DEALLOCATE
+DECLARE
+DEFAULT
+DELETE
+DENY
+DESC
+DISK
+DISTINCT
+DISTRIBUTED
+DOUBLE
+DROP
+DUMMY
+DUMP
+ELSE
+END
+ERRLVL
+ERROREXIT
+ESCAPE
+EXCEPT
+EXEC
+EXECUTE
+EXISTS
+EXIT
+FETCH
+FILE
+FILLFACTOR
+FLOPPY
+FOR
+FOREIGN
+FREETEXT
+FREETEXTTABLE
+FROM
+FULL
+GOTO
+GRANT
+GROUP
+HAVING
+HOLDLOCK
+IDENTITY
+IDENTITY_INSERT
+IDENTITYCOL
+IF
+IN
+INDEX
+INNER
+INSERT
+INTERSECT
+INTO
+IS
+ISOLATION
+JOIN
+KEY
+KILL
+LEFT
+LEVEL
+LIKE
+LINENO
+LOAD
+MAX
+MIN
+MIRROREXIT
+NATIONAL
+NOCHECK
+NONCLUSTERED
+NOT
+NULL
+NULLIF
+OF
+OFF
+OFFSETS
+ON
+ONCE
+ONLY
+OPEN
+OPENDATASOURCE
+OPENQUERY
+OPENROWSET
+OPTION
+OR
+ORDER
+OUTER
+OVER
+PERCENT
+PERM
+PERMANENT
+PIPE
+PLAN
+PRECISION
+PREPARE
+PRIMARY
+PRINT
+PRIVILEGES
+PROC
+PROCEDURE
+PROCESSEXIT
+PUBLIC
+RAISERROR
+READ
+READTEXT
+RECONFIGURE
+REFERENCES
+REPEATABLE
+REPLICATION
+RESTORE
+RESTRICT
+RETURN
+REVOKE
+RIGHT
+ROLLBACK
+ROWCOUNT
+ROWGUIDCOL
+RULE
+SAVE
+SCHEMA
+SELECT
+SERIALIZABLE
+SESSION_USER
+SET
+SETUSER
+SHUTDOWN
+SOME
+STATISTICS
+SUM
+SYSTEM_USER
+TABLE
+TAPE
+TEMP
+TEMPORARY
+TEXTSIZE
+THEN
+TO
+TOP
+TRAN
+TRANSACTION
+TRIGGER
+TRUNCATE
+TSEQUAL
+UNCOMMITTED
+UNION
+UNIQUE
+UPDATE
+UPDATETEXT
+USE
+USER
+VALUES
+VARYING
+VIEW
+WAITFOR
+WHEN
+WHERE
+WHILE
+WITH
+WORK
+WRITETEXT</value>
+  </data>
+  <data name="FieldInitExpressionBindingsShouldBeEmpty" xml:space="preserve">
+    <value>FieldInitExpression binding debe estar vacío</value>
+  </data>
+  <data name="TheTransactionIsRolledBack" xml:space="preserve">
+    <value>Se ha hecho Rollback de la transaccion (un Transaction previo no se ha confirmado)</value>
+  </data>
+  <data name="TransactionRollbacked" xml:space="preserve">
+    <value>Se ha hecho un ROLLBACK!</value>
+  </data>
+  <data name="TheView0IsNotOnQueryManager" xml:space="preserve">
+    <value>La vista {0} no ha sido dada de alta en el QueryManager</value>
+  </data>
+  <data name="TheProperty0ForType1IsnotFound" xml:space="preserve">
+    <value>No se ha encontrado la propiedad {0} para el tipo {1}</value>
+  </data>
+  <data name="TheExpressionCanTBeTranslatedToSQL" xml:space="preserve">
+    <value>La expresión no se puede traducir a SQL:
+</value>
+  </data>
+  <data name="SetOperationsAreNotAllowedOnQueriesWithNonSingleCellProjections" xml:space="preserve">
+    <value>Operaciones de conjuntos no están permitidas en consultas de mas de una celda</value>
+  </data>
+  <data name="Table0NotLoadedInSchema" xml:space="preserve">
+    <value>La tabla para el tipo {0} no está cargada en el Schema actual</value>
+  </data>
+  <data name="Idof0isZero" xml:space="preserve">
+    <value>El Id de {0} es 0</value>
+  </data>
+  <data name="NoFieldFoundForMember0" xml:space="preserve">
+    <value>No field found for member {0}</value>
+  </data>
+  <data name="TheField0IsNotIncluded" xml:space="preserve">
+    <value>El campo {0} no está incluido</value>
+  </data>
+  <data name="TheFieldHasNoImplementationForType0" xml:space="preserve">
+    <value>El campo no tiene una implementación para el tipo {0}</value>
+  </data>
+  <data name="TheType0IsNotInTheTypesTable" xml:space="preserve">
+    <value>El tipo {0} no está en la tabla de tipos</value>
+  </data>
+  <data name="TheUnaryOperator0IsNotSupported" xml:space="preserve">
+    <value>El operador unario '{0}' no está soportado</value>
+  </data>
+  <data name="TheBinaryOperator0IsNotSupported" xml:space="preserve">
+    <value>El operador binario '{0}' no está soportado</value>
+  </data>
+  <data name="TheConstantFor0IsNotSupported" xml:space="preserve">
+    <value>La constante  '{0}' no está soportada</value>
+  </data>
+  <data name="ReferenceToUndefinedColumn" xml:space="preserve">
+    <value>Referencia a columna no definida</value>
+  </data>
+  <data name="TypeOfExpressionIs0ButTypeOfFieldIs1" xml:space="preserve">
+    <value>El tipo de la expresion es {0} pero el del campo es {1}</value>
+  </data>
+  <data name="TheType0IsNotTheLazyVersionOf1" xml:space="preserve">
+    <value>El tipo {0} no es la versiona Lazy de {1}</value>
+  </data>
+  <data name="UnhandledExpressionType0" xml:space="preserve">
+    <value>Tipo de expresion no tratado '{0}'</value>
+  </data>
+  <data name="UnhandledBindingType0" xml:space="preserve">
+    <value>Tipo de binding no tratado '{0}'</value>
+  </data>
+  <data name="CannotEnumerateMoreThanOnce" xml:space="preserve">
+    <value>No se puede enumerar más de una vez</value>
+  </data>
+  <data name="EntityOfType0AndId1NotFound" xml:space="preserve">
+    <value>No se ha encontrado la entidad de tipo {0} e id {1}</value>
+  </data>
+  <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
+    <value>No se ha eliminado todas las entidades de tipo {0} e ids: {1}</value>
+  </data>
+  <data name="NoSeHanEncontrado0ConId1" xml:space="preserve">
+    <value>No se han encontrado {0} con Id {1}</value>
+  </data>
+  <data name="TableForType0NotInSchema" xml:space="preserve">
+    <value>No se ha encontrado la tabla para el tipo {0} en el Schema</value>
+  </data>
+  <data name="_0ObjectsInsertedButOnly1IdsAreGenerated" xml:space="preserve">
+    <value>Se han insertado {0} objetos pero solo se han generado {1} ids</value>
+  </data>
+  <data name="ThereIsASqlPreComandSimpleWithMoreThan0Parameters" xml:space="preserve">
+    <value>Existe un SqlPreCommandSimple con más de {0} parámetros</value>
+  </data>
+  <data name="Type0IsNotAnIdentifiableEntityOrAnEnum" xml:space="preserve">
+    <value>El tipo {0} no es una Entidad ni un enumerado</value>
+  </data>
+  <data name="Field0OfTipe1HasNoCompatibleProperty" xml:space="preserve">
+    <value>&lt;=!=&gt; El Campo {0} del tipo {1} no tiene una propiedad compatible</value>
+  </data>
+  <data name="Field0OfType1HasNoDatabaseRepresentation" xml:space="preserve">
+    <value>El campo {0} de la clase {1} no tiene una manera de representarse en la base de datos</value>
+  </data>
+  <data name="Field0OfType1ShouldBeMappedAs2ButItIsIncompatibleWithContext3" xml:space="preserve">
+    <value>El campo {0} de la clase {1} deberia ser mapeado como un {2} pero es incompatible en un contexto {3}</value>
+  </data>
+  <data name="NoWayOfMappingType0Found" xml:space="preserve">
+    <value>No se ha encontrado manera de mapear el tipo {0}</value>
+  </data>
+  <data name="Types0DoNotImplement1" xml:space="preserve">
+    <value>Los tipos {0} no implementan {1}</value>
+  </data>
+  <data name="NoNameForType0Defined" xml:space="preserve">
+    <value>No está definido el nombre para {0} en este caso</value>
+  </data>
+  <data name="NoNameForField0Defined" xml:space="preserve">
+    <value>No está definido el nombre para {0} en este caso</value>
+  </data>
+  <data name="NoFieldWasGiven" xml:space="preserve">
+    <value>No se ha proporcionado ningún campo</value>
+  </data>
+  <data name="Field0NotInTable1" xml:space="preserve">
+    <value>El campo {0} no se encuentra en la tabla {1}</value>
+  </data>
+  <data name="Field0NotInField0" xml:space="preserve">
+    <value>El campo {0} no se encuentra en el campo {1}</value>
+  </data>
+  <data name="MemberInfo0NotSupportedByCollectionField" xml:space="preserve">
+    <value>El MemberInfo {0} no está soportado por CampoColeccion</value>
+  </data>
+  <data name="Field0HasNullAndOsNotNullable" xml:space="preserve">
+    <value>El campo {0} tiene una valor nulo y no es nullable</value>
+  </data>
+  <data name="ThereIsMoreThanOneValueFor0" xml:space="preserve">
+    <value>Existen más de un valor para {0}</value>
+  </data>
+  <data name="Type0IsNotAMappedType1" xml:space="preserve">
+    <value>El tipo {0} no es de ninguno de los tipos mapeados: {1}</value>
+  </data>
+  <data name="ThereIsADiferentInstanceOfTheSameObjectOnObjectCache" xml:space="preserve">
+    <value>Ya existe un objeto con mismo id y tipo en la cache, pero es una instancia distinta</value>
+  </data>
+  <data name="ErrorCatchingTypesTableFrom0TablesInSchemaButNotIn01TablesIn0ButNotInSchema2" xml:space="preserve">
+    <value>Error cacheando la tabla de Tipos desde {0}:
+    Tablas en el Schema pero no en {0}: {1}
+    Tablas en {0} pero no en el Schema: {2}</value>
+  </data>
+  <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
+    <value>Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}</value>
+  </data>
+  <data name="Field0ContainsBoth1And2" xml:space="preserve">
+    <value>El campo {0} contiene tanto un atributo {1} como uno {2}</value>
+  </data>
+  <data name="Type0ContainsBoth1And2" xml:space="preserve">
+    <value>El tipo {0} contiene tanto un atributo {1} como uno {2}</value>
+  </data>
+  <data name="NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt" xml:space="preserve">
+    <value>No se ha establecido ninguna conexión actual. Utiliza ConnectionScope.Default para hacerlo</value>
+  </data>
+  <data name="NoStackFoundForThisKey" xml:space="preserve">
+    <value>No hay una pila para esta clave</value>
+  </data>
+  <data name="_0RepeatedOnTable1" xml:space="preserve">
+    <value>{0} repetido en la tabla {1}</value>
+  </data>
+</root>

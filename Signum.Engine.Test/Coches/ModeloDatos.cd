@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Signum.Engine.Coches.Marca" Collapsed="true">
+    <Position X="9.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAACEAAAAgAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Engine.Coches.Modelo">
+    <Position X="9.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAQAACEAAAAgAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="marca" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Signum.Engine.Coches.Coche">
+    <Position X="6.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAQAAIAEAAAAAAEAIAAAECAAABAAACAAAgAgAAIAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="modelo" />
+      <Field Name="intervalo" />
+      <Field Name="color" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Signum.Engine.Coches.Intervalo" Collapsed="true">
+    <Position X="9.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAACEAAAAAAAAAAAABAAAgAAAAIAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Engine.Coches.Motor" Collapsed="true">
+    <Position X="1.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Engine.Coches.MotorCombustion">
+    <Position X="0.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAABEAAAAAAAAAAAAAQAAAAAAAAAAAAE=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="tipoCombustion" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Signum.Engine.Coches.MotorElectrico">
+    <Position X="2.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAEACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Engine.Coches.Comentario">
+    <Position X="5.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAAAAQAAIAEAACAAAAAAAIAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Engine.Coches.Nota" Collapsed="true">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAMAAABCAAAAQAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="Signum.Engine.Coches.TipoCombustion" Collapsed="true">
+    <Position X="0.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Signum.Engine.Coches.Color" Collapsed="true">
+    <Position X="3.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAEAAQQAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Signum.Engine.Coches.Valoracion" Collapsed="true">
+    <Position X="12" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAgCAAAAAgAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Coches\ModeloDatos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

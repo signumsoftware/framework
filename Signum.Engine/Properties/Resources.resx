@@ -1,0 +1,475 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="TransactionRollbacked" xml:space="preserve">
+    <value>TRANSACTION ROLLBACKED!</value>
+  </data>
+  <data name="TheView0IsNotOnQueryManager" xml:space="preserve">
+    <value>View {0} is not in the QueryManager</value>
+  </data>
+  <data name="TheProperty0ForType1IsnotFound" xml:space="preserve">
+    <value>Property {0} for type {1} not found</value>
+  </data>
+  <data name="TheExpressionCanTBeTranslatedToSQL" xml:space="preserve">
+    <value>The expression can't be translated to SQL:
+</value>
+  </data>
+  <data name="SetOperationsAreNotAllowedOnQueriesWithNonSingleCellProjections" xml:space="preserve">
+    <value>Set operations are not allowed on queries with Non-Single Cell projections</value>
+  </data>
+  <data name="Table0NotLoadedInSchema" xml:space="preserve">
+    <value>Table for type {0} not loaded on current Schema</value>
+  </data>
+  <data name="NoFieldFoundForMember0" xml:space="preserve">
+    <value>No field found for member {0}</value>
+  </data>
+  <data name="TheField0IsNotIncluded" xml:space="preserve">
+    <value>The field {0} is not included</value>
+  </data>
+  <data name="TheFieldHasNoImplementationForType0" xml:space="preserve">
+    <value>The field has no implementation for type {0}</value>
+  </data>
+  <data name="TheType0IsNotInTheTypesTable" xml:space="preserve">
+    <value>The type {0} is not in the Types Table</value>
+  </data>
+  <data name="TheUnaryOperator0IsNotSupported" xml:space="preserve">
+    <value>The unary operator '{0}' is not supported</value>
+  </data>
+  <data name="TheBinaryOperator0IsNotSupported" xml:space="preserve">
+    <value>The binary operator '{0}' is not supported</value>
+  </data>
+  <data name="TheConstantFor0IsNotSupported" xml:space="preserve">
+    <value>The constant for '{0}' is not supported</value>
+  </data>
+  <data name="ReferenceToUndefinedColumn" xml:space="preserve">
+    <value>Reference to undefined column</value>
+  </data>
+  <data name="TypeOfExpressionIs0ButTypeOfFieldIs1" xml:space="preserve">
+    <value>Type of Expression is  {0} but type of field is {1}</value>
+  </data>
+  <data name="TheType0IsNotTheLazyVersionOf1" xml:space="preserve">
+    <value>The type {0} is not the Lazy version of {1}</value>
+  </data>
+  <data name="UnhandledExpressionType0" xml:space="preserve">
+    <value>Unhandled expression type: '{0}'</value>
+  </data>
+  <data name="UnhandledBindingType0" xml:space="preserve">
+    <value>Unhandled binding type '{0}'</value>
+  </data>
+  <data name="CannotEnumerateMoreThanOnce" xml:space="preserve">
+    <value>Cannot enumerate more than once</value>
+  </data>
+  <data name="EntityOfType0AndId1NotFound" xml:space="preserve">
+    <value>Entity of type {0} and id {1} not found</value>
+  </data>
+  <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
+    <value>Not all entities of type {0} and ids {1} are removed</value>
+  </data>
+  <data name="NoSeHanEncontrado0ConId1" xml:space="preserve">
+    <value>Entity with type {0} and Id {1} not found</value>
+  </data>
+  <data name="TableForType0NotInSchema" xml:space="preserve">
+    <value>Table for type {0} not loaded on current Schema</value>
+  </data>
+  <data name="_0ObjectsInsertedButOnly1IdsAreGenerated" xml:space="preserve">
+    <value> {0} objects inserted but only {1} ids have been generated</value>
+  </data>
+  <data name="ThereIsASqlPreComandSimpleWithMoreThan0Parameters" xml:space="preserve">
+    <value>There is a  SqlPreCommandSimple with more than {0} parameters</value>
+  </data>
+  <data name="Type0IsNotAnIdentifiableEntityOrAnEnum" xml:space="preserve">
+    <value>Type {0} is not an Entity neither an Enum</value>
+  </data>
+  <data name="Field0OfTipe1HasNoCompatibleProperty" xml:space="preserve">
+    <value>&lt;=!=&gt; The field {0} of type {1} has not corresponding property</value>
+  </data>
+  <data name="Field0OfType1HasNoDatabaseRepresentation" xml:space="preserve">
+    <value>Field {0} of type {1} has no database representation</value>
+  </data>
+  <data name="Field0OfType1ShouldBeMappedAs2ButItIsIncompatibleWithContext3" xml:space="preserve">
+    <value>Field {0} of type {1} shuld be mapped as {2} but is incompatible with context {3}</value>
+  </data>
+  <data name="NoWayOfMappingType0Found" xml:space="preserve">
+    <value>No way of mapping type {0} found</value>
+  </data>
+  <data name="Types0DoNotImplement1" xml:space="preserve">
+    <value>The types  {0} do not implement {1}</value>
+  </data>
+  <data name="NoNameForType0Defined" xml:space="preserve">
+    <value>No name for type {0} is defined</value>
+  </data>
+  <data name="NoNameForField0Defined" xml:space="preserve">
+    <value>No name for field {0} is defined</value>
+  </data>
+  <data name="NoFieldWasGiven" xml:space="preserve">
+    <value>No field was given</value>
+  </data>
+  <data name="Field0NotInTable1" xml:space="preserve">
+    <value>Field {0} not found on table {1}</value>
+  </data>
+  <data name="Field0NotInField0" xml:space="preserve">
+    <value>Field {0} not found on field {1}</value>
+  </data>
+  <data name="MemberInfo0NotSupportedByCollectionField" xml:space="preserve">
+    <value>MemberInfo {0} not supported by CollectionField</value>
+  </data>
+  <data name="Field0HasNullAndOsNotNullable" xml:space="preserve">
+    <value>Field {0} has a null value but is not nullable</value>
+  </data>
+  <data name="ThereIsMoreThanOneValueFor0" xml:space="preserve">
+    <value>There is more than one value for {0}</value>
+  </data>
+  <data name="Type0IsNotAMappedType1" xml:space="preserve">
+    <value>Type {0} is not any of Mapped types : {1}</value>
+  </data>
+  <data name="ThereIsADiferentInstanceOfTheSameObjectOnObjectCache" xml:space="preserve">
+    <value>There is a different instance of the same of object on ObjectCache</value>
+  </data>
+  <data name="__SqlKeywords__" xml:space="preserve">
+    <value>ADD
+ALL
+ALTER
+AND
+ANY
+AS
+ASC
+AUTHORIZATION
+AVG
+BACKUP
+BEGIN
+BETWEEN
+BREAK
+BROWSE
+BULK
+BY
+CASCADE
+CASE
+CHECK
+CHECKPOINT
+CLOSE
+CLUSTERED
+COALESCE
+COLUMN
+COMMIT
+COMMITTED
+COMPUTE
+CONFIRM
+CONSTRAINT
+CONTAINS
+CONTAINSTABLE
+CONTINUE
+CONTROLROW
+CONVERT
+COUNT
+CREATE
+CROSS
+CURRENT
+CURRENT_DATE
+CURRENT_TIME
+CURRENT_TIMESTAMP
+CURRENT_USER
+CURSOR
+DATABASE
+DBCC
+DEALLOCATE
+DECLARE
+DEFAULT
+DELETE
+DENY
+DESC
+DISK
+DISTINCT
+DISTRIBUTED
+DOUBLE
+DROP
+DUMMY
+DUMP
+ELSE
+END
+ERRLVL
+ERROREXIT
+ESCAPE
+EXCEPT
+EXEC
+EXECUTE
+EXISTS
+EXIT
+FETCH
+FILE
+FILLFACTOR
+FLOPPY
+FOR
+FOREIGN
+FREETEXT
+FREETEXTTABLE
+FROM
+FULL
+GOTO
+GRANT
+GROUP
+HAVING
+HOLDLOCK
+IDENTITY
+IDENTITY_INSERT
+IDENTITYCOL
+IF
+IN
+INDEX
+INNER
+INSERT
+INTERSECT
+INTO
+IS
+ISOLATION
+JOIN
+KEY
+KILL
+LEFT
+LEVEL
+LIKE
+LINENO
+LOAD
+MAX
+MIN
+MIRROREXIT
+NATIONAL
+NOCHECK
+NONCLUSTERED
+NOT
+NULL
+NULLIF
+OF
+OFF
+OFFSETS
+ON
+ONCE
+ONLY
+OPEN
+OPENDATASOURCE
+OPENQUERY
+OPENROWSET
+OPTION
+OR
+ORDER
+OUTER
+OVER
+PERCENT
+PERM
+PERMANENT
+PIPE
+PLAN
+PRECISION
+PREPARE
+PRIMARY
+PRINT
+PRIVILEGES
+PROC
+PROCEDURE
+PROCESSEXIT
+PUBLIC
+RAISERROR
+READ
+READTEXT
+RECONFIGURE
+REFERENCES
+REPEATABLE
+REPLICATION
+RESTORE
+RESTRICT
+RETURN
+REVOKE
+RIGHT
+ROLLBACK
+ROWCOUNT
+ROWGUIDCOL
+RULE
+SAVE
+SCHEMA
+SELECT
+SERIALIZABLE
+SESSION_USER
+SET
+SETUSER
+SHUTDOWN
+SOME
+STATISTICS
+SUM
+SYSTEM_USER
+TABLE
+TAPE
+TEMP
+TEMPORARY
+TEXTSIZE
+THEN
+TO
+TOP
+TRAN
+TRANSACTION
+TRIGGER
+TRUNCATE
+TSEQUAL
+UNCOMMITTED
+UNION
+UNIQUE
+UPDATE
+UPDATETEXT
+USE
+USER
+VALUES
+VARYING
+VIEW
+WAITFOR
+WHEN
+WHERE
+WHILE
+WITH
+WORK
+WRITETEXT</value>
+  </data>
+  <data name="CatchingTypesTableFrom0" xml:space="preserve">
+    <value>catching Types Table from {0}</value>
+  </data>
+  <data name="FieldInitExpressionBindingsShouldBeEmpty" xml:space="preserve">
+    <value>FieldInitExpression bindings should be empty</value>
+  </data>
+  <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
+    <value>Concurrency error on database, Table = {0}, Id = {1}</value>
+  </data>
+  <data name="_0RepeatedOnTable1" xml:space="preserve">
+    <value>{0} repeated on table {1}</value>
+  </data>
+  <data name="Field0ContainsBoth1And2" xml:space="preserve">
+    <value>Field {0} contains both a {1} as a {2}</value>
+  </data>
+  <data name="Type0ContainsBoth1And2" xml:space="preserve">
+    <value>Type {0} contains both {1} and {2}</value>
+  </data>
+  <data name="NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt" xml:space="preserve">
+    <value>No Current Connection established. Use ConnectionScope.Default to do it</value>
+  </data>
+  <data name="TheTransactionIsRolledBack" xml:space="preserve">
+    <value>The transaction is rolled back (a previous transaction has not been confirmed)</value>
+  </data>
+  <data name="NoStackFoundForThisKey" xml:space="preserve">
+    <value>There is no stack for this key</value>
+  </data>
+  <data name="TypeDNTableNotCached" xml:space="preserve">
+    <value>TypeDN table not cached. Remember to call TypeLogic.Start in your Starter and call Administrator.InitializeCurrentSchema </value>
+  </data>
+</root>

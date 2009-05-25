@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Signum.Utilities</RootNamespace>
+    <AssemblyName>Signum.Utilities</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutUtils.cs" />
+    <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="ConsoleSwitch.cs" />
+    <Compile Include="CSV.cs" />
+    <Compile Include="DataStructures\Grouping.cs" />
+    <Compile Include="DataStructures\ImmutableAVLTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataStructures\ImmutableQueue.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataStructures\ImmutableStack.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataStructures\LambdaComparer.cs" />
+    <Compile Include="DataStructures\MinMax.cs" />
+    <Compile Include="DataStructures\Sequence.cs" />
+    <Compile Include="DateTimeExtensions.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="EnumExtensions.cs" />
+    <Compile Include="DataStructures\DirectedEdgedGraph.cs" />
+    <Compile Include="DataStructures\IntervalDictionaries\Cube.cs" />
+    <Compile Include="DataStructures\IntervalDictionaries\CubeDictionary.cs" />
+    <Compile Include="DataStructures\DirectedGraph.cs" />
+    <Compile Include="DataStructures\IntervalDictionaries\Interval.cs" />
+    <Compile Include="DataStructures\IntervalDictionaries\IntervalDictionary.cs" />
+    <Compile Include="DataStructures\IntervalDictionaries\Square.cs" />
+    <Compile Include="DataStructures\IntervalDictionaries\SquareDictionary.cs" />
+    <Compile Include="DataStructures\Tuple.cs" />
+    <Compile Include="DataStructures\PriorityQueue.cs" />
+    <Compile Include="DataStructures\RecentsDictionary.cs" />
+    <Compile Include="JsonExtensions.cs" />
+    <Compile Include="ReflectionExtensions.cs" />
+    <Compile Include="Reflection\MemberEntryFactory.cs" />
+    <Compile Include="Serialization.cs" />
+    <Compile Include="Switch.cs" />
+    <Compile Include="ExpressionTrees\CSharpAuxRenderer.cs" />
+    <Compile Include="ExpressionTrees\CSharpTreeRenderer.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="GroupExtensions.cs" />
+    <Compile Include="ExpressionTrees\ExpressionExtensions.cs" />
+    <Compile Include="ExpressionTrees\ExpressionVisitor.cs" />
+    <Compile Include="ExpressionTrees\QueryableExtensions.cs" />
+    <Compile Include="ExpressionTrees\Utils.cs" />
+    <Compile Include="ListExtensions.cs" />
+    <Compile Include="MyRandom.cs" />
+    <Compile Include="Properties\Resources.es.Designer.cs">
+      <DependentUpon>Resources.es.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Reflection\ReflectionUtils.cs" />
+    <Compile Include="RegexExtensions.cs" />
+    <Compile Include="SafeConsole.cs" />
+    <Compile Include="Disposable.cs" />
+    <Compile Include="ProgressEnumerator.cs" />
+    <Compile Include="ProgressProxy.cs" />
+    <Compile Include="Synchronization\Sync.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Synchronization\ThreadSafeEnumerator.cs" />
+    <Compile Include="StreamExtensions.cs" />
+    <Compile Include="StringDistance.cs" />
+    <Compile Include="StringExtensions.cs" />
+    <Compile Include="TreeExtensions.cs" />
+    <Compile Include="Properties\Version.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SignumFramework.pfx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

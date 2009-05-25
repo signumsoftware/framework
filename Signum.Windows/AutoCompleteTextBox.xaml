@@ -1,0 +1,17 @@
+﻿<Grid x:Class="Signum.Windows.AutoCompleteTextBox"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--<ComboBox x:Name="comboBox" IsTabStop="False" />-->
+    <TextBox x:Name="textBox" VerticalContentAlignment="Center" 
+             TextChanged="textBox_TextChanged" 
+             PreviewKeyDown="textBox_PreviewKeyDown" 
+             Focusable="True"
+             LostFocus="textBox_LostFocus"/>
+    <Popup x:Name="popup" PlacementTarget="{Binding ElementName = textBox}" Placement="Bottom" StaysOpen="False" Width="{Binding ActualWidth, ElementName=textBox}">
+        <ListBox x:Name="listBox" 
+                 MouseDoubleClick="listBox_MouseDoubleClick"
+                 KeyDown="listbox_KeyDown"
+                 Focusable="True" 
+                 LostFocus="listBox_LostFocus"/>
+    </Popup>
+</Grid>

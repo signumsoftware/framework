@@ -1,0 +1,41 @@
+﻿<Window x:Class="Signum.Windows.TypeSelectorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:m="clr-namespace:Signum.Windows"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="TypeSelectorWindow" 
+    SizeToContent="WidthAndHeight"
+    x:Name="win">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock x:Name="tb" Grid.Row="0" Margin="10,10,10,0" FontWeight="bold"/>
+        <Border BorderThickness="1" BorderBrush="RoyalBlue" Margin="10" Grid.Row="1" CornerRadius="4" Padding="2">
+            <ItemsControl x:Name="itemsControl" ItemsSource="{Binding Types, ElementName=win}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ToggleButton Checked="ToggleButton_Checked" Padding="3">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Converter={x:Static m:Converters.TypeImage}}" Height="16" Width="16"/>
+                                <TextBlock Text="{Binding Converter={x:Static m:Converters.TypeName}}" FontSize="12" Margin="10,0"/>
+                            </StackPanel>
+                        </ToggleButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ContentPresenter}" >
+                        <Setter Property="Margin" Value="4" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <StackPanel Orientation="Vertical" IsItemsHost="True"/>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+            </ItemsControl>
+        </Border>
+        <m:ImageButton x:Name="btCancel"  HorizontalAlignment="Right" Margin="6,4,6,4"  Image="Images\cancel.png" Content="{m:Loc Cancel}" IsCancel="true" Click="btCancel_Click" Grid.Row="2"/>
+    </Grid>
+</Window>

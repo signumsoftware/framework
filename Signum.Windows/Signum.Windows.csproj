@@ -1,0 +1,381 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{76278145-7CCD-4411-9B8A-078708128571}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Signum.Windows</RootNamespace>
+    <AssemblyName>Signum.Windows</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="PresentationFramework.Classic" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Page Include="ErrorSummary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="ErrorSummary.xaml.cs">
+      <DependentUpon>ErrorSummary.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="AutoCompleteTextBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Basics\Note.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ButtonBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ColorUtils\ColorSelector.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ColorUtils\RGBTextBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AdminWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="FileLine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DynamicQuery\SearchControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LightEntityLine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DynamicQuery\FilterBuilder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DynamicQuery\SearchWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EntityButtons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EntityCombo.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ToolBarButton.generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Widgets\LinksWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Widgets\NotesWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Widgets\WidgetPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="NormalWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\ColorPicker.generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\ImageButton.generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\MonthCalendar.generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\DateTimePicker.generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\NumericTextBox.generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\PickerBase.generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TypeSelectorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ValueLine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EntityList.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EntityLine.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="EntityLine.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>EntityLine.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Signum.Utilities\Properties\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
+    <Compile Include="AdminBase.cs" />
+    <Compile Include="Async.cs" />
+    <Compile Include="AutoCompleteTextBox.xaml.cs">
+      <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Basics\Note.xaml.cs">
+      <DependentUpon>Note.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ButtonBar.xaml.cs">
+      <DependentUpon>ButtonBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Common.cs" />
+    <Compile Include="Controls\ShyControl.cs" />
+    <Compile Include="Controls\ToolBarButton.cs" />
+    <Compile Include="Facades\Constructor.cs" />
+    <Compile Include="Converters\DateTimeConverter.cs" />
+    <Compile Include="Converters\NullableDecimalConverter.cs" />
+    <Compile Include="Converters\DoubleListConverter.cs" />
+    <Compile Include="Facades\ViewOptions.cs" />
+    <Compile Include="Facades\AdminOptions.cs" />
+    <Compile Include="Facades\FindOptions.cs" />
+    <Compile Include="Facades\QuerySettings.cs" />
+    <Compile Include="Facades\EntitySettings.cs" />
+    <Compile Include="MarkupExtensions\LazyExtension.cs" />
+    <Compile Include="TypeContext.cs" />
+    <Compile Include="Controls\ColorPicker.cs" />
+    <Compile Include="Controls\ColorUtils\ColorSelector.xaml.cs">
+      <DependentUpon>ColorSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorUtils\HsvColor.cs" />
+    <Compile Include="Controls\ColorUtils\RGBTextBox.xaml.cs">
+      <DependentUpon>RGBTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorUtils\SpectrumSlider.cs" />
+    <Compile Include="Controls\DateUtils\CalendarDataGenerator.cs" />
+    <Compile Include="Controls\DateUtils\CalendarDate.cs" />
+    <Compile Include="Controls\DateUtils\Converters.cs" />
+    <Compile Include="Controls\DateTimePicker.cs" />
+    <Compile Include="Controls\DateUtils\DateTimeValueConverter.cs" />
+    <Compile Include="Controls\DateUtils\InvalidEntryEventArgs.cs" />
+    <Compile Include="Controls\MonthCalendar.cs" />
+    <Compile Include="Controls\DateUtils\MonthCalendarContainer.cs" />
+    <Compile Include="Controls\DateUtils\MonthCalendarDayHeaderWeekNumber.cs" />
+    <Compile Include="Controls\DateUtils\MonthCalendarHelper.cs" />
+    <Compile Include="Controls\DateUtils\MonthCalendarItem.cs" />
+    <Compile Include="Controls\DateUtils\MonthCalendarTitle.cs" />
+    <Compile Include="Controls\ImageButton.cs" />
+    <Compile Include="Controls\NumericTextBox.cs" />
+    <Compile Include="Controls\PickerBase.cs" />
+    <Compile Include="Converters\Converter.cs" />
+    <Compile Include="Converters\Converters.cs" />
+    <Compile Include="AdminWindow.xaml.cs">
+      <DependentUpon>AdminWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\GradientConverter.cs" />
+    <Compile Include="Converters\NotNullValidationRule.cs" />
+    <Compile Include="Converters\FormatStringConverter.cs" />
+    <Compile Include="DataBorder.cs" />
+    <Compile Include="FileLine.xaml.cs">
+      <DependentUpon>FileLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\SearchControl.xaml.cs">
+      <DependentUpon>SearchControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LightEntityLine.xaml.cs">
+      <DependentUpon>LightEntityLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\FilterBuilder.xaml.cs">
+      <DependentUpon>FilterBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\SearchWindow.xaml.cs">
+      <DependentUpon>SearchWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityBase.cs" />
+    <Compile Include="EntityButtons.xaml.cs">
+      <DependentUpon>EntityButtons.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityCombo.xaml.cs">
+      <DependentUpon>EntityCombo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ImageLoader.cs" />
+    <Compile Include="Widgets\LinksWidget.xaml.cs">
+      <DependentUpon>LinksWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Widgets\NotesWidget.xaml.cs">
+      <DependentUpon>NotesWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Widgets\WidgetPanel.xaml.cs">
+      <DependentUpon>WidgetPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LocExtension.cs" />
+    <Compile Include="MarkupExtensions\DebugConverter.cs" />
+    <Compile Include="MarkupExtensions\EnumValuesExtension.cs" />
+    <Compile Include="MarkupExtensions\ImageExtension.cs" />
+    <Compile Include="Facades\Navigator.cs" />
+    <Compile Include="NormalWindow.xaml.cs">
+      <DependentUpon>NormalWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.es.Designer.cs">
+      <DependentUpon>Resources.es.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Facades\Server.cs" />
+    <Compile Include="TypeSelectorWindow.xaml.cs">
+      <DependentUpon>TypeSelectorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ValueLine.xaml.cs">
+      <DependentUpon>ValueLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityList.xaml.cs">
+      <DependentUpon>EntityList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\cancel.png" />
+    <Resource Include="Images\close.png" />
+    <Resource Include="Images\ok.png" />
+    <Resource Include="Images\save.png" />
+    <Resource Include="Images\entity.png" />
+    <Resource Include="Images\find.png" />
+    <Resource Include="Images\reload.png" />
+    <Resource Include="Images\admin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\open.png" />
+    <Resource Include="Images\pin.png" />
+    <Resource Include="Images\star.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SignumFramework.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
+      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Name>Signum.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Services\Signum.Services.csproj">
+      <Project>{B63C47DF-4EC3-4D80-863C-2B5A38D2C35B}</Project>
+      <Name>Signum.Services</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
+      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Name>Signum.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

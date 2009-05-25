@@ -1,0 +1,67 @@
+﻿<UserControl
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:m="clr-namespace:Signum.Windows"
+    xmlns:dq="clr-namespace:Signum.Entities.DynamicQuery;assembly=Signum.Entities"
+	mc:Ignorable="d"
+	x:Class="Signum.Windows.FilterBuilder"
+	x:Name="UserControl">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="..\Resources.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<Grid x:Name="LayoutRoot">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
+            <Border Child="{StaticResource Filter}" Margin="4,4,4,4" Opacity="0.5"/>
+			<Label Content="{m:Loc NewFilter}" Margin="0,2,2,2" Target="{Binding ElementName=cbFilters, Mode=OneWay}"/>
+			<ComboBox IsSynchronizedWithCurrentItem="True" Margin="2,2,2,2" x:Name="cbFilters" MinWidth="150" DisplayMemberPath="DisplayName"/>
+			<Button x:Name="btCreate" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" Margin="2,2,2,2" Click="btCreate_Click" />
+		</StackPanel>
+		<Grid  Grid.Row="1" x:Name="filtros" Height="120">
+			<ListView IsSynchronizedWithCurrentItem="True" x:Name="lvFilters" m:Common.LabelVisible="False" KeyDown="lvFilters_KeyDown" Margin="0,0,28,4">
+				<ListView.ItemContainerStyle>
+					<Style TargetType="{x:Type ListViewItem}">
+						<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+					</Style>
+				</ListView.ItemContainerStyle>
+				<ListView.View>
+					<GridView AllowsColumnReorder="False">
+						<GridViewColumn Header="{m:Loc Field}" DisplayMemberBinding="{Binding Path=Column.DisplayName}" Width="100"/>
+						<GridViewColumn Header="{m:Loc Operation}" Width="100">
+							<GridViewColumn.CellTemplate>
+								<DataTemplate>
+									<Grid MinWidth="80" HorizontalAlignment="Stretch">
+                                        <ComboBox SelectedItem="{Binding Path=Operation}" Loaded="ComboBox_Loaded">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Converter={x:Static m:Converters.FilterOperation}}"/>
+                                                </DataTemplate>                                                
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </Grid>
+								</DataTemplate>
+							</GridViewColumn.CellTemplate>
+						</GridViewColumn>
+						<GridViewColumn Header="{m:Loc Value}" Width="200">
+							<GridViewColumn.CellTemplate>
+								<DataTemplate>
+									<Grid Loaded="Grid_Loaded" HorizontalAlignment="Stretch"/>
+								</DataTemplate>
+							</GridViewColumn.CellTemplate>
+						</GridViewColumn>
+					</GridView>
+				</ListView.View>
+			</ListView>
+			<Button x:Name="btRemove" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" HorizontalAlignment="Right" d:LayoutOverrides="Width" VerticalAlignment="Top" Click="btRemove_Click" Margin="0,4,4,0"/>
+		</Grid>
+	</Grid>
+</UserControl>

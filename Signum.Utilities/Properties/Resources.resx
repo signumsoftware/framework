@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="InconsistenceFoundCube012CouldHaveValues34" xml:space="preserve">
+    <value>Inconsistence found, cube {0} x {1} x {2} could have values {3} ó {4}</value>
+  </data>
+  <data name="MinIsGreaterThanMax" xml:space="preserve">
+    <value>Min is greater than Max</value>
+  </data>
+  <data name="Intervalo0OverlapsWithExistingOne1Value2" xml:space="preserve">
+    <value>Interval {0} overlaps with the existing {1}, value : {2}</value>
+  </data>
+  <data name="Interval0OverlapsWithTheExisting1" xml:space="preserve">
+    <value>Interval {0} overlaps with the exisisting {1}</value>
+  </data>
+  <data name="DictionaryEmpty" xml:space="preserve">
+    <value>Dictionary Empty</value>
+  </data>
+  <data name="NoIntervalFound" xml:space="preserve">
+    <value>No interval found</value>
+  </data>
+  <data name="IntervalLimitsDoNotExistOnDictionary" xml:space="preserve">
+    <value>Interval limits do not exisit on dictionary</value>
+  </data>
+  <data name="InconsistenceFoundOnSquare01CouldHaveValues23" xml:space="preserve">
+    <value>Inconsistence found, square {0} x {1} could have values {2} ó {3}</value>
+  </data>
+  <data name="TheNode0IsNotInTheGraph" xml:space="preserve">
+    <value>The node {0} is not in the graph</value>
+  </data>
+  <data name="EmptyList" xml:space="preserve">
+    <value>Empty List</value>
+  </data>
+  <data name="NoMatchInA01Switch" xml:space="preserve">
+    <value>No match in a {0} -&gt; {1} switch</value>
+  </data>
+  <data name="NoMemberNamed0" xml:space="preserve">
+    <value>There is no member with name '{0}'</value>
+  </data>
+  <data name="MoreThanOneMemberNamed0" xml:space="preserve">
+    <value>There is more than one member named '{0}'</value>
+  </data>
+  <data name="_0HasNoFreeBits" xml:space="preserve">
+    <value>{0:X} has no free bits</value>
+  </data>
+  <data name="CellStartsByQuotesButNotEndsLikeThis" xml:space="preserve">
+    <value>Cell starts by " but do not ends like this : {0}</value>
+  </data>
+  <data name="CellHasQuotesInAnUnexpectedPosition" xml:space="preserve">
+    <value>Cell has  " in an unexpected position: {0}</value>
+  </data>
+  <data name="SecondCollectionsIsShorter" xml:space="preserve">
+    <value>The second collection is shorter</value>
+  </data>
+  <data name="FirstCollectionIsShorter" xml:space="preserve">
+    <value>The first collecton is shorter</value>
+  </data>
+  <data name="NoElementExistWithKey0" xml:space="preserve">
+    <value>No element exist with key: {0}</value>
+  </data>
+  <data name="ThereIsMoreThanOneElementWithKey0" xml:space="preserve">
+    <value>There is more than one element with key: {0}</value>
+  </data>
+  <data name="String0IsTooShort" xml:space="preserve">
+    <value>String '{0}' is too short</value>
+  </data>
+  <data name="ThereIsNoAnidableScopeForType0" xml:space="preserve">
+    <value>The is no ScopeAnidable fot type {0}</value>
+  </data>
+  <data name="IsNotAnEnum" xml:space="preserve">
+    <value>{0} is not an Enum</value>
+  </data>
+  <data name="_0Year1Month2Day" xml:space="preserve">
+    <value>{0} Year(s), {1} Month(s), {2} Day(s)</value>
+  </data>
+  <data name="SquareNotFound" xml:space="preserve">
+    <value>Square not found</value>
+  </data>
+  <data name="CubeNotFound" xml:space="preserve">
+    <value>Cube not found</value>
+  </data>
+  <data name="EmptyPriorityQueue" xml:space="preserve">
+    <value>Empty Priority Queue</value>
+  </data>
+  <data name="Key0NotFound" xml:space="preserve">
+    <value>Key {0} not found</value>
+  </data>
+  <data name="EmptyStack" xml:space="preserve">
+    <value>Empty stack</value>
+  </data>
+  <data name="EmptyQueue" xml:space="preserve">
+    <value>Empty queue</value>
+  </data>
+  <data name="EmptyTree" xml:space="preserve">
+    <value>Empty tree</value>
+  </data>
+  <data name="CannotRemoveItemThatIsNotInTree" xml:space="preserve">
+    <value>Cannot remove item that is not in tree.</value>
+  </data>
+  <data name="MinAndMaxShouldBeGreaterThan0" xml:space="preserve">
+    <value>min and max should be greater than 0</value>
+  </data>
+  <data name="MaxShouldBeGreaterOrEqualThanMin" xml:space="preserve">
+    <value>max should be greater or equal than min</value>
+  </data>
+  <data name="Error0Lacking1Extra2" xml:space="preserve">
+    <value>Error {0}:
+ Lacking: {1}
+ Extra: {2}</value>
+  </data>
+</root>

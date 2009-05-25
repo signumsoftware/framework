@@ -1,0 +1,303 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Reflection;
+using System.Linq.Expressions;
+using System.Reflection.Emit;
+
+namespace Signum.Utilities.Reflection
+{
+    public static class ReflectionTools
+    { 
+        public static bool FieldEquals(FieldInfo f1, FieldInfo f2)
+        {
+            return MemeberEquals(f1, f2);
+        }
+
+        public static bool PropertyEquals(PropertyInfo p1, PropertyInfo p2)
+        {
+            return MemeberEquals(p1, p2);
+        }
+
+        public static bool MethodEqual(MethodInfo m1, MethodInfo m2)
+        {
+            return MemeberEquals(m1, m2);
+        }
+
+        public static bool MemeberEquals(MemberInfo m1, MemberInfo m2)
+        {
+            if (m1 == m2)
+                return true;
+
+            if (m1.DeclaringType != m2.DeclaringType)
+                return false;
+
+            // Methods on arrays do not have metadata tokens but their ReflectedType
+            // always equals their DeclaringType
+            if (m1.DeclaringType != null && m1.DeclaringType.IsArray)
+                return false;
+
+            if (m1.MetadataToken != m2.MetadataToken || m1.Module != m2.Module)
+                return false;
+
+            if (m1 is MethodInfo)
+            {
+                MethodInfo lhsMethod = m1 as MethodInfo;
+
+                if (lhsMethod.IsGenericMethod)
+                {
+                    MethodInfo rhsMethod = m2 as MethodInfo;
+
+                    Type[] lhsGenArgs = lhsMethod.GetGenericArguments();
+                    Type[] rhsGenArgs = rhsMethod.GetGenericArguments();
+                    for (int i = 0; i < rhsGenArgs.Length; i++)
+                    {
+                        if (lhsGenArgs[i] != rhsGenArgs[i])
+                            return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static PropertyInfo GetPropertyInfo(Expression<Func<object>> lambda)
+        {
+            return (PropertyInfo)BaseMemberInfo(lambda);
+        }
+
+        public static PropertyInfo GetPropertyInfo<T1>(Expression<Func<T1, object>> lambda)
+        {
+            return (PropertyInfo)BaseMemberInfo(lambda);
+        }
+
+        public static FieldInfo GetFieldInfo(Expression<Func<object>> lambda)
+        {
+            return (FieldInfo)BaseMemberInfo(lambda);
+        }
+
+        public static FieldInfo GetFieldInfo<T1>(Expression<Func<T1, object>> lambda)
+        {
+            return (FieldInfo)BaseMemberInfo(lambda);
+        }
+
+        public static MemberInfo GetMemberInfo<T1>(Expression<Func<T1, object>> lambda)
+        {
+            return BaseMemberInfo(lambda);
+        }
+
+        static MemberInfo BaseMemberInfo(LambdaExpression lambdaExpression)
+        {
+            Expression body = lambdaExpression.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            return ((MemberExpression)body).Member;
+        }
+
+        public static MethodInfo GetMethodInfo(Expression<Func<object>> lambda)
+        {
+            return BaseMethodInfo(lambda);
+        }
+
+        public static MethodInfo GetMethodInfo<T1>(Expression<Func<T1, object>> lambda)
+        {
+            return BaseMethodInfo(lambda);
+        }
+
+        public static MethodInfo GetMethodInfo<T1, T2>(Expression<Func<T1, T2, object>> lambda)
+        {
+            return BaseMethodInfo(lambda);
+        }
+
+        public static MethodInfo GetMethodInfo<T1, T2, T3>(Expression<Func<T1, T2, T3, object>> lambda)
+        {
+            return BaseMethodInfo(lambda);
+        }
+
+        public static MethodInfo GetMethodInfo<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, object>> lambda)
+        {
+            return BaseMethodInfo(lambda);
+        }
+
+        static MethodInfo BaseMethodInfo(LambdaExpression lambdaExpression)
+        {
+            Expression body = lambdaExpression.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            return ((MethodCallExpression)body).Method;
+        }
+
+        public static Func<T, object> CreateGetter<T>(MemberInfo m)
+        {
+            if ((m as PropertyInfo).TryCS(a => !a.CanRead) ?? false)
+                return null;
+
+            ParameterExpression p = Expression.Parameter(typeof(T), "p");
+            Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(T), typeof(object));
+            var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(p, m), typeof(object)), p);
+            return (Func<T, object>)exp.Compile();
+        }
+
+        public static Func<object, object> CreateGetterUntyped(Type type, MemberInfo m)
+        {
+            if ((m as PropertyInfo).TryCS(a => !a.CanRead) ?? false)
+                return null;
+
+            ParameterExpression p = Expression.Parameter(typeof(object), "p");
+            Type lambdaType = typeof(Func<,>).MakeGenericType(typeof(object), typeof(object));
+            var exp = Expression.Lambda(lambdaType, Expression.Convert(Expression.MakeMemberAccess(Expression.Convert(p, type), m), typeof(object)), p);
+            return (Func<object, object>)exp.Compile();
+        }
+
+        //Replace when C# 4.0 is available
+        public static Action<T, object> CreateSetter<T>(MemberInfo m)
+        {
+            if ((m as PropertyInfo).TryCS(a => !a.CanWrite) ?? false)
+                return null;
+
+            DynamicMethod setter = new DynamicMethod(
+                "{0}_Setter".Formato(m.Name),
+                    typeof(void), new[] { typeof(T), typeof(object) },
+                    m.DeclaringType);
+
+            ILGenerator generator = setter.GetILGenerator();
+            GenerateSetterIL(generator, m, null);
+
+            return (Action<T, object>)setter.CreateDelegate(typeof(Action<T, object>));
+
+        }
+
+        static Module module = ((Expression<Func<int>>)(() => 2)).Compile().Method.Module;
+
+        //Replace when C# 4.0 is available
+        public static Action<object, object> CreateSetterUntyped(Type type, MemberInfo m)
+        {
+            if ((m as PropertyInfo).TryCS(a => !a.CanWrite) ?? false)
+                return null;
+
+            DynamicMethod setter = new DynamicMethod(
+                "{0}_Setter".Formato(m.Name),
+                    typeof(void), new[] { typeof(object), typeof(object) },
+                    m.DeclaringType);
+
+            ILGenerator generator = setter.GetILGenerator();
+            GenerateSetterIL(generator, m, type);
+
+            return (Action<object, object>)setter.CreateDelegate(typeof(Action<object, object>));
+        }
+
+        static void GenerateSetterIL(ILGenerator generator, MemberInfo m, Type castingType)
+        {
+            Type retType = m.ReturningType();
+
+            generator.Emit(OpCodes.Ldarg_0);
+
+            if (castingType != null)
+                generator.Emit(OpCodes.Castclass, castingType);
+
+            generator.Emit(OpCodes.Ldarg_1);
+
+            if (retType.IsClass)
+                generator.Emit(OpCodes.Castclass, retType);
+            else
+                generator.Emit(OpCodes.Unbox_Any, retType);
+
+            if (m is PropertyInfo)
+                generator.Emit(OpCodes.Callvirt, ((PropertyInfo)m).GetSetMethod(true));
+            else
+                generator.Emit(OpCodes.Stfld, (FieldInfo)m);
+
+            generator.Emit(OpCodes.Ret);
+        }
+
+        public static Func<T> CreateConstructor<T>(Type type)
+        {
+            return Expression.Lambda<Func<T>>(Expression.Convert(Expression.New(type), typeof(T))).Compile();
+        }
+
+        public static Func<object> CreateConstructorUntyped(Type type)
+        {
+            return Expression.Lambda<Func<object>>(Expression.Convert(Expression.New(type), typeof(object))).Compile();
+        }
+
+
+        public static T Parse<T>(string value)
+        {
+            if (typeof(T) == typeof(string))
+                return (T)(object)value;
+
+            if (value == null || value == "")
+                return (T)(object)null;
+
+            Type utype = typeof(T).UnNullify();
+            if (utype.IsEnum)
+                return (T)Enum.Parse(utype, (string)value);
+            else
+                return (T)Convert.ChangeType(value, utype);
+        }
+
+        public static object Parse(string value, Type type)
+        {
+            if (type == typeof(string))
+                return (object)value;
+
+            if (value == null || value == "")
+                return (object)null;
+
+            Type utype = type.UnNullify();
+            if (utype.IsEnum)
+                return Enum.Parse(utype, (string)value);
+            else
+                return Convert.ChangeType(value, utype);
+        }
+
+        public static T ChangeType<T>(object value)
+        {
+            if (value == null)
+                return (T)(object)null;
+
+            if (value.GetType() == typeof(T))
+                return (T)value;
+            else
+            {
+                Type utype = typeof(T).UnNullify();
+
+                if (utype.IsEnum)
+                {
+                    if (value is string)
+                        return (T)Enum.Parse(utype, (string)value);
+                    else
+                        return (T)Enum.ToObject(utype, value);
+                }
+                else
+                    return (T)Convert.ChangeType(value, utype);
+            }
+        }
+
+        public static object ChangeType(object value, Type type)
+        {
+            if (value == null)
+                return null;
+
+            if (value.GetType() == type)
+                return value;
+            else
+            {
+                Type utype = type.UnNullify();
+
+                if (utype.IsEnum)
+                {
+                    if (value is string)
+                        return Enum.Parse(utype, (string)value);
+                    else
+                        return Enum.ToObject(utype, value);
+                }
+                else
+                    return Convert.ChangeType(value, utype);
+            }
+        }
+    }
+}

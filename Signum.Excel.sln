@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Excel", "Signum.Excel\Signum.Excel.csproj", "{7730FF46-3548-4E79-8028-22F4D33BFE86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Utilities", "Signum.Utilities\Signum.Utilities.csproj", "{B9503621-D65D-4319-83BC-59EC8BC31D3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Excel.Generator", "Signum.Excel.Generator\Signum.Excel.Generator.csproj", "{1B51CC8C-CCAC-42D8-A445-995F5C823BDD}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 4
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://192.168.0.8:8080/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Signum.Utilities\\Signum.Utilities.csproj
+		SccProjectName1 = Signum.Utilities
+		SccLocalPath1 = Signum.Utilities
+		SccProjectUniqueName2 = Signum.Excel\\Signum.Excel.csproj
+		SccProjectName2 = Signum.Excel
+		SccLocalPath2 = Signum.Excel
+		SccProjectUniqueName3 = Signum.Excel.Generator\\Signum.Excel.Generator.csproj
+		SccProjectName3 = Signum.Excel.Generator
+		SccLocalPath3 = Signum.Excel.Generator
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7730FF46-3548-4E79-8028-22F4D33BFE86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7730FF46-3548-4E79-8028-22F4D33BFE86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7730FF46-3548-4E79-8028-22F4D33BFE86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7730FF46-3548-4E79-8028-22F4D33BFE86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9503621-D65D-4319-83BC-59EC8BC31D3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9503621-D65D-4319-83BC-59EC8BC31D3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9503621-D65D-4319-83BC-59EC8BC31D3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9503621-D65D-4319-83BC-59EC8BC31D3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B51CC8C-CCAC-42D8-A445-995F5C823BDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B51CC8C-CCAC-42D8-A445-995F5C823BDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B51CC8C-CCAC-42D8-A445-995F5C823BDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B51CC8C-CCAC-42D8-A445-995F5C823BDD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

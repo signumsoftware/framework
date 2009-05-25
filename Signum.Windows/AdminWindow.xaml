@@ -1,0 +1,41 @@
+﻿<m:AdminBase
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	x:Class="Signum.Windows.AdminWindow"
+	x:Name="Window"
+	ShowInTaskbar="True" 
+	ResizeMode="CanResizeWithGrip" 
+	WindowStartupLocation="CenterScreen" 
+	MinHeight="180"
+    SizeToContent="WidthAndHeight"
+	SnapsToDevicePixels="True" >
+	<m:AdminBase.Resources>
+		<m:FormatStringConverter x:Key="formatConverter" Format="{m:Loc Administration0}" />
+	</m:AdminBase.Resources>
+	<m:AdminBase.Title>
+		<MultiBinding Converter="{StaticResource formatConverter}">
+			<Binding ElementName="Window" Path="MainControl" Converter="{x:Static m:Converters.TypeContextName}" />
+		</MultiBinding>
+	</m:AdminBase.Title>
+	<DockPanel>
+        <m:ButtonBar x:Name="buttonBar" DockPanel.Dock="Top" SaveVisible="True" ReloadVisible="True" SaveClick="Save_Click" ReloadClick="Reload_Click"/>
+        <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" m:Common.Route="/" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />
+		<m:ErrorSummary ValidationTarget="{Binding Path=MainControl, ElementName=Window}" DockPanel.Dock="Bottom"/>
+		<Grid Margin="5">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition MinWidth="200" />
+				<ColumnDefinition MinWidth="200" />
+			</Grid.ColumnDefinitions>
+            <m:EntityList x:Name="entityList" Remove="False" Find="False" View="False" ViewOnCreate="False" m:Common.Route="" Margin="5,0,5,5"/>
+			<m:DataBorder Margin="5,0,5,5" Grid.Column="1"  BorderBrush="Gray"   BorderThickness="1" m:Common.Route="/" Padding="5">
+				<ContentControl Content="{Binding Path=MainControl, ElementName=Window}" x:Name="contentControl"/>
+			</m:DataBorder>
+			<GridSplitter Grid.Column="1"  HorizontalAlignment="Left"  x:Name="gridSplitter1" Width="6" Margin="-3,0,0,0" />
+		</Grid>
+
+	</DockPanel>
+
+</m:AdminBase>

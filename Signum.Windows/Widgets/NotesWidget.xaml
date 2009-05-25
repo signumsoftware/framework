@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="Signum.Windows.NotesWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:m="clr-namespace:Signum.Windows"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Expander BorderBrush="#FF878787" Style="{DynamicResource GroupBoxExpander}" x:Name="expNotes" Margin="5" Background="White" IsExpanded="True">
+        <Expander.Header>
+            <Grid HorizontalAlignment="Stretch" MinWidth="100">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image Source="..\Images\pin.png" Stretch="Fill" Margin="-2,-2,-2,-2"/>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Text="Notes" TextWrapping="Wrap" x:Name="tbNotes"/>
+            </Grid>
+        </Expander.Header>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" MinHeight="20"/>
+            </Grid.RowDefinitions>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="2,2,2,2" MinHeight="10" MaxHeight="200">
+                <ItemsControl x:Name="lvNotas" MaxWidth="120">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Path=ToStr}" Tag="{Binding}"  Style="{DynamicResource LinkButtonStyle}"  FontFamily="Comic Sans MS" HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="Hand" Margin="0,2,0,2"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <Border CornerRadius="7,7,7,7" Grid.Row="1" BorderThickness="0">
+                <Border.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#00FFE793" Offset="0.009"/>
+                        <GradientStop Color="#3F000000" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Button x:Name="btnNewNote" Click="btnNewNote_Click" Content="{m:Loc NewNote}" Style="{DynamicResource LinkButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Comic Sans MS" Foreground="#FF077500" Margin="5,0,5,0" />
+            </Border>
+        </Grid>
+    </Expander>
+</UserControl>

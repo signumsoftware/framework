@@ -1,0 +1,29 @@
+﻿<Window
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:m="clr-namespace:Signum.Windows"
+	x:Class="Signum.Windows.SearchWindow"
+	x:Name="me"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" ResizeMode="CanResizeWithGrip">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="..\Resources.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
+	<Grid Margin="10,0,10,0">
+        <m:SearchControl x:Name="searchControl" Margin="0,0,0,8" 
+                         QueryName="{Binding QueryName, ElementName=me}"
+                         FilterOptions="{Binding FilterOptions, ElementName=me}"
+                         MultiSelection="{Binding MultiSelection, ElementName=me}"
+                         Mode="{Binding Mode, ElementName=me}" 
+						 SearchOnLoad="{Binding SearchOnLoad, ElementName=me}" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,6"  VerticalAlignment="Bottom" > 
+			 <m:ImageButton x:Name="btAccept" Margin="6,0,6,0" Image="..\Images\ok.png" Content="{m:Loc Ok}"  Width="70" IsDefault="True" Click="Accept_Click" />
+			 <m:ImageButton x:Name="btCancel" Margin="6,0,6,0" Image="..\Images\cancel.png" Content="{m:Loc Cancel}"  Width="70" IsCancel="True" Click="Cancel_Click" />
+			 <m:ImageButton x:Name="btClose" Margin="6,0,0,0" Image="..\Images\close.png" Content="{m:Loc Close}"  Width="70" IsCancel="True" Click="Close_Click" />
+		</StackPanel>
+    </Grid>
+</Window>
