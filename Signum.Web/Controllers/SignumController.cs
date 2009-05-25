@@ -25,9 +25,9 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfTypeName, int? sfId, string prefix, string sfOnOk, string sfOnCancel)
+        public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix, string sfOnOk, string sfOnCancel)
         {
-            Type type = Navigator.ResolveType(sfTypeName);
+            Type type = Navigator.ResolveType(sfStaticType);
 
             ModifiableEntity entity = null;
             if (sfId.HasValue)
@@ -51,9 +51,9 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult TrySavePartial(string prefix, string prefixToIgnore, string sfTypeName, int? sfId)
+        public ContentResult TrySavePartial(string prefix, string prefixToIgnore, string sfStaticType, int? sfId)
         {
-            Type type = Navigator.ResolveType(sfTypeName);
+            Type type = Navigator.ResolveType(sfStaticType);
 
             ModifiableEntity entity = null;
             if (sfId.HasValue)

@@ -51,7 +51,7 @@ namespace Signum.Web
             string divASustituir = helper.GlobalName("divASustituir");
 
             StringBuilder sb = new StringBuilder();
-            sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.TypeName, (Reflector.ExtractLazy(typeof(T)) ?? typeof(T)).Name));
+            sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, (Reflector.ExtractLazy(typeof(T)) ?? typeof(T)).Name));
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));

@@ -25,7 +25,7 @@ namespace Signum.Web
         protected static readonly string[] specialProperties = new[] { 
             TypeContext.RuntimeType, 
             TypeContext.Id, 
-            TypeContext.TypeName, 
+            TypeContext.StaticType, 
             EntityBaseKeys.ToStr, 
             EntityBaseKeys.ImplementationsDDL }; 
 

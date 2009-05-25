@@ -33,7 +33,7 @@ namespace Signum.Web
 
             Type elementsCleanType = Reflector.ExtractLazy(typeof(T)) ?? typeof(T);
             
-            sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.TypeName, elementsCleanType.Name) + "\n");
+            sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, elementsCleanType.Name) + "\n");
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
