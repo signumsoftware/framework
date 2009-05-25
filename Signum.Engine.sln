@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		MotorDB1.vsmdi = MotorDB1.vsmdi
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionTreeVisualizer", "ExpressionTreeVisualizer\ExpressionTreeVisualizer.csproj", "{97D88080-A3E3-4E05-82E7-7365B36C67EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionTreeVisualizer", "..\Tecnico\ExpressionTreeVisualizer\ExpressionTreeVisualizer.csproj", "{97D88080-A3E3-4E05-82E7-7365B36C67EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signum.Engine", "Signum.Engine\Signum.Engine.csproj", "{7F2DB6FE-C109-4057-B207-C62A767F905D}"
 EndProject
@@ -38,30 +38,30 @@ Global
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = ExpressionTreeVisualizer\\ExpressionTreeVisualizer.csproj
-		SccProjectName1 = ExpressionTreeVisualizer
-		SccLocalPath1 = ExpressionTreeVisualizer
-		SccProjectUniqueName2 = Signum.Engine\\Signum.Engine.csproj
-		SccProjectName2 = Signum.Engine
-		SccLocalPath2 = Signum.Engine
-		SccProjectUniqueName3 = Signum.Engine.Test\\Signum.Engine.Test.csproj
-		SccProjectName3 = Signum.Engine.Test
-		SccLocalPath3 = Signum.Engine.Test
-		SccProjectUniqueName4 = Signum.Entities\\Signum.Entities.csproj
-		SccProjectName4 = Signum.Entities
-		SccLocalPath4 = Signum.Entities
-		SccProjectUniqueName5 = Signum.Utilities\\Signum.Utilities.csproj
-		SccProjectName5 = Signum.Utilities
-		SccLocalPath5 = Signum.Utilities
-		SccProjectUniqueName6 = Signum.Services\\Signum.Services.csproj
-		SccProjectName6 = Signum.Services
-		SccLocalPath6 = Signum.Services
-		SccProjectUniqueName7 = Signum.Windows\\Signum.Windows.csproj
-		SccProjectName7 = Signum.Windows
-		SccLocalPath7 = Signum.Windows
-		SccProjectUniqueName8 = SignumFrameworkSetup\\SignumFrameworkSetup.vdproj
-		SccProjectName8 = SignumFrameworkSetup
-		SccLocalPath8 = SignumFrameworkSetup
+		SccProjectUniqueName1 = Signum.Engine\\Signum.Engine.csproj
+		SccProjectName1 = Signum.Engine
+		SccLocalPath1 = Signum.Engine
+		SccProjectUniqueName2 = Signum.Engine.Test\\Signum.Engine.Test.csproj
+		SccProjectName2 = Signum.Engine.Test
+		SccLocalPath2 = Signum.Engine.Test
+		SccProjectUniqueName3 = Signum.Entities\\Signum.Entities.csproj
+		SccProjectName3 = Signum.Entities
+		SccLocalPath3 = Signum.Entities
+		SccProjectUniqueName4 = Signum.Utilities\\Signum.Utilities.csproj
+		SccProjectName4 = Signum.Utilities
+		SccLocalPath4 = Signum.Utilities
+		SccProjectUniqueName5 = Signum.Services\\Signum.Services.csproj
+		SccProjectName5 = Signum.Services
+		SccLocalPath5 = Signum.Services
+		SccProjectUniqueName6 = Signum.Windows\\Signum.Windows.csproj
+		SccProjectName6 = Signum.Windows
+		SccLocalPath6 = Signum.Windows
+		SccProjectUniqueName7 = SignumFrameworkSetup\\SignumFrameworkSetup.vdproj
+		SccProjectName7 = SignumFrameworkSetup
+		SccLocalPath7 = SignumFrameworkSetup
+		SccProjectUniqueName8 = ..\\Tecnico\\ExpressionTreeVisualizer\\ExpressionTreeVisualizer.csproj
+		SccProjectName8 = ../Tecnico/ExpressionTreeVisualizer
+		SccLocalPath8 = ..\\Tecnico\\ExpressionTreeVisualizer
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = MotorDB1.vsmdi
