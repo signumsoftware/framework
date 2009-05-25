@@ -81,11 +81,11 @@ namespace Signum.Utilities
         public static string Right(this string str, int numChars, bool throws)
         {
             if (numChars > str.Length)
-        {
+            {
                 if (throws)
                     throw new InvalidOperationException(Resources.String0IsTooShort.Formato(str));
                 return str;
-        }
+            }
 
             return str.Substring(str.Length - numChars, numChars);
         }
@@ -115,11 +115,11 @@ namespace Signum.Utilities
         public static string RemoveRight(this string str, int numChars, bool throws)
         {
             if (numChars > str.Length)
-        {
+            {
                 if (throws)
                     throw new InvalidOperationException(Resources.String0IsTooShort.Formato(str));
                 return "";
-        }
+            }
 
             return str.Substring(0, str.Length - numChars);
         }
@@ -159,7 +159,7 @@ namespace Signum.Utilities
         public static string Etc(this string str, int max, string etcString)
         {
             if (str.HasText() && (str.Length > max))
-                    return str.Left(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
+                return str.Left(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
             return str;
         }
 
@@ -168,17 +168,21 @@ namespace Signum.Utilities
             return str.Etc(max, "(...)");
         }
 
+        public static bool ContinuesWith(this string str, string subString, int pos)
+        {
+            return str.IndexOf(subString, pos) == pos;
+        }
+
         public static string RemoveChars(this string str, params char[] chars)
         {
             StringBuilder sb = new StringBuilder(str.Length);
             for (int i = 0; i < str.Length; i++)
-        {
+            {
                 if (!chars.Contains(str[i]))
                     sb.Append(str[i]);
             }
             return sb.ToString();
         }
-
 
         public static string Formato(string format, object arg0)
         {
@@ -202,19 +206,19 @@ namespace Signum.Utilities
 
         public static string Formato(this string format, IFormatProvider provider, params object[] args)
         {
-            return string.Format(provider, format, args); 
+            return string.Format(provider, format, args);
         }
 
         public static string Replace(this string str, Dictionary<string, string> replacements)
-            {
+        {
             Regex regex = new Regex(replacements.Keys.ToString(a => "(" + Regex.Escape(a) + ")", "|"));
 
-            return regex.Replace(str, m => replacements[m.Value]); 
-            }
+            return regex.Replace(str, m => replacements[m.Value]);
+        }
 
         public static string Indent(this string str, int numChars)
         {
-            return Indent(str, numChars, ' '); 
+            return Indent(str, numChars, ' ');
         }
 
         public static string Indent(this string str, int numChars, char indentChar)
@@ -232,7 +236,7 @@ namespace Signum.Utilities
 
             string result = sb.ToString(0, str.EndsWith("\r\n") ? sb.Length : Math.Max(sb.Length - 2, 0));
 
-            return result; 
+            return result;
         }
 
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)
@@ -242,15 +246,15 @@ namespace Signum.Utilities
             {
                 char a = pascalStr[i];
                 if (char.IsUpper(a) && i + 1 < pascalStr.Length && !char.IsUpper(pascalStr[i + 1]))
-        {
+                {
                     if (sb.Length > 0)
                         sb.Append(' ');
                     sb.Append(preserveUppercase ? a : char.ToLower(a));
-        }
+                }
                 else
                     sb.Append(a);
 
-        }
+            }
 
             return sb.ToString();
         }
@@ -287,19 +291,19 @@ namespace Signum.Utilities
         {
             pattern = Regex.Escape(pattern);
             pattern = pattern.Replace("%", ".*").Replace("_", ".");
-            pattern = pattern.Replace(@"\[", "[").Replace(@"\]","]").Replace(@"\^", "^");
+            pattern = pattern.Replace(@"\[", "[").Replace(@"\]", "]").Replace(@"\^", "^");
             return Regex.IsMatch(str, pattern);
         }
 
         public static string ToComputerSize(this long value)
         {
             return ToComputerSize(value, false);
-            }
+        }
 
         static string[] abbreviations = new[] { "Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
         static string[] magnitudes = new[] { "Bytes", "KBytes", "MBytes", "GBytes", "TBytes", "PBytes", "EBytes", "ZBytes", "YBytes" };
         public static string ToComputerSize(this long value, bool useAbbreviations)
-            {
+        {
             double valor = value;
             long i;
             for (i = 0; i < magnitudes.Length && valor >= 1024; i++)
@@ -307,7 +311,5 @@ namespace Signum.Utilities
 
             return "{0:#,###.00} {1}".Formato(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
-
-
     }
 }

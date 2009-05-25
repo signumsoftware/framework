@@ -47,11 +47,15 @@ namespace Signum.Web
 
         protected static MinMax<int> FindSubInterval(SortedList<string, object> formValues, MinMax<int> interval, int knownPrefixLength, string newPrefix)
         {
+            
+            int maxLength = knownPrefixLength + newPrefix.Length;
+
             for (int i = interval.Min; i < interval.Max; i++)
             {
                 string subControlID = formValues.Keys[i];
 
-                if (!string.IsNullOrEmpty(newPrefix) && subControlID.IndexOf(newPrefix, knownPrefixLength) != knownPrefixLength)
+                if (!(subControlID.ContinuesWith(newPrefix, knownPrefixLength) &&
+                     (subControlID.Length == maxLength || subControlID.ContinuesWith(TypeContext.Separator, maxLength))))
                     return new MinMax<int>(interval.Min, i);
             }
 
@@ -147,7 +151,7 @@ namespace Signum.Web
             {
                 string subControlID = formValues.Keys[i];
 
-                if (subControlID.IndexOf(TypeContext.Separator, ControlID.Length) != ControlID.Length)
+                if (!subControlID.ContinuesWith(TypeContext.Separator, ControlID.Length))
                     throw new FormatException("The control ID {0} has an invalid format".Formato(subControlID));
 
                 int propertyEnd = subControlID.IndexOf(TypeContext.Separator, propertyStart).Map(pe => pe == -1 ? subControlID.Length : pe);
@@ -346,7 +350,7 @@ namespace Signum.Web
             {
                 string subControlID = formValues.Keys[i];
 
-                if (subControlID.IndexOf(TypeContext.Separator, ControlID.Length) != ControlID.Length)
+                if (!subControlID.ContinuesWith(TypeContext.Separator, ControlID.Length))
                     continue;
 
                 int propertyEnd = subControlID.IndexOf(TypeContext.Separator, propertyStart);
