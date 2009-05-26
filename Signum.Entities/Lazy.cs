@@ -46,6 +46,25 @@ namespace Signum.Entities
             internal set { entityOrNull = value; }
         }
 
+        //public static bool operator ==(Lazy<T> lazy, T entity)
+        //{
+        //    throw new ApplicationException("For queries only");
+        //}
+
+        //public static bool operator !=(Lazy<T> lazy, T entity)
+        //{
+        //    throw new ApplicationException("For queries only");
+        //}
+
+        //public static bool operator ==(T entity, Lazy<T> lazy)
+        //{
+        //    throw new ApplicationException("For queries only");
+        //}
+
+        //public static bool operator !=(T entity, Lazy<T> lazy)
+        //{
+        //    throw new ApplicationException("For queries only");
+        //}
 
         public bool Equals(Lazy<T> other)
         {

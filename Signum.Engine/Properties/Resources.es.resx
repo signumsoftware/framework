@@ -474,4 +474,10 @@ WRITETEXT</value>
   <data name="_0RepeatedOnTable1" xml:space="preserve">
     <value>{0} repetido en la tabla {1}</value>
   </data>
+  <data name="Type0IsAbstract" xml:space="preserve">
+    <value>El tipo {0} es abstract</value>
+  </data>
+  <data name="ImpossibleToIncludeInTheSchema" xml:space="preserve">
+    <value>Imposible incluir en el Schema:</value>
+  </data>
 </root>

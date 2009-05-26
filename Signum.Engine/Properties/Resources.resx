@@ -472,4 +472,10 @@ WRITETEXT</value>
   <data name="TypeDNTableNotCached" xml:space="preserve">
     <value>TypeDN table not cached. Remember to call TypeLogic.Start in your Starter and call Administrator.InitializeCurrentSchema </value>
   </data>
+  <data name="Type0IsAbstract" xml:space="preserve">
+    <value>Type {0} is abstract</value>
+  </data>
+  <data name="ImpossibleToIncludeInTheSchema" xml:space="preserve">
+    <value>Impossible to include in the Schema:</value>
+  </data>
 </root>

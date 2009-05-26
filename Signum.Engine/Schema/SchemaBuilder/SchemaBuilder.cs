@@ -57,10 +57,13 @@ namespace Signum.Engine.Maps
 
         Table PreCreate(Type type)
         {
-            if (Reflector.IsIdentifiableEntity(type) && !type.IsAbstract || type.IsEnum)
-                return new Table(type);
+            if (type.IsAbstract)
+                throw new ApplicationException(Resources.ImpossibleToIncludeInTheSchema + " " +  Resources.Type0IsAbstract.Formato(type));
 
-            throw new ApplicationException(Resources.Type0IsNotAnIdentifiableEntityOrAnEnum.Formato(type));
+            if (!Reflector.IsIdentifiableEntity(type) && !type.IsEnum)
+                throw new ApplicationException(Resources.ImpossibleToIncludeInTheSchema + " " + Resources.Type0IsNotAnIdentifiableEntityOrAnEnum.Formato(type));
+            
+            return new Table(type);
         }
 
         void Complete(Table table)
@@ -76,7 +79,7 @@ namespace Signum.Engine.Maps
 
         public bool NotDefined<T>()
         {
-            return NotDefined(typeof(T).Name); 
+            return NotDefined(typeof(T).FullName); 
         }
 
         public bool NotDefined(string moduleName)

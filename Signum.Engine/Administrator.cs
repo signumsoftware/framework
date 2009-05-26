@@ -15,15 +15,13 @@ namespace Signum.Engine
 {
     public static class Administrator
     {      
-        public static void TotalGenerationAndInitialize()
+        public static void TotalGeneration()
         {
             SqlPreCommandConcat totalScript = (SqlPreCommandConcat)Schema.Current.GenerationScipt();
             foreach (SqlPreCommand command in totalScript.Commands)
             {
                 command.ExecuteLeaves(); 
             }
-
-            Schema.Current.Initialize();  
         }
 
         public static bool ExistTable<T>()
