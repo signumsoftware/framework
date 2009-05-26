@@ -63,7 +63,7 @@
     <Compile Include="Basics\ServiceOperationLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
-    <Compile Include="Operations\ActionLogic.cs" />
+    <Compile Include="Operations\ActionLogics.cs" />
     <Compile Include="Operations\Graph.cs">
       <SubType>Code</SubType>
     </Compile>
