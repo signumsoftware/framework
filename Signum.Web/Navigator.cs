@@ -45,12 +45,7 @@ namespace Signum.Web
 
         public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix)
         {
-            return NavigationManager.PartialView(controller, entity, prefix, "", "");
-        }
-
-        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, string onOk, string onCancel)
-        {
-            return NavigationManager.PartialView(controller, entity, prefix, onOk, onCancel);
+            return NavigationManager.PartialView(controller, entity, prefix);
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixToIgnore)
@@ -237,14 +232,12 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix, string onOk, string onCancel)
+        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix)
         {
             EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
             
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            controller.ViewData[ViewDataKeys.OnOk] = onOk;
-            controller.ViewData[ViewDataKeys.OnCancel] = onCancel;
             controller.ViewData.Model = entity;
             
             return new PartialViewResult

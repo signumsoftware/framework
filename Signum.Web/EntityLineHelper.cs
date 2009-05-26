@@ -143,10 +143,12 @@ namespace Signum.Web
                 sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, string> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
+            string viewingUrl = "javascript:OpenPopup('/Signum/PartialView','{0}','{1}',function(){{OnPopupOK('/Signum/TrySavePartial','{1}');}},function(){{OnPopupCancel('{1}');}});".Formato(divASustituir, idValueField);
+
             sb.Append(
                     helper.Href(idValueField + TypeContext.Separator + EntityBaseKeys.ToStrLink,
                         (value!=null) ? value.ToString() : "&nbsp;",
-                        "javascript:OpenPopup('/Signum/PartialView','" + divASustituir + "','" + idValueField + "','','');",
+                        viewingUrl,
                         "View",
                         "valueLine",
                         new Dictionary<string, string> { {"style","display:" + ((value==null) ? "none" : "block")}}));
@@ -154,7 +156,7 @@ namespace Signum.Web
             sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
             
             string creatingUrl = (settings.Implementations == null) ? 
-                "OpenPopup('/Signum/PartialView','" + divASustituir + "','" + idValueField + "','','');" : 
+                viewingUrl : 
                 "ChooseImplementation('" + divASustituir + "','" + idValueField + "');";
             if (settings.Create)
                 sb.Append(
@@ -168,7 +170,7 @@ namespace Signum.Web
                 sb.Append(
                     helper.Button(idValueField + "_btnRemove",
                               "x",
-                              "RemoveContainedEntity('/Signum/PartialView','" + idValueField + "','','');",
+                              "RemoveContainedEntity('" + idValueField + "');",
                               "lineButton",
                               (value == null) ? new Dictionary<string, string>() { { "style", "display:none" } } : new Dictionary<string, string>()));
 

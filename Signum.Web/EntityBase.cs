@@ -12,6 +12,7 @@ namespace Signum.Web
         public const string Entity = "sfEntity";
         public const string ToStr = "sfToStr";
         public const string ToStrLink = "sfLink";
+        public const string IsNew = "sfIsNew";
     }
 
     public class EntityBase

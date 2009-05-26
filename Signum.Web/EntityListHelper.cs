@@ -54,18 +54,19 @@ namespace Signum.Web
                         { 
                             { ViewDataKeys.CustomHtml, ddlStr},
                             { ViewDataKeys.PopupPrefix, idValueField},
-                            { ViewDataKeys.OnOk, "OnListImplementationsOk('/Signum/PartialView','" + divASustituir + "','" + idValueField + "','','OnListPopupCancel(this.id);');"},
+                            { ViewDataKeys.OnOk, "OnListImplementationsOk('/Signum/PartialView','" + divASustituir + "','" + idValueField + "',function(){OnListPopupOK('/Signum/TrySavePartial','" + idValueField + "');},function(){OnListPopupCancel(this.id);});"},
                             { ViewDataKeys.OnCancel, "OnImplementationsCancel('" + idValueField + "');"}
                         }
                 ));
                 sb.Append("</div>\n");
             }
 
+            string viewingUrl = "OpenPopupList('/Signum/PartialView','{0}','{1}',function(){{OnListPopupOK('/Signum/TrySavePartial','{1}',this.id);}},function(){{OnListPopupCancel(this.id);}});".Formato(divASustituir, idValueField);
             StringBuilder sbSelect = new StringBuilder();
             sbSelect.Append("<select id=\"" + idValueField + "\" " + 
                                "name=\"" + idValueField + "\" " + 
                                "multiple=\"multiple\" " +
-                               "ondblclick = \"javascript:OpenPopupList('/Signum/PartialView','" + divASustituir + "','" + idValueField + "','','OnListPopupCancel(this.id);');\"" +
+                               "ondblclick = \"" + viewingUrl + "\" " +
                                ">\n");
 
             for (int i = 0; i < value.Count; i++)
@@ -77,8 +78,7 @@ namespace Signum.Web
 
             sb.Append(sbSelect);
 
-            string creatingUrl = (settings.Implementations == null) ?
-                "OpenPopupList('/Signum/PartialView','" + divASustituir + "','" + idValueField + "','','OnListPopupCancel(this.id);');" :
+            string creatingUrl = (settings.Implementations == null) ? viewingUrl :
                 "ChooseImplementation('" + divASustituir + "','" + idValueField + "');";
             if (settings.Create)
                 sb.Append(
@@ -92,7 +92,7 @@ namespace Signum.Web
                 sb.Append(
                     helper.Button(idValueField + "_btnRemove",
                               "x",
-                              "RemoveListContainedEntity('/Signum/PartialView','" + idValueField + "','','OnListPopupCancel(this.id);');",
+                              "RemoveListContainedEntity('" + idValueField + "');",
                               "lineButton",
                               new Dictionary<string, string>()));
 
@@ -130,7 +130,16 @@ namespace Signum.Web
                                     ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToStr)
                                     : ((Lazy)(object)value).TryCC(i => i.ToStr)) + 
                                 "</option>\n");
-               
+
+                string runtimeType = "";
+                if (value != null)
+                {
+                    Type cleanRuntimeType = value.GetType();
+                    if (typeof(Lazy).IsAssignableFrom(value.GetType()))
+                        cleanRuntimeType = (value as Lazy).RuntimeType;
+                    runtimeType = cleanRuntimeType.Name;
+                }
+                sb.Append(helper.Hidden(idValueField + indexedSeparator + TypeContext.RuntimeType, runtimeType) + "\n");
             }
             else
             {
@@ -160,16 +169,6 @@ namespace Signum.Web
                                 ((EmbeddedEntity)(object)value).TryCC(i => i.ToString()) + 
                                 "</option>\n");
             }
-
-            string runtimeType = "";
-            if (value != null)
-            {
-                Type cleanRuntimeType = value.GetType();
-                if (typeof(Lazy).IsAssignableFrom(value.GetType()))
-                    cleanRuntimeType = (value as Lazy).RuntimeType;
-                runtimeType = cleanRuntimeType.Name;
-            }
-            sb.Append(helper.Hidden(idValueField + indexedSeparator + TypeContext.RuntimeType, runtimeType) + "\n");
 
             sb.Append("<script type=\"text/javascript\">var " + idValueField + indexedSeparator + "_sfEntityTemp = \"\"</script>\n");
 

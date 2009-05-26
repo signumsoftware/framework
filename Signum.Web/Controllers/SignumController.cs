@@ -25,7 +25,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix, string sfOnOk, string sfOnCancel)
+        public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix)
         {
             Type type = Navigator.ResolveType(sfStaticType);
 
@@ -35,7 +35,7 @@ namespace Signum.Web.Controllers
             else
                 entity = Navigator.CreateInstance(type);
 
-            return Navigator.PartialView(this, entity, prefix, sfOnOk, sfOnCancel);
+            return Navigator.PartialView(this, entity, prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
