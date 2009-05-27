@@ -56,6 +56,16 @@ namespace Signum.Web
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
 
+            string runtimeType = "";
+            if (value != null)
+            {
+                Type cleanRuntimeType = value.GetType();
+                if (typeof(Lazy).IsAssignableFrom(value.GetType()))
+                    cleanRuntimeType = (value as Lazy).RuntimeType;
+                runtimeType = cleanRuntimeType.Name;
+            }
+            sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.RuntimeType, runtimeType));
+                
             string popupOpeningParameters = "'/Signum/PartialView','{0}','{1}',function(){{OnPopupOK('/Signum/TrySavePartial','{1}');}},function(){{OnPopupCancel('{1}');}}".Formato(divASustituir, idValueField);
 
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
@@ -82,16 +92,6 @@ namespace Signum.Web
                     }));
                 sb.Append("\n");
 
-                string runtimeType = "";
-                if (value != null)
-                {
-                    Type cleanRuntimeType = value.GetType();
-                    if (typeof(Lazy).IsAssignableFrom(value.GetType()))
-                        cleanRuntimeType = (value as Lazy).RuntimeType;
-                    runtimeType = cleanRuntimeType.Name;
-                }
-                sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.RuntimeType, runtimeType));
-                
                 if(settings.Autocomplete)
                     sb.Append(helper.AutoCompleteExtender(idValueField + TypeContext.Separator + EntityLineKeys.DDL,
                                                       idValueField + TypeContext.Separator + EntityBaseKeys.ToStr,

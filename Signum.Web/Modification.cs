@@ -13,6 +13,7 @@ using Signum.Engine;
 using Signum.Entities.Reflection;
 using System.Reflection;
 using System.Collections;
+using System.Diagnostics;
 
 namespace Signum.Web
 {
@@ -28,7 +29,8 @@ namespace Signum.Web
             TypeContext.StaticType, 
             EntityBaseKeys.ToStr, 
             EntityBaseKeys.ImplementationsDDL,
-            EntityBaseKeys.IsNew
+            EntityBaseKeys.IsNew,
+            EntityListKeys.Index,
         }; 
 
         public Modification(Type staticType, string controlID)
@@ -115,7 +117,7 @@ namespace Signum.Web
     {
         Type RuntimeType; 
         int? EntityId; //optional
-        bool IsNew = false;
+        bool IsNew;
 
         internal class PropertyPackModification
         {
@@ -128,19 +130,21 @@ namespace Signum.Web
         public EntityModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
             : base(staticType, controlID)
         {
-            if (typeof(EmbeddedEntity).IsAssignableFrom(staticType))
-                RuntimeType = staticType;
-            else
-            {
+            //if (typeof(EmbeddedEntity).IsAssignableFrom(staticType))
+            //    RuntimeType = staticType;
+            //else
+            //{
                 string runtimeTypeName = (string)formValues[controlID + TypeContext.Separator + TypeContext.RuntimeType];
                 RuntimeType = runtimeTypeName.HasText() ? Navigator.ResolveType(runtimeTypeName) : null; 
                 
-                string id = (string)formValues[controlID + TypeContext.Separator + TypeContext.Id]; 
-                EntityId = id.HasText()? int.Parse(id):(int?)null;
+                IsNew = formValues.ContainsKey(controlID + TypeContext.Separator + EntityBaseKeys.IsNew);
 
-                if (formValues.ContainsKey(controlID + TypeContext.Separator + EntityBaseKeys.IsNew))
-                    IsNew = true;
-            }
+                if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType))
+                {
+                    string id = (string)formValues[controlID + TypeContext.Separator + TypeContext.Id];
+                    EntityId = id.HasText() ? int.Parse(id) : (int?)null;
+                }
+            //}
 
             Fill(formValues, interval);
         }
@@ -149,7 +153,7 @@ namespace Signum.Web
         {
             int propertyStart = ControlID.Length + TypeContext.Separator.Length;
 
-            var propertyValidators = ModifiableEntity.GetPropertyValidators(RuntimeType);
+            var propertyValidators = ModifiableEntity.GetPropertyValidators(RuntimeType ?? StaticType);
 
             Properties = new Dictionary<string, PropertyPackModification>();
 
@@ -179,9 +183,6 @@ namespace Signum.Web
 
         public override object ApplyChanges(object obj)
         {
-            if (RuntimeType == null)
-                return null; 
-
             ModifiableEntity entity = Change((ModifiableEntity)obj);
 
             foreach (var ppm in Properties.Values)
@@ -196,42 +197,24 @@ namespace Signum.Web
 
         private ModifiableEntity Change(ModifiableEntity entity)
         {
-            if (typeof(EmbeddedEntity).IsAssignableFrom(RuntimeType))
-            {
-                if (entity == null || IsNew)
-                    return (EmbeddedEntity)Constructor.Construct(RuntimeType);
-                else
-                    return entity;
-            }
-            else
-            {
-                IdentifiableEntity ident = (IdentifiableEntity)entity;
+            if (RuntimeType == null)
+                return null;
 
-                if (ident == null)
-                {
-                    if (EntityId == null)
-                        return (IdentifiableEntity)Constructor.Construct(RuntimeType);
-                    else
-                        return Database.Retrieve(RuntimeType, EntityId.Value);
-                }
-                else
-                {
-                    if (EntityId == ident.IdOrNull && RuntimeType == ident.GetType())
-                    {
-                        if (EntityId == null && IsNew)
-                            return (IdentifiableEntity)Constructor.Construct(RuntimeType);
-                        else
-                            return ident;
-                    }
-                    else
-                    {
-                        if (EntityId == null)
-                            return (IdentifiableEntity)Constructor.Construct(RuntimeType);
-                        else
-                            return Database.Retrieve(RuntimeType, EntityId.Value);
-                    }
-                }
-            }
+            if (IsNew)
+                return (ModifiableEntity)Constructor.Construct(RuntimeType);
+
+            if (typeof(EmbeddedEntity).IsAssignableFrom(RuntimeType))
+                return entity;
+
+            IdentifiableEntity ident = (IdentifiableEntity)entity;
+
+            if (ident == null)
+                return Database.Retrieve(RuntimeType, EntityId.Value);
+
+            if (EntityId == ident.IdOrNull && RuntimeType == ident.GetType())
+                return ident;
+            else
+                return Database.Retrieve(RuntimeType, EntityId.Value);
         }
 
         public override void Validate(object entity, Dictionary<string, List<string>> errors)
@@ -268,7 +251,7 @@ namespace Signum.Web
         int? EntityId; //optional
         Type CleanType; 
         EntityModification EntityModification;
-        bool IsNew = false;
+        bool IsNew;
 
         public LazyModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
             : base(staticType, controlID)
@@ -279,8 +262,7 @@ namespace Signum.Web
             string id = (string)formValues[controlID + TypeContext.Separator + TypeContext.Id];
             EntityId = id.HasText() ? int.Parse(id) : (int?)null;
 
-            if (formValues.ContainsKey(controlID + TypeContext.Separator + EntityBaseKeys.IsNew))
-                IsNew = true;
+            IsNew = formValues.ContainsKey(controlID + TypeContext.Separator + EntityBaseKeys.IsNew);
 
             CleanType = Reflector.ExtractLazy(staticType); 
 
@@ -294,41 +276,37 @@ namespace Signum.Web
             if (RuntimeType == null)
                 return null;
 
+            if (IsNew)
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(null));
+
             Lazy lazy = (Lazy)obj;
 
             if (lazy == null)
             {
-                if (EntityId == null)
-                    return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(null));
+                if (EntityModification == null)
+                    return Lazy.Create(CleanType, RuntimeType, EntityId.Value);
                 else
-                {
-                    if (EntityModification == null)
-                        return Lazy.Create(CleanType, RuntimeType, EntityId.Value);
-                    else
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(Database.Retrieve(RuntimeType, EntityId.Value)));
-                }
+                    return Lazy.Create(CleanType,
+                        (IdentifiableEntity)EntityModification.ApplyChanges(
+                           Database.Retrieve(RuntimeType, EntityId.Value)));
+            }
+
+            if (EntityId == null)
+            {
+                Debug.Assert(lazy.IdOrNull == null && RuntimeType == lazy.GetType() && EntityModification != null); 
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(lazy.UntypedEntityOrNull));
             }
             else
             {
-                if (EntityId == null)
+                if (EntityId.Value == lazy.IdOrNull && RuntimeType == lazy.RuntimeType)
                 {
-                    if (lazy.IdOrNull != null || IsNew)
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(null));
+                    if (EntityModification == null)
+                        return lazy;
                     else
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(lazy.UntypedEntityOrNull));
+                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(Database.Retrieve(lazy)));
                 }
                 else
-                {
-                    if (EntityId == lazy.IdOrNull && RuntimeType == lazy.RuntimeType)
-                    {
-                        if (EntityModification == null)
-                            return lazy;
-                        else
-                            return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(Database.Retrieve(lazy)));
-                    }
-                    else
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(Database.Retrieve(RuntimeType, EntityId.Value)));
-                }
+                    return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(Database.Retrieve(RuntimeType, EntityId.Value)));
             }
         }
 
@@ -341,7 +319,7 @@ namespace Signum.Web
 
     class MListModification : Modification
     {
-        List<Modification> modifications;
+        List<Tuple<Modification, int?>> modifications;
         Type staticElementType;
 
         public MListModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
@@ -357,7 +335,7 @@ namespace Signum.Web
 
         private void Fill(SortedList<string, object> formValues, MinMax<int> interval)
         {
-            SortedList<int, Modification> list = new SortedList<int, Modification>();
+            SortedList<int, Tuple<Modification, int?>> list = new SortedList<int, Tuple<Modification, int?>>();
 
             int propertyStart = ControlID.Length + TypeContext.Separator.Length;
 
@@ -384,8 +362,13 @@ namespace Signum.Web
 
                 MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(i, interval.Max), ControlID.Length, TypeContext.Separator + index);
                 Modification mod = Modification.Create(staticElementType, formValues, subInterval, commonSubControlID);
+                
+                string oldIndex = "";
+                string indexFormEntry = commonSubControlID + TypeContext.Separator + EntityListKeys.Index;
+                if (formValues.ContainsKey(indexFormEntry))
+                    oldIndex = formValues[indexFormEntry].ToString();
 
-                list.Add(int.Parse(index), mod);
+                list.Add(int.Parse(index), Tuple.New(mod, string.IsNullOrEmpty(oldIndex) ? (int?)null : (int?)int.Parse(oldIndex)));
 
                 i = subInterval.Max - 1;
             }
@@ -396,10 +379,15 @@ namespace Signum.Web
 
         public override object ApplyChanges(object obj)
         {
+            IList old = (IList)obj;
+
             IList list = (IList)Activator.CreateInstance(StaticType, modifications.Count);
             foreach (var item in modifications)
             {
-                list.Add(item.ApplyChanges(null));
+                if (item.Second.HasValue)
+                    list.Add(item.First.ApplyChanges(old[item.Second.Value]));
+                else
+                    list.Add(item.First.ApplyChanges(null));
             }
             return list;
         }
@@ -407,7 +395,7 @@ namespace Signum.Web
         public override void Validate(object entity, Dictionary<string, List<string>> errors)
         {
             IList list = (IList)entity;
-            list.Cast<object>().ZipForeachStrict(modifications, (obj, mod) => mod.Validate(obj, errors));
+            list.Cast<object>().ZipForeachStrict(modifications, (obj, mod) => mod.First.Validate(obj, errors));
         }
     }
 }

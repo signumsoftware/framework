@@ -41,9 +41,9 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult TrySave(string prefixToIgnore)
         {   
-            IdentifiableEntity entity = Navigator.ExtractEntity(Request.Form);
+            Modifiable entity = Navigator.ExtractEntity(Request.Form);
 
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(Request.Form, prefixToIgnore, entity);
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(Request.Form, prefixToIgnore, ref entity);
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
@@ -55,7 +55,7 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(sfStaticType);
 
-            ModifiableEntity entity = null;
+            Modifiable entity = null;
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
@@ -63,7 +63,7 @@ namespace Signum.Web.Controllers
 
             var sortedList = Navigator.ToSortedList(Request.Form, prefixToIgnore);
             
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(sortedList, entity, prefix);
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(sortedList, ref entity, prefix);
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
@@ -94,9 +94,9 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult DoPostBack(string prefixToIgnore)
         {
-            IdentifiableEntity entity = Navigator.ExtractEntity(Request.Form);
+            Modifiable entity = Navigator.ExtractEntity(Request.Form);
 
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(Request.Form, prefixToIgnore, entity);
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(Request.Form, prefixToIgnore, ref entity);
 
             this.ModelState.FromDictionary(errors, Request.Form);
             

@@ -12,6 +12,11 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
+    public static class EntityListKeys
+    {
+        public const string Index = "sfIndex";
+    }
+
     public class EntityList : EntityBase
     {
         public Type EntitiesType { get; set; }
@@ -77,7 +82,7 @@ namespace Signum.Web
             sb.Append(sbSelect);
 
             string creatingUrl = (settings.Implementations == null) ?
-                "NewPopupList({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))) : 
+                "NewPopupList({0},'{1}','{2}');".Formato(popupOpeningParameters, elementsCleanType.Name, (typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))) : 
                 "ChooseImplementation('{0}','{1}');".Formato(divASustituir, idValueField);
             if (settings.Create)
                 sb.Append(
@@ -104,24 +109,37 @@ namespace Signum.Web
         private static string InternalListElement<T>(this HtmlHelper helper, StringBuilder sbOptions, string idValueField, T value, int index, EntityList settings, string divASustituir)
         {
             StringBuilder sb = new StringBuilder();
-
+            
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
             bool isLazy = typeof(Lazy).IsAssignableFrom(typeof(T));
 
-            string indexedSeparator = TypeContext.Separator + index.ToString() + TypeContext.Separator;
+            string indexedPrefix = idValueField + TypeContext.Separator + index.ToString() + TypeContext.Separator;
+
+            string runtimeType = "";
+            if (value != null)
+            {
+                Type cleanRuntimeType = value.GetType();
+                if (typeof(Lazy).IsAssignableFrom(value.GetType()))
+                    cleanRuntimeType = (value as Lazy).RuntimeType;
+                runtimeType = cleanRuntimeType.Name;
+            }
+            sb.Append(helper.Hidden(indexedPrefix + TypeContext.RuntimeType, runtimeType) + "\n");
+
+            sb.Append(helper.Hidden(indexedPrefix + EntityListKeys.Index, index.ToString()) + "\n");
+
             if (isIdentifiable || isLazy)
             {
                 sb.Append(helper.Hidden(
-                    idValueField + indexedSeparator + TypeContext.Id,
+                    indexedPrefix + TypeContext.Id,
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.Id)
                        : ((Lazy)(object)value).TryCS(i => i.Id)) + "\n");
 
-                sb.Append(helper.Div(idValueField + indexedSeparator + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
+                sb.Append(helper.Div(indexedPrefix + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
                 
                 //Note this is added to the sbOptions, not to the result sb
-                sbOptions.Append("<option id=\"" + idValueField + indexedSeparator + EntityBaseKeys.ToStr + "\" " +
-                                "name=\"" + idValueField + indexedSeparator + EntityBaseKeys.ToStr + "\" " + 
+                sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
+                                "name=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " + 
                                 "value=\"\" " +
                                 "class = valueLine\" " +
                                 ">" + 
@@ -129,21 +147,11 @@ namespace Signum.Web
                                     ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToStr)
                                     : ((Lazy)(object)value).TryCC(i => i.ToStr)) + 
                                 "</option>\n");
-
-                string runtimeType = "";
-                if (value != null)
-                {
-                    Type cleanRuntimeType = value.GetType();
-                    if (typeof(Lazy).IsAssignableFrom(value.GetType()))
-                        cleanRuntimeType = (value as Lazy).RuntimeType;
-                    runtimeType = cleanRuntimeType.Name;
-                }
-                sb.Append(helper.Hidden(idValueField + indexedSeparator + TypeContext.RuntimeType, runtimeType) + "\n");
             }
             else
             {
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
-                sb.Append("<div id=\"" + idValueField + indexedSeparator + EntityBaseKeys.Entity + "\" name=\"" + idValueField + indexedSeparator + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
+                sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
 
                 EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
 
@@ -160,8 +168,8 @@ namespace Signum.Web
                 sb.Append("</div>\n");
 
                 //Note this is added to the sbOptions, not to the result sb
-                sbOptions.Append("<option id=\"" + idValueField + indexedSeparator + EntityBaseKeys.ToStr + "\" " +
-                                "name=\"" + idValueField + indexedSeparator + EntityBaseKeys.ToStr + "\" " +
+                sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
+                                "name=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
                                 "value=\"\" " +
                                 "class = valueLine\" " +
                                 ">" +
@@ -169,7 +177,7 @@ namespace Signum.Web
                                 "</option>\n");
             }
 
-            sb.Append("<script type=\"text/javascript\">var " + idValueField + indexedSeparator + "_sfEntityTemp = \"\"</script>\n");
+            sb.Append("<script type=\"text/javascript\">var " + indexedPrefix + "sfEntityTemp = \"\"</script>\n");
 
             return sb.ToString();
         }

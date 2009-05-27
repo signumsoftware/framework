@@ -63,21 +63,22 @@ namespace Signum.Web
             return formValues;
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate(NameValueCollection form, string prefixToIgnore, Modifiable obj)
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(NameValueCollection form, string prefixToIgnore, ref T obj)
         {
             SortedList<string, object> formValues = ToSortedList(form, prefixToIgnore);
 
-            return NavigationManager.ApplyChangesAndValidate(formValues, obj, null);
+            return NavigationManager.ApplyChangesAndValidate(formValues, ref obj, null);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate(SortedList<string, object> formValues, Modifiable obj)
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(SortedList<string, object> formValues, ref T obj)
         {
-            return NavigationManager.ApplyChangesAndValidate(formValues, obj, null);
+            return NavigationManager.ApplyChangesAndValidate(formValues, ref obj, null);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate(SortedList<string, object> formValues, Modifiable obj, string prefix)
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(SortedList<string, object> formValues, ref T obj, string prefix)
+            where T:Modifiable
         {
-            return NavigationManager.ApplyChangesAndValidate(formValues, obj, prefix);
+            return NavigationManager.ApplyChangesAndValidate(formValues, ref obj, prefix);
         }
 
         public static IdentifiableEntity ExtractEntity(NameValueCollection form)
@@ -268,13 +269,13 @@ namespace Signum.Web
             return type;
         }
 
-        protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate(SortedList<string, object> formValues, Modifiable obj, string prefix)
+        protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(SortedList<string, object> formValues, ref T obj, string prefix)
         {
-            Modification modification = GenerateModification(formValues, obj, prefix ?? "");
+            Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
 
-            modification.ApplyChanges(obj);
+            obj = (T)modification.ApplyChanges(obj);
 
-            return GenerateErrors(obj, modification);
+            return GenerateErrors((Modifiable)(object)obj, modification);
         }
 
         protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable obj, Modification modification)
