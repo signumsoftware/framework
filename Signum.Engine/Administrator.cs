@@ -68,7 +68,7 @@ namespace Signum.Engine
             }
         }
 
-        public static void InitializeCurrentSchema()
+        public static void Initialize()
         {
             Schema.Current.Initialize();  
         }
