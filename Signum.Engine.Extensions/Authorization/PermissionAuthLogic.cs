@@ -46,7 +46,7 @@ namespace Signum.Engine.Authorization
 
         static List<PermissionDN> GeneratePermissions()
         {
-            return (from type in PermissionTypes
+            return (from type in permissionTypes
                     from item in Enum.GetValues(type).Cast<object>()
                     select PermissionDN.FromEnum(item)).ToList();
         }
