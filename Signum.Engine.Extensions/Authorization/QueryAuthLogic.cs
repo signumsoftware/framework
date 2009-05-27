@@ -31,6 +31,7 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.Start(sb);
                 QueryLogic.Start(sb, dqm);
+
                 QueryAuthLogic.dqm = dqm;  
                 
                 sb.Include<RuleQueryDN>();

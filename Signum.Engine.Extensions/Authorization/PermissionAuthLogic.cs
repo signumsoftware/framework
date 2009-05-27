@@ -17,20 +17,19 @@ namespace Signum.Engine.Authorization
 
     public static class PermissionAuthLogic
     {
-        static Type[] permissionTypes;
+        static List<Type> permissionTypes;
         static Dictionary<RoleDN, Dictionary<string, bool>> _runtimeRules;
         static Dictionary<RoleDN, Dictionary<string, bool>> RuntimeRules
         {
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-
-        public static void Start(SchemaBuilder sb, params Type[] permissionTypes)
+        public static void Start(SchemaBuilder sb, params Type[] types)
         {
             if (sb.NotDefined<RulePermissionDN>())
             {
                 AuthLogic.Start(sb);
-                PermissionAuthLogic.permissionTypes = permissionTypes;
+                permissionTypes = new List<Type>(types);
 
                 sb.Include<RulePermissionDN>();
                 sb.Include<PermissionDN>();
@@ -39,11 +38,15 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
+            else
+            {
+                permissionTypes.AddRange(types);
+            }
         }
 
         static List<PermissionDN> GeneratePermissions()
         {
-            return (from type in permissionTypes
+            return (from type in PermissionTypes
                     from item in Enum.GetValues(type).Cast<object>()
                     select PermissionDN.FromEnum(item)).ToList();
         }
