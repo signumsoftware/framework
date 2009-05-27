@@ -38,6 +38,8 @@ namespace Signum.Web
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
 
+            string popupOpeningParameters = "'/Signum/PartialView','{0}','{1}',function(){{OnListPopupOK('/Signum/TrySavePartial','{1}',this.id);}},function(){{OnListPopupCancel(this.id);}}".Formato(divASustituir, idValueField);
+
             if (settings.Implementations != null) //Interface with several possible implementations
             {
                 sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" style=\"display:none\" >\n");
@@ -54,20 +56,16 @@ namespace Signum.Web
                         { 
                             { ViewDataKeys.CustomHtml, ddlStr},
                             { ViewDataKeys.PopupPrefix, idValueField},
-                            { ViewDataKeys.OnOk, "OnListImplementationsOk('/Signum/PartialView','" + divASustituir + "','" + idValueField + "',function(){OnListPopupOK('/Signum/TrySavePartial','" + idValueField + "');},function(){OnListPopupCancel(this.id);});"},
+                            { ViewDataKeys.OnOk, "OnListImplementationsOk({0},'{1}');".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType)) },
                             { ViewDataKeys.OnCancel, "OnImplementationsCancel('" + idValueField + "');"}
                         }
                 ));
                 sb.Append("</div>\n");
             }
 
-            string viewingUrl = "OpenPopupList('/Signum/PartialView','{0}','{1}',function(){{OnListPopupOK('/Signum/TrySavePartial','{1}',this.id);}},function(){{OnListPopupCancel(this.id);}});".Formato(divASustituir, idValueField);
+            string viewingUrl = "OpenPopupList(" + popupOpeningParameters + ");";
             StringBuilder sbSelect = new StringBuilder();
-            sbSelect.Append("<select id=\"" + idValueField + "\" " + 
-                               "name=\"" + idValueField + "\" " + 
-                               "multiple=\"multiple\" " +
-                               "ondblclick = \"" + viewingUrl + "\" " +
-                               ">\n");
+            sbSelect.Append("<select id=\"{0}\" name=\"{0}\" multiple=\"multiple\" ondblclick=\"{1}\" >\n".Formato(idValueField, viewingUrl));
 
             for (int i = 0; i < value.Count; i++)
             {
@@ -78,8 +76,9 @@ namespace Signum.Web
 
             sb.Append(sbSelect);
 
-            string creatingUrl = (settings.Implementations == null) ? viewingUrl :
-                "ChooseImplementation('" + divASustituir + "','" + idValueField + "');";
+            string creatingUrl = (settings.Implementations == null) ?
+                "NewPopupList({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))) : 
+                "ChooseImplementation('{0}','{1}');".Formato(divASustituir, idValueField);
             if (settings.Create)
                 sb.Append(
                     helper.Button(idValueField + "_btnCreate",
@@ -92,7 +91,7 @@ namespace Signum.Web
                 sb.Append(
                     helper.Button(idValueField + "_btnRemove",
                               "x",
-                              "RemoveListContainedEntity('" + idValueField + "');",
+                              "RemoveListContainedEntity('{0}');".Formato(idValueField),
                               "lineButton",
                               new Dictionary<string, string>()));
 

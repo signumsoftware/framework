@@ -55,7 +55,9 @@ namespace Signum.Web
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
-            
+
+            string popupOpeningParameters = "'/Signum/PartialView','{0}','{1}',function(){{OnPopupOK('/Signum/TrySavePartial','{1}');}},function(){{OnPopupCancel('{1}');}}".Formato(divASustituir, idValueField);
+
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
             bool isLazy = typeof(Lazy).IsAssignableFrom(typeof(T));
             if (isIdentifiable || isLazy)
@@ -114,7 +116,7 @@ namespace Signum.Web
                         { 
                             { ViewDataKeys.CustomHtml, ddlStr},
                             { ViewDataKeys.PopupPrefix, idValueField},
-                            { ViewDataKeys.OnOk, "OnImplementationsOk('/Signum/PartialView','" + divASustituir + "','" + idValueField + "','','');"},
+                            { ViewDataKeys.OnOk, "OnImplementationsOk({0},'{1}');".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(typeof(T))) },
                             { ViewDataKeys.OnCancel, "OnImplementationsCancel('" + idValueField + "');"}
                         }
                     ));
@@ -143,8 +145,7 @@ namespace Signum.Web
                 sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, string> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
-            string viewingUrl = "javascript:OpenPopup('/Signum/PartialView','{0}','{1}',function(){{OnPopupOK('/Signum/TrySavePartial','{1}');}},function(){{OnPopupCancel('{1}');}});".Formato(divASustituir, idValueField);
-
+            string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters +");";
             sb.Append(
                     helper.Href(idValueField + TypeContext.Separator + EntityBaseKeys.ToStrLink,
                         (value!=null) ? value.ToString() : "&nbsp;",
@@ -155,9 +156,9 @@ namespace Signum.Web
 
             sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
             
-            string creatingUrl = (settings.Implementations == null) ? 
-                viewingUrl : 
-                "ChooseImplementation('" + divASustituir + "','" + idValueField + "');";
+            string creatingUrl = (settings.Implementations == null) ?
+                "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))) : 
+                "ChooseImplementation('{0}','{1}');".Formato(divASustituir, idValueField);
             if (settings.Create)
                 sb.Append(
                     helper.Button(idValueField + "_btnCreate",
