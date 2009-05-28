@@ -188,8 +188,15 @@ namespace Signum.Web
             foreach (var ppm in Properties.Values)
             {
                 object oldValue = ppm.PropertyPack.GetValue(entity);
-                object newValue =  ppm.Modification.ApplyChanges(oldValue);
-                ppm.PropertyPack.SetValue(entity, newValue); 
+                object newValue = ppm.Modification.ApplyChanges(oldValue);
+                try
+                {
+                    ppm.PropertyPack.SetValue(entity, newValue);
+                }
+                catch (Exception ex)
+                {
+                    ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(ex.Message);
+                }
             }
 
             return entity;
@@ -227,6 +234,9 @@ namespace Signum.Web
                 if (error != null)
                     errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
             }
+
+            if (!string.IsNullOrEmpty(BindingError))
+                errors.GetOrCreate(ControlID).Add(BindingError);
         }
 
         public override string ToString()
