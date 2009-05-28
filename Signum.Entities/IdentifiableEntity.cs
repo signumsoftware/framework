@@ -69,13 +69,30 @@ namespace Signum.Entities
             return "{0} ({1})".Formato(GetType().Name, IsNew ? Resources.New : id.ToString());
         }
 
+        public bool EqualsIdent(IdentifiableEntity ident)
+        {
+            if (this == ident)
+                return true; 
+
+            if (ident.GetType() == this.GetType() && !this.IsNew && this.id == ident.id)
+                return true;
+
+            return false; 
+        }
+
         public override bool Equals(object obj)
         {
             if(obj == this)
                 return true;
 
-            if(obj != null && obj.GetType() == base.GetType() && !this.IsNew && this.id == ((IdentifiableEntity)obj).id)
-                return true;
+            if(obj == null)
+                return false;
+
+            if (obj is IdentifiableEntity)
+                return EqualsIdent((IdentifiableEntity)obj);
+
+            if (obj is Lazy)
+                return ((Lazy)obj).EqualsIdent(this); 
 
             return false;
         }

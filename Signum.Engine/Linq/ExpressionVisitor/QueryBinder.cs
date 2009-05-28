@@ -133,8 +133,8 @@ namespace Signum.Engine.Linq
             {
                 return Visit(Expression.MakeMemberAccess(m.Object, ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr)));
             }
-            else if (m.Method.DeclaringType.IsGenericType && 
-                m.Method.DeclaringType.GetGenericTypeDefinition() == typeof(EnumProxy<>) &&
+            else if (
+                m.Method.DeclaringType.IsInstantiationOf(typeof(EnumProxy<>)) &&
                 m.Method.Name == "ToEnum")
             {
                 FieldInitExpression fi = (FieldInitExpression)Visit(m.Object);
@@ -230,7 +230,7 @@ namespace Signum.Engine.Linq
             if (result.NodeType == ExpressionType.Call)
             {
                 MethodCallExpression mca = (MethodCallExpression)result;
-                if (mca.Method.Name == "New" && mca.Method.ReturnType.GetGenericTypeDefinition() == typeof(IGrouping<,>))
+                if (mca.Method.Name == "New" && mca.Method.ReturnType.IsInstantiationOf(typeof(IGrouping<,>)))
                     return (ProjectionExpression)mca.Arguments[1];
             }
             else if (result.NodeType == (ExpressionType)DbExpressionType.MList)
@@ -599,7 +599,7 @@ namespace Signum.Engine.Linq
         private Type TableType(object value)
         {
             return value.TryCC(v => v.GetType()
-                .Map(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Query<>) ? t.GetGenericArguments()[0] : null));
+                .Map(t => t.IsInstantiationOf(typeof(Query<>)) ? t.GetGenericArguments()[0] : null));
         }
 
         private void FillFie(FieldInitExpression fie)
@@ -707,7 +707,7 @@ namespace Signum.Engine.Linq
                     return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second; 
                 case ExpressionType.Call:
                     MethodCallExpression mca = (MethodCallExpression)source;
-                    if(mca.Method.DeclaringType.GetGenericTypeDefinition() == typeof(Grouping<,>) && 
+                    if (mca.Method.DeclaringType.IsInstantiationOf(typeof(Grouping<,>)) && 
                        mca.Method.Name == "New" && m.Member.Name == "Key")
                         return mca.Arguments[0];
                     break;

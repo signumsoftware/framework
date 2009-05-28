@@ -9,7 +9,7 @@ using Signum.Entities.Properties;
 namespace Signum.Entities
 {
     [Serializable]
-    public class Lazy<T> : Lazy 
+    public class Lazy<T> : Lazy
         where T : class, IIdentifiable
     {
         T entityOrNull;
@@ -46,46 +46,6 @@ namespace Signum.Entities
             internal set { entityOrNull = value; }
         }
 
-        //public static bool operator ==(Lazy<T> lazy, T entity)
-        //{
-        //    throw new ApplicationException("For queries only");
-        //}
-
-        //public static bool operator !=(Lazy<T> lazy, T entity)
-        //{
-        //    throw new ApplicationException("For queries only");
-        //}
-
-        //public static bool operator ==(T entity, Lazy<T> lazy)
-        //{
-        //    throw new ApplicationException("For queries only");
-        //}
-
-        //public static bool operator !=(T entity, Lazy<T> lazy)
-        //{
-        //    throw new ApplicationException("For queries only");
-        //}
-
-        public bool Equals(Lazy<T> other)
-        {
-            if (other == null)
-                return false;
-
-            if (base.RuntimeType != other.RuntimeType)
-                return false;
-
-            if (EntityOrNull == null)
-                return base.Id == other.IdOrNull;
-            else
-                return object.ReferenceEquals(this.EntityOrNull, other.EntityOrNull); 
-        }
-
-        public override bool Equals(object obj)
-        {
-            Lazy<T> casted = obj as Lazy<T>;
-            return ((casted != null) && this.Equals(casted));
-        }
-
         public override int GetHashCode()
         {
             if (this.EntityOrNull != null)
@@ -95,7 +55,7 @@ namespace Signum.Entities
     }
 
     [Serializable]
-    public abstract class Lazy : Modifiable 
+    public abstract class Lazy : Modifiable
     {
         Type runtimeType;
         int? id;
@@ -227,6 +187,46 @@ namespace Signum.Entities
             get { return toStr; }
             internal set { toStr = value;  }
         }
+
+        internal bool EqualsLazy(Lazy other)
+        {
+            if (other == null)
+                return false;
+
+            if (RuntimeType != other.RuntimeType)
+                return false;
+
+            if (UntypedEntityOrNull == null)
+                return Id == other.IdOrNull;
+            else
+                return object.ReferenceEquals(this.UntypedEntityOrNull, other.UntypedEntityOrNull);
+        }
+
+        internal bool EqualsIdent(IdentifiableEntity entity)
+        {
+            if (entity == null)
+                return false;
+
+            if (RuntimeType != entity.GetType())
+                return false;
+
+            if (UntypedEntityOrNull == null)
+                return Id == entity.IdOrNull;
+            else
+                return object.ReferenceEquals(this.UntypedEntityOrNull, entity);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (this == obj)
+                return true; 
+
+            if (obj is Lazy)
+                return EqualsLazy((Lazy)obj);
+            else if (obj is IdentifiableEntity)
+                return EqualsIdent((IdentifiableEntity)obj);
+            return false;
+        }
     }
 
 
@@ -254,6 +254,6 @@ namespace Signum.Entities
         public static Lazy<T> ToLazyFat<T>(this T entidad) where T : class, IIdentifiable
         {
             return new Lazy<T>(entidad);
-        }
+        }      
     }
 }
