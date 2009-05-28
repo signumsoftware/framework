@@ -19,6 +19,9 @@ namespace Signum.Web
         public const string OnCancel = "sfOnCancel";
         public const string BtnOk = "sfBtnOk";
         public const string BtnCancel = "sfBtnCancel";
+        
+        public const string Columns = "sfColumns";
+        public const string Filters = "sfFilters";
 
         public static string GlobalName(this HtmlHelper helper, string localName)
         {

@@ -91,6 +91,11 @@ namespace Signum.Web.Controllers
             return Content(result.ToJSonObject(idAndType => idAndType.Quote(), str => str.Quote()));
         }
 
+        public ActionResult Find(string queryName)
+        {
+            return Navigator.Find(this, queryName);
+        }
+
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult DoPostBack(string prefixToIgnore)
         {

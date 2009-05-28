@@ -81,6 +81,7 @@
     <Compile Include="EntityBase.cs" />
     <Compile Include="EntityLineHelper.cs" />
     <Compile Include="EntityListHelper.cs" />
+    <Compile Include="FindOptions.cs" />
     <Compile Include="HtmlHelpers.cs" />
     <Compile Include="Modification.cs" />
     <Compile Include="Navigator.cs" />
@@ -91,6 +92,7 @@
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
     <Compile Include="ScriptHelper.cs" />
+    <Compile Include="Server.cs" />
     <Compile Include="SignumViewEngine.cs" />
     <Compile Include="StringResponseFilter.cs" />
     <Compile Include="StyleContext.cs" />
@@ -108,6 +110,15 @@
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.js" />
+    <EmbeddedResource Include="Views\FilterBuilder.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\SearchControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\SearchWindow.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\OKCancelPopup.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
@@ -137,6 +148,10 @@
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Services\Signum.Services.csproj">
+      <Project>{B63C47DF-4EC3-4D80-863C-2B5A38D2C35B}</Project>
+      <Name>Signum.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
