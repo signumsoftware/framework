@@ -92,6 +92,7 @@
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
     <Compile Include="ScriptHelper.cs" />
+    <Compile Include="SearchControlHelper.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="SignumViewEngine.cs" />
     <Compile Include="StringResponseFilter.cs" />

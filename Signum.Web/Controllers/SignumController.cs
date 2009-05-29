@@ -97,6 +97,12 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult AddFilter(string filterType, string columnName, string displayName)
+        {
+            return Content(SearchControlHelper.NewFilter(filterType, columnName, displayName));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult DoPostBack(string prefixToIgnore)
         {
             Modifiable entity = Navigator.ExtractEntity(Request.Form);
