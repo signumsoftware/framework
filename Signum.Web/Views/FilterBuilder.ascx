@@ -9,7 +9,7 @@
    {
        string name = column.Name;
        %>
-       <option id="<%=column.Name %>" value="<%=column.Type.Name %>"><%=column.DisplayName%></option>
+       <option id="<%="option" + column.Name %>" value="<%=column.Type.Name %>"><%=column.DisplayName%></option>
    <%
    } 
    %>

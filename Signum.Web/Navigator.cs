@@ -273,6 +273,7 @@ namespace Signum.Web
             {
                 new FilterOptions{Column = columna1, ColumnName="IdOrNull", Frozen=false, Operation=FilterOperation.GreaterThan, Value=1},
                 new FilterOptions{Column = columna2, ColumnName="Nombre", Frozen=false, Operation=FilterOperation.DistinctTo, Value="Max"},
+                new FilterOptions{Column = columna3, ColumnName="FechaNacimiento", Frozen=false, Operation=FilterOperation.GreaterThanOrEqual, Value=DateTime.Now.AddYears(-30)},
             };
                     
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
