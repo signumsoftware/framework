@@ -30,12 +30,7 @@
         for (int i=0; i<filterOptions.Count; i++)
         {
             FilterOptions filter = filterOptions[i];
-            //string columnName = filter.ColumnName + "_" + i.ToString();
-
-            //FilterType filterType = FilterOperationsUtils.GetFilterType(filter.Column.Type);
-            //List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
-
-            Html.NewFilter(filter);            
+            Html.NewFilter(filter, index);            
         } 
         %>
     </tbody>

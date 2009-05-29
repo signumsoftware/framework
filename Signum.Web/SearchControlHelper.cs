@@ -57,7 +57,7 @@ namespace Signum.Web
                         new ViewPage()); 
         }
 
-        public static void NewFilter(this HtmlHelper helper, FilterOptions filterOptions)
+        public static void NewFilter(this HtmlHelper helper, FilterOptions filterOptions, int index)
         {
             StringBuilder sb = new StringBuilder();
 
