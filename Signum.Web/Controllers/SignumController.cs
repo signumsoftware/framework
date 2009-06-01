@@ -91,15 +91,18 @@ namespace Signum.Web.Controllers
             return Content(result.ToJSonObject(idAndType => idAndType.Quote(), str => str.Quote()));
         }
 
-        public ActionResult Find(string queryName)
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult Find(string queryFriendlyName)
         {
+            object queryName = Navigator.ResolveQueryFromUrlName(queryFriendlyName);
+
             return Navigator.Find(this, queryName);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string filterType, string columnName, string displayName)
+        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index)
         {
-            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName));
+            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

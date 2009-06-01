@@ -1,20 +1,22 @@
 <%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
+<%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
+<%@ Import Namespace="Signum.Entities.Reflection" %>
 <%@ Import Namespace="System.Collections.Generic" %>
+<%@ Import Namespace="Signum.Utilities" %>
 
 <select id="ddlNewFilters" name="ddlNewFilters">
-
 <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.Columns])
    {
-       string name = column.Name;
+       Type type = column.Type.UnNullify();
        %>
-       <option id="<%="option" + column.Name %>" value="<%=column.Type.Name %>"><%=column.DisplayName%></option>
+       <option id="<%="option" + column.Name %>" value="<%=typeof(Lazy).IsAssignableFrom(type) ? Reflector.ExtractLazy(type).Name : type.Name %>"><%=column.DisplayName%></option>
    <%
    } 
    %>
-   <%=Html.Button("btnAddFilter", "+", "AddFilter('/Signum/AddFilter')","",new Dictionary<string, string>()) %>
-
+   <%=Html.Button("btnAddFilter", "+", "AddFilter('/Signum/AddFilter');","",new Dictionary<string, string>()) %>
+   <%=Html.Button("btnClearAllFilters", "+", "ClearAllFilters();","",new Dictionary<string, string>()) %>
 </select>
 <br />
 <table id="tblFilters" name="tblFilters">
@@ -30,7 +32,7 @@
         for (int i=0; i<filterOptions.Count; i++)
         {
             FilterOptions filter = filterOptions[i];
-            Html.NewFilter(filter, index);            
+            Html.NewFilter(filter, i);            
         } 
         %>
     </tbody>

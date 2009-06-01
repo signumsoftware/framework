@@ -93,7 +93,6 @@
     </Compile>
     <Compile Include="ScriptHelper.cs" />
     <Compile Include="SearchControlHelper.cs" />
-    <Compile Include="Server.cs" />
     <Compile Include="SignumViewEngine.cs" />
     <Compile Include="StringResponseFilter.cs" />
     <Compile Include="StyleContext.cs" />
@@ -149,10 +148,6 @@
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Services\Signum.Services.csproj">
-      <Project>{B63C47DF-4EC3-4D80-863C-2B5A38D2C35B}</Project>
-      <Name>Signum.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>

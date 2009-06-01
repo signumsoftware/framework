@@ -16,14 +16,14 @@ using Signum.Web.Properties;
 using Signum.Entities.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
-using Signum.Services;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
     public static class Navigator
     {
         public static NavigationManager NavigationManager;
-
+        
         public static Type ResolveType(string typeName)
         {
             return NavigationManager.ResolveType(typeName);
@@ -32,6 +32,11 @@ namespace Signum.Web
         public static Type ResolveTypeFromUrlName(string typeUrlName)
         {
             return NavigationManager.ResolveTypeFromUrlName(typeUrlName); 
+        }
+
+        public static object ResolveQueryFromUrlName(string queryUrlName)
+        {
+            return NavigationManager.ResolveQueryFromUrlName(queryUrlName);
         }
 
         public static ViewResult View(this Controller controller, object obj)
@@ -158,11 +163,29 @@ namespace Signum.Web
     public class NavigationManager
     {
         public Dictionary<Type, EntitySettings> Settings = new Dictionary<Type, EntitySettings>();
+        private DynamicQueryManager queries;
+        public DynamicQueryManager Queries
+        {
+            get { return queries; }
+            set 
+            {
+                queries = value;
+                URLnamesToQueries = new Dictionary<string,object>();
+                foreach (object key in queries.Queries.Keys)
+                {
+                    if (key.GetType().IsValueType || key.GetType().IsEnum)
+                        URLnamesToQueries.Add(key.ToString(), key);
+                    else
+                        URLnamesToQueries.Add(((Type)key).Name, key);
+                }
+            }
+        }
+        internal Dictionary<string, object> URLnamesToQueries { get; private set; }
 
         internal string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
         internal string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
         internal string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
-
+        
         internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         internal Dictionary<Type, string> TypesToURLNames { get; private set; }
         internal Dictionary<Type, TypeDN> TypesToTypesDN { get; private set; }
@@ -259,21 +282,13 @@ namespace Signum.Web
 
         protected internal virtual ViewResult Find(Controller controller, FindOptions findOptions)
         {
-            //QueryDescription queryDescription = Server.GetQueryDescription(findOptions.QueryName);
-            
-            Column columna1 = new Column{DisplayName = "Id", Name="IdOrNull", Filterable = true, Type = typeof(int), Visible = true};
-            Column columna2 = new Column{DisplayName = "Nombre", Name ="Nombre", Filterable = true, Type = typeof(string), Visible = true};
-            Column columna3 = new Column{DisplayName = "DOB", Name = "FechaNacimiento", Filterable = true, Type = typeof(DateTime), Visible = true};
+            QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
-            QueryDescription queryDescription = new QueryDescription()
-            {
-                Columns = new List<Column>{ columna1, columna2, columna3 }
-            };
             findOptions.FilterOptions = new List<FilterOptions>
             {
-                new FilterOptions{Column = columna1, ColumnName="IdOrNull", Frozen=false, Operation=FilterOperation.GreaterThan, Value=1},
-                new FilterOptions{Column = columna2, ColumnName="Nombre", Frozen=false, Operation=FilterOperation.DistinctTo, Value="Max"},
-                new FilterOptions{Column = columna3, ColumnName="FechaNacimiento", Frozen=false, Operation=FilterOperation.GreaterThanOrEqual, Value=DateTime.Now.AddYears(-30)},
+                new FilterOptions{Column = queryDescription.Columns[0], ColumnName="IdOrNull", Frozen=true, Operation=FilterOperation.GreaterThan, Value=1},
+                new FilterOptions{Column = queryDescription.Columns[1], ColumnName="Nombre", Frozen=false, Operation=FilterOperation.DistinctTo, Value="Max"},
+                new FilterOptions{Column = queryDescription.Columns[2], ColumnName="FechaNacimiento", Frozen=true, Operation=FilterOperation.GreaterThan, Value=DateTime.Now},
             };
                     
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
@@ -294,11 +309,11 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions)
         {
-            QueryDescription queryDescription = Server.Service<IQueryServer>().GetQueryDescription(findOptions.QueryName);
-            List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
+            //QueryDescription queryDescription = Server.Service<IQueryServer>().GetQueryDescription(findOptions.QueryName);
+            //List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
             
-            controller.ViewData[ViewDataKeys.Columns] = columns;
-            controller.ViewData[ViewDataKeys.Filters] = findOptions;
+            //controller.ViewData[ViewDataKeys.Columns] = columns;
+            //controller.ViewData[ViewDataKeys.Filters] = findOptions;
 
             return new PartialViewResult
             {
@@ -313,6 +328,13 @@ namespace Signum.Web
             return Navigator.NavigationManager.URLNamesToTypes
                 .TryGetC(typeUrlName)
                 .ThrowIfNullC("No hay un tipo asociado al nombre: " + typeUrlName);
+        }
+
+        protected internal virtual object ResolveQueryFromUrlName(string queryUrlName)
+        {
+            return Navigator.NavigationManager.URLnamesToQueries 
+                .TryGetC(queryUrlName)
+                .ThrowIfNullC("No hay una query asociado al nombre: " + queryUrlName);
         }
 
         protected internal virtual Type ResolveType(string typeName)
