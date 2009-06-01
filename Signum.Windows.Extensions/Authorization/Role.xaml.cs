@@ -42,8 +42,8 @@ namespace Signum.Windows.Authorization
                 if (Server.Implements<IQueryAuthServer>())
                     links.Add(new QuickLink("Query Rules") { Action = () => new QueryRules { Role = Lazy }.Show() });
 
-                if (Server.Implements<IServiceOperationAuthServer>())
-                    links.Add(new QuickLink("Service Operation Rules") { Action = () => new ServiceOperationRules { Role = Lazy }.Show() });
+                if (Server.Implements<IFacadeMethodAuthServer>())
+                    links.Add(new QuickLink("Facade Method Rules") { Action = () => new FacadeMethodRules { Role = Lazy }.Show() });
 
                 if (Server.Implements<ITypeAuthServer>())
                     links.Add(new QuickLink("Type Rules") { Action = () => new TypeRules { Role = Lazy }.Show() });

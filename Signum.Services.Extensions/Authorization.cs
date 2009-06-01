@@ -29,13 +29,13 @@ namespace Signum.Services
     }
 
     [ServiceContract]
-    public interface IServiceOperationAuthServer
+    public interface IFacadeMethodAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetServiceOperationAllowedRules(Lazy<RoleDN> role);
+        List<AllowedRule> GetFacadeMethodAllowedRules(Lazy<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetServiceOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role); 
+        void SetFacadeMethodAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role); 
     }
 
     [ServiceContract]

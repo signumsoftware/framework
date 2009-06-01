@@ -81,8 +81,8 @@
     <Compile Include="Authorization\TypeRules.xaml.cs">
       <DependentUpon>TypeRules.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Authorization\ServiceOperationRules.xaml.cs">
-      <DependentUpon>ServiceOperationRules.xaml</DependentUpon>
+    <Compile Include="Authorization\FacadeMethodRules.xaml.cs">
+      <DependentUpon>FacadeMethodRules.xaml</DependentUpon>
     </Compile>
     <Compile Include="Authorization\Role.xaml.cs">
       <DependentUpon>Role.xaml</DependentUpon>
@@ -182,7 +182,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Authorization\ServiceOperationRules.xaml">
+    <Page Include="Authorization\FacadeMethodRules.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

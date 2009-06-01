@@ -19,7 +19,7 @@ namespace Signum.Windows.Authorization
     /// <summary>
     /// Interaction logic for Test.xaml
     /// </summary>
-    public partial class ServiceOperationRules : Window
+    public partial class FacadeMethodRules : Window
     {
         public Lazy<RoleDN> Role
         {
@@ -28,9 +28,9 @@ namespace Signum.Windows.Authorization
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(ServiceOperationRules), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(FacadeMethodRules), new UIPropertyMetadata(null));
 
-        public ServiceOperationRules()
+        public FacadeMethodRules()
         {
             InitializeComponent();
             this.Loaded += new RoutedEventHandler(Test_Loaded);
@@ -43,12 +43,12 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Service<IServiceOperationAuthServer>().GetServiceOperationAllowedRules(Role);
+            listView.ItemsSource = Server.Service<IFacadeMethodAuthServer>().GetFacadeMethodAllowedRules(Role);
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Service<IServiceOperationAuthServer>().SetServiceOperationAllowedRules((List<AllowedRule>)listView.ItemsSource, Role);
+            Server.Service<IFacadeMethodAuthServer>().SetFacadeMethodAllowedRules((List<AllowedRule>)listView.ItemsSource, Role);
             Load(); 
         }
 
