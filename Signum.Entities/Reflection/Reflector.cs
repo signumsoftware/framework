@@ -71,7 +71,7 @@ namespace Signum.Entities.Reflection
             return typeof(IdentifiableEntity).IsAssignableFrom(ft);
         }
 
-        public static bool IsEmbebedEntity(Type t)
+        public static bool IsEmbeddedEntity(Type t)
         {
             return typeof(EmbeddedEntity).IsAssignableFrom(t);
         }

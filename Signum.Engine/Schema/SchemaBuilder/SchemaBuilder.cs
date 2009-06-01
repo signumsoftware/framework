@@ -190,7 +190,7 @@ namespace Signum.Engine.Maps
             if (Reflector.IsIIdentifiable(fieldType))
                 return KindOfField.Reference;
 
-            if (Reflector.IsEmbebedEntity(fieldType))
+            if (Reflector.IsEmbeddedEntity(fieldType))
                 return KindOfField.Embedded;
 
             if (Reflector.IsMList(fieldType))
