@@ -20,8 +20,10 @@ namespace Signum.Web
             idValueField = helper.GlobalName(idValueField);
 
             if (StyleContext.Current.LabelVisible)
-                sb.Append(helper.Span(idValueField + "lbl", labelText, TypeContext.CssLineLabel));
-
+            {
+                sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
+                //sb.Append(helper.Span(idValueField + "lbl", labelText, TypeContext.CssLineLabel));
+            }
             string valueStr = (value != null) ? value.ToString() : "";
             if (StyleContext.Current.ReadOnly)
                 sb.Append(helper.Span(idValueField, valueStr, "valueLine"));
@@ -223,13 +225,13 @@ namespace Signum.Web
             {ValueLineType.Calendar, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, valueLineData.HtmlProperties)},
             {ValueLineType.Number, (helper, valueLineData) => 
                 {
-                    valueLineData.HtmlProperties.Add("onKeyDown", onKeyDownNumber);
+                    valueLineData.HtmlProperties.Add("onkeydown", onKeyDownNumber);
                     return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.HtmlProperties);
                 }
             },
             {ValueLineType.DecimalNumber, (helper, valueLineData) => 
                 {
-                    valueLineData.HtmlProperties.Add("onKeyDown", onKeyDownDecimalNumber);
+                    valueLineData.HtmlProperties.Add("onkeydown", onKeyDownDecimalNumber);
                     return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.HtmlProperties);
                 }
             }

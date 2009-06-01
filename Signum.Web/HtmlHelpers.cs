@@ -18,11 +18,28 @@ namespace Signum.Web
                    + "&nbsp;</div>";
         }
 
+        /// <summary>
+        /// Returns a "label" label that is used to show the name of a field in a form
+        /// </summary>
+        /// <param name="html"></param>
+        /// <param name="id">The id of the label</param>
+        /// <param name="value">The text of the label, which will be shown</param>
+        /// <param name="idField">The id of the field that the label is describing</param>
+        /// <param name="cssClass">The class that will be appended to the label</param>
+        /// <returns>An HTML string representing a "label" label</returns>
+        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
+        {
+            return
+            String.IsNullOrEmpty(id) ?
+                String.Format("<label for='{0}' class='{1}'>{2}</label>", idField, cssClass, value) :
+                String.Format("<label for='{0}' id='{3}' class='{1}'>{2}</label>", idField, cssClass, value, id);
+        }
+
         public static string Span(this HtmlHelper html, string name, string value, string cssClass)
         { 
             return "<span " + 
                 ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
-                "class=\"" + cssClass + "\" >" + value + 
+                "class=\"" + cssClass + "\" >" + value.Replace('_',' ') + 
                 "</span>\n";
         }
 
