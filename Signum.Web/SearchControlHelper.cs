@@ -19,9 +19,9 @@ namespace Signum.Web
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[FilterOperationsUtils.GetFilterType(columnType)];
 
             sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato("trFilter_" + index.ToString()));
-            sb.Append("<td id=\"{0}\" name=\"{0}\">{1}</td>\n".Formato("lbl" + columnName, displayName));
+            sb.Append("<td id=\"{0}\" name=\"{0}\">{1}</td>\n".Formato("td" + index.ToString() + "_" + columnName, displayName));
             sb.Append("<td>\n");
-            sb.Append("<select>\n");
+            sb.Append("<select id=\"{0}\" name=\"{0}\">\n".Formato("ddlSelector_" + index.ToString()));
             for (int j=0; j<possibleOperations.Count; j++)
                 sb.Append("<option value=\"{0}\">{1}</option>\n"
                     .Formato(possibleOperations[j], possibleOperations[j].NiceToString()));
@@ -33,7 +33,7 @@ namespace Signum.Web
             sb.Append(
                 ValueLineHelper.Configurator.constructor[vlType](
                     CreateHtmlHelper(controller), 
-                    new ValueLineData(columnName + "_" + index, null, new Dictionary<string, object>()))); 
+                    new ValueLineData("value_" + index.ToString(), null, new Dictionary<string, object>()))); 
 
             sb.Append("</td>\n");
             sb.Append("<td>\n");
@@ -67,9 +67,11 @@ namespace Signum.Web
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
                 
             sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato("trFilter_" + index.ToString()));
-            sb.Append("<td id=\"{0}\" name=\"{0}\">{1}</td>\n".Formato("lbl" + filterOptions.Column.Name, filterOptions.Column.DisplayName));
+            sb.Append("<td id=\"{0}\" name=\"{0}\">{1}</td>\n".Formato("td" + index.ToString() + "_" + filterOptions.Column.Name, filterOptions.Column.DisplayName));
             sb.Append("<td>\n");
-            sb.Append("<select{0}>\n".Formato(filterOptions.Frozen ? " disabled=\"disabled\"" : ""));
+            sb.Append("<select{0} id=\"{1}\" name=\"{1}\">\n"
+                .Formato(filterOptions.Frozen ? " disabled=\"disabled\"" : "",
+                        "ddlSelector_" + index.ToString()));
             for (int j=0; j<possibleOperations.Count; j++)
                 sb.Append("<option value=\"{0}\" {1}>{2}</option>\n"
                     .Formato(
@@ -80,7 +82,7 @@ namespace Signum.Web
             sb.Append("</td>\n");
             sb.Append("<td>\n");
 
-            string txtId = filterOptions.Column.Name + "_" + index;
+            string txtId = "value_" + index.ToString();
             string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
             if (filterOptions.Frozen)
                 sb.Append("<input type=\"text\" id=\"{0}\" name=\"{0}\" value=\"{1}\" {2}/>\n".Formato(txtId, txtValue, filterOptions.Frozen ? " readonly=\"readonly\"" : ""));

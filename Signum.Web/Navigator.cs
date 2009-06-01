@@ -39,6 +39,11 @@ namespace Signum.Web
             return NavigationManager.ResolveQueryFromUrlName(queryUrlName);
         }
 
+        public static object ResolveQueryFromToStr(string queryNameToStr)
+        {
+            return NavigationManager.ResolveQueryFromToStr(queryNameToStr);
+        }
+
         public static ViewResult View(this Controller controller, object obj)
         {
             return NavigationManager.View(controller, obj); 
@@ -57,6 +62,16 @@ namespace Signum.Web
         public static ViewResult Find(Controller controller, FindOptions findOptions)
         {
             return NavigationManager.Find(controller, findOptions);
+        }
+
+        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit)
+        {
+            return NavigationManager.Search(controller, queryName, filters, resultsLimit);
+        }
+
+        internal static List<Filter> ExtractFilters(NameValueCollection form)
+        {
+            return NavigationManager.ExtractFilters(form);
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixToIgnore)
@@ -295,7 +310,7 @@ namespace Signum.Web
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
-            controller.ViewData[ViewDataKeys.PageTitle] = findOptions.QueryName;
+            controller.ViewData[ViewDataKeys.QueryName] = findOptions.QueryName;
             controller.ViewData[ViewDataKeys.Columns] = columns;
             controller.ViewData[ViewDataKeys.Filters] = findOptions;
 
@@ -324,18 +339,70 @@ namespace Signum.Web
             };
         }
 
+        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit)
+        {
+            QueryResult queryResult = Queries.ExecuteQuery(queryName, filters, resultsLimit);
+
+            controller.ViewData[ViewDataKeys.Results] = queryResult;
+
+            return new PartialViewResult
+            {
+                ViewName = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchResults.ascx",
+                ViewData = controller.ViewData,
+                TempData = controller.TempData
+            };
+        }
+
+        protected internal virtual List<Filter> ExtractFilters(NameValueCollection form)
+        {
+            List<Filter> result = new List<Filter>();
+
+            int index = 0;
+            string name;
+            object value;
+            string operation;
+            while (true)
+            {
+                if (form.AllKeys.SingleOrDefault(k => k=="name" + index.ToString()) == null)
+                    break;
+
+                name = form["name" + index.ToString()];
+                value = form["val" + index.ToString()];
+                operation = form["sel" + index.ToString()];
+
+                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.NiceToString() == operation);
+
+                result.Add(new Filter
+                {
+                    Column = new Column() { Name = name },
+                    Operation = filterOperation,
+                    Value = value,
+                });
+
+                index ++;
+            }
+            return result;
+        }
+
         protected internal virtual Type ResolveTypeFromUrlName(string typeUrlName)
         {
-            return Navigator.NavigationManager.URLNamesToTypes
+            return URLNamesToTypes
                 .TryGetC(typeUrlName)
                 .ThrowIfNullC("No hay un tipo asociado al nombre: " + typeUrlName);
         }
 
         protected internal virtual object ResolveQueryFromUrlName(string queryUrlName)
         {
-            return Navigator.NavigationManager.URLnamesToQueries 
+            return URLnamesToQueries 
                 .TryGetC(queryUrlName)
                 .ThrowIfNullC("No hay una query asociado al nombre: " + queryUrlName);
+        }
+
+        protected internal virtual object ResolveQueryFromToStr(string queryNameToStr)
+        {
+            return Queries.GetQueryNames()
+                .SingleOrDefault(qn => qn.ToString() == queryNameToStr)
+                .ThrowIfNullC("No hay una query asociado al nombre: " + queryNameToStr);
         }
 
         protected internal virtual Type ResolveType(string typeName)

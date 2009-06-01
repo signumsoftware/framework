@@ -21,7 +21,9 @@ namespace Signum.Web
         public const string BtnCancel = "sfBtnCancel";
         
         public const string Columns = "sfColumns";
+        public const string QueryName = "sfQueryName";
         public const string Filters = "sfFilters";
+        public const string Results = "sfResults";
 
         public static string GlobalName(this HtmlHelper helper, string localName)
         {

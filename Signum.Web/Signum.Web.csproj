@@ -110,6 +110,9 @@
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.js" />
+    <EmbeddedResource Include="Views\SearchResults.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\FilterBuilder.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>

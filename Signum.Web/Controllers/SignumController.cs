@@ -11,6 +11,7 @@ using Signum.Engine.Maps;
 using Signum.Web.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.Controllers
 {
@@ -99,6 +100,16 @@ namespace Signum.Web.Controllers
             return Navigator.Find(this, queryName);
         }
 
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfResultsLimit)
+        {
+            object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
+
+            List<Filter> filters = Navigator.ExtractFilters(Request.Form);
+
+            return Navigator.Search(this, queryName, filters, sfResultsLimit);
+        }
+        
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult AddFilter(string filterType, string columnName, string displayName, int index)
         {

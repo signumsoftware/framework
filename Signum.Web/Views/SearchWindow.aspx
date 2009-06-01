@@ -21,7 +21,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
-        <input type="button" onclick="Search('/Signum/Search')" value="Buscar" /> 
+        <input type="button" onclick="Search('/Signum/Search','100')" value="Buscar" /> 
         <br />
         <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString()); %>
         <div id="divASustituir"></div>
