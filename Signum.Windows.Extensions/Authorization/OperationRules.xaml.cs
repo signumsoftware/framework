@@ -19,7 +19,7 @@ namespace Signum.Windows.Authorization
     /// <summary>
     /// Interaction logic for Test.xaml
     /// </summary>
-    public partial class ActionRules : Window
+    public partial class OperationRules : Window
     {
         public Lazy<RoleDN> Role
         {
@@ -28,9 +28,9 @@ namespace Signum.Windows.Authorization
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(ActionRules), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(OperationRules), new UIPropertyMetadata(null));
 
-        public ActionRules()
+        public OperationRules()
         {
             InitializeComponent();
             this.Loaded += new RoutedEventHandler(Test_Loaded);
@@ -43,12 +43,12 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Service<IActionAuthServer>().GetActionAllowedRules(Role);
+            listView.ItemsSource = Server.Service<IOperationAuthServer>().GetOperationAllowedRules(Role);
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Service<IActionAuthServer>().SetActionAllowedRules((List<AllowedRule>)listView.ItemsSource, Role);
+            Server.Service<IOperationAuthServer>().SetOperationAllowedRules((List<AllowedRule>)listView.ItemsSource, Role);
             Load(); 
         }  
 

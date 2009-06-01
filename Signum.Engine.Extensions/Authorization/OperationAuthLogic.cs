@@ -16,7 +16,7 @@ using Signum.Engine.Operations;
 
 namespace Signum.Engine.Authorization
 {
-    public static class ActionAuthLogic
+    public static class OperationAuthLogic
     {
         static Dictionary<RoleDN, Dictionary<Enum, bool>> _runtimeRules;
         static Dictionary<RoleDN, Dictionary<Enum, bool>> RuntimeRules
@@ -26,14 +26,14 @@ namespace Signum.Engine.Authorization
 
         public static void Start(SchemaBuilder sb)
         {
-            if (sb.NotDefined<RuleActionDN>())
+            if (sb.NotDefined<RuleOperationDN>())
             {
                 AuthLogic.Start(sb);
-                ActionLogic.Start(sb);
+                OperationLogic.Start(sb);
 
-                ActionLogic.ExecutingEvent += new ExecuteActionHandler(ActionLogic_ExecutingEvent);
+                OperationLogic.ExecutingEvent += new ExecuteOperationHandler(OperationLogic_ExecutingEvent);
 
-                sb.Include<RuleActionDN>();
+                sb.Include<RuleOperationDN>();
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saved(Schema sender, IdentifiableEntity ident)
         {
-            if (ident is RuleActionDN)
+            if (ident is RuleOperationDN)
             {
                 Transaction.RealCommit += () => _runtimeRules = null;
             }
@@ -58,35 +58,35 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void ActionLogic_ExecutingEvent(Enum actionKey, ActionDN action, IdentifiableEntity entity, object[] parameters)
+        static void OperationLogic_ExecutingEvent(Enum operationKey, OperationDN action, IdentifiableEntity entity, object[] parameters)
         {
-            if (!GetAllowed(UserDN.Current.Role, actionKey))
-                throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(actionKey));
+            if (!GetAllowed(UserDN.Current.Role, operationKey))
+                throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(operationKey));
         }
 
-        static bool GetAllowed(RoleDN role, Enum actionKey)
+        static bool GetAllowed(RoleDN role, Enum operationKey)
         {
-            return RuntimeRules.TryGetC(role).TryGetS(actionKey) ?? true;
+            return RuntimeRules.TryGetC(role).TryGetS(operationKey) ?? true;
         }
 
-        static bool GetBaseAllowed(RoleDN role, Enum actionKey)
+        static bool GetBaseAllowed(RoleDN role, Enum operationKey)
         {
             return role.Roles.Count == 0 ? true :
-                  role.Roles.Select(r => GetAllowed(r, actionKey)).MaxAllowed();
+                  role.Roles.Select(r => GetAllowed(r, operationKey)).MaxAllowed();
         }
 
-        public static List<ActionInfo> GetActionInfos(RoleDN role, Lazy lazy)
+        public static List<OperationInfo> GetActionInfos(RoleDN role, Lazy lazy)
         {
-            return ActionLogic.GetActionInfos(lazy).Where(ai => GetAllowed(role, ai.ActionKey)).ToList(); 
+            return OperationLogic.GetActionInfos(lazy).Where(ai => GetAllowed(role, ai.OperationKey)).ToList(); 
         }
 
         public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)
         {
             var role = roleLazy.Retrieve();
 
-            var queries = Database.RetrieveAll<ActionDN>();
+            var queries = Database.RetrieveAll<OperationDN>();
             return (from a in queries
-                   let ak = ActionLogic.ToEnum[a.Key]     
+                   let ak = OperationLogic.ToEnum[a.Key]     
                    select new AllowedRule(GetBaseAllowed(role, ak))
                    {
                        Resource = a,
@@ -116,8 +116,8 @@ namespace Signum.Engine.Authorization
             {
                 List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
 
-                Dictionary<RoleDN, Dictionary<Enum, bool>> realRules = Database.RetrieveAll<RuleActionDN>()
-                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => ActionLogic.ToEnum[a.Action.Key], a => a.Allowed));
+                Dictionary<RoleDN, Dictionary<Enum, bool>> realRules = Database.RetrieveAll<RuleOperationDN>()
+                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => OperationLogic.ToEnum[a.Operation.Key], a => a.Allowed));
 
                 Dictionary<RoleDN, Dictionary<Enum, bool>> newRules = new Dictionary<RoleDN, Dictionary<Enum, bool>>();
                 foreach (var role in roles)

@@ -68,9 +68,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\AuthLogic.cs" />
-    <Compile Include="Authorization\ActionRules.xaml.cs">
-      <DependentUpon>ActionRules.xaml</DependentUpon>
+    <Compile Include="Authorization\AuthClient.cs" />
+    <Compile Include="Authorization\OperationRules.xaml.cs">
+      <DependentUpon>OperationRules.xaml</DependentUpon>
     </Compile>
     <Compile Include="Authorization\PermissionRules.xaml.cs">
       <DependentUpon>PermissionRules.xaml</DependentUpon>
@@ -125,7 +125,7 @@
     <Compile Include="Excel\ExcelReportMenuItem.cs" />
     <Compile Include="Excel\ExcelReportPivotTableMenuItem.cs" />
     <Compile Include="Excel\ExcelReportPivotTablesGenerator.cs" />
-    <Compile Include="Operations\ActionStyle.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Panels\TreeMapPanel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -166,7 +166,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Authorization\ActionRules.xaml">
+    <Page Include="Authorization\OperationRules.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

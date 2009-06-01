@@ -11,7 +11,7 @@ using System.Collections;
 
 namespace Signum.Windows.Authorization
 {
-    public static class AuthLogic
+    public static class AuthClient
     {
         static Dictionary<Type, Dictionary<string, Access>> _runtimeRules;
 

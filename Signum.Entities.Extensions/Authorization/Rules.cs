@@ -46,9 +46,9 @@ namespace Signum.Entities.Authorization
             set { Set(ref role, value, "Role"); }
         }
 
-        ServiceOperationDN serviceOperation;
+        FacadeMethodDN serviceOperation;
         [NotNullValidator]
-        public ServiceOperationDN ServiceOperation
+        public FacadeMethodDN ServiceOperation
         {
             get { return serviceOperation; }
             set { Set(ref serviceOperation, value, "ServiceOperation"); }
@@ -90,7 +90,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class RuleActionDN : IdentifiableEntity
+    public class RuleOperationDN : IdentifiableEntity
     {
         RoleDN role;
         [NotNullValidator]
@@ -100,12 +100,12 @@ namespace Signum.Entities.Authorization
             set { Set(ref role, value, "Role"); }
         }
 
-        ActionDN action;
+        OperationDN operation;
         [NotNullValidator]
-        public ActionDN Action
+        public OperationDN Operation
         {
-            get { return action; }
-            set { Set(ref action, value, "Action"); }
+            get { return operation; }
+            set { Set(ref operation, value, "Operation"); }
         }
 
         bool allowed;

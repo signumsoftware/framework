@@ -13,7 +13,7 @@ using Signum.Entities;
 
 namespace Signum.Engine.Authorization
 {
-    public static class ServiceOperationAuthLogic
+    public static class FacadeMethodAuthLogic
     {
         static Dictionary<RoleDN, Dictionary<string, bool>> _runtimeRules;
         public static Dictionary<RoleDN, Dictionary<string, bool>> RuntimeRules
@@ -26,7 +26,7 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined<RuleServiceOperationDN>())
             {
                 AuthLogic.Start(sb);
-                ServiceOperationLogic.Start(sb, serviceInterface);
+                FacadeMethodLogic.Start(sb, serviceInterface);
                 sb.Include<RuleServiceOperationDN>();
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
         {
             var role = roleLazy.Retrieve();
 
-            var operations = ServiceOperationLogic.RetrieveOrGenerateServiceOperations();
+            var operations = FacadeMethodLogic.RetrieveOrGenerateServiceOperations();
             return operations.Select(o => new AllowedRule(GetBaseAllowed(role, o.Name))
                     {
                         Resource = o,
@@ -79,7 +79,7 @@ namespace Signum.Engine.Authorization
         {
             var role = roleLazy.Retrieve();
             var current = Database.Query<RuleServiceOperationDN>().Where(r => r.Role == role).ToDictionary(a => a.ServiceOperation);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => (ServiceOperationDN)r.Resource);
+            var should = rules.Where(a => a.Overriden).ToDictionary(r => (FacadeMethodDN)r.Resource);
 
             Synchronizer.Syncronize(current, should,
                 (s, sr) => sr.Delete(),

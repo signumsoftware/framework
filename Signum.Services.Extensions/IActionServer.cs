@@ -9,15 +9,15 @@ using Signum.Entities;
 namespace Signum.Services
 {
     [ServiceContract]
-    public interface IActionServer
+    public interface IOperationServer
     {
         [OperationContract, NetDataContract]
-        List<ActionInfo> GetActionPairs(Lazy lazy);
+        List<OperationInfo> GetOperationsInfo(Lazy lazy);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteAction(IdentifiableEntity entity, Enum actionKey, object[] parameters);
+        IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] parameters);
 
         [OperationContract, NetDataContract]
-        void ExecuteActionLazy(Lazy lazy, Enum actionKey, object[] parameters);
+        IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum operationKey, params object[] parameters);
     }
 }

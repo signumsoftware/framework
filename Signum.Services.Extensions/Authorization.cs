@@ -75,12 +75,12 @@ namespace Signum.Services
     }
 
     [ServiceContract]
-    public interface IActionAuthServer
+    public interface IOperationAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetActionAllowedRules(Lazy<RoleDN> role);
+        List<AllowedRule> GetOperationAllowedRules(Lazy<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetActionAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+        void SetOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
     }
 }

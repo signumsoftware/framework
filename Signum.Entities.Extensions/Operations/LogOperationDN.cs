@@ -8,9 +8,9 @@ using Signum.Utilities;
 namespace Signum.Entities.Operations
 {
     [Serializable]
-    public class LogActionDN : IdentifiableEntity
+    public class LogOperationDN : IdentifiableEntity
     {
-        [ImplementedByAll, NotNullable]
+        [ImplementedByAll]
         Lazy<IdentifiableEntity> entity;
         [NotNullValidator]
         public Lazy<IdentifiableEntity> Entity
@@ -19,13 +19,12 @@ namespace Signum.Entities.Operations
             set { Set(ref entity, value, "Entity"); }
         }
 
-        [ImplementedBy, NotNullable]
-        ActionDN action;
+        OperationDN operation;
         [NotNullValidator]
-        public ActionDN Action
+        public OperationDN Operation
         {
-            get { return action; }
-            set { Set(ref action, value, "Action"); }
+            get { return operation; }
+            set { Set(ref operation, value, "Operation"); }
         }
 
         UserDN user;

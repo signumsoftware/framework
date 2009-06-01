@@ -58,7 +58,7 @@ namespace Signum.Engine.Authorization
             return GeneratePermissions().Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
         }
 
-        const string ActionsKey = "Permissions";
+        const string PersmissionKey = "Permissions";
 
         public static SqlPreCommand SynchronizationScript(Replacements replacements)
         {
@@ -66,7 +66,7 @@ namespace Signum.Engine.Authorization
 
             List<PermissionDN> current = Administrator.TryRetrieveAll<PermissionDN>(replacements);
 
-            return Synchronizer.SyncronizeReplacing(replacements, ActionsKey,
+            return Synchronizer.SyncronizeReplacing(replacements, PersmissionKey,
                 current.ToDictionary(c => c.Key),
                 GeneratePermissions().ToDictionary(s => s.Key),
                 (k, c) => table.DeleteSqlSync(c.Id),

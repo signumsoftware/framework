@@ -51,8 +51,8 @@ namespace Signum.Windows.Authorization
                 if (Server.Implements<IPermissionAuthServer>())
                     links.Add(new QuickLink("Persmission Rules") { Action = () => new PermissionRules { Role = Lazy }.Show() });
 
-                if (Server.Implements<IActionAuthServer>())
-                    links.Add(new QuickLink("Action Rules") { Action = () => new ActionRules { Role = Lazy }.Show() });
+                if (Server.Implements<IOperationAuthServer>())
+                    links.Add(new QuickLink("Operation Rules") { Action = () => new OperationRules { Role = Lazy }.Show() });
             }
 
             return links;

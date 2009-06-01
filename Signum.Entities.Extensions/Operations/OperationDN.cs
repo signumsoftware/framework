@@ -8,7 +8,7 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Operations
 {
     [Serializable]
-    public class ActionDN : IdentifiableEntity
+    public class OperationDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;
@@ -38,9 +38,9 @@ namespace Signum.Entities.Operations
             return "{0}.{1}".Formato(enumValue.GetType().Name, enumValue.ToString());
         }
 
-        public static ActionDN FromEnum(Enum enumValue)
+        public static OperationDN FromEnum(Enum enumValue)
         {
-            return new ActionDN
+            return new OperationDN
             {
                 Key = UniqueKey(enumValue),
                 Name = EnumExtensions.NiceToString((object)enumValue)
@@ -49,17 +49,19 @@ namespace Signum.Entities.Operations
     }
 
     [Serializable]
-    public class ActionInfo
+    public class OperationInfo
     {
-        public Enum ActionKey { get; set; }
-        public ActionType ActionType { get; set; }
+        public Enum OperationKey { get; set; }
+        public OperationFlags Flags { get; set; }
         public bool CanExecute { get; set; }
     }
 
-    public enum ActionType
+    [Flags]
+    public enum OperationFlags
     {
         Entity = 1,
         Lazy = 2, 
-        Both = 3,
+        Returns = 4,
+        Default = Entity | Lazy | Returns
     }
 }

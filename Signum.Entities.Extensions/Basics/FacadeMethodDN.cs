@@ -6,7 +6,7 @@ using System.Text;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public class ServiceOperationDN : IdentifiableEntity
+    public class FacadeMethodDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;

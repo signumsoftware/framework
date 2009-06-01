@@ -13,46 +13,46 @@ using Signum.Entities;
 
 namespace Signum.Engine.Basics
 {
-    public static class ServiceOperationLogic
+    public static class FacadeMethodLogic
     {
         static Type serviceInterface;
         public static void Start(SchemaBuilder sb, Type serviceInterface)
         {
-            if (sb.NotDefined<ServiceOperationDN>())
+            if (sb.NotDefined<FacadeMethodDN>())
             {
-                ServiceOperationLogic.serviceInterface = serviceInterface;
-                sb.Include<ServiceOperationDN>();
+                FacadeMethodLogic.serviceInterface = serviceInterface;
+                sb.Include<FacadeMethodDN>();
 
                 sb.Schema.Synchronizing += SyncronizeServiceOperations;
             }
         }
 
-        public static List<ServiceOperationDN> RetrieveOrGenerateServiceOperations()
+        public static List<FacadeMethodDN> RetrieveOrGenerateServiceOperations()
         {
-            var current = Database.RetrieveAll<ServiceOperationDN>().ToDictionary(a => a.Name);
+            var current = Database.RetrieveAll<FacadeMethodDN>().ToDictionary(a => a.Name);
             var total = GenerateServiceOperations().ToDictionary(a => a.Name);
 
             total.SetRange(current);
             return total.Values.ToList();
         }
 
-        static List<ServiceOperationDN> GenerateServiceOperations()
+        static List<FacadeMethodDN> GenerateServiceOperations()
         {
             return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy))
-                .Select(mi => new ServiceOperationDN { Name = mi.Name }).ToList();
+                .Select(mi => new FacadeMethodDN { Name = mi.Name }).ToList();
         }
 
-        const string ServiceOperationsKey = "ServiceOperations";
+        const string FacadeMethodKey = "FacadeMethod";
 
         public static SqlPreCommand SyncronizeServiceOperations(Replacements replacements)
         {
             var should = GenerateServiceOperations();
 
-            var current = Administrator.TryRetrieveAll<ServiceOperationDN>(replacements);
+            var current = Administrator.TryRetrieveAll<FacadeMethodDN>(replacements);
 
-            Table table = Schema.Current.Table<ServiceOperationDN>();
+            Table table = Schema.Current.Table<FacadeMethodDN>();
 
-            return Synchronizer.SyncronizeReplacing(replacements, ServiceOperationsKey,
+            return Synchronizer.SyncronizeReplacing(replacements, FacadeMethodKey,
                 current.ToDictionary(a => a.Name),
                 should.ToDictionary(a => a.Name),
                 (n, c) => table.DeleteSqlSync(c.Id),

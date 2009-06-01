@@ -20,7 +20,7 @@ namespace Signum.Engine.Operations
         where E : IdentifiableEntity
         where S : struct
     {
-        public class GraphOption : IActionOption
+        public class GraphOption : IOperation
         {
             Graph<E, S> graph;
             S targetState;
@@ -28,11 +28,11 @@ namespace Signum.Engine.Operations
             Action<E, object[]> execute;
             Func<E, bool> canExecute;
 
-            public ActionType ActionType { get; set; }
+            public OperationFlags Flags { get; set; }
 
             public GraphOption(Graph<E, S> graph, S targetState, S[] fromStates,
                 Action<E, object[]> execute,
-                Func<E, bool> canExecute, ActionType actionType)
+                Func<E, bool> canExecute, OperationFlags actionType)
             {
                 this.graph = graph;
                 this.targetState = targetState;
@@ -43,7 +43,7 @@ namespace Signum.Engine.Operations
  
                 this.execute = execute;
                 this.canExecute = canExecute;
-                this.ActionType = actionType; 
+                this.Flags = actionType; 
             }
 
             public bool CanExecute(IIdentifiable ident)
@@ -100,22 +100,22 @@ namespace Signum.Engine.Operations
         protected Action<E, S> EnterState {get;set;}
         protected Action<E, S> ExitState {get;set;}
 
-        protected Dictionary<Enum, IActionOption> Actions { get; set; }
+        protected Dictionary<Enum, IOperation> Operations { get; set; }
         protected Dictionary<S, StateOptions> States { get; set; }
 
         protected static bool Registered = false;
 
-        public IActionOption Goto(S targetState, S[] fromStates, Action<E, object[]> execute)
+        public IOperation Goto(S targetState, S[] fromStates, Action<E, object[]> execute)
         {
-            return new GraphOption(this, targetState, fromStates, execute, null, ActionType.Both);
+            return new GraphOption(this, targetState, fromStates, execute, null, OperationFlags.Default);
         }
 
-        public IActionOption Goto(S targetState, S[] fromStates, Action<E, object[]> execute, Func<E, bool> canExecute)
+        public IOperation Goto(S targetState, S[] fromStates, Action<E, object[]> execute, Func<E, bool> canExecute)
         {
-            return new GraphOption(this, targetState, fromStates, execute, canExecute, ActionType.Both);
+            return new GraphOption(this, targetState, fromStates, execute, canExecute, OperationFlags.Default);
         }
 
-        public IActionOption Goto(S targetState, S[] fromStates, Action<E, object[]> execute, Func<E, bool> canExecute, ActionType actionType)
+        public IOperation Goto(S targetState, S[] fromStates, Action<E, object[]> execute, Func<E, bool> canExecute, OperationFlags actionType)
         {
             return new GraphOption(this, targetState, fromStates, execute, canExecute, actionType);
         }
@@ -125,9 +125,9 @@ namespace Signum.Engine.Operations
             if (Registered)
                 throw new ApplicationException("A {0} have allready been registered".Formato(typeof(Graph<E, S>).TypeName()));
 
-            foreach (var item in Actions)
+            foreach (var item in Operations)
 	        {
-                ActionLogic.Register<E>(item.Key, item.Value);
+                OperationLogic.Register<E>(item.Key, item.Value);
 	        }
 
             Registered = true;

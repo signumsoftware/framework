@@ -63,7 +63,7 @@ namespace Signum.Windows.Excel
                 MenuItem b = (MenuItem)e.OriginalSource;
                 Lazy<ExcelReportDN> reportLazy = (Lazy<ExcelReportDN>)b.Tag;
 
-                ExcelReportDN report = reportLazy.RetrieveFromLazyAndForget();
+                ExcelReportDN report = reportLazy.RetrieveLazyThin();
                 string extension = Path.GetExtension(report.File.FileName);
                 if (extension != ".xls" && extension != ".xlsx")
                     throw new ApplicationException("El template de los ficheros Excel personalizados debe tener la extensión .xls o .xlsx, y el fichero seleccionado tiene " + extension);
