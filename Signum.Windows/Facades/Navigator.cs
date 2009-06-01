@@ -178,8 +178,8 @@ namespace Signum.Windows
             {
                 lazyType = Reflector.ExtractLazy(entity.GetType());
 
-                entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveFromLazyAndForget((Lazy)entity) :
-                                                                   Server.RetrieveFromLazyAndRemember((Lazy)entity);
+                entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveLazyThin((Lazy)entity) :
+                                                                   Server.RetrieveLazyFat((Lazy)entity);
             }
 
             EntitySettings es = Settings.TryGetC(entity.GetType()).ThrowIfNullC(Resources.NoEntitySettingsForType0.Formato(entity.GetType()));             
@@ -251,6 +251,12 @@ namespace Signum.Windows
 
         public virtual Type SelectTypes(Type[] implementations)
         {
+            if (implementations == null || implementations.Length == 0)
+                throw new ArgumentException("implementations"); 
+
+            if (implementations.Length == 1)
+                return implementations[0]; 
+
             TypeSelectorWindow win = new TypeSelectorWindow();
             win.Types = implementations;
             if (win.ShowDialog() == true)

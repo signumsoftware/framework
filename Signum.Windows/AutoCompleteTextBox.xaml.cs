@@ -178,6 +178,8 @@ namespace Signum.Windows
                 textBox.Focus(); 
                 e.Handled = true; 
             }
+            if (e.Key == Key.Up || e.Key == Key.Down)
+                e.Handled = true; 
         }
 
         private void listBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)

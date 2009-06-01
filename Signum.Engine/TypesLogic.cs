@@ -46,7 +46,7 @@ namespace Signum.Engine
             var dict = EnumerableExtensions.JoinStrict(
                 types, sender.Tables.Keys, t => t.ClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).Name,
                 (typeDN, type) => new { typeDN, type },
-                Resources.CatchingTypesTableFrom0.Formato(sender.Table(typeof(TypeDN)).Name)
+                Resources.CachingTypesTableFrom0.Formato(sender.Table(typeof(TypeDN)).Name)
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
             sender.IDsForType = dict.SelectDictionary(k=>k, v=>v.Id);

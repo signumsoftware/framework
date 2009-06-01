@@ -480,4 +480,7 @@ WRITETEXT</value>
   <data name="ImpossibleToIncludeInTheSchema" xml:space="preserve">
     <value>Imposible incluir en el Schema:</value>
   </data>
+  <data name="CachingTypesTableFrom0" xml:space="preserve">
+    <value>cachenado la tabla de tipos desde {0}</value>
+  </data>
 </root>

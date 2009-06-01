@@ -16,11 +16,14 @@ using Signum.Entities.Reflection;
 using Signum.Windows.Properties;
 using System.Collections;
 using Signum.Services;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
     public static class Common
     {
+        public static readonly DependencyProperty LabelWidthProperty =
+           DependencyProperty.RegisterAttached("LabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.Inherits));
         public static double GetLabelWidth(DependencyObject obj)
         {
             return (double)obj.GetValue(LabelWidthProperty);
@@ -29,77 +32,56 @@ namespace Signum.Windows
         {
             obj.SetValue(LabelWidthProperty, value);
         }
-        public static readonly DependencyProperty LabelWidthProperty =
-            DependencyProperty.RegisterAttached("LabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(100.0, FrameworkPropertyMetadataOptions.Inherits));
 
 
-
+        public static readonly DependencyProperty LabelVisibleProperty =
+            DependencyProperty.RegisterAttached("LabelVisible", typeof(bool), typeof(Common), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits));
         public static bool GetLabelVisible(DependencyObject obj)
         {
             return (bool)obj.GetValue(LabelVisibleProperty);
         }
-
         public static void SetLabelVisible(DependencyObject obj, bool value)
         {
             obj.SetValue(LabelVisibleProperty, value);
         }
-        public static readonly DependencyProperty LabelVisibleProperty =
-            DependencyProperty.RegisterAttached("LabelVisible", typeof(bool), typeof(Common), new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.Inherits));
 
 
-
+        public static readonly DependencyProperty IsReadOnlyProperty =
+          DependencyProperty.RegisterAttached("IsReadOnly", typeof(bool), typeof(Common), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         public static bool GetIsReadOnly(DependencyObject obj)
         {
             return (bool)obj.GetValue(IsReadOnlyProperty); 
         }
-
         public static void SetIsReadOnly(DependencyObject obj, bool value)
         {
             obj.SetValue(IsReadOnlyProperty, value);
         }
 
-        public static readonly DependencyProperty IsReadOnlyProperty =
-            DependencyProperty.RegisterAttached("IsReadOnly", typeof(bool), typeof(Common), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
 
-
+        public static readonly DependencyProperty TypeContextProperty =
+        DependencyProperty.RegisterAttached("TypeContext", typeof(TypeContext), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
         public static TypeContext GetTypeContext(DependencyObject obj)
         {
             return (TypeContext)obj.GetValue(TypeContextProperty);
         }
-
         public static void SetTypeContext(DependencyObject obj, TypeContext value)
         {
             obj.SetValue(TypeContextProperty, value);
         }
 
-        // Using a DependencyProperty as the backing store for TypeContext.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty TypeContextProperty =
-            DependencyProperty.RegisterAttached("TypeContext", typeof(TypeContext), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
 
 
-        public static event CommonRouteTask RouteTask;
-
-        static Common()
-        {
-            RouteTask += TaskSetTypeProperty;
-            RouteTask += TaskSetValueProperty;
-            RouteTask += TaskSetLabelText;
-            RouteTask += TaskSetIsReadonly;
-            RouteTask += TaskSetImplementations;
-        }
-
+        public static readonly DependencyProperty RouteProperty =
+         DependencyProperty.RegisterAttached("Route", typeof(string), typeof(Common), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(RoutePropertyChanged)));
         public static string GetRoute(DependencyObject obj)
         {
             return (string)obj.GetValue(RouteProperty);
         }
-
         public static void SetRoute(DependencyObject obj, string value)
         {
             obj.SetValue(RouteProperty, value);
         }
-        public static readonly DependencyProperty RouteProperty =
-            DependencyProperty.RegisterAttached("Route", typeof(string), typeof(Common), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(RoutePropertyChanged)));
-
+     
         static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -128,22 +110,15 @@ namespace Signum.Windows
 
             string[] steps = route.Replace("/", ".Item.").Split('.').Where(s=>s.Length>0).ToArray();
 
-            TypeContext preContext = null;
-
             foreach (var step in steps)
             {
-                if (preContext != null)
-                {
-                    context = preContext;
-                    preContext = null;
-                }
+                if (Reflector.IsIdentifiableEntity(context.Type))
+                    context = new TypeContext(context.Type); //Reset
 
                 if (!validIdentifier.IsMatch(step))
                     throw new ApplicationException("'{0}' is not a valid identifier".Formato(step));
 
                 PropertyInfo pi = context.Type.GetProperty(step).ThrowIfNullC(Resources.Property0DoNotExistOnType1.Formato(step, context.Type.TypeName()));
-                if (Reflector.IsIdentifiableEntity(pi.PropertyType))
-                    preContext = new TypeContext(pi.PropertyType);
                 context = new TypeSubContext(pi, context);
             }
 
@@ -156,6 +131,17 @@ namespace Signum.Windows
         }
 
         #region Tasks
+        public static event CommonRouteTask RouteTask;
+
+        static Common()
+        {
+            RouteTask += TaskSetTypeProperty;
+            RouteTask += TaskSetValueProperty;
+            RouteTask += TaskSetLabelText;
+            RouteTask += TaskSetIsReadonly;
+            RouteTask += TaskSetImplementations;
+        }
+        
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
         {
             DependencyProperty valueProp =
@@ -243,22 +229,57 @@ namespace Signum.Windows
         } 
         #endregion
 
+        public static readonly RoutedEvent ChangeDataContextEvent = EventManager.RegisterRoutedEvent("ChangeDataContext", RoutingStrategy.Bubble, typeof(ChangeDataContextHandler), typeof(Common));
+        public static void AddChangeDataContextHandler(DependencyObject d, ChangeDataContextHandler handler)
+        {
+            ((UIElement)d).AddHandler(ChangeDataContextEvent, handler);
+        }
+        public static void RemoveChangeDataContextHandler(DependencyObject d, ChangeDataContextHandler handler)
+        {
+            ((UIElement)d).RemoveHandler(ChangeDataContextEvent, handler);
+        }
 
+
+        public static bool HasChanges(this FrameworkElement element)
+        {
+            var graph = GraphExplorer.FromRoot((Modifiable)element.DataContext);
+            return graph.Any(a => a.SelfModified);
+        }
+
+        public static bool AssertErrors(this FrameworkElement element)
+        {
+            var graph = GraphExplorer.FromRoot((Modifiable)element.DataContext);
+            GraphExplorer.PreSaving(graph);
+            string error = GraphExplorer.Integrity(graph);
+
+            if (error.HasText())
+            {
+                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            return true;
+        }
+
+        public static bool LooseChangesIfAny(this FrameworkElement element)
+        {
+            return !element.HasChanges() || 
+                MessageBox.Show(
+                Properties.Resources.ThereAreChangesContinue, 
+                Properties.Resources.ThereAreChanges,
+                MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) == MessageBoxResult.OK;
+        }
+
+        public static readonly DependencyProperty CurrentWindowProperty =
+            DependencyProperty.RegisterAttached("CurrentWindow", typeof(Window), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
         public static Window GetCurrentWindow(DependencyObject obj)
         {
             return (Window)obj.GetValue(CurrentWindowProperty);
         }
-
         public static void SetCurrentWindow(DependencyObject obj, Window value)
         {
             obj.SetValue(CurrentWindowProperty, value);
         }
-
-        // Using a DependencyProperty as the backing store for CurrentWindow.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CurrentWindowProperty =
-            DependencyProperty.RegisterAttached("CurrentWindow", typeof(Window), typeof(Common), new FrameworkPropertyMetadata(null,  FrameworkPropertyMetadataOptions.Inherits));
-
-
+  
 
         public static Window FindCurrentWindow(this FrameworkElement fe)
         {
@@ -310,7 +331,19 @@ namespace Signum.Windows
             }
             return null;
         }
-      
+    }
+
+    public delegate void ChangeDataContextHandler(object sender, ChangeDataContextEventArgs e);
+
+    public class ChangeDataContextEventArgs : RoutedEventArgs
+    {
+        public object NewDataContext { get; set; }
+
+        public ChangeDataContextEventArgs(object newDataContext)
+            :base(Common.ChangeDataContextEvent)
+        {
+            this.NewDataContext = newDataContext;
+        }
     }
 
     public delegate void CommonRouteTask(FrameworkElement fe, string route, TypeContext context);

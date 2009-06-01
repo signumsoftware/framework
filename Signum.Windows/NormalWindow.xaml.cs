@@ -42,10 +42,20 @@ namespace Signum.Windows
 
             OnButtonsChanged();
             this.DataContextChanged+=new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
-            RefreshEnabled();
 
+            Common.AddChangeDataContextHandler(this, ChangeDataContext_DataContextChanged);
+
+            RefreshEnabled();
+  
             this.Loaded += new RoutedEventHandler(NormalWindow_Loaded);
 		}
+
+        void ChangeDataContext_DataContextChanged(object sender, ChangeDataContextEventArgs e)
+        {
+            DataContext = null; 
+            DataContext = e.NewDataContext;
+            e.Handled = true; 
+        }
 
         void NormalWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -78,20 +88,6 @@ namespace Signum.Windows
             buttonBar.SaveVisible = b == ViewButtons.Save;
         }
 
-        //private void OkSaving_Click(object sender, RoutedEventArgs e)
-        //{
-        //    if (!AssertErrors(Graph()))
-        //        return;
-
-        //    buttonBar.SaveButton.IsEnabled = false;
-        //    IdentifiableEntity ei = (IdentifiableEntity)base.DataContext;
-        //    IdentifiableEntity nueva = null;
-        //    Async.Do(this,
-        //        () => nueva = Server.Save(ei),
-        //        () => { base.DataContext = null; base.DataContext = nueva; base.DialogResult = true; this.Close(); },
-        //        () => buttonBar.SaveButton.IsEnabled = true);       
-        //}
-
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             base.DialogResult = true;
@@ -102,7 +98,6 @@ namespace Signum.Windows
             base.DialogResult = false;
         }
 
-
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             Save();
@@ -110,15 +105,14 @@ namespace Signum.Windows
 
         private void Save()
         {
-            var graph = Graph();
-            if (!HasChanges(graph))
+            if (!this.HasChanges())
             {
                 MessageBox.Show(Properties.Resources.NoChanges);
 
                 return;
             }
 
-            if (!AssertErrors(graph))
+            if (!this.AssertErrors())
                 return;
 
             buttonBar.SaveButton.IsEnabled = false;
@@ -130,34 +124,11 @@ namespace Signum.Windows
                 () => buttonBar.SaveButton.IsEnabled = true);
         }
 
-        public bool AssertErrors(DirectedGraph<Modifiable> graph)
-        {
-            GraphExplorer.PreSaving(graph);
-            string error = GraphExplorer.Integrity(graph);
-
-            if (error.HasText())
-            {
-                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            return true;
-        }
-
-        public DirectedGraph<Modifiable> Graph()
-        {
-            return GraphExplorer.FromRoot((IdentifiableEntity)base.DataContext); 
-        }
-
-        bool HasChanges(DirectedGraph<Modifiable> graph)
-        {
-            return graph.Any(a => a.SelfModified);
-        }
-
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
 
-            if (Buttons == ViewButtons.Save && HasChanges(Graph()))
+            if (Buttons == ViewButtons.Save && this.HasChanges())
             {
                 var result = MessageBox.Show(Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
                     MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
@@ -180,8 +151,7 @@ namespace Signum.Windows
 
         private void Reload_Click(object sender, RoutedEventArgs e)
         {
-            if (!HasChanges(Graph()) || MessageBox.Show(Properties.Resources.ThereAreChangesContinue, Properties.Resources.ThereAreChanges,
-                MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) == MessageBoxResult.OK)
+            if (this.LooseChangesIfAny())
             {
                 IdentifiableEntity ei = (IdentifiableEntity)DataContext;
                 DataContext = null;  // Equal returns true 

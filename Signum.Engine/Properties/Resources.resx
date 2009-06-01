@@ -442,8 +442,8 @@ WITH
 WORK
 WRITETEXT</value>
   </data>
-  <data name="CatchingTypesTableFrom0" xml:space="preserve">
-    <value>catching Types Table from {0}</value>
+  <data name="CachingTypesTableFrom0" xml:space="preserve">
+    <value>caching types' table from {0}</value>
   </data>
   <data name="FieldInitExpressionBindingsShouldBeEmpty" xml:space="preserve">
     <value>FieldInitExpression bindings should be empty</value>

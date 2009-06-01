@@ -220,16 +220,9 @@ deallocate cur");
                         current.ToDictionary(c => c.Id),
                         should.ToDictionary(s => s.Id),
                         (id, c) => table.DeleteSqlSync(c.Id),
-                        (id, s) =>
-                        {
-                            s.PreSaving();
-                            return table.InsertSqlSync(s);
-                        },
-                        (id, c, s) =>
-                        {
-                            c.PreSaving();
-                            return table.UpdateSqlSync(c);
-                        }, Spacing.Simple);
+                        (id, s) => table.InsertSqlSync(s),
+                        (id, c, s) => table.UpdateSqlSync(c),
+                        Spacing.Simple);
 
                     commands.Add(com);
                 }

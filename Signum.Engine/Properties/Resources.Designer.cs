@@ -147,20 +147,20 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to caching types&apos; table from {0}.
+        /// </summary>
+        internal static string CachingTypesTableFrom0 {
+            get {
+                return ResourceManager.GetString("CachingTypesTableFrom0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot enumerate more than once.
         /// </summary>
         internal static string CannotEnumerateMoreThanOnce {
             get {
                 return ResourceManager.GetString("CannotEnumerateMoreThanOnce", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to catching Types Table from {0}.
-        /// </summary>
-        internal static string CatchingTypesTableFrom0 {
-            get {
-                return ResourceManager.GetString("CatchingTypesTableFrom0", resourceCulture);
             }
         }
         
