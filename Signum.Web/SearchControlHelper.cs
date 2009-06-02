@@ -19,7 +19,10 @@ namespace Signum.Web
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[FilterOperationsUtils.GetFilterType(columnType)];
 
             sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato("trFilter_" + index.ToString()));
-            sb.Append("<td id=\"{0}\" name=\"{0}\">{1}</td>\n".Formato("td" + index.ToString() + "_" + columnName, displayName));
+            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato("td" + index.ToString() + "_" + columnName));
+            //sb.Append("<input type=\"hidden\" id=\"{0}\" name\"{0}\" value=\"{1}\" />\n".Formato("type_" + index.ToString(), columnType.ToString()));
+            sb.Append(displayName);
+            sb.Append("</td>\n");
             sb.Append("<td>\n");
             sb.Append("<select id=\"{0}\" name=\"{0}\">\n".Formato("ddlSelector_" + index.ToString()));
             for (int j=0; j<possibleOperations.Count; j++)
@@ -67,7 +70,10 @@ namespace Signum.Web
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
                 
             sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato("trFilter_" + index.ToString()));
-            sb.Append("<td id=\"{0}\" name=\"{0}\">{1}</td>\n".Formato("td" + index.ToString() + "_" + filterOptions.Column.Name, filterOptions.Column.DisplayName));
+            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato("td" + index.ToString() + "_" + filterOptions.Column.Name));
+            //sb.Append("<input type=\"hidden\" id=\"{0}\" name\"{0}\" value=\"{1}\" />\n".Formato("type_" + index.ToString(), filterOptions.Column.Type.ToString()));
+            sb.Append(filterOptions.Column.DisplayName);
+            sb.Append("</td>\n");
             sb.Append("<td>\n");
             sb.Append("<select{0} id=\"{1}\" name=\"{1}\">\n"
                 .Formato(filterOptions.Frozen ? " disabled=\"disabled\"" : "",

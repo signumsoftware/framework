@@ -23,16 +23,16 @@
     </thead>    
     <tbody>
     <%
-        for (int row=0; row<queryResult.Data.Count; row++)
+        for (int row=0; row<queryResult.Data.Length; row++)
         {
             %>
             <tr id="<%="trResults_" + row.ToString()%>" name="<%="trResults_" + row.ToString()%>">
                 <%
-                for (int col=0; col<queryResult.Data[row].Count; col++)
+                    for (int col = 0; col < queryResult.Data[row].Length; col++)
                 {
                     %>
                     <td id="<%="tdResults_" + col.ToString()%>" name="<%="tdResults_" + col.ToString()%>">
-                        <%=(queryResults.Data[row][col]!=null) ? queryResults.Data[row][col].ToString() : "" %>
+                        <%=queryResult.Data[row][col]%>
                     </td>
                     <%
                 }

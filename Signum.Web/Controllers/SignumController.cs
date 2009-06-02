@@ -105,7 +105,7 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
 
-            List<Filter> filters = Navigator.ExtractFilters(Request.Form);
+            List<Filter> filters = Navigator.ExtractFilters(Request.Form, queryName);
 
             return Navigator.Search(this, queryName, filters, sfResultsLimit);
         }

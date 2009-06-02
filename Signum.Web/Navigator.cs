@@ -69,9 +69,9 @@ namespace Signum.Web
             return NavigationManager.Search(controller, queryName, filters, resultsLimit);
         }
 
-        internal static List<Filter> ExtractFilters(NameValueCollection form)
+        internal static List<Filter> ExtractFilters(NameValueCollection form, object queryName)
         {
-            return NavigationManager.ExtractFilters(form);
+            return NavigationManager.ExtractFilters(form, queryName);
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixToIgnore)
@@ -304,7 +304,7 @@ namespace Signum.Web
             {
                 new FilterOptions{Column = queryDescription.Columns[0], ColumnName="IdOrNull", Frozen=true, Operation=FilterOperation.GreaterThan, Value=1},
                 new FilterOptions{Column = queryDescription.Columns[1], ColumnName="Nombre", Frozen=false, Operation=FilterOperation.DistinctTo, Value="Max"},
-                new FilterOptions{Column = queryDescription.Columns[2], ColumnName="FechaNacimiento", Frozen=true, Operation=FilterOperation.GreaterThan, Value=DateTime.Now},
+                new FilterOptions{Column = queryDescription.Columns[2], ColumnName="FechaNacimiento", Frozen=false, Operation=FilterOperation.GreaterThan, Value=DateTime.Now},
             };
                     
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
@@ -353,14 +353,17 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual List<Filter> ExtractFilters(NameValueCollection form)
+        protected internal virtual List<Filter> ExtractFilters(NameValueCollection form, object queryName)
         {
             List<Filter> result = new List<Filter>();
+
+            QueryDescription queryDescription = Queries.QueryDescription(queryName);
 
             int index = 0;
             string name;
             object value;
             string operation;
+            Type type;
             while (true)
             {
                 if (form.AllKeys.SingleOrDefault(k => k=="name" + index.ToString()) == null)
@@ -369,12 +372,16 @@ namespace Signum.Web
                 name = form["name" + index.ToString()];
                 value = form["val" + index.ToString()];
                 operation = form["sel" + index.ToString()];
+                type = queryDescription.Columns
+                           .Single(c => c.Name == name)
+                           .ThrowIfNullC("Invalid filter, column \"{0}\" not found".Formato(name))
+                           .Type;
 
-                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.NiceToString() == operation);
+                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
 
                 result.Add(new Filter
                 {
-                    Column = new Column() { Name = name },
+                    Column = new Column() { Name = name, Type = type },
                     Operation = filterOperation,
                     Value = value,
                 });
