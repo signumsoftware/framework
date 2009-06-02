@@ -64,9 +64,11 @@ namespace Signum.Windows
 
         void ViewNote(INoteDN note)
         {
-            INoteDN result = (INoteDN)Navigator.View(new ViewOptions { Buttons = ViewButtons.Save, Modal = true }, note);
-
-            ReloadNotes();
+            INoteDN result = (INoteDN)Navigator.View(new ViewOptions
+            {
+                Buttons = ViewButtons.Save,
+                Closed = (o, e) => ReloadNotes(),
+            }, note);
         }
 
         private void ReloadNotes()

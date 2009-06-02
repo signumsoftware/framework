@@ -50,8 +50,7 @@ namespace Signum.Windows
         {
             Navigator.View(new ViewOptions
             {
-                Buttons = ViewButtons.Save,
-                Modal = false
+                Buttons = ViewButtons.Save
             }, this.Entity);
         }
 

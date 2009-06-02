@@ -213,6 +213,8 @@ namespace Signum.Windows
             else
                 win.DataContext = entity;
 
+            win.Closed += viewOptions.Closed; 
+
             if (viewOptions.Modal)
             {
                 bool? ok = win.ShowDialog();

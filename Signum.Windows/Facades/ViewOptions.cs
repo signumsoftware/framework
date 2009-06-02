@@ -22,12 +22,12 @@ namespace Signum.Windows
             set { clone = value; }
         }
 
-        bool? modal;
         public bool Modal
         {
-            get { return modal ?? Buttons == ViewButtons.OkCancel; }
-            set { modal = value; }
+            get { return Buttons == ViewButtons.OkCancel; }
         }
+
+        public EventHandler Closed { get; set; }
 
         public bool Admin { get; set; }
 
