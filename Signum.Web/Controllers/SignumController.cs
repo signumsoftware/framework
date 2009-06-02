@@ -101,13 +101,13 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfResultsLimit)
+        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop)
         {
             object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
 
             List<Filter> filters = Navigator.ExtractFilters(Request.Form, queryName);
 
-            return Navigator.Search(this, queryName, filters, sfResultsLimit);
+            return Navigator.Search(this, queryName, filters, sfTop);
         }
         
         [AcceptVerbs(HttpVerbs.Post)]

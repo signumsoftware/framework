@@ -131,7 +131,7 @@ namespace Signum.Web
         public static Dictionary<string, Type> NameToType
         {
             get { return nameToType.ThrowIfNullC("Names to Types dictionary not initialized"); }
-            set { nameToType = value; }
+            internal set { nameToType = value; }
         }
 
         public static string NormalPageUrl
@@ -143,7 +143,7 @@ namespace Signum.Web
 
         internal static void ConfigureEntityBase(EntityBase el, Type entityType, bool admin)
         {
-            EntitySettings es = NavigationManager.Settings[entityType];
+            EntitySettings es = NavigationManager.EntitySettings[entityType];
             if (es.IsCreable != null)
                 el.Create = es.IsCreable(admin);
 
@@ -154,115 +154,45 @@ namespace Signum.Web
         }
     }
 
-    public class EntitySettings
+    public class NavigationManagerSettings
     {
-        public string PartialViewName;
-        public Func<bool, bool> IsCreable;
-        public Func<bool, bool> IsViewable;
-
-        public EntitySettings(bool isSimpleType)
-        {
-            if (isSimpleType)
-            {
-                IsCreable = admin => admin;
-                IsViewable = admin => admin;
-            }
-            else
-            {
-                IsCreable = admin => true;
-                IsViewable = admin => true;
-            }
-        }
+        public Dictionary<Type, EntitySettings> EntitySettings = new Dictionary<Type, EntitySettings>();
+        public Dictionary<object, QuerySettings> QuerySettings;
+        public DynamicQueryManager Queries { get; set; }
     }
 
     public class NavigationManager
     {
-        public Dictionary<Type, EntitySettings> Settings = new Dictionary<Type, EntitySettings>();
-        private DynamicQueryManager queries;
-        public DynamicQueryManager Queries
-        {
-            get { return queries; }
-            set 
-            {
-                queries = value;
-                URLnamesToQueries = new Dictionary<string,object>();
-                foreach (object key in queries.Queries.Keys)
-                {
-                    if (key.GetType().IsValueType || key.GetType().IsEnum)
-                        URLnamesToQueries.Add(key.ToString(), key);
-                    else
-                        URLnamesToQueries.Add(((Type)key).Name, key);
-                }
-            }
-        }
-        internal Dictionary<string, object> URLnamesToQueries { get; private set; }
-
-        internal string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
-        internal string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
-        internal string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
+        protected internal Dictionary<Type, EntitySettings> EntitySettings;
+        protected internal Dictionary<object, QuerySettings> QuerySettings;
+        protected internal DynamicQueryManager Queries { get; set; }
         
-        internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
-        internal Dictionary<Type, string> TypesToURLNames { get; private set; }
-        internal Dictionary<Type, TypeDN> TypesToTypesDN { get; private set; }
-        internal Dictionary<string, Type> ModifiablesNamesToTypes { get; private set; }
-        internal Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
+        protected internal string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
+        protected internal string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
+        protected internal string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
+        
+        protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
+        protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
+        protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
 
-        public NavigationManager()
+        protected internal Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
+
+        public NavigationManager(NavigationManagerSettings settings)
         {
-            URLNamesToTypes = Schema.Current.Tables.Keys.ToDictionary(t =>
-                    t.Name.EndsWith("DN") ? t.Name.Substring(0, t.Name.Length - 2) : t.Name);
-            TypesToURLNames = Schema.Current.Tables.Keys.ToDictionary(
-                t => t,
-                e => e.Name.EndsWith("DN") ? e.Name.Substring(0, e.Name.Length - 2) : e.Name);
-
-            InitializeTypesDN();
-        }
-
-        public NavigationManager(Dictionary<string, Type> customTypeURLNames)
-        {
-            URLNamesToTypes = customTypeURLNames;
-
-            TypesToURLNames = new Dictionary<Type, string>();
-            customTypeURLNames.ForEach(t => TypesToURLNames.Add(t.Value,t.Key));
-
-            InitializeTypesDN();
-        }
-
-        public NavigationManager(Dictionary<string, Type> customTypeURLNames, Dictionary<Type, TypeDN> customTypesToTypeDN)
-        {
-            URLNamesToTypes = customTypeURLNames;
-
-            TypesToURLNames = new Dictionary<Type, string>();
-            customTypeURLNames.ForEach(t => TypesToURLNames.Add(t.Value, t.Key));
-
-            TypesToTypesDN = customTypesToTypeDN;
-
-            Navigator.NameToType = TypesToTypesDN.SelectDictionary(k => k.Name, (t, tdn) => t);
-        }
-
-        public virtual void InitializeModifiablesNamesToTypes()
-        {
-            ModifiablesNamesToTypes = new Dictionary<string, Type>();
-            ModifiablesNamesToTypes
-                .AddRange(Settings.Keys.Where(t => typeof(ModifiableEntity).IsAssignableFrom(t)),
-                          k => k.Name,
-                          v => v);
-        }
-
-        private void InitializeTypesDN()
-        { 
-            List<TypeDN> typesDN = Database.RetrieveAll<TypeDN>();
-
-            TypesToTypesDN = TypeLogic.TypeToDN;
-                //Schema.Current.Tables.Keys.ToDictionary(t => t, t => (Reflector.ExtractEnumProxy(t) ?? t).Name)
-                //.JumpDictionary(typesDN.ToDictionary(td=>td.ClassName));
-
-            Navigator.NameToType = Schema.Current.Tables.Keys.ToDictionary(t => t.Name, t => t); 
+            EntitySettings = settings.EntitySettings;
+            QuerySettings = settings.QuerySettings;
+            Queries = settings.Queries;
+            URLNamesToTypes = EntitySettings.ToDictionary(
+                kvp => kvp.Value.UrlName ?? (kvp.Key.Name.EndsWith("DN") ? kvp.Key.Name.Substring(0, kvp.Key.Name.Length - 2) : kvp.Key.Name), 
+                kvp => kvp.Key);
+            TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+            Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);
+            UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
         }
 
         protected internal virtual ViewResult View(Controller controller, object obj)
         {
-            EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
+            EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
             string urlName = Navigator.NavigationManager.TypesToURLNames.TryGetC(obj.GetType()).ThrowIfNullC("No hay un nombre asociado al tipo: " + obj.GetType());
             
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
@@ -282,7 +212,7 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix)
         {
-            EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
+            EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
             
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
@@ -300,19 +230,22 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
-            findOptions.FilterOptions = new List<FilterOptions>
-            {
-                new FilterOptions{Column = queryDescription.Columns[0], ColumnName="IdOrNull", Frozen=true, Operation=FilterOperation.GreaterThan, Value=1},
-                new FilterOptions{Column = queryDescription.Columns[1], ColumnName="Nombre", Frozen=false, Operation=FilterOperation.DistinctTo, Value="Max"},
-                new FilterOptions{Column = queryDescription.Columns[2], ColumnName="FechaNacimiento", Frozen=false, Operation=FilterOperation.GreaterThan, Value=DateTime.Now},
-            };
+            //findOptions.FilterOptions = new List<FilterOptions>
+            //{
+            //    new FilterOptions{Column = queryDescription.Columns[0], ColumnName="IdOrNull", Frozen=true, Operation=FilterOperation.GreaterThan, Value=1},
+            //    new FilterOptions{Column = queryDescription.Columns[1], ColumnName="Nombre", Frozen=false, Operation=FilterOperation.DistinctTo, Value="Max"},
+            //    new FilterOptions{Column = queryDescription.Columns[2], ColumnName="FechaNacimiento", Frozen=false, Operation=FilterOperation.GreaterThan, Value=DateTime.Now},
+            //};
                     
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
-            controller.ViewData[ViewDataKeys.QueryName] = findOptions.QueryName;
-            controller.ViewData[ViewDataKeys.Columns] = columns;
-            controller.ViewData[ViewDataKeys.Filters] = findOptions;
+            controller.ViewData[ViewDataKeys.FilterColumns] = columns;
+            controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
+            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
+            if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
+                controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
+            
 
             return new ViewResult()
             {
@@ -321,6 +254,25 @@ namespace Signum.Web
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
+        }
+
+        protected virtual string SearchTitle(object queryName)
+        {
+            if (QuerySettings != null)
+            {
+                QuerySettings qs = QuerySettings.TryGetC(queryName);
+                if (qs != null && qs.Title != null)
+                    return qs.Title;
+            }
+
+            return GetQueryName(queryName);
+        }
+
+        protected virtual string GetQueryName(object queryName)
+        { 
+            return (queryName is Type) ? TypesToURLNames[(Type)queryName] :
+                   (queryName is Enum) ? EnumExtensions.NiceToString(queryName) :
+                   queryName.ToString();
         }
 
         protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions)
@@ -400,9 +352,8 @@ namespace Signum.Web
 
         protected internal virtual object ResolveQueryFromUrlName(string queryUrlName)
         {
-            return URLnamesToQueries 
-                .TryGetC(queryUrlName)
-                .ThrowIfNullC("No hay una query asociado al nombre: " + queryUrlName);
+            return UrlQueryNames[queryUrlName]
+                  .ThrowIfNullC("No hay una query asociado al nombre: " + queryUrlName);
         }
 
         protected internal virtual object ResolveQueryFromToStr(string queryNameToStr)
@@ -417,8 +368,6 @@ namespace Signum.Web
             Type type = null;
             if (Navigator.NameToType.ContainsKey(typeName))
                 type = Navigator.NameToType[typeName];
-            else
-                type = Navigator.NavigationManager.ModifiablesNamesToTypes[typeName];
             
             if (type == null)
                 throw new ArgumentException(Resource.Type0NotFoundInTheSchema);

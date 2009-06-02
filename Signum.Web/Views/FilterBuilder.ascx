@@ -7,7 +7,7 @@
 <%@ Import Namespace="Signum.Utilities" %>
 
 <select id="ddlNewFilters" name="ddlNewFilters">
-<% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.Columns])
+<% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
    {
        Type type = column.Type.UnNullify();
        %>
@@ -28,7 +28,7 @@
         </tr>  
     </thead>  
     <tbody>
-        <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.Filters]).FilterOptions;
+        <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions;
         for (int i=0; i<filterOptions.Count; i++)
         {
             FilterOptions filter = filterOptions[i];
@@ -37,3 +37,4 @@
         %>
     </tbody>
 </table>
+Top: <%= Html.TextBox(ViewDataKeys.Top, ViewData[ViewDataKeys.Top] ?? "") %>

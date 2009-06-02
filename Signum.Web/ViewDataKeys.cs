@@ -20,9 +20,9 @@ namespace Signum.Web
         public const string BtnOk = "sfBtnOk";
         public const string BtnCancel = "sfBtnCancel";
         
-        public const string Columns = "sfColumns";
-        public const string QueryName = "sfQueryName";
-        public const string Filters = "sfFilters";
+        public const string FilterColumns = "sfFilterColumns";
+        public const string FindOptions = "sfFindOptions";
+        public const string Top = "sfTop";
         public const string Results = "sfResults";
 
         public static string GlobalName(this HtmlHelper helper, string localName)

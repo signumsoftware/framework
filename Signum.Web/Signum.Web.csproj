@@ -81,6 +81,7 @@
     <Compile Include="EntityBase.cs" />
     <Compile Include="EntityLineHelper.cs" />
     <Compile Include="EntityListHelper.cs" />
+    <Compile Include="EntitySettings.cs" />
     <Compile Include="FindOptions.cs" />
     <Compile Include="HtmlHelpers.cs" />
     <Compile Include="Modification.cs" />
@@ -91,6 +92,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
+    <Compile Include="QuerySettings.cs" />
     <Compile Include="ScriptHelper.cs" />
     <Compile Include="SearchControlHelper.cs" />
     <Compile Include="SignumViewEngine.cs" />

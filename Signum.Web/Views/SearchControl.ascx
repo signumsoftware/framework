@@ -3,7 +3,7 @@
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 
-<%=Html.Hidden("sfQueryName", ViewData[ViewDataKeys.QueryName].ToString()) %>
+<%=Html.Hidden("sfQueryName", ((FindOptions)ViewData[ViewDataKeys.FindOptions]).QueryName.ToString())%>
 
 <%Html.RenderPartial("~/Plugin/Signum.Web.dll/Signum.Web.Views.FilterBuilder.ascx", ViewData); %>
 

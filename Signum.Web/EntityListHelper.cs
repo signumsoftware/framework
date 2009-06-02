@@ -72,9 +72,12 @@ namespace Signum.Web
             StringBuilder sbSelect = new StringBuilder();
             sbSelect.Append("<select id=\"{0}\" name=\"{0}\" multiple=\"multiple\" ondblclick=\"{1}\" >\n".Formato(idValueField, viewingUrl));
 
-            for (int i = 0; i < value.Count; i++)
+            if (value != null)
             {
-                sb.Append(InternalListElement(helper, sbSelect, idValueField, value[i], i, settings, divASustituir));
+                for (int i = 0; i < value.Count; i++)
+                {
+                    sb.Append(InternalListElement(helper, sbSelect, idValueField, value[i], i, settings, divASustituir));
+                }
             }
 
             sbSelect.Append("</select>\n");
@@ -153,7 +156,7 @@ namespace Signum.Web
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
                 sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
 
-                EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+                EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
 
                 sb.Append(
                     helper.RenderPartialToString(
