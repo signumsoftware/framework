@@ -141,7 +141,7 @@ namespace Signum.Engine.Operations
             operations.GetOrCreate(operationKey)[typeof(T)] = option;
         }
 
-        public static List<OperationInfo> GetActionInfos(Lazy lazy)
+        public static List<OperationInfo> GetOperationInfos(Lazy lazy)
         {
             IdentifiableEntity entity = Database.Retrieve(lazy);
 

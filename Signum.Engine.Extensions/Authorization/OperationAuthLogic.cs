@@ -77,7 +77,7 @@ namespace Signum.Engine.Authorization
 
         public static List<OperationInfo> GetActionInfos(RoleDN role, Lazy lazy)
         {
-            return OperationLogic.GetActionInfos(lazy).Where(ai => GetAllowed(role, ai.OperationKey)).ToList(); 
+            return OperationLogic.GetOperationInfos(lazy).Where(ai => GetAllowed(role, ai.OperationKey)).ToList(); 
         }
 
         public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)

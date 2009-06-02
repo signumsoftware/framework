@@ -12,7 +12,7 @@ namespace Signum.Services
     public interface IOperationServer
     {
         [OperationContract, NetDataContract]
-        List<OperationInfo> GetOperationsInfo(Lazy lazy);
+        List<OperationInfo> GetOperationInfos(Lazy lazy);
 
         [OperationContract, NetDataContract]
         IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] parameters);
