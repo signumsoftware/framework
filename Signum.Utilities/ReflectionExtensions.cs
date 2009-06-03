@@ -31,6 +31,7 @@ namespace Signum.Utilities
             return (m is PropertyInfo) ? ((PropertyInfo)m).PropertyType :
                 (m is FieldInfo) ? ((FieldInfo)m).FieldType :
                 (m is MethodInfo) ? ((MethodInfo)m).ReturnType :
+                (m is ConstructorInfo) ? ((ConstructorInfo)m).DeclaringType:
                 ((EventInfo)m).EventHandlerType;
         }
 

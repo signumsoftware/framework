@@ -9,6 +9,14 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
+    public enum MessageType
+    {
+        Ok,
+        Info,
+        Warning,
+        Error
+    }
+
     public static class HtmlHelperExtenders
     {
         public static string ValidationSummaryAjax(this HtmlHelper html)
@@ -80,6 +88,19 @@ namespace Signum.Web
                    "onclick=\"" + onclick + "\" " +
                    "/>\n";
         }
+
+
+        public static void Message(this HtmlHelper html, string name, string title, string content, MessageType type) {
+            
+               string message= String.Format("<div class='{0}' id='{3}'><span class='title'>{1}</span><span class='content'>{2}</span></div>",
+                    Enum.GetName(typeof(MessageType),type),
+                    title,
+                    content,
+                    name
+                );
+            html.ViewContext.HttpContext.Response.Write(message);
+        }
+
 
         public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string extendedControlName, 
                                                   string entityTypeName, string implementations, string entityIdFieldName,

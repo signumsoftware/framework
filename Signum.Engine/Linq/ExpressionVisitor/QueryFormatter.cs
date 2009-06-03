@@ -299,6 +299,11 @@ namespace Signum.Engine.Linq
             return sqlEnum;
         }
 
+        bool IsSupported(Type type)
+        {
+            return type == typeof(Guid) || Type.GetTypeCode(type) != TypeCode.Object;
+        }
+
         protected override Expression VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
@@ -307,7 +312,7 @@ namespace Signum.Engine.Linq
             }
             else
             {
-                if(Type.GetTypeCode(c.Value.GetType()) == TypeCode.Object)
+                if (!IsSupported(c.Value.GetType()))
                     throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
 
                 string paramName = GetNextParamAlias();
