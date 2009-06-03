@@ -93,21 +93,39 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult Find(string queryFriendlyName)
+        public ActionResult Find(string queryFriendlyName, bool? allowMultiple)
         {
             object queryName = Navigator.ResolveQueryFromUrlName(queryFriendlyName);
 
-            return Navigator.Find(this, queryName);
+            FindOptions findOptions = new FindOptions(queryName);
+            
+            if (allowMultiple.HasValue)
+                findOptions.AllowMultiple = allowMultiple.Value;
+
+            return Navigator.Find(this, findOptions);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop)
+        public PartialViewResult PartialFind(string queryFriendlyName, bool? allowMultiple, string prefix)
+        {
+            object queryName = Navigator.ResolveQueryFromUrlName(queryFriendlyName);
+
+            FindOptions findOptions = new FindOptions(queryName);
+
+            if (allowMultiple.HasValue)
+                findOptions.AllowMultiple = allowMultiple.Value;
+
+            return Navigator.PartialFind(this, findOptions, prefix);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop, bool sfAllowMultiple)
         {
             object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
 
             List<Filter> filters = Navigator.ExtractFilters(Request.Form, queryName);
 
-            return Navigator.Search(this, queryName, filters, sfTop);
+            return Navigator.Search(this, queryName, filters, sfTop, sfAllowMultiple);
         }
         
         [AcceptVerbs(HttpVerbs.Post)]

@@ -11,4 +11,6 @@ namespace Signum.Web
         public int? Top;
         public string UrlName;
     }
+
+    
 }

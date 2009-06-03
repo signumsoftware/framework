@@ -64,9 +64,14 @@ namespace Signum.Web
             return NavigationManager.Find(controller, findOptions);
         }
 
-        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit)
+        public static PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix)
         {
-            return NavigationManager.Search(controller, queryName, filters, resultsLimit);
+            return NavigationManager.PartialFind(controller, findOptions, prefix);
+        }
+
+        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple)
+        {
+            return NavigationManager.Search(controller, queryName, filters, resultsLimit, allowMultiple);
         }
 
         internal static List<Filter> ExtractFilters(NameValueCollection form, object queryName)
@@ -134,6 +139,11 @@ namespace Signum.Web
             internal set { nameToType = value; }
         }
 
+        public static Dictionary<Type, string> TypesToURLNames
+        {
+            get { return NavigationManager.TypesToURLNames; }
+        }
+
         public static string NormalPageUrl
         {
             get { return NavigationManager.NormalPageUrl; }
@@ -150,7 +160,7 @@ namespace Signum.Web
             if (es.IsViewable != null)
                 el.View = es.IsViewable(admin);
 
-            el.Find = false; //depends on having a query
+            el.Find = NavigationManager.ExistsQuery(TypesToURLNames[entityType]);
         }
     }
 
@@ -168,6 +178,7 @@ namespace Signum.Web
         protected internal DynamicQueryManager Queries { get; set; }
         
         protected internal string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
+        protected internal string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";
         protected internal string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
         protected internal string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
         
@@ -176,6 +187,11 @@ namespace Signum.Web
         protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
 
         protected internal Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
+
+        internal bool ExistsQuery(string urlQueryName)
+        {
+            return UrlQueryNames.Count(kvp => kvp.Key == urlQueryName) > 0;
+        }
 
         public NavigationManager(NavigationManagerSettings settings)
         {
@@ -193,7 +209,7 @@ namespace Signum.Web
         protected internal virtual ViewResult View(Controller controller, object obj)
         {
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
-            string urlName = Navigator.NavigationManager.TypesToURLNames.TryGetC(obj.GetType()).ThrowIfNullC("No hay un nombre asociado al tipo: " + obj.GetType());
+            //string urlName = Navigator.NavigationManager.TypesToURLNames.TryGetC(obj.GetType()).ThrowIfNullC("No hay un nombre asociado al tipo: " + obj.GetType());
             
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             IdentifiableEntity entity = (IdentifiableEntity)obj;
@@ -220,7 +236,7 @@ namespace Signum.Web
             
             return new PartialViewResult
             {
-                ViewName = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx",
+                ViewName = PopupControlUrl,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
@@ -230,13 +246,8 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
-            //findOptions.FilterOptions = new List<FilterOptions>
-            //{
-            //    new FilterOptions{Column = queryDescription.Columns[0], ColumnName="IdOrNull", Frozen=true, Operation=FilterOperation.GreaterThan, Value=1},
-            //    new FilterOptions{Column = queryDescription.Columns[1], ColumnName="Nombre", Frozen=false, Operation=FilterOperation.DistinctTo, Value="Max"},
-            //    new FilterOptions{Column = queryDescription.Columns[2], ColumnName="FechaNacimiento", Frozen=false, Operation=FilterOperation.GreaterThan, Value=DateTime.Now},
-            //};
-                    
+            string entitiesTypeName = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type).Name;
+
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
@@ -245,12 +256,38 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
-            
+            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesTypeName;
 
             return new ViewResult()
             {
                 ViewName = SearchWindowUrl,
                 MasterName = null,
+                ViewData = controller.ViewData,
+                TempData = controller.TempData
+            };
+        }
+
+        protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix)
+        {
+            QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
+
+            string entitiesTypeName = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type).Name;
+
+            List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
+
+            controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
+            controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+
+            controller.ViewData[ViewDataKeys.FilterColumns] = columns;
+            controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
+            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
+            if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
+                controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
+            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesTypeName;
+
+            return new PartialViewResult
+            {
+                ViewName = PopupControlUrl,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
@@ -275,27 +312,18 @@ namespace Signum.Web
                    queryName.ToString();
         }
 
-        protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions)
-        {
-            //QueryDescription queryDescription = Server.Service<IQueryServer>().GetQueryDescription(findOptions.QueryName);
-            //List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
-            
-            //controller.ViewData[ViewDataKeys.Columns] = columns;
-            //controller.ViewData[ViewDataKeys.Filters] = findOptions;
-
-            return new PartialViewResult
-            {
-                ViewName = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx",
-                ViewData = controller.ViewData,
-                TempData = controller.TempData
-            };
-        }
-
-        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit)
+        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple)
         {
             QueryResult queryResult = Queries.ExecuteQuery(queryName, filters, resultsLimit);
 
             controller.ViewData[ViewDataKeys.Results] = queryResult;
+            controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
+
+            if (queryResult != null && queryResult.Data != null && queryResult.Data.Length > 0 && queryResult.VisibleColums.Count > 0)
+            {
+                int entityColumnIndex = queryResult.Columns.IndexOf(c => c.IsEntity);
+                controller.ViewData[ViewDataKeys.EntityColumnIndex] = entityColumnIndex;
+            }
 
             return new PartialViewResult
             {

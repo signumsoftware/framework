@@ -6,6 +6,8 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 
+<%= Html.Hidden(ViewDataKeys.EntityTypeName, ViewData[ViewDataKeys.EntityTypeName].ToString())%>
+
 <select id="ddlNewFilters" name="ddlNewFilters">
 <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
    {
@@ -16,7 +18,7 @@
    } 
    %>
    <%=Html.Button("btnAddFilter", "+", "AddFilter('/Signum/AddFilter');","",new Dictionary<string, string>()) %>
-   <%=Html.Button("btnClearAllFilters", "+", "ClearAllFilters();","",new Dictionary<string, string>()) %>
+   <%=Html.Button("btnClearAllFilters", "XX", "ClearAllFilters();","",new Dictionary<string, string>()) %>
 </select>
 <br />
 <table id="tblFilters" name="tblFilters">

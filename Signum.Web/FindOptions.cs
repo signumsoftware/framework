@@ -19,20 +19,6 @@ namespace Signum.Web
             this.QueryName = queryName;
         }
 
-        private SearchButtons buttons = SearchButtons.OkCancel;
-        public SearchButtons Buttons
-        {
-            get { return this.buttons; }
-            set { this.buttons = value; }
-        }
-
-        private bool? modal;
-        public bool Modal
-        {
-            get { return modal ?? this.Buttons == SearchButtons.OkCancel; }
-            set { this.modal = new bool?(value); }
-        }
-
         List<FilterOptions> filterOptions = new List<FilterOptions>();
         public List<FilterOptions> FilterOptions
         {
@@ -40,7 +26,12 @@ namespace Signum.Web
             set { this.filterOptions = value; }
         }
 
-        public bool AllowMultiple { get; set; }
+        private bool allowMultiple = true;
+        public bool AllowMultiple
+        {
+            get { return allowMultiple; }
+            set { allowMultiple = value; }
+        }
         
         FilterMode filterMode = FilterMode.Visible;
         public FilterMode FilterMode
@@ -75,11 +66,5 @@ namespace Signum.Web
         VisibleAndReadOnly,
         Hidden,
         AlwaysHidden,
-    }
-
-    public enum SearchButtons
-    {
-        OkCancel,
-        Close
     }
 }

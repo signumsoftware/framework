@@ -3,10 +3,14 @@
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 
-<%=Html.Hidden("sfQueryName", ((FindOptions)ViewData[ViewDataKeys.FindOptions]).QueryName.ToString())%>
+<% FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions]; %>
+<%=Html.Hidden("sfQueryName", findOptions.QueryName.ToString())%>
+<%=Html.Hidden("sfAllowMultiple", findOptions.AllowMultiple.ToString())%>
 
 <%Html.RenderPartial("~/Plugin/Signum.Web.dll/Signum.Web.Views.FilterBuilder.ascx", ViewData); %>
-
+<br />
+<input type="button" onclick="Search('/Signum/Search')" value="Buscar" /> 
+<br />
 <div id="divResults" name="divResults">
 
 </div>
