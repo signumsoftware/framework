@@ -92,7 +92,7 @@ namespace Signum.Web
 
         public static void Message(this HtmlHelper html, string name, string title, string content, MessageType type) {
             
-               string message= String.Format("<div class='{0}' id='{3}'><span class='title'>{1}</span><span class='content'>{2}</span></div>",
+               string message= String.Format("<div class='message{0}' id='{3}'><span class='title'>{1}</span><span class='content'>{2}</span></div>",
                     Enum.GetName(typeof(MessageType),type),
                     title,
                     content,
