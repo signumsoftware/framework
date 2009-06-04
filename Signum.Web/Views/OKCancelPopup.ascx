@@ -9,8 +9,8 @@
     
 <div id="<%=Html.GlobalName("panelPopup")%>" style="width:auto; background-color: Black; color: white; position: absolute; z-index: 100001;">
     <div id="<%=Html.GlobalName("divPopupDragHandle")%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup")%>');">
-        <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk].ToString()%>" />
-        <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel)%>" value="Cancel" onclick="<%=ViewData[ViewDataKeys.OnCancel].ToString()%>" />
+        <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" />
+        <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel)%>" value="Cancel" />
     </div>
     
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>

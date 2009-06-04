@@ -380,8 +380,18 @@ namespace Signum.Web
 
         protected internal virtual object ResolveQueryFromUrlName(string queryUrlName)
         {
-            return UrlQueryNames[queryUrlName]
-                  .ThrowIfNullC("No hay una query asociado al nombre: " + queryUrlName);
+            if (UrlQueryNames.ContainsKey(queryUrlName)) 
+                return UrlQueryNames[queryUrlName];
+
+            //If it's the name of a Type
+            if (Navigator.NameToType.ContainsKey(queryUrlName))
+            { 
+                string urlName= TypesToURLNames[Navigator.NameToType[queryUrlName]];
+                if (!string.IsNullOrEmpty(urlName))
+                    return UrlQueryNames[urlName].ThrowIfNullC("No hay una query asociado al nombre: " + queryUrlName);
+            }
+
+            throw new ArgumentException("No hay una query asociado al nombre: " + queryUrlName);
         }
 
         protected internal virtual object ResolveQueryFromToStr(string queryNameToStr)
