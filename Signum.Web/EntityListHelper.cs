@@ -40,6 +40,8 @@ namespace Signum.Web
             
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, elementsCleanType.Name) + "\n");
 
+            sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
+
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
 
@@ -102,6 +104,14 @@ namespace Signum.Web
                               "RemoveListContainedEntity('{0}');".Formato(idValueField),
                               "lineButton",
                               new Dictionary<string, string>()));
+
+            if (settings.Find)
+                sb.Append(
+                    helper.Button(idValueField + "_btnFind",
+                                "O",
+                                "Find('/Signum/PartialFind','{0}','true',function(){{OnListSearchOk('{1}');}},function(){{OnListSearchCancel('{1}');}},'{2}','{1}');".Formato(Navigator.TypesToURLNames[Reflector.ExtractLazy(typeof(T)) ?? typeof(T)], idValueField, divASustituir),
+                                "lineButton",
+                                new Dictionary<string, string>()));
 
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class=\"clearall\"></div>\n");

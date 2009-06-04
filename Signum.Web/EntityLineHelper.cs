@@ -179,7 +179,7 @@ namespace Signum.Web
                 sb.Append(
                     helper.Button(idValueField + "_btnFind",
                                 "O",
-                                "Find('/Signum/PartialFind','{0}',function(){{OnSearchOk('{1}');}},function(){{OnSearchCancel('{1}');}},'{2}','{1}');".Formato(Navigator.TypesToURLNames[typeof(T)], idValueField, divASustituir),
+                                "Find('/Signum/PartialFind','{0}','false',function(){{OnSearchOk('{1}');}},function(){{OnSearchCancel('{1}');}},'{2}','{1}');".Formato(Navigator.TypesToURLNames[typeof(T)], idValueField, divASustituir),
                                 "lineButton",
                                 (value == null) ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "style", "display:none" } }));
 

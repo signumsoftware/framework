@@ -42,7 +42,7 @@
                     if (allowMultiple)
                     { 
                         %>
-                        <input type="checkbox" name="rowSelection" id="<%="radio_" + row.ToString() %>" value="<%= entityField.Id.ToString() + "_" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="checkbox" name="<%="check_" + row.ToString() %>" id="<%="check_" + row.ToString() %>" value="<%= entityField.Id.ToString() + "_" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                     <%} else{ %>
                         <input type="radio" name="rowSelection" id="<%="radio_" + row.ToString() %>" value="<%= entityField.Id.ToString() + "_" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                         <%
