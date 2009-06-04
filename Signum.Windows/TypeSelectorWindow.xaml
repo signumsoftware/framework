@@ -3,6 +3,7 @@
     xmlns:m="clr-namespace:Signum.Windows"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="TypeSelectorWindow" 
+    WindowStartupLocation="CenterOwner"    
     SizeToContent="WidthAndHeight"
     x:Name="win">
     <Grid>

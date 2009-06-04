@@ -172,9 +172,16 @@ namespace Signum.Entities
             return (Lazy)Activator.CreateInstance(Reflector.GenerateLazy(type), type, id);
         }
 
-        public static Lazy Create(Type type, Type runtimeType, int id)
+        public static Lazy Create(Type type, int id, Type runtimeType)
         {
             return (Lazy)Activator.CreateInstance(Reflector.GenerateLazy(type), runtimeType, id);
+        }
+
+        public static Lazy Create(Type type, int id, Type runtimeType, string toStr)
+        {
+            Lazy result = (Lazy)Activator.CreateInstance(Reflector.GenerateLazy(type), runtimeType, id);
+            result.ToStr = toStr;
+            return result;
         }
 
         public static Lazy Create(Type type, IdentifiableEntity entidad)

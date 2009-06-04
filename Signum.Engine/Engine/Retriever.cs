@@ -236,7 +236,7 @@ namespace Signum.Engine
 
             if (ident != null) return Lazy.Create(lazyType, ident);
 
-            Lazy req = Lazy.Create(lazyType, table.Type, id);
+            Lazy req = Lazy.Create(lazyType, id, table.Type);
 
             List<Lazy> lista = reqLazy.GetOrCreate(table).GetOrCreate(id);
 

@@ -131,13 +131,18 @@ namespace Signum.Windows
             
             if (typeof(Lazy).IsAssignableFrom(type))
             {
-                Type lazyType= Reflector.ExtractLazy(type); 
+                Type lazyType = Reflector.ExtractLazy(type); 
                 
                 if(typeof(Lazy).IsAssignableFrom(sourceType))
                 {
                     Lazy lazy = (Lazy)obj;
-                    if(lazyType.IsAssignableFrom( lazy.RuntimeType))
-                    return Lazy.Create(lazyType, lazy.UntypedEntityOrNull);
+                    if (lazyType.IsAssignableFrom(lazy.RuntimeType))
+                    {
+                        if (lazy.UntypedEntityOrNull != null)
+                            return Lazy.Create(lazyType, lazy.UntypedEntityOrNull);
+                        else
+                            return Lazy.Create(lazyType, lazy.Id, lazy.RuntimeType, lazy.ToStr); 
+                    }
                 }
 
                 else if(lazyType.IsAssignableFrom(sourceType))
