@@ -67,7 +67,7 @@ namespace Signum.Engine.Basics
                 {
                     PropertyDN property = new PropertyDN { Type = typeDN, Name = pi.Name };
 
-                    if (Reflector.IsEmbebedEntity(pi.PropertyType))
+                    if (Reflector.IsEmbeddedEntity(pi.PropertyType))
                     {
                         var stack = GenerateAllEmbeddedFields(typeDN, pi.PropertyType, pi.Name + ".");
                         return stack.PreAnd(property);
@@ -76,7 +76,7 @@ namespace Signum.Engine.Basics
                     if (Reflector.IsMList(pi.PropertyType))
                     {
                         Type colType = Reflector.CollectionType(pi.PropertyType);
-                        if (Reflector.IsEmbebedEntity(colType))
+                        if (Reflector.IsEmbeddedEntity(colType))
                         {
                             var stack = GenerateAllEmbeddedFields(typeDN, colType, pi.Name + "/");
                             return stack.PreAnd(property);
@@ -95,7 +95,7 @@ namespace Signum.Engine.Basics
                 {
                     PropertyDN field = new PropertyDN { Type = typeDN, Name = prefix + pi.Name };
 
-                    if (Reflector.IsEmbebedEntity(pi.PropertyType))
+                    if (Reflector.IsEmbeddedEntity(pi.PropertyType))
                     {
                         var list = GenerateAllEmbeddedFields(typeDN, pi.PropertyType, prefix + pi.Name + ".");
                         return list.PreAnd(field);
