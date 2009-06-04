@@ -56,6 +56,7 @@
     <Compile Include="Attributes.cs" />
     <Compile Include="Basics\ColorDN.cs" />
     <Compile Include="Basics\FileDN.cs" />
+    <Compile Include="CorruptEntity.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />
     <Compile Include="DynamicQuery\FilterOperationsUtils.cs" />
     <Compile Include="DynamicQuery\QueryDescription.cs" />

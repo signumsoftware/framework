@@ -24,7 +24,7 @@ namespace Signum.Entities
 
         public string Error(object value)
         {
-            if (DisableOnCorrupt && !Corruption.Denied)
+            if (DisableOnCorrupt && !Corruption.Strict)
                 return null;
 
             return OverrideError(value); 

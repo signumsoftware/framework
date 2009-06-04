@@ -101,7 +101,7 @@ namespace Signum.Engine
             DirectedGraph<Modifiable> modifiables = GraphExplorer.FromRoot(ie);
 
             //colapsa los modificables (colecciones y contenidos) dejando solo identificables
-            DirectedGraph<IdentifiableEntity> identifiables = modifiables.ColapseTo<IdentifiableEntity>();
+            DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
 
             foreach (var ident in identifiables)
                 Add(ident);

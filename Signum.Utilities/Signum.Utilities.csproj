@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="DataStructures\LambdaComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
+    <Compile Include="DataStructures\ReferenceEqualityComparer.cs" />
     <Compile Include="DataStructures\Sequence.cs" />
     <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="DictionaryExtensions.cs" />

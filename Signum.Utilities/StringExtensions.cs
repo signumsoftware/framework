@@ -6,6 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
 using Signum.Utilities.Properties;
+using System.Globalization;
 
 namespace Signum.Utilities
 {
@@ -293,6 +294,24 @@ namespace Signum.Utilities
             pattern = pattern.Replace("%", ".*").Replace("_", ".");
             pattern = pattern.Replace(@"\[", "[").Replace(@"\]", "]").Replace(@"\^", "^");
             return Regex.IsMatch(str, pattern);
+        }
+
+        public static string RemoveDiacritics(this string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return s; 
+
+            string normalizedString = s.Normalize(NormalizationForm.FormD);
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (int i = 0; i < normalizedString.Length; i++)
+            {
+                char c = normalizedString[i];
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    stringBuilder.Append(c);
+            }
+
+            return stringBuilder.ToString();
         }
 
         public static string ToComputerSize(this long value)

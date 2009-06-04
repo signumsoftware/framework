@@ -65,18 +65,18 @@ namespace Signum.Entities
         {
             get
             {
-                return hashCode != GetHashCode();
+                return hashCode != HashCodeSum();
             }
             internal set
             {
                 if (value == false)
                 {
-                    hashCode = GetHashCode();
+                    hashCode = HashCodeSum();
                 }
             }
         }
 
-        public override int GetHashCode()
+        int HashCodeSum()
         {
             long hash = 0;
             foreach (var item in innerList)

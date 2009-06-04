@@ -18,34 +18,33 @@ namespace Signum.Engine
     {
         public static void SaveAll(IdentifiableEntity[] idents)
         {
-            DirectedGraph<Modifiable> modifiable = DirectedGraph<Modifiable>.Union(
-                idents.Select(e => GraphExplorer.FromRoot(e)));
+             GraphExplorer.PreSaving(GraphExplorer.FromRoots(idents));
 
-            Save(modifiable);
+             Save(GraphExplorer.FromRoots(idents));
         }
 
-        public static void Save<T>(T entities) where T : IdentifiableEntity
+        public static void Save<T>(T ident) where T : IdentifiableEntity
         {
             //Generate a graph from the root visiting all the modifiables
-            DirectedGraph<Modifiable> modifiables = GraphExplorer.FromRoot(entities);
+            GraphExplorer.PreSaving(GraphExplorer.FromRoot(ident));
 
-            Save(modifiables);
+            Save(GraphExplorer.FromRoot(ident));
         }
-
-
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
 
-        static void Save(DirectedGraph<Modifiable> modifiable)
+     
+
+        static void Save(DirectedGraph<Modifiable> modifiables)
         {
-            GraphExplorer.PreSaving(modifiable); 
+            string error = GraphExplorer.Integrity(modifiables);
+            if (error.HasText())
+                throw new ApplicationException(error); 
 
-            GraphExplorer.Integrity(modifiable);
-
-            GraphExplorer.PropagateModifications(modifiable.Inverse());
+            GraphExplorer.PropagateModifications(modifiables.Inverse());
 
             //colapsa modifiables (collections and embeddeds) keeping indentifiables only
-            DirectedGraph<IdentifiableEntity> identifiables = modifiable.ColapseTo<IdentifiableEntity>();
+            DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
 
             //Remove all the edges that doesn't mean a dependency
             identifiables.RemoveAll(identifiables.Edges.Where(e=>!e.To.IsNew).ToList());

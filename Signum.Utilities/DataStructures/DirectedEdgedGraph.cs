@@ -10,7 +10,18 @@ namespace Signum.Utilities.DataStructures
 {
     public class DirectedEdgedGraph<T,E>:IEnumerable<T>
     {
-        Dictionary<T, Dictionary<T, E>> adjacency = new Dictionary<T, Dictionary<T, E>>(); 
+        Dictionary<T, Dictionary<T, E>> adjacency; 
+         public IEqualityComparer<T> Comparer { get; private set; }
+
+         public DirectedEdgedGraph():this(EqualityComparer<T>.Default)
+         {
+         }
+
+        public DirectedEdgedGraph(IEqualityComparer<T> comparer)
+        {
+            this.Comparer = comparer; 
+            this.adjacency = new Dictionary<T, Dictionary<T, E>>(comparer);
+        }
 
         public IEnumerable<T> Nodes
         {
@@ -152,7 +163,7 @@ namespace Signum.Utilities.DataStructures
 
         Dictionary<T, E> TryGetOrAdd(T node)
         {
-            return adjacency.GetOrCreate(node);
+            return adjacency.GetOrCreate(node, () => new Dictionary<T, E>(Comparer));
         }
 
         public Dictionary<T, E> TryRelatedTo(T node)
@@ -235,7 +246,7 @@ namespace Signum.Utilities.DataStructures
 
         public DirectedEdgedGraph<T,E> Inverse()
         {
-            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>();
+            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
             foreach (var item in Nodes)
             {
                 result.Add(item); 
@@ -252,28 +263,39 @@ namespace Signum.Utilities.DataStructures
             return this.Inverse().Do(g => g.Union(this));
         }
 
-        public void Union(DirectedEdgedGraph<T, E> other)
+        public void UnionWith(DirectedEdgedGraph<T, E> other)
         {
             foreach (var item in other.Nodes)
                 Add(item, other.RelatedTo(item));
         }
 
-        public static DirectedEdgedGraph<T, E> Union(IEnumerable<DirectedEdgedGraph<T, E>> others)
-        {
-            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T,E>();
-            others.ForEach(d => result.Union(d));
-            return result;
-        }
-
         public DirectedEdgedGraph<T,E> Clone()
         {
-            return new DirectedEdgedGraph<T, E>().Do(g => g.Union(this)); 
+            return new DirectedEdgedGraph<T, E>(Comparer).Do(g => g.UnionWith(this)); 
         }
 
         public static DirectedEdgedGraph<T, E> Generate(T root, Func<T, IEnumerable<KeyValuePair<T, E>>> expandFunction)
         {
-            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>();
+            return Generate(root, expandFunction, EqualityComparer<T>.Default); 
+        }
+
+        public static DirectedEdgedGraph<T, E> Generate(T root, Func<T, IEnumerable<KeyValuePair<T, E>>> expandFunction, IEqualityComparer<T> comparer)
+        {
+            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(comparer);
             result.Expand(root, expandFunction);
+            return result;
+        }
+
+        public static DirectedEdgedGraph<T, E> Generate(IEnumerable<T> roots, Func<T, IEnumerable<KeyValuePair<T, E>>> expandFunction)
+        {
+            return Generate(roots, expandFunction, EqualityComparer<T>.Default);
+        }
+
+        public static DirectedEdgedGraph<T, E> Generate(IEnumerable<T> roots, Func<T, IEnumerable<KeyValuePair<T, E>>> expandFunction, IEqualityComparer<T> comparer)
+        {
+            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(comparer);
+            foreach (var root in roots)
+                result.Expand(root, expandFunction);
             return result;
         }
 
@@ -339,7 +361,7 @@ namespace Signum.Utilities.DataStructures
         /// <returns></returns>
         public DirectedEdgedGraph<T, E> FeedbackEdgeSet()
         {
-            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>();
+            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
 
             DirectedEdgedGraph<T, E> clone = this.Clone();
             DirectedEdgedGraph<T, E> inv = this.Inverse();
@@ -398,35 +420,9 @@ namespace Signum.Utilities.DataStructures
             return adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key).ToHashSet(); 
         }
 
-        public DirectedGraph<S> ColapseTo<S>() where S : T
-        {
-            DirectedGraph<S> result = new DirectedGraph<S>();
-            foreach (var item in Nodes.OfType<S>())
-            {
-                var toColapse = IndirectlyRelatedTo(item, kvp => !(kvp.Key is S));
-                var toColapseFriends = toColapse.SelectMany(i => RelatedTo(i).Select(kvp => kvp.Key).OfType<S>());
-                result.Add(item, toColapseFriends);
-                result.Add(item, RelatedTo(item).Select(kvp => kvp.Key).OfType<S>()); 
-            }
-            return result; 
-        }
-
-        public DirectedGraph<T> Colapse(Func<T, bool> colapse)
-        {
-            DirectedGraph<T> result = new DirectedGraph<T>();
-            foreach (var item in Nodes.Where(a => !colapse(a)))
-            {
-                var toColapse = IndirectlyRelatedTo(item, kvp=> colapse(kvp.Key));
-                var toColapseFriends = toColapse.SelectMany(i => RelatedTo(i).Select(kvp => kvp.Key).Where(a => !colapse(a)));
-                result.Add(item, toColapseFriends);
-                result.Add(item, RelatedTo(item).Select(kvp => kvp.Key).Where(a => !colapse(a)));
-            }
-            return result;
-        }
-
         public DirectedEdgedGraph<T, E> WhereEdges(Func<Edge<T, E>, bool> condition)
         {
-            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>();
+            DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
             foreach (var item in Nodes)
                 result.Add(item, RelatedTo(item).Where(to => condition(new Edge<T, E>(item, to.Key, to.Value))));
             return result;

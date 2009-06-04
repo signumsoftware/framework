@@ -248,9 +248,9 @@ namespace Signum.Windows
 
         public static bool AssertErrors(this FrameworkElement element)
         {
-            var graph = GraphExplorer.FromRoot((Modifiable)element.DataContext);
-            GraphExplorer.PreSaving(graph);
-            string error = GraphExplorer.Integrity(graph);
+            Modifiable mod = (Modifiable)element.DataContext;
+            GraphExplorer.PreSaving(GraphExplorer.FromRoot(mod));
+            string error = GraphExplorer.Integrity(GraphExplorer.FromRoot(mod));
 
             if (error.HasText())
             {

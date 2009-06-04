@@ -17,6 +17,8 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.ComponentModel;
+using Signum.Entities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -36,8 +38,20 @@ namespace Signum.Windows
 
         void UpdateVisibility()
         {
-            bool readOnly = Common.GetIsReadOnly(this);
-            btView.Visibility = Entity != null ? Visibility.Visible : Visibility.Collapsed;
+            if (Entity != null)
+            {
+                btView.Visibility = Visibility.Visible;
+
+                Type cleanType = Entity is Lazy ? ((Lazy)Entity).RuntimeType : Entity.GetType(); 
+
+                EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(cleanType);
+
+                btView.IsEnabled = es == null ? false : es.IsViewable(false);
+            }
+            else
+            {
+                btView.Visibility = Visibility.Collapsed;
+            }
         }
 
         public LightEntityLine()

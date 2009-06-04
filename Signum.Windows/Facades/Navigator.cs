@@ -182,7 +182,7 @@ namespace Signum.Windows
                                                                    Server.RetrieveLazyFat((Lazy)entity);
             }
 
-            EntitySettings es = Settings.TryGetC(entity.GetType()).ThrowIfNullC(Resources.NoEntitySettingsForType0.Formato(entity.GetType()));             
+            EntitySettings es = Settings.GetOrThrow(entity.GetType(), Resources.NoEntitySettingsForType0);             
 
             Window win = null;
             if (es.ViewWindow != null)

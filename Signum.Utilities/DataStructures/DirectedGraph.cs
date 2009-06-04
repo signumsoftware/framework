@@ -10,7 +10,18 @@ namespace Signum.Utilities.DataStructures
 {
 public class DirectedGraph<T>:IEnumerable<T>
 {
-    Dictionary<T, HashSet<T>> adjacency = new Dictionary<T,HashSet<T>>(); 
+    Dictionary<T, HashSet<T>> adjacency;
+    public IEqualityComparer<T> Comparer { get; private set; }
+
+    public DirectedGraph():this(EqualityComparer<T>.Default)
+    {
+    }
+
+    public DirectedGraph(IEqualityComparer<T> comparer)
+    {
+        this.Comparer = comparer; 
+        this.adjacency = new Dictionary<T,HashSet<T>>(comparer);
+    }
 
     public IEnumerable<T> Nodes
     {
@@ -145,7 +156,7 @@ public class DirectedGraph<T>:IEnumerable<T>
 
     HashSet<T> TryGetOrAdd(T node)
     {
-        return adjacency.GetOrCreate(node);
+        return adjacency.GetOrCreate(node, ()=>new HashSet<T>(Comparer));
     }
 
     public HashSet<T> TryRelatedTo(T node)
@@ -233,7 +244,7 @@ public class DirectedGraph<T>:IEnumerable<T>
 
     public DirectedGraph<T> Inverse()
     {
-        DirectedGraph<T> result = new DirectedGraph<T>();
+        DirectedGraph<T> result = new DirectedGraph<T>(Comparer);
         foreach (var item in Nodes)
         {
             result.Add(item); 
@@ -247,31 +258,42 @@ public class DirectedGraph<T>:IEnumerable<T>
 
     public DirectedGraph<T> UndirectedGraph()
     {
-        return this.Inverse().Do(g => g.Union(this));
+        return this.Inverse().Do(g => g.UnionWith(this));
     }
 
-    public void Union(DirectedGraph<T> other)
+    public void UnionWith(DirectedGraph<T> other)
     {
         foreach (var item in other.Nodes)
             Add(item, other.RelatedTo(item));
     }
 
-    public static DirectedGraph<T> Union(IEnumerable<DirectedGraph<T>> others)
+    public DirectedGraph<T> Clone()
+    {  
+        return new DirectedGraph<T>(Comparer).Do(g=>g.UnionWith(this)); 
+    }
+
+    public static DirectedGraph<T> Generate(T root, Func<T, IEnumerable<T>> expandFunction)
     {
-        DirectedGraph<T> result = new DirectedGraph<T>();
-        others.ForEach(d => result.Union(d));
+        return Generate(root, expandFunction, EqualityComparer<T>.Default); 
+    }
+
+    public static DirectedGraph<T> Generate(T root, Func<T,IEnumerable<T>> expandFunction, IEqualityComparer<T> comparer)
+    {
+        DirectedGraph<T> result = new DirectedGraph<T>(comparer);
+        result.Expand(root, expandFunction);
         return result;
     }
 
-    public DirectedGraph<T> Clone()
-    {  
-        return new DirectedGraph<T>().Do(g=>g.Union(this)); 
+    public static DirectedGraph<T> Generate(IEnumerable<T> roots, Func<T, IEnumerable<T>> expandFunction)
+    {
+        return Generate(roots, expandFunction, EqualityComparer<T>.Default);
     }
 
-    public static DirectedGraph<T> Generate(T root, Func<T,IEnumerable<T>> expandFunction)
+    public static DirectedGraph<T> Generate(IEnumerable<T> roots, Func<T, IEnumerable<T>> expandFunction, IEqualityComparer<T> comparer)
     {
-        DirectedGraph<T> result = new DirectedGraph<T>();
-        result.Expand(root, expandFunction);
+        DirectedGraph<T> result = new DirectedGraph<T>(comparer);
+        foreach (var root in roots)
+            result.Expand(root, expandFunction);        
         return result;
     }
 
@@ -290,6 +312,23 @@ public class DirectedGraph<T>:IEnumerable<T>
     public override string ToString()
     {
         return adjacency.ToString(kvp => "{0}=>{1};".Formato(kvp.Key, kvp.Value.ToString(",")), "\r\n");  
+    }
+
+    public string Graphviz()
+    {
+        return Graphviz("Graph", a => a.ToString()); 
+    }
+
+    public string Graphviz(string name)
+    {
+        return Graphviz(name, a => a.ToString());
+    }
+
+    public string Graphviz(string name, Func<T, string> getName)
+    {
+        string arrows = Edges.ToString(e => "   \"{0}\" -> \"{1}\";".Formato(getName(e.From), getName(e.To)), "\r\n");
+
+        return "digraph \"{0}\"\r\n{{\r\n{1}\r\n}}".Formato(name, arrows); 
     }
 
     #region IEnumerable<T> Members
@@ -340,7 +379,7 @@ public class DirectedGraph<T>:IEnumerable<T>
 
     public DirectedGraph<T> FeedbackEdgeSet()
     {
-        DirectedGraph<T> result = new DirectedGraph<T>();
+        DirectedGraph<T> result = new DirectedGraph<T>(Comparer);
 
         DirectedGraph<T> clone = this.Clone();
         DirectedGraph<T> inv = this.Inverse();
@@ -399,35 +438,9 @@ public class DirectedGraph<T>:IEnumerable<T>
         return adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key).ToHashSet(); 
     }
 
-    public DirectedGraph<S> ColapseTo<S>() where S : T
-    {
-        DirectedGraph<S> result = new DirectedGraph<S>();
-        foreach (var item in Nodes.OfType<S>())
-        {
-            var toColapse = IndirectlyRelatedTo(item, i => !(i is S)); 
-            var toColapseFriends = toColapse.SelectMany(i => RelatedTo(i).OfType<S>());
-            result.Add(item, toColapseFriends);
-            result.Add(item, RelatedTo(item).OfType<S>()); 
-        }
-        return result; 
-    }
-
-    public DirectedGraph<T> Colapse(Func<T,bool> colapse)
-    {
-        DirectedGraph<T> result = new DirectedGraph<T>();
-        foreach (var item in Nodes.Where(a => !colapse(a)))
-        {
-            var toColapse = IndirectlyRelatedTo(item, colapse);
-            var toColapseFriends = toColapse.SelectMany(i => RelatedTo(i).Where(a=>!colapse(a)));
-            result.Add(item, toColapseFriends);
-            result.Add(item, RelatedTo(item).Where(a => !colapse(a)));
-        }
-        return result;
-    }
-
     public DirectedGraph<T> WhereEdges(Func<Edge<T>, bool> condition)
     {
-        DirectedGraph<T> result = new DirectedGraph<T>();
+        DirectedGraph<T> result = new DirectedGraph<T>(Comparer);
         foreach (var item in Nodes)
             result.Add(item, RelatedTo(item).Where(to => condition(new Edge<T>(item, to)))); 
         return result; 

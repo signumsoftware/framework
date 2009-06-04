@@ -54,29 +54,29 @@ namespace Signum.Windows
             UpdateInterface();
         }
 
-        public virtual bool HasChanges(DirectedGraph<Modifiable> graph)
+        public virtual bool HasChanges()
         {
-            return graph.Any(a => a.SelfModified);
+            return Graph().Any(a => a.SelfModified);
         }
 
         public DirectedGraph<Modifiable> Graph()
         {
-            return DirectedGraph<Modifiable>.Union(GetEntities().Select(e => GraphExplorer.FromRoot(e)));
+            return GraphExplorer.FromRoots(GetEntities());
         }
 
         protected void Reload_Click(object sender, RoutedEventArgs e)
         {
-            if (!HasChanges(Graph()) || MessageBox.Show(Properties.Resources.ThereAreChangesContinue, Properties.Resources.ThereAreChanges,
+            if (!HasChanges() || MessageBox.Show(Properties.Resources.ThereAreChangesContinue, Properties.Resources.ThereAreChanges,
                 MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) == MessageBoxResult.OK)
             {
                 Retrieve();
             }
         }
 
-        public bool AssertErrors(DirectedGraph<Modifiable> graph)
+        public bool AssertErrors()
         {
-            GraphExplorer.PreSaving(graph);
-            string error = GraphExplorer.Integrity(graph);
+            GraphExplorer.PreSaving(Graph());
+            string error = GraphExplorer.Integrity(Graph());
 
             if (error.HasText())
             {
@@ -88,8 +88,7 @@ namespace Signum.Windows
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            var graph = Graph();
-            if (HasChanges(graph))
+            if (HasChanges())
             {
                 var result = MessageBox.Show(Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
                     MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
@@ -100,7 +99,7 @@ namespace Signum.Windows
                 }
                 else if (result == MessageBoxResult.Yes)
                 {
-                    if (AssertErrors(graph))
+                    if (AssertErrors())
                     {
                         SetEntities(SaveEntities(GetEntities()));
                         UpdateInterface();
@@ -124,14 +123,13 @@ namespace Signum.Windows
 
         protected void Save_Click(object sender, RoutedEventArgs e)
         {
-            var graph = Graph();
-            if (!HasChanges(graph))
+            if (!HasChanges())
             {
                 MessageBox.Show(Properties.Resources.NoChangeHaveBeenFound, Properties.Resources.NoChanges, MessageBoxButton.OK, MessageBoxImage.Hand );
                 return;
             }
 
-            if (!AssertErrors(graph))
+            if (!AssertErrors())
                 return;
 
             List<IdentifiableEntity> value = GetEntities();

@@ -46,11 +46,13 @@ namespace Signum.Entities
             internal set { entityOrNull = value; }
         }
 
+        const int MagicMask = 123456853; 
+
         public override int GetHashCode()
         {
             if (this.EntityOrNull != null)
-                return EntityOrNull.GetHashCode();
-            return base.Id.GetHashCode() ^ base.RuntimeType.Name.GetHashCode();
+                return EntityOrNull.GetHashCode() ^ MagicMask;
+            return base.Id.GetHashCode() ^ base.RuntimeType.Name.GetHashCode() ^ MagicMask;
         }
     }
 
@@ -195,20 +197,6 @@ namespace Signum.Entities
             internal set { toStr = value;  }
         }
 
-        internal bool EqualsLazy(Lazy other)
-        {
-            if (other == null)
-                return false;
-
-            if (RuntimeType != other.RuntimeType)
-                return false;
-
-            if (UntypedEntityOrNull == null)
-                return Id == other.IdOrNull;
-            else
-                return object.ReferenceEquals(this.UntypedEntityOrNull, other.UntypedEntityOrNull);
-        }
-
         internal bool EqualsIdent(IdentifiableEntity entity)
         {
             if (entity == null)
@@ -225,13 +213,24 @@ namespace Signum.Entities
 
         public override bool Equals(object obj)
         {
+            if (obj == null)
+                return false;
+      
             if (this == obj)
-                return true; 
+                return true;
 
-            if (obj is Lazy)
-                return EqualsLazy((Lazy)obj);
-            else if (obj is IdentifiableEntity)
-                return EqualsIdent((IdentifiableEntity)obj);
+            Lazy lazy = obj as Lazy;
+            if (lazy != null)
+            {
+                if (RuntimeType != lazy.RuntimeType)
+                    return false;
+
+                if (UntypedEntityOrNull == null)
+                    return Id == lazy.IdOrNull;
+                else
+                    return object.ReferenceEquals(this.UntypedEntityOrNull, lazy.UntypedEntityOrNull);
+            }
+           
             return false;
         }
     }

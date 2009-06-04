@@ -48,36 +48,11 @@ namespace Signum.Entities
             base.PreSaving();
 
             toStr = ToString();
-
-            if (this is ICorrupt)
-            {
-                ICorrupt corrupt = (ICorrupt)this;
-                if (corrupt.Corrupt)
-                {
-                    using (Corruption.Deny())
-                    {
-                        string integrity = IdentifiableIntegrityCheck();
-                        if (string.IsNullOrEmpty(integrity))
-                            corrupt.Corrupt = false;
-                    }
-                }
-            }
         }
 
         public override string ToString()
         {
             return "{0} ({1})".Formato(GetType().Name, IsNew ? Resources.New : id.ToString());
-        }
-
-        public bool EqualsIdent(IdentifiableEntity ident)
-        {
-            if (this == ident)
-                return true; 
-
-            if (ident.GetType() == this.GetType() && !this.IsNew && this.id == ident.id)
-                return true;
-
-            return false; 
         }
 
         public override bool Equals(object obj)
@@ -88,8 +63,9 @@ namespace Signum.Entities
             if(obj == null)
                 return false;
 
-            if (obj is IdentifiableEntity)
-                return EqualsIdent((IdentifiableEntity)obj);
+            IdentifiableEntity ident = obj as IdentifiableEntity;
+            if (ident != null && ident.GetType() == this.GetType() && !this.IsNew && this.id == ident.id)
+                return true;
 
             if (obj is Lazy)
                 return ((Lazy)obj).EqualsIdent(this); 
@@ -97,12 +73,12 @@ namespace Signum.Entities
             return false;
         }
 
-        public string IdentifiableIntegrityCheck()
+        public virtual string IdentifiableIntegrityCheck()
         {
-            return GraphExplorer.GraphIntegrityCheck(this, ModifyInspector.IdentifiableExplore); 
+            return GraphExplorer.GraphIntegrityCheck(this, ModifyInspector.IdentifiableExplore);
         }
 
-        public Dictionary<Modifiable,string> IdentifiableIntegrityCheckDictionary()
+        public virtual Dictionary<Modifiable,string> IdentifiableIntegrityCheckDictionary()
         {
             return GraphExplorer.GraphIntegrityCheckDictionary(this, ModifyInspector.IdentifiableExplore);
         }
@@ -112,33 +88,6 @@ namespace Signum.Entities
             return IsNew ?
                 base.GetHashCode() :
                 GetType().FullName.GetHashCode() ^ id.Value;
-        }
-    }
-
-    public interface ICorrupt : IIdentifiable
-    {
-        bool Corrupt { get; set; }
-    }
-
-    public static class Corruption
-    {
-        [ThreadStatic]
-        static bool allowed = false;
-
-        public static bool Denied { get { return !allowed; } }
-
-        public static IDisposable Allow()
-        {
-            if (allowed) return null;
-            allowed = true;
-            return new Disposable(() => allowed = false);
-        }
-
-        public static IDisposable Deny()
-        {
-            if (!allowed) return null; 
-            allowed = false;
-            return new Disposable(() => allowed = true);
         }
     }
 

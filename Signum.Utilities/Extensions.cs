@@ -130,6 +130,11 @@ namespace Signum.Utilities
             return EqualityComparer<T>.Default.Equals(default(T), value) ? (T?)null : value;
         }
 
+        public static int? NotFoundToNull(this int value)
+        {
+            return value == -1 ? null : (int?)value; 
+        }
+
         public static T ThrowIfNullS<T>(this T? t, string mensaje)
          where T : struct
         {

@@ -142,7 +142,7 @@ namespace Signum.Entities
         }
 
         [Ignore]
-        int temporalId = MyRandom.Current.Next();
+        internal int temporalId = MyRandom.Current.Next();
 
         public override int GetHashCode()
         {
