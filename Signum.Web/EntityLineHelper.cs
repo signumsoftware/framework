@@ -116,8 +116,8 @@ namespace Signum.Web
                         { 
                             { ViewDataKeys.CustomHtml, ddlStr},
                             { ViewDataKeys.PopupPrefix, idValueField},
-                            { ViewDataKeys.OnOk, "OnImplementationsOk({0},'{1}');".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(typeof(T))) },
-                            { ViewDataKeys.OnCancel, "OnImplementationsCancel('" + idValueField + "');"}
+                            //{ ViewDataKeys.OnOk, "OnImplementationsOk({0},'{1}');".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(typeof(T))) },
+                            //{ ViewDataKeys.OnCancel, "OnImplementationsCancel('" + idValueField + "');"}
                         }
                     ));
                     sb.Append("</div>\n");
@@ -157,8 +157,8 @@ namespace Signum.Web
             sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
             
             string creatingUrl = (settings.Implementations == null) ?
-                "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))) : 
-                "ChooseImplementation('{0}','{1}');".Formato(divASustituir, idValueField);
+                "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))) :
+                "ChooseImplementation('{0}','{1}',function(){{OnImplementationsOk({2},'{3}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)));
             if (settings.Create)
                 sb.Append(
                     helper.Button(idValueField + "_btnCreate",
@@ -175,13 +175,20 @@ namespace Signum.Web
                               "lineButton",
                               (value == null) ? new Dictionary<string, string>() { { "style", "display:none" } } : new Dictionary<string, string>()));
 
-            if (settings.Find)
-                sb.Append(
-                    helper.Button(idValueField + "_btnFind",
-                                "O",
-                                "Find('/Signum/PartialFind','{0}','false',function(){{OnSearchOk('{1}');}},function(){{OnSearchCancel('{1}');}},'{2}','{1}');".Formato(Navigator.TypesToURLNames[typeof(T)], idValueField, divASustituir),
-                                "lineButton",
-                                (value == null) ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "style", "display:none" } }));
+            if (isIdentifiable || isLazy)
+            {
+                string popupFindingParameters = "'/Signum/PartialFind','{0}','false',function(){{OnSearchOk('{1}');}},function(){{OnSearchCancel('{1}');}},'{2}','{1}'".Formato(Navigator.TypesToURLNames[Reflector.ExtractLazy(typeof(T)) ?? typeof(T)], idValueField, divASustituir);
+                string findingUrl = (settings.Implementations == null) ?
+                    "Find({0});".Formato(popupFindingParameters) :
+                    "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
+                if (settings.Find)
+                    sb.Append(
+                        helper.Button(idValueField + "_btnFind",
+                                    "O",
+                                    findingUrl,
+                                    "lineButton",
+                                    (value == null) ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "style", "display:none" } }));
+            }
 
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class=\"clearall\"></div>\n");

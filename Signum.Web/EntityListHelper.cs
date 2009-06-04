@@ -105,17 +105,21 @@ namespace Signum.Web
                               "lineButton",
                               new Dictionary<string, string>()));
 
-            string popupFindingParameters = "'/Signum/PartialFind','{0}','true',function(){{OnListSearchOk('{1}');}},function(){{OnListSearchCancel('{1}');}},'{2}','{1}'".Formato(Navigator.TypesToURLNames[Reflector.ExtractLazy(typeof(T)) ?? typeof(T)], idValueField, divASustituir);
-            string findingUrl = (settings.Implementations == null) ? 
-                "Find({0});".Formato(popupFindingParameters) :
-                "ChooseImplementation('{0}','{1}',function(){{OnListSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
-            if (settings.Find)
-                sb.Append(
-                    helper.Button(idValueField + "_btnFind",
-                                "O",
-                                findingUrl,
-                                "lineButton",
-                                new Dictionary<string, string>()));
+
+            if (!typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))
+            {
+                string popupFindingParameters = "'/Signum/PartialFind','{0}','true',function(){{OnListSearchOk('{1}');}},function(){{OnListSearchCancel('{1}');}},'{2}','{1}'".Formato(Navigator.TypesToURLNames[Reflector.ExtractLazy(typeof(T)) ?? typeof(T)], idValueField, divASustituir);
+                string findingUrl = (settings.Implementations == null) ?
+                    "Find({0});".Formato(popupFindingParameters) :
+                    "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
+                if (settings.Find)
+                    sb.Append(
+                        helper.Button(idValueField + "_btnFind",
+                                    "O",
+                                    findingUrl,
+                                    "lineButton",
+                                    new Dictionary<string, string>()));
+            }
 
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class=\"clearall\"></div>\n");
