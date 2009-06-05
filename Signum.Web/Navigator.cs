@@ -353,10 +353,18 @@ namespace Signum.Web
                 value = form["val" + index.ToString()];
                 operation = form["sel" + index.ToString()];
                 type = queryDescription.Columns
-                           .Single(c => c.Name == name)
+                           .SingleOrDefault(c => c.Name == name)
                            .ThrowIfNullC("Invalid filter, column \"{0}\" not found".Formato(name))
                            .Type;
 
+                if (typeof(Lazy).IsAssignableFrom(type))
+                {
+                    int intValue;
+                    if (value!=null && int.TryParse(value.ToString(), out intValue))
+                        value = Lazy.Create(Reflector.ExtractLazy(type), intValue);
+                    else
+                        value = null;
+                }
                 FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
 
                 result.Add(new Filter

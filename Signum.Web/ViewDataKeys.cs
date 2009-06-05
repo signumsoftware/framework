@@ -25,7 +25,7 @@ namespace Signum.Web
         public const string Top = "sfTop";
         public const string Results = "sfResults";
         public const string EntityColumnIndex = "sfEntityColumnIndex";
-        public const string EntityTypeName = "sfEntityType";
+        public const string EntityTypeName = "sfEntityTypeName";
         public const string AllowMultiple = "sfAllowMultiple";
 
         public static string GlobalName(this HtmlHelper helper, string localName)

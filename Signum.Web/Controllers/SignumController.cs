@@ -129,9 +129,9 @@ namespace Signum.Web.Controllers
         }
         
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index)
+        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string entityTypeName)
         {
-            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index));
+            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, entityTypeName));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
