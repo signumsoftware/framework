@@ -59,7 +59,20 @@
                     {
                         %>
                         <td id="<%="tdResults_" + col.ToString()%>" name="<%="tdResults_" + col.ToString()%>">
-                            <%=queryResult.Data[row][col]%>
+                            <%                        
+                            Type colType = queryResult.Columns[col].Type;
+                            if (typeof(Lazy).IsAssignableFrom(colType) && queryResult.Data[row][col]!=null)
+                            {
+                                Lazy lazy = (Lazy)queryResult.Data[row][col];
+                                %>
+                                <a href="<%="/View/" + Navigator.TypesToURLNames[lazy.RuntimeType] + "/" + lazy.Id.ToString() %>" title="Navigate"><%=lazy.ToStr %></a>   
+                                <%
+                            }
+                            else
+                            {
+                            %>
+                                <%=queryResult.Data[row][col]%>
+                            <%} %>
                         </td>
                         <%
                     }
