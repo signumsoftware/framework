@@ -260,7 +260,7 @@ namespace Signum.Utilities.DataStructures
 
         public DirectedEdgedGraph<T,E> UndirectedGraph()
         {
-            return this.Inverse().Do(g => g.Union(this));
+            return this.Inverse().Do(g => g.UnionWith(this));
         }
 
         public void UnionWith(DirectedEdgedGraph<T, E> other)
