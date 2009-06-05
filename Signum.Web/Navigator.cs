@@ -69,14 +69,14 @@ namespace Signum.Web
             return NavigationManager.PartialFind(controller, findOptions, prefix);
         }
 
-        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple)
+        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple, string prefix)
         {
-            return NavigationManager.Search(controller, queryName, filters, resultsLimit, allowMultiple);
+            return NavigationManager.Search(controller, queryName, filters, resultsLimit, allowMultiple, prefix);
         }
 
-        internal static List<Filter> ExtractFilters(NameValueCollection form, object queryName)
+        internal static List<Filter> ExtractFilters(NameValueCollection form, object queryName, string prefix)
         {
-            return NavigationManager.ExtractFilters(form, queryName);
+            return NavigationManager.ExtractFilters(form, queryName); //, prefix);
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixToIgnore)
@@ -169,6 +169,7 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings = new Dictionary<Type, EntitySettings>();
         public Dictionary<object, QuerySettings> QuerySettings;
         public DynamicQueryManager Queries { get; set; }
+        public Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
     }
 
     public class NavigationManager
@@ -186,7 +187,7 @@ namespace Signum.Web
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
         protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
 
-        protected internal Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
+        protected internal Dictionary<Type, Func<ModifiableEntity>> Constructors;
 
         internal bool ExistsQuery(string urlQueryName)
         {
@@ -195,6 +196,7 @@ namespace Signum.Web
 
         public NavigationManager(NavigationManagerSettings settings)
         {
+            Constructors = settings.Constructors;
             EntitySettings = settings.EntitySettings;
             QuerySettings = settings.QuerySettings;
             Queries = settings.Queries;
@@ -312,12 +314,13 @@ namespace Signum.Web
                    queryName.ToString();
         }
 
-        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple)
+        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple, string prefix)
         {
             QueryResult queryResult = Queries.ExecuteQuery(queryName, filters, resultsLimit);
 
             controller.ViewData[ViewDataKeys.Results] = queryResult;
             controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
+            controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
 
             if (queryResult != null && queryResult.Data != null && queryResult.Data.Length > 0 && queryResult.VisibleColums.Count > 0)
             {

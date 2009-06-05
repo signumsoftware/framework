@@ -119,19 +119,19 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop, bool sfAllowMultiple)
+        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop, bool sfAllowMultiple, string sfPrefix)
         {
             object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
 
-            List<Filter> filters = Navigator.ExtractFilters(Request.Form, queryName);
+            List<Filter> filters = Navigator.ExtractFilters(Request.Form, queryName, sfPrefix);
 
-            return Navigator.Search(this, queryName, filters, sfTop, sfAllowMultiple);
+            return Navigator.Search(this, queryName, filters, sfTop, sfAllowMultiple, sfPrefix);
         }
         
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string entityTypeName)
+        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string entityTypeName, string prefix)
         {
-            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, entityTypeName));
+            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, entityTypeName, prefix));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

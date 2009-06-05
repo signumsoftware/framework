@@ -15,7 +15,7 @@
         colVisibility.Add(i, queryResult.Columns[i].Visible);
     }
  %>
-<table id="tblResults" name="tblResults">
+<table id="<%=Html.GlobalName("tblResults")%>" name="<%=Html.GlobalName("tblResults")%>">
     <thead>
         <tr>
             <td></td>
@@ -35,21 +35,21 @@
         for (int row=0; row<queryResult.Data.Length; row++)
         {
             %>
-            <tr id="<%="trResults_" + row.ToString()%>" name="<%="trResults_" + row.ToString()%>">
+            <tr id="<%=Html.GlobalName("trResults_" + row.ToString())%>" name="<%=Html.GlobalName("trResults_" + row.ToString())%>">
                 <% Lazy entityField = (Lazy)queryResult.Data[row][EntityColumnIndex.Value]; %>
-                <td id="tdRowSelection" name="tdRowSelection">
+                <td id="<%=Html.GlobalName("tdRowSelection")%>" name="<%=Html.GlobalName("tdRowSelection")%>">
                     <%
                     if (allowMultiple)
                     { 
                         %>
-                        <input type="checkbox" name="<%="check_" + row.ToString() %>" id="<%="check_" + row.ToString() %>" value="<%= entityField.Id.ToString() + "_" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="checkbox" name="<%=Html.GlobalName("check_" + row.ToString())%>" id="<%=Html.GlobalName("check_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                     <%} else{ %>
-                        <input type="radio" name="rowSelection" id="<%="radio_" + row.ToString() %>" value="<%= entityField.Id.ToString() + "_" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="radio" name="<%=Html.GlobalName("rowSelection")%>" id="<%=Html.GlobalName("radio_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                         <%
                     }
                  %>
                  </td>
-                <td id="tdResults" name="tdResults">
+                <td id="<%=Html.GlobalName("tdResults")%>" name="<%=Html.GlobalName("tdResults")%>">
                     <a href="<%="/View/" + Navigator.TypesToURLNames[entityField.RuntimeType] + "/" + entityField.Id.ToString() %>" title="Navigate">Ver</a>
                 </td>
                 <%
@@ -58,7 +58,7 @@
                     if (colVisibility[col])
                     {
                         %>
-                        <td id="<%="tdResults_" + col.ToString()%>" name="<%="tdResults_" + col.ToString()%>">
+                        <td id="<%=Html.GlobalName("tdResults_" + col.ToString())%>" name="<%=Html.GlobalName("tdResults_" + col.ToString())%>">
                             <%                        
                             Type colType = queryResult.Columns[col].Type;
                             if (typeof(Lazy).IsAssignableFrom(colType) && queryResult.Data[row][col]!=null)

@@ -6,22 +6,22 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 
-<%= Html.Hidden(ViewDataKeys.EntityTypeName, ViewData[ViewDataKeys.EntityTypeName].ToString())%>
+<%= Html.Hidden(Html.GlobalName(ViewDataKeys.EntityTypeName), ViewData[ViewDataKeys.EntityTypeName].ToString())%>
 
-<select id="ddlNewFilters" name="ddlNewFilters">
+<select id="<%=Html.GlobalName("ddlNewFilters")%>" name="<%=Html.GlobalName("ddlNewFilters")%>">
 <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
    {
        Type type = column.Type.UnNullify();
        %>
-       <option id="<%="option" + column.Name %>" value="<%=typeof(Lazy).IsAssignableFrom(type) ? Reflector.ExtractLazy(type).Name : type.Name %>"><%=column.DisplayName%></option>
+       <option id="<%=Html.GlobalName("option__" + column.Name) %>" value="<%=typeof(Lazy).IsAssignableFrom(type) ? Reflector.ExtractLazy(type).Name : type.Name %>"><%=column.DisplayName%></option>
    <%
    } 
    %>
-   <%=Html.Button("btnAddFilter", "+", "AddFilter('/Signum/AddFilter');","",new Dictionary<string, string>()) %>
-   <%=Html.Button("btnClearAllFilters", "XX", "ClearAllFilters();","",new Dictionary<string, string>()) %>
+   <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('/Signum/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""),"",new Dictionary<string, string>()) %>
+   <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "XX", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, string>())%>
 </select>
 <br />
-<table id="tblFilters" name="tblFilters">
+<table id="<%=Html.GlobalName("tblFilters")%>" name="<%=Html.GlobalName("tblFilters")%>">
     <thead>
         <tr>
             <td>Campo</td>
@@ -39,4 +39,4 @@
         %>
     </tbody>
 </table>
-Top: <%= Html.TextBox(ViewDataKeys.Top, ViewData[ViewDataKeys.Top] ?? "") %>
+Top: <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "") %>

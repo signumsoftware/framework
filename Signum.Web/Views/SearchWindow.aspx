@@ -22,6 +22,6 @@
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString()); %>
-        <div id="divASustituir"></div>
+        <div id="<%=Html.GlobalName("divASustituir")%>"></div>
  <%}%>
 </asp:Content>
