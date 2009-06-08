@@ -63,8 +63,6 @@ namespace Signum.Web
                         { 
                             { ViewDataKeys.CustomHtml, ddlStr},
                             { ViewDataKeys.PopupPrefix, idValueField},
-                            //{ ViewDataKeys.OnOk, "OnListImplementationsOk({0},'{1}');".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType)) },
-                            //{ ViewDataKeys.OnCancel, "OnImplementationsCancel('" + idValueField + "');"}
                         }
                 ));
                 sb.Append("</div>\n");

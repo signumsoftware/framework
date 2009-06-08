@@ -347,12 +347,13 @@ namespace Signum.Web
             object value;
             string operation;
             Type type;
-            while (true)
+            var names = form.AllKeys.Where(k => k.StartsWith("name"));
+            foreach(string nameKey in names)
             {
-                if (form.AllKeys.SingleOrDefault(k => k=="name" + index.ToString()) == null)
-                    break;
+                if (!int.TryParse(nameKey.RemoveLeft(4), out index))
+                    continue;
 
-                name = form["name" + index.ToString()];
+                name = form[nameKey];
                 value = form["val" + index.ToString()];
                 operation = form["sel" + index.ToString()];
                 type = queryDescription.Columns
@@ -376,8 +377,6 @@ namespace Signum.Web
                     Operation = filterOperation,
                     Value = value,
                 });
-
-                index ++;
             }
             return result;
         }

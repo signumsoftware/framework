@@ -94,7 +94,7 @@ namespace Signum.Web
                 if(settings.Autocomplete)
                     sb.Append(helper.AutoCompleteExtender(idValueField + TypeContext.Separator + EntityLineKeys.DDL,
                                                       idValueField + TypeContext.Separator + EntityBaseKeys.ToStr,
-                                                      (!string.IsNullOrEmpty(runtimeType)) ? runtimeType : (Reflector.ExtractLazy(type) ?? type).Name, 
+                                                      (Reflector.ExtractLazy(type) ?? type).Name, 
                                                       (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name,",") : "",
                                                       idValueField + TypeContext.Separator +  TypeContext.Id,
                                                       "/Signum/Autocomplete", 1, 5, 500));
