@@ -119,6 +119,10 @@ namespace Signum.Excel
                 }
                 writer.WriteEndElement();
             }
+            if (ConditionalFormating != null)
+            {
+                writer.WriteRaw(ConditionalFormating);
+            }
             writer.WriteEndElement();
         }
 
@@ -184,6 +188,8 @@ namespace Signum.Excel
                 this._options = value; 
             }
         }
+
+        public string ConditionalFormating { get; set; }
 
         public PivotTable PivotTable
         {
