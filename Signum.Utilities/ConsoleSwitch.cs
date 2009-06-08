@@ -24,12 +24,12 @@ namespace Signum.Utilities
 
         public void Add(K key, V value)
         {
-            dictionary.Add(key.ToString().ToLower(), Tuple.New(value, ToString(value)));
+            dictionary.Add(key.ToString(), Tuple.New(value, ToString(value)));
         }
 
         public void Add(K key, V value, string str)
         {
-            dictionary.Add(key.ToString().ToLower(), Tuple.New(value, str));
+            dictionary.Add(key.ToString(), Tuple.New(value, str));
         }
 
         private string ToString(object value)
@@ -57,11 +57,11 @@ namespace Signum.Utilities
                 dictionary.ToConsole(kvp => " {0} - {1}".Formato(kvp.Key, kvp.Value.Second));
 
                 Console.Write(endMessage);
-                string result = Console.ReadLine();
+                string line = Console.ReadLine();
                 
                 Console.WriteLine();
 
-                return GetValue(result);
+                return GetValue(line);
             }
             catch (Exception e)
             {
@@ -84,14 +84,14 @@ namespace Signum.Utilities
                 dictionary.ToConsole(kvp => " {0} - {1}".Formato(kvp.Key, kvp.Value.Second));
 
                 Console.Write(endMessage);
-                string result = Console.ReadLine();
+                string line = Console.ReadLine();
 
-                if (string.IsNullOrEmpty(result))
+                if (string.IsNullOrEmpty(line))
                     return null;
 
                 Console.WriteLine(); 
 
-                return result.Split(',').Select(str => GetValue(str)).ToArray();
+                return line.Split(',').Select(str => GetValue(str)).ToArray();
             }
             catch (Exception e)
             {
@@ -100,9 +100,10 @@ namespace Signum.Utilities
             }
         }
 
-        private V GetValue(string result)
+        private V GetValue(string line)
         {
-            return dictionary.GetOrThrow(result.Trim().ToLower(), "No option with key {0} found").First;
+            return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).Single("No option with key {0} found")
+                .Value.First;
         }
 
    
