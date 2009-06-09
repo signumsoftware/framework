@@ -27,11 +27,21 @@ namespace Signum.Entities
         public Lazy(Type runtimeType, int id)
             : base(runtimeType, id)
         {
+            if (!typeof(T).IsAssignableFrom(runtimeType))
+                throw new ApplicationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(T)));
         }
 
         public Lazy(T entidad)
             : base((IdentifiableEntity)(IIdentifiable)entidad)
         {   
+        }
+
+        public static explicit operator Lazy<T>(Lazy lazy)
+        {
+            if (lazy.UntypedEntityOrNull != null)
+                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull);
+            else
+                return new Lazy<T>(lazy.RuntimeType, lazy.Id);
         }
 
         public override IdentifiableEntity UntypedEntityOrNull
@@ -246,7 +256,6 @@ namespace Signum.Entities
             var milazy = new Lazy<T>(entity);
             milazy.EntityOrNull = null;
             return milazy;
-            
         }
 
         public static Lazy<T> ToLazy<T>(this T entidad, bool fat) where T : class, IIdentifiable
