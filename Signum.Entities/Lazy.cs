@@ -47,15 +47,6 @@ namespace Signum.Entities
             get { return entityOrNull; }
             internal set { entityOrNull = value; }
         }
-
-        const int MagicMask = 123456853; 
-
-        public override int GetHashCode()
-        {
-            if (this.EntityOrNull != null)
-                return EntityOrNull.GetHashCode() ^ MagicMask;
-            return base.Id.GetHashCode() ^ base.RuntimeType.Name.GetHashCode() ^ MagicMask;
-        }
     }
 
     [Serializable]
@@ -199,19 +190,19 @@ namespace Signum.Entities
             internal set { toStr = value;  }
         }
 
-        internal bool EqualsIdent(IdentifiableEntity entity)
-        {
-            if (entity == null)
-                return false;
+        //internal bool EqualsIdent(IdentifiableEntity entity)
+        //{
+        //    if (entity == null)
+        //        return false;
 
-            if (RuntimeType != entity.GetType())
-                return false;
+        //    if (RuntimeType != entity.GetType())
+        //        return false;
 
-            if (UntypedEntityOrNull == null)
-                return Id == entity.IdOrNull;
-            else
-                return object.ReferenceEquals(this.UntypedEntityOrNull, entity);
-        }
+        //    if (UntypedEntityOrNull == null)
+        //        return Id == entity.IdOrNull;
+        //    else
+        //        return object.ReferenceEquals(this.UntypedEntityOrNull, entity);
+        //}
 
         public override bool Equals(object obj)
         {
@@ -234,6 +225,14 @@ namespace Signum.Entities
             }
            
             return false;
+        }
+
+        const int MagicMask = 123456853; 
+        public override int GetHashCode()
+        {
+            if (this.UntypedEntityOrNull != null)
+                return UntypedEntityOrNull.GetHashCode() ^ MagicMask;
+            return this.Id.GetHashCode() ^ this.RuntimeType.Name.GetHashCode() ^ MagicMask;
         }
     }
 

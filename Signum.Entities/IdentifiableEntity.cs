@@ -67,9 +67,6 @@ namespace Signum.Entities
             if (ident != null && ident.GetType() == this.GetType() && !this.IsNew && this.id == ident.id)
                 return true;
 
-            if (obj is Lazy)
-                return ((Lazy)obj).EqualsIdent(this); 
-
             return false;
         }
 
