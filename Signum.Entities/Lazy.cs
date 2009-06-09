@@ -36,14 +36,6 @@ namespace Signum.Entities
         {   
         }
 
-        public static explicit operator Lazy<T>(Lazy lazy)
-        {
-            if (lazy.UntypedEntityOrNull != null)
-                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull);
-            else
-                return new Lazy<T>(lazy.RuntimeType, lazy.Id);
-        }
-
         public override IdentifiableEntity UntypedEntityOrNull
         {
             get { return (IdentifiableEntity)(object)EntityOrNull; }
@@ -248,6 +240,14 @@ namespace Signum.Entities
 
     public static class LazyUtils
     {
+        public static Lazy<T> ToLazy<T>(this Lazy lazy) where T : class, IIdentifiable
+        {
+            if (lazy.UntypedEntityOrNull != null)
+                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull);
+            else
+                return new Lazy<T>(lazy.RuntimeType, lazy.Id);
+        }
+
         public static Lazy<T> ToLazy<T>(this T entity) where T : class, IIdentifiable
         {
             if (entity.IsNew)
