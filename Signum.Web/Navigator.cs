@@ -254,6 +254,12 @@ namespace Signum.Web
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
+            foreach (FilterOptions opt in findOptions.FilterOptions)
+            {
+                opt.Column = queryDescription.Columns.Where(c => c.Name == opt.ColumnName)
+                    .Single("Filter Column {0} not found or found more than once in query description".Formato(opt.ColumnName));
+            }
+
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -306,7 +312,7 @@ namespace Signum.Web
             };
         }
 
-        protected virtual string SearchTitle(object queryName)
+        protected internal virtual string SearchTitle(object queryName)
         {
             if (QuerySettings != null)
             {
