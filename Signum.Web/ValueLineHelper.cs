@@ -13,7 +13,7 @@ namespace Signum.Web
     {
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator(); 
 
-        private static string ManualValueLine<T>(this HtmlHelper helper, string idValueField, T value, string labelText, Dictionary<string, object> valueFieldHtmlProps)
+        private static string ManualValueLine<T>(this HtmlHelper helper, string idValueField, T value, string labelText, Dictionary<string, object> valueFieldHtmlProps, ValueLineType? valueLineType)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -23,20 +23,23 @@ namespace Signum.Web
             {
                 sb.Append("<div>");
                 sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
-                //sb.Append(helper.Span(idValueField + "lbl", labelText, TypeContext.CssLineLabel));
             }
             string valueStr = (value != null) ? value.ToString() : "";
             if (StyleContext.Current.ReadOnly)
                 sb.Append(helper.Span(idValueField, valueStr, "valueLine"));
             else
             {
-                ValueLineType vlType = Configurator.GetDefaultValueLineType(typeof(T));
+                ValueLineType vltype = (valueLineType.HasValue) ? 
+                    valueLineType.Value : 
+                    Configurator.GetDefaultValueLineType(typeof(T));
+
                 if (valueFieldHtmlProps == null)
                     valueFieldHtmlProps = new Dictionary<string, object>();
+
                 if (StyleContext.Current.ShowValidationMessage)
                 {
                     valueFieldHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-                    sb.Append(Configurator.constructor[vlType](helper, new ValueLineData(idValueField, value, valueFieldHtmlProps, typeof(T)))); 
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, valueFieldHtmlProps, typeof(T)))); 
                     sb.Append("\n");
                     sb.Append("&nbsp;");
                     sb.Append(helper.ValidationMessage(idValueField));
@@ -45,7 +48,7 @@ namespace Signum.Web
                 else
                 {
                     valueFieldHtmlProps.Add("class", "valueLine");
-                    sb.Append(Configurator.constructor[vlType](helper, new ValueLineData(idValueField, value, valueFieldHtmlProps, typeof(T)))); 
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, valueFieldHtmlProps, typeof(T)))); 
                     sb.Append("\r\n");
                 }
             }
@@ -97,16 +100,20 @@ namespace Signum.Web
             return System.Web.Mvc.Html.InputExtensions.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, htmlProperties) + "\n";
         }
 
-        public static string ValueLine<T>(this HtmlHelper helper, string labelText, T value, string idValueField, StyleContext styleContext)
+        public static string ValueLine<T>(this HtmlHelper helper, T value, string idValueField, ValueLine options)
         {
-            using (styleContext)
-                return helper.ManualValueLine(idValueField, value, labelText, null); 
-        }
+            if (options == null || options.LabelText == null)
+                throw new ArgumentException("LabelText property of ValueLineOptions must be specified for Manual Value Lines");
 
-        public static string ValueLine<T>(this HtmlHelper helper, string labelText, T value, string idValueField, StyleContext styleContext, Dictionary<string, object> valueFieldHtmlProps)
-        {
-            using (styleContext)
-                return helper.ManualValueLine(idValueField, value, labelText, valueFieldHtmlProps);
+            if (options.StyleContext != null)
+            {
+                using (options.StyleContext)
+                    return helper.ManualValueLine(idValueField, value, options.LabelText, options.ValueFieldHtmlProps, options.ValueLineType);
+            }
+            else
+            {
+                return helper.ManualValueLine(idValueField, value, options.LabelText, options.ValueFieldHtmlProps, options.ValueLineType);
+            }
         }
 
         public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
@@ -114,67 +121,28 @@ namespace Signum.Web
             Type t = typeof(S);
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
 
-            return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, null);
+            return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, null, null);
         }
 
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Dictionary<string, object> valueFieldHtmlProps)
+        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, ValueLine options)
         {
             Type t = typeof(S);
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
 
-            return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, valueFieldHtmlProps);
-        }
-
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, string labelText)
-        {
-            Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
-
-            return helper.ManualValueLine(context.Name, context.Value, labelText, null);
-        }
-
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, string labelText, Dictionary<string, object> valueFieldHtmlProps)
-        {
-            Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
-
-            return helper.ManualValueLine(context.Name, context.Value, labelText, valueFieldHtmlProps);
-        }
-
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, StyleContext styleContext)
-        {
-            Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
-
-            using (styleContext)
-                return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, null);
-        }
-
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, StyleContext styleContext, Dictionary<string, object> valueFieldHtmlProps)
-        {
-            Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
-
-            using (styleContext)
-                return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, valueFieldHtmlProps);
-        }
-
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, string labelText, StyleContext styleContext)
-        {
-            Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
-
-            using (styleContext)
-                return helper.ManualValueLine(context.Name, context.Value, labelText, null);
-        }
-
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, string labelText, StyleContext styleContext, Dictionary<string, object> valueFieldHtmlProps)
-        {
-            Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
-
-            using (styleContext)
-                return helper.ManualValueLine(context.Name, context.Value, labelText, valueFieldHtmlProps);
+            if (options == null)
+                return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, null, null);                
+            else
+            {
+                if (options.StyleContext != null)
+                {
+                    using (options.StyleContext)
+                        return helper.ManualValueLine(context.Name, context.Value, options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.ValueLineType);
+                }
+                else
+                {
+                    return helper.ManualValueLine(context.Name, context.Value, options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.ValueLineType);                
+                }
+            }
         }
 
         private static Expression<Func<T, object>> CastToObject<T, S>(Expression<Func<T, S>> property)
@@ -184,6 +152,14 @@ namespace Signum.Web
             // Use Expression.Lambda to get back to strong typing
             return Expression.Lambda<Func<T, object>>(converted, property.Parameters);
         }
+    }
+
+    public class ValueLine
+    { 
+        public string LabelText;
+        public StyleContext StyleContext;
+        public Dictionary<string, object> ValueFieldHtmlProps;
+        public ValueLineType? ValueLineType;
     }
 
     public class ValueLineConfigurator
