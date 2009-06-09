@@ -22,6 +22,39 @@ namespace Signum.Web
 {
     public static class Navigator
     {
+        private static Func<Type, int, string> viewRoute;
+        public static Func<Type, int, string> ViewRoute 
+        { 
+            get 
+            {
+                return viewRoute ??
+                       (viewRoute = (Type type, int id) => "/View/{0}/{1}".Formato(Navigator.TypesToURLNames[type], id));
+            }
+            set 
+            {
+                viewRoute = value;
+            }
+        }
+
+        private static Func<string, string> findRoute;
+        public static Func<string, string> FindRoute
+        {
+            get
+            {
+                return findRoute ??
+                       (findRoute = (string urlQueryName) => "/Find/{0}".Formato(urlQueryName));
+            }
+            set
+            {
+                findRoute = value;
+            }
+        }
+
+        public static string FindTypeRoute(Type type)
+        {
+            return findRoute(Navigator.TypesToURLNames[type]);
+        }
+
         public static NavigationManager NavigationManager;
         
         public static Type ResolveType(string typeName)

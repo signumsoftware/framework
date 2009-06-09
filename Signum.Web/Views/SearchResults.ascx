@@ -50,7 +50,8 @@
                  %>
                  </td>
                 <td id="<%=Html.GlobalName("tdResults")%>" name="<%=Html.GlobalName("tdResults")%>">
-                    <a href="<%="/View/" + Navigator.TypesToURLNames[entityField.RuntimeType] + "/" + entityField.Id.ToString() %>" title="Navigate">Ver</a>
+                    <%--<a href="<%= "/View/" + Navigator.TypesToURLNames[entityField.RuntimeType] + "/" + entityField.Id.ToString() %>" title="Navigate">Ver</a>--%>
+                    <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Navigate">Ver</a>
                 </td>
                 <%
                     for (int col = 0; col < queryResult.Data[row].Length; col++)
@@ -65,7 +66,8 @@
                             {
                                 Lazy lazy = (Lazy)queryResult.Data[row][col];
                                 %>
-                                <a href="<%="/View/" + Navigator.TypesToURLNames[lazy.RuntimeType] + "/" + lazy.Id.ToString() %>" title="Navigate"><%=lazy.ToStr %></a>   
+                                <%--<a href="<%="/View/" + Navigator.TypesToURLNames[lazy.RuntimeType] + "/" + lazy.Id.ToString() %>" title="Navigate"><%=lazy.ToStr %></a>   --%>
+                                <a href="<%=Navigator.ViewRoute(lazy.RuntimeType, lazy.Id) %>" title="Navigate"><%=lazy.ToStr %></a>   
                                 <%
                             }
                             else
