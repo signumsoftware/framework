@@ -31,16 +31,6 @@ namespace Signum.Web
         }
     }
 
-    public class EntityCombo : EntityBase
-    {
-        public EntityCombo()
-        {
-            Create = false;
-            Remove = false;
-            Find = false;
-        }
-    }
-
     public static class EntityLineHelper
     {
 

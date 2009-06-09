@@ -31,6 +31,7 @@ namespace Signum.Web
             EntityBaseKeys.ImplementationsDDL,
             EntityBaseKeys.IsNew,
             EntityListKeys.Index,
+            EntityComboKeys.Combo,
         }; 
 
         public Modification(Type staticType, string controlID)

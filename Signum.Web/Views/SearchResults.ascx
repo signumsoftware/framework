@@ -50,7 +50,6 @@
                  %>
                  </td>
                 <td id="<%=Html.GlobalName("tdResults")%>" name="<%=Html.GlobalName("tdResults")%>">
-                    <%--<a href="<%= "/View/" + Navigator.TypesToURLNames[entityField.RuntimeType] + "/" + entityField.Id.ToString() %>" title="Navigate">Ver</a>--%>
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Navigate">Ver</a>
                 </td>
                 <%
