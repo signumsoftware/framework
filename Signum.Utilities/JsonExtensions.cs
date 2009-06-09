@@ -9,7 +9,7 @@ namespace Signum.Utilities
     {
         public static string Quote(this string obj)
         {
-            return "\"" + obj.ToString() + "\"";
+            return "\"" + obj + "\"";
         }
 
         public static string ToJSonArray<T>(this IEnumerable<T> collection, Func<T, string> toString)

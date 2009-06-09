@@ -64,9 +64,9 @@ namespace Signum.Web
             return NavigationManager.Find(controller, findOptions);
         }
 
-        public static PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix)
+        public static PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string prefixEnd)
         {
-            return NavigationManager.PartialFind(controller, findOptions, prefix);
+            return NavigationManager.PartialFind(controller, findOptions, prefix, prefixEnd);
         }
 
         public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple, string prefix)
@@ -180,6 +180,7 @@ namespace Signum.Web
         
         protected internal string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
         protected internal string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";
+        protected internal string SearchPopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchPopupControl.ascx";
         protected internal string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
         protected internal string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
         
@@ -234,6 +235,7 @@ namespace Signum.Web
             
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+
             controller.ViewData.Model = entity;
             
             return new PartialViewResult
@@ -248,7 +250,7 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
-            string entitiesTypeName = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type).Name;
+            Type entitiesType = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type);
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
@@ -258,7 +260,11 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
-            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesTypeName;
+            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
+            controller.ViewData[ViewDataKeys.Create] =
+                (findOptions.Create.HasValue) ?
+                findOptions.Create.Value :
+                EntitySettings[entitiesType].ThrowIfNullC("Invalid type {0}".Formato(entitiesType.Name)).IsCreable(false);
 
             return new ViewResult()
             {
@@ -269,23 +275,28 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix)
+        protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string prefixEnd)
         {
             QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
-            string entitiesTypeName = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type).Name;
+            Type entitiesType = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type);
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+            controller.ViewData[ViewDataKeys.PopupSufix] = prefixEnd ?? "";
 
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
             controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
-            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesTypeName;
+            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
+            controller.ViewData[ViewDataKeys.Create] =
+                (findOptions.Create.HasValue) ?
+                findOptions.Create.Value :
+                EntitySettings[entitiesType].ThrowIfNullC("Invalid type {0}".Formato(entitiesType.Name)).IsCreable(false);
 
             return new PartialViewResult
             {

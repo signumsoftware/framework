@@ -172,19 +172,18 @@ namespace Signum.Web
                               "lineButton",
                               (value == null) ? new Dictionary<string, string>() { { "style", "display:none" } } : new Dictionary<string, string>()));
 
-            if (isIdentifiable || isLazy)
+            if (settings.Find && (isIdentifiable || isLazy))
             {
                 string popupFindingParameters = "'/Signum/PartialFind','{0}','false',function(){{OnSearchOk('{1}');}},function(){{OnSearchCancel('{1}');}},'{2}','{1}'".Formato(Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
-                if (settings.Find)
-                    sb.Append(
-                        helper.Button(idValueField + "_btnFind",
-                                    "O",
-                                    findingUrl,
-                                    "lineButton",
-                                    (value == null) ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "style", "display:none" } }));
+                sb.Append(
+                    helper.Button(idValueField + "_btnFind",
+                                 "O",
+                                 findingUrl,
+                                 "lineButton",
+                                 (value == null) ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "style", "display:none" } }));
             }
 
             if (StyleContext.Current.BreakLine)
@@ -205,6 +204,10 @@ namespace Signum.Web
                     runtimeType = (context.Value as Lazy).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
+            }
+            else
+            {
+                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
             }
 
             EntityLine el = new EntityLine();
@@ -229,6 +232,10 @@ namespace Signum.Web
                     runtimeType = (context.Value as Lazy).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
+            }
+            else
+            {
+                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
             }
 
             EntityLine el = new EntityLine();

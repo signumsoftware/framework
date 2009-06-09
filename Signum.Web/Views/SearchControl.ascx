@@ -20,7 +20,12 @@
     <input type="button" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
 <%} %>
 <input id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="Search('/Signum/Search','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
+
+<%if ((bool)ViewData[ViewDataKeys.Create]){ %>
+    <input id="<%=Html.GlobalName("btnCreate")%>" type="button" onclick="<%="SearchCreate('/Signum/PartialView','{0}',function(){{OnSearchCreateOK('/Signum/TrySavePartial','{0}');}},function(){{OnSearchCreateCancel('{0}');}},'false');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "")%>" value="+" /> 
+<%} %>
 <br />
 <div id="<%=Html.GlobalName("divResults")%>" name="<%=Html.GlobalName("divResults")%>">
 
 </div>
+<div id="<%=Html.GlobalName("divASustituir")%>"></div>

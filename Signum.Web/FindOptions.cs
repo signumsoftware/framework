@@ -39,6 +39,8 @@ namespace Signum.Web
             get { return filterMode; }
             set { this.filterMode = value; }
         }
+
+        public bool? Create { get; set; }
     }
 
     public class FilterOptions

@@ -9,6 +9,7 @@ namespace Signum.Web
     public static class ViewDataKeys
     {
         public const string PopupPrefix = "sfPrefix";
+        public const string PopupSufix = "sfSufix";
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
         public const string MainControlUrl = "sfMainControlUrl";
        // public const string PopupInnerControlUrl = "sfPopupInnerControlUrl";
@@ -18,6 +19,8 @@ namespace Signum.Web
         public const string OnOk = "sfOnOk";
         public const string OnCancel = "sfOnCancel";
         public const string BtnOk = "sfBtnOk";
+        public const string OnCancelS = "sfOnCancelS";
+        public const string BtnOkS = "sfBtnOkS";
         public const string BtnCancel = "sfBtnCancel";
         
         public const string FilterColumns = "sfFilterColumns";
@@ -27,6 +30,7 @@ namespace Signum.Web
         public const string EntityColumnIndex = "sfEntityColumnIndex";
         public const string EntityTypeName = "sfEntityTypeName";
         public const string AllowMultiple = "sfAllowMultiple";
+        public const string Create = "sfCreate";
 
         public static string GlobalName(this HtmlHelper helper, string localName)
         {

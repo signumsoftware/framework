@@ -106,7 +106,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialFind(string queryFriendlyName, bool? allowMultiple, string prefix)
+        public PartialViewResult PartialFind(string queryFriendlyName, bool? allowMultiple, string prefix, string prefixEnd)
         {
             object queryName = Navigator.ResolveQueryFromUrlName(queryFriendlyName);
 
@@ -115,7 +115,7 @@ namespace Signum.Web.Controllers
             if (allowMultiple.HasValue)
                 findOptions.AllowMultiple = allowMultiple.Value;
 
-            return Navigator.PartialFind(this, findOptions, prefix);
+            return Navigator.PartialFind(this, findOptions, prefix, prefixEnd);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
