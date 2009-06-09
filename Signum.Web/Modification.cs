@@ -89,7 +89,14 @@ namespace Signum.Web
         {
             try
             {
-                Value = ReflectionTools.Parse((string)formValues[controlID], staticType);
+                string valueStr = (string)formValues[controlID];
+                if (staticType == typeof(bool))
+                {
+                    string[] vals = valueStr.Split(',');
+                    Value = (vals[0] == "true") ? true : false;
+                }
+                else
+                    Value = ReflectionTools.Parse(valueStr, staticType);
             }
             catch (Exception ex)
             {
@@ -295,7 +302,7 @@ namespace Signum.Web
             if (lazy == null)
             {
                 if (EntityModification == null)
-                    return Lazy.Create(CleanType, RuntimeType, EntityId.Value);
+                    return Lazy.Create(CleanType, EntityId.Value, RuntimeType);
                 else
                     return Lazy.Create(CleanType,
                         (IdentifiableEntity)EntityModification.ApplyChanges(

@@ -92,6 +92,11 @@ namespace Signum.Web
             return helper.TextBox(idValueField, valueStr, htmlProperties);
         }
 
+        public static string CheckBox(this HtmlHelper helper, string idValueField, bool? value, Dictionary<string, object> htmlProperties)
+        { 
+            return System.Web.Mvc.Html.InputExtensions.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, htmlProperties) + "\n";
+        }
+
         public static string ValueLine<T>(this HtmlHelper helper, string labelText, T value, string idValueField, StyleContext styleContext)
         {
             using (styleContext)
@@ -196,7 +201,7 @@ namespace Signum.Web
                     case TypeCode.DateTime:
                         return ValueLineType.Calendar;
                     case TypeCode.Boolean:
-                    //    return ValueLineType.Boolean;
+                        return ValueLineType.Boolean;
                     case TypeCode.Double:
                     case TypeCode.Decimal:
                     case TypeCode.Single:
@@ -224,6 +229,7 @@ namespace Signum.Web
         public Dictionary<ValueLineType, Func<HtmlHelper, ValueLineData, string>> constructor = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLineData, string>>()
         {
             {ValueLineType.TextBox, (helper, valueLineData) => helper.TextboxInLine(valueLineData.IdValueField, (string)valueLineData.Value, valueLineData.HtmlProperties)},
+            {ValueLineType.Boolean, (helper, valueLineData) => helper.CheckBox(valueLineData.IdValueField, (bool?)valueLineData.Value, valueLineData.HtmlProperties)},
             {ValueLineType.Combo, (helper, valueLineData) => helper.EnumComboBox(valueLineData.IdValueField, valueLineData.EnumType, valueLineData.Value, valueLineData.HtmlProperties)},
             {ValueLineType.Calendar, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, valueLineData.HtmlProperties)},
             {ValueLineType.Number, (helper, valueLineData) => 
@@ -294,6 +300,7 @@ namespace Signum.Web
 
     public enum ValueLineType
     {
+        Boolean,
         Combo,
         Calendar,
         TextBox,

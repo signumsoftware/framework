@@ -411,6 +411,12 @@ namespace Signum.Web
                            .ThrowIfNullC("Invalid filter, column \"{0}\" not found".Formato(name))
                            .Type;
 
+                if (type == typeof(bool))
+                {
+                    string[] vals = ((string)value).Split(',');
+                    value = (vals[0] == "true") ? true : false;
+                }
+
                 if (typeof(Lazy).IsAssignableFrom(type))
                 {
                     int intValue;
