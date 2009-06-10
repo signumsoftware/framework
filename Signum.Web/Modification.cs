@@ -302,7 +302,7 @@ namespace Signum.Web
             if (lazy == null)
             {
                 if (EntityModification == null)
-                    return Lazy.Create(CleanType, RuntimeType, EntityId.Value);
+                    return Lazy.Create(CleanType, EntityId.Value, RuntimeType);
                 else
                     return Lazy.Create(CleanType,
                         (IdentifiableEntity)EntityModification.ApplyChanges(
