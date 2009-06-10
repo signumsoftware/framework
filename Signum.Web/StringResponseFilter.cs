@@ -85,9 +85,9 @@ namespace Signum.Web
         }
     }
 
-    internal static class RenderPartialExtenders
+    public static class RenderPartialExtenders
     {
-        internal static string RenderPartialToString(this HtmlHelper helper, string partialViewName, ViewDataDictionary viewData)
+        public static string RenderPartialToString(this HtmlHelper helper, string partialViewName, ViewDataDictionary viewData)
         {
             HttpResponseBase response = helper.ViewContext.HttpContext.Response;
             return Capture(
