@@ -87,7 +87,7 @@ namespace Signum.Excel
             Expression<Func<Cell>> constructor = Constructor(Data.Text, Data.Type, _styleID);
 
             return UtilExpression.MemberInit<Cell>(constructor,
-                new TrioList<Cell>()
+                new MemberBindingList<Cell>()
             {   
                 {0,_offset,a=>a.Offset},
                 {-1,_mergeAcross,a=>a.MergeAcross},
@@ -105,18 +105,21 @@ namespace Signum.Excel
             {
                 case DataType.Boolean:
                     bool b = bool.Parse(text);
-                    return () => new Cell(Tree.Literal<string>(styleID), b);
+                    return () => new Cell(CSharpRenderer.Literal<string>(styleID), b);
                 case DataType.DateTime:
                     DateTime dt = DateTime.Parse(text);
-                    return () => new Cell(Tree.Literal<string>(styleID), dt);
+                    return () => new Cell(CSharpRenderer.Literal<string>(styleID), dt);
                 case DataType.Number:
                     decimal d = decimal.Parse(text, NumberStyles.Float, CultureInfo.InvariantCulture);
-                    return () => new Cell(Tree.Literal<string>(styleID), d);
+                    return () => new Cell(CSharpRenderer.Literal<string>(styleID), d);
                 case DataType.String:
-                    return () => new Cell(Tree.Literal<string>(styleID), text);
+                    if (string.IsNullOrEmpty(text))
+                        return () => new Cell(CSharpRenderer.Literal<string>(styleID));
+                    else
+                        return () => new Cell(CSharpRenderer.Literal<string>(styleID), text);
                 case DataType.Error:
                 case DataType.NotSet:
-                    return () => new Cell(Tree.Literal<string>(styleID), type, text);
+                    return () => new Cell(CSharpRenderer.Literal<string>(styleID), type, text);
             }
             return null;
         }

@@ -13,7 +13,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<PageFooter>(new TrioList<PageFooter>()
+            return UtilExpression.MemberInit<PageFooter>(new MemberBindingList<PageFooter>()
             {  
                 {null,_data,a=>a.Data},
                 {0.5f,_margin,a=>a.Margin}

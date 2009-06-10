@@ -19,7 +19,7 @@
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<Alignment>(new TrioList<Alignment>()
+            return UtilExpression.MemberInit<Alignment>(new MemberBindingList<Alignment>()
             {
                 {HorizontalAlignment.Automatic,_horizontal, w=>w.Horizontal},
                 {0, _indent, w=>w.Indent},

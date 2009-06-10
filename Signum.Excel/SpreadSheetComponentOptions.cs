@@ -18,7 +18,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<ComponentOptions>(new TrioList<ComponentOptions>()
+            return UtilExpression.MemberInit<ComponentOptions>(new MemberBindingList<ComponentOptions>()
             {
                 {_toolbar, a=>a.Toolbar},
                 {Namespaces.NullValue,_nextSheetNumber,a=>a.NextSheetNumber},

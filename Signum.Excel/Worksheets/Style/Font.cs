@@ -18,7 +18,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<Font>(new TrioList<Font>()
+            return UtilExpression.MemberInit<Font>(new MemberBindingList<Font>()
             { 
                 {false,_bold,a=>a.Bold},
                 {false,_italic,a=>a.Italic},

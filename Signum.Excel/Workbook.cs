@@ -22,21 +22,33 @@ namespace Signum.Excel
         private StyleCollection _styles;
         private WorksheetCollection _worksheets;
 
-        public CodeNamespace WriteCode(string fullClassName)
+        public CodeCompileUnit WriteCode(string fullClassName)
         {
             string className = fullClassName.Split('.').Last();
             string nameSpace = fullClassName.RemoveRight(className.Length + 1);
 
-            CodeNamespace ns = new CodeNamespace(nameSpace);
-            ns.Imports.Add(new CodeNamespaceImport("System"));
-            ns.Imports.Add(new CodeNamespaceImport("System.Xml"));
-            ns.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
-            ns.Imports.Add(new CodeNamespaceImport("System.Linq"));
-            ns.Imports.Add(new CodeNamespaceImport("Utilidades"));
-            ns.Imports.Add(new CodeNamespaceImport("Utilidades.Excel"));
+            CodeCompileUnit unit = new CodeCompileUnit();
+
+            string[] importedNamespaces = 
+            { 
+                "System", 
+                "System.Xml",
+                "System.Collections.Generic",
+                "System.Linq",
+                "Signum.Utilities",
+                "Signum.Excel"
+            };
+
+            CodeNamespace ns = new CodeNamespace(null);
+            ns.Imports.AddRange(importedNamespaces.Select(i=>new CodeNamespaceImport(i)).ToArray()); 
+
+            unit.Namespaces.Add(ns);
+
+            CodeNamespace ns2 = new CodeNamespace(nameSpace);
+            unit.Namespaces.Add(ns2);
 
             CodeTypeDeclaration type = new CodeTypeDeclaration(className);
-            ns.Types.Add(type);
+            ns2.Types.Add(type);
 
             if (_styles != null)
             {  
@@ -61,10 +73,11 @@ namespace Signum.Excel
                 Name = "Generate",
                 Attributes = MemberAttributes.Public | MemberAttributes.Static
             };
+
             method.Parameters.Add(new CodeParameterDeclarationExpression(typeof(string), "filename"));
             type.Members.Add(method);
 
-            Expression memberInit = UtilExpression.MemberInit<Workbook>(new TrioList<Workbook>()
+            Expression memberInit = UtilExpression.MemberInit<Workbook>(new MemberBindingList<Workbook>()
             {
                 {_documentProperties,a=>a.Properties},
                 {_names,a=>a.Names},
@@ -72,7 +85,7 @@ namespace Signum.Excel
                 {_excelWorkbook,a=>a.ExcelWorkbook},
             }); 
 
-            method.Statements.Add(new CodeVariableDeclarationStatement(typeof(Workbook), "book", UtilCodeDom.CodeSnippet(memberInit)));
+            method.Statements.Add(new CodeVariableDeclarationStatement(CSharpRenderer.TypeReference(typeof(Workbook), importedNamespaces), "book", UtilCodeDom.CodeSnippet(memberInit, importedNamespaces)));
             CodeVariableReferenceExpression book = new CodeVariableReferenceExpression("book");
 
             if (_styles != null)
@@ -81,12 +94,11 @@ namespace Signum.Excel
                 CodeMemberMethod method2 = new CodeMemberMethod()
                 {
                     Name = "GenerateStyles",
-                    ReturnType = new CodeTypeReference(typeof(StyleCollection)),
+                    ReturnType = CSharpRenderer.TypeReference(typeof(StyleCollection), importedNamespaces),
                     Attributes = MemberAttributes.Static,
                 };
-            
-                UtilCodeDom.AddComment(method, "Generate Styles");
-                method2.Statements.Add(new CodeMethodReturnStatement(UtilCodeDom.CodeSnippet(_styles.CreateExpression())));
+           
+                method2.Statements.Add(new CodeMethodReturnStatement(UtilCodeDom.CodeSnippet(_styles.CreateExpression(), importedNamespaces)));
 
                 type.Members.Add(method2);
 
@@ -103,12 +115,11 @@ namespace Signum.Excel
                     CodeMemberMethod method2 = new CodeMemberMethod()
                     {
                         Name = "GenerateWorksheet" + str,
-                        ReturnType = new CodeTypeReference(typeof(Worksheet)),
+                        ReturnType = CSharpRenderer.TypeReference(typeof(Worksheet), importedNamespaces),
                         Attributes = MemberAttributes.Static,
                     };
 
-                    UtilCodeDom.AddComment(method, "Generate " + worksheet.Name + " Worksheet");
-                    method2.Statements.Add(new CodeMethodReturnStatement(UtilCodeDom.CodeSnippet(worksheet.CreateExpression())));
+                    method2.Statements.Add(new CodeMethodReturnStatement(UtilCodeDom.CodeSnippet(worksheet.CreateExpression(), importedNamespaces)));
                     type.Members.Add(method2);
 
                     CodeMethodInvokeExpression mi = new CodeMethodInvokeExpression(null, method2.Name);
@@ -118,7 +129,7 @@ namespace Signum.Excel
 
              method.Statements.Add(new CodeMethodInvokeExpression(book, "Save", new CodeExpression[] { new CodeVariableReferenceExpression("filename") }));
 
-             return ns;
+             return unit;
         }
 
         void IReader.ReadXml(XmlElement element)

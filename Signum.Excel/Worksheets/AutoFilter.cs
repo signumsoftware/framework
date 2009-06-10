@@ -12,7 +12,7 @@
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<AutoFilter>(new TrioList<AutoFilter>()
+            return UtilExpression.MemberInit<AutoFilter>(new MemberBindingList<AutoFilter>()
             {
                 {null,_range, w=>w.Range},
             }); 

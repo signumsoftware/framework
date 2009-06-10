@@ -16,7 +16,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<Crn>(new TrioList<Crn>()
+            return UtilExpression.MemberInit<Crn>(new MemberBindingList<Crn>()
             {
                 {null,_row,a=>a.Row},
                 {Namespaces.NullValue,_colFirst,a=>a.ColFirst},

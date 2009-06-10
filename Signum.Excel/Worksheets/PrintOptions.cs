@@ -25,7 +25,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<PrintOptions>(new TrioList<PrintOptions>()
+            return UtilExpression.MemberInit<PrintOptions>(new MemberBindingList<PrintOptions>()
             {
                 {Namespaces.NullValue,_paperSizeIndex,a=>a.PaperSizeIndex},
                 {600,_horizontalResolution,a=>a.HorizontalResolution},

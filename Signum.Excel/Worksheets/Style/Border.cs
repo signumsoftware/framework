@@ -15,14 +15,14 @@
 
 
         public Expression CreateExpression()
-        {       
-            return UtilExpression.MemberInit<Border>(new TrioList<Border>()
+        {
+            return UtilExpression.MemberInit<Border>(new MemberBindingList<Border>()
             {
                 {Position.NotSet,_position, w=>w.Position},
                 {-1,_weight, w=>w.Weight},
                 {null,_color, w=>w.Color},
                 {LineStyleOption.NotSet,_lineStyle, w=>w.LineStyle},
-            }); 
+            }).Collapse(); 
         }
 
         void IReader.ReadXml(XmlElement element)

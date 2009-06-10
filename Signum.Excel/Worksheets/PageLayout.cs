@@ -14,7 +14,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<PageLayout>(new TrioList<PageLayout>()
+            return UtilExpression.MemberInit<PageLayout>(new MemberBindingList<PageLayout>()
             {
                 {Orientation.NotSet,_orientation,a=>a.Orientation},
                 {false,_centerHorizontal, a=>a.CenterHorizontal },

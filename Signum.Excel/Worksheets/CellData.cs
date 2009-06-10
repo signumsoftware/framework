@@ -48,7 +48,7 @@ namespace Signum.Excel
 
         public virtual Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<CellData>(new TrioList<CellData>()
+            return UtilExpression.MemberInit<CellData>(new MemberBindingList<CellData>()
             {
                 {null,_text,a=>a.Text},
                 {DataType.NotSet, _type, a=>a.Type}
@@ -115,7 +115,7 @@ namespace Signum.Excel
     {
         public override Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<CellData>(new TrioList<CellData>()
+            return UtilExpression.MemberInit<CellData>(new MemberBindingList<CellData>()
             {
                 {null,_text,a=>a.Text}
             });

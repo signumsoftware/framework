@@ -14,7 +14,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<PageSetup>(new TrioList<PageSetup>()
+            return UtilExpression.MemberInit<PageSetup>(new MemberBindingList<PageSetup>()
             {
                 {_layout,a=>a.Layout},
                 {_header,a=>a.Header},

@@ -22,20 +22,34 @@ namespace Signum.Excel
             this._id = id;
         }
 
+        public Style(string id, string parent)
+        {
+            this._id = id;
+            this._parent = parent;
+        }
+
         public Expression CreateExpression()
         {
-            string id = _id; // las variables locales si se tratan como valores
-            return UtilExpression.MemberInit<Style>(()=>new Style(Tree.Literal<string>(id)), //escribe bla, no "bla"
-                new TrioList<Style>()
-            {
-                {null,_name,a=>a.Name},
-                {null,_parent,a=>a.Parent},
-                {_font,a=>a.Font},
-                {_interior,a=>a.Interior},
-                {_alignment,a=>a.Alignment},
-                {_borders,a=>a.Borders},
-                {"General",_numberFormat,a=>a.NumberFormat}
-            }); 
+            return UtilExpression.MemberInit<Style>(GetConstructor(),
+                new MemberBindingList<Style>()
+                {
+                    {null,_name,a=>a.Name},
+                    {_font,a=>a.Font},
+                    {_interior,a=>a.Interior},
+                    {_alignment,a=>a.Alignment},
+                    {_borders,a=>a.Borders},
+                    {"General",_numberFormat,a=>a.NumberFormat}
+                }); 
+        }
+
+        private Expression<Func<Style>> GetConstructor()
+        {
+            string id = _id;
+            string parent = _parent;
+            if (parent == null)
+                return () => new Style(CSharpRenderer.Literal<string>(id));
+            else
+                return () => new Style(CSharpRenderer.Literal<string>(id), CSharpRenderer.Literal<string>(parent));
         }
 
 
@@ -236,12 +250,12 @@ namespace Signum.Excel
             {
                 return this._parent;
             }
-            set
+
+            set 
             {
-                this._parent = value;
+                this._parent = value; 
             }
         }
-
     }
 }
 

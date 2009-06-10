@@ -22,7 +22,7 @@
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<WorksheetTable>( new TrioList<WorksheetTable>()
+            return UtilExpression.MemberInit<WorksheetTable>(new MemberBindingList<WorksheetTable>()
             {
                 {12.75f,_defaultRowHeight, w=>w.DefaultRowHeight},
                 {48f,_defaultColumnWidth,w=>w.DefaultColumnWidth},

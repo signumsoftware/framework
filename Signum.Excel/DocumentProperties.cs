@@ -20,7 +20,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<DocumentProperties>(new TrioList<DocumentProperties>()
+            return UtilExpression.MemberInit<DocumentProperties>(new MemberBindingList<DocumentProperties>()
             { 
                 {null,_title,a=>a.Title},
                 {null,_subject,a=>a.Subject},

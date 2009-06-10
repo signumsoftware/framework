@@ -11,7 +11,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<Toolbar>(new TrioList<Toolbar>()
+            return UtilExpression.MemberInit<Toolbar>(new MemberBindingList<Toolbar>()
             {
                 {false,_hidden,a=>a.Hidden}
             }); 

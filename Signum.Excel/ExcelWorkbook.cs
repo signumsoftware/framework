@@ -25,7 +25,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<ExcelWorkbook>(new TrioList<ExcelWorkbook>()
+            return UtilExpression.MemberInit<ExcelWorkbook>(new MemberBindingList<ExcelWorkbook>()
             {
                 {_links, a=>a.Links},
                 {false,_hideWorkbookTabs,a=>a.HideWorkbookTabs},

@@ -13,7 +13,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<Interior>(new TrioList<Interior>()
+            return UtilExpression.MemberInit<Interior>(new MemberBindingList<Interior>()
             {
                 {null,_color,a=>a.Color},
                 {InteriorPattern.NotSet,_pattern,a=>a.Pattern}

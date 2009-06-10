@@ -31,7 +31,7 @@
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<NamedRange>(new TrioList<NamedRange>()
+            return UtilExpression.MemberInit<NamedRange>(new MemberBindingList<NamedRange>()
             { 
                 {null, _name, a=>a.Name},
                 {null, _refersTo, a=>a.RefersTo},

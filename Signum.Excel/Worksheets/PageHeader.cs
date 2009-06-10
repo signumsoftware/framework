@@ -14,7 +14,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<PageHeader>(new TrioList<PageHeader>()
+            return UtilExpression.MemberInit<PageHeader>(new MemberBindingList<PageHeader>()
             {    
                 {null,_data,a=>a.Data},
                 {0.5f,_margin,a=>a.Margin}

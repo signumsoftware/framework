@@ -25,8 +25,8 @@ namespace Signum.Excel
         private string _viewableRange;
 
         public Expression CreateExpression()
-        {       
-            return UtilExpression.MemberInit<Options>(new TrioList<Options>()
+        {
+            return UtilExpression.MemberInit<Options>(new MemberBindingList<Options>()
             {
                 {false,_selected,a=>a.Selected},
                 {Namespaces.NullValue,_topRowVisible,a=>a.TopRowVisible},

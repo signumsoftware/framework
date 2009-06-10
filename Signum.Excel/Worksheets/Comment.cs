@@ -14,7 +14,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<Comment>(new TrioList<Comment>()
+            return UtilExpression.MemberInit<Comment>(new MemberBindingList<Comment>()
             {   
                 {false,_showAlways,a=>a.ShowAlways},
                 {null,_author,a=>a.Author},

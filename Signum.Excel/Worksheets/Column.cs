@@ -28,8 +28,8 @@ namespace Signum.Excel
         }
 
         public Expression CreateExpression()
-        {       
-            return UtilExpression.MemberInit<Column>(()=>new Column(Tree.Literal<string>(_styleID)), new TrioList<Column>()
+        {
+            return UtilExpression.MemberInit<Column>(() => new Column(CSharpRenderer.Literal<string>(_styleID)), new MemberBindingList<Column>()
             {
                 {0,_offset,a=>a.Offset},
                 {Namespaces.NullValue,_width,a=>a.Width},

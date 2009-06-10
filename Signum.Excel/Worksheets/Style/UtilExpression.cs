@@ -26,57 +26,49 @@ namespace Signum.Excel
                 return Expression.ListInit(Expression.New(collection.GetType()), collection.Select(func));
         }
 
-        public static Expression MemberInit<T>(TrioList<T> trios) where T : new()
+        public static Expression MemberInit<T>(MemberBindingList<T> bindings) where T : new()
         {
-            if (trios.Count == 0)
+            if (bindings.Count == 0)
                 return Expression.New(typeof(T));
             else
-                return Expression.MemberInit(Expression.New(typeof(T)),
-                    trios.Select(t => (MemberBinding)Expression.Bind(t.Member, t.RightSide)));
+                return Expression.MemberInit(Expression.New(typeof(T)), bindings);
         }
 
-        public static Expression MemberInit<T>(Expression<Func<T>> constructor,  TrioList<T> trios)
+        public static Expression MemberInit<T>(Expression<Func<T>> constructor, MemberBindingList<T> bindings)
         {
-            if (trios.Count == 0)
+            if (bindings.Count == 0)
                 return (NewExpression)constructor.Body;
             else
-            return Expression.MemberInit((NewExpression)constructor.Body,
-                trios.Select(t => (MemberBinding)Expression.Bind(t.Member, t.RightSide)));
+                return Expression.MemberInit((NewExpression)constructor.Body, bindings);
         }
 
         public static Expression Collapse(this Expression expression)
         {
-            return Expression.Call(typeof(Tree).GetMethod("Collapse").MakeGenericMethod(expression.Type), expression);
+            return Expression.Call(typeof(CSharpRenderer).GetMethod("Collapse").MakeGenericMethod(expression.Type), expression);
         }
     }
 
-    public class Trio<T>
-    {
-        public Expression RightSide;
-        public MemberInfo Member;
-    }
-
-    public class TrioList<T> : Collection<Trio<T>>
+    public class MemberBindingList<T> : List<MemberBinding>
     {
         public void Add<S>(S defaultValue, S valor, Expression<Func<T, S>> exp)
         {
             if (!object.Equals(defaultValue,valor))
-                Add(Expression.Constant(valor), exp);
+                AddInternal(Expression.Constant(valor), exp);
         }
 
-        public void Add<S>(S expressionWriter, Expression<Func<T, S>> exp) where S:IExpressionWriter
+        public void Add<S>(S expressionWriter, Expression<Func<T, S>> exp) where S : IExpressionWriter
         {
             if (expressionWriter != null)
-                Add( expressionWriter.CreateExpression(), exp);
+                AddInternal(expressionWriter.CreateExpression(), exp);
         }
 
         public void Add(Collection<string> stringCollection, Expression<Func<T, Collection<string>>> exp)
         {
             if (stringCollection != null)
-                Add(UtilExpression.ListInit(stringCollection, s => Expression.Constant(s)), exp);
+                AddInternal(UtilExpression.ListInit(stringCollection, s => Expression.Constant(s)), exp);
         }
 
-        void Add<S>(Expression rightSide, Expression<Func<T, S>> exp)
+        public void AddInternal<S>(Expression rightSide, Expression<Func<T, S>> exp)
         {
             Expression exp2 = exp.Body;
             if(exp.Body.NodeType == ExpressionType.Convert || exp.Body.NodeType == ExpressionType.ConvertChecked)
@@ -85,12 +77,7 @@ namespace Signum.Excel
             if(exp2.NodeType != ExpressionType.MemberAccess)
                   throw new ApplicationException("Invalid lambda {0}".Formato(exp.GenerateCSharpCode()));
 
-            this.Add(new Trio<T>
-            {
-                RightSide = rightSide,
-                Member = ((MemberExpression)exp2).Member
-            }); 
+            this.Add(Expression.Bind(((MemberExpression)exp2).Member, rightSide));
         }
-
     }
 }

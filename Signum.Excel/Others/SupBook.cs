@@ -16,7 +16,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<SupBook>(new TrioList<SupBook>()
+            return UtilExpression.MemberInit<SupBook>(new MemberBindingList<SupBook>()
             {
                 {null,_path,a=>a.Path},
                 {_references, a=>a.References},

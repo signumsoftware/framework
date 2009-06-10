@@ -14,18 +14,6 @@
 
     internal static class UtilCodeDom
     {
-        public static void AddComment(CodeMemberMethod method, string text)
-        {
-            AddCommentSeparator(method);
-            method.Statements.Add(new CodeCommentStatement(" " + text));
-            AddCommentSeparator(method);
-        }
-
-        public static void AddCommentSeparator(CodeMemberMethod method)
-        {
-            method.Statements.Add(new CodeCommentStatement("-----------------------------------------------"));
-        }
-
         internal static string CreateSafeName(string strName, string prefix)
         {
             StringBuilder builder = new StringBuilder();
@@ -48,9 +36,9 @@
             return builder.ToString();
         }
       
-        internal static CodeExpression CodeSnippet(Expression expression)
+        internal static CodeExpression CodeSnippet(Expression expression, string[] importedNamespaces)
         {
-            string str = expression.GenerateCSharpCode();
+            string str = expression.GenerateCSharpCode(importedNamespaces);
             str = str.Indent(12).RemoveLeft(12);
             return new CodeSnippetExpression(str);
         }

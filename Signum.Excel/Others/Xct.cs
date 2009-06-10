@@ -13,7 +13,7 @@ namespace Signum.Excel
 
         public Expression CreateExpression()
         {
-            return UtilExpression.MemberInit<Xct>(new TrioList<Xct>()
+            return UtilExpression.MemberInit<Xct>(new MemberBindingList<Xct>()
             {
                 {Namespaces.NullValue,_sheetIndex,a=>a.SheetIndex},
                 {_operands,a=>a.Operands},
