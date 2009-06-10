@@ -42,7 +42,7 @@ namespace Signum.Engine
                         .ToString(p => "{0} {1}: {2}".Formato(
                             p.ParameterName,
                             p.SqlDbType,
-                            p.Value.TryCC(v => CSharpAuxRenderer.Value(v, v.GetType()))), "\r\n"));
+                            p.Value.TryCC(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
                 log.WriteLine();
             }
         }

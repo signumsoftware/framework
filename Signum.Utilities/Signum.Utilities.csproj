@@ -86,8 +86,8 @@
     <Compile Include="Reflection\MemberEntryFactory.cs" />
     <Compile Include="Serialization.cs" />
     <Compile Include="Switch.cs" />
-    <Compile Include="ExpressionTrees\CSharpAuxRenderer.cs" />
-    <Compile Include="ExpressionTrees\CSharpTreeRenderer.cs" />
+    <Compile Include="ExpressionTrees\CSharpRenderer.cs" />
+    <Compile Include="ExpressionTrees\CSharpTreeVisitor.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GroupExtensions.cs" />
     <Compile Include="ExpressionTrees\ExpressionExtensions.cs" />

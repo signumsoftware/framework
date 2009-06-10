@@ -15,10 +15,34 @@ using Signum.Utilities.DataStructures;
 
 namespace Signum.Utilities.ExpressionTrees
 {
- 
-
-    public static class CSharpAuxRenderer
+    public static class CSharpRenderer
     {
+        public static string GenerateCSharpCode(this Expression expression, string[] importedNamespaces)
+        {
+            return new CSharTreeVisitor { ImportedNamespaces = importedNamespaces }.VisitReal(expression);
+        }
+
+        public static string GenerateCSharpCode(this Expression expression)
+        {
+            return new CSharTreeVisitor().VisitReal(expression);
+        }
+
+        /// <summary>
+        /// Colapse un collection o object initializer in one single line
+        /// </summary>
+        public static T Collapse<T>(this T obj)
+        {
+            return obj;
+        }
+
+        /// <summary>
+        /// Allows to write string litterals in an expression tree, be carefull with parenthesis
+        /// </summary>
+        public static T Literal<T>(string literal)
+        {
+            return default(T);
+        }
+
         static Dictionary<TypeCode, string> basicTypes = new Dictionary<TypeCode, string>
         {
             { TypeCode.Boolean, "bool"}, 
@@ -116,17 +140,25 @@ namespace Signum.Utilities.ExpressionTrees
         static CSharpCodeProvider provider = new CSharpCodeProvider();
         static CodeGeneratorOptions options = new CodeGeneratorOptions(); 
         
-        public static string Value(object valor, Type type)
+        public static string Value(object valor, Type type, string[] importedNamespaces)
         {
              StringBuilder sb = new StringBuilder();
              using (StringWriter w = new StringWriter(sb))
              {
-                 provider.GenerateCodeFromExpression(GetRightExpressionForValue(valor, type), w, options);
+                 provider.GenerateCodeFromExpression(GetRightExpressionForValue(valor, type, importedNamespaces), w, options);
                  return w.ToString();
              }
         }
 
-        public static CodeExpression GetRightExpressionForValue(object value, Type type)
+        public static CodeTypeReference TypeReference(Type type, string[] importedNamespaces)
+        {
+            if (!type.IsGenericType && !type.IsArray &&  importedNamespaces != null && importedNamespaces.Contains(type.Namespace))
+                return new CodeTypeReference(type.Name);
+            else
+                return new CodeTypeReference(type); ;
+        }
+
+        public static CodeExpression GetRightExpressionForValue(object value, Type type, string[] importedNamespaces)
         {
             if (value is DBNull || value == null)
             {
@@ -158,12 +190,12 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 Array array = (Array)value;
                 CodeArrayCreateExpression expression = new CodeArrayCreateExpression();
-                expression.CreateType = new CodeTypeReference(type.GetElementType());
+                expression.CreateType = TypeReference(type.GetElementType(), importedNamespaces);
                 if (array != null)
                 {
                     foreach (object obj2 in array)
                     {
-                        expression.Initializers.Add(GetRightExpressionForValue(obj2, type.GetElementType()));
+                        expression.Initializers.Add(GetRightExpressionForValue(obj2, type.GetElementType(), importedNamespaces));
                     }
                 }
                 return expression;
@@ -185,11 +217,11 @@ namespace Signum.Utilities.ExpressionTrees
                 {
                     if (descriptor.MemberInfo is FieldInfo)
                     {
-                        return new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(descriptor.MemberInfo.DeclaringType.FullName), descriptor.MemberInfo.Name);
+                        return new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(TypeReference( descriptor.MemberInfo.DeclaringType, importedNamespaces)), descriptor.MemberInfo.Name);
                     }
                     if (descriptor.MemberInfo is PropertyInfo)
                     {
-                        return new CodePropertyReferenceExpression(new CodeTypeReferenceExpression(descriptor.MemberInfo.DeclaringType.FullName), descriptor.MemberInfo.Name);
+                        return new CodePropertyReferenceExpression(new CodeTypeReferenceExpression(TypeReference(descriptor.MemberInfo.DeclaringType, importedNamespaces)), descriptor.MemberInfo.Name);
                     }
                     object[] objArray = new object[descriptor.Arguments.Count];
                     descriptor.Arguments.CopyTo(objArray, 0);
@@ -199,7 +231,7 @@ namespace Signum.Utilities.ExpressionTrees
                         ParameterInfo[] parameters = ((MethodInfo)descriptor.MemberInfo).GetParameters();
                         for (int i = 0; i < objArray.Length; i++)
                         {
-                            expressionArray[i] = GetRightExpressionForValue(objArray[i], parameters[i].ParameterType);
+                            expressionArray[i] = GetRightExpressionForValue(objArray[i], parameters[i].ParameterType, importedNamespaces);
                         }
                         CodeMethodInvokeExpression expression4 = new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(descriptor.MemberInfo.DeclaringType.FullName), descriptor.MemberInfo.Name, new CodeExpression[0]);
                         foreach (CodeExpression expression5 in expressionArray)
@@ -213,7 +245,7 @@ namespace Signum.Utilities.ExpressionTrees
                         ParameterInfo[] infoArray2 = ((ConstructorInfo)descriptor.MemberInfo).GetParameters();
                         for (int j = 0; j < objArray.Length; j++)
                         {
-                            expressionArray[j] = GetRightExpressionForValue(objArray[j], infoArray2[j].ParameterType);
+                            expressionArray[j] = GetRightExpressionForValue(objArray[j], infoArray2[j].ParameterType, importedNamespaces);
                         }
                         CodeObjectCreateExpression expression6 = new CodeObjectCreateExpression(descriptor.MemberInfo.DeclaringType.FullName, new CodeExpression[0]);
                         foreach (CodeExpression expression7 in expressionArray)
@@ -228,24 +260,4 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
     }
-
-    public static class Tree
-    {
-        /// <summary>
-        /// Colapse un collection o object initializer in one single line
-        /// </summary>
-        public static T Collapse<T>(this T obj)
-        {
-            return obj;
-        }
-
-        /// <summary>
-        /// Allows to write string litterals in an expression tree, be carefull with parenthesis
-        /// </summary>
-        public static T Literal<T>(string literal)
-        {
-            return default(T);
-        }
-    }
-
 }
