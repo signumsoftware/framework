@@ -76,7 +76,6 @@ namespace Signum.Utilities
         }
 
 
-        /// <param name="menssage"></param>
         public static V GetOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, string message)
         {
             V result;
