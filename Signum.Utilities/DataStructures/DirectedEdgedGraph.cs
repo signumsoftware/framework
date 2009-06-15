@@ -318,6 +318,23 @@ namespace Signum.Utilities.DataStructures
                 "\r\n"); ;  
         }
 
+        public string Graphviz()
+        {
+            return Graphviz("Graph", a => a.ToString(), e=>e.ToString() );
+        }
+
+        public string Graphviz(string name, Func<T, string> getNodeName, Func<E, string> getEdgeName)
+        {
+            int num = 0;
+            Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
+
+            string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".Formato(nodeDic[e], getNodeName(e)), "\r\n");
+
+            string edges = EdgesWithValue.ToString(e => "   {0} -> {1} [ label =\"{2}\"];".Formato(nodeDic[e.From], nodeDic[e.To], getEdgeName(e.Value)), "\r\n");
+
+            return "digraph \"{0}\"\r\n{{\r\n{1}\r\n{2}\r\n}}".Formato(name, nodes, edges);
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             return adjacency.Keys.GetEnumerator();

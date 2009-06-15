@@ -319,16 +319,16 @@ public class DirectedGraph<T>:IEnumerable<T>
         return Graphviz("Graph", a => a.ToString()); 
     }
 
-    public string Graphviz(string name)
-    {
-        return Graphviz(name, a => a.ToString());
-    }
-
     public string Graphviz(string name, Func<T, string> getName)
     {
-        string arrows = Edges.ToString(e => "   \"{0}\" -> \"{1}\";".Formato(getName(e.From), getName(e.To)), "\r\n");
+        int num = 0;
+        Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
 
-        return "digraph \"{0}\"\r\n{{\r\n{1}\r\n}}".Formato(name, arrows); 
+        string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".Formato(nodeDic[e], getName(e)), "\r\n");  
+
+        string edges = Edges.ToString(e => "   {0} -> {1};".Formato(nodeDic[e.From], nodeDic[e.To]), "\r\n");
+
+        return "digraph \"{0}\"\r\n{{\r\n{1}\r\n{2}\r\n}}".Formato(name, nodes, edges); 
     }
 
     #region IEnumerable<T> Members
