@@ -117,7 +117,7 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            return "Value({0}): {1}".Formato(Value.TryCC(a => CSharpAuxRenderer.Value(a, a.GetType())) ?? "[null]", ControlID);
+            return "Value({0}): {1}".Formato(Value.TryCC(a => CSharpRenderer.Value(a, a.GetType(), null)) ?? "[null]", ControlID);
         }
     }
 
