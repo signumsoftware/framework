@@ -40,7 +40,7 @@ namespace Signum.Web
             this.ControlID = controlID;
         }
 
-        public abstract object ApplyChanges(object obj);
+        public abstract object ApplyChanges(NavigationManager navigationManager, object obj);
 
         public abstract void Validate(object entity, Dictionary<string, List<string>> errors);
 
@@ -104,7 +104,7 @@ namespace Signum.Web
             }
         }
 
-        public override object ApplyChanges(object obj)
+        public override object ApplyChanges(NavigationManager navigationManager, object obj)
         {
             return Value;
         }
@@ -126,6 +126,7 @@ namespace Signum.Web
         Type RuntimeType; 
         int? EntityId; //optional
         bool IsNew;
+        bool AvoidChange = false; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
 
         internal class PropertyPackModification
         {
@@ -138,21 +139,23 @@ namespace Signum.Web
         public EntityModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
             : base(staticType, controlID)
         {
-            //if (typeof(EmbeddedEntity).IsAssignableFrom(staticType))
-            //    RuntimeType = staticType;
-            //else
-            //{
+            if (formValues.ContainsKey(controlID + TypeContext.Separator + TypeContext.RuntimeType))
+            {
                 string runtimeTypeName = (string)formValues[controlID + TypeContext.Separator + TypeContext.RuntimeType];
-                RuntimeType = runtimeTypeName.HasText() ? Navigator.ResolveType(runtimeTypeName) : null; 
-                
-                IsNew = formValues.ContainsKey(controlID + TypeContext.Separator + EntityBaseKeys.IsNew);
+                RuntimeType = (runtimeTypeName.HasText()) ? Navigator.ResolveType(runtimeTypeName) : null;
+            }
+            else
+            {
+                AvoidChange = true;
+            }
+            
+            IsNew = formValues.ContainsKey(controlID + TypeContext.Separator + EntityBaseKeys.IsNew);
 
-                if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType))
-                {
-                    string id = (string)formValues[controlID + TypeContext.Separator + TypeContext.Id];
-                    EntityId = id.HasText() ? int.Parse(id) : (int?)null;
-                }
-            //}
+            if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType) && formValues.ContainsKey(controlID + TypeContext.Separator + TypeContext.Id))
+            {
+                string id = (string)formValues[controlID + TypeContext.Separator + TypeContext.Id];
+                EntityId = id.HasText() ? int.Parse(id) : (int?)null;
+            }
 
             Fill(formValues, interval);
         }
@@ -189,14 +192,18 @@ namespace Signum.Web
             }
         }
 
-        public override object ApplyChanges(object obj)
+        public override object ApplyChanges(NavigationManager navigationManager, object obj)
         {
-            ModifiableEntity entity = Change((ModifiableEntity)obj);
+            ModifiableEntity entity;
+            if (AvoidChange)
+                entity = (ModifiableEntity)obj;
+            else
+                entity = Change((ModifiableEntity)obj, navigationManager);
 
             foreach (var ppm in Properties.Values)
             {
                 object oldValue = ppm.PropertyPack.GetValue(entity);
-                object newValue = ppm.Modification.ApplyChanges(oldValue);
+                object newValue = ppm.Modification.ApplyChanges(navigationManager, oldValue);
                 try
                 {
                     ppm.PropertyPack.SetValue(entity, newValue);
@@ -210,13 +217,13 @@ namespace Signum.Web
             return entity;
         }
 
-        private ModifiableEntity Change(ModifiableEntity entity)
+        private ModifiableEntity Change(ModifiableEntity entity, NavigationManager navigationManager)
         {
             if (RuntimeType == null)
                 return null;
 
             if (IsNew)
-                return (ModifiableEntity)Constructor.Construct(RuntimeType);
+                return (ModifiableEntity)navigationManager.Constructors[RuntimeType]();
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(RuntimeType))
                 return entity;
@@ -289,13 +296,13 @@ namespace Signum.Web
                 EntityModification = null;
         }
 
-        public override object ApplyChanges(object obj)
+        public override object ApplyChanges(NavigationManager navigationManager, object obj)
         {
             if (RuntimeType == null)
                 return null;
 
             if (IsNew)
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(null));
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, null));
 
             Lazy lazy = (Lazy)obj;
 
@@ -306,13 +313,14 @@ namespace Signum.Web
                 else
                     return Lazy.Create(CleanType,
                         (IdentifiableEntity)EntityModification.ApplyChanges(
+                           navigationManager, 
                            Database.Retrieve(RuntimeType, EntityId.Value)));
             }
 
             if (EntityId == null)
             {
                 Debug.Assert(lazy.IdOrNull == null && RuntimeType == lazy.GetType() && EntityModification != null); 
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(lazy.UntypedEntityOrNull));
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, lazy.UntypedEntityOrNull));
             }
             else
             {
@@ -321,10 +329,10 @@ namespace Signum.Web
                     if (EntityModification == null)
                         return lazy;
                     else
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(Database.Retrieve(lazy)));
+                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, Database.Retrieve(lazy)));
                 }
                 else
-                    return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(Database.Retrieve(RuntimeType, EntityId.Value)));
+                    return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, Database.Retrieve(RuntimeType, EntityId.Value)));
             }
         }
 
@@ -395,7 +403,7 @@ namespace Signum.Web
         }
 
 
-        public override object ApplyChanges(object obj)
+        public override object ApplyChanges(NavigationManager navigationManager, object obj)
         {
             IList old = (IList)obj;
 
@@ -403,9 +411,9 @@ namespace Signum.Web
             foreach (var item in modifications)
             {
                 if (item.Second.HasValue)
-                    list.Add(item.First.ApplyChanges(old[item.Second.Value]));
+                    list.Add(item.First.ApplyChanges(navigationManager, old[item.Second.Value]));
                 else
-                    list.Add(item.First.ApplyChanges(null));
+                    list.Add(item.First.ApplyChanges(navigationManager, null));
             }
             return list;
         }

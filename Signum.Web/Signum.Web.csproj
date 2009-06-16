@@ -94,6 +94,7 @@
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
     <Compile Include="QuerySettings.cs" />
+    <Compile Include="RadioButtonLine.cs" />
     <Compile Include="ScriptHelper.cs" />
     <Compile Include="SearchControlHelper.cs" />
     <Compile Include="SignumViewEngine.cs" />

@@ -12,42 +12,42 @@ using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
-    public static class Constructor
-    {
-        public static ConstructorManager ConstructorManager = new ConstructorManager() {  Constructors = new Dictionary<Type,Func<object>>()};
+    //public static class Constructor
+    //{
+    //    public static ConstructorManager ConstructorManager = new ConstructorManager() {  Constructors = new Dictionary<Type,Func<object>>()};
 
-        public static object Construct(Type type)
-        {
-            return ConstructorManager.Construct(type); 
-        }
+    //    public static object Construct(Type type)
+    //    {
+    //        return ConstructorManager.Construct(type); 
+    //    }
 
-        public static T Construct<T>()
-        {
-            return (T)Construct(typeof(T));
-        }
-    }
+    //    public static T Construct<T>()
+    //    {
+    //        return (T)Construct(typeof(T));
+    //    }
+    //}
     
-    public class ConstructorManager
-    {
-        public Dictionary<Type, Func<object>> Constructors;
+    //public class ConstructorManager
+    //{
+    //    public Dictionary<Type, Func<object>> Constructors;
 
-        public virtual object Construct(Type type)
-        {
-            Type exType = Reflector.ExtractLazy(type) ?? type;
+    //    public virtual object Construct(Type type)
+    //    {
+    //        Type exType = Reflector.ExtractLazy(type) ?? type;
 
-            Func<object> c = Constructors.TryGetC(exType);
+    //        Func<object> c = Constructors.TryGetC(exType);
 
-            object result = c != null? c(): DefaultContructor(exType); 
+    //        object result = c != null? c(): DefaultContructor(exType); 
            
-            return exType == type ? result: Activator.CreateInstance(type, result); // make lazy if possible
-        }
+    //        return exType == type ? result: Activator.CreateInstance(type, result); // make lazy if possible
+    //    }
 
-        public static object DefaultContructor(Type type)
-        {
-            object result = Activator.CreateInstance(type);
+    //    public static object DefaultContructor(Type type)
+    //    {
+    //        object result = Activator.CreateInstance(type);
 
-            return result;
-        }
+    //        return result;
+    //    }
 
 
         //public static object AddFilterProperties(Window window, object obj)
@@ -72,19 +72,19 @@ namespace Signum.Web
 
         //    return obj; 
         //}
-    }
+    //}
 
-    public static class NotesProvider
-    {
-        public static NotesProviderManager Manager; 
-    }
+    //public static class NotesProvider
+    //{
+    //    public static NotesProviderManager Manager; 
+    //}
 
-    public class NotesProviderManager
-    {
-        public Func<IdentifiableEntity, INoteDN> ConstructNote;
-        /// <summary>
-        /// Null means hide notes
-        /// </summary>
-        public Func<IdentifiableEntity, List<Lazy<INoteDN>>> RetrieveNotes;
-    }
+    //public class NotesProviderManager
+    //{
+    //    public Func<IdentifiableEntity, INoteDN> ConstructNote;
+    //    /// <summary>
+    //    /// Null means hide notes
+    //    /// </summary>
+    //    public Func<IdentifiableEntity, List<Lazy<INoteDN>>> RetrieveNotes;
+    //}
 }

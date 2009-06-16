@@ -247,7 +247,8 @@ namespace Signum.Web
         {
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
             //string urlName = Navigator.NavigationManager.TypesToURLNames.TryGetC(obj.GetType()).ThrowIfNullC("No hay un nombre asociado al tipo: " + obj.GetType());
-            
+
+            controller.ViewData[ViewDataKeys.ResourcesRoute] = System.Configuration.ConfigurationManager.AppSettings["RutaResources"] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
@@ -266,7 +267,8 @@ namespace Signum.Web
         protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix)
         {
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
-            
+
+            controller.ViewData[ViewDataKeys.ResourcesRoute] = System.Configuration.ConfigurationManager.AppSettings["RutaResources"] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
 
@@ -294,6 +296,7 @@ namespace Signum.Web
                     .Single("Filter Column {0} not found or found more than once in query description".Formato(opt.ColumnName));
             }
 
+            controller.ViewData[ViewDataKeys.ResourcesRoute] = System.Configuration.ConfigurationManager.AppSettings["RutaResources"] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -323,6 +326,7 @@ namespace Signum.Web
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
+            controller.ViewData[ViewDataKeys.ResourcesRoute] = System.Configuration.ConfigurationManager.AppSettings["RutaResources"] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData[ViewDataKeys.PopupSufix] = prefixEnd ?? "";
@@ -369,6 +373,7 @@ namespace Signum.Web
         {
             QueryResult queryResult = Queries.ExecuteQuery(queryName, filters, resultsLimit);
 
+            controller.ViewData[ViewDataKeys.ResourcesRoute] = System.Configuration.ConfigurationManager.AppSettings["RutaResources"] ?? "../../";
             controller.ViewData[ViewDataKeys.Results] = queryResult;
             controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
@@ -483,7 +488,7 @@ namespace Signum.Web
         {
             Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
 
-            obj = (T)modification.ApplyChanges(obj);
+            obj = (T)modification.ApplyChanges(this, obj);
 
             return GenerateErrors((Modifiable)(object)obj, modification);
         }
@@ -523,7 +528,7 @@ namespace Signum.Web
             if (!string.IsNullOrEmpty(id))
                 return Database.Retrieve(type, int.Parse(id));
             else
-                return (IdentifiableEntity)Constructor.Construct(type);
+                return (IdentifiableEntity)Constructors[type]();
         }
     }
 
