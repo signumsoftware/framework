@@ -25,8 +25,13 @@ namespace Signum.Entities
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [field:NonSerialized]
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
+        [NonSerialized]
+        NotifyCollectionChangedEventHandler collectionChanged;
+        event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
+        {
+            add { collectionChanged += value; }
+            remove { collectionChanged -= value; }
+        }
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
@@ -46,9 +51,9 @@ namespace Signum.Entities
                     break;
             }
 
-            if (this.CollectionChanged != null)
+            if (this.collectionChanged != null)
             {
-                this.CollectionChanged(this, e);
+                this.collectionChanged(this, e);
             }
 
         }
