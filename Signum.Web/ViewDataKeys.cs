@@ -8,6 +8,7 @@ namespace Signum.Web
 {
     public static class ViewDataKeys
     {
+        public const string ResourcesRoute = "sfResourcesRoute";
         public const string PopupPrefix = "sfPrefix";
         public const string PopupSufix = "sfSufix";
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
