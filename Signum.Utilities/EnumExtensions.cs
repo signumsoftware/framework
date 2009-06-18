@@ -32,12 +32,12 @@ namespace Signum.Utilities
 
         public static string NiceToString<T>(T a) where T : struct
         {
-            return EnumDescriptionCache.Get(a) ?? a.ToString().SpacePascal(true);
+            return EnumDescriptionCache.Get(a) ?? a.ToString().NiceName();
         }
 
         public static string NiceToString(object a)
         {
-            return EnumDescriptionCache.Get(a) ?? a.ToString().SpacePascal(true);
+            return EnumDescriptionCache.Get(a) ?? a.ToString().NiceName();
         }
 
         public static bool IsDefined<T>(T value) where T : struct

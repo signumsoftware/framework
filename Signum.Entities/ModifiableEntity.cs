@@ -192,7 +192,7 @@ namespace Signum.Entities
                 {
                     PropertyPack pp = GetPropertyValidators(GetType())[columnName];
                     object val = pp.GetValue(this);
-                    return pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(columnName)).FirstOrDefault();
+                    return pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(pp.NiceName)).FirstOrDefault();
                 }
             }
         }
@@ -224,12 +224,16 @@ namespace Signum.Entities
             Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true).OfType<ValidatorAttribute>().ToReadOnly();
             this.GetValue = getValue;
             this.SetValue = setValue;
+            NiceName = pi.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description) ?? pi.Name.NiceName();
         }
+
+        
 
         public readonly Func<object, object> GetValue;
         public readonly Action<object, object> SetValue;
         public readonly PropertyInfo PropertyInfo;
         public readonly ReadOnlyCollection<ValidatorAttribute> Validators;
+        public readonly string NiceName; 
     }
 
    

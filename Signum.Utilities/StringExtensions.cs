@@ -240,6 +240,13 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static string NiceName(this string memberName)
+        {
+            return memberName.Contains('_') ?
+              memberName.Replace('_', ' ') :
+              memberName.SpacePascal(true);
+        }
+
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)
         {
             StringBuilder sb = new StringBuilder();
@@ -330,5 +337,7 @@ namespace Signum.Utilities
 
             return "{0:#,###.00} {1}".Formato(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
+
+        
     }
 }

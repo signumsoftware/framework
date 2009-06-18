@@ -72,7 +72,7 @@ namespace Signum.Web
                     .Cast<object>()
                     .Select(v => new SelectListItem()
                         {
-                            Text = v.ToString().Replace("_", " "), 
+                            Text = EnumExtensions.NiceToString(v),
                             Value = v.ToString(), 
                             Selected = object.Equals(value,v),
                         })
