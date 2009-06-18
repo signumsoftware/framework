@@ -9,6 +9,7 @@
     	<m:ValueLine LabelText="_UserName" m:Common.Route="UserName"/>
     	<auth:DoublePassword PasswordHash="{Binding Path=PasswordHash}"/>
         <m:EntityLine LabelText="_Role" m:Common.Route="Role"  />
+        <m:ValueLine LabelText="_EMail" m:Common.Route="EMail"  />
         <m:EntityLine LabelText="_Related" m:Common.Route="Related"/>
     </StackPanel>
 </UserControl>
