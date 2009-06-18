@@ -45,6 +45,14 @@ namespace Signum.Entities.Authorization
             get { return role; }
             set { Set(ref role, value, "Role"); }
         }
+
+        string email;
+        [EmailValidator]
+        public string EMail
+        {
+            get { return email; }
+            set { Set(ref email, value, "EMail"); }
+        }
     
         public IIdentity Identity
         {
