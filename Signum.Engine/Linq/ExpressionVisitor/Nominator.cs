@@ -283,6 +283,18 @@ namespace Signum.Engine.Linq
             return u;
         }
 
+        protected override Expression VisitIn(InExpression inExp)
+        {
+            Expression exp = this.Visit(inExp.Expression);
+            if (exp != inExp.Expression)
+                inExp = new InExpression(exp, inExp.Values);
+
+            if (candidates.Contains(exp))
+                candidates.Add(inExp);
+
+            return inExp;
+        }
+
         protected override Expression VisitEnumExpression(EnumExpression enumExp)
         {
             var id = (ColumnExpression)Visit(enumExp.ID);

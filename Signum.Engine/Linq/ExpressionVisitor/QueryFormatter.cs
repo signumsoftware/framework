@@ -293,13 +293,30 @@ namespace Signum.Engine.Linq
             return like;
         }
 
+        protected override Expression VisitIn(InExpression inExpression)
+        {
+            Visit(inExpression.Expression);
+            sb.Append(" IN (");
+            bool any = false;
+            foreach (var obj in inExpression.Values)
+            {
+                VisitConstant(Expression.Constant(obj));
+                sb.Append(",");
+                any = true;
+            }
+            if (any)
+                sb.Remove(sb.Length - 1, 1);
+            sb.Append(" )");
+            return inExpression;
+        }
+
         protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             sb.Append(sqlEnum.Value);
             return sqlEnum;
         }
 
-        bool IsSupported(Type type)
+        internal static bool IsSupported(Type type)
         {
             return type == typeof(Guid) || Type.GetTypeCode(type) != TypeCode.Object;
         }

@@ -48,6 +48,8 @@ namespace Signum.Engine.Linq
                     return this.VisitSetOperation((SetOperationExpression)exp);
                 case DbExpressionType.Like:
                     return this.VisitLike((LikeExpression)exp);
+                case DbExpressionType.In:
+                    return this.VisitIn((InExpression)exp); 
                 case DbExpressionType.FieldInit:
                     return this.VisitFieldInit((FieldInitExpression)exp);
                 case DbExpressionType.ImplementedBy:
@@ -62,11 +64,11 @@ namespace Signum.Engine.Linq
                     return this.VisitLazyLiteral((LazyLiteralExpression)exp);
                 case DbExpressionType.MList:
                     return this.VisitMList((MListExpression)exp);
+
                 default:
                     return base.Visit(exp);
             }
         }
-
 
         protected virtual Expression VisitMList(MListExpression ml)
         {
@@ -174,6 +176,15 @@ namespace Signum.Engine.Linq
             if (exp != like.Expression || pattern != like.Pattern)
                 return new LikeExpression(exp, pattern);
             return like;
+        }
+
+
+        protected virtual Expression VisitIn(InExpression inExpression)
+        {
+            Expression exp = Visit(inExpression.Expression);
+            if (exp != inExpression.Expression)
+                return new InExpression(exp, inExpression.Values);
+            return inExpression;
         }
 
         protected virtual Expression VisitRowNumber(RowNumberExpression rowNumber)

@@ -394,8 +394,18 @@ namespace Signum.Engine.Linq
 
         private Expression BindContains(Type resultType, Expression source, Expression item)
         {
-            ProjectionExpression projection = this.VisitCastProjection(source);
             Expression newItem = Visit(item);
+
+            if (source.NodeType == ExpressionType.Constant && typeof(IEnumerable).IsAssignableFrom(source.Type) && !typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                ConstantExpression ce = (ConstantExpression)source;
+                IEnumerable ie = (IEnumerable)ce.Value;
+                
+                return new InExpression(newItem, ie== null ? new object[0]: ie.Cast<object>().ToArray());
+            }
+
+            ProjectionExpression projection = this.VisitCastProjection(source);
+            
 
             Expression where = Nominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem), true);
 

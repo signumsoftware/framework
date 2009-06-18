@@ -32,6 +32,7 @@ namespace Signum.Engine.Linq
         RowNumber,
         SetOperation,
         Like,
+        In,
         FieldInit,
         ImplementedBy,
         ImplementedByAll,
@@ -450,6 +451,30 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0} LIKE {1}".Formato(Expression, Pattern);
+        }
+    }
+
+    internal class InExpression : Expression
+    {
+        public readonly Expression Expression;
+        public readonly object[] Values;
+
+        public InExpression(Expression expression, object[] values)
+            : base((ExpressionType)DbExpressionType.In, typeof(bool))
+        {
+            if (expression == null)
+                throw new ArgumentException("expression");
+
+            if (values == null)
+                throw new ArgumentException("values"); 
+       
+            this.Expression = expression;
+            this.Values = values;
+        }
+
+        public override string ToString()
+        {
+            return "{0} IN ({1})".Formato(Expression, Values.ToString(", "));
         }
     }
 

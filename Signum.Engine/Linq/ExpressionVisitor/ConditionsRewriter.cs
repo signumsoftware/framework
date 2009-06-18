@@ -128,6 +128,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.Case:
                     return false; 
                 case DbExpressionType.Like:
+                case DbExpressionType.In:
                     return true; 
             }
 
