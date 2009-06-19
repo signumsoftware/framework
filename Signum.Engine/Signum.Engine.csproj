@@ -94,7 +94,6 @@
     <Compile Include="Linq\ExpressionVisitor\SubqueryRemover.cs" />
     <Compile Include="Linq\ExpressionVisitor\TranslatorBuilder.cs" />
     <Compile Include="Linq\ExpressionVisitor\UnusedColumnRemover.cs" />
-    <Compile Include="Linq\Grouping.cs" />
     <Compile Include="Linq\DbExpressions.Projection.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />
     <Compile Include="Linq\Query.cs" />
@@ -125,7 +124,7 @@
     <Compile Include="Schema\SchemaBuilder\SchemaBuilderSettings.cs" />
     <Compile Include="Schema\SchemaBuilder\NameSequence.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ObjectCache.cs" />
+    <Compile Include="EntityCache.cs" />
     <Compile Include="Engine\SqlBuilder.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

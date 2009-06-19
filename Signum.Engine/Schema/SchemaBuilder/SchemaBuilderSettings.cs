@@ -111,8 +111,10 @@ namespace Signum.Engine.Maps
 
         internal bool IsNullable(Type type, FieldInfo fi, Type fieldType)
         {
-            return fieldType.IsValueType ? Nullable.GetUnderlyingType(fieldType) != null :
-                                        !FieldInfoAttributes(type, fi).OfType<NotNullableAttribute>().Any();
+            if (FieldInfoAttributes(type, fi).OfType<NotNullableAttribute>().Any())
+                return false; 
+
+            return fieldType.IsValueType ? Nullable.GetUnderlyingType(fieldType) != null : true;
         }
 
         internal Index? IndexType(Type type, FieldInfo fi)
@@ -135,7 +137,7 @@ namespace Signum.Engine.Maps
                 return Index.Unique;
         }
 
-        internal Attribute GetReferenceFieldType(Type type, FieldInfo fi, Type fieldType)
+        internal Attribute GetReferenceFieldType(Type type, FieldInfo fi, Type entityType)
         {
             var fieldAtt = FieldInfoAttributes(type, fi);
 
@@ -148,13 +150,13 @@ namespace Signum.Engine.Maps
             if (ib != null) return ib;
             if (iba != null) return iba;
 
-            var typeAtt = TypeAttributes(fieldType);
+            var typeAtt = TypeAttributes(entityType);
 
             ib = typeAtt.OfType<ImplementedByAttribute>().SingleOrDefault();
             iba = typeAtt.OfType<ImplementedByAllAttribute>().SingleOrDefault();
 
             if (ib != null && iba != null)
-                throw new ApplicationException(Resources.Type0ContainsBoth1And2.Formato(fieldType, ib.GetType(), iba.GetType()));
+                throw new ApplicationException(Resources.Type0ContainsBoth1And2.Formato(entityType, ib.GetType(), iba.GetType()));
 
             if (ib != null) return ib;
             if (iba != null) return iba;

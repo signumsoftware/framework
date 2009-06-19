@@ -430,20 +430,14 @@ WRITETEXT</value>
   <data name="NoFieldWasGiven" xml:space="preserve">
     <value>No se ha proporcionado ningún campo</value>
   </data>
-  <data name="Field0NotInTable1" xml:space="preserve">
-    <value>El campo {0} no se encuentra en la tabla {1}</value>
-  </data>
-  <data name="Field0NotInField0" xml:space="preserve">
-    <value>El campo {0} no se encuentra en el campo {1}</value>
+  <data name="Field0NotInType1" xml:space="preserve">
+    <value>El campo {0} no se encuentra en el tipo {1}</value>
   </data>
   <data name="MemberInfo0NotSupportedByCollectionField" xml:space="preserve">
     <value>El MemberInfo {0} no está soportado por CampoColeccion</value>
   </data>
   <data name="Field0HasNullAndOsNotNullable" xml:space="preserve">
     <value>El campo {0} tiene una valor nulo y no es nullable</value>
-  </data>
-  <data name="ThereIsMoreThanOneValueFor0" xml:space="preserve">
-    <value>Existen más de un valor para {0}</value>
   </data>
   <data name="Type0IsNotAMappedType1" xml:space="preserve">
     <value>El tipo {0} no es de ninguno de los tipos mapeados: {1}</value>
@@ -482,5 +476,8 @@ WRITETEXT</value>
   </data>
   <data name="CachingTypesTableFrom0" xml:space="preserve">
     <value>cachenado la tabla de tipos desde {0}</value>
+  </data>
+  <data name="Fields0AreSetAtTheSameTime" xml:space="preserve">
+    <value>Los campos {0} estan estableclidos al mismo tiempo</value>
   </data>
 </root>

@@ -46,15 +46,15 @@ namespace Signum.Engine.Linq
                     TableExpression tableExpression = new TableExpression(fie.Type, tableAlias, table.Name);
                     requests.Add(new TableCondition
                     {
-                        Id = (ColumnExpression)fie.ID,
+                        Id = (ColumnExpression)fie.ExternalId,
                         NewId = newId,
                         Table = tableExpression
                     });
 
-                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ID, toStr );
+                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId, toStr );
                 }
                 else
-                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ID,  fie.Bindings.ToStrColumn() );
+                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId,  fie.Bindings.ToStrColumn() );
             }
             
             return base.VisitLazyReference(lazy);
@@ -64,8 +64,8 @@ namespace Signum.Engine.Linq
         {
             if (typeof(IdentifiableEntity).IsAssignableFrom(fieldInit.Type))
             {
-                ColumnExpression newID = (ColumnExpression)Visit(fieldInit.ID);
-                if (newID != fieldInit.ID)
+                ColumnExpression newID = (ColumnExpression)Visit(fieldInit.ExternalId);
+                if (newID != fieldInit.ExternalId)
                 {
                     Debug.Assert(false, "FieldInit has identity"); 
                     return new FieldInitExpression(fieldInit.Type, fieldInit.Alias, newID); // eliminamos los bindings

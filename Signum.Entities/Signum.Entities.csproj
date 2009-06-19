@@ -61,6 +61,7 @@
     <Compile Include="DynamicQuery\FilterOperationsUtils.cs" />
     <Compile Include="DynamicQuery\QueryDescription.cs" />
     <Compile Include="Basics\NoteDN.cs" />
+    <Compile Include="ImmutableEntity.cs" />
     <Compile Include="Properties\Resources.es.Designer.cs">
       <DependentUpon>Resources.es.resx</DependentUpon>
       <AutoGen>True</AutoGen>

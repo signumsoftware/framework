@@ -42,7 +42,7 @@ namespace Signum.Engine.Linq
         DbQueryProvider provider;
 
         Retriever retriever;
-        ObjectCache objectCache; 
+        EntityCache objectCache; 
 
 
         IProjectionRow previous;
@@ -61,7 +61,7 @@ namespace Signum.Engine.Linq
             if (HasFullObjects && previous == null)
             {
                 this.retriever = new Retriever();
-                this.objectCache = new ObjectCache(); 
+                this.objectCache = new EntityCache(); 
             }
         }
 
@@ -127,7 +127,7 @@ namespace Signum.Engine.Linq
   
         public MList<S> GetList<S>(RelationalTable tr, int id)
         {
-            return (MList<S>)Retriever.GetList(tr, typeof(MList<S>), id);
+            return (MList<S>)Retriever.GetList(tr, id);
         }
 
         public S GetIdentificable<S>(int? id) where S : IdentifiableEntity

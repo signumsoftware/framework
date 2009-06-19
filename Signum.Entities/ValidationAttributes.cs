@@ -131,6 +131,17 @@ namespace Signum.Entities
         }
     }
 
+    public class TelephoneAttribute : RegexValidatorAttribute
+    {
+        const string TelephoneRegex = @"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-0-9]+$";
+
+        public TelephoneAttribute()
+            : base(TelephoneRegex)
+        {
+            this.FormatName = "Telephone";
+        }
+    }
+
     public class NumberIsValidatorAttribute : ValidatorAttribute
     {
         public ComparisonType ComparisonType;

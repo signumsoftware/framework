@@ -11,7 +11,7 @@ using Signum.Engine.Properties;
 
 namespace Signum.Engine
 {
-    public class ObjectCache: IDisposable
+    public class EntityCache: IDisposable
     {
         class RealObjectCache : Dictionary<Type, Dictionary<int, IdentifiableEntity>>
         {
@@ -51,9 +51,9 @@ namespace Signum.Engine
 
         private bool facked = false;
 
-        public ObjectCache() : this(false) { }
+        public EntityCache() : this(false) { }
 
-        public ObjectCache(bool forceNew)
+        public EntityCache(bool forceNew)
         {
             if (stack == null)
                 stack = ImmutableStack<RealObjectCache>.Empty;

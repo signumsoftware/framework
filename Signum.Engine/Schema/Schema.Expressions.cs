@@ -21,7 +21,7 @@ namespace Signum.Engine.Maps
     {
         internal ReadOnlyCollection<FieldBinding> CreateBindings(string alias)
         {
-            var bindings = Fields.Values.Select(c => new FieldBinding(c.FieldInfo, c.Expression(alias))).ToReadOnly();
+            var bindings = Fields.Values.Select(c => new FieldBinding(c.FieldInfo, c.Field.GetExpression(alias))).ToReadOnly();
 
             if (!IsView)
             {
@@ -43,7 +43,7 @@ namespace Signum.Engine.Maps
 
         internal Expression CampoExpression(string alias)
         {
-            return Field.Expression(alias); 
+            return Field.GetExpression(alias); 
         }
     }
 
@@ -59,23 +59,22 @@ namespace Signum.Engine.Maps
 
     public abstract partial class Field
     {
-        internal abstract Expression Expression(string alias);
+        internal abstract Expression GetExpression(string alias);
     }
 
     public partial class PrimaryKeyField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
-            return new ColumnExpression(this.FieldType, alias, this.Name);
+            return new ColumnExpression(typeof(int), alias, this.Name);
         } 
     }
 
     public partial class ValueField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
-            return new ColumnExpression(this.FieldInfo.FieldType //queremos los nullables
-                , alias, this.Name);
+            return new ColumnExpression(this.FieldType, alias, this.Name);
         } 
     }
 
@@ -93,24 +92,23 @@ namespace Signum.Engine.Maps
 
     public partial class ReferenceField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
-            return this.MaybeLazy(new FieldInitExpression(this.FieldType, alias ,new ColumnExpression(this.ReferenceType(), alias, Name))); 
+            return this.MaybeLazy(new FieldInitExpression(Reflector.ExtractLazy(FieldType) ?? FieldType, alias, new ColumnExpression(this.ReferenceType(), alias, Name))); 
         } 
     }
 
     public partial class EnumField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
-            return new EnumExpression(this.FieldType,
-                new ColumnExpression(this.ReferenceType(), alias, Name));
+            return Expression.Convert(new ColumnExpression(this.ReferenceType(), alias, Name), FieldType);
         }
     }
 
-    public partial class CollectionField
+    public partial class MListField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
             return new MListExpression(FieldType, null, RelationalTable); // keep back id empty for some seconds 
         }
@@ -118,13 +116,13 @@ namespace Signum.Engine.Maps
 
     public partial class EmbeddedField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
             List<FieldBinding> fb = new List<FieldBinding>();
             foreach (var kvp in EmbeddedFields)
 	        {
                 FieldInfo fi = FieldType.GetField(kvp.Key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic); 
-                fb.Add(new FieldBinding(fi, kvp.Value.Expression(alias))); 
+                fb.Add(new FieldBinding(fi, kvp.Value.Field.GetExpression(alias))); 
             }
             return new FieldInitExpression(this.FieldType, alias, null) { Bindings = fb.NotNull().ToReadOnly() }; 
         }
@@ -132,7 +130,7 @@ namespace Signum.Engine.Maps
 
     public partial class ImplementedByField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
             List<ImplementationColumnExpression> ri = new List<ImplementationColumnExpression>();
             foreach (var kvp in ImplementationColumns)
@@ -141,15 +139,15 @@ namespace Signum.Engine.Maps
                     new FieldInitExpression(kvp.Key, new ColumnExpression(kvp.Value.ReferenceType(), alias, kvp.Value.Name))));
             }
 
-            return this.MaybeLazy(new ImplementedByExpression(FieldType, ri.NotNull().ToReadOnly())); 
+            return this.MaybeLazy(new ImplementedByExpression(Reflector.ExtractLazy(FieldType)??FieldType, ri.NotNull().ToReadOnly())); 
         }
     }
 
     public partial class ImplementedByAllField
     {
-        internal override Expression Expression(string alias)
+        internal override Expression GetExpression(string alias)
         {
-            return this.MaybeLazy(new ImplementedByAllExpression(FieldType,
+            return this.MaybeLazy(new ImplementedByAllExpression(Reflector.ExtractLazy(FieldType) ?? FieldType,
                 new ColumnExpression( Column.ReferenceType(), alias, Column.Name),
                 new ColumnExpression( Column.ReferenceType(), alias, ColumnTypes.Name)));
         }

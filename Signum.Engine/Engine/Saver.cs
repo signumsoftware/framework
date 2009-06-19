@@ -132,7 +132,7 @@ namespace Signum.Engine
 
                 dt.Rows.Cast<DataRow>().ZipForeach(insertedEntities, (dr, ei) => ei.id = (int)dr[0]);
 
-                ObjectCache.Add<IdentifiableEntity>(insertedEntities);
+                EntityCache.Add<IdentifiableEntity>(insertedEntities);
                 lastId = ds.Tables[1].Rows[0]["LastID"].Map(o => o == DBNull.Value ? (int?)null : (int?)o);
             }
         }

@@ -75,7 +75,7 @@ namespace Signum.Engine.Maps
             table.GenerateColumns();
         }
 
-        List<string> loadedModules = new List<string>();
+        HashSet<string> loadedModules = new HashSet<string>();
 
         public bool NotDefined<T>()
         {
@@ -84,10 +84,7 @@ namespace Signum.Engine.Maps
 
         public bool NotDefined(string moduleName)
         {
-            if (loadedModules.Contains(moduleName))
-                return false;
-            loadedModules.Add(moduleName);
-            return true;
+            return loadedModules.Add(moduleName); 
         }
 
         bool notifyFieldsWithoutProperty = true;
@@ -98,19 +95,18 @@ namespace Signum.Engine.Maps
         }
 
         #region Field Generator
-        protected Dictionary<string, Field> GenerateFields(Type type, Contexts contexto, Table table, NameSequence preName)
+        protected Dictionary<string, EntityField> GenerateFields(Type type, Contexts contexto, Table table, NameSequence preName)
         {
-            Dictionary<string, Field> result = new Dictionary<string, Field>();
+            Dictionary<string, EntityField> result = new Dictionary<string, EntityField>();
             foreach (FieldInfo fi in Reflector.InstanceFieldsInOrder(type))
             {
-                if (!fi.HasAttribute<IgnoreAttribute>())
+                if (!settings.FieldInfoAttributes(type, fi).Any(a=>a is IgnoreAttribute))
                 {
                     if (NotifyFieldsWithoutProperty && Reflector.FindPropertyInfo(fi) == null)
                         Debug.WriteLine(Resources.Field0OfTipe1HasNoCompatibleProperty.Formato(fi.Name, type.Name));
 
                     Field campo = GenerateField(type, fi, fi.FieldType, contexto, table, preName);
-                    if (campo != null)
-                        result.Add(fi.Name, campo);
+                    result.Add(fi.Name, new EntityField(type, fi) { Field = campo });
                 }
             }
             return result;
@@ -130,8 +126,8 @@ namespace Signum.Engine.Maps
             NameSequence name = preName;
             if (contexto == Contexts.Normal || contexto == Contexts.Embedded || contexto == Contexts.View)
                 name = name.Add(GenerateFieldName(fi, kof));
-            else if (contexto == Contexts.Collection && (kof == KindOfField.Enum || kof == KindOfField.Reference || kof == KindOfField.Lazy))
-                name = name.Add(GenerateFieldName(fieldType, kof));
+            else if (contexto == Contexts.MList && (kof == KindOfField.Enum || kof == KindOfField.Reference))
+                name = name.Add(GenerateFieldName(Reflector.ExtractLazy(fieldType) ?? fieldType, kof));
 
             switch (kof)
             {
@@ -141,7 +137,7 @@ namespace Signum.Engine.Maps
                     return GenerateFieldValue(type, fi, fieldType, name);
                 case KindOfField.Reference:
                     {
-                        Attribute at = settings.GetReferenceFieldType(type, fi, fieldType);
+                        Attribute at = settings.GetReferenceFieldType(type, fi, Reflector.ExtractLazy(fieldType) ?? fieldType);
                         if (at == null)
                             return GenerateFieldReference(type, fi, fieldType, name);
                         else if (at is ImplementedByAttribute)
@@ -153,10 +149,8 @@ namespace Signum.Engine.Maps
                     return GenerateFieldEnum(type, fi, fieldType, name);
                 case KindOfField.Embedded:
                     return GenerateFieldEmbebed(type, fi, fieldType, name);
-                case KindOfField.Collection:
-                    return GenerateFieldCollection(type, fi, table, name);
-                case KindOfField.Lazy:
-                    return GenerateFieldLazy(type, fi, fieldType, table, name);
+                case KindOfField.MList:
+                    return GenerateFieldMList(type, fi, table, name);
                 default:
                     throw new ApplicationException(Resources.NoWayOfMappingType0Found.Formato(fieldType));
             }
@@ -165,12 +159,11 @@ namespace Signum.Engine.Maps
         static Dictionary<KindOfField, Contexts> contextosAdmitidos = new Dictionary<KindOfField, Contexts>()
         {
             {KindOfField.PrimaryKey,      Contexts.Normal  },
-            {KindOfField.Value,           Contexts.Normal | Contexts.Collection | Contexts.Embedded | Contexts.View },
-            {KindOfField.Reference,      Contexts.Normal  | Contexts.Collection | Contexts.Embedded | Contexts.View| Contexts.Lazy },
-            {KindOfField.Enum,            Contexts.Normal | Contexts.Collection | Contexts.Embedded | Contexts.View| Contexts.Lazy },
-            {KindOfField.Embedded,       Contexts.Normal   | Contexts.Collection | Contexts.Embedded | Contexts.View},
-            {KindOfField.Lazy,            Contexts.Normal | Contexts.Collection | Contexts.Embedded | Contexts.View},
-            {KindOfField.Collection,       Contexts.Normal },
+            {KindOfField.Value,           Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
+            {KindOfField.Reference,      Contexts.Normal  | Contexts.MList | Contexts.Embedded | Contexts.View },
+            {KindOfField.Enum,            Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
+            {KindOfField.Embedded,       Contexts.Normal   | Contexts.MList | Contexts.Embedded | Contexts.View},
+            {KindOfField.MList,       Contexts.Normal },
         };
 
         private KindOfField? GetKindOfField(Type type, FieldInfo fi, Type fieldType)
@@ -184,17 +177,14 @@ namespace Signum.Engine.Maps
             if (fieldType.UnNullify().IsEnum)
                 return KindOfField.Enum;
 
-            if (Reflector.ExtractLazy(fieldType) != null)
-                return KindOfField.Lazy;
-
-            if (Reflector.IsIIdentifiable(fieldType))
+            if (Reflector.IsIIdentifiable(Reflector.ExtractLazy(fieldType) ?? fieldType))
                 return KindOfField.Reference;
 
             if (Reflector.IsEmbeddedEntity(fieldType))
                 return KindOfField.Embedded;
 
             if (Reflector.IsMList(fieldType))
-                return KindOfField.Collection;
+                return KindOfField.MList;
 
             return null;
         }
@@ -206,7 +196,7 @@ namespace Signum.Engine.Maps
 
         private static Field GenerateFieldPrimaryKey(Type type, FieldInfo fi, bool identity, NameSequence name)
         {
-            return new PrimaryKeyField(type, fi, fi.FieldType)
+            return new PrimaryKeyField(fi.FieldType)
             {
                 Identity = identity
             };
@@ -216,7 +206,7 @@ namespace Signum.Engine.Maps
         {
             SqlDbType sqlDbType = settings.GetSqlDbType(type, fi, fieldType.UnNullify()).Value;
 
-            return new ValueField(type, fi, fieldType.UnNullify())
+            return new ValueField(fieldType)
             {
                 Name = name.ToString(),
                 SqlDbType = sqlDbType,
@@ -227,16 +217,9 @@ namespace Signum.Engine.Maps
             };
         }
 
-        private Field GenerateFieldLazy(Type type, FieldInfo fi, Type fieldType, Table table, NameSequence name)
-        {
-            IReferenceField campo = (IReferenceField)GenerateField(type, fi, Reflector.ExtractLazy(fieldType), Contexts.Lazy, table, name);
-            campo.IsLazy = true;
-            return (Field)campo;
-        }
-
         protected virtual Field GenerateFieldEnum(Type type, FieldInfo fi, Type fieldType, NameSequence name)
         {
-            return new EnumField(type, fi, fieldType.UnNullify())
+            return new EnumField(fieldType)
             {
                 Nullable = settings.IsNullable(type, fi, fieldType),
                 IsLazy = false,
@@ -248,12 +231,13 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldReference(Type type, FieldInfo fi, Type fieldType, NameSequence name)
         {
-            return new ReferenceField(type, fi, fieldType)
+            return new ReferenceField(fieldType)
             {
                 Name = name.ToString(),
-                ReferenceTable = Include(fieldType),
+                ReferenceTable = Include(Reflector.ExtractLazy(fieldType) ?? fieldType),
                 Index = settings.IndexType(type, fi) ?? DefaultReferenceIndex(),
                 Nullable = settings.IsNullable(type, fi, fieldType),
+                IsLazy  = Reflector.ExtractLazy(fieldType) != null
             };
         }
 
@@ -265,7 +249,9 @@ namespace Signum.Engine.Maps
 
             Index indice = settings.IndexType(type, fi) ?? DefaultReferenceIndex();
 
-            return new ImplementedByField(type, fi, fieldType)
+            bool nullable = settings.IsNullable(type, fi, fieldType) || ib.ImplementedTypes.Length > 1;
+
+            return new ImplementedByField(fieldType)
             {
                 ImplementationColumns = ib.ImplementedTypes.ToDictionary(t => t, t => new ImplementationColumn
                 {
@@ -273,7 +259,8 @@ namespace Signum.Engine.Maps
                     Name = name.Add(t.Name).ToString(),
                     Index = indice,
                     Nullable = true,
-                })
+                }),
+                IsLazy  = Reflector.ExtractLazy(fieldType) != null
             };
         }
 
@@ -282,7 +269,7 @@ namespace Signum.Engine.Maps
             Index indice = settings.IndexType(type, fi) ?? DefaultReferenceIndex();
             bool nullable = settings.IsNullable(type, fi, fieldType);
 
-            return new ImplementedByAllField(type, fi, fieldType)
+            return new ImplementedByAllField(fieldType)
             {
                 Column = new ImplementationColumn
                 {
@@ -297,15 +284,16 @@ namespace Signum.Engine.Maps
                     Index = indice,
                     Nullable = nullable,
                     ReferenceTable = Include(typeof(TypeDN))
-                }
+                },
+                IsLazy = Reflector.ExtractLazy(fieldType) != null
             };
         }
 
-        protected virtual Field GenerateFieldCollection(Type type, FieldInfo fi, Table table, NameSequence name)
+        protected virtual Field GenerateFieldMList(Type type, FieldInfo fi, Table table, NameSequence name)
         {
             Type elementType = Reflector.CollectionType(fi.FieldType);
 
-            return new CollectionField(type, fi, fi.FieldType)
+            return new MListField(fi.FieldType)
             {
                 RelationalTable = new RelationalTable(fi.FieldType)
                 {
@@ -317,14 +305,14 @@ namespace Signum.Engine.Maps
                         ReferenceTable = table
                     },
                     PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
-                    Field = GenerateField(type, fi, elementType, Contexts.Collection, null, NameSequence.Void) // sin FieldInfo!
+                    Field = GenerateField(type, fi, elementType, Contexts.MList, null, NameSequence.Void) // sin FieldInfo!
                 }.Do(t => t.GenerateColumns())
             };
         }
 
         protected virtual Field GenerateFieldEmbebed(Type type, FieldInfo fi, Type fieldType, NameSequence name)
         {
-            return new EmbeddedField(type, fi, fieldType)
+            return new EmbeddedField(fieldType)
             {
                 EmbeddedFields = GenerateFields(fieldType, Contexts.Embedded, null, name)
             };
@@ -359,7 +347,6 @@ namespace Signum.Engine.Maps
                     return type.Name.FirstUpper();
                 case KindOfField.Enum:
                 case KindOfField.Reference:
-                case KindOfField.Lazy:       //es el lazy el que determina el nombre
                     return "id" + TypeName(type);
                 default:
                     throw new NotImplementedException(Resources.NoNameForType0Defined.Formato(type));
@@ -375,11 +362,10 @@ namespace Signum.Engine.Maps
                 case KindOfField.PrimaryKey:
                 case KindOfField.Value:
                 case KindOfField.Embedded:
-                case KindOfField.Collection:  //se usa solo para el nombre de la tabla 
+                case KindOfField.MList:  //se usa solo para el nombre de la tabla 
                     return name;
                 case KindOfField.Reference:
                 case KindOfField.Enum:
-                case KindOfField.Lazy:       //es el lazy el que determina el nombre
                     return "id" + name;
                 default:
                     throw new NotImplementedException(Resources.NoNameForField0Defined.Formato(fi.Name));

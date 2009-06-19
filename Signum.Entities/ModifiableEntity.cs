@@ -32,7 +32,7 @@ namespace Signum.Entities
             internal set { selfModified = value; }
         }
 
-        protected bool Set<T>(ref T variable, T value, string propertyName)
+        protected virtual bool Set<T>(ref T variable, T value, string propertyName)
         {
             if (EqualityComparer<T>.Default.Equals(variable, value))
                 return false;

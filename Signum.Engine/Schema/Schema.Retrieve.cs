@@ -9,6 +9,7 @@ using Signum.Utilities;
 using System.Data;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Maps
 {
@@ -31,17 +32,19 @@ namespace Signum.Engine.Maps
 
         internal void Fill(DataRow row, IdentifiableEntity ei, Retriever retriever)
         {
-            foreach (Field field in Fields.Values)
+            foreach (EntityField ef in Fields.Values)
             {
-                field.Setter(ei, field.GenerateValue(row, retriever)); 
+                ef.Setter(ei, ef.Field.GenerateValue(row, retriever)); 
             }
             
             ei.Modified = false; 
         }
 
+        static string toStr = ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr).Name;
+
         internal void FillLazy(DataRow row, Lazy lazy)
         {
-            ValueField campo = (ValueField)Fields[ ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei=>ei.toStr).Name];
+            ValueField campo = (ValueField)Fields[toStr].Field;
             lazy.ToStr = (string)campo.GenerateValue(row, null);
             lazy.Modified = false;
         }
@@ -92,7 +95,7 @@ namespace Signum.Engine.Maps
                 else return null;
 
             if (IsLazy)
-                return retriever.GetLazy(ReferenceTable, FieldType, id.Value);
+                return retriever.GetLazy(ReferenceTable, Reflector.ExtractLazy(FieldType), id.Value);
             else
                 return retriever.GetIdentifiable(ReferenceTable, id.Value); 
         }
@@ -107,17 +110,17 @@ namespace Signum.Engine.Maps
                 if (!Nullable) throw new InvalidOperationException(Resources.Field0HasNullAndOsNotNullable.Formato(Name));
                 else return null;
 
-            return Enum.ToObject(FieldType, id);
+            return Enum.ToObject(FieldType.UnNullify(), id);
         }     
     }
 
-    public partial class CollectionField
+    public partial class MListField
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
             int myID = (int)row.Cell(SqlBuilder.PrimaryKeyName);
 
-            return retriever.GetList(RelationalTable, FieldType, myID); 
+            return retriever.GetList(RelationalTable, myID); 
         }
     }
 
@@ -127,9 +130,9 @@ namespace Signum.Engine.Maps
         {
             EmbeddedEntity result = Constructor();
 
-            foreach (Field field in EmbeddedFields.Values)
+            foreach (EntityField ef in EmbeddedFields.Values)
             {
-                field.Setter(result, field.GenerateValue(row, retriever)); 
+                ef.Setter(result, ef.Field.GenerateValue(row, retriever)); 
             }
 
             result.Modified = false;
@@ -143,23 +146,22 @@ namespace Signum.Engine.Maps
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
-            return ImplementationColumns.Select(c => c.Value.GenerateValue(row, retriever, FieldType, IsLazy)).NotNull().SingleOrDefault(Resources.ThereIsMoreThanOneValueFor0.Formato(FieldInfo.Name)); 
-        }
-    }
+            var columns = ImplementationColumns.Where(c => row.Cell(c.Value.Name) != null).ToArray();
 
-    public partial class ImplementationColumn
-    {
-        internal object GenerateValue(DataRow row, Retriever retriever, Type type, bool isLazy)
-        {
-            int? id = (int?)row.Cell(Name);
-
-            if (!id.HasValue)
+            if(columns.Length == 0)
                 return null;
+            
+            if (columns.Length > 1)
+                throw new ApplicationException(Resources.Fields0AreSetAtTheSameTime.Formato(columns.ToString(c=>c.Value.Name, ", ")));
 
-            if (isLazy)
-                return retriever.GetLazy(ReferenceTable, type, id.Value);
+            ImplementationColumn col = columns[0].Value;
+
+            int? id = (int?)row.Cell(col.Name);
+
+             if(IsLazy)
+                return retriever.GetLazy(col.ReferenceTable, Reflector.ExtractLazy(FieldType), id.Value);
             else
-                return retriever.GetIdentifiable(ReferenceTable, id.Value); 
+                return retriever.GetIdentifiable(col.ReferenceTable, id.Value); 
         }
     }
 
@@ -171,13 +173,13 @@ namespace Signum.Engine.Maps
             int? idTipo = (int?)row.Cell(ColumnTypes.Name);
 
             if (id.HasValue != idTipo.HasValue)
-                throw new ApplicationException("ImplementedByAll {0} = {1} pero {2} = {3}".Formato(Column.Name, id, ColumnTypes.Name, idTipo));
+                throw new ApplicationException("ImplementedByAll {0} = {1} but {2} = {3}".Formato(Column.Name, id, ColumnTypes.Name, idTipo));
 
             if (id == null)
                 return null;
 
             if (IsLazy)
-                return retriever.GetLazy(Schema.Current.TablesForID[idTipo.Value], FieldType, id.Value);
+                return retriever.GetLazy(Schema.Current.TablesForID[idTipo.Value], Reflector.ExtractLazy(FieldType), id.Value);
             else
                 return retriever.GetIdentifiable(Schema.Current.TablesForID[idTipo.Value], id.Value); 
         }

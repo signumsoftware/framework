@@ -8,6 +8,9 @@ using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using Signum.Engine.Properties;
 using System.Text.RegularExpressions;
+using System.IO;
+using System.Threading;
+using System.Diagnostics;
 
 namespace Signum.Engine
 {
@@ -100,6 +103,19 @@ namespace Signum.Engine
             var dic = cs.Parameters.ToDictionary(a=>a.ParameterName, a=>Encode(a.Value)); 
 
             return regex.Replace(cs.Sql, m=> dic.TryGetC(m.Value) ?? m.Value);
+        }
+
+        public static void OpenSqlFile(this SqlPreCommand command)
+        {
+            string content = command.PlainSql(); 
+
+            string fileName = "Sync {0:dd-MM-YYYY}.sql".Formato(DateTime.Now);
+
+            File.WriteAllText(fileName, content);
+
+            Thread.Sleep(1000);
+
+            Process.Start(fileName); 
         }
 
         static string Encode(object value)

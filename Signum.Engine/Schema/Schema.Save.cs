@@ -25,11 +25,13 @@ namespace Signum.Engine.Maps
     {
         public SqlPreCommand Save(IdentifiableEntity ident, Forbidden forbidden)
         {   
-            var collectionFields = Fields.Values.OfType<CollectionField>();
+            var collectionFields = Fields.Values.Select(f=>f.Field).OfType<MListField>();
 
             SqlPreCommand entity = ident.IsNew ? InsertSql(ident, forbidden) : UpdateSql(ident, forbidden);
 
-            SqlPreCommand cols = collectionFields.Select(c => c.RelationalTable.RelationalInserts((Modifiable)c.Getter(ident), forbidden)).Combine(Spacing.Double);
+            SqlPreCommand cols = (from ef in Fields.Values
+                                  where ef.Field is MListField
+                                  select ((MListField)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), forbidden)).Combine(Spacing.Simple);
 
             ident.Modified = forbidden.Count > 0;
 
@@ -41,7 +43,7 @@ namespace Signum.Engine.Maps
             ident.PreSaving(); 
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            Fields.Values.ForEach(v => v.CreateParameter(parameters, v.Getter(ident), Forbidden.None));
+            Fields.Values.ForEach(v => v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None));
 
             return SqlBuilder.Insert(Name, parameters);
         }
@@ -53,7 +55,7 @@ namespace Signum.Engine.Maps
                 ent.Ticks = Transaction.StartTime.Ticks;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            Fields.Values.ForEach(v => v.CreateParameter(parameters, v.Getter(ident), forbidden));
+            Fields.Values.ForEach(v => v.Field.CreateParameter(parameters, v.Getter(ident), forbidden));
 
             return Identity  ? SqlBuilder.InsertSaveId(Name, parameters, ident) :
                                SqlBuilder.Insert(Name, parameters);
@@ -67,7 +69,7 @@ namespace Signum.Engine.Maps
                 return null;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            Fields.ForEach(c => c.Value.CreateParameter(parameters, c.Value.Getter(ident), Forbidden.None));
+            Fields.ForEach(c => c.Value.Field.CreateParameter(parameters, c.Value.Getter(ident), Forbidden.None));
             return SqlBuilder.UpdateId(Name, parameters, ident.Id);
         }
 
@@ -81,13 +83,13 @@ namespace Signum.Engine.Maps
                 entity.Ticks = Transaction.StartTime.Ticks;
 
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                Fields.ForEach(c => c.Value.CreateParameter(parameters, c.Value.Getter(entity), forbidden));
+                Fields.ForEach(c => c.Value.Field.CreateParameter(parameters, c.Value.Getter(entity), forbidden));
                 return SqlBuilder.UpdateSetIdEntity(Name, parameters, entity.Id, oldTicks);
             }
             else
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                Fields.ForEach(c => c.Value.CreateParameter(parameters, c.Value.Getter(ident), forbidden));
+                Fields.ForEach(c => c.Value.Field.CreateParameter(parameters, c.Value.Getter(ident), forbidden));
                 return SqlBuilder.UpdateSetId(Name, parameters, ident.Id);
             }
         }
@@ -177,7 +179,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class CollectionField
+    public partial class MListField
     {
     }
 
@@ -189,7 +191,7 @@ namespace Signum.Engine.Maps
             {
                 EmbeddedEntity ec = (EmbeddedEntity)value;
                 ec.Modified = false; 
-                EmbeddedFields.ForEach(c => c.Value.CreateParameter(parameters, c.Value.Getter(value), forbidden));
+                EmbeddedFields.ForEach(c => c.Value.Field.CreateParameter(parameters, c.Value.Getter(value), forbidden));
             }
         }      
     }

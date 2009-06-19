@@ -32,7 +32,7 @@ namespace Signum.Engine.Linq
 
     internal class FieldInitExpression : Expression
     {
-        public readonly Expression ID;
+        public readonly Expression ExternalId;
         public readonly string Alias; 
 
         // no es readonly!!!
@@ -42,19 +42,19 @@ namespace Signum.Engine.Linq
             : base((ExpressionType)DbExpressionType.FieldInit, type)
         {
             this.Alias = alias;
-            this.ID = externalId; 
+            this.ExternalId = externalId; 
         }
 
-        public FieldInitExpression(Type type, ColumnExpression externalID)
+        public FieldInitExpression(Type type, ColumnExpression externalId)
             : base((ExpressionType)DbExpressionType.FieldInit, type)
         {
-            this.Alias = externalID.Alias;
-            this.ID = externalID; 
+            this.Alias = externalId.Alias;
+            this.ExternalId = externalId; 
         }
 
         public override string ToString()
         {
-            return "new {0}({1}){2}".Formato(Type.TypeName(), ID, Bindings.TryCC(b => "{{\r\n{0}\r\n}}".Formato(b.ToString(",\r\n ").Indent(4))) ?? "");
+            return "new {0}({1}){2}".Formato(Type.TypeName(), ExternalId, Bindings.TryCC(b => "{{\r\n{0}\r\n}}".Formato(b.ToString(",\r\n ").Indent(4))) ?? "");
         }
     }
 
@@ -92,27 +92,6 @@ namespace Signum.Engine.Linq
             return "{0} = {1}".Formato(FieldInfo.Name, Binding);
         }
     }
-
-    internal class EnumExpression :  Expression
-    {
-        public readonly ColumnExpression ID;
-
-        public EnumExpression(Type type, ColumnExpression id)
-            : base((ExpressionType)DbExpressionType.Enum, type)
-        {
-            if (!type.IsEnum)
-                throw new ArgumentException("type");
- 
-            this.ID = id;
-        }
-
-        public override string ToString()
-        {
-            return "({0}){1}".Formato(Type, ID);
-        }
-    }
-
-  
 
     internal class ImplementedByExpression : Expression
     {

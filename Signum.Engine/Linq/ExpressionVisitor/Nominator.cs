@@ -295,18 +295,6 @@ namespace Signum.Engine.Linq
             return inExp;
         }
 
-        protected override Expression VisitEnumExpression(EnumExpression enumExp)
-        {
-            var id = (ColumnExpression)Visit(enumExp.ID);
-            if (id != enumExp.ID)
-                enumExp =  new EnumExpression(enumExp.Type, id);
-
-            if (candidates.Contains(id))
-                candidates.Add(enumExp); 
-
-            return enumExp;
-        }
-
         protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             candidates.Add(sqlEnum);
@@ -471,9 +459,9 @@ namespace Signum.Engine.Linq
             if (existingAliases != null || fieldInit.Bindings != null && fieldInit.Bindings.Count > 0)
                 return base.VisitFieldInit(fieldInit);
 
-            var id = Visit(fieldInit.ID);
+            var id = Visit(fieldInit.ExternalId);
             var alias = VisitFieldInitAlias(fieldInit.Alias);
-            if (fieldInit.ID != id)
+            if (fieldInit.ExternalId != id)
                 fieldInit = new FieldInitExpression(fieldInit.Type, alias, id);
 
             if (candidates.Contains(id))

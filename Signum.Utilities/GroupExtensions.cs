@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Properties;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Utilities
 {
@@ -103,6 +104,13 @@ namespace Signum.Utilities
         {
             return collection
                 .GroupBy(t => keySelector(t))
+                .ToDictionary(g => g.Key, agregateSelector);
+        }
+
+        public static Dictionary<K, V> AgGroupToDictionary<T, K, V>(this IEnumerable<T> collection, IEnumerable<K> keys, Func<T, K> keySelector, Func<IGrouping<K, T>, V> agregateSelector)
+        {
+            return keys
+                .GroupJoin(collection, k => k, keySelector, (k, col) => (IGrouping<K, T>)new Grouping<K, T>(k, col))
                 .ToDictionary(g => g.Key, agregateSelector);
         }
 

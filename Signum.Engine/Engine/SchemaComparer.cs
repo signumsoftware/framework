@@ -79,7 +79,7 @@ namespace Signum.Engine
                         col.Identity = bla.Identity;
                     }));
 
-            var model = Schema.Current.Tables.Values.SelectMany(t => t.Fields.Values.OfType<CollectionField>().Select(f => (ITable)f.RelationalTable).PreAnd(t)).ToDictionary(a => a.Name);
+            var model = Schema.Current.Tables.Values.SelectMany(t => t.Fields.Values.Select(a=>a.Field).OfType<MListField>().Select(f => (ITable)f.RelationalTable).PreAnd(t)).ToDictionary(a => a.Name);
 
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =

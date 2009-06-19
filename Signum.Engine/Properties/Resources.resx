@@ -220,11 +220,8 @@
   <data name="NoFieldWasGiven" xml:space="preserve">
     <value>No field was given</value>
   </data>
-  <data name="Field0NotInTable1" xml:space="preserve">
-    <value>Field {0} not found on table {1}</value>
-  </data>
-  <data name="Field0NotInField0" xml:space="preserve">
-    <value>Field {0} not found on field {1}</value>
+  <data name="Field0NotInType1" xml:space="preserve">
+    <value>Field {0} not found on type {1}</value>
   </data>
   <data name="MemberInfo0NotSupportedByCollectionField" xml:space="preserve">
     <value>MemberInfo {0} not supported by CollectionField</value>
@@ -232,8 +229,8 @@
   <data name="Field0HasNullAndOsNotNullable" xml:space="preserve">
     <value>Field {0} has a null value but is not nullable</value>
   </data>
-  <data name="ThereIsMoreThanOneValueFor0" xml:space="preserve">
-    <value>There is more than one value for {0}</value>
+  <data name="Fields0AreSetAtTheSameTime" xml:space="preserve">
+    <value>Fields {0} are set at the same time</value>
   </data>
   <data name="Type0IsNotAMappedType1" xml:space="preserve">
     <value>Type {0} is not any of Mapped types : {1}</value>

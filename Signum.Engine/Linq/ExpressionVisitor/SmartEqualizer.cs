@@ -49,7 +49,7 @@ namespace Signum.Engine.Linq
                 if (tE2 == DbExpressionType.FieldInit) return FieFieEquals((FieldInitExpression)e1, (FieldInitExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedBy) return FieIbEquals((FieldInitExpression)e1, (ImplementedByExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedByAll) return FieIbaEquals((FieldInitExpression)e1, (ImplementedByAllExpression)e2);
-                else if (IsNullConstant(e2)) return EqualsToNull(((FieldInitExpression)e1).ID);
+                else if (IsNullConstant(e2)) return EqualsToNull(((FieldInitExpression)e1).ExternalId);
                 else return null;
             else if (tE1 == DbExpressionType.ImplementedBy)
                 if (tE2 == DbExpressionType.FieldInit) return FieIbEquals((FieldInitExpression)e2, (ImplementedByExpression)e1);
@@ -64,7 +64,7 @@ namespace Signum.Engine.Linq
                 else if (IsNullConstant(e2)) return EqualsToNull(((ImplementedByAllExpression)e1).ID);
                 else return null;
             else if (IsNullConstant(e1))
-                if (tE2 == DbExpressionType.FieldInit) return EqualsToNull(((FieldInitExpression)e2).ID);
+                if (tE2 == DbExpressionType.FieldInit) return EqualsToNull(((FieldInitExpression)e2).ExternalId);
                 else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Field)).Aggregate((a, b) => Expression.And(a, b));
                 else if (tE2 == DbExpressionType.ImplementedByAll) return EqualsToNull(((ImplementedByAllExpression)e2).ID);
                 else if (IsNullConstant(e2)) return True;
@@ -84,7 +84,7 @@ namespace Signum.Engine.Linq
         private static Expression FieFieEquals(FieldInitExpression fie1, FieldInitExpression fie2)
         {
             if (fie1.Type == fie2.Type)
-                return EqualNullable(fie1.ID, fie2.ID);
+                return EqualNullable(fie1.ExternalId, fie2.ExternalId);
             else 
                 return False;
         }
@@ -95,19 +95,19 @@ namespace Signum.Engine.Linq
             if (imp == null)
                 return False;
 
-            return EqualNullable(imp.Field.ID, fie.ID); 
+            return EqualNullable(imp.Field.ExternalId, fie.ExternalId); 
         }
 
         private static Expression FieIbaEquals(FieldInitExpression fie, ImplementedByAllExpression iba)
         {
             int id = Schema.Current.IDsForType[fie.Type];
 
-            return Expression.And(EqualNullable(fie.ID, iba.ID), EqualNullable(Expression.Constant(id), iba.TypeID));
+            return Expression.And(EqualNullable(fie.ExternalId, iba.ID), EqualNullable(Expression.Constant(id), iba.TypeID));
         }
 
         private static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2)
         {
-            var list = ib.Implementations.Join(ib2.Implementations, i => i.Type, j => j.Type, (i, j) => EqualNullable(i.Field.ID, j.Field.ID)).ToList();
+            var list = ib.Implementations.Join(ib2.Implementations, i => i.Type, j => j.Type, (i, j) => EqualNullable(i.Field.ExternalId, j.Field.ExternalId)).ToList();
             if(list.Count == 0)
                 return False;
             return list.Aggregate((e1, e2) => Expression.Or(e1, e2));
@@ -116,7 +116,7 @@ namespace Signum.Engine.Linq
         private static Expression IbIbaEquals(ImplementedByExpression ib, ImplementedByAllExpression iba)
         {
             var list = ib.Implementations.Select(i => Expression.And(
-                EqualNullable(iba.ID, i.Field.ID),
+                EqualNullable(iba.ID, i.Field.ExternalId),
                 EqualNullable(iba.TypeID, Expression.Constant(Schema.Current.IDsForType[i.Type])))).ToList();
 
             if (list.Count == 0)

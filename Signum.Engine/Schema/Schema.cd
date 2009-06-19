@@ -12,7 +12,7 @@
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAABEAQCAQAAAAAAAAAAAAAAAAABBgBA=</HashCode>
+      <HashCode>IIBUAAAAQAAAMQBUpUCIUIGAAABEAIAAAAAAAABAgBA=</HashCode>
       <FileName>Schema\Schema.Basics.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
@@ -21,17 +21,11 @@
   </Class>
   <Class Name="Signum.Engine.Maps.Table" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="6.25" Y="2" Width="1.5" />
-    <AssociationLine Name="Fields" Type="Signum.Engine.Maps.Field">
-      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
-        <Position X="-1.203" Y="0.31" Height="0.182" Width="0.954" />
-      </MemberNameLabel>
-    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAEIAAhAgAAAREAAAABERAAAAADAAAAUAAAAgCgAQ=</HashCode>
+      <HashCode>AgABEMgAhAgAIAREAAAAAERAAAAADAAAAUAAAAoCgAQ=</HashCode>
       <FileName>Schema\Schema.Basics.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
-      <Field Name="Fields" />
       <Property Name="Columns" />
     </ShowAsCollectionAssociation>
     <Lollipop Position="0.1" />
@@ -39,7 +33,7 @@
   <Class Name="Signum.Engine.Maps.Field" Collapsed="true">
     <Position X="6.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAQAIBAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAwAAAA=</HashCode>
+      <HashCode>AAAQAABAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAwAAAA=</HashCode>
       <FileName>Schema\Schema.Basics.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -61,18 +55,10 @@
   </Class>
   <Class Name="Signum.Engine.Maps.EmbeddedField" Collapsed="true">
     <Position X="5.75" Y="5" Width="1.5" />
-    <AssociationLine Name="EmbebedFields" Type="Signum.Engine.Maps.Field">
-      <MemberNameLabel ManuallyPlaced="true">
-        <Position X="0.19" Y="0.284" />
-      </MemberNameLabel>
-    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAQAAAAgAAAAAAEAAAAAAAAAAAAAAAQAAIAAAwAAAA=</HashCode>
+      <HashCode>AAAQAEAAgAAAAAAEAAAAAAAAAAAAAAAQAAAAIAwAAAA=</HashCode>
       <FileName>Schema\Schema.Basics.cs</FileName>
     </TypeIdentifier>
-    <ShowAsCollectionAssociation>
-      <Field Name="EmbebedFields" />
-    </ShowAsCollectionAssociation>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Signum.Engine.Maps.ReferenceField" Collapsed="true">
@@ -164,10 +150,27 @@
   </Class>
   <Class Name="Signum.Engine.Maps.RelationalTable" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="8.25" Y="2" Width="1.5" />
+    <NestedTypes>
+      <Class Name="Signum.Engine.Maps.RelationalTable.PrimaryKeyColumn" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Schema\Schema.Basics.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="Signum.Engine.Maps.RelationalTable.BackReferenceColumn" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Schema\Schema.Basics.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAABAAAAAAAgAAQEAAAAAEQAAAAAAAAIAAAAAAgAoAw=</HashCode>
+      <HashCode>AAABAEAAAAAgIAQEAAAAAEQAAAAAAAAIAAAAAAgAoAw=</HashCode>
       <FileName>Schema\Schema.Basics.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Field" />
+    </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
   <Interface Name="Signum.Engine.Maps.IFieldFinder" Collapsed="true">
@@ -191,7 +194,7 @@
       <FileName>Schema\Schema.Basics.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Signum.Engine.Maps.IReferenceField" Collapsed="true">
+  <Interface Name="Signum.Engine.Maps.IReferenceField">
     <Position X="2.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>

@@ -253,7 +253,7 @@ namespace Signum.Engine.Maps
         public bool Identity {get; set;}
         public bool IsView { get; internal set; }
 
-        public Dictionary<string, Field> Fields { get; set; }
+        public Dictionary<string, EntityField> Fields { get; set; }
         public Dictionary<string, IColumn> Columns { get; set; }
 
         public Func<object> Constructor { get; private set; }
@@ -271,32 +271,40 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            Columns = Fields.Values.SelectMany(c => c.Columns()).ToDictionary(c => c.Name);
+            Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
             
         }
     
         public Field GetField(MemberInfo value)
         {
-            return Fields.GetOrThrow(Reflector.FindFieldInfo(value).Name, Resources.Field0NotInTable1.Formato(value.Name, Name));
+            return Fields.GetOrThrow(Reflector.FindFieldInfo(value).Name, Resources.Field0NotInType1.Formato(value.Name, Type.TypeName())).Field;
+        }
+    }
+
+    public class EntityField
+    {
+        public Field Field { get; set; }
+        public FieldInfo FieldInfo { get; private set; }
+        public Func<object, object> Getter { get; private set; }
+        public Action<object, object> Setter { get; private set; }
+
+        public EntityField(Type type, FieldInfo fi)
+        {
+            FieldInfo = fi;
+            Getter = ReflectionTools.CreateGetterUntyped(type, fi);
+            Setter = ReflectionTools.CreateSetterUntyped(type, fi);
         }
     }
 
     public abstract partial class Field
     {
-        public Field(Type type, FieldInfo fi, Type fieldType)
-        {
-            FieldInfo = fi;
-            Getter = ReflectionTools.CreateGetterUntyped(type, fi);
-            Setter = ReflectionTools.CreateSetterUntyped(type, fi);
-            FieldType = fieldType;
-        }
-
-        public FieldInfo FieldInfo { get; private set; }
-        public Func<object, object> Getter { get; private set; }
-        public Action<object, object> Setter { get; private set; }
-
         public Type FieldType { get; private set; }
 
+        public Field(Type fieldType)
+        {
+            FieldType = fieldType;
+        }
+        
         public abstract IEnumerable<IColumn> Columns();
     }
 
@@ -330,7 +338,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
 
-        public PrimaryKeyField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) { }
+        public PrimaryKeyField(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -355,7 +363,7 @@ namespace Signum.Engine.Maps
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
 
-        public ValueField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) { }
+        public ValueField(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -375,11 +383,11 @@ namespace Signum.Engine.Maps
 
     public partial class EmbeddedField : Field, IFieldFinder
     {
-        public Dictionary<string, Field> EmbeddedFields{get;set;}
+        public Dictionary<string, EntityField> EmbeddedFields { get; set; }
 
         public Func<EmbeddedEntity> Constructor { get; private set; } 
 
-        public EmbeddedField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) 
+        public EmbeddedField(Type fieldType) : base(fieldType) 
         {
             Constructor = ReflectionTools.CreateConstructor<EmbeddedEntity>(fieldType); 
         }
@@ -391,12 +399,12 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo value)
         {
-            return EmbeddedFields.GetOrThrow(Reflector.FindFieldInfo(value).Name, Resources.Field0NotInField0.Formato(value.Name, this.FieldInfo.Name));
+            return EmbeddedFields.GetOrThrow(Reflector.FindFieldInfo(value).Name, Resources.Field0NotInType1.Formato(value.Name, FieldType.TypeName())).Field;
         }
 
         public override IEnumerable<IColumn> Columns()
         {
-            return EmbeddedFields.Values.SelectMany(c => c.Columns());
+            return EmbeddedFields.Values.SelectMany(c => c.Field.Columns());
         }
     }
 
@@ -414,7 +422,7 @@ namespace Signum.Engine.Maps
 
         public bool IsLazy { get; set; }
 
-        public ReferenceField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) { }
+        public ReferenceField(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -434,7 +442,7 @@ namespace Signum.Engine.Maps
 
     public partial class EnumField : ReferenceField
     {
-        public EnumField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) { }
+        public EnumField(Type fieldType) : base(fieldType) { }
     }
 
     public partial class ImplementedByField : Field, IReferenceField
@@ -443,7 +451,7 @@ namespace Signum.Engine.Maps
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns{get;set;}
 
-        public ImplementedByField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) { }
+        public ImplementedByField(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -462,7 +470,7 @@ namespace Signum.Engine.Maps
         public ImplementationColumn Column { get; set; }
         public ImplementationColumn ColumnTypes { get; set; }
 
-        public ImplementedByAllField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) { }
+        public ImplementedByAllField(Type fieldType) : base(fieldType) { }
 
         public override IEnumerable<IColumn> Columns()
         {
@@ -483,11 +491,11 @@ namespace Signum.Engine.Maps
         public Table ReferenceTable { get; set; }
     }
 
-    public partial class CollectionField : Field, IFieldFinder
+    public partial class MListField : Field, IFieldFinder
     {
         public RelationalTable RelationalTable { get; set; }
 
-        public CollectionField(Type type, FieldInfo fi, Type fieldType) : base(type, fi, fieldType) { }
+        public MListField(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -571,8 +579,7 @@ namespace Signum.Engine.Maps
         Reference,
         Enum,
         Embedded,
-        Collection,
-        Lazy
+        MList,
     }
 
     [Flags]
@@ -580,9 +587,8 @@ namespace Signum.Engine.Maps
     {
         Normal = 1,
         Embedded = 2,
-        Collection = 4,
-        Lazy = 8,
-        View = 16,
+        MList = 4,
+        View = 8,
     }
 
    

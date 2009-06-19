@@ -92,7 +92,7 @@ namespace Signum.Engine
 
                     table.Fill(row, ei, this);
 
-                    ObjectCache.Add(ei);
+                    EntityCache.Add(ei);
                     PostRetrieving.Add(ei);
                     dic.Remove(id);
                 }
@@ -164,11 +164,12 @@ namespace Signum.Engine
         #region Interface Database
         public IdentifiableEntity Retrieve(Type type, int id)
         {
-            IdentifiableEntity result = GetIdentifiable(Schema.Current.Table(type), id);
+            return GetIdentifiable(Schema.Current.Table(type), id);
+        }
 
-            ProcessAll();
-
-            return result;
+        public IdentifiableEntity Retrieve(Lazy lazy)
+        {
+            return GetIdentifiable(Schema.Current.Table(lazy.RuntimeType), lazy.Id);
         }
 
         public List<IdentifiableEntity> RetrieveAll(Type type)
@@ -177,7 +178,7 @@ namespace Signum.Engine
 
             DataTable table = Executor.ExecuteDataTable(spc);
 
-            return RetrieveAll(type, table.Rows.Cast<DataRow>().Select(r => (int)r.Cell(SqlBuilder.PrimaryKeyName)).ToList());
+            return RetrieveList(type, table.Rows.Cast<DataRow>().Select(r => (int)r.Cell(SqlBuilder.PrimaryKeyName)).ToList());
         }
 
         public List<Lazy> RetrieveAllLazy(Type type)
@@ -186,38 +187,30 @@ namespace Signum.Engine
 
             DataTable table = Executor.ExecuteDataTable(spc);
 
-            return RetrieveAllLazy(type, table.Rows.Cast<DataRow>().Select(r => (int)r.Cell(SqlBuilder.PrimaryKeyName)).ToList());
+            return RetrieveListLazy(type, table.Rows.Cast<DataRow>().Select(r => (int)r.Cell(SqlBuilder.PrimaryKeyName)).ToList());
         }
 
-        public List<IdentifiableEntity> RetrieveAll(Type type, List<int> list)
+        public List<IdentifiableEntity> RetrieveList(Type type, List<int> list)
         {
             Table table = Schema.Current.Table(type);
 
-            List<IdentifiableEntity> result = list.Select(id => GetIdentifiable(table, id)).ToList();
-
-            ProcessAll();
-
-            return result;
+            return list.Select(id => GetIdentifiable(table, id)).ToList();
         }
 
-        public List<Lazy> RetrieveAllLazy(Type type, List<int> list)
+        public List<Lazy> RetrieveListLazy(Type type, List<int> list)
         {
             Table table = Schema.Current.Table(type);
 
-            List<Lazy> result = list.Select(id => GetLazy(table, type, id)).ToList();
-
-            ProcessAll();
-
-            return result;
+            return list.Select(id => GetLazy(table, type, id)).ToList();
         }
         #endregion
 
-        #region Interfaz Arbol.Recuperar
+        #region Schema Interface
         public IdentifiableEntity GetIdentifiable(Table table, int id)
         {
             Schema.Current.OnRetrieving(table.Type, id); 
 
-            IdentifiableEntity result = ObjectCache.Get(table.Type, id);
+            IdentifiableEntity result = EntityCache.Get(table.Type, id);
 
             if (result != null) return result;
       
@@ -232,7 +225,7 @@ namespace Signum.Engine
 
         public Lazy GetLazy(Table table, Type lazyType, int id)
         {
-            IdentifiableEntity ident = ObjectCache.Get(table.Type, id);
+            IdentifiableEntity ident = EntityCache.Get(table.Type, id);
 
             if (ident != null) return Lazy.Create(lazyType, ident);
 
@@ -245,7 +238,7 @@ namespace Signum.Engine
             return req;
         }
 
-        public IList GetList(RelationalTable table, Type listType, int id)
+        public IList GetList(RelationalTable table, int id)
         {
             return reqList.GetOrCreate(table).GetOrCreate(id, table.Constructor);
         } 

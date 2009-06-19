@@ -139,7 +139,7 @@ namespace Signum.Engine.Linq
             {
                 FieldInitExpression fi = (FieldInitExpression)Visit(m.Object);
 
-                return new EnumExpression(m.Method.DeclaringType.GetGenericArguments()[0], (ColumnExpression)fi.ID);            
+                return Expression.Convert((ColumnExpression)fi.ExternalId, m.Method.DeclaringType.GetGenericArguments()[0]);            
             }
             else if (m.Object != null && typeof(IList).IsAssignableFrom(m.Object.Type) && m.Method.Name == "Contains" && m.Object is ConstantExpression)
             {
@@ -201,7 +201,7 @@ namespace Signum.Engine.Linq
 
             JoinExpression source = (JoinExpression)allProjections.Aggregate((Expression)projection.Source, (e, p) =>
                 new JoinExpression(type, JoinType.LeftOuterJoin, e, p.Table,
-                  SmartEqualizer.EqualNullable(p.FieldInit.ID, p.FieldInit.Bindings.IDColumn()),
+                  SmartEqualizer.EqualNullable(p.FieldInit.ExternalId, p.FieldInit.Bindings.IDColumn()),
                 true));
 
             projection = new ProjectionExpression(
@@ -546,7 +546,7 @@ namespace Signum.Engine.Linq
             string elementAlias = GetNextAlias();
             ProjectedColumns pcElements = ColumnProjector.ProjectColumns(elementProjector, elementAlias, projection.Source.Alias);
 
-            MethodInfo mi = typeof(Grouping<,>).MakeGenericType(keyType, elementType).GetMethod("New");
+            ConstructorInfo ci = typeof(Grouping<,>).MakeGenericType(keyType, elementType).GetConstructor(new Type[] { keyType, typeof(IEnumerable<>).MakeGenericType(elementType) });
 
             Type groupingType = typeof(IGrouping<,>).MakeGenericType(keyType, elementType);
             Type queryType = typeof(IQueryable<>).MakeGenericType(elementType);
@@ -561,7 +561,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression elementsProjection = new ProjectionExpression(selectElements, pcElements.Projector, null);
 
             return new ProjectionExpression(selectKey,
-                Expression.Call(mi, pcKey.Projector.TryConvert(keyType), elementsProjection), null);
+                Expression.New(ci, pcKey.Projector.TryConvert(keyType), elementsProjection), null);
         }
    
         List<OrderExpression> thenBys;
@@ -728,7 +728,7 @@ namespace Signum.Engine.Linq
                         throw new ApplicationException(Resources.NoFieldFoundForMember0.Formato(m.Member.MemberName()));
 
                     if (fi.FieldEquals<IdentifiableEntity>(ei => ei.id))
-                        return fie.ID;
+                        return fie.ExternalId;
 
                     if (fie.Bindings == null)
                          FillFie(fie);
@@ -755,7 +755,7 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression rib = (ImplementedByExpression)operand;
                 FieldInitExpression fie = rib.Implementations.Where(ri => ri.Type == b.TypeOperand).Single(Resources.TheFieldHasNoImplementationForType0.Formato(b.Type.TypeName())).Field;
-                return Expression.NotEqual(fie.ID, Expression.Constant(null, fie.ID.Type));
+                return Expression.NotEqual(fie.ExternalId, Expression.Constant(null, fie.ExternalId.Type));
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {

@@ -23,7 +23,7 @@ namespace Signum.Engine
 
         public static void SaveParams(params IdentifiableEntity[] entities)
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Saver.SaveAll(entities);
@@ -35,7 +35,7 @@ namespace Signum.Engine
         public static void Save<T>(this T obj)
             where T : IdentifiableEntity
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Saver.Save(obj);
@@ -73,16 +73,16 @@ namespace Signum.Engine
 
         public static IdentifiableEntity Retrieve(Type type, int id)
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
 
                 IdentifiableEntity ident = rec.Retrieve(type, id);
 
-                tr.Commit();
+                rec.ProcessAll();
 
-                return ident;
+                return tr.Commit(ident);
             }
         }
         #endregion
@@ -119,16 +119,16 @@ namespace Signum.Engine
 
         public static List<IdentifiableEntity> RetrieveAll(Type type)
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
 
                 List<IdentifiableEntity> ident = rec.RetrieveAll(type);
 
-                tr.Commit();
+                rec.ProcessAll(); 
 
-                return ident;
+                return tr.Commit(ident);
             }
         }
 
@@ -140,16 +140,16 @@ namespace Signum.Engine
 
         public static List<Lazy> RetrieveAllLazy(Type type)
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
 
                 List<Lazy> ident = rec.RetrieveAllLazy(type);
 
-                tr.Commit();
+                rec.ProcessAll(); 
 
-                return ident;
+                return tr.Commit(ident);
             }
         }
 
@@ -160,16 +160,16 @@ namespace Signum.Engine
 
         public static List<IdentifiableEntity> RetrieveList(Type type, List<int> ids)
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
 
-                List<IdentifiableEntity> ident = rec.RetrieveAll(type, ids);
+                List<IdentifiableEntity> ident = rec.RetrieveList(type, ids);
 
-                tr.Commit();
+                rec.ProcessAll();
 
-                return ident;
+                return tr.Commit(ident);
             }
         }
 
@@ -181,18 +181,50 @@ namespace Signum.Engine
 
         public static List<Lazy> RetrieveListLazy(Type type, List<int> ids)
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
 
-                List<Lazy> ident = rec.RetrieveAllLazy(type, ids);
+                List<Lazy> ident = rec.RetrieveListLazy(type, ids);
 
-                tr.Commit();
+                rec.ProcessAll();
 
-                return ident;
+                return tr.Commit(ident);
             }
         }
+
+        public static List<T> RetrieveFromListOfLazy<T>(List<Lazy<T>> lazys)
+         where T : class, IIdentifiable
+        {
+            using (new EntityCache())
+            using (Transaction tr = new Transaction())
+            {
+                Retriever rec = new Retriever();
+
+                List<T> ident = lazys.Select(l => (T)(IIdentifiable)rec.Retrieve(l)).ToList();
+
+                rec.ProcessAll();
+
+                return tr.Commit(ident);
+            }
+        }
+
+        public static List<IdentifiableEntity> RetrieveFromLazyList(List<Lazy> lazys)
+        {
+            using (new EntityCache())
+            using (Transaction tr = new Transaction())
+            {
+                Retriever rec = new Retriever();
+
+                List<IdentifiableEntity> ident = lazys.Select(l => rec.Retrieve(l)).ToList();
+
+                rec.ProcessAll(); 
+
+                return tr.Commit(ident);
+            }
+        }
+
         #endregion
 
         #region Delete

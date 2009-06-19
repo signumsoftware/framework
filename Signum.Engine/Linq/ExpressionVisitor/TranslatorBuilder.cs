@@ -141,7 +141,7 @@ namespace Signum.Engine.Linq
                 if (typeof(IdentifiableEntity).IsAssignableFrom(fieldInit.Type))
                 {
                     HasFullObjects = true;
-                    return Expression.Call(row, miGetIdentificable.MakeGenericMethod(fieldInit.Type), Visit(NullifyColumn(fieldInit.ID)));
+                    return Expression.Call(row, miGetIdentificable.MakeGenericMethod(fieldInit.Type), Visit(NullifyColumn(fieldInit.ExternalId)));
                 }
                 else
                     return Expression.MemberInit(Expression.New(fieldInit.Type),
@@ -156,10 +156,10 @@ namespace Signum.Engine.Linq
                     Visit(ml.BackID));
             }
 
-            protected override Expression VisitEnumExpression(EnumExpression enumExp)
-            {
-                return Expression.Convert(Visit(enumExp.ID), enumExp.Type);
-            }
+            //protected override Expression VisitEnumExpression(EnumExpression enumExp)
+            //{
+            //    return Expression.Convert(Visit(enumExp.ID), enumExp.Type);
+            //}
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)
             {
@@ -167,7 +167,7 @@ namespace Signum.Engine.Linq
                 Type[] types = rb.Implementations.Select(a => a.Type).ToArray();
                 return Expression.Call(row, miGetImplementedBy.MakeGenericMethod(rb.Type),
                     Expression.Constant(types),
-                    Expression.NewArrayInit(typeof(int?), rb.Implementations.Select(i => Visit(NullifyColumn(i.Field.ID))).ToArray()));
+                    Expression.NewArrayInit(typeof(int?), rb.Implementations.Select(i => Visit(NullifyColumn(i.Field.ExternalId))).ToArray()));
             }
 
             protected override Expression VisitImplementedByAll(ImplementedByAllExpression rba)
@@ -188,13 +188,13 @@ namespace Signum.Engine.Linq
                     case DbExpressionType.FieldInit:
                         Debug.Assert(false);
                         return Expression.Call(row, miGetLazyIdentificable.MakeGenericMethod(lazyType), Expression.Constant(reference.Type),
-                            Visit(NullifyColumn(((FieldInitExpression)reference).ID)));
+                            Visit(NullifyColumn(((FieldInitExpression)reference).ExternalId)));
                     case DbExpressionType.ImplementedBy:
                         ImplementedByExpression rb = (ImplementedByExpression)reference;
                         Type[] types = rb.Implementations.Select(a => a.Type).ToArray();
                         return Expression.Call(row, miGetLazyImplementedBy.MakeGenericMethod(lazyType),
                             Expression.Constant(types),
-                            Expression.NewArrayInit(typeof(int?), rb.Implementations.Select(i => Visit(NullifyColumn( i.Field.ID))).ToArray()));
+                            Expression.NewArrayInit(typeof(int?), rb.Implementations.Select(i => Visit(NullifyColumn( i.Field.ExternalId))).ToArray()));
                     case DbExpressionType.ImplementedByAll:
                         ImplementedByAllExpression rba = (ImplementedByAllExpression)reference;
                         return Expression.Call(row, miGetLazyImplementedByAll.MakeGenericMethod(lazyType),

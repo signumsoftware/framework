@@ -16,7 +16,7 @@ namespace Signum.Engine.Maps
     {
         internal SqlPreCommand CreateCollectionTables()
         {
-            var collecciones = Fields.Select(c => c.Value).OfType<CollectionField>();
+            var collecciones = Fields.Values.Select(c => c.Field).OfType<MListField>();
 
             return collecciones.Select(c => c.RelationalTable.CreateTableTotal()).Combine(Spacing.Double);
         }

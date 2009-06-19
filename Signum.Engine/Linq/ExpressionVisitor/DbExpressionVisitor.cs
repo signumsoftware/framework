@@ -55,9 +55,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.ImplementedBy:
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
                 case DbExpressionType.ImplementedByAll:
-                    return this.VisitImplementedByAll((ImplementedByAllExpression)exp);
-                case DbExpressionType.Enum:
-                    return this.VisitEnumExpression((EnumExpression)exp);          
+                    return this.VisitImplementedByAll((ImplementedByAllExpression)exp);       
                 case  DbExpressionType.LazyReference:
                     return this.VisitLazyReference((LazyReferenceExpression)exp);
                 case DbExpressionType.LazyLiteral:
@@ -112,14 +110,6 @@ namespace Signum.Engine.Linq
             return column;
         }
 
-        protected virtual Expression VisitEnumExpression(EnumExpression enumExp)
-        {
-            var id = (ColumnExpression)Visit(enumExp.ID);
-            if (id != enumExp.ID)
-                return new EnumExpression(enumExp.Type, id);
-            return enumExp;
-        }
-
         protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
             var id = (ColumnExpression)Visit(reference.ID);
@@ -145,9 +135,9 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitFieldInit(FieldInitExpression fieldInit)
         {
             var newFields = fieldInit.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
-            var id = Visit(fieldInit.ID);
+            var id = Visit(fieldInit.ExternalId);
             var alias = VisitFieldInitAlias(fieldInit.Alias);
-            if (fieldInit.Bindings != newFields || fieldInit.ID != id)
+            if (fieldInit.Bindings != newFields || fieldInit.ExternalId != id)
             {
                 return new FieldInitExpression(fieldInit.Type, alias, id) { Bindings = newFields };
             }
