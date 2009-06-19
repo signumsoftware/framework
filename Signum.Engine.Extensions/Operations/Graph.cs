@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Operations
 {
@@ -20,70 +21,58 @@ namespace Signum.Engine.Operations
         where E : IdentifiableEntity
         where S : struct
     {
-        public class GraphOption : IOperation
+        public class Goto : IOperation
         {
-            Graph<E, S> graph;
-            S targetState;
-            S[] fromStates; 
-            Action<E, object[]> execute;
-            Func<E, bool> canExecute;
-
+            internal Graph<E, S> Graph { get; set; }
+            public S TargetState { get; private set; }
+            public S[] FromStates { get; set; } 
+            public Action<E, object[]> Execute {get;set;}
+            public Func<E, bool> CanExecute {get;set;}
             public OperationFlags Flags { get; set; }
 
-            public GraphOption(Graph<E, S> graph, S targetState, S[] fromStates,
-                Action<E, object[]> execute,
-                Func<E, bool> canExecute, OperationFlags actionType)
+            public Goto(S targetState)
             {
-                this.graph = graph;
-                this.targetState = targetState;
-                this.fromStates = fromStates;
-
-                if (execute == null)
-                    throw new ArgumentException("execute");
- 
-                this.execute = execute;
-                this.canExecute = canExecute;
-                this.Flags = actionType; 
+                this.TargetState = targetState;
             }
 
-            public bool CanExecute(IIdentifiable ident)
+            bool IOperation.CanExecuteOperation(IIdentifiable ident)
             {
-                S state = graph.GetState((E)ident);
-                if (fromStates != null && !fromStates.Contains(state))
+                S state = Graph.GetState((E)ident);
+                if (FromStates != null && !FromStates.Contains(state))
                     return false;
 
-                if (canExecute != null)
-                    return canExecute((E)ident);
+                if (CanExecute != null)
+                    return CanExecute((E)ident);
 
                 return true;
             }
 
-            public void Execute(IIdentifiable ident, params object[] parameters)
+            void IOperation.ExecuteOperation(IIdentifiable ident, params object[] parameters)
             {
                 E entity = (E)ident; 
 
-                S oldState = graph.GetState(entity);
-                if (fromStates!= null && !fromStates.Contains(oldState))
+                S oldState = Graph.GetState(entity);
+                if (FromStates!= null && !FromStates.Contains(oldState))
                     throw new ApplicationException("State {0} is not compatible with the action".Formato(oldState));
 
-                StateOptions so = graph.States.TryGetC(oldState);
+                StateOptions so = Graph.States.TryGetC(oldState);
                 if (so != null && so.Exit != null)
                     so.Exit(entity);
 
-                if (graph.ExitState != null)
-                    graph.ExitState(entity, oldState);
+                if (Graph.ExitState != null)
+                    Graph.ExitState(entity, oldState);
 
-                execute(entity, parameters);
+                Execute(entity, parameters);
 
-                S newState = graph.GetState(entity);
+                S newState = Graph.GetState(entity);
 
-                if (!newState.Equals(targetState))
-                    throw new ApplicationException("After the action the state should be {0} but is {1}".Formato(targetState, newState)); 
+                if (!newState.Equals(TargetState))
+                    throw new ApplicationException("After the action the state should be {0} but is {1}".Formato(TargetState, newState)); 
 
-                if (graph.EnterState != null)
-                    graph.EnterState(entity, newState);
+                if (Graph.EnterState != null)
+                    Graph.EnterState(entity, newState);
 
-                StateOptions sn = graph.States.TryGetC(newState);
+                StateOptions sn = Graph.States.TryGetC(newState);
                 if (sn != null && sn.Enter != null)
                     sn.Enter(entity);
             }
@@ -91,8 +80,8 @@ namespace Signum.Engine.Operations
 
         public class StateOptions
         {
-            public Action<E> Enter;
-            public Action<E> Exit;
+            public Action<E> Enter { get; set; }
+            public Action<E> Exit { get; set; }
         }
 
         protected Func<E, S> GetState { get; set; }
@@ -100,25 +89,10 @@ namespace Signum.Engine.Operations
         protected Action<E, S> EnterState {get;set;}
         protected Action<E, S> ExitState {get;set;}
 
-        protected Dictionary<Enum, IOperation> Operations { get; set; }
+        protected Dictionary<Enum, Goto> Operations { get; set; }
         protected Dictionary<S, StateOptions> States { get; set; }
 
         protected static bool Registered = false;
-
-        public IOperation Goto(S targetState, S[] fromStates, Action<E, object[]> execute)
-        {
-            return new GraphOption(this, targetState, fromStates, execute, null, OperationFlags.Default);
-        }
-
-        public IOperation Goto(S targetState, S[] fromStates, Action<E, object[]> execute, Func<E, bool> canExecute)
-        {
-            return new GraphOption(this, targetState, fromStates, execute, canExecute, OperationFlags.Default);
-        }
-
-        public IOperation Goto(S targetState, S[] fromStates, Action<E, object[]> execute, Func<E, bool> canExecute, OperationFlags actionType)
-        {
-            return new GraphOption(this, targetState, fromStates, execute, canExecute, actionType);
-        }
 
         public void Register()
         {
@@ -127,10 +101,25 @@ namespace Signum.Engine.Operations
 
             foreach (var item in Operations)
 	        {
+                item.Value.Graph= this;
+                if (item.Value.Execute == null)
+                    throw new ApplicationException("Operation {0} does not have Execute initialized".Formato(item.Key)); 
                 OperationLogic.Register<E>(item.Key, item.Value);
 	        }
 
             Registered = true;
+        }
+
+        public DirectedEdgedGraph<S, Enum> ToDirectedGraph()
+        {
+            return DirectedEdgedGraph<S, Enum>.Generate(EnumExtensions.GetValues<S>(), ConnectionsFrom);
+        }
+
+        IEnumerable<KeyValuePair<S, Enum>> ConnectionsFrom(S state)
+        {
+            return from kvp in this.Operations
+                   where kvp.Value.FromStates.TryCS(ar => ar.Contains(state)) ?? false
+                   select new KeyValuePair<S, Enum>(kvp.Value.TargetState, kvp.Key);
         }
     }
 }

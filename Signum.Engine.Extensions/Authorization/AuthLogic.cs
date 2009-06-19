@@ -45,9 +45,9 @@ namespace Signum.Engine.Authorization
             RoleDN role = ident as RoleDN;
             if (role != null && !role.IsNew && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
             {
-                 using(new ObjectCache())
+                 using(new EntityCache())
                  {
-                    ObjectCache.AddFullGraph(ident);
+                    EntityCache.AddFullGraph(ident);
 
                     DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
 
@@ -83,7 +83,7 @@ namespace Signum.Engine.Authorization
             {
                 DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
 
-                using (new ObjectCache())
+                using (new EntityCache())
                     foreach (var role in Database.RetrieveAll<RoleDN>())
                     {
                         newRoles.Expand(role, r => r.Roles);

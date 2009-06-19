@@ -112,7 +112,7 @@ namespace Signum.Engine.Authorization
         static Dictionary<RoleDN, Dictionary<Enum, bool>> NewCache()
         {
             using (AuthLogic.Disable())
-            using (new ObjectCache(true))
+            using (new EntityCache(true))
             {
                 List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
 

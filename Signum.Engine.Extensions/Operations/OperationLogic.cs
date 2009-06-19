@@ -18,8 +18,8 @@ namespace Signum.Engine.Operations
     public interface IOperation
     {
         OperationFlags Flags { get; set; }
-        bool CanExecute(IIdentifiable entity);
-        void Execute(IIdentifiable entity, params object[] parameters);
+        bool CanExecuteOperation(IIdentifiable entity);
+        void ExecuteOperation(IIdentifiable entity, params object[] parameters);
     }
 
     public class Operation<T> : IOperation
@@ -40,14 +40,14 @@ namespace Signum.Engine.Operations
         Func<T, bool> canExecute;
         Action<T, object[]> execute;
 
-        public bool CanExecute(IIdentifiable entity)
+        public bool CanExecuteOperation(IIdentifiable entity)
         {
             if (canExecute != null)
                 return canExecute((T)entity);
             return true;
         }
 
-        public void Execute(IIdentifiable entity, params object[] parameters)
+        public void ExecuteOperation(IIdentifiable entity, params object[] parameters)
         {
             execute((T)entity, parameters);
         }
@@ -79,7 +79,7 @@ namespace Signum.Engine.Operations
         static void Schema_Initializing(Schema sender)
         {
             using (AuthLogic.Disable())
-            using (new ObjectCache(true))
+            using (new EntityCache(true))
             {
                 ToOperation = EnumerableExtensions.JoinStrict(
                      Database.RetrieveAll<OperationDN>(),
@@ -152,7 +152,7 @@ namespace Signum.Engine.Operations
                     {
                         OperationKey = k,
                         Flags = ao.Flags,
-                        CanExecute = ao.CanExecute(entity)
+                        CanExecute = ao.CanExecuteOperation(entity)
                     }).ToList();
         }
 
@@ -196,7 +196,7 @@ namespace Signum.Engine.Operations
                         User = (UserDN)Thread.CurrentPrincipal
                     };
 
-                    operationOptions.Execute(entity, parameters);
+                    operationOptions.ExecuteOperation(entity, parameters);
 
                     entity.Save(); //Nothing happens if allready saved
 
@@ -235,22 +235,22 @@ namespace Signum.Engine.Operations
         public static bool CanExecuteLazy(this Lazy lazy, Enum operationKey)
         {
             IdentifiableEntity entity = Database.Retrieve(lazy);
-            return Find(operationKey, entity.GetType(), true).CanExecute(entity);
+            return Find(operationKey, entity.GetType(), true).CanExecuteOperation(entity);
         }
 
         public static bool CanExecuteLazy(this Lazy lazy, Type entityType, Enum operationKey)
         {
-            return Find(operationKey, entityType, true).CanExecute(Database.Retrieve(lazy));
+            return Find(operationKey, entityType, true).CanExecuteOperation(Database.Retrieve(lazy));
         }
 
         public static bool CanExecute(this IIdentifiable entity, Enum operationKey)
         {
-            return Find(operationKey, entity.GetType(), false).CanExecute((IdentifiableEntity)entity);
+            return Find(operationKey, entity.GetType(), false).CanExecuteOperation((IdentifiableEntity)entity);
         }
 
         public static bool CanExecute(this IIdentifiable entity, Type entityType, Enum operationKey)
         {
-            return Find(operationKey, entityType, false).CanExecute((IdentifiableEntity)entity);
+            return Find(operationKey, entityType, false).CanExecuteOperation((IdentifiableEntity)entity);
         }
 
         static IOperation Find(Enum operationKey, Type type, bool isLazy)
