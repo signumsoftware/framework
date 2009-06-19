@@ -48,6 +48,9 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
+            if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
+                Database.Save((IdentifiableEntity)entity);
+
             return Content(this.ModelState.ToJsonData());
         }
 
@@ -67,6 +70,9 @@ namespace Signum.Web.Controllers
             Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(sortedList, ref entity, prefix);
 
             this.ModelState.FromDictionary(errors, Request.Form);
+
+            if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
+                Database.Save((IdentifiableEntity)entity);
 
             return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
         }
