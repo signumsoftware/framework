@@ -13,6 +13,7 @@
     using System.Windows.Forms;
     using Signum.Excel;
     using Signum.Excel.Generator;
+    using Signum.Utilities;
 
     public sealed class GeneratorDialog : Form
     {
@@ -87,22 +88,24 @@
         private string Generate(string data)
         {
             if (this._filename == null)
-            {
                 return "";
-            }
+
             Workbook workbook = this.LoadWorkbook(this._filename);
             if (workbook == null)
-            {
                 return "";
-            }
 
-            CodeNamespace ns = workbook.WriteCode(textBox1.Text);
+            var dup = workbook.FindDuplicatedStyles();
+            if (dup.Count > 0)
+                if (MessageBox.Show(this, "Some identical styles have been found:\r\n{0}\r\n\r\nSimplify?".Formato(dup.ToString(kvp => "{0} -> {1}".Formato(kvp.Key, kvp.Value), "\r\n")), "Simplify?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    workbook.ReplaceStyles(dup);
+
+            CodeCompileUnit unit = workbook.WriteCode(textBox1.Text);
 
             this.codeEditor1.Colorizer = this._language.GetColorizer();
-            return this.GenerateCode(ns, this._language).Replace("Utilidades.Excel.", "");
+            return this.GenerateCode(unit, this._language);
         }
 
-        private string GenerateCode(CodeNamespace ns, Language language)
+        private string GenerateCode(CodeCompileUnit unit, Language language)
         {
             try
             {
@@ -110,7 +113,7 @@
                 StringBuilder sb = new StringBuilder();
                 StringWriter w = new StringWriter(sb);
                 CodeGeneratorOptions o = new CodeGeneratorOptions() { BracingStyle = "C" };
-                generator.GenerateCodeFromNamespace(ns, w, o);
+                generator.GenerateCodeFromCompileUnit(unit, w, o);
                 w.Close();
                 return sb.ToString();
             }

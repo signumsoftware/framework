@@ -10,6 +10,7 @@ namespace Signum.Excel
     using System.Linq;
     using Signum.Utilities;
     using Signum.Utilities.ExpressionTrees;
+    using System.Collections.Generic;
 
     public sealed class Workbook : IWriter, IReader
     {
@@ -282,6 +283,68 @@ namespace Signum.Excel
                 Save(ms);
                 return ms.ToArray(); 
             }
+        }
+
+        public Dictionary<string, string> FindDuplicatedStyles()
+        {
+            List<Style> finnalStyle = new List<Style>();
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            foreach (var item in _styles)
+            {
+                Style real = finnalStyle.SingleOrDefault(s => s.Identical(item));
+                if (real != null)
+                    result.Add(item.ID, real.ID);
+                else
+                    finnalStyle.Add(item); 
+            }
+
+            HashSet<string> used = finnalStyle.Select(a => a.Parent).ToHashSet();
+            foreach (var w in Worksheets)
+	        {
+                used.AddRange(w.Table.Columns.Select(a => a.StyleID));
+                used.AddRange(w.Table.Rows.SelectMany(r => r.Cells.Select(c => c.StyleID)));
+                used.Add(w.Table.StyleID); 
+	        }
+
+            used.Remove(null);
+
+            used.AddRange(used.Select(u => result.TryGetC(u)).ToList());
+
+            var notUsed = finnalStyle.Select(a => a.ID).Where(id => !used.Contains(id)).ToList();
+
+            result.SetRange(notUsed, notUsed.Select(s => (string)null));
+
+             return result; 
+        }
+
+        public void ReplaceStyles(Dictionary<string, string> dictionary)
+        {
+            foreach (var w in Worksheets)
+            {
+                w.Table.StyleID = Replace(dictionary, w.Table.StyleID);
+
+                foreach (var c in w.Table.Columns)
+                    c.StyleID = Replace(dictionary, c.StyleID);
+
+                foreach (var r in w.Table.Rows)
+                    foreach (var c in r.Cells)
+                        c.StyleID = Replace(dictionary, c.StyleID);
+            }
+
+            foreach (var style in _styles.ToList())
+            {
+                if (dictionary.ContainsKey(style.ID))
+                    _styles.Remove(style);
+                else
+                    style.Parent = Replace(dictionary, style.Parent);
+            }
+        }
+
+        string Replace(Dictionary<string, string> dictionary, string styleID)
+        {
+            if (styleID == null) return null;
+
+            return dictionary.TryGetC(styleID) ?? styleID;
         }
 
         public ExcelWorkbook ExcelWorkbook

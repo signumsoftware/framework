@@ -1,15 +1,18 @@
 ﻿namespace Signum.Excel
 {
+
     using System;
     using System.CodeDom;
     using System.Collections;
     using System.Globalization;
     using System.Reflection;
+    using System.Linq;
     using System.Xml;
     using System.Collections.ObjectModel;
     using System.Linq.Expressions;
+    using Signum.Utilities;
 
-    public sealed class BorderCollection  : Collection<Border>,IWriter, IReader, IExpressionWriter
+    public sealed class BorderCollection  : Collection<Border>,IWriter, IReader, IExpressionWriter, IEquatable<BorderCollection>
     {
         public Border Add(Position position, LineStyleOption lineStyle)
         {
@@ -69,6 +72,16 @@
         internal static bool IsElement(XmlElement element)
         {
             return UtilXml.IsElement(element, "Borders", Namespaces.SpreadSheet);
+        }
+
+        public bool Equals(BorderCollection other)
+        {
+            if (other == null) return false;
+            if (other == this) return true;
+   
+            return other.ToDictionary(b=>b.Position).OuterJoinDictionaryCC(this.ToDictionary(b=>b.Position), (p,b1,b2)=> 
+                b1 != null && b2 != null &&
+                b1.Color == b2.Color && b1.LineStyle == b2.LineStyle && b1.Weight == b2.Weight).Values.All(b=>b);
         }
     }
 }

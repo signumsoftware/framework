@@ -5,6 +5,8 @@ namespace Signum.Excel
     using System.Xml;
     using System.Linq.Expressions;
     using Signum.Utilities.ExpressionTrees;
+    using System.Collections.Generic;
+    using Signum.Utilities;
 
     public sealed class Style : IWriter, IReader, IExpressionWriter
     {
@@ -143,6 +145,26 @@ namespace Signum.Excel
         internal static bool IsElement(XmlElement element)
         {
             return UtilXml.IsElement(element, "Style", Namespaces.SpreadSheet);
+        }
+
+        public bool Identical(Style other)
+        {
+            if (other == null) return false;
+            if (other == this) return true;
+
+            return
+                this._parent == other._parent &&
+                this._numberFormat == other._numberFormat &&
+                EqualityComparer<Alignment>.Default.Equals(this._alignment, other._alignment) &&
+                EqualityComparer<Font>.Default.Equals(this._font, other._font) &&
+                EqualityComparer<Interior>.Default.Equals(this._interior, other._interior) &&
+                EqualityComparer<BorderCollection>.Default.Equals(this._borders, other._borders);
+                
+        }
+
+        public override string ToString()
+        {
+            return "Style: {0}".Formato(ID);
         }
 
         public Alignment Alignment

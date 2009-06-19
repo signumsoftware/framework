@@ -6,7 +6,7 @@ namespace Signum.Excel
     using System.Xml;
     using System.Linq.Expressions;
 
-    public sealed class Interior : IWriter, IReader, IExpressionWriter
+    public sealed class Interior : IWriter, IReader, IExpressionWriter, IEquatable<Interior>
     {
         private string _color;
         private InteriorPattern _pattern;
@@ -75,6 +75,16 @@ namespace Signum.Excel
             {
                 this._pattern = value;
             }
+        }
+
+        public bool Equals(Interior other)
+        {
+            if (other == null) return false;
+            if (other == this) return true;
+
+            return
+                this._color == other._color &&
+                this._pattern == other._pattern;
         }
     }
 }

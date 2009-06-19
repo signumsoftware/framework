@@ -14,6 +14,9 @@
     {
         internal int PreWrite()
         {
+            if (this.Count() == 0)
+                return 0;
+
             return this.Max(r => r.Cells.UpdateIndices());
         }
     }

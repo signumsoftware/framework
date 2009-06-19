@@ -6,6 +6,8 @@ namespace Signum.Excel
     using System.Xml;
     using System.Linq.Expressions;
     using System.Collections.ObjectModel;
+    using System.Collections.Generic;
+    using Signum.Utilities;
 
     public sealed class Worksheet : IWriter, IReader, IExpressionWriter
     {

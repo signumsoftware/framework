@@ -13,7 +13,6 @@
         private Position _position;
         private int _weight = -1;
 
-
         public Expression CreateExpression()
         {
             return UtilExpression.MemberInit<Border>(new MemberBindingList<Border>()

@@ -6,7 +6,7 @@ namespace Signum.Excel
     using System.Xml;
     using System.Linq.Expressions;
 
-    public sealed class Font : IWriter, IReader, IExpressionWriter
+    public sealed class Font : IWriter, IReader, IExpressionWriter, IEquatable<Font>
     {
         private bool _bold;
         private string _color;
@@ -170,6 +170,21 @@ namespace Signum.Excel
             {
                 this._underline = value;
             }
+        }
+
+        public bool Equals(Font other)
+        {
+            if (other == null) return false;
+            if (other == this) return true;
+
+            return
+                this._bold == other._bold &&
+                this._color == other._color &&
+                this._fontName == other._fontName &&
+                this._italic == other._italic &&
+                this._size == other._size &&
+                this._strikethrough == other._strikethrough &&
+                this._underline == other._underline;
         }
     }
 }
