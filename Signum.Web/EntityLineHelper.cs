@@ -9,6 +9,7 @@ using System.Web.Mvc.Html;
 using Signum.Entities;
 using System.Reflection;
 using Signum.Entities.Reflection;
+using System.Configuration;
 
 namespace Signum.Web
 {
@@ -39,6 +40,8 @@ namespace Signum.Web
             idValueField = helper.GlobalName(idValueField);
             string divASustituir = helper.GlobalName("divASustituir");
 
+            string routePrefix = ConfigurationManager.AppSettings["RoutePrefix"] ?? "";
+
             StringBuilder sb = new StringBuilder();
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, (Reflector.ExtractLazy(type) ?? type).Name));
 
@@ -55,7 +58,7 @@ namespace Signum.Web
             }
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.RuntimeType, runtimeType));
                 
-            string popupOpeningParameters = "'/Signum/PartialView','{0}','{1}',function(){{OnPopupOK('/Signum/TrySavePartial','{1}');}},function(){{OnPopupCancel('{1}');}}".Formato(divASustituir, idValueField);
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}');}},function(){{OnPopupCancel('{2}');}}".Formato(routePrefix + "/Signum/PartialView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
 
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(type);
             bool isLazy = typeof(Lazy).IsAssignableFrom(type);
@@ -87,7 +90,7 @@ namespace Signum.Web
                                                       (Reflector.ExtractLazy(type) ?? type).Name, 
                                                       (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name,",") : "",
                                                       idValueField + TypeContext.Separator +  TypeContext.Id,
-                                                      "/Signum/Autocomplete", 1, 5, 500));
+                                                      routePrefix + "/Signum/Autocomplete", 1, 5, 500));
                 
                 if (settings.Implementations != null) //Interface with several possible implementations
                 {
@@ -164,7 +167,7 @@ namespace Signum.Web
 
             if (settings.Find && (isIdentifiable || isLazy))
             {
-                string popupFindingParameters = "'/Signum/PartialFind','{0}','false',function(){{OnSearchOk('{1}');}},function(){{OnSearchCancel('{1}');}},'{2}','{1}'".Formato(Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
+                string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}');}},function(){{OnSearchCancel('{2}');}},'{3}','{2}'".Formato(routePrefix + "/Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);

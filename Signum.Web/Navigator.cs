@@ -297,7 +297,7 @@ namespace Signum.Web
                     .Single("Filter Column {0} not found or found more than once in query description".Formato(opt.ColumnName));
             }
 
-            controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            controller.ViewData[ViewDataKeys.SearchResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.SearchResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;

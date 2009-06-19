@@ -13,49 +13,54 @@ namespace Signum.Engine.DynamicQuery
 {
     public class DynamicQueryManager
     {
-        public Dictionary<object, IQueryable> Queries = new Dictionary<object, IQueryable>();
+        internal DynamicQueryManager Parent{get; private set;}
+        Dictionary<object, IQueryable> queries = new Dictionary<object, IQueryable>();
 
-        public IQueryable this[object type]
+        public DynamicQueryManager(DynamicQueryManager parent)
         {
-            get { return Queries[type]; }
-            set { Queries[type] = value; }
+            this.Parent = parent;         
+        }
+
+        public IQueryable this[object queryName]
+        {
+            get
+            {
+                return TryGet(queryName).ThrowIfNullC(Resources.TheView0IsNotOnQueryManager.Formato(queryName));
+            }
+            set { queries[queryName] = value; }
+        }
+
+        public IQueryable TryGet(object queryName)
+        {
+            var result = queries.TryGetC(queryName);
+            if (result != null)
+                return result;
+
+            if (Parent != null)
+                return Parent[queryName];
+
+            return null; 
         }
     
         public QueryDescription QueryDescription(object queryName)
         {
-            IQueryable q = Queries.GetOrThrow(queryName, Resources.TheView0IsNotOnQueryManager);
-
-            return ViewDescription(q);
-        }
-
-        public static QueryDescription ViewDescription(IQueryable q)
-        {
-            Type parameter = ExtractQueryType(q);
-
-            return DynamicQueryUtils.GetViewDescription(parameter);
+            return DynamicQueryUtils.ViewDescription(this[queryName]);
         }
 
         public List<object> GetQueryNames()
         {
-            return Queries.Keys.ToList();
-        }
+            if (Parent == null)
+                return queries.Keys.ToList();
 
-        private static Type ExtractQueryType(IQueryable q)
-        {
-            Type parameter = q.GetType().GetInterfaces()
-                .Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQueryable<>))
-                .GetGenericArguments()[0];
-            return parameter;
+            return queries.Keys.Union(Parent.GetQueryNames()).ToList(); 
         }
-
-        static MethodInfo miExecuteQueryGeneric = typeof(DynamicQueryManager).GetMethod("ExecuteQueryGeneric");
 
         public QueryResult ExecuteQuery(object queryName, List<Filter> filter, int? limit)
         {
-            IQueryable q = Queries.GetOrThrow(queryName, Resources.TheView0IsNotOnQueryManager);
-            Type parameter = ExtractQueryType(q);
+            IQueryable q = this[queryName];
+            Type parameter = DynamicQueryUtils.ExtractQueryType(q);
 
-            MethodInfo mi = miExecuteQueryGeneric.MakeGenericMethod(parameter);
+            MethodInfo mi = DynamicQueryUtils.miExecuteQueryGeneric.MakeGenericMethod(parameter);
             try
             {
                 return (QueryResult)mi.Invoke(null, new object[] { q, filter, limit });
@@ -64,18 +69,6 @@ namespace Signum.Engine.DynamicQuery
             {
                 throw te.InnerException;
             }
-        }
-
-        public static QueryResult ExecuteQueryGeneric<T>(IQueryable<T> query, List<Filter> filter, int? limit)
-        {
-            var f = DynamicQueryUtils.GetWhereExpression<T>(filter);
-            if (f != null)
-                query = query.Where(f);
-
-            if (limit != null)
-                query = query.Take(limit.Value); 
-
-            return query.ToView();
         }
     }
 }

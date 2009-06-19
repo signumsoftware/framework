@@ -170,6 +170,34 @@ namespace Signum.Engine.DynamicQuery
             return Database.Query<RT>().Select(a => a.ToLazy<LT>()).AsEnumerable().Cast<Lazy>().ToList();
         }
 
+        public static QueryDescription ViewDescription(IQueryable q)
+        {
+            Type parameter = ExtractQueryType(q);
+
+            return DynamicQueryUtils.GetViewDescription(parameter);
+        }
+
+        public static Type ExtractQueryType(IQueryable q)
+        {
+            Type parameter = q.GetType().GetInterfaces()
+                .Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQueryable<>))
+                .GetGenericArguments()[0];
+            return parameter;
+        }
+
+        internal static MethodInfo miExecuteQueryGeneric = ReflectionTools.GetMethodInfo<int>(a => DynamicQueryUtils.ExecuteQueryGeneric<int>(null, null, null)).GetGenericMethodDefinition();
+        public static QueryResult ExecuteQueryGeneric<T>(IQueryable<T> query, List<Filter> filter, int? limit)
+        {
+            var f = DynamicQueryUtils.GetWhereExpression<T>(filter);
+            if (f != null)
+                query = query.Where(f);
+
+            if (limit != null)
+                query = query.Take(limit.Value);
+
+            return query.ToView();
+        }
+
 
     }
 }

@@ -3,6 +3,7 @@
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="System.Configuration" %>
 
 <% FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];%>
 <%=Html.Hidden(Html.GlobalName("sfQueryName"), findOptions.QueryName.ToString())%>
@@ -19,10 +20,10 @@
 <% if (findOptions.FilterMode != FilterMode.AlwaysHidden){%>
     <input type="button" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
 <%} %>
-<input id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="Search('/Signum/Search','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
+<input id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="Search('{0}','{1}');".Formato((ConfigurationManager.AppSettings["RoutePrefix"] ?? "") + "/Signum/Search", ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
 
 <%if ((bool)ViewData[ViewDataKeys.Create]){ %>
-    <input id="<%=Html.GlobalName("btnCreate")%>" type="button" onclick="<%="SearchCreate('/Signum/PartialView','{0}',function(){{OnSearchCreateOK('/Signum/TrySavePartial','{0}');}},function(){{OnSearchCreateCancel('{0}');}},'false');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "")%>" value="+" /> 
+    <input id="<%=Html.GlobalName("btnCreate")%>" type="button" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato((ConfigurationManager.AppSettings["RoutePrefix"] ?? "") + "/Signum/PartialView", ViewData[ViewDataKeys.PopupPrefix] ?? "", (ConfigurationManager.AppSettings["RoutePrefix"] ?? "") + "/Signum/TrySavePartial")%>" value="+" /> 
 <%} %>
 <br />
 <div id="<%=Html.GlobalName("divResults")%>" name="<%=Html.GlobalName("divResults")%>">

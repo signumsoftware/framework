@@ -221,7 +221,7 @@ namespace Signum.Windows
 
             view.Columns.ForEach((c, i) =>
             {
-                if (c.IsEntity) return;
+                if (!c.Visible) return;
 
                 Binding b = new Binding("[{0}]".Formato(i)) { Mode = BindingMode.OneTime };
                 DataTemplate dt = CreateDataTemplate(c.Type, b);

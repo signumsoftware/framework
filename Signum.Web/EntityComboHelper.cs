@@ -10,6 +10,7 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Engine;
+using System.Configuration;
 
 namespace Signum.Web
 {
@@ -35,6 +36,8 @@ namespace Signum.Web
         {
             idValueField = helper.GlobalName(idValueField);
             string divASustituir = helper.GlobalName("divASustituir");
+
+            string routePrefix = ConfigurationManager.AppSettings["RoutePrefix"] ?? "";
 
             StringBuilder sb = new StringBuilder();
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, (Reflector.ExtractLazy(type) ?? type).Name));
@@ -87,7 +90,7 @@ namespace Signum.Web
                 sb.Append("\n");
             }
 
-            string viewingUrl = "javascript:OpenPopup('/Signum/PartialView','{0}','{1}',function(){{OnPopupComboOk('/Signum/TrySavePartial','{1}');}},function(){{OnPopupComboCancel('{1}');}});".Formato(divASustituir, idValueField);
+            string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato(routePrefix + "/Signum/PartialView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
             sb.Append(helper.Button(
                         idValueField + TypeContext.Separator + "_btnView",
                         "->",
