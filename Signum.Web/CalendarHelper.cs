@@ -13,7 +13,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
             string resourcesRoute = helper.ViewData[ViewDataKeys.ResourcesRoute].ToString();
-
+            
             sb.Append(helper.ScriptInclude(resourcesRoute + "Scripts/jqueryui/ui.core.js"));
             sb.Append(helper.ScriptInclude(resourcesRoute + "Scripts/jqueryui/ui.datepicker.js"));
             sb.Append(helper.ScriptInclude(resourcesRoute + "Scripts/jqueryui/i18n/ui.datepicker-es.js"));
