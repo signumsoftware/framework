@@ -23,17 +23,14 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        static DynamicQueryManager dqm; 
-
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
         {
             if (sb.NotDefined<RuleQueryDN>())
             {
                 AuthLogic.Start(sb);
-                QueryLogic.Start(sb, dqm);
+                QueryLogic.Start(sb, queryManagers);
 
-                QueryAuthLogic.dqm = dqm;  
-                
+               
                 sb.Include<RuleQueryDN>();
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
@@ -61,7 +58,7 @@ namespace Signum.Engine.Authorization
 
         public static List<object> AuthorizedQueryNames()
         {
-            return dqm.GetQueryNames().Where(q => GetAllowed(UserDN.Current.Role, q.ToString())).ToList();
+            return QueryLogic.QueryNames.Where(q => GetAllowed(UserDN.Current.Role, q.ToString())).ToList();
         }
 
         public static void AuthorizeQuery(object queryName)

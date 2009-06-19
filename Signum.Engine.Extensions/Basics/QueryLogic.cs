@@ -11,12 +11,14 @@ namespace Signum.Engine.Basics
 {
     public static class QueryLogic
     {
-        static DynamicQueryManager dynamicQueryManager;
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dynamicQueryManager)
+        public static HashSet<object> QueryNames { get; private set; }
+
+        public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
         {
             if (sb.NotDefined<QueryDN>())
             {
-                QueryLogic.dynamicQueryManager = dynamicQueryManager;
+                QueryNames = queryManagers.SelectMany(a => a.GetQueryNames()).ToHashSet();  
+
                 sb.Include<QueryDN>();
 
                 sb.Schema.Synchronizing += SynchronizeQueries;
@@ -34,7 +36,7 @@ namespace Signum.Engine.Basics
 
         static List<QueryDN> GenerateQueries()
         {
-            return dynamicQueryManager.GetQueryNames().Select(o => new QueryDN { Name = o.ToString() }).ToList();
+            return QueryNames.Select(o => new QueryDN { Name = o.ToString() }).ToList();
         }
 
         const string QueriesKey = "Queries";
