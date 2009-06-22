@@ -91,7 +91,10 @@ namespace Signum.Web
         public static string TextboxInLine(this HtmlHelper helper, string idValueField, string valueStr, Dictionary<string, object> htmlProperties)
         {
             htmlProperties.Add("autocomplete", "off");
-            htmlProperties.Add("onblur", "this.setAttribute('value', this.value);");
+            if (htmlProperties.ContainsKey("onblur"))
+                htmlProperties["onblur"] = "this.setAttribute('value', this.value); " + htmlProperties["onblur"];
+            else
+                htmlProperties.Add("onblur", "this.setAttribute('value', this.value);");
             return helper.TextBox(idValueField, valueStr, htmlProperties);
         }
 
