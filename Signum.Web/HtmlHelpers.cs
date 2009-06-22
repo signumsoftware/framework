@@ -35,12 +35,28 @@ namespace Signum.Web
         /// <param name="idField">The id of the field that the label is describing</param>
         /// <param name="cssClass">The class that will be appended to the label</param>
         /// <returns>An HTML string representing a "label" label</returns>
-        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
+        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass, Dictionary<string, string> htmlAttributes)
         {
+            if (htmlAttributes == null)
+                htmlAttributes = new Dictionary<string, string>();
+
+            if (htmlAttributes.ContainsKey("class"))
+                htmlAttributes["class"] += " " + cssClass;
+            else
+                htmlAttributes["class"] = cssClass;
+
             return
             String.IsNullOrEmpty(id) ?
-                String.Format("<label for='{0}' class='{1}'>{2}</label>", idField, cssClass, value) :
-                String.Format("<label for='{0}' id='{3}' class='{1}'>{2}</label>", idField, cssClass, value, id);
+                String.Format("<label for='{0}' {1}>{2}</label>", idField, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote(), " "), value) :
+                String.Format("<label for='{0}' id='{1}' {2}>{3}</label>", idField, id, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote(), " "), value);
+        }
+
+        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
+        {
+            return html.Label(id, value, idField, cssClass, null);
+            //String.IsNullOrEmpty(id) ?
+            //    String.Format("<label for='{0}' class='{1}'>{2}</label>", idField, cssClass, value) :
+            //    String.Format("<label for='{0}' id='{3}' class='{1}'>{2}</label>", idField, cssClass, value, id);
         }
 
         public static string Span(this HtmlHelper html, string name, string value, string cssClass)

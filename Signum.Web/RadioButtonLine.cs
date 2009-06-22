@@ -15,6 +15,7 @@ namespace Signum.Web
     {
         public string LabelText;
         public StyleContext StyleContext;
+        public Dictionary<string, string> LabelFieldHtmlProps;
         public Dictionary<string, object> ValueFieldHtmlProps;
         public string LabelTrue;
         public string LabelFalse;
@@ -22,15 +23,19 @@ namespace Signum.Web
 
     public static class RadioButtonLineHelper
     {
-        private static string InternalRadioButtonLine(this HtmlHelper helper, string idValueField, bool? value, string trueLabel, string falseLabel, string labelText, Dictionary<string, object> rbHtmlOptions)
+        private static string InternalRadioButtonLine(this HtmlHelper helper, string idValueField, bool? value, string trueLabel, string falseLabel, string labelText, Dictionary<string, object> rbHtmlOptions, Dictionary<string, string> labelHtmlOptions)
         {
             StringBuilder sb = new StringBuilder();
 
             idValueField = helper.GlobalName(idValueField);
 
             if (StyleContext.Current.LabelVisible)
-                sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
-
+            {
+                if (labelHtmlOptions != null && labelHtmlOptions.Count > 0)
+                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, labelHtmlOptions));
+                else
+                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
+            }
             if (rbHtmlOptions == null)
                 rbHtmlOptions = new Dictionary<string, object>();
 
@@ -126,17 +131,17 @@ namespace Signum.Web
             TypeContext<bool?> context = (TypeContext<bool?>)Common.WalkExpression(tc, CastToObject(property));
             
             if (options == null)
-                return helper.InternalRadioButtonLine(context.Name, context.Value, "true", "false", context.PropertyName, options.ValueFieldHtmlProps);
+                return helper.InternalRadioButtonLine(context.Name, context.Value, "true", "false", context.PropertyName, null, null);
             else
             {
                 if (options.StyleContext != null)
                 {
                     using (options.StyleContext)
-                        return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps);
+                        return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
                 }
                 else
                 {
-                    return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps);
+                    return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
                 }
             }
         }
