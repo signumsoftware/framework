@@ -47,6 +47,22 @@ namespace Signum.Entities
             get { return entityOrNull; }
             internal set { entityOrNull = value; }
         }
+
+
+        public bool PointsTo(T entity)
+        {
+            if (entity == null)
+                return false;
+
+            if (RuntimeType != entity.GetType())
+                return false;
+
+            if (IdOrNull != null)
+                return Id == entity.IdOrNull;
+            else
+                return object.ReferenceEquals(this.EntityOrNull, entity);
+        }
+
     }
 
     [Serializable]
@@ -189,20 +205,6 @@ namespace Signum.Entities
             get { return toStr; }
             internal set { toStr = value;  }
         }
-
-        //internal bool EqualsIdent(IdentifiableEntity entity)
-        //{
-        //    if (entity == null)
-        //        return false;
-
-        //    if (RuntimeType != entity.GetType())
-        //        return false;
-
-        //    if (UntypedEntityOrNull == null)
-        //        return Id == entity.IdOrNull;
-        //    else
-        //        return object.ReferenceEquals(this.UntypedEntityOrNull, entity);
-        //}
 
         public override bool Equals(object obj)
         {
