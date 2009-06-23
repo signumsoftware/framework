@@ -206,7 +206,7 @@ namespace Signum.Engine.Maps
 
             Field field = FindField(Table(lazyType), members); 
 
-            ImplementedByField ibaField = field as ImplementedByField;
+            FieldImplementedBy ibaField = field as FieldImplementedBy;
             if (ibaField != null)
                 return ibaField.ImplementationColumns.Keys.ToArray();
 
@@ -321,12 +321,12 @@ namespace Signum.Engine.Maps
         Table ReferenceTable { get; }
     }
 
-    public interface IReferenceField
+    public interface IFieldReference
     {
         bool IsLazy { get; set; }
     }
 
-    public partial class PrimaryKeyField : Field, IColumn
+    public partial class FieldPrimaryKey : Field, IColumn
     {
         public string Name { get { return SqlBuilder.PrimaryKeyName; } }
         bool IColumn.Nullable { get { return false; } }
@@ -338,7 +338,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
 
-        public PrimaryKeyField(Type fieldType) : base(fieldType) { }
+        public FieldPrimaryKey(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -351,7 +351,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ValueField : Field, IColumn
+    public partial class FieldValue : Field, IColumn
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
@@ -363,7 +363,7 @@ namespace Signum.Engine.Maps
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
 
-        public ValueField(Type fieldType) : base(fieldType) { }
+        public FieldValue(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -381,13 +381,13 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class EmbeddedField : Field, IFieldFinder
+    public partial class FieldEmbedded : Field, IFieldFinder
     {
         public Dictionary<string, EntityField> EmbeddedFields { get; set; }
 
         public Func<EmbeddedEntity> Constructor { get; private set; } 
 
-        public EmbeddedField(Type fieldType) : base(fieldType) 
+        public FieldEmbedded(Type fieldType) : base(fieldType) 
         {
             Constructor = ReflectionTools.CreateConstructor<EmbeddedEntity>(fieldType); 
         }
@@ -408,7 +408,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ReferenceField : Field, IColumn,IReferenceField
+    public partial class FieldReference : Field, IColumn, IFieldReference
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
@@ -422,7 +422,7 @@ namespace Signum.Engine.Maps
 
         public bool IsLazy { get; set; }
 
-        public ReferenceField(Type fieldType) : base(fieldType) { }
+        public FieldReference(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -440,18 +440,18 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class EnumField : ReferenceField
+    public partial class FieldEnum : FieldReference
     {
-        public EnumField(Type fieldType) : base(fieldType) { }
+        public FieldEnum(Type fieldType) : base(fieldType) { }
     }
 
-    public partial class ImplementedByField : Field, IReferenceField
+    public partial class FieldImplementedBy : Field, IFieldReference
     {
         public bool IsLazy { get; set; }
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns{get;set;}
 
-        public ImplementedByField(Type fieldType) : base(fieldType) { }
+        public FieldImplementedBy(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
@@ -464,13 +464,13 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ImplementedByAllField : Field, IReferenceField
+    public partial class FieldImplementedByAll : Field, IFieldReference
     {
         public bool IsLazy { get; set; }
         public ImplementationColumn Column { get; set; }
         public ImplementationColumn ColumnTypes { get; set; }
 
-        public ImplementedByAllField(Type fieldType) : base(fieldType) { }
+        public FieldImplementedByAll(Type fieldType) : base(fieldType) { }
 
         public override IEnumerable<IColumn> Columns()
         {
@@ -491,11 +491,11 @@ namespace Signum.Engine.Maps
         public Table ReferenceTable { get; set; }
     }
 
-    public partial class MListField : Field, IFieldFinder
+    public partial class FieldMList : Field, IFieldFinder
     {
         public RelationalTable RelationalTable { get; set; }
 
-        public MListField(Type fieldType) : base(fieldType) { }
+        public FieldMList(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {

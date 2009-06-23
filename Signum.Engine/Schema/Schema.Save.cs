@@ -25,13 +25,13 @@ namespace Signum.Engine.Maps
     {
         public SqlPreCommand Save(IdentifiableEntity ident, Forbidden forbidden)
         {   
-            var collectionFields = Fields.Values.Select(f=>f.Field).OfType<MListField>();
+            var collectionFields = Fields.Values.Select(f=>f.Field).OfType<FieldMList>();
 
             SqlPreCommand entity = ident.IsNew ? InsertSql(ident, forbidden) : UpdateSql(ident, forbidden);
 
             SqlPreCommand cols = (from ef in Fields.Values
-                                  where ef.Field is MListField
-                                  select ((MListField)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), forbidden)).Combine(Spacing.Simple);
+                                  where ef.Field is FieldMList
+                                  select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), forbidden)).Combine(Spacing.Simple);
 
             ident.Modified = forbidden.Count > 0;
 
@@ -125,7 +125,7 @@ namespace Signum.Engine.Maps
         protected internal virtual void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden) { }
     }
 
-    public partial class PrimaryKeyField
+    public partial class FieldPrimaryKey
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
@@ -134,7 +134,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ValueField 
+    public partial class FieldValue 
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
@@ -144,7 +144,7 @@ namespace Signum.Engine.Maps
 
     public static partial class ReferenceFieldExtensions
     {
-        public static int? GetIdForLazy(this IReferenceField cr, object value, Forbidden forbidden)
+        public static int? GetIdForLazy(this IFieldReference cr, object value, Forbidden forbidden)
         {
             return value == null ? null :
                       cr.IsLazy ? ((Lazy)value).Map(l => l.UntypedEntityOrNull == null ? l.Id :
@@ -153,7 +153,7 @@ namespace Signum.Engine.Maps
                      ((IdentifiableEntity)value).Map(ei => forbidden.Contains(ei) ? (int?)null : ei.Id);
         }
 
-        public static Type GetTypeForLazy(this IReferenceField cr, object value, Forbidden forbidden)
+        public static Type GetTypeForLazy(this IFieldReference cr, object value, Forbidden forbidden)
         {
             return value == null ? null :
                       cr.IsLazy ? ((Lazy)value).Map(l => l.UntypedEntityOrNull == null ? l.RuntimeType :
@@ -163,7 +163,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ReferenceField
+    public partial class FieldReference
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
@@ -171,7 +171,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class EnumField
+    public partial class FieldEnum
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
@@ -179,11 +179,11 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class MListField
+    public partial class FieldMList
     {
     }
 
-    public partial class EmbeddedField
+    public partial class FieldEmbedded
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
@@ -196,7 +196,7 @@ namespace Signum.Engine.Maps
         }      
     }
 
-    public partial class ImplementedByField
+    public partial class FieldImplementedBy
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
@@ -220,7 +220,7 @@ namespace Signum.Engine.Maps
 
     }
 
-    public partial class ImplementedByAllField
+    public partial class FieldImplementedByAll
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {

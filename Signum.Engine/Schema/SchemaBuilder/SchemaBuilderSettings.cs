@@ -62,7 +62,7 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 2}, 
         };
 
-        public void OverrideTypeAttributes<T>(params Attribute[] attributes) where T : IdentifiableEntity
+        public void OverrideTypeAttributes<T>(params Attribute[] attributes) where T : IIdentifiable
         {
             OverrideTypeAttributes(typeof(T), attributes); 
         }

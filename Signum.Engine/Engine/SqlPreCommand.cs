@@ -105,11 +105,15 @@ namespace Signum.Engine
             return regex.Replace(cs.Sql, m=> dic.TryGetC(m.Value) ?? m.Value);
         }
 
+
         public static void OpenSqlFile(this SqlPreCommand command)
         {
-            string content = command.PlainSql(); 
+            OpenSqlFile(command, "Sync {0:dd-MM-YYYY}.sql".Formato(DateTime.Now));
+        }
 
-            string fileName = "Sync {0:dd-MM-YYYY}.sql".Formato(DateTime.Now);
+        public static void OpenSqlFile(this SqlPreCommand command, string fileName)
+        {
+            string content = command.PlainSql(); 
 
             File.WriteAllText(fileName, content);
 

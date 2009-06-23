@@ -44,7 +44,7 @@ namespace Signum.Engine.Maps
 
         internal void FillLazy(DataRow row, Lazy lazy)
         {
-            ValueField campo = (ValueField)Fields[toStr].Field;
+            FieldValue campo = (FieldValue)Fields[toStr].Field;
             lazy.ToStr = (string)campo.GenerateValue(row, null);
             lazy.Modified = false;
         }
@@ -68,7 +68,7 @@ namespace Signum.Engine.Maps
         internal abstract object GenerateValue(DataRow row, Retriever retriever);
     }
 
-    public partial class PrimaryKeyField
+    public partial class FieldPrimaryKey
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
@@ -76,7 +76,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ValueField
+    public partial class FieldValue
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
@@ -84,7 +84,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ReferenceField
+    public partial class FieldReference
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
@@ -101,7 +101,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class EnumField
+    public partial class FieldEnum
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
@@ -114,7 +114,7 @@ namespace Signum.Engine.Maps
         }     
     }
 
-    public partial class MListField
+    public partial class FieldMList
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
@@ -124,7 +124,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class EmbeddedField
+    public partial class FieldEmbedded
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
@@ -142,7 +142,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ImplementedByField
+    public partial class FieldImplementedBy
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
@@ -165,7 +165,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ImplementedByAllField
+    public partial class FieldImplementedByAll
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {

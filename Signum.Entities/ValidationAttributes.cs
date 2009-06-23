@@ -131,14 +131,35 @@ namespace Signum.Entities
         }
     }
 
-    public class TelephoneAttribute : RegexValidatorAttribute
+    public class TelephoneValidatorAttribute : RegexValidatorAttribute
     {
         const string TelephoneRegex = @"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-0-9]+$";
 
-        public TelephoneAttribute()
+        public TelephoneValidatorAttribute()
             : base(TelephoneRegex)
         {
             this.FormatName = "Telephone";
+        }
+    }
+
+    public class URLValidatorAttribute : RegexValidatorAttribute
+    {
+        const string URLRegex = 
+              "^(https?://)" 
+            + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@ 
+            + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184 
+            + "|" // allows either IP or domain 
+            + @"([0-9a-z_!~*'()-]+\.)*" // tertiary domain(s)- www. 
+            + @"([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\." // second level domain 
+            + "[a-z]{2,6})" // first level domain- .com or .museum 
+            + "(:[0-9]{1,4})?" // port number- :80 
+            + "((/?)|" // a slash isn't required if there is no file name 
+            + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+
+        public URLValidatorAttribute()
+            : base(URLRegex)
+        {
+            this.FormatName = "URL";
         }
     }
 

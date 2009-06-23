@@ -13,7 +13,7 @@ namespace Signum.Engine.Maps
     {
         public SqlPreCommand DeleteSql(int id)
         {   
-            var collectionFields = Fields.Values.OfType<MListField>();
+            var collectionFields = Fields.Values.OfType<FieldMList>();
 
             return SqlPreCommand.Combine(Spacing.Simple, 
                         SqlBuilder.RestoreLastId(id),  

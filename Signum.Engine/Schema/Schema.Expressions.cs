@@ -62,7 +62,7 @@ namespace Signum.Engine.Maps
         internal abstract Expression GetExpression(string alias);
     }
 
-    public partial class PrimaryKeyField
+    public partial class FieldPrimaryKey
     {
         internal override Expression GetExpression(string alias)
         {
@@ -70,7 +70,7 @@ namespace Signum.Engine.Maps
         } 
     }
 
-    public partial class ValueField
+    public partial class FieldValue
     {
         internal override Expression GetExpression(string alias)
         {
@@ -80,7 +80,7 @@ namespace Signum.Engine.Maps
 
     public static partial class ReferenceFieldExtensions
     {
-        internal static Expression MaybeLazy(this IReferenceField campo, Expression reference)
+        internal static Expression MaybeLazy(this IFieldReference campo, Expression reference)
         {
             if (!campo.IsLazy)
                 return reference;
@@ -90,7 +90,7 @@ namespace Signum.Engine.Maps
     }
 
 
-    public partial class ReferenceField
+    public partial class FieldReference
     {
         internal override Expression GetExpression(string alias)
         {
@@ -98,7 +98,7 @@ namespace Signum.Engine.Maps
         } 
     }
 
-    public partial class EnumField
+    public partial class FieldEnum
     {
         internal override Expression GetExpression(string alias)
         {
@@ -106,7 +106,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class MListField
+    public partial class FieldMList
     {
         internal override Expression GetExpression(string alias)
         {
@@ -114,7 +114,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class EmbeddedField
+    public partial class FieldEmbedded
     {
         internal override Expression GetExpression(string alias)
         {
@@ -128,7 +128,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ImplementedByField
+    public partial class FieldImplementedBy
     {
         internal override Expression GetExpression(string alias)
         {
@@ -143,7 +143,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class ImplementedByAllField
+    public partial class FieldImplementedByAll
     {
         internal override Expression GetExpression(string alias)
         {

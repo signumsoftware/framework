@@ -17,13 +17,13 @@ namespace Signum.Engine.Maps
 {
     public class SchemaBuilder
     {
-        SchemaBuilderSettings settings;
+        public SchemaBuilderSettings Settings { get; private set; }
 
         public SchemaBuilder() : this(new SchemaBuilderSettings()) { }
 
         public SchemaBuilder(SchemaBuilderSettings settings)
         {
-            this.settings = settings;
+            this.Settings = settings;
         }
 
         Schema schema = new Schema();
@@ -100,7 +100,7 @@ namespace Signum.Engine.Maps
             Dictionary<string, EntityField> result = new Dictionary<string, EntityField>();
             foreach (FieldInfo fi in Reflector.InstanceFieldsInOrder(type))
             {
-                if (!settings.FieldInfoAttributes(type, fi).Any(a=>a is IgnoreAttribute))
+                if (!Settings.FieldInfoAttributes(type, fi).Any(a=>a is IgnoreAttribute))
                 {
                     if (NotifyFieldsWithoutProperty && Reflector.FindPropertyInfo(fi) == null)
                         Debug.WriteLine(Resources.Field0OfTipe1HasNoCompatibleProperty.Formato(fi.Name, type.Name));
@@ -137,7 +137,7 @@ namespace Signum.Engine.Maps
                     return GenerateFieldValue(type, fi, fieldType, name);
                 case KindOfField.Reference:
                     {
-                        Attribute at = settings.GetReferenceFieldType(type, fi, Reflector.ExtractLazy(fieldType) ?? fieldType);
+                        Attribute at = Settings.GetReferenceFieldType(type, fi, Reflector.ExtractLazy(fieldType) ?? fieldType);
                         if (at == null)
                             return GenerateFieldReference(type, fi, fieldType, name);
                         else if (at is ImplementedByAttribute)
@@ -171,7 +171,7 @@ namespace Signum.Engine.Maps
             if (fi.FieldEquals<IdentifiableEntity>(i => i.id))
                 return KindOfField.PrimaryKey;
 
-            if (settings.GetSqlDbType(type, fi, fieldType.UnNullify()) != null)
+            if (Settings.GetSqlDbType(type, fi, fieldType.UnNullify()) != null)
                 return KindOfField.Value;
 
             if (fieldType.UnNullify().IsEnum)
@@ -196,7 +196,7 @@ namespace Signum.Engine.Maps
 
         private static Field GenerateFieldPrimaryKey(Type type, FieldInfo fi, bool identity, NameSequence name)
         {
-            return new PrimaryKeyField(fi.FieldType)
+            return new FieldPrimaryKey(fi.FieldType)
             {
                 Identity = identity
             };
@@ -204,26 +204,26 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldValue(Type type, FieldInfo fi, Type fieldType, NameSequence name)
         {
-            SqlDbType sqlDbType = settings.GetSqlDbType(type, fi, fieldType.UnNullify()).Value;
+            SqlDbType sqlDbType = Settings.GetSqlDbType(type, fi, fieldType.UnNullify()).Value;
 
-            return new ValueField(fieldType)
+            return new FieldValue(fieldType)
             {
                 Name = name.ToString(),
                 SqlDbType = sqlDbType,
-                Nullable = settings.IsNullable(type, fi, fieldType),
-                Size = settings.GetSqlSize(type, fi, sqlDbType),
-                Scale = settings.GetSqlScale(type, fi, sqlDbType),
-                Index = settings.IndexType(type, fi) ?? Index.None
+                Nullable = Settings.IsNullable(type, fi, fieldType),
+                Size = Settings.GetSqlSize(type, fi, sqlDbType),
+                Scale = Settings.GetSqlScale(type, fi, sqlDbType),
+                Index = Settings.IndexType(type, fi) ?? Index.None
             };
         }
 
         protected virtual Field GenerateFieldEnum(Type type, FieldInfo fi, Type fieldType, NameSequence name)
         {
-            return new EnumField(fieldType)
+            return new FieldEnum(fieldType)
             {
-                Nullable = settings.IsNullable(type, fi, fieldType),
+                Nullable = Settings.IsNullable(type, fi, fieldType),
                 IsLazy = false,
-                Index = settings.IndexType(type, fi) ?? Index.None,
+                Index = Settings.IndexType(type, fi) ?? Index.None,
                 Name = name.ToString(),
                 ReferenceTable = Include(Reflector.GenerateEnumProxy(fieldType.UnNullify())),
             };
@@ -231,27 +231,28 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldReference(Type type, FieldInfo fi, Type fieldType, NameSequence name)
         {
-            return new ReferenceField(fieldType)
+            return new FieldReference(fieldType)
             {
                 Name = name.ToString(),
                 ReferenceTable = Include(Reflector.ExtractLazy(fieldType) ?? fieldType),
-                Index = settings.IndexType(type, fi) ?? DefaultReferenceIndex(),
-                Nullable = settings.IsNullable(type, fi, fieldType),
+                Index = Settings.IndexType(type, fi) ?? DefaultReferenceIndex(),
+                Nullable = Settings.IsNullable(type, fi, fieldType),
                 IsLazy  = Reflector.ExtractLazy(fieldType) != null
             };
         }
 
         protected virtual Field GenerateFieldImplmentedBy(Type type, FieldInfo fi, Type fieldType, NameSequence name, ImplementedByAttribute ib)
         {
-            string erroneos = ib.ImplementedTypes.Where(t => !fieldType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
+            Type cleanType = Reflector.ExtractLazy(fieldType) ?? fieldType;
+            string erroneos = ib.ImplementedTypes.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
             if (erroneos.Length != 0)
-                throw new InvalidOperationException(Resources.Types0DoNotImplement1.Formato(erroneos, fieldType));
+                throw new InvalidOperationException(Resources.Types0DoNotImplement1.Formato(erroneos, cleanType));
 
-            Index indice = settings.IndexType(type, fi) ?? DefaultReferenceIndex();
+            Index indice = Settings.IndexType(type, fi) ?? DefaultReferenceIndex();
 
-            bool nullable = settings.IsNullable(type, fi, fieldType) || ib.ImplementedTypes.Length > 1;
+            bool nullable = Settings.IsNullable(type, fi, fieldType) || ib.ImplementedTypes.Length > 1;
 
-            return new ImplementedByField(fieldType)
+            return new FieldImplementedBy(fieldType)
             {
                 ImplementationColumns = ib.ImplementedTypes.ToDictionary(t => t, t => new ImplementationColumn
                 {
@@ -266,10 +267,10 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldImplmentedByAll(Type type, FieldInfo fi, Type fieldType, NameSequence preName, ImplementedByAllAttribute implementedByAllAttribute)
         {
-            Index indice = settings.IndexType(type, fi) ?? DefaultReferenceIndex();
-            bool nullable = settings.IsNullable(type, fi, fieldType);
+            Index indice = Settings.IndexType(type, fi) ?? DefaultReferenceIndex();
+            bool nullable = Settings.IsNullable(type, fi, fieldType);
 
-            return new ImplementedByAllField(fieldType)
+            return new FieldImplementedByAll(fieldType)
             {
                 Column = new ImplementationColumn
                 {
@@ -293,7 +294,7 @@ namespace Signum.Engine.Maps
         {
             Type elementType = Reflector.CollectionType(fi.FieldType);
 
-            return new MListField(fi.FieldType)
+            return new FieldMList(fi.FieldType)
             {
                 RelationalTable = new RelationalTable(fi.FieldType)
                 {
@@ -312,7 +313,7 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldEmbebed(Type type, FieldInfo fi, Type fieldType, NameSequence name)
         {
-            return new EmbeddedField(fieldType)
+            return new FieldEmbedded(fieldType)
             {
                 EmbeddedFields = GenerateFields(fieldType, Contexts.Embedded, null, name)
             };
