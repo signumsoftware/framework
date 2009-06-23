@@ -137,6 +137,7 @@ namespace Signum.Engine.Operations
         }
 
         public static void Register<T>(Enum operationKey, IOperation option)
+             where T : IIdentifiable
         {
             operations.GetOrCreate(operationKey)[typeof(T)] = option;
         }

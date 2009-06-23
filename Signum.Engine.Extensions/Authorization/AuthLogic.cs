@@ -105,7 +105,7 @@ namespace Signum.Engine.Authorization
         }
 
 
-        public static bool gloaballyEnabled = true;
+        static bool gloaballyEnabled = true;
         public static bool GloballyEnabled
         {
             get { return gloaballyEnabled; }
@@ -113,7 +113,7 @@ namespace Signum.Engine.Authorization
         }
 
         [ThreadStatic]
-        public static bool temporallyDisabled;
+        static bool temporallyDisabled;
 
         public static IDisposable Disable()
         {

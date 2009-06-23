@@ -31,8 +31,8 @@ namespace Signum.Entities.Authorization
         }
 
         //ImplementedBy this
-        Lazy<IdentifiableEntity> related;
-        public Lazy<IdentifiableEntity> Related
+        Lazy<IEmployee> related;
+        public Lazy<IEmployee> Related
         {
             get { return related; }
             set { Set(ref related, value, "Related;"); }
@@ -73,5 +73,10 @@ namespace Signum.Entities.Authorization
         {
             get { return Thread.CurrentPrincipal as UserDN; }
         }
+    }
+
+    public interface IEmployee:IIdentifiable
+    {
+
     }
 }
