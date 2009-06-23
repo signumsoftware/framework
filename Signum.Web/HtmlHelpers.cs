@@ -76,6 +76,20 @@ namespace Signum.Web
                 "</span>\n";
         }
 
+        public static string Span(this HtmlHelper html, string name, object value, string cssClass, Type type)
+        {
+            string format = String.Empty;
+            string strValue= String.Empty;
+
+            if (type == typeof(Nullable<Int32>) || type == typeof(Int32)) strValue=(value !=null) ? ((int)value).ToString("N0") : String.Empty;
+            if (type == typeof(Nullable<Double>) || type == typeof(Double)) strValue=String.Format("{0:N}",value);
+            if (strValue == String.Empty)
+            {
+                strValue = (value != null) ? value.ToString() : "";
+            }
+            return Span(html, name, strValue, cssClass);
+        }
+
         public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, Dictionary<string, string> htmlAttributes)
         { 
             return "<a " +

@@ -29,7 +29,7 @@ namespace Signum.Web
             }
             string valueStr = (value != null) ? value.ToString() : "";
             if (StyleContext.Current.ReadOnly)
-                sb.Append(helper.Span(idValueField, valueStr, "valueLine"));
+                sb.Append(helper.Span(idValueField, value, "valueLine", typeof(T)));
             else
             {
                 ValueLineType vltype = (valueLineType.HasValue) ? 
