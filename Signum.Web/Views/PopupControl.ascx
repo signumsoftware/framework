@@ -6,7 +6,7 @@
 <div id="<%=Html.GlobalName("modalBackground" + sufix)%>" class="transparent popupBackground"></div>
   
 <div id="<%=Html.GlobalName("panelPopup" + sufix)%>" class="popupWindow">
-    <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup" + sufix)%>');">
+    <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup" + sufix)%>');" class="dragHandle">
         <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk + sufix)%>" value="OK" />
         <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel + sufix)%>" value="Cancel" />
     </div>

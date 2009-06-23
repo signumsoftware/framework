@@ -90,7 +90,7 @@ namespace Signum.Web
                 sb.Append("\n");
             }
 
-            string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato(routePrefix + "/Signum/PartialView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
+            string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato(routePrefix + "/Signum/PopupView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
             sb.Append(helper.Button(
                         idValueField + TypeContext.Separator + "_btnView",
                         "->",

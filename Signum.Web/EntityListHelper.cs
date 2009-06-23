@@ -21,7 +21,9 @@ namespace Signum.Web
     public class EntityList : EntityBase
     {
         public Type EntitiesType { get; set; }
-        
+        //public bool CreateEntityDiv = true;
+        public string DetailDiv = null;
+
         public EntityList()
         {
         }
@@ -43,12 +45,13 @@ namespace Signum.Web
             
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, elementsCleanType.Name) + "\n");
 
-            sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
+            //if (settings.CreateEntityDiv)
+            //    sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
 
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id);}},function(){{OnListPopupCancel(this.id);}}".Formato(routePrefix + "/Signum/PartialView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id);}},function(){{OnListPopupCancel(this.id);}}".Formato(routePrefix + "/Signum/PopupView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
 
             if (settings.Implementations != null) //Interface with several possible implementations
             {
@@ -71,9 +74,9 @@ namespace Signum.Web
                 sb.Append("</div>\n");
             }
 
-            string viewingUrl = "OpenPopupList(" + popupOpeningParameters + ");";
+            string viewingUrl = "OpenPopupList(" + popupOpeningParameters + ",'{0}');".Formato(settings.DetailDiv);
             StringBuilder sbSelect = new StringBuilder();
-            sbSelect.Append("<select id=\"{0}\" name=\"{0}\" multiple=\"multiple\" ondblclick=\"{1}\" >\n".Formato(idValueField, viewingUrl));
+            sbSelect.Append("<select id=\"{0}\" name=\"{0}\" multiple=\"multiple\" ondblclick=\"{1}\" class=\"entityList\">\n".Formato(idValueField, viewingUrl));
 
             if (value != null)
             {
@@ -88,8 +91,8 @@ namespace Signum.Web
             sb.Append(sbSelect);
 
             string creatingUrl = (settings.Implementations == null) ?
-                "NewPopupList({0},'{1}','{2}');".Formato(popupOpeningParameters, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType)) : 
-                "ChooseImplementation('{0}','{1}',function(){{OnListImplementationsOk({2},'{3}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType));
+                "NewPopupList({0},'{1}','{2}','{3}');".Formato(popupOpeningParameters, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv) : 
+                "ChooseImplementation('{0}','{1}',function(){{OnListImplementationsOk({2},'{3}','{4}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv);
             if (settings.Create)
                 sb.Append(
                     helper.Button(idValueField + "_btnCreate",
@@ -163,7 +166,7 @@ namespace Signum.Web
                 sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
                                 "name=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " + 
                                 "value=\"\" " +
-                                "class = valueLine\" " +
+                                "class = valueLine entityListOption\" " +
                                 ">" + 
                                 ((isIdentifiable)
                                     ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToStr)
@@ -214,9 +217,35 @@ namespace Signum.Web
             EntityList el = new EntityList() { EntitiesType = entitiesType };
             Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
 
-            //if (el.Implementations == null)
-            //    Navigator.ConfigureEntityBase(el, runtimeType, false);
+            if (el.Implementations == null)
+                Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(typeof(S)) ?? typeof(S), false);
 
+            helper.InternalEntityList<S>(context.Name, context.Value, el);
+        }
+
+        public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityList> settingsModifier)
+            where S : Modifiable
+        {
+            TypeContext<MList<S>> context = Common.WalkExpressionGen(tc, property);
+
+            Type entitiesType = typeof(T);
+
+            EntityList el = new EntityList() { EntitiesType = entitiesType };
+            Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
+
+            settingsModifier(el);
+
+            if (el.Implementations == null)
+                Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(typeof(S)) ?? typeof(S), false);
+
+            if (el.StyleContext != null)
+            {
+                using (el.StyleContext)
+                    helper.InternalEntityList<S>(context.Name, context.Value, el);
+                return;
+            }
+
+            
             helper.InternalEntityList<S>(context.Name, context.Value, el);
         }
     }

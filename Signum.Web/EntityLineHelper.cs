@@ -58,7 +58,7 @@ namespace Signum.Web
             }
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.RuntimeType, runtimeType));
                 
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}');}},function(){{OnPopupCancel('{2}');}}".Formato(routePrefix + "/Signum/PartialView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}');}},function(){{OnPopupCancel('{2}');}}".Formato(routePrefix + "/Signum/PopupView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
 
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(type);
             bool isLazy = typeof(Lazy).IsAssignableFrom(type);

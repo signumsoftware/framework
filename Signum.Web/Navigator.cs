@@ -83,6 +83,11 @@ namespace Signum.Web
             return NavigationManager.View(controller, obj); 
         }
 
+        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix)
+        {
+            return NavigationManager.PopupView(controller, entity, prefix);
+        }
+
         public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix)
         {
             return NavigationManager.PartialView(controller, entity, prefix);
@@ -226,6 +231,9 @@ namespace Signum.Web
 
         internal bool ExistsQuery(string urlQueryName)
         {
+            if (UrlQueryNames == null)
+                return false;
+
             return UrlQueryNames.Count(kvp => kvp.Key == urlQueryName) > 0;
         }
 
@@ -265,7 +273,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix)
+        protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix)
         {
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
 
@@ -278,6 +286,22 @@ namespace Signum.Web
             return new PartialViewResult
             {
                 ViewName = PopupControlUrl,
+                ViewData = controller.ViewData,
+                TempData = controller.TempData
+            };
+        }
+
+        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix)
+        {
+            EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
+
+            controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+            controller.ViewData.Model = entity;
+
+            return new PartialViewResult
+            {
+                ViewName = es.PartialViewName,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };

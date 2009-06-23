@@ -78,6 +78,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="Controllers\SignumController.cs" />
+    <Compile Include="EntityRepeaterHelper.cs" />
     <Compile Include="EntityComboHelper.cs" />
     <Compile Include="EntityBase.cs" />
     <Compile Include="EntityLineHelper.cs" />
@@ -133,7 +134,6 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NormalPage.aspx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

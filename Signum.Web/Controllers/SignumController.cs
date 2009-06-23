@@ -26,6 +26,20 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult PopupView(string sfStaticType, int? sfId, string prefix)
+        {
+            Type type = Navigator.ResolveType(sfStaticType);
+
+            ModifiableEntity entity = null;
+            if (sfId.HasValue)
+                entity = Database.Retrieve(type, sfId.Value);
+            else
+                entity = Navigator.CreateInstance(type);
+
+            return Navigator.PopupView(this, entity, prefix);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix)
         {
             Type type = Navigator.ResolveType(sfStaticType);
@@ -38,6 +52,7 @@ namespace Signum.Web.Controllers
 
             return Navigator.PartialView(this, entity, prefix);
         }
+
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult TrySave(string prefixToIgnore)

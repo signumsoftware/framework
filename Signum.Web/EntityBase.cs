@@ -17,6 +17,13 @@ namespace Signum.Web
 
     public class EntityBase
     {
+        private StyleContext styleContext;
+        public StyleContext StyleContext
+        {
+            get { return styleContext; }
+            set { styleContext = value; }
+        }
+
         private string labelText = "";
         public string LabelText
         {
