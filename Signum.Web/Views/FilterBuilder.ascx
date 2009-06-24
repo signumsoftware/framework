@@ -17,7 +17,7 @@
    <%
    } 
    %>
-   <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('{0}','{1}');".Formato((ConfigurationManager.AppSettings["RoutePrefix"] ?? "") + "/Signum/AddFilter", ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, string>())%>
+   <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, string>())%>
    <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "XX", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, string>())%>
 </select>
 <br />

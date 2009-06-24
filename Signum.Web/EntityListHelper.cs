@@ -51,7 +51,7 @@ namespace Signum.Web
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
 
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id);}},function(){{OnListPopupCancel(this.id);}}".Formato(routePrefix + "/Signum/PopupView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id);}},function(){{OnListPopupCancel(this.id);}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/TrySavePartial");
 
             if (settings.Implementations != null) //Interface with several possible implementations
             {
@@ -112,7 +112,7 @@ namespace Signum.Web
 
             if (!typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))
             {
-                string popupFindingParameters = "'{0}','{1}','true',function(){{OnListSearchOk('{2}');}},function(){{OnListSearchCancel('{2}');}},'{3}','{2}'".Formato(routePrefix + "/Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(typeof(T)) ?? typeof(T)], idValueField, divASustituir);
+                string popupFindingParameters = "'{0}','{1}','true',function(){{OnListSearchOk('{2}');}},function(){{OnListSearchCancel('{2}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(typeof(T)) ?? typeof(T)], idValueField, divASustituir);
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);

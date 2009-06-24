@@ -24,6 +24,8 @@ namespace Signum.Web
         public Type EntitiesType { get; set; }
         public string RemoveElementLinkText = "Remove";
         public string AddElementLinkText = "New";
+        public int? maxElements = null;
+
         public EntityRepeater() 
         { 
         }
@@ -71,7 +73,7 @@ namespace Signum.Web
             }
 
             string creatingUrl = (settings.Implementations == null) ?
-                "javascript:NewRepeaterElement('{0}','{1}','{2}','{3}','{4}');".Formato(routePrefix + "/Signum/PartialView", idValueField, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.RemoveElementLinkText) :
+                "javascript:NewRepeaterElement('{0}','{1}','{2}','{3}','{4}','{5}');".Formato(routePrefix + "/Signum/PartialView", idValueField, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.RemoveElementLinkText, (settings.maxElements.HasValue ? settings.maxElements.Value.ToString() : "")) :
                 ""; //"ChooseImplementation('{0}','{1}',function(){{OnListImplementationsOk({2},'{3}','{4}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv);
             if (settings.Create)
                 sb.Append(

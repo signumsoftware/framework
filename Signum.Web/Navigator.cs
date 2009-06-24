@@ -257,7 +257,7 @@ namespace Signum.Web
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
             //string urlName = Navigator.NavigationManager.TypesToURLNames.TryGetC(obj.GetType()).ThrowIfNullC("No hay un nombre asociado al tipo: " + obj.GetType());
 
-            controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
@@ -277,7 +277,7 @@ namespace Signum.Web
         {
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
 
-            controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
 
@@ -295,7 +295,7 @@ namespace Signum.Web
         {
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
 
-            controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;
 
@@ -321,7 +321,7 @@ namespace Signum.Web
                     .Single("Filter Column {0} not found or found more than once in query description".Formato(opt.ColumnName));
             }
 
-            controller.ViewData[ViewDataKeys.SearchResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.SearchResourcesRoute] ?? "../../";
+            //controller.ViewData[ViewDataKeys.SearchResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.SearchResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -351,7 +351,7 @@ namespace Signum.Web
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
-            controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData[ViewDataKeys.PopupSufix] = prefixEnd ?? "";
@@ -398,7 +398,7 @@ namespace Signum.Web
         {
             QueryResult queryResult = Queries.ExecuteQuery(queryName, filters, resultsLimit);
 
-            controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.Results] = queryResult;
             controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;

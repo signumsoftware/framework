@@ -58,7 +58,7 @@ namespace Signum.Web
             }
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.RuntimeType, runtimeType));
                 
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}');}},function(){{OnPopupCancel('{2}');}}".Formato(routePrefix + "/Signum/PopupView", divASustituir, idValueField, routePrefix + "/Signum/TrySavePartial");
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}');}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/TrySavePartial");
 
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(type);
             bool isLazy = typeof(Lazy).IsAssignableFrom(type);
@@ -90,7 +90,7 @@ namespace Signum.Web
                                                       (Reflector.ExtractLazy(type) ?? type).Name, 
                                                       (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name,",") : "",
                                                       idValueField + TypeContext.Separator +  TypeContext.Id,
-                                                      routePrefix + "/Signum/Autocomplete", 1, 5, 500));
+                                                      "Signum/Autocomplete", 1, 5, 500));
                 
                 if (settings.Implementations != null) //Interface with several possible implementations
                 {
@@ -167,7 +167,7 @@ namespace Signum.Web
 
             if (settings.Find && (isIdentifiable || isLazy))
             {
-                string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}');}},function(){{OnSearchCancel('{2}');}},'{3}','{2}'".Formato(routePrefix + "/Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
+                string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}');}},function(){{OnSearchCancel('{2}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);

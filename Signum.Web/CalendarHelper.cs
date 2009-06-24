@@ -12,17 +12,16 @@ namespace Signum.Web
         public static string Calendar(this HtmlHelper helper, string elementId)
         {
             StringBuilder sb = new StringBuilder();
-            string resourcesRoute = helper.ViewData[ViewDataKeys.ResourcesRoute].ToString();
             
-            sb.Append(helper.ScriptInclude(resourcesRoute + "Scripts/jqueryui/ui.core.js"));
-            sb.Append(helper.ScriptInclude(resourcesRoute + "Scripts/jqueryui/ui.datepicker.js"));
-            sb.Append(helper.ScriptInclude(resourcesRoute + "Scripts/jqueryui/i18n/ui.datepicker-es.js"));
+            sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.core.js"));
+            sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.datepicker.js"));
+            sb.Append(helper.ScriptInclude("Scripts/jqueryui/i18n/ui.datepicker-es.js"));
 
-            sb.AppendLine(helper.DynamicCssInclude(resourcesRoute + "Scripts/jqueryui/ui.all.css"));
-            sb.AppendLine(helper.DynamicCssInclude(resourcesRoute + "Scripts/jqueryui/ui.base.css"));
-            sb.AppendLine(helper.DynamicCssInclude(resourcesRoute + "Scripts/jqueryui/ui.core.css"));
-            sb.AppendLine(helper.DynamicCssInclude(resourcesRoute + "Scripts/jqueryui/ui.datepicker.css"));
-            sb.AppendLine(helper.DynamicCssInclude(resourcesRoute + "Scripts/jqueryui/ui.theme.css"));
+            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.all.css"));
+            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.base.css"));
+            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.core.css"));
+            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.datepicker.css"));
+            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.theme.css"));
 
             sb.Append(
                 "<script type=\"text/javascript\">\n" + 
