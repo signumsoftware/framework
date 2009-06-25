@@ -37,8 +37,6 @@ namespace Signum.Web
             idValueField = helper.GlobalName(idValueField);
             string divASustituir = helper.GlobalName("divASustituir");
 
-            string routePrefix = ConfigurationManager.AppSettings["RoutePrefix"] ?? "";
-
             StringBuilder sb = new StringBuilder();
 
             Type elementsCleanType = Reflector.ExtractLazy(typeof(T)) ?? typeof(T);
