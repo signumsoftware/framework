@@ -90,10 +90,10 @@ namespace Signum.Web
             try
             {
                 string valueStr = (string)formValues[controlID];
-                if (staticType == typeof(bool))
+                if (staticType.UnNullify() == typeof(bool))
                 {
                     string[] vals = valueStr.Split(',');
-                    Value = (vals[0] == "true") ? true : false;
+                    Value = (vals[0] == "true" || vals[0] == "True") ? true : false;
                 }
                 else
                     Value = ReflectionTools.Parse(valueStr, staticType);
