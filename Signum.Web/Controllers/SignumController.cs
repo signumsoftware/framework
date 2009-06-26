@@ -86,8 +86,8 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
-            if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
-                Database.Save((IdentifiableEntity)entity);
+            //if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
+            //    Database.Save((IdentifiableEntity)entity);
 
             return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
         }
