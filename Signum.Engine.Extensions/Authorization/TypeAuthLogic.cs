@@ -62,7 +62,7 @@ namespace Signum.Engine.Authorization
                     throw new ApplicationException("Not user logged");
 
                 TypeAccess access = GetAccess(UserDN.Current.Role, ident.GetType());
-                if (ident.IsNew && access != TypeAccess.Create || access < TypeAccess.Modify)
+                if (access < TypeAccess.Modify || ident.IsNew && access != TypeAccess.Create)
                     throw new UnauthorizedAccessException("Not authorized to Save '{0}'".Formato(ident.GetType()));
             }
         }

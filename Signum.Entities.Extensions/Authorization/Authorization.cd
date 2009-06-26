@@ -13,16 +13,19 @@
       <Compartment Name="Properties" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
-    <AssociationLine Name="role" Type="Signum.Entities.Authorization.RoleDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+    <AssociationLine Name="role" Type="Signum.Entities.Authorization.RoleDN" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="2.25" Y="3.136" />
-        <Point X="2.25" Y="4.322" />
-        <Point X="6.062" Y="4.322" />
+        <Point X="2.25" Y="3.328" />
+        <Point X="2.25" Y="4.75" />
+        <Point X="6.062" Y="4.75" />
         <Point X="6.062" Y="5" />
       </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="2.789" Y="0.391" />
+      </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AASAAAAACAAAAAAEEACAABAAAAAAAAAAAUAAAAEEgAA=</HashCode>
+      <HashCode>AASAAAAACAAAAAAkEACAABAAACAAAAAAAUAAAAEEgAA=</HashCode>
       <FileName>Authorization\UserDN.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -32,10 +35,10 @@
   </Class>
   <Class Name="Signum.Entities.Authorization.RoleDN" Collapsed="true">
     <Position X="5.75" Y="5" Width="1.5" />
-    <AssociationLine Name="roles" Type="Signum.Entities.Authorization.RoleDN" ManuallyRouted="true">
+    <AssociationLine Name="roles" Type="Signum.Entities.Authorization.RoleDN" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="6.269" Y="5" />
-        <Point X="6.269" Y="4.605" />
+        <Point X="6.5" Y="5" />
+        <Point X="6.5" Y="4.605" />
         <Point X="6.742" Y="4.605" />
         <Point X="6.742" Y="5" />
       </Path>
@@ -79,14 +82,17 @@
         <Point X="9.25" Y="5.5" />
         <Point X="7.25" Y="5.5" />
       </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.37" Y="-1.003" />
+      </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAQAAAAEAAEAAAABAAAAAAAAAAAAAAAQAAAAE=</HashCode>
       <FileName>Authorization\RulePropertyDN.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="property" />
       <Field Name="role" />
+      <Field Name="property" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Signum.Entities.Authorization.RuleQueryDN">
@@ -97,14 +103,17 @@
         <Point X="3.25" Y="5.5" />
         <Point X="5.75" Y="5.5" />
       </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.86" Y="-1.075" />
+      </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAAAAMAAAABAAAAAAAAgAAAAIAAAAAAA=</HashCode>
       <FileName>Authorization\Rules.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="query" />
       <Field Name="role" />
+      <Field Name="query" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Signum.Entities.Authorization.RuleServiceOperationDN">
@@ -116,6 +125,9 @@
         <Point X="6.688" Y="6.375" />
         <Point X="6.688" Y="5.691" />
       </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.171" Y="0.695" />
+      </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAAAAMAAAABAAAAAAAAAAAAAAAAAIIAA=</HashCode>
@@ -131,35 +143,20 @@
     <AssociationLine Name="role" Type="Signum.Entities.Authorization.RoleDN" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="1.25" Y="6.75" />
-        <Point X="1.25" Y="5.187" />
-        <Point X="5.75" Y="5.187" />
+        <Point X="1.25" Y="5.312" />
+        <Point X="5.75" Y="5.312" />
       </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="3.839" Y="-1.388" />
+      </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAAAAMAAAABAAAAAgAAAAIAAAAAAAAAA=</HashCode>
       <FileName>Authorization\Rules.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
+      <Field Name="role" />
       <Field Name="permission" />
-      <Field Name="role" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="Signum.Entities.Authorization.RuleActionDN">
-    <Position X="10.5" Y="6.75" Width="1.5" />
-    <AssociationLine Name="role" Type="Signum.Entities.Authorization.RoleDN" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="11.25" Y="6.75" />
-        <Point X="11.25" Y="5.25" />
-        <Point X="7.25" Y="5.25" />
-      </Path>
-    </AssociationLine>
-    <TypeIdentifier>
-      <HashCode>AAAABAAAAAAgAAAAMAAAABAAAAAAAAAAAAAAAAAAAAQ=</HashCode>
-      <FileName>Authorization\Rules.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="role" />
-      <Field Name="action" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Signum.Entities.Authorization.AllowedRule" Collapsed="true">
@@ -193,6 +190,9 @@
         <Point X="6.281" Y="6.375" />
         <Point X="6.281" Y="5.691" />
       </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="1.204" Y="0.695" />
+      </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAQAAAAEAAEAAAABAAAAABAAAAAQAAAAAAAAA=</HashCode>
@@ -237,19 +237,40 @@
     <Position X="4.5" Y="10" Width="1.5" />
     <TypeIdentifier />
   </Class>
-  <Class Name="Signum.Entities.Basics.ServiceOperationDN" Collapsed="true">
+  <Class Name="Signum.Entities.Basics.FacadeMethodDN" Collapsed="true">
     <Position X="6.5" Y="10" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAQAAAAEAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Basics\ServiceOperationDN.cs</FileName>
+      <FileName>Basics\FacadeMethodDN.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Signum.Entities.Operations.ActionDN" Collapsed="true">
+  <Class Name="Signum.Entities.Operations.OperationDN" Collapsed="true">
     <Position X="10.5" Y="10" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAQEAAAGAAQAAAAEAAAAAAAAAAAEAAA=</HashCode>
-      <FileName>Operations\ActionDN.cs</FileName>
+      <FileName>Operations\OperationDN.cs</FileName>
     </TypeIdentifier>
+  </Class>
+  <Class Name="Signum.Entities.Authorization.RuleOperationDN">
+    <Position X="10.5" Y="6.75" Width="1.5" />
+    <AssociationLine Name="role" Type="Signum.Entities.Authorization.RoleDN" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="11.25" Y="6.75" />
+        <Point X="11.25" Y="5.375" />
+        <Point X="7.25" Y="5.375" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="3.287" Y="-1.107" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAMAAAABAAAAAAAAAAAAEAAAABAAA=</HashCode>
+      <FileName>Authorization\Rules.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="role" />
+      <Field Name="operation" />
+    </ShowAsAssociation>
   </Class>
   <Struct Name="System.Boolean" Collapsed="true">
     <Position X="9.25" Y="2.25" Width="1.5" />

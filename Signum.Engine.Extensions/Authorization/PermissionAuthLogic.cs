@@ -70,7 +70,7 @@ namespace Signum.Engine.Authorization
                 current.ToDictionary(c => c.Key),
                 GeneratePermissions().ToDictionary(s => s.Key),
                 (k, c) => table.DeleteSqlSync(c.Id),
-                (k, s) => table.InsertSqlSync(s),
+                (k, s) => null,
                 (k, c, s) =>
                 {
                     c.Name = s.Name;

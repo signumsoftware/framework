@@ -27,9 +27,9 @@ namespace Signum.Engine.Basics
         const string FieldsForKey = "Properties For:{0}";
         static SqlPreCommand SyncronizeProperties(Replacements replacements)
         {
-            var current = Administrator.TryRetrieveAll<PropertyDN>(replacements).AgGroupToDictionary(a => a.Type.FriendlyName, g => g.ToDictionary(f => f.Name));
+            var current = Administrator.TryRetrieveAll<PropertyDN>(replacements).AgGroupToDictionary(a => a.Type.ClassName, g => g.ToDictionary(f => f.Name));
 
-            var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.FriendlyName, (dn, t) => GenerateProperties(dn, t).ToDictionary(f => f.Name));
+            var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.ClassName, (dn, t) => GenerateProperties(dn, t).ToDictionary(f => f.Name));
 
             Table table = Schema.Current.Table<PropertyDN>();
 
