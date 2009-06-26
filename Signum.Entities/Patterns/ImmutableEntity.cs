@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Signum.Entities
 {
+    [Serializable]
     public class ImmutableEntity: IdentifiableEntity
     {
         protected override bool Set<T>(ref T variable, T value, string propertyName)

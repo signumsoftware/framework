@@ -30,6 +30,7 @@ namespace Signum.Entities
             internal set { id = value; }
         }
 
+        [DoNotValidate]
         public int? IdOrNull
         {
             get { return id; }
@@ -41,7 +42,14 @@ namespace Signum.Entities
             private set { Set(ref toStr, value, "ToStr"); }
         }
 
-        public bool IsNew { get { return id == null; } }
+        [Ignore]
+        bool isNew = true; 
+        [DoNotValidate]
+        public bool IsNew 
+        {
+            get { return isNew; }
+            set { isNew = value; }
+        }
 
         protected internal override void PreSaving()
         {
@@ -52,7 +60,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return "{0} ({1})".Formato(GetType().Name, IsNew ? Resources.New : id.ToString());
+            return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : Resources.New);
         }
 
         public override bool Equals(object obj)
@@ -64,7 +72,7 @@ namespace Signum.Entities
                 return false;
 
             IdentifiableEntity ident = obj as IdentifiableEntity;
-            if (ident != null && ident.GetType() == this.GetType() && !this.IsNew && this.id == ident.id)
+            if (ident != null && ident.GetType() == this.GetType() && this.id != null && this.id == ident.id)
                 return true;
 
             return false;
@@ -82,7 +90,7 @@ namespace Signum.Entities
 
         public override int GetHashCode()
         {
-            return IsNew ?
+            return id == null ?
                 base.GetHashCode() :
                 GetType().FullName.GetHashCode() ^ id.Value;
         }

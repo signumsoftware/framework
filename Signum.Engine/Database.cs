@@ -104,9 +104,7 @@ namespace Signum.Engine
 
                 int? count = (int?)Executor.ExecuteScalar(command.ToSimple());
 
-                tr.Commit();
-
-                return count == 1;
+                return tr.Commit(count == 1);
             }
         }
         #endregion

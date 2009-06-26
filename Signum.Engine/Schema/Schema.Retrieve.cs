@@ -37,7 +37,8 @@ namespace Signum.Engine.Maps
                 ef.Setter(ei, ef.Field.GenerateValue(row, retriever)); 
             }
             
-            ei.Modified = false; 
+            ei.Modified = false;
+            ei.IsNew = false; 
         }
 
         static string toStr = ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr).Name;

@@ -124,7 +124,9 @@ namespace Signum.Engine
                         difCol.Equals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tn, tabCol)),
                     Spacing.Simple)), Spacing.Double);
 
-            replacements[Replacements.KeyTablesInverse] = replacements.TryGetC(Replacements.KeyTables).TryCC(d => d.Inverse());
+            var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
+            if (tableReplacements != null)
+                replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
 
             SqlPreCommand addForeingKeys =
                  Synchronizer.SyncronizeCommands(database, model,

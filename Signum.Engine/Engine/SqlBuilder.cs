@@ -160,7 +160,7 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("SELECT COUNT(id) FROM {0} WHERE  id = {1}".Formato(table.SqlScape(), idParam.ParameterName), new List<SqlParameter> { idParam });
         }
 
-        internal static SqlPreCommand SelectAll(string table, string[] columns)
+        internal static SqlPreCommandSimple SelectAll(string table, string[] columns)
         {
             return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(
             columns.ToString(a => a.SqlScape(), ", "),
@@ -320,5 +320,11 @@ END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlSc
             return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'COLUMN' ".Formato(tableName, oldName, newName));
         }
         #endregion
+
+        internal static SqlPreCommandSimple SetIdentityInsert(string table, bool value)
+        {
+            return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".Formato(
+                table.SqlScape(), value?"ON": "OFF"));
+        }
     }
 }

@@ -78,6 +78,8 @@ namespace Signum.Engine
             SaveGroup(postSavings, schema, null);
 
             identifiables.ForEach(node => schema.OnSaved(node)); 
+
+            EntityCache.Add(identifiables);
         }
 
 

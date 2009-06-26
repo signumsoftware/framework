@@ -6,7 +6,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities
 {
-    [Serializable]
+    [Serializable] // Just a pattern
     public class CorruptEntity : Entity
     {
         bool corrupt;

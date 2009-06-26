@@ -230,5 +230,40 @@ deallocate cur");
 
             return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
         }
+
+        public static T SetId<T>(int id, T ident)
+            where T:IdentifiableEntity
+        {
+            ident.id = id;
+            return ident; 
+        }
+
+        public static IDisposable DisableIdentity<T>()
+            where T : IdentifiableEntity
+        {
+            Table table = Schema.Current.Table<T>();
+            table.Identity = false;
+            FieldPrimaryKey fpk = (FieldPrimaryKey)table.Fields["id"].Field;
+            fpk.Identity = false;
+            SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
+
+            return new Disposable(() =>
+            {
+                table.Identity = true;
+                fpk.Identity = true;
+                SqlBuilder.SetIdentityInsert(table.Name, false).ExecuteNonQuery();
+            });
+        }
+
+        public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
+            where T:IdentifiableEntity
+        {
+              using (Transaction tr = new Transaction())
+              using (Administrator.DisableIdentity<T>())
+              {
+                  Database.SaveList(entities); 
+                  tr.Commit(); 
+              }
+        }
     }
 }

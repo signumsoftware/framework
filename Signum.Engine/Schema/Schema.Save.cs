@@ -57,8 +57,19 @@ namespace Signum.Engine.Maps
             List<SqlParameter> parameters = new List<SqlParameter>();
             Fields.Values.ForEach(v => v.Field.CreateParameter(parameters, v.Getter(ident), forbidden));
 
-            return Identity  ? SqlBuilder.InsertSaveId(Name, parameters, ident) :
-                               SqlBuilder.Insert(Name, parameters);
+            ident.IsNew = false; 
+
+            if (Identity)
+            {
+                if (ident.IdOrNull != null)
+                    throw new ApplicationException("{0} is New, but has Id ({1}) and Identity is true".Formato(ident, ident.IdOrNull)); 
+
+                return SqlBuilder.InsertSaveId(Name, parameters, ident);
+            }
+            else
+            {
+                return SqlBuilder.Insert(Name, parameters);
+            }                               
         }
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident)

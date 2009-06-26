@@ -122,8 +122,7 @@ namespace Signum.Engine
             using (SqlCommand cmd = NewCommand(preCommand))
             {
                 object result = cmd.ExecuteScalar();
-                tr.Commit();
-                return result;
+                return tr.Commit(result);
             }
         }
 
@@ -133,8 +132,7 @@ namespace Signum.Engine
             using (SqlCommand cmd = NewCommand(preCommand))
             {
                 int result = cmd.ExecuteNonQuery();
-                tr.Commit();
-                return result;
+                return tr.Commit(result);
             }
         }
 
@@ -148,8 +146,7 @@ namespace Signum.Engine
                 DataTable result = new DataTable();
                 da.Fill(result);
 
-                tr.Commit();
-                return result;
+                return tr.Commit(result);
             }
         }
 
@@ -163,8 +160,7 @@ namespace Signum.Engine
                 DataSet result = new DataSet();
                 da.Fill(result);
 
-                tr.Commit();
-                return result;
+                return tr.Commit(result);
             }
         }
     }

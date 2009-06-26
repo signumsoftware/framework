@@ -212,7 +212,8 @@ namespace Signum.Engine
 
             IdentifiableEntity result = EntityCache.Get(table.Type, id);
 
-            if (result != null) return result;
+            if (result != null) 
+                return result;
       
             return reqIdentifiables.GetOrCreate(table)
                 .GetOrCreate(id, () =>
