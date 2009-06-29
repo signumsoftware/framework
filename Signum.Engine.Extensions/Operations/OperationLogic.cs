@@ -159,13 +159,13 @@ namespace Signum.Engine.Operations
 
         public static IdentifiableEntity ExecuteLazy(this Lazy lazy, Enum operationKey, params object[] parameters)
         {
-            IdentifiableEntity entity = Database.Retrieve(lazy);
+            IdentifiableEntity entity = Database.RetrieveAndForget(lazy);
             return ExecutePrivate(Find(operationKey, entity.GetType(), true), (IdentifiableEntity)entity, operationKey, parameters);
         }
 
         public static IdentifiableEntity ExecuteLazy(this Lazy lazy, Type entityType, Enum operationKey, params object[] parameters)
         {
-            return ExecutePrivate(Find(operationKey, entityType,true), Database.Retrieve(lazy), operationKey, parameters);
+            return ExecutePrivate(Find(operationKey, entityType, true), Database.RetrieveAndForget(lazy), operationKey, parameters);
         }
 
         public static IdentifiableEntity Execute(this IIdentifiable entity, Enum operationKey, params object[] parameters)
