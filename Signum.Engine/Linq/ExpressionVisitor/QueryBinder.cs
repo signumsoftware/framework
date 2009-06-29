@@ -227,11 +227,11 @@ namespace Signum.Engine.Linq
 
         private ProjectionExpression AsProjection(Expression result)
         {
-            if (result.NodeType == ExpressionType.Call)
+            if (result.NodeType == ExpressionType.New)
             {
-                MethodCallExpression mca = (MethodCallExpression)result;
-                if (mca.Method.Name == "New" && mca.Method.ReturnType.IsInstantiationOf(typeof(IGrouping<,>)))
-                    return (ProjectionExpression)mca.Arguments[1];
+                NewExpression nex = (NewExpression)result;
+                if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)))
+                    return (ProjectionExpression)nex.Arguments[1]; 
             }
             else if (result.NodeType == (ExpressionType)DbExpressionType.MList)
             {
@@ -713,14 +713,10 @@ namespace Signum.Engine.Linq
                         .Single(a => ReflectionTools.MemeberEquals(a.Member, m.Member)).Expression;
                 case ExpressionType.New:
                     NewExpression nex = (NewExpression)source;
+                    if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && m.Member.Name == "Key")
+                        return nex.Arguments[0]; 
                     MethodInfo mi = ((PropertyInfo)m.Member).GetGetMethod();
                     return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second; 
-                case ExpressionType.Call:
-                    MethodCallExpression mca = (MethodCallExpression)source;
-                    if (mca.Method.DeclaringType.IsInstantiationOf(typeof(Grouping<,>)) && 
-                       mca.Method.Name == "New" && m.Member.Name == "Key")
-                        return mca.Arguments[0];
-                    break;
                 case (ExpressionType)DbExpressionType.FieldInit:
                     FieldInitExpression fie = (FieldInitExpression)source;
                     FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo((PropertyInfo)m.Member);
