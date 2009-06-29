@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Web.Mvc.Html;
 
+
 namespace Signum.Web
 {
     public static class ValueLineHelper
@@ -98,6 +99,7 @@ namespace Signum.Web
                 htmlProperties["onblur"] = "this.setAttribute('value', this.value); " + htmlProperties["onblur"];
             else
                 htmlProperties.Add("onblur", "this.setAttribute('value', this.value);");
+
             return helper.TextBox(idValueField, valueStr, htmlProperties);
         }
 
@@ -253,8 +255,8 @@ namespace Signum.Web
             "(event.keyCode == 109) || " + //NumPad -
             "(event.keyCode == 189) ";     //-
 
-        private static string onKeyDownNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " )";
-        private static string onKeyDownDecimalNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " || " + decimalKeyCode + " )";
+        private static string onKeyDownNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " );";
+        private static string onKeyDownDecimalNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " || " + decimalKeyCode + " );";
     }
 
     public class ValueLineData
