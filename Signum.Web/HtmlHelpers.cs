@@ -161,6 +161,12 @@ namespace Signum.Web
             return sb.ToString();
         }
 
+        /*public static string RelativePath(this HtmlHelper html)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(html.RelativePath);// Request.Url.GetLeftPart(UriPartial.Authority) + VirtualPathUtility.ToAbsolute("~/"));
+            return sb.ToString();
+        }*/
    }
 
 }
