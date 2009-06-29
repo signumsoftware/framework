@@ -16,7 +16,7 @@ namespace Signum.Engine.Linq
     {
         public static Expression TryConvert(this Expression expression, Type type)
         {
-            if (expression.Type != type)
+            if (!type.IsAssignableFrom(expression.Type))
                 return Expression.Convert(expression, type);
             return expression;
         }
