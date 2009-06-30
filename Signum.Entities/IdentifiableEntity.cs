@@ -51,6 +51,14 @@ namespace Signum.Entities
             set { isNew = value; }
         }
 
+        protected bool SetIfNew<T>(ref T variable, T value, string propertyName)
+        {
+            if (!IsNew)
+                throw new ApplicationException("Attempt to modify {0} when the entity is not new".Formato(propertyName));
+
+            return base.Set<T>(ref variable, value, propertyName);
+        }
+
         protected internal override void PreSaving()
         {
             base.PreSaving();

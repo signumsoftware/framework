@@ -4,28 +4,29 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Collections;
-using Signum.Utilities.Properties; 
+using Signum.Utilities.Properties;
 
 namespace Signum.Utilities.DataStructures
 {
-    public class DirectedEdgedGraph<T,E>:IEnumerable<T>
+    public class DirectedEdgedGraph<T, E> : IEnumerable<T>
     {
-        Dictionary<T, Dictionary<T, E>> adjacency; 
-         public IEqualityComparer<T> Comparer { get; private set; }
+        Dictionary<T, Dictionary<T, E>> adjacency;
+        public IEqualityComparer<T> Comparer { get; private set; }
 
-         public DirectedEdgedGraph():this(EqualityComparer<T>.Default)
-         {
-         }
+        public DirectedEdgedGraph()
+            : this(EqualityComparer<T>.Default)
+        {
+        }
 
         public DirectedEdgedGraph(IEqualityComparer<T> comparer)
         {
-            this.Comparer = comparer; 
+            this.Comparer = comparer;
             this.adjacency = new Dictionary<T, Dictionary<T, E>>(comparer);
         }
 
         public IEnumerable<T> Nodes
         {
-            get{return adjacency.Keys;}
+            get { return adjacency.Keys; }
         }
 
         public IEnumerable<Edge<T>> Edges
@@ -50,17 +51,17 @@ namespace Signum.Utilities.DataStructures
 
         public bool Contains(T node)
         {
-            return adjacency.ContainsKey(node); 
+            return adjacency.ContainsKey(node);
         }
 
         public bool Connected(T from, T to)
         {
-            return Get(from).ContainsKey(to); 
+            return Get(from).ContainsKey(to);
         }
 
         public bool TryConnected(T from, T to)
         {
-            return TryGet(from).TryCS(hs => hs.ContainsKey(to)) ?? false; 
+            return TryGet(from).TryCS(hs => hs.ContainsKey(to)) ?? false;
         }
 
         public void Add(T from)
@@ -76,7 +77,7 @@ namespace Signum.Utilities.DataStructures
 
         }
 
-        public void Add(T from, params KeyValuePair<T,E>[] elements)
+        public void Add(T from, params KeyValuePair<T, E>[] elements)
         {
             var f = TryGetOrAdd(from);
             foreach (var item in elements)
@@ -99,15 +100,15 @@ namespace Signum.Utilities.DataStructures
         public bool Remove(T from, T to)
         {
             var dic = adjacency.TryGetC(from);
-            if(dic == null)
+            if (dic == null)
                 return false;
 
-            return dic.Remove(to); 
+            return dic.Remove(to);
         }
 
         public bool Remove(Edge<T> edge)
         {
-            return Remove(edge.From, edge.To); 
+            return Remove(edge.From, edge.To);
         }
 
         public void RemoveAll(IEnumerable<Edge<T>> edges)
@@ -133,10 +134,10 @@ namespace Signum.Utilities.DataStructures
                 return false;
 
             adjacency.Remove(node);
-            foreach (var n in inverseRelated)            
+            foreach (var n in inverseRelated)
                 Remove(n, node);
 
-            return true; 
+            return true;
         }
 
         public static void RemoveFullNodeSymetric(DirectedEdgedGraph<T, E> original, DirectedEdgedGraph<T, E> inverse, T node)
@@ -145,20 +146,20 @@ namespace Signum.Utilities.DataStructures
             var to = original.RelatedTo(node).Keys;
 
             original.RemoveFullNode(node, from);
-            inverse.RemoveFullNode(node, to); 
+            inverse.RemoveFullNode(node, to);
         }
-   
-        Dictionary<T,E> TryGet(T node)
+
+        Dictionary<T, E> TryGet(T node)
         {
-           return adjacency.TryGetC(node); 
+            return adjacency.TryGetC(node);
         }
 
         Dictionary<T, E> Get(T node)
         {
-            var result = adjacency.TryGetC(node); 
+            var result = adjacency.TryGetC(node);
             if (result == null)
                 throw new InvalidOperationException(Resources.TheNode0IsNotInTheGraph.Formato(node));
-            return result; 
+            return result;
         }
 
         Dictionary<T, E> TryGetOrAdd(T node)
@@ -168,7 +169,7 @@ namespace Signum.Utilities.DataStructures
 
         public Dictionary<T, E> TryRelatedTo(T node)
         {
-            return TryGet(node) ?? new Dictionary<T, E>(); 
+            return TryGet(node) ?? new Dictionary<T, E>();
         }
 
         public Dictionary<T, E> RelatedTo(T node)
@@ -198,7 +199,7 @@ namespace Signum.Utilities.DataStructures
                     IndirectlyRelatedTo(item.Key, set);
         }
 
-        public HashSet<T> IndirectlyRelatedTo(T node, Func<KeyValuePair<T,E>, bool> condition)
+        public HashSet<T> IndirectlyRelatedTo(T node, Func<KeyValuePair<T, E>, bool> condition)
         {
             HashSet<T> set = new HashSet<T>();
             IndirectlyRelatedTo(node, set, condition);
@@ -244,21 +245,21 @@ namespace Signum.Utilities.DataStructures
             }
         }
 
-        public DirectedEdgedGraph<T,E> Inverse()
+        public DirectedEdgedGraph<T, E> Inverse()
         {
             DirectedEdgedGraph<T, E> result = new DirectedEdgedGraph<T, E>(Comparer);
             foreach (var item in Nodes)
             {
-                result.Add(item); 
+                result.Add(item);
                 foreach (var related in RelatedTo(item))
-	            {
+                {
                     result.Add(related.Key, item, related.Value);
                 }
             }
-            return result; 
+            return result;
         }
 
-        public DirectedEdgedGraph<T,E> UndirectedGraph()
+        public DirectedEdgedGraph<T, E> UndirectedGraph()
         {
             return this.Inverse().Do(g => g.UnionWith(this));
         }
@@ -269,14 +270,14 @@ namespace Signum.Utilities.DataStructures
                 Add(item, other.RelatedTo(item));
         }
 
-        public DirectedEdgedGraph<T,E> Clone()
+        public DirectedEdgedGraph<T, E> Clone()
         {
-            return new DirectedEdgedGraph<T, E>(Comparer).Do(g => g.UnionWith(this)); 
+            return new DirectedEdgedGraph<T, E>(Comparer).Do(g => g.UnionWith(this));
         }
 
         public static DirectedEdgedGraph<T, E> Generate(T root, Func<T, IEnumerable<KeyValuePair<T, E>>> expandFunction)
         {
-            return Generate(root, expandFunction, EqualityComparer<T>.Default); 
+            return Generate(root, expandFunction, EqualityComparer<T>.Default);
         }
 
         public static DirectedEdgedGraph<T, E> Generate(T root, Func<T, IEnumerable<KeyValuePair<T, E>>> expandFunction, IEqualityComparer<T> comparer)
@@ -313,14 +314,19 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return adjacency.ToString(kvp => "{0}=>{1};".Formato(kvp.Key, 
+            return adjacency.ToString(kvp => "{0}=>{1};".Formato(kvp.Key,
                  kvp.Value.ToString(kvp2 => "[{0}->{1}]".Formato(kvp2.Value, kvp2.Key), ",")),
-                "\r\n"); ;  
+                "\r\n"); ;
         }
 
         public string Graphviz()
         {
-            return Graphviz("Graph", a => a.ToString(), e=>e.ToString() );
+            return Graphviz(typeof(E).Name, a => a.ToString(), e => e.ToString());
+        }
+
+        public string Graphviz(string name)
+        {
+            return Graphviz(name, a => a.ToString(), e => e.ToString());
         }
 
         public string Graphviz(string name, Func<T, string> getNodeName, Func<E, string> getEdgeName)
@@ -342,7 +348,7 @@ namespace Signum.Utilities.DataStructures
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return adjacency.Keys.GetEnumerator(); 
+            return adjacency.Keys.GetEnumerator();
         }
 
         public IEnumerable<HashSet<T>> CompilationOrderGroups()
@@ -361,7 +367,7 @@ namespace Signum.Utilities.DataStructures
 
         public IEnumerable<T> CompilationOrder()
         {
-            return CompilationOrderGroups().SelectMany(e => e); 
+            return CompilationOrderGroups().SelectMany(e => e);
         }
 
         /// <summary>
@@ -409,7 +415,7 @@ namespace Signum.Utilities.DataStructures
                     continue;
                 }
 
-                Func<T,int> fanInOut = n => clone.RelatedTo(n).Count() - inv.RelatedTo(n).Count();
+                Func<T, int> fanInOut = n => clone.RelatedTo(n).Count() - inv.RelatedTo(n).Count();
 
                 MinMax<T> mm = clone.WithMinMaxPair(fanInOut);
 
@@ -434,7 +440,7 @@ namespace Signum.Utilities.DataStructures
 
         HashSet<T> Sinks()
         {
-            return adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key).ToHashSet(); 
+            return adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key).ToHashSet();
         }
 
         public DirectedEdgedGraph<T, E> WhereEdges(Func<Edge<T, E>, bool> condition)
@@ -449,12 +455,12 @@ namespace Signum.Utilities.DataStructures
         {
             //http://en.wikipedia.org/wiki/Dijkstra's_algorithm
 
-            Dictionary<T,int> distance = this.ToDictionary(e=>e,e=>int.MaxValue); 
-            Dictionary<T,T> previous = new Dictionary<T,T>();
+            Dictionary<T, int> distance = this.ToDictionary(e => e, e => int.MaxValue);
+            Dictionary<T, T> previous = new Dictionary<T, T>();
 
             distance[from] = 0;
             PriorityQueue<T> queue = new PriorityQueue<T>((a, b) => distance[a].CompareTo(distance[b]));
-            queue.PushAll(this);  
+            queue.PushAll(this);
 
             while (queue.Count > 0)
             {
@@ -464,7 +470,7 @@ namespace Signum.Utilities.DataStructures
 
                 foreach (var v in RelatedTo(u))
                 {
-                    int newDist = distance[u] + getWeight(v.Value); 
+                    int newDist = distance[u] + getWeight(v.Value);
                     if (newDist < distance[v.Key])
                     {
                         distance[v.Key] = newDist;
@@ -481,10 +487,10 @@ namespace Signum.Utilities.DataStructures
             return to.For(n => previous.ContainsKey(n), n => previous[n]).Reverse().ToList();
         }
 
- 
+
     }
 
-    public struct Edge<T,E>
+    public struct Edge<T, E>
     {
         public readonly T From;
         public readonly T To;
