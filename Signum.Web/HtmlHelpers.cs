@@ -35,10 +35,10 @@ namespace Signum.Web
         /// <param name="idField">The id of the field that the label is describing</param>
         /// <param name="cssClass">The class that will be appended to the label</param>
         /// <returns>An HTML string representing a "label" label</returns>
-        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass, Dictionary<string, string> htmlAttributes)
+        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass, Dictionary<string, object> htmlAttributes)
         {
             if (htmlAttributes == null)
-                htmlAttributes = new Dictionary<string, string>();
+                htmlAttributes = new Dictionary<string, object>();
 
             if (htmlAttributes.ContainsKey("class"))
                 htmlAttributes["class"] += " " + cssClass;
@@ -47,8 +47,8 @@ namespace Signum.Web
 
             return
             String.IsNullOrEmpty(id) ?
-                String.Format("<label for='{0}' {1}>{2}</label>", idField, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote(), " "), value) :
-                String.Format("<label for='{0}' id='{1}' {2}>{3}</label>", idField, id, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote(), " "), value);
+                String.Format("<label for='{0}' {1}>{2}</label>", idField, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), value) :
+                String.Format("<label for='{0}' id='{1}' {2}>{3}</label>", idField, id, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), value);
         }
 
         public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
@@ -67,12 +67,12 @@ namespace Signum.Web
                 "</span>\n";
         }
 
-        public static string Span(this HtmlHelper html, string name, string value, string cssClass, Dictionary<string, string> htmlAttributes)
+        public static string Span(this HtmlHelper html, string name, string value, string cssClass, Dictionary<string, object> htmlAttributes)
         {
             return "<span " +
                 ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
                 "class=\"" + cssClass + "\" " +
-                htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote(), " ") + ">" + value +
+                htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") + ">" + value +
                 "</span>\n";
         }
 
@@ -90,31 +90,31 @@ namespace Signum.Web
             return Span(html, name, strValue, cssClass);
         }
 
-        public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, Dictionary<string, string> htmlAttributes)
+        public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, Dictionary<string, object> htmlAttributes)
         { 
             return "<a " +
                 ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
                 "href=\"" + href + "\" " +
-                "class=\"" + cssClass + "\" " + 
-                htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote()," ") + ">" + text +
+                "class=\"" + cssClass + "\" " +
+                htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") + ">" + text +
                 "</a>\n";
         }
 
-        public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass, Dictionary<string, string> htmlAttributes)
+        public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass, Dictionary<string, object> htmlAttributes)
         {
             return "<div " +
                 ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
-                "class=\"" + cssClass + "\" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote()," ") + ">" + innerHTML +
+                "class=\"" + cssClass + "\" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") + ">" + innerHTML +
                 "</div>\n";
         }
 
-        public static string Button(this HtmlHelper html, string name, string value, string onclick, string cssClass, Dictionary<string, string> htmlAttributes)
+        public static string Button(this HtmlHelper html, string name, string value, string onclick, string cssClass, Dictionary<string, object> htmlAttributes)
         {
             return "<input type=\"button\" " +
                    "id=\"" + name + "\" " +
                    "value=\"" + value + "\" " +
                    "class=\"" + cssClass + "\" " +
-                   htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.Quote()," ") +
+                   htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") +
                    "onclick=\"" + onclick + "\" " +
                    "/>\n";
         }
@@ -141,7 +141,7 @@ namespace Signum.Web
                         ddlName,
                         "",
                         "AutoCompleteMainDiv",
-                        new Dictionary<string, string>() 
+                        new Dictionary<string, object>() 
                         { 
                             { "onclick", "AutocompleteOnClick('" + ddlName + "','" + 
                                                               extendedControlName + "','" + 

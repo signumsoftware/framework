@@ -15,15 +15,15 @@ namespace Signum.Web
     {
         public string LabelText;
         public StyleContext StyleContext;
-        public Dictionary<string, string> LabelFieldHtmlProps;
-        public Dictionary<string, object> ValueFieldHtmlProps;
+        public Dictionary<string, object> LabelHtmlProps;
+        public Dictionary<string, object> ValueHtmlProps;
         public string LabelTrue;
         public string LabelFalse;
     }
 
     public static class RadioButtonLineHelper
     {
-        private static string InternalRadioButtonLine(this HtmlHelper helper, string idValueField, bool? value, string trueLabel, string falseLabel, string labelText, Dictionary<string, object> rbHtmlOptions, Dictionary<string, string> labelHtmlOptions)
+        private static string InternalRadioButtonLine(this HtmlHelper helper, string idValueField, bool? value, string trueLabel, string falseLabel, string labelText, Dictionary<string, object> rbHtmlOptions, Dictionary<string, object> labelHtmlOptions)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -137,20 +137,20 @@ namespace Signum.Web
                 if (options.StyleContext != null)
                 {
                     using (options.StyleContext)
-                        return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.FriendlyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
+                        return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.FriendlyName, options.ValueHtmlProps, options.LabelHtmlProps);
                 }
                 else
                 {
-                    return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.FriendlyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
+                    return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.FriendlyName, options.ValueHtmlProps, options.LabelHtmlProps);
                 }
             }
         }
 
         public static string RadioButtonLine<T>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, bool?>> property, string onclick, RadioButtonLine options)
         {
-            if (options.ValueFieldHtmlProps == null)
-                options.ValueFieldHtmlProps = new Dictionary<string, object>();
-            options.ValueFieldHtmlProps.Add("onclick", onclick);
+            if (options.ValueHtmlProps == null)
+                options.ValueHtmlProps = new Dictionary<string, object>();
+            options.ValueHtmlProps.Add("onclick", onclick);
 
             return helper.RadioButtonLine(tc, property, options);
         }

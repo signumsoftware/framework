@@ -17,8 +17,8 @@
    <%
    } 
    %>
-   <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, string>())%>
-   <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "XX", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, string>())%>
+   <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
+   <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "XX", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
 </select>
 <br />
 <table id="<%=Html.GlobalName("tblFilters")%>" name="<%=Html.GlobalName("tblFilters")%>">

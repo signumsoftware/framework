@@ -28,6 +28,7 @@ namespace Signum.Web
             ValueTask += new ValueTask(TaskSetLabelText);
             ValueTask += new ValueTask(TaskSetReadOnly);
             ValueTask += new ValueTask(TaskSetValueLineType);
+            ValueTask += new ValueTask(TaskSetHtmlProperties);
         }
 
         internal static void FireCommonTasks(EntityBase eb, Type parent, TypeContext context)
@@ -85,6 +86,26 @@ namespace Signum.Web
             {
                 if (context.GetPath().Last().HasAttribute<DateOnlyValidatorAttribute>())
                     vl.ValueLineType = ValueLineType.Date;
+            }
+        }
+
+        public static void TaskSetHtmlProperties(ValueLine vl, Type parent, TypeContext context)
+        {
+            if (vl != null)
+            {
+                var atribute = context.GetPath().Last().SingleAttribute<StringLengthValidatorAttribute>();
+                if (atribute != null)
+                {
+                    int max = atribute.Max; //-1 if not set
+                    if (max != -1)
+                    {
+                        vl.ValueHtmlProps.AddRange(new
+                        {
+                            maxlength = max,
+                            size = max
+                        });
+                    }
+                }
             }
         }
 #endregion

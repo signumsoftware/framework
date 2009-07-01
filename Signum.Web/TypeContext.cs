@@ -154,7 +154,7 @@ namespace Signum.Web
     #region TypeSubContext<T>
     internal class TypeSubContext<T> : TypeContext<T>, IDisposable
     {
-        internal PropertyInfo Property { get; private set; }
+        public PropertyInfo Property { get; private set; }
         internal TypeContext Parent { get; private set; }
 
         public TypeSubContext(T value, TypeContext parent, PropertyInfo property)

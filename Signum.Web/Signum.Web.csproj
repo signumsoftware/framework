@@ -78,6 +78,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="Controllers\SignumController.cs" />
+    <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="EntityRepeaterHelper.cs" />
     <Compile Include="EntityComboHelper.cs" />
     <Compile Include="EntityBase.cs" />

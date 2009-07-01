@@ -44,7 +44,7 @@ namespace Signum.Web
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, elementsCleanType.Name) + "\n");
 
             //if (settings.CreateEntityDiv)
-            //    sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
+            //    sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
@@ -97,7 +97,7 @@ namespace Signum.Web
                               "+",
                               creatingUrl,
                               "lineButton",
-                              new Dictionary<string, string>()));
+                              new Dictionary<string, object>()));
 
             if (settings.Remove)
                 sb.Append(
@@ -105,7 +105,7 @@ namespace Signum.Web
                               "x",
                               "RemoveListContainedEntity('{0}');".Formato(idValueField),
                               "lineButton",
-                              new Dictionary<string, string>()));
+                              new Dictionary<string, object>()));
 
 
             if (!typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))
@@ -120,7 +120,7 @@ namespace Signum.Web
                                     "O",
                                     findingUrl,
                                     "lineButton",
-                                    new Dictionary<string, string>()));
+                                    new Dictionary<string, object>()));
             }
 
             if (StyleContext.Current.BreakLine)
@@ -158,7 +158,7 @@ namespace Signum.Web
                        ? ((IIdentifiable)(object)value).TryCS(i => i.Id)
                        : ((Lazy)(object)value).TryCS(i => i.Id)) + "\n");
 
-                sb.Append(helper.Div(indexedPrefix + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
+                sb.Append(helper.Div(indexedPrefix + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 
                 //Note this is added to the sbOptions, not to the result sb
                 sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +

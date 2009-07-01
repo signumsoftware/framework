@@ -127,7 +127,7 @@ namespace Signum.Web
 
             sb.Append("<td>\n");
             if (!filterOptions.Frozen)
-                sb.Append(helper.Button(helper.GlobalName("btnDelete_" + index), "X", "DeleteFilter('{0}','{1}');".Formato(index, helper.ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, string>()));
+                sb.Append(helper.Button(helper.GlobalName("btnDelete_" + index), "X", "DeleteFilter('{0}','{1}');".Formato(index, helper.ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>()));
             sb.Append("</td>\n");
 
             sb.Append("</tr>\n");

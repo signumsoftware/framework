@@ -68,7 +68,7 @@ namespace Signum.Web
                        ? ((IIdentifiable)(object)value).TryCS(i => i.Id).TrySS(id => id)
                        : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id)) + "\n");
 
-                sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
+                sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 sb.Append(helper.TextBox(
                     idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, 
                     (isIdentifiable) 
@@ -130,7 +130,7 @@ namespace Signum.Web
                 );
                 sb.Append("</div>\n");
 
-                sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, string> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
+                sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
             string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters +");";
@@ -140,7 +140,7 @@ namespace Signum.Web
                         viewingUrl,
                         "View",
                         "valueLine",
-                        new Dictionary<string, string> { {"style","display:" + ((value==null) ? "none" : "block")}}));
+                        new Dictionary<string, object> { {"style","display:" + ((value==null) ? "none" : "block")}}));
 
             sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
             
@@ -153,7 +153,7 @@ namespace Signum.Web
                               "+",
                               creatingUrl,
                               "lineButton",
-                              (value == null) ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "style", "display:none" } }));
+                              (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
 
             if (settings.Remove)
                 sb.Append(
@@ -161,7 +161,7 @@ namespace Signum.Web
                               "x",
                               "RemoveContainedEntity('" + idValueField + "');",
                               "lineButton",
-                              (value == null) ? new Dictionary<string, string>() { { "style", "display:none" } } : new Dictionary<string, string>()));
+                              (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Find && (isIdentifiable || isLazy))
             {
@@ -174,7 +174,7 @@ namespace Signum.Web
                                  "O",
                                  findingUrl,
                                  "lineButton",
-                                 (value == null) ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "style", "display:none" } }));
+                                 (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
             }
 
             if (StyleContext.Current.BreakLine)

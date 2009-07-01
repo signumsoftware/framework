@@ -63,7 +63,7 @@ namespace Signum.Web
                        ? ((IIdentifiable)(object)value).TryCS(i => i.Id).TrySS(id => id)
                        : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id)) + "\n");
 
-                sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, string> { { "style", "display:none" } }));
+                sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
                 List<SelectListItem> items = new List<SelectListItem>();
                 items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
@@ -94,7 +94,7 @@ namespace Signum.Web
                         "->",
                         viewingUrl,
                         "",
-                        new Dictionary<string, string> { {"style","display:" + ((value==null) ? "none" : "block")}}));
+                        new Dictionary<string, object> { {"style","display:" + ((value==null) ? "none" : "block")}}));
 
             sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
             

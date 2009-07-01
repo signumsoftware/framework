@@ -12,9 +12,9 @@ namespace Signum.Web
 {
     public static class ValueLineHelper
     {
-        public static ValueLineConfigurator Configurator = new ValueLineConfigurator(); 
+        public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
-        private static string ManualValueLine<T>(this HtmlHelper helper, string idValueField, T value, string labelText, Dictionary<string, object> valueFieldHtmlProps, ValueLineType? valueLineType, Dictionary<string, string> labelFieldHtmlProps)
+        private static string ManualValueLine<T>(this HtmlHelper helper, string idValueField, T value, string labelText, Dictionary<string, object> ValueHtmlProps, ValueLineType? valueLineType, Dictionary<string, object> LabelHtmlProps)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -23,8 +23,8 @@ namespace Signum.Web
             if (StyleContext.Current.LabelVisible)
             {
                 //sb.Append("<div>");
-                if (labelFieldHtmlProps != null && labelFieldHtmlProps.Count > 0)
-                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, labelFieldHtmlProps));
+                if (LabelHtmlProps != null && LabelHtmlProps.Count > 0)
+                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, LabelHtmlProps));
                 else
                     sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
             }
@@ -37,13 +37,13 @@ namespace Signum.Web
                     valueLineType.Value : 
                     Configurator.GetDefaultValueLineType(typeof(T));
 
-                if (valueFieldHtmlProps == null)
-                    valueFieldHtmlProps = new Dictionary<string, object>();
+                if (ValueHtmlProps == null)
+                    ValueHtmlProps = new Dictionary<string, object>();
 
                 if (StyleContext.Current.ShowValidationMessage)
                 {
-                    valueFieldHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, valueFieldHtmlProps, typeof(T)))); 
+                    ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T)))); 
                     sb.Append("\n");
                     sb.Append("&nbsp;");
                     sb.Append(helper.ValidationMessage(idValueField));
@@ -51,8 +51,8 @@ namespace Signum.Web
                 }
                 else
                 {
-                    valueFieldHtmlProps.Add("class", "valueLine");
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, valueFieldHtmlProps, typeof(T)))); 
+                    ValueHtmlProps.Add("class", "valueLine");
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T)))); 
                     sb.Append("\r\n");
                 }
             }
@@ -116,11 +116,11 @@ namespace Signum.Web
             if (options.StyleContext != null)
             {
                 using (options.StyleContext)
-                    return helper.ManualValueLine(idValueField, value, options.LabelText, options.ValueFieldHtmlProps, options.ValueLineType, options.LabelFieldHtmlProps);
+                    return helper.ManualValueLine(idValueField, value, options.LabelText, options.ValueHtmlProps, options.ValueLineType, options.LabelHtmlProps);
             }
             else
             {
-                return helper.ManualValueLine(idValueField, value, options.LabelText, options.ValueFieldHtmlProps, options.ValueLineType, options.LabelFieldHtmlProps);
+                return helper.ManualValueLine(idValueField, value, options.LabelText, options.ValueHtmlProps, options.ValueLineType, options.LabelHtmlProps);
             }
         }
 
@@ -157,11 +157,11 @@ namespace Signum.Web
                 if (vl.StyleContext != null)
                 {
                     using (vl.StyleContext)
-                        return helper.ManualValueLine(context.Name, context.Value, vl.LabelText ?? context.FriendlyName, vl.ValueFieldHtmlProps, vl.ValueLineType, vl.LabelFieldHtmlProps);
+                        return helper.ManualValueLine(context.Name, context.Value, vl.LabelText ?? context.FriendlyName, vl.ValueHtmlProps, vl.ValueLineType, vl.LabelHtmlProps);
                 }
                 else
                 {
-                    return helper.ManualValueLine(context.Name, context.Value, vl.LabelText ?? context.FriendlyName, vl.ValueFieldHtmlProps, vl.ValueLineType, vl.LabelFieldHtmlProps);
+                    return helper.ManualValueLine(context.Name, context.Value, vl.LabelText ?? context.FriendlyName, vl.ValueHtmlProps, vl.ValueLineType, vl.LabelHtmlProps);
                 }
             }
         }
@@ -179,8 +179,8 @@ namespace Signum.Web
     { 
         public string LabelText;
         public StyleContext StyleContext;
-        public Dictionary<string, string> LabelFieldHtmlProps;
-        public Dictionary<string, object> ValueFieldHtmlProps;
+        public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string,object>(0);
+        public readonly Dictionary<string, object> ValueHtmlProps = new Dictionary<string, object>(0);
         public ValueLineType? ValueLineType;
     }
 
@@ -280,7 +280,7 @@ namespace Signum.Web
         public Dictionary<string, object> HtmlProperties { get; private set; }
         
         public Type EnumType { get; private set; }
-        
+
         public ValueLineData(string idValueField, object value, Dictionary<string, object> htmlProperties)
         {
             IdValueField = idValueField;
