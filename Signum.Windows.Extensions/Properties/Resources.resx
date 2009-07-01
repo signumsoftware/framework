@@ -130,7 +130,7 @@
     <value>Microsoft Office Excel 97-2003 Spreadsheet (*.xls)|*.xls</value>
   </data>
   <data name="ExcelReport" xml:space="preserve">
-    <value>Informe Excel</value>
+    <value>To Excel</value>
   </data>
   <data name="ExportExcelReportPivotTable" xml:space="preserve">
     <value>Export Excel Report with Pivot Table</value>

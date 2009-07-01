@@ -14,5 +14,8 @@ namespace Signum.Services
     {
         [OperationContract, NetDataContract]
         List<Lazy<ExcelReportDN>> GetExcelReports(string queryName);
+        [OperationContract, NetDataContract]
+        List<Lazy<ExcelReportDN>> GetEnabledExcelReports(string queryName);
+
     }
 }
