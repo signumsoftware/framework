@@ -22,7 +22,7 @@ namespace Signum.Web
 
             if (StyleContext.Current.LabelVisible)
             {
-                sb.Append("<div>");
+                //sb.Append("<div>");
                 if (labelFieldHtmlProps != null && labelFieldHtmlProps.Count > 0)
                     sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, labelFieldHtmlProps));
                 else
@@ -56,10 +56,10 @@ namespace Signum.Web
                     sb.Append("\r\n");
                 }
             }
-            if (StyleContext.Current.LabelVisible)
-                sb.Append("</div>");
+            //if (StyleContext.Current.LabelVisible)
+            //    sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
-                sb.Append("<div class=\"clearall\">&nbsp;</div>\n");
+                sb.Append("<div class='clearall'></div>\n");
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
 
