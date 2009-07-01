@@ -26,7 +26,7 @@ namespace Signum.Web
             sb.Append(
                 "<script type=\"text/javascript\">\n" + 
                 "$(document).ready(function(){\n" +
-                "$(\"#" + elementId + "\").datepicker({ changeMonth:true, changeYear:true, firstDay:1, showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'images/menu_fleche_es_on.gif' });\n" + 
+                "$(\"#" + elementId + "\").datepicker({ changeMonth:true, changeYear:true, firstDay:1, yearRange:'-90:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png' });\n" + 
                 "});\n" + 
                 "</script>\n");
 
