@@ -177,7 +177,9 @@ namespace Signum.Entities
                     return Error;
                 else
                 {
-                    PropertyPack pp = Reflector.GetPropertyValidators(GetType())[columnName];
+                    PropertyPack pp = Reflector.GetPropertyValidators(GetType()).TryGetC(columnName);
+                    if (pp == null)
+                        return null; 
                     object val = pp.GetValue(this);
                     return pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(pp.NiceName)).FirstOrDefault();
                 }
