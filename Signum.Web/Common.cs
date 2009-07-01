@@ -71,7 +71,7 @@ namespace Signum.Web
         {
             if (vl != null)
             {
-                if (!context.Property.IsReadOnly())
+                if (context.Property.IsReadOnly())
                 {
                     if (vl.StyleContext == null)
                         vl.StyleContext = new StyleContext();
