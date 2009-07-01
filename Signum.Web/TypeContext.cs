@@ -78,6 +78,7 @@ namespace Signum.Web
         public abstract string FriendlyName { get; }
         public abstract Type ContextType { get; }
         public abstract List<PropertyInfo> GetPath();
+        public abstract PropertyInfo Property { get; }
 
         public virtual void Dispose()
         {
@@ -144,6 +145,11 @@ namespace Signum.Web
             get { throw new NotImplementedException("TypeContext has no DisplayName"); }
         }
 
+        public override PropertyInfo Property
+        {
+	         get { throw new NotImplementedException("TypeContext has no Property"); }
+        }
+
         public override Type ContextType
         {
             get { return typeof(T); }
@@ -154,15 +160,20 @@ namespace Signum.Web
     #region TypeSubContext<T>
     internal class TypeSubContext<T> : TypeContext<T>, IDisposable
     {
-        public PropertyInfo Property { get; private set; }
+        PropertyInfo property; 
         internal TypeContext Parent { get; private set; }
 
         public TypeSubContext(T value, TypeContext parent, PropertyInfo property)
             : base(value)
         {
-            Property = property;
+            this.property = property;
             Parent = parent;
         }
+
+        public override PropertyInfo Property
+        {
+	         get { return property; }
+        }        
 
         public override List<PropertyInfo> GetPath()
         {

@@ -71,7 +71,7 @@ namespace Signum.Web
         {
             if (vl != null)
             {
-                if (!context.GetPath().Last().CanWrite)
+                if (!context.Property.IsReadOnly())
                 {
                     if (vl.StyleContext == null)
                         vl.StyleContext = new StyleContext();
@@ -84,7 +84,7 @@ namespace Signum.Web
         { 
             if (vl != null)
             {
-                if (context.GetPath().Last().HasAttribute<DateOnlyValidatorAttribute>())
+                if (context.Property.HasAttribute<DateOnlyValidatorAttribute>())
                     vl.ValueLineType = ValueLineType.Date;
             }
         }
@@ -93,7 +93,7 @@ namespace Signum.Web
         {
             if (vl != null)
             {
-                var atribute = context.GetPath().Last().SingleAttribute<StringLengthValidatorAttribute>();
+                var atribute = context.Property.SingleAttribute<StringLengthValidatorAttribute>();
                 if (atribute != null)
                 {
                     int max = atribute.Max; //-1 if not set

@@ -299,5 +299,12 @@ namespace Signum.Utilities.Reflection
                     return Convert.ChangeType(value, utype);
             }
         }
+
+        public static bool IsReadOnly(this PropertyInfo pi)
+        {
+            MethodInfo mi = pi.GetSetMethod();
+
+            return mi == null || !mi.IsPublic;
+        }
     }
 }

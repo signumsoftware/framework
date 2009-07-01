@@ -36,14 +36,6 @@ namespace Signum.Windows
 
         public PropertyInfo PropertyInfo{get; internal set;}
 
-        public bool IsReadOnly
-        {
-            get
-            {
-                return PropertyInfo.GetSetMethod().Map(a => a == null || !a.IsPublic);
-            }
-        }
-
         public TypeSubContext(PropertyInfo propertyInfo, TypeContext parent)
             : base(propertyInfo.PropertyType)
         {

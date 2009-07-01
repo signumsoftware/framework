@@ -17,6 +17,7 @@ using Signum.Windows.Properties;
 using System.Collections;
 using Signum.Services;
 using Signum.Entities;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Windows
 {
@@ -152,7 +153,7 @@ namespace Signum.Windows
                 fe is FileLine ? FileLine.EntityProperty :
                 FrameworkElement.DataContextProperty;
 
-            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.IsReadOnly) ?? true;
+            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
 
             if (!BindingOperations.IsDataBound(fe, valueProp))
             {
@@ -198,7 +199,7 @@ namespace Signum.Windows
 
         public static void TaskSetIsReadonly(FrameworkElement fe, string route, TypeContext context)
         {
-            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.IsReadOnly) ?? true;
+            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
 
             if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty)  && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is FileLine))
             {
