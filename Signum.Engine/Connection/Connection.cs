@@ -4,9 +4,12 @@ using System.Text;
 using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
+using System.Linq;
 using System.IO;
 using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
+using System.Text.RegularExpressions;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine
 {
@@ -31,6 +34,8 @@ namespace Signum.Engine
             get { return log; }
             set { log = value; }
         }
+
+        public abstract string GetSchemaName();
 
         protected static void Log(SqlPreCommandSimple pcs)
         {
@@ -86,6 +91,11 @@ namespace Signum.Engine
             set { connectionString = value; }
         }
 
+        public override string GetSchemaName()
+        {
+            return (string)SqlBuilder.GetCurrentSchema().ExecuteScalar();
+        }
+
         protected internal override bool IsMock
         {
             get { return false; }
@@ -121,8 +131,15 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             using (SqlCommand cmd = NewCommand(preCommand))
             {
-                object result = cmd.ExecuteScalar();
-                return tr.Commit(result);
+                try
+                {
+                    object result = cmd.ExecuteScalar();
+                    return tr.Commit(result);
+                }
+                catch (SqlException ex)
+                {
+                    throw HandleException(ex);
+                }
             }
         }
 
@@ -131,8 +148,15 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             using (SqlCommand cmd = NewCommand(preCommand))
             {
-                int result = cmd.ExecuteNonQuery();
-                return tr.Commit(result);
+                try
+                {
+                    int result = cmd.ExecuteNonQuery();
+                    return tr.Commit(result);
+                }
+                catch (SqlException ex)
+                {
+                    throw HandleException(ex); 
+                }
             }
         }
 
@@ -141,12 +165,19 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             using (SqlCommand cmd = NewCommand(preCommand))
             {
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                try
+                {
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
 
-                DataTable result = new DataTable();
-                da.Fill(result);
+                    DataTable result = new DataTable();
+                    da.Fill(result);
 
-                return tr.Commit(result);
+                    return tr.Commit(result);
+                }
+                catch (SqlException ex)
+                {
+                    throw HandleException(ex);
+                }
             }
         }
 
@@ -155,12 +186,31 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             using (SqlCommand cmd = NewCommand(preCommand))
             {
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                try
+                {
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
 
-                DataSet result = new DataSet();
-                da.Fill(result);
+                    DataSet result = new DataSet();
+                    da.Fill(result);
 
-                return tr.Commit(result);
+                    return tr.Commit(result);
+                }
+                catch (SqlException ex)
+                {
+                    throw HandleException(ex);
+                }
+            }
+        }
+
+
+     
+
+        private Exception HandleException(SqlException ex)
+        {
+            switch (ex.Number)
+            {
+                case 2601: return new UniqueKeyException(ex);
+                default: return ex; 
             }
         }
     }
@@ -171,6 +221,11 @@ namespace Signum.Engine
             : base(schema)
         {
 
+        }
+
+        public override string GetSchemaName()
+        {
+            return "Mock";
         }
 
         List<SqlPreCommandSimple> executedCommands = new List<SqlPreCommandSimple>();

@@ -63,7 +63,7 @@ namespace Signum.Entities
         {
             base.PreSaving();
 
-            toStr = ToString();
+            ToStr = ToString();
         }
 
         public override string ToString()

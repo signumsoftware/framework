@@ -17,9 +17,9 @@ namespace Signum.Entities
             selfModified = false; 
         }
 
-        public EnumProxy(string nombre)
+        public EnumProxy(string name)
         {
-            this.toStr = nombre; 
+            this.toStr = name; 
         }
 
         public static EnumProxy<T> FromEnum(T t)

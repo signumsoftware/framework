@@ -110,7 +110,7 @@ namespace Signum.Engine.Maps
         public event Func<SqlPreCommand> Generating;
         public event InitEventHandler Initializing;
 
-        internal SqlPreCommand SynchronizationScript()
+        internal SqlPreCommand SynchronizationScript(string schemaName)
         {
             if (Synchronizing == null)
                 return null;
@@ -135,6 +135,7 @@ namespace Signum.Engine.Maps
 
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple("--- START OF SYNC SCRIPT GENERATED ON {0}".Formato(DateTime.Now)),
+                new SqlPreCommandSimple("use {0}".Formato(schemaName)),
                 command,
                 new SqlPreCommandSimple("--- END OF SYNC SCRIPT")); 
         }

@@ -194,7 +194,7 @@ deallocate cur");
 
         public static SqlPreCommand TotalSynchronizeScript()
         {
-            return Schema.Current.SynchronizationScript(); 
+            return Schema.Current.SynchronizationScript(ConnectionScope.Current.GetSchemaName()); 
         }
 
         public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)
