@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
@@ -74,7 +75,7 @@ namespace Signum.Web
         public abstract object UntypedValue { get; }
         public abstract string Name { get; }
 
-        public abstract string PropertyName { get; }
+        public abstract string FriendlyName { get; }
         public abstract Type ContextType { get; }
         public abstract List<PropertyInfo> GetPath();
 
@@ -138,9 +139,9 @@ namespace Signum.Web
             get { return  TypeContext.Separator + prefix; }
         }
 
-        public override string PropertyName
+        public override string FriendlyName
         {
-            get { return prefix; }
+            get { throw new NotImplementedException("TypeContext has no DisplayName"); }
         }
 
         public override Type ContextType
@@ -173,9 +174,9 @@ namespace Signum.Web
             get { return ((Parent.Name == TypeContext.Separator) ? "" : Parent.Name) + TypeContext.Separator + Property.Name; }
         }
 
-        public override string PropertyName
+        public override string FriendlyName
         {
-            get { return Property.Name; }
+            get { return Property.FriendlyName(); }
         }
     }
     #endregion

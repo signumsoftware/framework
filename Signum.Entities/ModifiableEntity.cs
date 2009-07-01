@@ -154,20 +154,7 @@ namespace Signum.Entities
 
         #region IDataErrorInfo Members
 
-        internal static Dictionary<string, PropertyPack> GetPropertyValidators(Type type)
-        {
-            lock (validators)
-            {
-                return validators.GetOrCreate(type, () =>
-                    MemberEntryFactory.GenerateIList(type, MemberOptions.Properties | MemberOptions.Getter| MemberOptions.Setters| MemberOptions.Untyped)
-                    .Cast<IMemberEntry>()
-                    .Where(p=>!Attribute.IsDefined(p.MemberInfo, typeof(DoNotValidateAttribute)))
-                    .ToDictionary(p => p.Name, p => new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter)));
-            }
-        }
-
-        static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();
-
+   
         [DoNotValidate]
         public string Error
         {
@@ -177,7 +164,7 @@ namespace Signum.Entities
         //override for full entitity integrity check. Remember to call base. 
         public override string IntegrityCheck()
         {
-            return GetPropertyValidators(GetType()).Select(k => this[k.Key]).NotNull().ToString("\r\n");
+            return Reflector.GetPropertyValidators(GetType()).Select(k => this[k.Key]).NotNull().ToString("\r\n");
         }
 
         //override for per-property checks
@@ -190,7 +177,7 @@ namespace Signum.Entities
                     return Error;
                 else
                 {
-                    PropertyPack pp = GetPropertyValidators(GetType())[columnName];
+                    PropertyPack pp = Reflector.GetPropertyValidators(GetType())[columnName];
                     object val = pp.GetValue(this);
                     return pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(pp.NiceName)).FirstOrDefault();
                 }
@@ -216,25 +203,4 @@ namespace Signum.Entities
         #endregion
     }
 
-    public class PropertyPack
-    {
-        public PropertyPack(PropertyInfo pi, Func<object, object> getValue, Action<object, object> setValue)
-        {
-            this.PropertyInfo = pi;
-            Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true).OfType<ValidatorAttribute>().ToReadOnly();
-            this.GetValue = getValue;
-            this.SetValue = setValue;
-            NiceName = pi.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description) ?? pi.Name.NiceName();
-        }
-
-        
-
-        public readonly Func<object, object> GetValue;
-        public readonly Action<object, object> SetValue;
-        public readonly PropertyInfo PropertyInfo;
-        public readonly ReadOnlyCollection<ValidatorAttribute> Validators;
-        public readonly string NiceName; 
-    }
-
-   
 }

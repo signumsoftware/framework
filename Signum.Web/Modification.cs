@@ -164,7 +164,7 @@ namespace Signum.Web
         {
             int propertyStart = ControlID.Length + TypeContext.Separator.Length;
 
-            var propertyValidators = ModifiableEntity.GetPropertyValidators(RuntimeType ?? StaticType);
+            var propertyValidators = Reflector.GetPropertyValidators(RuntimeType ?? StaticType);
 
             Properties = new Dictionary<string, PropertyPackModification>();
 

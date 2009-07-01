@@ -8,31 +8,43 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities;
 using Signum.Engine.Maps;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
-    public delegate void CommonRouteTask(EntityBase eb, Type parent, TypeContext context);
+    public delegate void EntityTask(EntityBase eb, Type parent, TypeContext context);
+    public delegate void ValueTask(ValueLine vl, Type parent, TypeContext context);
 
     public static class Common
     {
-        public static event CommonRouteTask CommonTask;
+        public static event EntityTask EntityTask;
+        public static event ValueTask ValueTask;
 
         static Common()
         {
-            CommonTask += new CommonRouteTask(TaskSetLabelText);
-            CommonTask += new CommonRouteTask(TaskSetImplementations);
+            EntityTask += new EntityTask(TaskSetLabelText);
+            EntityTask += new EntityTask(TaskSetImplementations);
+
+            ValueTask += new ValueTask(TaskSetLabelText);
+            ValueTask += new ValueTask(TaskSetReadOnly);
+            ValueTask += new ValueTask(TaskSetValueLineType);
         }
 
         internal static void FireCommonTasks(EntityBase eb, Type parent, TypeContext context)
         {
-            CommonTask(eb, parent, context);
+            EntityTask(eb, parent, context);
+        }
+
+        internal static void FireCommonTasks(ValueLine vl, Type parent, TypeContext context)
+        {
+            ValueTask(vl, parent, context);
         }
 
 #region Tasks
         public static void TaskSetLabelText(EntityBase eb, Type parent, TypeContext context)
         {
             if (eb!=null)
-                eb.LabelText = context.PropertyName;
+                eb.LabelText = context.FriendlyName;
         }
 
         public static void TaskSetImplementations(EntityBase eb, Type parent, TypeContext context)
@@ -46,7 +58,35 @@ namespace Signum.Web
 
                 eb.Implementations = Schema.Current.FindImplementations(parent, path.Cast<MemberInfo>().ToArray());
             }
-        } 
+        }
+
+        public static void TaskSetLabelText(ValueLine vl, Type parent, TypeContext context)
+        {
+            if (vl != null)
+                vl.LabelText = context.FriendlyName;
+        }
+
+        public static void TaskSetReadOnly(ValueLine vl, Type parent, TypeContext context)
+        {
+            if (vl != null)
+            {
+                if (!context.GetPath().Last().CanWrite)
+                {
+                    if (vl.StyleContext == null)
+                        vl.StyleContext = new StyleContext();
+                    vl.StyleContext.ReadOnly = true;
+                }
+            }
+        }
+
+        public static void TaskSetValueLineType(ValueLine vl, Type parent, TypeContext context)
+        { 
+            if (vl != null)
+            {
+                if (context.GetPath().Last().HasAttribute<DateOnlyValidatorAttribute>())
+                    vl.ValueLineType = ValueLineType.Date;
+            }
+        }
 #endregion
 
         internal static TypeContext<S> WalkExpressionGen<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
@@ -104,7 +144,7 @@ namespace Signum.Web
 
             foreach (PropertyInfo pi in properties)
             {
-                PropertyPack pp = ModifiableEntity.GetPropertyValidators(pi.DeclaringType).TryGetC(pi.Name);
+                PropertyPack pp = Reflector.GetPropertyValidators(pi.DeclaringType).TryGetC(pi.Name);
                 if (pp != null)
                 {
                     Func<object, object> getter = pp.GetValue;

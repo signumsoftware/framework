@@ -42,7 +42,7 @@ namespace Signum.Web
             if (StyleContext.Current.ReadOnly)
             {
                 rbHtmlOptions.Add("name", idValueField);
-                rbHtmlOptions.Add("class", "valueLine");
+                rbHtmlOptions.Add("class", "rbValueLine");
                 rbHtmlOptions.Add("disabled", "disabled");
                 string rb = helper.RadioButton(idValueField, true, value.HasValue && value.Value, rbHtmlOptions);
                 rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_True\"");
@@ -59,8 +59,8 @@ namespace Signum.Web
                 if (StyleContext.Current.ShowValidationMessage)
                 {
                     rbHtmlOptions.Add("name", idValueField);
-                    rbHtmlOptions.Add("class", "valueLine inlineVal");//inlineVal class tells Javascript code to show Inline Error
-                    sb.Append("<div id='" + idValueField + "'>");
+                    rbHtmlOptions.Add("class", "rbValueLine inlineVal");//inlineVal class tells Javascript code to show Inline Error
+                    sb.Append("<div id='" + idValueField + "' class='valueLine'>");
                     string rb = helper.RadioButton(idValueField, true, value.HasValue && value.Value, rbHtmlOptions); 
                     rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_True\"");
                     sb.Append(rb);
@@ -77,7 +77,7 @@ namespace Signum.Web
                 else
                 {
                     rbHtmlOptions.Add("name", idValueField);
-                    rbHtmlOptions.Add("class", "valueLine");
+                    rbHtmlOptions.Add("class", "rbValueLine");
                     string rb = helper.RadioButton(idValueField, true, value.HasValue && value.Value, rbHtmlOptions);
                     rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_True\"");
                     sb.Append(rb);
@@ -90,7 +90,7 @@ namespace Signum.Web
                 }
             }
             if (StyleContext.Current.BreakLine)
-                sb.Append("<div class=\"clearall\"></div>\n");
+                sb.Append("<div class=\"clearall\">&nbsp;</div>\n");
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
 
@@ -131,17 +131,17 @@ namespace Signum.Web
             TypeContext<bool?> context = (TypeContext<bool?>)Common.WalkExpression(tc, CastToObject(property));
             
             if (options == null)
-                return helper.InternalRadioButtonLine(context.Name, context.Value, "true", "false", context.PropertyName, null, null);
+                return helper.InternalRadioButtonLine(context.Name, context.Value, "true", "false", context.FriendlyName, null, null);
             else
             {
                 if (options.StyleContext != null)
                 {
                     using (options.StyleContext)
-                        return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
+                        return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.FriendlyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
                 }
                 else
                 {
-                    return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
+                    return helper.InternalRadioButtonLine(context.Name, context.Value, options.LabelTrue ?? "true", options.LabelFalse ?? "false", options.LabelText ?? context.FriendlyName, options.ValueFieldHtmlProps, options.LabelFieldHtmlProps);
                 }
             }
         }

@@ -10,6 +10,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
 using Signum.Entities.Properties;
+using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Reflection
 {
@@ -213,5 +214,47 @@ namespace Signum.Entities.Reflection
 
             return !typeof(Entity).IsAssignableFrom(type);
         }
+
+        static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();
+
+        public static Dictionary<string, PropertyPack> GetPropertyValidators(Type type)
+        {
+            lock (validators)
+            {
+                return validators.GetOrCreate(type, () =>
+                    MemberEntryFactory.GenerateIList(type, MemberOptions.Properties | MemberOptions.Getter | MemberOptions.Setters | MemberOptions.Untyped)
+                    .Cast<IMemberEntry>()
+                    .Where(p => !Attribute.IsDefined(p.MemberInfo, typeof(DoNotValidateAttribute)))
+                    .ToDictionary(p => p.Name, p => new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter)));
+            }
+        }
+
+        public static string FriendlyName(this PropertyInfo pi)
+        {
+            return GetPropertyValidators(pi.DeclaringType).TryGetC(pi.Name).TryCC(pp => pp.NiceName) ?? PropertyPack.CalculateNiceName(pi);
+        }
+    }
+
+    public class PropertyPack
+    {
+        public PropertyPack(PropertyInfo pi, Func<object, object> getValue, Action<object, object> setValue)
+        {
+            this.PropertyInfo = pi;
+            Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true).OfType<ValidatorAttribute>().ToReadOnly();
+            this.GetValue = getValue;
+            this.SetValue = setValue;
+            NiceName = CalculateNiceName(pi); 
+        }
+
+        internal static string CalculateNiceName(PropertyInfo pi)
+        {
+            return pi.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description) ?? pi.Name.NiceName();
+        }
+
+        public readonly Func<object, object> GetValue;
+        public readonly Action<object, object> SetValue;
+        public readonly PropertyInfo PropertyInfo;
+        public readonly ReadOnlyCollection<ValidatorAttribute> Validators;
+        public readonly string NiceName;
     }
 }

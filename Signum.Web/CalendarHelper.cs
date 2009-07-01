@@ -25,8 +25,8 @@ namespace Signum.Web
 
             sb.Append(
                 "<script type=\"text/javascript\">\n" + 
-                "$(document).ready(function(){\n" + 
-                "$(\"#" + elementId + "\").datepicker($.datepicker.regional['es']);\n" + 
+                "$(document).ready(function(){\n" +
+                "$(\"#" + elementId + "\").datepicker({ changeMonth:true, changeYear:true, firstDay:1, showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'images/menu_fleche_es_on.gif' });\n" + 
                 "});\n" + 
                 "</script>\n");
 

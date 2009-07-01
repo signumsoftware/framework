@@ -59,7 +59,7 @@ namespace Signum.Web
             if (StyleContext.Current.LabelVisible)
                 sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
-                sb.Append("<div class=\"clearall\"></div>\n");
+                sb.Append("<div class=\"clearall\">&nbsp;</div>\n");
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
 
@@ -85,9 +85,9 @@ namespace Signum.Web
             return helper.DropDownList(idValueField, items, htmlProperties);
         }
 
-        public static string DateTimePickerTextbox(this HtmlHelper helper, string idValueField, object value, Dictionary<string, object> htmlProperties)
+        public static string DateTimePickerTextbox(this HtmlHelper helper, string idValueField, object value, string dateFormat, Dictionary<string, object> htmlProperties)
         {
-            return helper.TextBox(idValueField, value != null ? value.ToString() : "", htmlProperties) + 
+            return helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "", htmlProperties) + 
                    "\n" + 
                    helper.Calendar(idValueField);
         }
@@ -129,26 +129,39 @@ namespace Signum.Web
             Type t = typeof(S);
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
 
-            return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, null, null, null);
+            ValueLine vl = new ValueLine();
+            Common.FireCommonTasks(vl, typeof(T), context);
+
+            return SetManualValueLineOptions<S>(helper, context, vl);
         }
 
-        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, ValueLine options)
+        public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
             Type t = typeof(S);
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
 
-            if (options == null)
-                return helper.ManualValueLine(context.Name, context.Value, context.PropertyName, null, null, null);                
+            ValueLine vl = new ValueLine();
+            Common.FireCommonTasks(vl, typeof(T), context);
+            
+            settingsModifier(vl);
+
+            return SetManualValueLineOptions<S>(helper, context, vl);
+        }
+
+        private static string SetManualValueLineOptions<S>(HtmlHelper helper, TypeContext<S> context, ValueLine vl)
+        {
+            if (vl == null)
+                return helper.ManualValueLine(context.Name, context.Value, context.FriendlyName, null, null, null);
             else
             {
-                if (options.StyleContext != null)
+                if (vl.StyleContext != null)
                 {
-                    using (options.StyleContext)
-                        return helper.ManualValueLine(context.Name, context.Value, options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.ValueLineType, options.LabelFieldHtmlProps);
+                    using (vl.StyleContext)
+                        return helper.ManualValueLine(context.Name, context.Value, vl.LabelText ?? context.FriendlyName, vl.ValueFieldHtmlProps, vl.ValueLineType, vl.LabelFieldHtmlProps);
                 }
                 else
                 {
-                    return helper.ManualValueLine(context.Name, context.Value, options.LabelText ?? context.PropertyName, options.ValueFieldHtmlProps, options.ValueLineType, options.LabelFieldHtmlProps);                
+                    return helper.ManualValueLine(context.Name, context.Value, vl.LabelText ?? context.FriendlyName, vl.ValueFieldHtmlProps, vl.ValueLineType, vl.LabelFieldHtmlProps);
                 }
             }
         }
@@ -184,7 +197,7 @@ namespace Signum.Web
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.DateTime:
-                        return ValueLineType.Calendar;
+                        return ValueLineType.DateTime;
                     case TypeCode.Boolean:
                         return ValueLineType.Boolean;
                     case TypeCode.Double:
@@ -216,7 +229,8 @@ namespace Signum.Web
             {ValueLineType.TextBox, (helper, valueLineData) => helper.TextboxInLine(valueLineData.IdValueField, (string)valueLineData.Value, valueLineData.HtmlProperties)},
             {ValueLineType.Boolean, (helper, valueLineData) => helper.CheckBox(valueLineData.IdValueField, (bool?)valueLineData.Value, valueLineData.HtmlProperties)},
             {ValueLineType.Combo, (helper, valueLineData) => helper.EnumComboBox(valueLineData.IdValueField, valueLineData.EnumType, valueLineData.Value, valueLineData.HtmlProperties)},
-            {ValueLineType.Calendar, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, valueLineData.HtmlProperties)},
+            {ValueLineType.DateTime, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy hh:mm:ss", valueLineData.HtmlProperties)},
+            {ValueLineType.Date, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy", valueLineData.HtmlProperties)},
             {ValueLineType.Number, (helper, valueLineData) => 
                 {
                     valueLineData.HtmlProperties.Add("onkeydown", onKeyDownNumber);
@@ -287,7 +301,8 @@ namespace Signum.Web
     {
         Boolean,
         Combo,
-        Calendar,
+        DateTime,
+        Date,
         TextBox,
         Number,
         DecimalNumber,
