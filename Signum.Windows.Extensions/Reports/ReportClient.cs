@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using Signum.Windows.Reports;
 using Signum.Entities.Reports;
+using Signum.Services;
 
 namespace Signum.Windows.Reports
 {
     public class ReportClient
     {
+        public static Dictionary<string, object> QueryNames; 
+
         public static void Start(NavigationManager manager, bool toExcel, bool excelReport, bool compositeReport)
         {
             if (toExcel)
@@ -18,6 +21,8 @@ namespace Signum.Windows.Reports
             }
             if (excelReport)
             {
+                QueryNames = Server.Service<IQueryServer>().GetQueryNames().ToDictionary(a => a.ToString()); 
+
                 SearchControl.GetCustomMenuItems += qn => qn == typeof(ExcelReportDN) ? null : new ExcelReportPivotTableMenuItem();
                 
                 if (compositeReport)
