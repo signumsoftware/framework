@@ -108,14 +108,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\eliminar16.gif" />
-    <Content Include="Scripts\jquery-1.2.6-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.2.6.js" />
-    <Content Include="Scripts\jquery-1.2.6.min-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.2.6.min.js" />
-    <Content Include="Scripts\MicrosoftAjax.debug.js" />
-    <Content Include="Scripts\MicrosoftAjax.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
-    <Content Include="Scripts\MicrosoftMvcAjax.js" />
     <EmbeddedResource Include="Views\SearchResults.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
@@ -135,6 +127,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NormalPage.aspx">
+      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +154,19 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\jquery-1.3.2-vsdoc.js" />
+    <EmbeddedResource Include="Scripts\jquery-1.3.2.js" />
+    <EmbeddedResource Include="Scripts\jquery-1.3.2.min-vsdoc.js" />
+    <EmbeddedResource Include="Scripts\jquery-1.3.2.min.js" />
+    <EmbeddedResource Include="Scripts\MicrosoftAjax.debug.js" />
+    <EmbeddedResource Include="Scripts\MicrosoftAjax.js" />
+    <EmbeddedResource Include="Scripts\MicrosoftMvcAjax.debug.js" />
+    <EmbeddedResource Include="Scripts\MicrosoftMvcAjax.js" />
+    <EmbeddedResource Include="Scripts\SF_AjaxValidation.js" />
+    <EmbeddedResource Include="Scripts\SF_Globals.js" />
+    <EmbeddedResource Include="Scripts\SF_PopupPanel.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

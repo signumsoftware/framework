@@ -6,6 +6,8 @@ using System.Linq.Expressions;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using Signum.Utilities;
+using System.Reflection;
+using System.IO;
 
 namespace Signum.Web
 {
@@ -161,12 +163,70 @@ namespace Signum.Web
             return sb.ToString();
         }
 
-        /*public static string RelativePath(this HtmlHelper html)
+        //public static string GetEmbeddedResource(this HtmlHelper helper, string resourceName)
+        //{
+        //    Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);    
+        //    StreamReader reader = new StreamReader(stream);
+        //    string script = reader.ReadToEnd();
+        //    return script;
+        //}
+        //public static string GetEmbeddedResource(this HtmlHelper helper, string resourceName)
+        //{
+        //    string script = Assembly.GetExecutingAssembly().GetManifestResourceNames()[9];
+        //    return script;
+        //}
+        //public static string GetEmbeddedResource(this HtmlHelper helper, string resourceName)
+        //{
+        //    var a = CreateResourceUrl(helper, Assembly.GetExecutingAssembly(), resourceName, "text/javascript");
+        //    return a;
+        //}
+        //public static string GetEmbeddedResource(this HtmlHelper helper, Type caller, string resourceName)
+        //{
+        //    string scriptLocation = System.Web.UI.Page.ClientScript.GetWebResourceUrl( "MSDWUC_WindowStatus.js");
+        //    Page.ClientScript.RegisterClientScriptInclude("MSDWUC_WindowStatus.js", scriptLocation);
+
+        //}
+
+
+        public static string CreateResourceUrl(HtmlHelper helper, Assembly assembly, string resourceName, string contentType)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(html.RelativePath);// Request.Url.GetLeftPart(UriPartial.Authority) + VirtualPathUtility.ToAbsolute("~/"));
-            return sb.ToString();
-        }*/
+            return TranslateAbsolutePath(helper, string.Concat(new object[] { "~/_$res$_.axd/", EncodeToUrl(contentType), "/", EncodeToUrl(assembly.GetName().Name), '/', EncodeToUrl(resourceName) }));
+        }
+        internal static string EncodeToUrl(string s)
+        {
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(s)).Replace('+', '_').Replace('/', '-').Replace('=', '$');
+        }
+        public static string TranslateAbsolutePath(HtmlHelper helper, string path)
+        {
+            if (path.StartsWith("/") || path.StartsWith("http://"))
+            {
+                return path;
+            }
+            if (!path.StartsWith("~/"))
+            {
+                throw new Exception("Invalid path passed to PathHelper.TranslateAbsolutePath()");
+            }
+            string applicationPath = helper.ViewContext.HttpContext.Request.ApplicationPath;
+            if (!applicationPath.EndsWith("/"))
+            {
+                applicationPath = applicationPath + "/";
+            }
+            return (applicationPath + path.Substring(2));
+        }
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+ 
+
+ 
+
    }
 
 }

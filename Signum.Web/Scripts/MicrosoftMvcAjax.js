@@ -1,3 +1,7 @@
+//----------------------------------------------------------
+// Copyright (C) Microsoft Corporation. All rights reserved.
+//----------------------------------------------------------
+// MicrosoftMvcAjax.js
 
 Type.registerNamespace('Sys.Mvc');Sys.Mvc.$create_AjaxOptions=function(){return {};}
 Sys.Mvc.InsertionMode=function(){};Sys.Mvc.InsertionMode.prototype = {replace:0,insertBefore:1,insertAfter:2}

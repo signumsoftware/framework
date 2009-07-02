@@ -1,7 +1,7 @@
-//----------------------------------------------------------
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//----------------------------------------------------------
-// MicrosoftMvcAjax.js
+//!----------------------------------------------------------
+//! Copyright (C) Microsoft Corporation. All rights reserved.
+//!----------------------------------------------------------
+//! MicrosoftMvcAjax.js
 
 Type.registerNamespace('Sys.Mvc');
 
