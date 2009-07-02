@@ -34,6 +34,16 @@ namespace Signum.Utilities
         {
             return dateSpan.AddTo(date); 
         }
+
+        public static DateTime Min(DateTime a, DateTime b)
+        {
+            return a < b ? a : b;  
+        }
+
+        public static DateTime Max(DateTime a, DateTime b)
+        {
+            return a > b ? a : b;
+        }
     }
 
     public struct DateSpan
