@@ -168,6 +168,11 @@
     <EmbeddedResource Include="Scripts\SF_Globals.js" />
     <EmbeddedResource Include="Scripts\SF_PopupPanel.js" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\SF_Autocomplete.js" />
+    <EmbeddedResource Include="Scripts\SF_DragAndDrop.js" />
+    <EmbeddedResource Include="Scripts\SF_SearchEngine.js" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
