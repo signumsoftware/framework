@@ -56,9 +56,9 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        public static List<object> AuthorizedQueryNames()
+        public static List<object> AuthorizedQueryNames(DynamicQueryManager dqm)
         {
-            return QueryLogic.QueryNames.Where(q => GetAllowed(UserDN.Current.Role, q.ToString())).ToList();
+            return dqm.GetQueryNames().Where(q => GetAllowed(UserDN.Current.Role, q.ToString())).ToList();
         }
 
         public static void AuthorizeQuery(object queryName)

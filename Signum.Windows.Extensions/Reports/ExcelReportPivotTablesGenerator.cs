@@ -11,7 +11,7 @@ using Microsoft.Win32;
 using Signum.Entities.Extensions;
 using Microsoft.Office.Interop.Excel;
 
-namespace Signum.Windows.Excel
+namespace Signum.Windows.Reports
 {
     public static class ExcelReportPivotTablesGenerator
     {

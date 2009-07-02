@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Prop = Signum.Windows.Extensions.Properties;
 
-namespace Signum.Windows.Excel
+namespace Signum.Windows.Reports
 {
     public class ExcelReportMenuItem : SearchControlMenuItem
     {

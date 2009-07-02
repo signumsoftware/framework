@@ -6,7 +6,7 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Excel;
 
-namespace Signum.Windows.Excel
+namespace Signum.Windows.Reports
 {
     
     public static class ExcelReportGenerator

@@ -14,7 +14,7 @@ using Signum.Entities.Reports;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 
-namespace Signum.Windows.Excel
+namespace Signum.Windows.Reports
 {
     public class ExcelReportPivotTableMenuItem : SearchControlMenuItem
     {

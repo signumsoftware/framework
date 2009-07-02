@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D}</ProjectGuid>
     <OutputType>library</OutputType>
@@ -118,13 +118,17 @@
     </Compile>
     <Compile Include="Calendars\DatePanel.cs" />
     <Compile Include="Converters.cs" />
-    <Compile Include="Excel\ExcelReport.xaml.cs">
+    <Compile Include="Reports\CompositeReport.xaml.cs">
+      <DependentUpon>CompositeReport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\ExcelCompositeReportGenerator.cs" />
+    <Compile Include="Reports\ExcelReport.xaml.cs">
       <DependentUpon>ExcelReport.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Excel\ExcelReportGenerator.cs" />
-    <Compile Include="Excel\ExcelReportMenuItem.cs" />
-    <Compile Include="Excel\ExcelReportPivotTableMenuItem.cs" />
-    <Compile Include="Excel\ExcelReportPivotTablesGenerator.cs" />
+    <Compile Include="Reports\ExcelReportGenerator.cs" />
+    <Compile Include="Reports\ExcelReportMenuItem.cs" />
+    <Compile Include="Reports\ExcelReportPivotTableMenuItem.cs" />
+    <Compile Include="Reports\ExcelReportPivotTablesGenerator.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Panels\TreeMapPanel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -145,6 +149,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Reports\ReportClient.cs" />
     <Compile Include="Shapes\Arrow.cs" />
     <Compile Include="ZoomViewer.cs" />
     <EmbeddedResource Include="Properties\Resources.es.resx">
@@ -226,7 +231,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Excel\ExcelReport.xaml">
+    <Page Include="Reports\CompositeReport.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Reports\ExcelReport.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

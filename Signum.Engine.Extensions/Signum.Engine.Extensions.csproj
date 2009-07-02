@@ -68,6 +68,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reports\ReportsLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">

@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="Signum.Windows.Reports.CompositeReport"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:dq="clr-namespace:Signum.Entities.Reports;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="dq:CompositeReportDN" MinWidth="300">
+    <StackPanel>
+        <m:ImageButton x:Name="btGenerar" Margin="6,4,6,4"    Content="Generar" IsDefault="true" Click="btGenerar_Click"/>
+        <m:ValueLine  m:Common.Route="Nombre" LabelText="_Nombre" />
+        <m:EntityList m:Common.Route="ExcelReports" LabelText="_ExcelReports" />
+    </StackPanel>
+</UserControl>

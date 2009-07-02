@@ -13,7 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Windows;
 
-namespace Signum.Windows.Excel
+namespace Signum.Windows.Reports
 {
     /// <summary>
     /// Interaction logic for Pais.xaml
@@ -24,5 +24,7 @@ namespace Signum.Windows.Excel
         {
             InitializeComponent();
         }
+
+      
     }
 }
