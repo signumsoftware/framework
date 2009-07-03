@@ -38,11 +38,22 @@ namespace Signum.Entities
         protected abstract string OverrideError(object value);
     }
 
+    /*public class NotNullNorEmptyValidatorAttribute : ValidatorAttribute
+    {
+        protected override string OverrideError(object obj)
+        {
+            return String.IsNullOrEmpty((string)obj) ? null : Resources.Property0HasNoValue;
+        }
+    }*/
+
     public class NotNullValidatorAttribute : ValidatorAttribute
     {
         protected override string OverrideError(object obj)
         {
-            return obj != null ? null : Resources.Property0HasNoValue;
+            //if ((string)obj == String.Empty)
+            //    return String.IsNullOrEmpty((string)obj) ? null : Resources.Property0HasNoValue;
+            //else
+                return obj != null ? null : Resources.Property0HasNoValue;
         }
     }
 
@@ -72,10 +83,13 @@ namespace Signum.Entities
 
         protected override string OverrideError(object value)
         {
-            if (value == null)
+            string val = (string)value;
+
+            if (string.IsNullOrEmpty(val))
                 return  allowNulls? null: Resources.Property0HasNoValue;
 
-            string val = (string)value;
+            if (min == max && min != -1 && val.Length != min)
+                return Resources.TheLenghtOf0HasToBeEqualTo0.Formato(min);
 
             if (min != -1 && val.Length < min)
                 return Resources.TheLengthOf0HasToBeGreaterOrEqualTo0.Formato(min);

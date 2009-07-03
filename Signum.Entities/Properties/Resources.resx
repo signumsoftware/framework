@@ -216,4 +216,7 @@
   <data name="TheLazyIsPointingToANewEntityAndHasNoIdYet" xml:space="preserve">
     <value>The lazy is pointing to a new entity and has no id yet</value>
   </data>
+  <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
+    <value>The lenght of {{0}} has to be equal to {0}</value>
+  </data>
 </root>

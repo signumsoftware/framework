@@ -20,9 +20,10 @@ namespace Signum.Web
 
             idValueField = helper.GlobalName(idValueField);
 
-            if (StyleContext.Current.LabelVisible)
+           // if (StyleContext.Current.LabelVisible) sb.Append("<div>");
+            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("<div class='valueFirst'>");
+            if (StyleContext.Current.LabelVisible && !StyleContext.Current.ValueFirst)
             {
-                //sb.Append("<div>");
                 if (LabelHtmlProps != null && LabelHtmlProps.Count > 0)
                     sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, LabelHtmlProps));
                 else
@@ -42,7 +43,10 @@ namespace Signum.Web
 
                 if (StyleContext.Current.ShowValidationMessage)
                 {
-                    ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
+                    if (ValueHtmlProps.ContainsKey("class"))
+                        ValueHtmlProps["class"] = "valueLine inlineVal " + ValueHtmlProps["class"];
+                    else
+                        ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
                     sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T)))); 
                     sb.Append("\n");
                     sb.Append("&nbsp;");
@@ -51,13 +55,24 @@ namespace Signum.Web
                 }
                 else
                 {
-                    ValueHtmlProps.Add("class", "valueLine");
+                    if (ValueHtmlProps.ContainsKey("class"))
+                        ValueHtmlProps["class"] = "valueLine inlineVal " + ValueHtmlProps["class"];
+                    else
+                        ValueHtmlProps.Add("class", "valueLine");
                     sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T)))); 
                     sb.Append("\r\n");
                 }
             }
-            //if (StyleContext.Current.LabelVisible)
+            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst)
+            {
+                if (LabelHtmlProps != null && LabelHtmlProps.Count > 0)
+                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, LabelHtmlProps));
+                else
+                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
+            }
+           // if (StyleContext.Current.LabelVisible)
             //    sb.Append("</div>");
+            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class='clearall'></div>\n");
 

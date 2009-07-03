@@ -210,4 +210,7 @@
   <data name="Type0NotSupported" xml:space="preserve">
     <value>Tipo no soportado {0}</value>
   </data>
+  <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
+    <value>La longitud de {{0}} ha de ser {0}</value>
+  </data>
 </root>

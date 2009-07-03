@@ -98,7 +98,8 @@ namespace Signum.Web
                 ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
                 "href=\"" + href + "\" " +
                 "class=\"" + cssClass + "\" " +
-                htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") + ">" + text +
+                (htmlAttributes != null ? (htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "") + 
+                ">" + text +
                 "</a>\n";
         }
 
@@ -121,19 +122,34 @@ namespace Signum.Web
                    "/>\n";
         }
 
-
-        public static void Message(this HtmlHelper html, string name, string title, string content, MessageType type) {
-            
-               string message= String.Format("<div class='message{0}' id='{3}'><span class='title'>{1}</span><span class='content'>{2}</span></div>",
+        public static void Message(this HtmlHelper html, string title, string content, MessageType type, object attributeList) {
+            string cadena=String.Format("div class='message{0}' {3}><span class='title'>{1}</span><span class='content'>{2}</span></div>",
                     Enum.GetName(typeof(MessageType),type),
                     title,
                     content,
-                    name
-                );
-            html.ViewContext.HttpContext.Response.Write(message);
+                    ToAttributeList(attributeList));
+            html.ViewContext.HttpContext.Response.Write(cadena);
+            }
+
+        public static void Message(this HtmlHelper html, string name, string title, string content, MessageType type) {
+
+            string cadena = String.Format("<div class='message{0}' id='{3}'><span class='title'>{1}</span><span class='content'>{2}</span></div>",
+                    Enum.GetName(typeof(MessageType), type),
+                    title,
+                    content,
+                    name);
+            html.ViewContext.HttpContext.Response.Write(cadena);
+            }
+
+        private static string ToAttributeList(object values) {
+            StringBuilder sb = new StringBuilder(); 
+            foreach (System.ComponentModel.PropertyDescriptor descriptor in System.ComponentModel.TypeDescriptor.GetProperties(values))
+            {
+                object obj2 = descriptor.GetValue(values);
+                sb.Append("{0}=\"{1}\" ".Formato(descriptor.Name, obj2.ToString()));
+            }
+            return sb.ToString();
         }
-
-
         public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string extendedControlName, 
                                                   string entityTypeName, string implementations, string entityIdFieldName,
                                                   string controllerUrl, int numCharacters, int numResults, int delayMiliseconds)

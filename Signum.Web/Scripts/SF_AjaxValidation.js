@@ -45,7 +45,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 
                 if (allErrors != "") {
                     if (document.getElementById(sfGlobalValidationSummary) != null) {
-                        document.getElementById(sfGlobalValidationSummary).innerHTML = "<br /><ul class=\"" + sfSummaryErrorClass + "\">\n" + allErrors + "</ul><br />\n";
+                        document.getElementById(sfGlobalValidationSummary).innerHTML = "<ul class=\"" + sfSummaryErrorClass + "\">\n" + allErrors + "</ul>\n";
                     }
                     return;
                 }

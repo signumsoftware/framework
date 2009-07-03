@@ -16,7 +16,8 @@ namespace Signum.Web
                 BreakLine = true,
                 LabelVisible = true,
                 ShowValidationMessage = true,
-                ReadOnly = false
+                ReadOnly = false,
+                ValueFirst = false
             }; 
         }
 
@@ -53,6 +54,14 @@ namespace Signum.Web
             get { return showValidationMessage ?? parent.ShowValidationMessage; }
             set { showValidationMessage = value; }
         }
+
+        bool? valueFirst = null;
+        public bool ValueFirst
+        {
+            get { return valueFirst ?? parent.ValueFirst; }
+            set { valueFirst = value; }
+        }
+
 
         public StyleContext(): this(true)
         {
