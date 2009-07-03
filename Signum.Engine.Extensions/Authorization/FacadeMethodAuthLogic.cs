@@ -21,11 +21,11 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, Type serviceInterface)
+        public static void Start(SchemaBuilder sb,  DynamicQueryManager dqm,Type serviceInterface)
         {
             if (sb.NotDefined<RuleServiceOperationDN>())
             {
-                AuthLogic.Start(sb);
+                AuthLogic.Start(sb,dqm);
                 FacadeMethodLogic.Start(sb, serviceInterface);
                 sb.Include<RuleServiceOperationDN>();
                 sb.Schema.Initializing += Schema_Initializing;

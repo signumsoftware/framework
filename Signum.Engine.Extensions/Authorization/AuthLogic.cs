@@ -21,9 +21,9 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _roles, () => Cache()); }
         }
 
-        public static event InitEventHandler RolesModified; 
+        public static event InitEventHandler RolesModified;
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined<UserDN>())
             {
@@ -32,6 +32,25 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saving += Schema_Saving;
                 sb.Schema.Saved += Schema_Saved;
+
+
+                dqm[typeof(RoleDN)] = from r in Database.Query<RoleDN>()
+                                             select new
+                                             {
+                                                 Entity = r.ToLazy(),
+                                                 r.Id,
+                                                 r.Name,
+ 
+                                             };
+                dqm[typeof(UserDN)] = from e in Database.Query<UserDN>()
+                                          select new
+                                          { 
+                                              Entity = e.ToLazy(),
+                                              e.Id,
+                                              e.UserName,
+                                              Rol=e.Role.ToLazy(), 
+                                              Empleado = e.Related.ToString(),
+                                          };
             }
         }
 
@@ -45,8 +64,8 @@ namespace Signum.Engine.Authorization
             RoleDN role = ident as RoleDN;
             if (role != null && !role.IsNew && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
             {
-                 using(new EntityCache())
-                 {
+                using (new EntityCache())
+                {
                     EntityCache.AddFullGraph(ident);
 
                     DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
@@ -62,7 +81,7 @@ namespace Signum.Engine.Authorization
                     if (problems.Count > 0)
                         throw new ApplicationException("Some cycles have been found in the graph of Roles due to the relationships:\r\n{1}"
                             .Formato(problems.Count, problems.ToString("\r\n")));
-                 }
+                }
             }
         }
 
@@ -101,7 +120,7 @@ namespace Signum.Engine.Authorization
 
         public static IEnumerable<RoleDN> RolesInOrder()
         {
-            return Roles.CompilationOrder(); 
+            return Roles.CompilationOrder();
         }
 
 
@@ -137,7 +156,7 @@ namespace Signum.Engine.Authorization
                 if (user.PasswordHash != passwordHash)
                     throw new ApplicationException("Incorrect password");
 
-                return user; 
+                return user;
             }
         }
     }

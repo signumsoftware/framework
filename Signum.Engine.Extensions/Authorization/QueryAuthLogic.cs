@@ -23,11 +23,11 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, params DynamicQueryManager[] queryManagers) // TODO: olmo mira esto
         {
             if (sb.NotDefined<RuleQueryDN>())
             {
-                AuthLogic.Start(sb);
+                AuthLogic.Start(sb, dqm);
                 QueryLogic.Start(sb, queryManagers);
 
                

@@ -24,11 +24,11 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, params Type[] types)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] types)
         {
             if (sb.NotDefined<RulePermissionDN>())
             {
-                AuthLogic.Start(sb);
+                AuthLogic.Start(sb, dqm);
                 permissionTypes = new List<Type>(types);
 
                 sb.Include<RulePermissionDN>();
