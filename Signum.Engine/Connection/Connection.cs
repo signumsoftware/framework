@@ -202,9 +202,6 @@ namespace Signum.Engine
             }
         }
 
-
-     
-
         private Exception HandleException(SqlException ex)
         {
             switch (ex.Number)

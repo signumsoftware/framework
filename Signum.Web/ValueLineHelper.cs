@@ -31,11 +31,16 @@ namespace Signum.Web
             }
             string valueStr = (value != null) ? value.ToString() : "";
             if (StyleContext.Current.ReadOnly)
-                sb.Append(helper.Span(idValueField, value, "valueLine", typeof(T)));
+            {
+                if (value != null && typeof(T).UnNullify() == typeof(DateTime) && valueLineType != null && valueLineType == ValueLineType.Date)
+                    sb.Append(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
+                else
+                    sb.Append(helper.Span(idValueField, value, "valueLine", typeof(T)));
+            }
             else
             {
-                ValueLineType vltype = (valueLineType.HasValue) ? 
-                    valueLineType.Value : 
+                ValueLineType vltype = (valueLineType.HasValue) ?
+                    valueLineType.Value :
                     Configurator.GetDefaultValueLineType(typeof(T));
 
                 if (ValueHtmlProps == null)
@@ -47,7 +52,7 @@ namespace Signum.Web
                         ValueHtmlProps["class"] = "valueLine inlineVal " + ValueHtmlProps["class"];
                     else
                         ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T)))); 
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T))));
                     sb.Append("\n");
                     sb.Append("&nbsp;");
                     sb.Append(helper.ValidationMessage(idValueField));
@@ -59,7 +64,7 @@ namespace Signum.Web
                         ValueHtmlProps["class"] = "valueLine inlineVal " + ValueHtmlProps["class"];
                     else
                         ValueHtmlProps.Add("class", "valueLine");
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T)))); 
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, ValueHtmlProps, typeof(T))));
                     sb.Append("\r\n");
                 }
             }
