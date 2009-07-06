@@ -76,7 +76,7 @@ namespace Signum.Engine.Maps
         public void OverrideFieldAttributes<T>(Expression<Func<T, object>> lambda, params Attribute[] attributes)
         {
             MemberInfo mi = ReflectionTools.GetMemberInfo<T>(lambda);
-            FieldInfo fi = mi as FieldInfo ?? Reflector.FindFieldInfo((PropertyInfo)mi); 
+            FieldInfo fi = Reflector.FindFieldInfo(mi, true); 
             OverrideFieldAttributes(typeof(T), fi.Name, attributes); 
         }
 

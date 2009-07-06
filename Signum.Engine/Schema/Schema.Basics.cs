@@ -185,19 +185,25 @@ namespace Signum.Engine.Maps
             return Tables.GetOrThrow(type, Resources.Table0NotLoadedInSchema);
         }
 
-        static Field FindField(IFieldFinder fieldFinder, IEnumerable<MemberInfo> members)
+        static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members, bool throws)
         {
-            Field campo = fieldFinder.GetField(members.First(Resources.NoFieldWasGiven));
+            IFieldFinder current = fieldFinder; 
+            Field result = null;
+            foreach (var mi in members)
+            {
+                if (current == null)
+                    return null; 
 
-            if (members.Count() == 1)
-                return campo;
-            else
-                return FindField((IFieldFinder)campo, members.Skip(1));
-        }
+                result = current.GetField(members.First(Resources.NoFieldWasGiven), throws);
 
-        public Field FieldUntyped(Type type, MemberInfo[] fi)
-        {
-            return FindField(Table(type), fi);
+                if (result == null && !throws)
+                    return null; 
+
+                
+                current = result as IFieldFinder; 
+            }
+
+            return result; 
         }
 
         public Type[] FindImplementations(Type lazyType, MemberInfo[] members)
@@ -205,7 +211,7 @@ namespace Signum.Engine.Maps
             if (!Tables.ContainsKey(lazyType))
                 return null;
 
-            Field field = FindField(Table(lazyType), members); 
+            Field field = FindField(Table(lazyType), members, false); 
 
             FieldImplementedBy ibaField = field as FieldImplementedBy;
             if (ibaField != null)
@@ -221,7 +227,7 @@ namespace Signum.Engine.Maps
         public Field Field<T>(Expression<Func<T, object>> lambdaToField)
             where T : IdentifiableEntity
         {
-            return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField));
+            return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField, true), true);
         }
 
         public override string ToString()
@@ -236,7 +242,7 @@ namespace Signum.Engine.Maps
 
     public interface IFieldFinder
     {
-        Field GetField(MemberInfo value); 
+        Field GetField(MemberInfo value, bool throws); 
     }
 
     public interface ITable
@@ -275,10 +281,23 @@ namespace Signum.Engine.Maps
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
             
         }
-    
-        public Field GetField(MemberInfo value)
+
+        public Field GetField(MemberInfo value, bool throws)
         {
-            return Fields.GetOrThrow(Reflector.FindFieldInfo(value).Name, Resources.Field0NotInType1.Formato(value.Name, Type.TypeName())).Field;
+            FieldInfo fi = Reflector.FindFieldInfo(value, throws);
+
+            if (fi == null && !throws)
+                return null;
+
+            EntityField field = Fields.TryGetC(fi.Name);
+
+            if (field == null)
+                if (throws)
+                    throw new ApplicationException(Resources.Field0NotInType1.Formato(value.Name, Type.TypeName()));
+                else
+                    return null;
+
+            return field.Field;
         }
     }
 
@@ -398,9 +417,22 @@ namespace Signum.Engine.Maps
             return "Embebed\r\n{0}".Formato(EmbeddedFields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
         }
 
-        public Field GetField(MemberInfo value)
+        public Field GetField(MemberInfo value, bool throws)
         {
-            return EmbeddedFields.GetOrThrow(Reflector.FindFieldInfo(value).Name, Resources.Field0NotInType1.Formato(value.Name, FieldType.TypeName())).Field;
+            FieldInfo fi = Reflector.FindFieldInfo(value, throws);
+
+            if (fi == null && !throws)
+                return null;
+
+            EntityField field = EmbeddedFields.TryGetC(fi.Name);
+
+            if (field == null)
+                if (throws)
+                    throw new ApplicationException(Resources.Field0NotInType1.Formato(value.Name, FieldType.TypeName()));
+                else
+                    return null;
+
+            return field.Field;
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -504,12 +536,15 @@ namespace Signum.Engine.Maps
         }
 
         static readonly string[] elementMethods = new[] { "First" , "FirstOrDefault" ,"Single" ,"SingleOrDefault" };
-        public Field GetField(MemberInfo value)
+        public Field GetField(MemberInfo value, bool throws)
         {
             if (value is MethodInfo && elementMethods.Contains(value.Name)  || value is PropertyInfo && value.Name == "Item" )
                 return RelationalTable.Field;
 
-            throw new ApplicationException(Resources.MemberInfo0NotSupportedByCollectionField.Formato(value)); 
+            if (throws)
+                throw new ApplicationException(Resources.MemberInfo0NotSupportedByCollectionField.Formato(value));
+
+            return null;
         }
 
         public override IEnumerable<IColumn> Columns()

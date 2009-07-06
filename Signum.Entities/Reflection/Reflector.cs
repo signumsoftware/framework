@@ -124,7 +124,7 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-        internal static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField)
+        internal static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField, bool throws)
         {
             Expression e = lambdaToField.Body;
 
@@ -132,7 +132,7 @@ namespace Signum.Entities.Reflection
             if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
-            MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a)).NotNull().Reverse().ToArray();
+            MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a, throws)).NotNull().Reverse().ToArray();
 
             return result;          
         }
@@ -149,13 +149,13 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        static MemberInfo GetMember(Expression e)
+        static MemberInfo GetMember(Expression e, bool throws)
         {
             switch (e.NodeType)
             {
                 case ExpressionType.MemberAccess: return ((MemberExpression)e).Map(me=> me.Member.MemberType == MemberTypes.Field ? me.Member :
                                                                                         me.Member.Name == "EntityOrNull" ? null : 
-                                                                                        FindFieldInfo((PropertyInfo)me.Member));
+                                                                                        FindFieldInfo((PropertyInfo)me.Member, throws));
                 case ExpressionType.Call: return ((MethodCallExpression)e).Method;
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
@@ -163,18 +163,19 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        internal static FieldInfo FindFieldInfo(MemberInfo value)
+        internal static FieldInfo FindFieldInfo(MemberInfo value, bool throws)
         {
-            return value as FieldInfo ?? Reflector.FindFieldInfo((PropertyInfo)value);
+            return value as FieldInfo ?? Reflector.FindFieldInfo((PropertyInfo)value, throws);
         }
 
-        public static FieldInfo FindFieldInfo(PropertyInfo pi)
+        public static FieldInfo FindFieldInfo(PropertyInfo pi, bool throws)
         {
             Type type = pi.DeclaringType;
-            return (type.GetField(pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
+            FieldInfo fi = (type.GetField(pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
                 type.GetField("m" + pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
-                type.GetField("_" + pi, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic))
-                .ThrowIfNullC(Resources.FieldForPropertyNotFound.Formato(pi.Name));
+                type.GetField("_" + pi, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic));
+
+            return throws ? fi.ThrowIfNullC(Resources.FieldForPropertyNotFound.Formato(pi.Name)): fi;
         }
 
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)

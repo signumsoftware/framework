@@ -136,9 +136,6 @@
   <data name="Table0NotLoadedInSchema" xml:space="preserve">
     <value>Table for type {0} not loaded on current Schema</value>
   </data>
-  <data name="NoFieldFoundForMember0" xml:space="preserve">
-    <value>No field found for member {0}</value>
-  </data>
   <data name="TheField0IsNotIncluded" xml:space="preserve">
     <value>The field {0} is not included</value>
   </data>

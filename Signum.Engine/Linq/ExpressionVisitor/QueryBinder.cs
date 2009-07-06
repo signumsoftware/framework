@@ -719,9 +719,7 @@ namespace Signum.Engine.Linq
                     return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second; 
                 case (ExpressionType)DbExpressionType.FieldInit:
                     FieldInitExpression fie = (FieldInitExpression)source;
-                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo((PropertyInfo)m.Member);
-                    if (fi == null)
-                        throw new ApplicationException(Resources.NoFieldFoundForMember0.Formato(m.Member.MemberName()));
+                    FieldInfo fi =  Reflector.FindFieldInfo(m.Member, true);
 
                     if (fi.FieldEquals<IdentifiableEntity>(ei => ei.id))
                         return fie.ExternalId;

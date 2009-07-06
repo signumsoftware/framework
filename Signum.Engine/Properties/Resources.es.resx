@@ -346,9 +346,6 @@ WRITETEXT</value>
   <data name="Idof0isZero" xml:space="preserve">
     <value>El Id de {0} es 0</value>
   </data>
-  <data name="NoFieldFoundForMember0" xml:space="preserve">
-    <value>No field found for member {0}</value>
-  </data>
   <data name="TheField0IsNotIncluded" xml:space="preserve">
     <value>El campo {0} no está incluido</value>
   </data>
