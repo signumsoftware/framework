@@ -28,17 +28,24 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
                     if (controlID != sfGlobalErrorsKey && controlID != "") {
                         var control = $('#' + controlID);
 
-                        if (control.length == 0)
-                        {   //radioButtons
+                        if (control.length == 0) {   //radioButtons
                             control = $("input:radio[name='" + controlID + "']");
                         }
 
                         control.addClass(sfInputErrorClass);
                         if (showInlineError && control.hasClass(sfInlineErrorVal)) {
-                            if (fixedInlineErrorText == "")
-                                $('#' + controlID).after(inlineErrorStart + errorMessage + inlineErrorEnd);
-                            else
-                                $('#' + controlID).after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                            if (control.next().hasClass("ui-datepicker-trigger")) {
+                                if (fixedInlineErrorText == "")
+                                    $('#' + controlID).next().after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                                else
+                                    $('#' + controlID).next().after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                            }
+                            else {
+                                if (fixedInlineErrorText == "")
+                                    $('#' + controlID).after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                                else
+                                    $('#' + controlID).after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                            }
                         }
                     }
                 }
@@ -112,11 +119,11 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
                         tost.html(toStr); //EntityList
                     else {
                         var combo = $("#" + prefix + sfCombo);
-                        if (combo.length > 0) 
+                        if (combo.length > 0)
                             $('#' + prefix + sfCombo + " option:selected").html(toStr);
                     }
                 }
-                
+
                 //Remove previous errors
                 $('.' + sfFieldErrorClass).replaceWith("");
                 $('.' + sfInputErrorClass).removeClass(sfInputErrorClass);
@@ -137,10 +144,18 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
                         var control = $('#' + controlID);
                         control.addClass(sfInputErrorClass);
                         if (showInlineError && control.hasClass(sfInlineErrorVal)) {
-                            if (fixedInlineErrorText == "")
-                                $('#' + controlID).after(inlineErrorStart + errorMessage + inlineErrorEnd);
-                            else
-                                $('#' + controlID).after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                            if (control.next().hasClass("ui-datepicker-trigger")) {
+                                if (fixedInlineErrorText == "")
+                                    $('#' + controlID).next().after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                                else
+                                    $('#' + controlID).next().after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                            }
+                            else {
+                                if (fixedInlineErrorText == "")
+                                    $('#' + controlID).after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                                else
+                                    $('#' + controlID).after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                            }
                         }
                     }
                 }
