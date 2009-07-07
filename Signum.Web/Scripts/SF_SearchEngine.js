@@ -97,6 +97,53 @@ function OnListSearchOk(prefix) {
     $('#' + prefix + sfEntity).hide().html("");
 }
 
+function GetSelectedElements(prefix) {
+    var ids = "";
+    var selected = $("input:radio[name=" + prefix + "rowSelection]:checked, #" + prefix + "tdRowSelection input:checked");
+    if (selected.length == 0)
+        return ids;
+
+    selected.each(
+        function() {
+            var entitySelected = this.value;
+            ids += entitySelected.substring(0, entitySelected.indexOf("__")) + ",";
+        });
+    if (ids.substr(-1) == ",")
+        ids = ids.substring(0, ids.length - 1);
+    return ids;
+}
+
+function CallServer(urlController, prefix) {
+    var ids = GetSelectedElements(prefix);
+    if (ids == "")
+        return;
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: "sfIds=" + ids,
+        async: false,
+        dataType: "html",
+        success:
+                   function(msg) {
+                       window.alert(msg);
+                   },
+        error:
+                   function(XMLHttpRequest, textStatus, errorThrown) {
+                       ShowError(XMLHttpRequest, textStatus, errorThrown);
+                   }
+    });
+}
+
+function PostServer(urlController, prefix) {
+    var ids = GetSelectedElements(prefix);
+    if (ids == "")
+        return;
+
+    document.forms[0].innerHTML = "<input type='hidden' id='sfIds' name='sfIds' value='" + ids + "' />";
+    document.forms[0].action = urlController;
+    document.forms[0].submit();
+}
+
 function OnSearchCancel(prefix) {
     $('#' + prefix + sfRuntimeType).val("");
     toggleButtonsDisplay(prefix, false);

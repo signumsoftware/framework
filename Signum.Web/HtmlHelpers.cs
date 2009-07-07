@@ -23,7 +23,7 @@ namespace Signum.Web
     {
         public static string ValidationSummaryAjax(this HtmlHelper html)
         {
-            return "<div id=\"sfGlobalValidationSummary\" name=\"sfGlobalValidationSummary\">" + 
+            return "<div id='sfGlobalValidationSummary' name='sfGlobalValidationSummary'>" + 
                    html.ValidationSummary()
                    + "&nbsp;</div>";
         }
@@ -122,6 +122,15 @@ namespace Signum.Web
                    "/>\n";
         }
 
+        public static string ImageButton(this HtmlHelper html, string name, string imgSrc, string altText, string onclick, Dictionary<string, object> htmlAttributes)
+        {
+            return "<img id='{0}' src='{1}' alt='{2}' title='{2}' onclick=\"{3}\" {4} />".Formato
+                (
+                    name, imgSrc, altText, onclick,
+                    (htmlAttributes != null) ? htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") : ""
+                );
+        }
+
         public static void Message(this HtmlHelper html, string title, string content, MessageType type, object attributeList) {
             string cadena=String.Format("div class='message{0}' {3}><span class='title'>{1}</span><span class='content'>{2}</span></div>",
                     Enum.GetName(typeof(MessageType),type),
@@ -178,71 +187,6 @@ namespace Signum.Web
                                                               ");</script>\n");
             return sb.ToString();
         }
-
-        //public static string GetEmbeddedResource(this HtmlHelper helper, string resourceName)
-        //{
-        //    Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);    
-        //    StreamReader reader = new StreamReader(stream);
-        //    string script = reader.ReadToEnd();
-        //    return script;
-        //}
-        //public static string GetEmbeddedResource(this HtmlHelper helper, string resourceName)
-        //{
-        //    string script = Assembly.GetExecutingAssembly().GetManifestResourceNames()[9];
-        //    return script;
-        //}
-        //public static string GetEmbeddedResource(this HtmlHelper helper, string resourceName)
-        //{
-        //    var a = CreateResourceUrl(helper, Assembly.GetExecutingAssembly(), resourceName, "text/javascript");
-        //    return a;
-        //}
-        //public static string GetEmbeddedResource(this HtmlHelper helper, Type caller, string resourceName)
-        //{
-        //    string scriptLocation = System.Web.UI.Page.ClientScript.GetWebResourceUrl( "MSDWUC_WindowStatus.js");
-        //    Page.ClientScript.RegisterClientScriptInclude("MSDWUC_WindowStatus.js", scriptLocation);
-
-        //}
-
-
-        public static string CreateResourceUrl(HtmlHelper helper, Assembly assembly, string resourceName, string contentType)
-        {
-            return TranslateAbsolutePath(helper, string.Concat(new object[] { "~/_$res$_.axd/", EncodeToUrl(contentType), "/", EncodeToUrl(assembly.GetName().Name), '/', EncodeToUrl(resourceName) }));
-        }
-        internal static string EncodeToUrl(string s)
-        {
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(s)).Replace('+', '_').Replace('/', '-').Replace('=', '$');
-        }
-        public static string TranslateAbsolutePath(HtmlHelper helper, string path)
-        {
-            if (path.StartsWith("/") || path.StartsWith("http://"))
-            {
-                return path;
-            }
-            if (!path.StartsWith("~/"))
-            {
-                throw new Exception("Invalid path passed to PathHelper.TranslateAbsolutePath()");
-            }
-            string applicationPath = helper.ViewContext.HttpContext.Request.ApplicationPath;
-            if (!applicationPath.EndsWith("/"))
-            {
-                applicationPath = applicationPath + "/";
-            }
-            return (applicationPath + path.Substring(2));
-        }
-
- 
-
- 
-
- 
-
- 
-
-
- 
-
- 
-
    }
 
 }

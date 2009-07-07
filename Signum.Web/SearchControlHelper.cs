@@ -14,8 +14,83 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Web
 {
+    public class WebMenuItem
+    {
+        public string Id;
+        public string ImgSrc;
+        public string AltText;
+        public string OnClick;
+        /// <summary>
+        /// Controller URL
+        /// </summary>
+        public string OnServerClickAjax;
+        /// <summary>
+        /// Controller URL
+        /// </summary>
+        public string OnServerClickPost;
+
+        public readonly Dictionary<string, object> HtmlProps = new Dictionary<string, object>(0);
+    }
+
     public static class SearchControlHelper
     {
+        public delegate WebMenuItem MenuItemForQueryName(object queryName);
+
+        public static event MenuItemForQueryName GetCustomMenuItems;
+
+        public static string GetMenuItems(this HtmlHelper helper, object queryName, object prefix)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (GetCustomMenuItems != null)
+            {
+                WebMenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(queryName)).NotNull().ToArray();
+                foreach (WebMenuItem mi in menus)
+                {
+                    string onclick = "";
+                    string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
+                        
+                    //Add prefix to onclick
+                    if (!string.IsNullOrEmpty(mi.OnClick))
+                    {
+                        if (!string.IsNullOrEmpty(mi.OnServerClickAjax) || !string.IsNullOrEmpty(mi.OnServerClickPost))
+                            throw new ArgumentException("The custom Menu Item {0} cannot have OnClick and another Click defined".Formato(mi.Id));
+
+                        int lastEnd = mi.OnClick.LastIndexOf(")");
+                        int lastStart = mi.OnClick.LastIndexOf("(");
+                        if (lastStart == lastEnd -1)
+                            onclick = mi.OnClick.Insert(lastEnd, strPrefix);
+                        else
+                            onclick = mi.OnClick.Insert(lastEnd, ", " + strPrefix);
+                    }
+                    
+                    //Constructo OnServerClick
+                    if (!string.IsNullOrEmpty(mi.OnServerClickAjax))
+                    {
+                        if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
+                            throw new ArgumentException("The custom Menu Item {0} cannot have both OnServerClickAjax and another Click defined".Formato(mi.Id));
+                        onclick = "CallServer('{0}',{1});".Formato(mi.OnServerClickAjax, strPrefix);
+                    }
+
+                    //Constructo OnServerClick
+                    if (!string.IsNullOrEmpty(mi.OnServerClickPost))
+                    {
+                        if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
+                            throw new ArgumentException("The custom Menu Item {0} cannot have both OnServerClickPost and another Click defined".Formato(mi.Id));
+                        onclick = "PostServer('{0}',{1});".Formato(mi.OnServerClickPost, strPrefix);
+                    }
+
+                    //Add cursor pointer to the htmlProps
+                    if (!mi.HtmlProps.ContainsKey("style"))
+                        mi.HtmlProps.Add("style", "cursor: pointer");
+                    else if (mi.HtmlProps["style"].ToString().IndexOf("cursor")==-1)
+                        mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
+
+                    sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                }
+            }
+            return sb.ToString();
+        }
+
         public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, string prefixEnd)
         {
             QueryDescription queryDescription = Navigator.NavigationManager.Queries.QueryDescription(findOptions.QueryName);
