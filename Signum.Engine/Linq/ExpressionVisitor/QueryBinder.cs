@@ -125,16 +125,24 @@ namespace Signum.Engine.Linq
             }
             else if (m.Method.DeclaringType == typeof(LazyUtils) && m.Method.Name == "ToLazy")
             {
-                var entity = Visit(m.GetArgument("entity"));
+                if (m.Method.GetParameters().First().ParameterType == typeof(Lazy))
+                {
+                    LazyReferenceExpression lazyRef = (LazyReferenceExpression)Visit(m.GetArgument("lazy"));
 
-                return new LazyReferenceExpression(m.Type, entity);
+                    return new LazyReferenceExpression(m.Type, lazyRef.Reference);
+                }
+                else
+                {
+                    var entity = Visit(m.GetArgument("entity"));
+
+                    return new LazyReferenceExpression(m.Type, entity);
+                }
             }
             else if (m.Method.DeclaringType == typeof(object) && m.Method.Name == "ToString" && typeof(IdentifiableEntity).IsAssignableFrom(m.Object.Type))
             {
                 return Visit(Expression.MakeMemberAccess(m.Object, ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr)));
             }
-            else if (
-                m.Method.DeclaringType.IsInstantiationOf(typeof(EnumProxy<>)) &&
+            else if ( m.Method.DeclaringType.IsInstantiationOf(typeof(EnumProxy<>)) &&
                 m.Method.Name == "ToEnum")
             {
                 FieldInitExpression fi = (FieldInitExpression)Visit(m.Object);
