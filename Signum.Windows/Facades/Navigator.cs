@@ -271,6 +271,18 @@ namespace Signum.Windows
         public EntitySettings FindSettings(Type type)
         {
             return type.FollowC(t => t.BaseType).Select(t => Settings.TryGetC(t)).NotNull().FirstOrDefault();
-        }      
+        }
+
+        HashSet<string> loadedModules = new HashSet<string>();
+
+        public bool NotDefined<T>()
+        {
+            return NotDefined(typeof(T).FullName);
+        }
+
+        public bool NotDefined(string moduleName)
+        {
+            return loadedModules.Add(moduleName);
+        }
     }
 }
