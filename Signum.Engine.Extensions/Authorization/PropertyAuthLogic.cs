@@ -63,6 +63,11 @@ namespace Signum.Engine.Authorization
                   role.Roles.Select(r => GetAccess(r, type, property)).MaxAccess();
         }
 
+        public static Access GetPropertyAccess(Type type, string property)
+        {
+            return GetAccess(UserDN.Current.Role, type, property);
+        }
+
         public static List<AccessRule> GetAccessRule(Lazy<RoleDN> roleLazy, TypeDN typeDN)
         {
             var role = roleLazy.Retrieve(); 

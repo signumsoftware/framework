@@ -15,7 +15,7 @@ namespace Signum.Windows.Authorization
     {
         static Dictionary<Type, Dictionary<string, Access>> _runtimeRules;
 
-        private static Dictionary<Type, Dictionary<string, Access>> NewCache()
+        static Dictionary<Type, Dictionary<string, Access>> NewCache()
         {
             return Server.Service<IPropertyAuthServer>().AuthorizedProperties(); 
         }

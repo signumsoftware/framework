@@ -117,6 +117,11 @@ namespace Signum.Engine.Authorization
             _runtimeRules = null;
         }
 
+        public static TypeAccess GetTypeAccess(Type type)
+        {
+            return GetAccess(UserDN.Current.Role, type);
+        }
+
         public static Dictionary<Type, TypeAccess> AuthorizedTypes()
         {
             return RuntimeRules.TryGetC(UserDN.Current.Role) ?? new Dictionary<Type, TypeAccess>();

@@ -78,6 +78,11 @@ namespace Signum.Engine.Authorization
                   role.Roles.Select(r => GetAllowed(r, queryName)).MaxAllowed();
         }
 
+        public static bool GetQueryAllowed(object queryName)
+        {
+            return GetAllowed(UserDN.Current.Role, queryName.ToString());
+        }
+
         public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)
         {
             var role = roleLazy.Retrieve();

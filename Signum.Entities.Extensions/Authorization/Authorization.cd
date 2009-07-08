@@ -16,8 +16,8 @@
     <AssociationLine Name="role" Type="Signum.Entities.Authorization.RoleDN" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="2.25" Y="3.328" />
-        <Point X="2.25" Y="4.75" />
-        <Point X="6.062" Y="4.75" />
+        <Point X="2.25" Y="4.625" />
+        <Point X="6.062" Y="4.625" />
         <Point X="6.062" Y="5" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
@@ -164,7 +164,7 @@
     <AssociationLine Name="allowedBase" Type="System.Boolean" FixedToPoint="true">
       <Path>
         <Point X="10" Y="1.441" />
-        <Point X="10" Y="2.25" />
+        <Point X="10" Y="2.5" />
       </Path>
     </AssociationLine>
     <AssociationLine Name="allowedOverride" Type="System.Boolean">
@@ -207,7 +207,12 @@
     <Position X="5.25" Y="0.75" Width="1.5" />
     <AssociationLine Name="accessBase" Type="Signum.Entities.Authorization.TypeAccess">
       <MemberNameLabel ManuallyPlaced="true">
-        <Position X="-0.04" Y="0.587" />
+        <Position X="0.064" Y="0.17" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="accessOverride" Type="Signum.Entities.Authorization.TypeAccess">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.089" Y="0.55" />
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
@@ -273,7 +278,7 @@
     </ShowAsAssociation>
   </Class>
   <Struct Name="System.Boolean" Collapsed="true">
-    <Position X="9.25" Y="2.25" Width="1.5" />
+    <Position X="9.25" Y="2.5" Width="1.5" />
     <TypeIdentifier />
     <Lollipop Position="0.2" Collapsed="true" />
   </Struct>
