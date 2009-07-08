@@ -7,7 +7,7 @@ namespace Signum.Web
 {
     internal static class EntityBaseKeys
     {
-        public const string Implementations = "sfImplementations"; //READONLY
+        public const string Implementations = "sfImplementations"; 
         public const string ImplementationsDDL = "sfImplementationsDDL";
         public const string Entity = "sfEntity";
         public const string ToStr = "sfToStr";
@@ -15,22 +15,22 @@ namespace Signum.Web
         public const string IsNew = "sfIsNew";
     }
 
-    public class EntityBase
+    public class BaseLine
     {
-        private StyleContext styleContext;
-        public StyleContext StyleContext
+        public StyleContext StyleContext;
+        public string LabelText;
+        public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string, object>(0);
+        
+        bool view = true;
+        public bool View
         {
-            get { return styleContext; }
-            set { styleContext = value; }
+            get { return view; }
+            set { view = value; }
         }
+    }
 
-        private string labelText = "";
-        public string LabelText
-        {
-            get { return labelText; }
-            set { labelText = value; }
-        }
-
+    public class EntityBase : BaseLine
+    {
         private Type[] implementations;
         public Type[] Implementations
         {
@@ -59,13 +59,6 @@ namespace Signum.Web
             set { find = value; }
         }
 
-        bool view = true;
-        public bool View
-        {
-            get { return view; }
-            set { view = value; }
-        }
- 
         bool remove = true;
         public bool Remove 
         {

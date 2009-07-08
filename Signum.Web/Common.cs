@@ -12,62 +12,50 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
-    public delegate void EntityTask(EntityBase eb, Type parent, TypeContext context);
-    public delegate void ValueTask(ValueLine vl, Type parent, TypeContext context);
+    public delegate void CommonTask(BaseLine eb, Type parent, TypeContext context);
 
     public static class Common
     {
-        public static event EntityTask EntityTask;
-        public static event ValueTask ValueTask;
+        public static event CommonTask CommonTask;
 
         static Common()
         {
-            EntityTask += new EntityTask(TaskSetLabelText);
-            EntityTask += new EntityTask(TaskSetImplementations);
-
-            ValueTask += new ValueTask(TaskSetLabelText);
-            ValueTask += new ValueTask(TaskSetReadOnly);
-            ValueTask += new ValueTask(TaskSetValueLineType);
-            ValueTask += new ValueTask(TaskSetHtmlProperties);
+            CommonTask += new CommonTask(TaskSetLabelText);
+            CommonTask += new CommonTask(TaskSetImplementations);
+            CommonTask += new CommonTask(TaskSetReadOnly);
+            CommonTask += new CommonTask(TaskSetValueLineType);
+            CommonTask += new CommonTask(TaskSetHtmlProperties);
         }
 
-        internal static void FireCommonTasks(EntityBase eb, Type parent, TypeContext context)
+        internal static void FireCommonTasks(BaseLine eb, Type parent, TypeContext context)
         {
-            EntityTask(eb, parent, context);
-        }
-
-        internal static void FireCommonTasks(ValueLine vl, Type parent, TypeContext context)
-        {
-            ValueTask(vl, parent, context);
+            CommonTask(eb, parent, context);
         }
 
 #region Tasks
-        public static void TaskSetLabelText(EntityBase eb, Type parent, TypeContext context)
+        public static void TaskSetLabelText(BaseLine eb, Type parent, TypeContext context)
         {
             if (eb!=null)
                 eb.LabelText = context.FriendlyName;
         }
 
-        public static void TaskSetImplementations(EntityBase eb, Type parent, TypeContext context)
+        public static void TaskSetImplementations(BaseLine eb, Type parent, TypeContext context)
         {
-            if (eb != null)
+            if (eb is EntityBase)
             {
-                List<PropertyInfo> path = context.GetPath();
+                if (eb != null)
+                {
+                    List<PropertyInfo> path = context.GetPath();
 
-                if (eb is EntityList)
-                    path.Add(path.Last().PropertyType.GetProperty("Item"));
+                    if (eb is EntityList)
+                        path.Add(path.Last().PropertyType.GetProperty("Item"));
 
-                eb.Implementations = Schema.Current.FindImplementations(parent, path.Cast<MemberInfo>().ToArray());
+                    ((EntityBase)eb).Implementations = Schema.Current.FindImplementations(parent, path.Cast<MemberInfo>().ToArray());
+                }
             }
         }
 
-        public static void TaskSetLabelText(ValueLine vl, Type parent, TypeContext context)
-        {
-            if (vl != null)
-                vl.LabelText = context.FriendlyName;
-        }
-
-        public static void TaskSetReadOnly(ValueLine vl, Type parent, TypeContext context)
+        public static void TaskSetReadOnly(BaseLine vl, Type parent, TypeContext context)
         {
             if (vl != null)
             {
@@ -80,30 +68,36 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetValueLineType(ValueLine vl, Type parent, TypeContext context)
-        { 
-            if (vl != null)
+        public static void TaskSetValueLineType(BaseLine vl, Type parent, TypeContext context)
+        {
+            if (vl is ValueLine)
             {
-                if (context.Property.HasAttribute<DateOnlyValidatorAttribute>())
-                    vl.ValueLineType = ValueLineType.Date;
+                if (vl != null)
+                {
+                    if (context.Property.HasAttribute<DateOnlyValidatorAttribute>())
+                        ((ValueLine)vl).ValueLineType = ValueLineType.Date;
+                }
             }
         }
 
-        public static void TaskSetHtmlProperties(ValueLine vl, Type parent, TypeContext context)
+        public static void TaskSetHtmlProperties(BaseLine vl, Type parent, TypeContext context)
         {
-            if (vl != null)
+            if (vl is ValueLine)
             {
-                var atribute = context.Property.SingleAttribute<StringLengthValidatorAttribute>();
-                if (atribute != null)
+                if (vl != null)
                 {
-                    int max = atribute.Max; //-1 if not set
-                    if (max != -1)
+                    var atribute = context.Property.SingleAttribute<StringLengthValidatorAttribute>();
+                    if (atribute != null)
                     {
-                        vl.ValueHtmlProps.AddRange(new
+                        int max = atribute.Max; //-1 if not set
+                        if (max != -1)
                         {
-                            maxlength = max,
-                            size = max
-                        });
+                            ((ValueLine)vl).ValueHtmlProps.AddRange(new
+                            {
+                                maxlength = max,
+                                size = max
+                            });
+                        }
                     }
                 }
             }

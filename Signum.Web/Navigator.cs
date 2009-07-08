@@ -213,9 +213,9 @@ namespace Signum.Web
 
     public class NavigationManager
     {
-        protected internal Dictionary<Type, EntitySettings> EntitySettings;
-        protected internal Dictionary<object, QuerySettings> QuerySettings;
-        protected internal DynamicQueryManager Queries { get; set; }
+        public Dictionary<Type, EntitySettings> EntitySettings;
+        public Dictionary<object, QuerySettings> QuerySettings;
+        public DynamicQueryManager Queries { get; set; }
         
         protected internal string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
         protected internal string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";

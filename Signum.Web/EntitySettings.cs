@@ -12,6 +12,7 @@ namespace Signum.Web
 
         public Func<bool, bool> IsCreable;
         public Func<bool, bool> IsViewable;
+        public Func<bool, bool> IsReadOnly;
         
         public EntitySettings(bool isSimpleType)
         {
@@ -19,11 +20,13 @@ namespace Signum.Web
             {
                 IsCreable = admin => admin;
                 IsViewable = admin => admin;
+                IsReadOnly = admin => !admin;
             }
             else
             {
                 IsCreable = admin => true;
                 IsViewable = admin => true;
+                IsReadOnly = admin => false;
             }
         }
     }
