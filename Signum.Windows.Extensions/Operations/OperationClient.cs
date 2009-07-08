@@ -33,12 +33,12 @@ namespace Signum.Windows.Operations
         {
             ToolBarButton button = new ToolBarButton
             {
-                Content = operationInfo.OperationKey,
+                Content = operationInfo.Key,
                 IsEnabled = operationInfo.CanExecute,
                 Tag = operationInfo
             };
 
-            OperationSettings os = Settings.TryGetC(operationInfo.OperationKey);
+            OperationSettings os = Settings.TryGetC(operationInfo.Key);
 
             if (os != null)
             {
@@ -60,7 +60,7 @@ namespace Signum.Windows.Operations
         private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement control, OperationHandlerMethod handler)
         {
             if (!operationInfo.CanExecute)
-                throw new ApplicationException("Action {0} is disabled".Formato(operationInfo.OperationKey));
+                throw new ApplicationException("Action {0} is disabled".Formato(operationInfo.Key));
 
             IdentifiableEntity ident = (IdentifiableEntity)control.DataContext;
 
@@ -71,16 +71,16 @@ namespace Signum.Windows.Operations
             }
             else
             {
-                if ((operationInfo.Flags & OperationFlags.Lazy) == OperationFlags.Lazy)
+                if (operationInfo.Lazy)
                 {
                     if (control.LooseChangesIfAny())
                     {
                         Lazy<IdentifiableEntity> lazy = ident.ToLazy();
-                        newIdent = Server.Service<IOperationServer>().ExecuteOperationLazy(lazy, operationInfo.OperationKey, null);
+                        newIdent = Server.Service<IOperationServer>().ExecuteOperationLazy(lazy, operationInfo.Key, null);
                     }
                 }
                 else
-                    newIdent = Server.Service<IOperationServer>().ExecuteOperation(ident, operationInfo.OperationKey, null);
+                    newIdent = Server.Service<IOperationServer>().ExecuteOperation(ident, operationInfo.Key, null);
             }
 
             if (newIdent != null)

@@ -31,7 +31,7 @@ namespace Signum.Windows.Reports
 
             this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
 
-            List<Lazy<ExcelReportDN>> reports = Server.Service<IExcelReportServer>().GetEnabledExcelReports(SearchControl.QueryName.ToString());
+            List<Lazy<ExcelReportDN>> reports = Server.Service<IExcelReportServer>().GetExcelReports(SearchControl.QueryName.ToString());
             foreach (Lazy<ExcelReportDN> report in reports)
             {
                 MenuItem mi = new MenuItem()

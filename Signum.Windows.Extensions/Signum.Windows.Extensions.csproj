@@ -261,14 +261,6 @@
       <Project>{7730FF46-3548-4E79-8028-22F4D33BFE86}</Project>
       <Name>Signum.Excel</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Services.Extensions\Signum.Services.Extensions.csproj">
-      <Project>{81988BE3-48CB-4E3D-A044-F7B60FEE2456}</Project>
-      <Name>Signum.Services.Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Services\Signum.Services.csproj">
-      <Project>{B63C47DF-4EC3-4D80-863C-2B5A38D2C35B}</Project>
-      <Name>Signum.Services</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
