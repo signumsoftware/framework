@@ -148,7 +148,27 @@ namespace Signum.Web
                     content,
                     name);
             html.ViewContext.HttpContext.Response.Write(cadena);
-            }
+        }
+
+        #region Combined
+        public static string CombinedCssUrl(this HtmlHelper html, params string[] files) {
+            return "Combine.aspx/CSS?files={0}".Formato(String.Join(",", files));
+        }
+        public static void CombinedCss(this HtmlHelper html, params string[] files)
+        {
+            string cadena = "<link href=\"Combine.aspx/CSS?files={0}\" rel='stylesheet' type='text/css' />".Formato(String.Join(",", files));
+            html.ViewContext.HttpContext.Response.Write(cadena);
+        }
+        public static string CombinedJsUrl(this HtmlHelper html, params string[] files)
+        {
+            return "Combine.aspx/JS?files={0}".Formato(String.Join(",", files));
+        }
+        public static void CombinedJs(this HtmlHelper html, params string[] files)
+        {
+            string cadena = "<script type='text/javascript' src=\"Combine.aspx/JS?files={0}\"></script>".Formato(String.Join(",", files));
+            html.ViewContext.HttpContext.Response.Write(cadena);
+        }
+        #endregion
 
         private static string ToAttributeList(object values) {
             StringBuilder sb = new StringBuilder(); 
