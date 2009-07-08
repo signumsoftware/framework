@@ -6,7 +6,7 @@
     using System.Xml;
     using System.Linq.Expressions;
 
-    public sealed class Alignment : IWriter, IReader, IExpressionWriter
+    public sealed class Alignment : IWriter, IReader, IExpressionWriter, IEquatable<Alignment>
     {
         private HorizontalAlignment _horizontal;
         private int _indent;
@@ -102,6 +102,22 @@
         internal static bool IsElement(XmlElement element)
         {
             return UtilXml.IsElement(element, "Alignment", Namespaces.SpreadSheet);
+        }
+
+        public bool Equals(Alignment other)
+        {
+            if(other == null) return false;
+            if(other == this) return true;
+
+            return
+                this._horizontal == other._horizontal &&
+                this._indent == other._indent &&
+                this._readingOrder == other.ReadingOrder &&
+                this._rotate == other._rotate &&
+                this._shrinkToFit == other._shrinkToFit &&
+                this._vertical == other._vertical &&
+                this._verticalText == other._verticalText &&
+                this._wrapText == other._wrapText; 
         }
 
         public HorizontalAlignment Horizontal
