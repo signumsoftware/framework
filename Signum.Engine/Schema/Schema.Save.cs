@@ -74,6 +74,8 @@ namespace Signum.Engine.Maps
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident)
         {
+            string oldToStr = ident.ToStr; 
+
             ident.PreSaving(); 
 
             if (!ident.SelfModified)
@@ -81,7 +83,7 @@ namespace Signum.Engine.Maps
 
             List<SqlParameter> parameters = new List<SqlParameter>();
             Fields.ForEach(c => c.Value.Field.CreateParameter(parameters, c.Value.Getter(ident), Forbidden.None));
-            return SqlBuilder.UpdateId(Name, parameters, ident.Id);
+            return SqlBuilder.UpdateId(Name, parameters, ident.Id, oldToStr);
         }
 
         SqlPreCommand UpdateSql(IdentifiableEntity ident, Forbidden forbidden)

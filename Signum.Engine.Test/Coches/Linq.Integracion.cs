@@ -22,7 +22,7 @@ namespace Signum.Engine.Coches
         [TestMethod]
         public void FillData()
         {
-            Administrator.InitializeCurrentSchema();
+            Administrator.Initialize();
             Starter.Fill();
         }
 

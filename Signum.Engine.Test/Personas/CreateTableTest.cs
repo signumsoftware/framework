@@ -29,7 +29,8 @@ namespace Signum.Engine.Test.Personas
             ConnectionScope.Default = new Connection("Data Source=INSPIRON;Initial Catalog=LINQ3Capas;Integrated Security=True", generador.Schema);
 
 
-            Administrator.TotalGenerationAndInitialize();
+            Administrator.TotalGeneration();
+            Administrator.Initialize();
         }
 
         [TestMethod()]

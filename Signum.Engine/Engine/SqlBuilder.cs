@@ -67,13 +67,13 @@ namespace Signum.Engine
                     parameters.ToList()));
         }
 
-        internal static SqlPreCommand UpdateId(string table, List<SqlParameter> parameters, int id)
+        internal static SqlPreCommand UpdateId(string table, List<SqlParameter> parameters, int id, string oldToStr)
         {
             SqlParameter paramId = SqlParameterBuilder.CreateReferenceParameter(SqlBuilder.PrimaryKeyName, false, id);
 
             return new SqlPreCommandSimple(
-                    "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
-                        table.SqlScape(),
+                    "UPDATE {0} SET --{1}\r\n{2}\r\n WHERE id = {3}".Formato(
+                        table.SqlScape(), oldToStr,
                         parameters.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName).Indent(2), ",\r\n"),
                         paramId.ParameterName),
                     parameters.And(paramId).ToList());
@@ -107,9 +107,9 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("DELETE {0} WHERE id = @LastEntityID".Formato(table.SqlScape()));
         }
 
-        internal static SqlPreCommand DeleteSql(string table, int id)
+        internal static SqlPreCommand DeleteSql(string table, int id, string oldToStr)
         {
-            return new SqlPreCommandSimple("DELETE {0} WHERE id = {1}".Formato(table.SqlScape(), id));
+            return new SqlPreCommandSimple("DELETE {0} WHERE id = {1} --{2}".Formato(table.SqlScape(), id, oldToStr));
         }
 
         internal static SqlPreCommand DeclareIDsMemoryTable()

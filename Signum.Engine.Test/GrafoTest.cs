@@ -115,22 +115,22 @@ namespace Signum.Engine
           
           }
 
-          [TestMethod]
-          public void ColapseGraph()
-          {
-              //buscar topological sorting en la wikipedia
-              DirectedGraph<object> dg = new DirectedGraph<object>()
-              {
-                {"a", 2,4,  "b", "s"},
-                {"b", 3,"s"},
-                {2,3},
-                {3,"c"},
-                {"c", "b", "j"}
-              };
+          //[TestMethod]
+          //public void ColapseGraph()
+          //{
+          //    //buscar topological sorting en la wikipedia
+          //    DirectedGraph<object> dg = new DirectedGraph<object>()
+          //    {
+          //      {"a", 2,4,  "b", "s"},
+          //      {"b", 3,"s"},
+          //      {2,3},
+          //      {3,"c"},
+          //      {"c", "b", "j"}
+          //    };
 
-              DirectedGraph<string> colapsed = dg.ColapseTo<string>();
-              Assert.AreEqual(5, colapsed.Count);
-              Assert.AreEqual(7, colapsed.Edges.Count());
-          }
+          //    DirectedGraph<string> colapsed = dg.ColapseTo<string>();
+          //    Assert.AreEqual(5, colapsed.Count);
+          //    Assert.AreEqual(7, colapsed.Edges.Count());
+          //}
     }
 }

@@ -32,9 +32,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Snippets", "Snippets", "{93
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SignumFrameworkSetup", "SignumFrameworkSetup\SignumFrameworkSetup.vdproj", "{1A846B8F-8047-4323-882B-721233516FBF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizardProjectName", "Template\WizardProjectName\WizardProjectName\WizardProjectName.csproj", "{7D6E351E-9F48-406C-808C-6232A967088D}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 9
+		SccNumberOfProjects = 10
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://192.168.0.8:8080/
 		SccLocalPath0 = .
@@ -62,6 +64,9 @@ Global
 		SccProjectUniqueName8 = ..\\Tecnico\\ExpressionTreeVisualizer\\ExpressionTreeVisualizer.csproj
 		SccProjectName8 = ../Tecnico/ExpressionTreeVisualizer
 		SccLocalPath8 = ..\\Tecnico\\ExpressionTreeVisualizer
+		SccProjectUniqueName9 = Template\\WizardProjectName\\WizardProjectName\\WizardProjectName.csproj
+		SccProjectName9 = Template/WizardProjectName/WizardProjectName
+		SccLocalPath9 = Template\\WizardProjectName\\WizardProjectName
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = MotorDB1.vsmdi
@@ -103,6 +108,10 @@ Global
 		{1A846B8F-8047-4323-882B-721233516FBF}.Debug|Any CPU.Build.0 = Debug
 		{1A846B8F-8047-4323-882B-721233516FBF}.Release|Any CPU.ActiveCfg = Release
 		{1A846B8F-8047-4323-882B-721233516FBF}.Release|Any CPU.Build.0 = Release
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D6E351E-9F48-406C-808C-6232A967088D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

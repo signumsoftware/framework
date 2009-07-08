@@ -1,21 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="Signum.Entities.EnumProxy&lt;T&gt;">
-    <Position X="5" Y="11.25" Width="1.75" />
+    <Position X="5" Y="11.75" Width="1.75" />
     <Compartments>
       <Compartment Name="Properties" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
-    <InheritanceLine Type="Signum.Entities.IdentifiableEntity" FixedToPoint="true">
-      <Path>
-        <Point X="7.25" Y="10.521" />
-        <Point X="7.25" Y="10.875" />
-        <Point X="6.556" Y="10.875" />
-        <Point X="6.556" Y="11.25" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AEAAAAAAAAAAAAAEgAAQAAAAAAQAAAAAAEAAAAAEAAA=</HashCode>
+      <HashCode>AEAAAAAAAAAAAAAEgAAQAAAAAAQAAAAAAAAAAAAEAAA=</HashCode>
       <FileName>EnumProxy.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -23,14 +15,14 @@
   <Class Name="Signum.Entities.Modifiable">
     <Position X="4" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAQCAAAAAEEAAAABAAAAAAAAAAAAAAgAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAQCAEAAAEEAAAABAAAAAAAAAAAAAAgAAAAAAAAAA=</HashCode>
       <FileName>Modifiable.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Signum.Entities.Lazy&lt;T&gt;">
     <Position X="8.5" Y="4.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAQAAAAAIAAAAgAAAAgAAAAAAAIABAAAAAAAAAAA=</HashCode>
+      <HashCode>EAAAAQAAAAAIAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Lazy.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -40,23 +32,8 @@
       <Compartment Name="Methods" Collapsed="true" />
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
-    <NestedTypes>
-      <Class Name="Signum.Entities.ModifiableEntity.PropertyPack" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>ModifiableEntity.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-    </NestedTypes>
-    <InheritanceLine Type="Signum.Entities.Modifiable" FixedToPoint="true">
-      <Path>
-        <Point X="4.75" Y="3.276" />
-        <Point X="4.75" Y="3.875" />
-        <Point X="5.562" Y="3.875" />
-        <Point X="5.562" Y="4.25" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAEASKEAABABBYAICAAAgAAAkAAAEIBAgAAAAEAAAEA=</HashCode>
+      <HashCode>AAAAQKEACBAABQAICAAAAAAAkgAAAIBAgAAAIEQAAEA=</HashCode>
       <FileName>ModifiableEntity.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="1.065" />
@@ -66,17 +43,10 @@
     <Compartments>
       <Compartment Name="Properties" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
-    <InheritanceLine Type="Signum.Entities.Modifiable" FixedToPoint="true">
-      <Path>
-        <Point X="4.75" Y="3.276" />
-        <Point X="4.75" Y="3.875" />
-        <Point X="4.375" Y="3.875" />
-        <Point X="4.375" Y="4.25" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AmIAQEAACIAEABBVKAAQhCQQgAUAAJAAKAAAAIBUIAI=</HashCode>
+      <HashCode>AmoAQEAACIAEABAVKAAQhCYQgIUAABAAKAAAAIBUIAI=</HashCode>
       <FileName>MList.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.1" />
@@ -86,30 +56,14 @@
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
-    <InheritanceLine Type="Signum.Entities.ModifiableEntity" ManuallyRouted="true" FixedToPoint="true">
-      <Path>
-        <Point X="6" Y="7.29" />
-        <Point X="6" Y="7.625" />
-        <Point X="6.875" Y="7.625" />
-        <Point X="6.875" Y="8" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAACAAgAAAAIAAAEgAAAAAAAAAAAAIAAgEAAAAAAAgA=</HashCode>
+      <HashCode>AAACAAgAAAAIAAAEgAAEAAAAAgAAAICAgEAAAABAAgA=</HashCode>
       <FileName>IdentifiableEntity.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.517" />
   </Class>
   <Class Name="Signum.Entities.Entity">
-    <Position X="7.75" Y="11.25" Width="1.5" />
-    <InheritanceLine Type="Signum.Entities.IdentifiableEntity" FixedToPoint="true">
-      <Path>
-        <Point X="7.25" Y="10.521" />
-        <Point X="7.25" Y="10.875" />
-        <Point X="8.062" Y="10.875" />
-        <Point X="8.062" Y="11.25" />
-      </Path>
-    </InheritanceLine>
+    <Position X="7.75" Y="11.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAAAAAA=</HashCode>
       <FileName>Entity.cs</FileName>
@@ -124,14 +78,6 @@
   </Class>
   <Class Name="Signum.Entities.EmbeddedEntity">
     <Position X="4" Y="8" Width="1.5" />
-    <InheritanceLine Type="Signum.Entities.ModifiableEntity" FixedToPoint="true">
-      <Path>
-        <Point X="6" Y="7.29" />
-        <Point X="6" Y="7.625" />
-        <Point X="5.062" Y="7.625" />
-        <Point X="5.062" Y="8" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>EmbeddedEntity.cs</FileName>
@@ -143,14 +89,14 @@
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAQAgAAAAIgAAEAAAAEAAAAAAAAGBAgAAAQgACAgA=</HashCode>
+      <HashCode>AAACQAgAAAAIAAAEgAAAEAAAAAAAAODAgAAAQgACAgA=</HashCode>
       <FileName>Lazy.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Interface Name="Signum.Entities.IIdentifiable">
     <Position X="8.5" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAACAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAACAAAAAAAIAAAAAAAAAAAAAAAAAACAAEAAAAAAAAA=</HashCode>
       <FileName>IdentifiableEntity.cs</FileName>
     </TypeIdentifier>
   </Interface>

@@ -19,23 +19,23 @@ namespace Signum.Engine.Test.Personas
         [TestMethod()]
         public void CachearObjetos()
         {
-            using (new ObjectCache())
+            using (new EntityCache())
             {
-                Persona p = new Persona() { Id = 2 }; 
+                Persona p = new Persona() { Id = 2 };
 
-                ObjectCache.Add(p);
-                ObjectCache.Add(new Gato() { Id = 3 });
+                EntityCache.Add(p);
+                EntityCache.Add(new Gato() { Id = 3 });
 
-                using (new ObjectCache())
+                using (new EntityCache())
                 {
-                    Assert.IsTrue(ObjectCache.Contains<Gato>(3));
-                    Assert.IsTrue(ObjectCache.Contains<Persona>(2));
-                    Assert.AreSame(p, ObjectCache.Get<Persona>(2));
+                    Assert.IsTrue(EntityCache.Contains<Gato>(3));
+                    Assert.IsTrue(EntityCache.Contains<Persona>(2));
+                    Assert.AreSame(p, EntityCache.Get<Persona>(2));
                 }
 
-                Assert.IsTrue(ObjectCache.Contains<Gato>(3));
-                Assert.IsTrue(ObjectCache.Contains<Persona>(2));
-                Assert.AreSame(p, ObjectCache.Get<Persona>(2));
+                Assert.IsTrue(EntityCache.Contains<Gato>(3));
+                Assert.IsTrue(EntityCache.Contains<Persona>(2));
+                Assert.AreSame(p, EntityCache.Get<Persona>(2));
             }
         }
     }

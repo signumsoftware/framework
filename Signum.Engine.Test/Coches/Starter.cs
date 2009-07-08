@@ -24,7 +24,7 @@ namespace Signum.Engine.Coches
 
             ConnectionScope.Default = new Connection("Data Source=INSPIRON;Initial Catalog=LINQ3Capas;Integrated Security=True", sb.Schema);
 
-            Administrator.InitializeCurrentSchema();
+            Administrator.Initialize();
  
 
             Connection.CurrentLog = new StringWriter();

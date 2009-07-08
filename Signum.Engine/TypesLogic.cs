@@ -77,7 +77,7 @@ namespace Signum.Engine
             return Synchronizer.SyncronizeCommands(
                 current,
                 should,
-                (tn, c) => table.DeleteSqlSync(c.Id),
+                (tn, c) => table.DeleteSqlSync(c),
                 (tn, s) => table.InsertSqlSync(s),
                 (tn, c, s) =>
                 {

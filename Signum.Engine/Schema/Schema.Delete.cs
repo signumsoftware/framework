@@ -21,9 +21,9 @@ namespace Signum.Engine.Maps
                         SqlBuilder.DeleteSql(Name));
         }
 
-        public SqlPreCommand DeleteSqlSync(int id)
+        public SqlPreCommand DeleteSqlSync(IdentifiableEntity ident)
         {
-            return SqlBuilder.DeleteSql(Name, id);
+            return SqlBuilder.DeleteSql(Name, ident.Id, ident.ToStr);
         }
     }
 
