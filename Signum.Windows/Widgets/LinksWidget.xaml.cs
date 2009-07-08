@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -19,9 +20,9 @@ namespace Signum.Windows
     /// </summary>
     public partial class LinksWidget : UserControl, IWidget
     {
-        public IHaveQuickLinks IHaveQuickLinks { get; set; }
+        public static event Func<object, Control, QuickLink> GetLinks; 
+        public Control Control { get; set; }
         public event Action ForceShow;
-
 
         public LinksWidget()
         {
@@ -33,12 +34,24 @@ namespace Signum.Windows
 
         void LinksWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            var list = IHaveQuickLinks.QuickLinks();
+            List<QuickLink> links = new List<QuickLink>();
 
-            lvQuickLinks.ItemsSource = list;
+            if(Control is IHaveQuickLinks)
+                links.AddRange(((IHaveQuickLinks)Control).QuickLinks());
 
-            if (list.Count >= 0 && ForceShow != null)
-                ForceShow(); 
+            if (GetLinks != null)
+                links.AddRange(GetLinks.GetInvocationList().Cast<Func<object, Control, QuickLink>>().Select(a => a(DataContext, Control)).NotNull());
+
+            lvQuickLinks.ItemsSource = links;
+
+            if (links.Count == 0)
+                Visibility = Visibility.Collapsed;
+            else
+            {
+                Visibility = Visibility.Visible;
+                if (ForceShow != null)
+                    ForceShow(); 
+            }
         }
 
         private void QuickLink_MouseDown(object sender, RoutedEventArgs e)
@@ -49,10 +62,6 @@ namespace Signum.Windows
                 ((Action)b.Tag).Invoke();
             }
         }
-
-  
-       
-
     }
 
     /// <summary>
