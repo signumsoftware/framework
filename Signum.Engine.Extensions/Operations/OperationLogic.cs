@@ -17,45 +17,20 @@ namespace Signum.Engine.Operations
 {
     public interface IOperation
     {
-        OperationFlags Flags { get; set; }
-        bool CanExecuteOperation(IIdentifiable entity);
-        void ExecuteOperation(IIdentifiable entity, params object[] parameters);
-    }
+        Enum Key { get; }
+        Type Type { get; }
+        OperationType OperationType { get; }
+        bool Lazy { get; }
+        bool Returns { get; }
 
-    public class Operation<T> : IOperation
-        where T : IIdentifiable
-    {
-        public OperationFlags Flags { get; set; }
-
-        public Operation(OperationFlags flags, Action<T, object[]> execute, Func<T, bool> canExecute)
-        {
-            if (execute == null)
-                throw new ArgumentException("execute");
-
-            this.execute = execute;
-            this.canExecute = canExecute;
-            this.Flags = flags;
-        }
-
-        Func<T, bool> canExecute;
-        Action<T, object[]> execute;
-
-        public bool CanExecuteOperation(IIdentifiable entity)
-        {
-            if (canExecute != null)
-                return canExecute((T)entity);
-            return true;
-        }
-
-        public void ExecuteOperation(IIdentifiable entity, params object[] parameters)
-        {
-            execute((T)entity, parameters);
-        }
+        void AssertIsValid();
     }
 
     public static class OperationLogic
     {
-        static Dictionary<Enum, Dictionary<Type, IOperation>> operations = new Dictionary<Enum, Dictionary<Type, IOperation>>();
+        static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
+
+        internal static HashSet<Enum> OperationKeys; 
         internal static Dictionary<Enum, OperationDN> ToOperation;
         internal static Dictionary<string, Enum> ToEnum;
 
@@ -81,9 +56,11 @@ namespace Signum.Engine.Operations
             using (AuthLogic.Disable())
             using (new EntityCache(true))
             {
+                OperationKeys = operations.Values.SelectMany(b=>b.Keys).ToHashSet();
+
                 ToOperation = EnumerableExtensions.JoinStrict(
                      Database.RetrieveAll<OperationDN>(),
-                     operations.Keys,
+                     OperationKeys,
                      a => a.Key,
                      k => OperationDN.UniqueKey(k),
                      (a, k) => new { a, k }, "Caching ActionDN").ToDictionary(p => p.k, p => p.a);
@@ -109,7 +86,7 @@ namespace Signum.Engine.Operations
             return Synchronizer.SyncronizeReplacing(replacements, OperationsKey,
                 current.ToDictionary(c => c.Key),
                 GetOperations().ToDictionary(s => s.Key),
-                (k, c) => table.DeleteSqlSync(c.Id),
+                (k, c) => table.DeleteSqlSync(c),
                 (k, s) => table.InsertSqlSync(s),
                 (k, c, s) =>
                 {
@@ -121,173 +98,132 @@ namespace Signum.Engine.Operations
 
         static List<OperationDN> GetOperations()
         {
-            return operations.Keys.Select(k => OperationDN.FromEnum(k)).ToList();
+            return operations.Values.SelectMany(b => b.Keys).ToHashSet().Select(k => OperationDN.FromEnum(k)).ToList();
         }
 
-        public static void Register<T>(Enum operationKey, Action<T, object[]> execute)
-           where T : IIdentifiable
+        public static void Register(IOperation operation)
         {
-            Register<T>(operationKey, new Operation<T>(OperationFlags.Default, execute, null));
-        }
+            operation.AssertIsValid(); 
 
-        public static void Register<T>(Enum operationKey, Action<T, object[]> execute, Func<T, bool> canExecute)
-            where T : IIdentifiable
-        {
-            Register<T>(operationKey, new Operation<T>(OperationFlags.Default, execute, canExecute));
-        }
-
-        public static void Register<T>(Enum operationKey, IOperation option)
-             where T : IIdentifiable
-        {
-            operations.GetOrCreate(operationKey)[typeof(T)] = option;
+            operations.GetOrCreate(operation.Type)[operation.Key] = operation;
         }
 
         public static List<OperationInfo> GetOperationInfos(Lazy lazy)
         {
             IdentifiableEntity entity = Database.Retrieve(lazy);
 
-            return (from k in operations.Keys
+            return (from k in OperationKeys
                     let ao = TryFind(k, entity.GetType())
                     where ao != null
                     select new OperationInfo
                     {
-                        OperationKey = k,
-                        Flags = ao.Flags,
-                        CanExecute = ao.CanExecuteOperation(entity)
+                        Key = k,
+                        Lazy = ao.Lazy,
+                        Returns = ao.Returns,
+                        OperationType = ao.OperationType,
+                        CanExecute = ao.CanExecute(entity)
                     }).ToList();
         }
 
         public static IdentifiableEntity ExecuteLazy(this Lazy lazy, Enum operationKey, params object[] parameters)
         {
             IdentifiableEntity entity = Database.RetrieveAndForget(lazy);
-            return ExecutePrivate(Find(operationKey, entity.GetType(), true), (IdentifiableEntity)entity, operationKey, parameters);
+            return ExecutePrivate(Find(operationKey, entity.GetType(), true), (IdentifiableEntity)entity, parameters);
         }
 
         public static IdentifiableEntity ExecuteLazy(this Lazy lazy, Type entityType, Enum operationKey, params object[] parameters)
         {
-            return ExecutePrivate(Find(operationKey, entityType, true), Database.RetrieveAndForget(lazy), operationKey, parameters);
+            return ExecutePrivate(Find(operationKey, entityType, true), Database.RetrieveAndForget(lazy), parameters);
         }
 
         public static IdentifiableEntity Execute(this IIdentifiable entity, Enum operationKey, params object[] parameters)
         {
-            return ExecutePrivate(Find(operationKey, entity.GetType(), false), (IdentifiableEntity)entity, operationKey, parameters);
+            return ExecutePrivate(Find(operationKey, entity.GetType(), false), (IdentifiableEntity)entity, parameters);
         }
 
         public static IdentifiableEntity Execute(this IIdentifiable entity, Type entityType, Enum operationKey, params object[] parameters)
         {
-            return ExecutePrivate(Find(operationKey, entityType, false), (IdentifiableEntity)entity, operationKey, parameters);
+            return ExecutePrivate(Find(operationKey, entityType, false), (IdentifiableEntity)entity, parameters);
         }
 
-        static IdentifiableEntity ExecutePrivate(IOperation operationOptions, IdentifiableEntity entity, Enum operationKey, params object[] parameters)
+        static IdentifiableEntity ExecutePrivate(IExecuteOperation operationOptions, IdentifiableEntity entity, params object[] parameters)
         {
-            OperationDN operation = ToOperation[operationKey];
-
-            LogOperationDN log = null;
             try
             {
-                using (Transaction tr = new Transaction())
-                {
-                    if (ExecutingEvent != null)
-                        ExecutingEvent(operationKey, operation, entity, parameters);
+                if (ExecutingEvent != null)
+                    ExecutingEvent(operationOptions.Key, entity, parameters);
 
-                    log = new LogOperationDN
-                    {
-                        Operation = operation,
-                        Start = DateTime.Now,
-                        User = (UserDN)Thread.CurrentPrincipal
-                    };
+                operationOptions.Execute(entity, parameters);
 
-                    operationOptions.ExecuteOperation(entity, parameters);
+                if (ExecutedEvent != null)
+                    ExecutedEvent(operationOptions.Key, entity, parameters);
 
-                    entity.Save(); //Nothing happens if allready saved
+                return entity;
 
-                    log.Entity = entity.ToLazy<IdentifiableEntity>();
-                    log.End = DateTime.Now;
-                    log.Save();
-
-                    if (ExecutedEvent != null)
-                        ExecutedEvent(operationKey, operation, entity, parameters);
-
-                    return tr.Commit((operationOptions.Flags & OperationFlags.Returns) == OperationFlags.Returns ? entity : null);
-                }
             }
             catch (Exception ex)
             {
-                if (!entity.IsNew)
-                {
-                    using (Transaction tr2 = new Transaction(true))
-                    {
-                        log.Exception = ex.Message;
-                        log.Entity = entity.ToLazy<IdentifiableEntity>();
-                        log.End = DateTime.Now;
-                        log.Save();
-
-                        tr2.Commit();
-                    }
-                }
-
                 if (ErrorEvent != null)
-                    ErrorEvent(operationKey, operation, entity, ex);
+                    ErrorEvent(operationOptions.Key, entity, ex);
 
-                throw ex; 
+                throw ex;
             }
         }
 
+    
         public static bool CanExecuteLazy(this Lazy lazy, Enum operationKey)
         {
             IdentifiableEntity entity = Database.Retrieve(lazy);
-            return Find(operationKey, entity.GetType(), true).CanExecuteOperation(entity);
+            return Find(operationKey, entity.GetType(), true).CanExecute(entity);
         }
 
         public static bool CanExecuteLazy(this Lazy lazy, Type entityType, Enum operationKey)
         {
-            return Find(operationKey, entityType, true).CanExecuteOperation(Database.Retrieve(lazy));
+            return Find(operationKey, entityType, true).CanExecute(Database.Retrieve(lazy));
         }
 
         public static bool CanExecute(this IIdentifiable entity, Enum operationKey)
         {
-            return Find(operationKey, entity.GetType(), false).CanExecuteOperation((IdentifiableEntity)entity);
+            return Find(operationKey, entity.GetType(), false).CanExecute((IdentifiableEntity)entity);
         }
 
         public static bool CanExecute(this IIdentifiable entity, Type entityType, Enum operationKey)
         {
-            return Find(operationKey, entityType, false).CanExecuteOperation((IdentifiableEntity)entity);
+            return Find(operationKey, entityType, false).CanExecute((IdentifiableEntity)entity);
         }
 
-        static IOperation Find(Enum operationKey, Type type, bool isLazy)
+        static IExecuteOperation Find(Enum operationKey, Type type, bool isLazy)
         {
-            IOperation result = TryFind(operationKey, type);
+            IExecuteOperation result = TryFind(operationKey, type);
             if (result == null)
                 throw new ApplicationException("Operation {0} not found for Type {1}".Formato(operationKey, type));
 
-            if ((result.Flags & OperationFlags.Lazy) != OperationFlags.Lazy && isLazy)
-                throw new ApplicationException("Operation {0} is not alowed for lazies");
+            if (isLazy && !result.Lazy)
+                throw new ApplicationException("Operation {0} is not allowed for lazies");
 
-            if ((result.Flags & OperationFlags.Entity) != OperationFlags.Entity && !isLazy)
-                throw new ApplicationException("Operation {0} is not alowed for lazies"); 
+            if (!isLazy && result.Lazy)
+                throw new ApplicationException("Operation {0} needs a Lazy");
+
+            if (result.OperationType != OperationType.Execute)
+                throw new ApplicationException("Operation {0} is a {1} not a {2}".Formato(operationKey, result.OperationType, OperationType.Execute)); 
 
             return result;
         }
 
-        static IOperation TryFind(Enum operationKey, Type type)
+        static IExecuteOperation TryFind(Enum operationKey, Type type)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
                 throw new ApplicationException("type is a {0} but to implement {1} at least".Formato(type, typeof(IIdentifiable)));
 
-            var dic = operations.TryGetC(operationKey);
-
-            if (dic == null)
-                return null;
-
             IOperation result = type.FollowC(t => t.BaseType)
                 .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
-                .Select(t => dic.TryGetC(t)).FirstOrDefault();
+                .Select(t => operations.TryGetC(t).TryGetC(operationKey)).FirstOrDefault();
 
             if (result != null)
-                return result;
+                return (IExecuteOperation)result;
 
             List<Type> interfaces = type.GetInterfaces()
-                .Where(t => typeof(IdentifiableEntity).IsAssignableFrom(t) && dic.ContainsKey(t))
+                .Where(t => typeof(IdentifiableEntity).IsAssignableFrom(t) && operations.TryGetC(t).TryGetC(operationKey) != null)
                 .ToList();
 
             if (interfaces.Count > 1)
@@ -296,12 +232,12 @@ namespace Signum.Engine.Operations
             if (interfaces.Count < 1)
                 return null;
 
-            return dic[interfaces.Single()];
+            return (IExecuteOperation)operations[interfaces.Single()][operationKey];
         }
     }
 
-    public delegate void ExecuteOperationHandler(Enum operationKey, OperationDN actionDN, IdentifiableEntity entity, object[] parameters);
-    public delegate void ErrorOperationHandler(Enum operationKey, OperationDN actionDN, IdentifiableEntity entity, Exception ex);
-    public delegate bool CanExecuteActionHandler(Enum operationKey, OperationDN actionDN, IdentifiableEntity entityOrNull);
+    public delegate void ExecuteOperationHandler(Enum operationKey, IdentifiableEntity entity, object[] parameters);
+    public delegate void ErrorOperationHandler(Enum operationKey, IdentifiableEntity entity, Exception ex);
+    public delegate bool CanExecuteActionHandler(Enum operationKey, IdentifiableEntity entityOrNull);
 
 }

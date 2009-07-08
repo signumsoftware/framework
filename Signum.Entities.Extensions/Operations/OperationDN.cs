@@ -51,17 +51,20 @@ namespace Signum.Entities.Operations
     [Serializable]
     public class OperationInfo
     {
-        public Enum OperationKey { get; set; }
-        public OperationFlags Flags { get; set; }
+        public Enum Key { get; set; }
+        public OperationType OperationType { get; set; }
         public bool CanExecute { get; set; }
+        public bool Lazy { get; set; }
+        public bool Returns { get; set; }
     }
 
+
     [Flags]
-    public enum OperationFlags
+    public enum OperationType
     {
-        Entity = 1,
-        Lazy = 2, 
-        Returns = 4,
-        Default = Entity | Lazy | Returns
+        Execute, 
+        Constructor, 
+        ConstructorFrom,
+        ConstructorFromMany
     }
 }

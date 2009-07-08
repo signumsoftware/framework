@@ -52,7 +52,7 @@ namespace Signum.Engine.Basics
             return Synchronizer.SyncronizeReplacing(replacements, QueriesKey,
                 current.ToDictionary(a => a.Name),
                 should.ToDictionary(a => a.Name),
-                (n, c) => table.DeleteSqlSync(c.Id),
+                (n, c) => table.DeleteSqlSync(c),
                  null,
                  (fn, c, s) =>
                  {

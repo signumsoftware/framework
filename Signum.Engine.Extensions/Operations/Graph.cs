@@ -17,64 +17,121 @@ using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Operations
 {
+    
+
     public class Graph<E, S>
         where E : IdentifiableEntity
         where S : struct
     {
-        public class Goto : IOperation
+        public interface IGraphOperation : IOperation
         {
-            internal Graph<E, S> Graph { get; set; }
-            public S TargetState { get; private set; }
-            public S[] FromStates { get; set; } 
-            public Action<E, object[]> Execute {get;set;}
-            public Func<E, bool> CanExecute {get;set;}
-            public OperationFlags Flags { get; set; }
+            Graph<E, S> Graph{get;set;} 
+            S TargetState { get; }
+        }
 
-            public Goto(S targetState)
+        public class Goto : BasicExecute<E>, IGraphOperation
+        {
+            public Graph<E, S> Graph { get; set; } 
+            public S TargetState { get; private set; }
+            public S[] FromStates { get; set; }
+
+            public Goto(Enum key, S targetState) : base(key)
             {
                 this.TargetState = targetState;
             }
 
-            bool IOperation.CanExecuteOperation(IIdentifiable ident)
+            protected override string OnCanExecute(E entity)
             {
-                S state = Graph.GetState((E)ident);
+                S state = Graph.GetState(entity);
                 if (FromStates != null && !FromStates.Contains(state))
-                    return false;
+                    return "Impossible to execute {0} from state {1}".Formato(Key, state); 
 
-                if (CanExecute != null)
-                    return CanExecute((E)ident);
-
-                return true;
+                return base.OnCanExecute(entity);
             }
 
-            void IOperation.ExecuteOperation(IIdentifiable ident, params object[] parameters)
+            protected override void OnExecute(E entity, object[] args)
             {
-                E entity = (E)ident; 
-
                 S oldState = Graph.GetState(entity);
-                if (FromStates!= null && !FromStates.Contains(oldState))
-                    throw new ApplicationException("State {0} is not compatible with the action".Formato(oldState));
 
-                StateOptions so = Graph.States.TryGetC(oldState);
-                if (so != null && so.Exit != null)
-                    so.Exit(entity);
+                Graph.OnExitState(oldState, entity);
 
-                if (Graph.ExitState != null)
-                    Graph.ExitState(entity, oldState);
+                base.OnExecute(entity, args);
 
-                Execute(entity, parameters);
+                Graph.AssertEnterState(entity, this);
+            }
+        }
 
-                S newState = Graph.GetState(entity);
+        public class Construct : BasicConstructor<E>, IGraphOperation
+        {
+            public Graph<E, S> Graph { get; set; }
+            public S TargetState { get; private set; }
 
-                if (!newState.Equals(TargetState))
-                    throw new ApplicationException("After the action the state should be {0} but is {1}".Formato(TargetState, newState)); 
+            public Construct(Enum key, S targetState)
+                : base(key)
+            {
+                this.TargetState = targetState;
+            }
 
-                if (Graph.EnterState != null)
-                    Graph.EnterState(entity, newState);
+            protected override E OnConstruct(object[] args)
+            {
+                E result = base.OnConstruct(args);
 
-                StateOptions sn = Graph.States.TryGetC(newState);
-                if (sn != null && sn.Enter != null)
-                    sn.Enter(entity);
+                Graph.AssertEnterState(result, this);
+
+                return result;
+            }
+        }
+
+        public class ConstructFrom<F> : BasicConstructorFrom<F, E>, IGraphOperation
+            where F : class, IIdentifiable
+        {
+            public Graph<E, S> Graph { get; set; }
+            public S TargetState { get; private set; }
+
+            public ConstructFrom(Enum key, S targetState)
+                : base(key)
+            {
+                this.TargetState = targetState;
+            }
+
+            protected override E OnFromEntity(F entity, object[] args)
+            {
+                E result = base.OnFromEntity(entity, args);
+
+                Graph.AssertEnterState(result, this);
+
+                return result;
+            }
+
+            protected override E OnFromLazy(Lazy<F> lazy, object[] args)
+            {
+                E result = base.OnFromLazy(lazy, args);
+
+                Graph.AssertEnterState(result, this);
+
+                return result;
+            }
+        }
+
+        public class ConstructFromMany<F> : BasicConstructorFromMany<F, E>, IGraphOperation
+            where F : class, IIdentifiable
+        {
+            public Graph<E, S> Graph { get; set; }
+            public S TargetState { get; private set; }
+
+            public ConstructFromMany(Enum key, S targetState)
+                : base(key)
+            {
+                this.TargetState = targetState;
+            }
+
+            protected override E OnConstructor(List<Lazy<F>> lazies, object[] args)
+            {
+                E result = base.OnConstructor(lazies, args);
+
+                Graph.AssertEnterState(result, this);
+
+                return result;
             }
         }
 
@@ -86,10 +143,10 @@ namespace Signum.Engine.Operations
 
         protected Func<E, S> GetState { get; set; }
 
-        protected Action<E, S> EnterState {get;set;}
-        protected Action<E, S> ExitState {get;set;}
+        protected Action<E, S> EnterState { get; set; }
+        protected Action<E, S> ExitState { get; set; }
 
-        protected Dictionary<Enum, Goto> Operations { get; set; }
+        protected List<IGraphOperation> Operations { get; set; }
         protected Dictionary<S, StateOptions> States { get; set; }
 
         protected static bool Registered = false;
@@ -99,27 +156,63 @@ namespace Signum.Engine.Operations
             if (Registered)
                 throw new ApplicationException("A {0} have allready been registered".Formato(typeof(Graph<E, S>).TypeName()));
 
-            foreach (var item in Operations)
+            var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
+
+            if (errors.Count != 0)
+                throw new ApplicationException("The Following Keys have been repeated in {0}:\r\n{1}".Formato(GetType(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
+
+            foreach (var operation in Operations)
 	        {
-                item.Value.Graph= this;
-                if (item.Value.Execute == null)
-                    throw new ApplicationException("Operation {0} does not have Execute initialized".Formato(item.Key)); 
-                OperationLogic.Register<E>(item.Key, item.Value);
+                operation.Graph = this;
+
+                OperationLogic.Register(operation);
 	        }
 
             Registered = true;
         }
 
-        public DirectedEdgedGraph<S, Enum> ToDirectedGraph()
+        public DirectedEdgedGraph<S?, Enum> ToDirectedGraph()
         {
-            return DirectedEdgedGraph<S, Enum>.Generate(EnumExtensions.GetValues<S>(), ConnectionsFrom);
+            DirectedEdgedGraph<S?, Enum> result = new DirectedEdgedGraph<S?, Enum>(); 
+            foreach (var item in Operations)
+            {
+                if (item is Goto)
+                    ((Goto)item).FromStates.ForEach(s => result.Add(s, item.TargetState, item.Key));
+                else
+                    result.Add(null, item.TargetState, item.Key);
+            }
+
+            return result;
         }
 
-        IEnumerable<KeyValuePair<S, Enum>> ConnectionsFrom(S state)
+        internal void OnExitState(S state, E entity)
         {
-            return from kvp in this.Operations
-                   where kvp.Value.FromStates.TryCS(ar => ar.Contains(state)) ?? false
-                   select new KeyValuePair<S, Enum>(kvp.Value.TargetState, kvp.Key);
+            StateOptions so = States.TryGetC(state);
+            if (so != null && so.Exit != null)
+                so.Exit(entity);
+
+            if (ExitState != null)
+                ExitState(entity, state);
+        }
+
+        internal void OnEnterState(S state, E entity)
+        {
+            if (EnterState != null)
+                EnterState(entity, state);
+
+            StateOptions sn = States.TryGetC(state);
+            if (sn != null && sn.Enter != null)
+                sn.Enter(entity);
+        }
+
+        internal void AssertEnterState(E entity, IGraphOperation operation)
+        {
+            S state = GetState(entity);
+
+            if (!state.Equals(operation.TargetState))
+                throw new ApplicationException("After the action the state should be {0} but is {1}".Formato(operation.TargetState, state));
+
+            OnEnterState(state, entity);
         }
     }
 }

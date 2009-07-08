@@ -69,7 +69,7 @@ namespace Signum.Engine.Authorization
             return Synchronizer.SyncronizeReplacing(replacements, PersmissionKey,
                 current.ToDictionary(c => c.Key),
                 GeneratePermissions().ToDictionary(s => s.Key),
-                (k, c) => table.DeleteSqlSync(c.Id),
+                (k, c) => table.DeleteSqlSync(c),
                 (k, s) => null,
                 (k, c, s) =>
                 {

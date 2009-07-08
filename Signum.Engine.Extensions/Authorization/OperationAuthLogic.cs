@@ -58,7 +58,7 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void OperationLogic_ExecutingEvent(Enum operationKey, OperationDN action, IdentifiableEntity entity, object[] parameters)
+        static void OperationLogic_ExecutingEvent(Enum operationKey, IdentifiableEntity entity, object[] parameters)
         {
             if (!GetAllowed(UserDN.Current.Role, operationKey))
                 throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(operationKey));
@@ -77,7 +77,7 @@ namespace Signum.Engine.Authorization
 
         public static List<OperationInfo> GetActionInfos(RoleDN role, Lazy lazy)
         {
-            return OperationLogic.GetOperationInfos(lazy).Where(ai => GetAllowed(role, ai.OperationKey)).ToList(); 
+            return OperationLogic.GetOperationInfos(lazy).Where(ai => GetAllowed(role, ai.Key)).ToList(); 
         }
 
         public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)

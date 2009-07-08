@@ -40,7 +40,7 @@ namespace Signum.Engine.Basics
                     Synchronizer.SyncronizeReplacing(replacements, FieldsForKey.Formato(tn),
                     dicCurr,
                     dicShould,
-                    (fn, c) => table.DeleteSqlSync(c.Id),
+                    (fn, c) => table.DeleteSqlSync(c),
                     null,
                     (fn, c, s) =>
                     {

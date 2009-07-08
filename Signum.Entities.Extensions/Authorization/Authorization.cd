@@ -231,7 +231,7 @@
       <FileName>Basics\QueryDN.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Signum.Entities.Basics.PropertyDN" Collapsed="true">
+  <Class Name="Signum.Entities.Basics.PropertyDN">
     <Position X="8.5" Y="10" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAQAAAAFAAAAAQAAAAAAAAA=</HashCode>

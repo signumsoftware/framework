@@ -63,10 +63,12 @@
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
+    <Compile Include="Operations\Constructor.cs" />
+    <Compile Include="Operations\ConstructorFrom.cs" />
+    <Compile Include="Operations\ConstructorFromMany.cs" />
+    <Compile Include="Operations\Execute.cs" />
+    <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
-    <Compile Include="Operations\Graph.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
   </ItemGroup>
@@ -87,6 +89,9 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Operations\Operations.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
