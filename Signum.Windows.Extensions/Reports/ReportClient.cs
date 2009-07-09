@@ -12,12 +12,12 @@ namespace Signum.Windows.Reports
     {
         public static Dictionary<string, object> QueryNames; 
 
-        public static void Start(NavigationManager manager, bool toExcel, bool excelReport, bool compositeReport)
+        public static void Start(bool toExcel, bool excelReport, bool compositeReport)
         {
             if (toExcel)
             {
                 SearchControl.GetCustomMenuItems += qn => new ExcelReportMenuItem();
-                manager.Settings.Add(typeof(ExcelReportDN), new EntitySettings(false) { View = () => new ExcelReport() });
+                Navigator.Manager.Settings.Add(typeof(ExcelReportDN), new EntitySettings(false) { View = () => new ExcelReport() });
             }
             if (excelReport)
             {
@@ -27,7 +27,7 @@ namespace Signum.Windows.Reports
                 
                 if (compositeReport)
                 {
-                    manager.Settings.Add(typeof(CompositeReportDN), new EntitySettings(false) { View = () => new CompositeReport() });
+                    Navigator.Manager.Settings.Add(typeof(CompositeReportDN), new EntitySettings(false) { View = () => new CompositeReport() });
                 }
             }
             else
