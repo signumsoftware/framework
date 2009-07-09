@@ -20,10 +20,10 @@ namespace Signum.Windows.Authorization
             return Server.Service<IPropertyAuthServer>().AuthorizedProperties(); 
         }
 
-        public static void Start(NavigationManager manager, bool types, bool property)
+        public static void Start(bool types, bool property)
         {
-            manager.Settings.Add(typeof(UserDN), new EntitySettings(true){ View = ()=> new User()});
-            manager.Settings.Add(typeof(RoleDN), new EntitySettings(false){ View = ()=> new Role()});
+            Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(true){ View = ()=> new User()});
+            Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings(false) { View = () => new Role() });
 
             if (property)
             {
@@ -32,7 +32,7 @@ namespace Signum.Windows.Authorization
             }
 
             if (types)
-                Server.Service<ITypeAuthServer>().AuthorizedTypes().JoinDictionaryForeach(manager.Settings, Authorize);          
+                Server.Service<ITypeAuthServer>().AuthorizedTypes().JoinDictionaryForeach(Navigator.Manager.Settings, Authorize);          
         }
 
         static void Authorize(Type type, TypeAccess typeAccess, EntitySettings settings)

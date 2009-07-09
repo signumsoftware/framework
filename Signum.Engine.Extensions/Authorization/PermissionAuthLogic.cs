@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
         static List<PermissionDN> GeneratePermissions()
         {
             return (from type in permissionTypes
-                    from item in Enum.GetValues(type).Cast<object>()
+                    from item in Enum.GetValues(type).Cast<Enum>()
                     select PermissionDN.FromEnum(item)).ToList();
         }
 
@@ -97,26 +97,26 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        public static void Authorize(object permission)
+        public static void Authorize(Enum permissionKey)
         {
-            if (!GetAllowed(UserDN.Current.Role, PermissionDN.UniqueKey(permission)))
-                throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permission));
+            if (!GetAllowed(UserDN.Current.Role, PermissionDN.UniqueKey(permissionKey)))
+                throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
-        public static bool IsAuthorizedFor(object permission)
+        public static bool IsAuthorizedFor(Enum permissionKey)
         {
-            return GetAllowed(UserDN.Current.Role, PermissionDN.UniqueKey(permission));
+            return GetAllowed(UserDN.Current.Role, PermissionDN.UniqueKey(permissionKey));
         }
 
-        static bool GetAllowed(RoleDN role, string persmissionKey)
+        static bool GetAllowed(RoleDN role, string permissionKey)
         {
-            return RuntimeRules.TryGetC(role).TryGetS(persmissionKey) ?? true;
+            return RuntimeRules.TryGetC(role).TryGetS(permissionKey) ?? true;
         }
 
-        static bool GetBaseAllowed(RoleDN role, string persmissionKey)
+        static bool GetBaseAllowed(RoleDN role, string permissionKey)
         {
             return role.Roles.Count == 0 ? true :
-                  role.Roles.Select(r => GetAllowed(r, persmissionKey)).MaxAllowed();
+                  role.Roles.Select(r => GetAllowed(r, permissionKey)).MaxAllowed();
         }
 
         public static List<PermissionDN> RetrieveOrGeneratePermissions()

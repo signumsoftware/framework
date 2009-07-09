@@ -32,17 +32,17 @@ namespace Signum.Entities.Authorization
             return name;
         }
 
-        public static string UniqueKey(object enumValue)
+        public static string UniqueKey(Enum permissionKey)
         {
-            return "{0}.{1}".Formato(enumValue.GetType().Name, enumValue.ToString());
+            return "{0}.{1}".Formato(permissionKey.GetType().Name, permissionKey.ToString());
         }
 
-        public static PermissionDN FromEnum(object enumValue)
+        public static PermissionDN FromEnum(Enum permissionKey)
         {
             return new PermissionDN
             {
-                Key = UniqueKey(enumValue),
-                Name = EnumExtensions.NiceToString(enumValue)
+                Key = UniqueKey(permissionKey),
+                Name = EnumExtensions.NiceToString(permissionKey)
             };
         }
     }

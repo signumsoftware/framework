@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Data;
+using Signum.Windows.Operations;
+using Signum.Utilities;
 
 namespace Signum.Windows.Extensions
 {
@@ -22,5 +24,15 @@ namespace Signum.Windows.Extensions
         public static readonly IValueConverter Logarithmic100 = ConverterFactory.New(
             (double d) => Math.Log10(d) / 2,
             (double d) => Math.Pow(10, d * 2));
+
+        public static readonly IValueConverter OperationText =
+            ConverterFactory.New((Enum key) => OperationClient.GetText(key));
+
+        public static readonly IValueConverter OperationImage =
+            ConverterFactory.New((Enum key) => OperationClient.GetImage(key));
+
+        public static readonly IValueConverter OperationBackground =
+           ConverterFactory.New((Enum key) => OperationClient.GetBackground(key));
+
     }
 }

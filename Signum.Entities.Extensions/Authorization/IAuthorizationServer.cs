@@ -54,7 +54,7 @@ namespace Signum.Services
         void SetPermissionAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        bool IsAuthorizedFor(object permission);
+        bool IsAuthorizedFor(Enum permissionKey);
     }
 
     [ServiceContract]

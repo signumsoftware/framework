@@ -26,7 +26,11 @@ namespace Signum.Engine.Operations
         public Func<Lazy<F>, object[], T> FromLazy { get; set; }
         public bool Lazy { get; set; }
         public bool Returns { get; set; }
+
+        public bool AllowsNew { get; set; }
+        
         public Func<F, string> CanConstruct { get; set; }
+
 
         public BasicConstructorFrom(Enum key)
         {
@@ -41,7 +45,7 @@ namespace Signum.Engine.Operations
 
         string OnCanConstruct(IIdentifiable entity)
         {
-            if (entity.IsNew)
+            if (entity.IsNew && !AllowsNew)
                 return "The Entity {0} is New".Formato(entity);
 
             if (CanConstruct != null)

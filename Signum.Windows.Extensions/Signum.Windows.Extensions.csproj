@@ -118,6 +118,9 @@
     </Compile>
     <Compile Include="Calendars\DatePanel.cs" />
     <Compile Include="Converters.cs" />
+    <Compile Include="Operations\ConstructorSelectorWindow.xaml.cs">
+      <DependentUpon>ConstructorSelectorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Reports\CompositeReport.xaml.cs">
       <DependentUpon>CompositeReport.xaml</DependentUpon>
     </Compile>
@@ -228,6 +231,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Calendars\CalendarStripWithTitles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Operations\ConstructorSelectorWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

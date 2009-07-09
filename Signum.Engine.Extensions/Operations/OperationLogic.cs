@@ -28,6 +28,7 @@ namespace Signum.Engine.Operations
 
     public interface IEntityOperation : IOperation
     {
+        bool AllowsNew { get; }
         bool CanExecute(IIdentifiable entity);
     }
 
@@ -170,10 +171,8 @@ namespace Signum.Engine.Operations
                     select ToOperationInfo(cfm, true)).ToList();
         }
 
-        public static List<OperationInfo> GetEntityOperationInfos(Lazy lazy)
+        public static List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
         {
-            IdentifiableEntity entity = Database.Retrieve(lazy);
-
             return (from k in OperationKeys
                     let eo = TryFind(entity.GetType(), k) as IEntityOperation
                     where eo != null && OnAllowOperation(k)
@@ -262,15 +261,9 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFrom
-        public static IdentifiableEntity ConstructFrom(this IIdentifiable entity, Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ConstructFrom(this IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return ConstructFromPrivate(Find<IConstructorFromOperation>(type, operationKey, false), (IdentifiableEntity)entity, args);
-        }
-
-        public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
-            where T : IIdentifiable
-        {
-            return (T)(IIdentifiable)ConstructFromPrivate(Find<IConstructorFromOperation>(typeof(T), operationKey, false), (IdentifiableEntity)entity, args);
+            return ConstructFromPrivate(Find<IConstructorFromOperation>(entity.GetType(), operationKey, false), (IdentifiableEntity)entity, args);
         }
 
         static IdentifiableEntity ConstructFromPrivate(IConstructorFromOperation operation, IdentifiableEntity entity, params object[] parameters)
@@ -293,15 +286,9 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public static IdentifiableEntity ConstructFrom(this Lazy lazy, Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ConstructFrom(this Lazy lazy, Enum operationKey, params object[] args)
         {
-            return ConstructFromPrivate(Find<IConstructorFromOperation>(type, operationKey, true), lazy, args);
-        }
-
-        public static T ConstructFrom<T>(this Lazy lazy, Enum operationKey, params object[] args)
-            where T : IIdentifiable
-        {
-            return (T)(IIdentifiable)ConstructFromPrivate(Find<IConstructorFromOperation>(typeof(T), operationKey, true), lazy, args);
+            return ConstructFromPrivate(Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true), lazy, args);
         }
 
         static IdentifiableEntity ConstructFromPrivate(IConstructorFromOperation operation, Lazy lazy, params object[] parameters)

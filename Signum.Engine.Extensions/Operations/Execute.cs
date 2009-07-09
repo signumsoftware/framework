@@ -24,6 +24,8 @@ namespace Signum.Engine.Operations
         public bool Lazy { get; set; }
         public bool Returns { get; set; }
 
+        public bool AllowsNew { get; set; }
+
         public Func<T, string> CanExecute { get; set; }
         public Action<T, object[]> Execute { get; set; }
 
@@ -41,7 +43,7 @@ namespace Signum.Engine.Operations
 
         protected virtual string OnCanExecute(T entity)
         {
-            if (entity.IsNew)
+            if (entity.IsNew && !AllowsNew)
                 return "The Entity {0} is New".Formato(entity);
 
             if (CanExecute != null)

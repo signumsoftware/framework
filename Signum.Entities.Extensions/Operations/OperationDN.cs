@@ -33,17 +33,17 @@ namespace Signum.Entities.Operations
             return name;
         }
 
-        public static string UniqueKey(Enum enumValue)
+        public static string UniqueKey(Enum operationKey)
         {
-            return "{0}.{1}".Formato(enumValue.GetType().Name, enumValue.ToString());
+            return "{0}.{1}".Formato(operationKey.GetType().Name, operationKey.ToString());
         }
 
-        public static OperationDN FromEnum(Enum enumValue)
+        public static OperationDN FromEnum(Enum operationKey)
         {
             return new OperationDN
             {
-                Key = UniqueKey(enumValue),
-                Name = EnumExtensions.NiceToString((object)enumValue)
+                Key = UniqueKey(operationKey),
+                Name = EnumExtensions.NiceToString(operationKey)
             };
         }
     }

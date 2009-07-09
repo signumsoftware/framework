@@ -72,11 +72,10 @@ namespace Signum.Services
         #endregion
 
         #region IOperationServer Members
-
-        public List<OperationInfo> GetEntityOperationInfos(Lazy lazy)
+        public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.GetEntityOperationInfos(lazy));
+                () => OperationLogic.GetEntityOperationInfos(entity));
         }
 
         public List<OperationInfo> GetQueryOperationInfos(Type entityType)
@@ -109,16 +108,16 @@ namespace Signum.Services
               () => OperationLogic.Construct(type, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFrom(IIdentifiable entity, Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.ConstructFrom(entity, type, operationKey, args));
+              () => OperationLogic.ConstructFrom(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFrom(Lazy lazy, Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.ConstructFrom(lazy, type, operationKey, args));
+              () => OperationLogic.ConstructFrom(lazy, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args)
@@ -126,18 +125,6 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
               () => OperationLogic.ConstructFromMany(lazies, type, operationKey, args));
         }
-        #endregion
-
-        #region INotesServer
-
-        public List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lazy)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => (from n in Database.Query<NoteDN>()
-                    where n.Entity == lazy
-                    select n.ToLazy<INoteDN>()).ToList());
-        }
-
         #endregion
 
         #region IPropertyAuthServer Members
@@ -230,10 +217,10 @@ namespace Signum.Services
             () => PermissionAuthLogic.SetAllowedRule(rules, role));
         }
 
-        public bool IsAuthorizedFor(object permission)
+        public bool IsAuthorizedFor(Enum permissionKey)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-           () => PermissionAuthLogic.IsAuthorizedFor(permission));
+           () => PermissionAuthLogic.IsAuthorizedFor(permissionKey));
         }
 
         #endregion
