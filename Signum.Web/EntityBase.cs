@@ -15,8 +15,10 @@ namespace Signum.Web
         public const string IsNew = "sfIsNew";
     }
 
-    public class BaseLine
+    public abstract class BaseLine
     {
+        public abstract void SetReadOnly();
+
         public StyleContext StyleContext;
         public string LabelText;
         public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string, object>(0);
@@ -29,7 +31,7 @@ namespace Signum.Web
         }
     }
 
-    public class EntityBase : BaseLine
+    public abstract class EntityBase : BaseLine
     {
         private Type[] implementations;
         public Type[] Implementations

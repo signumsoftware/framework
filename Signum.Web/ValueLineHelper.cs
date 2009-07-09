@@ -23,7 +23,6 @@ namespace Signum.Web
 
             idValueField = helper.GlobalName(idValueField);
 
-           // if (StyleContext.Current.LabelVisible) sb.Append("<div>");
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("<div class='valueFirst'>");
             if (StyleContext.Current.LabelVisible && !StyleContext.Current.ValueFirst)
             {
@@ -75,8 +74,7 @@ namespace Signum.Web
                 else
                     sb.Append(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel));
             }
-           // if (StyleContext.Current.LabelVisible)
-            //    sb.Append("</div>");
+
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class='clearall'></div>\n");
@@ -190,6 +188,10 @@ namespace Signum.Web
     { 
         public readonly Dictionary<string, object> ValueHtmlProps = new Dictionary<string, object>(0);
         public ValueLineType? ValueLineType;
+
+        public override void SetReadOnly()
+        {
+        }
     }
 
     public class ValueLineConfigurator

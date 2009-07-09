@@ -27,6 +27,14 @@ namespace Signum.Web
             Remove = false;
             Find = false;
         }
+
+        public override void SetReadOnly()
+        {
+            Find = false;
+            Create = false;
+            Remove = false;
+            Implementations = null;
+        }
     }
 
     public static class EntityComboHelper
@@ -34,6 +42,9 @@ namespace Signum.Web
 
         internal static string InternalEntityCombo(this HtmlHelper helper, string idValueField, Type type, object value, EntityCombo settings)
         {
+            if (!settings.View)
+                return null;
+
             idValueField = helper.GlobalName(idValueField);
             string divASustituir = helper.GlobalName("divASustituir");
 
@@ -65,27 +76,34 @@ namespace Signum.Web
 
                 sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-                List<SelectListItem> items = new List<SelectListItem>();
-                items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
-                items.AddRange(
-                    Database.RetrieveAllLazy(Reflector.ExtractLazy(type) ?? type)
-                        .Select(lazy => new SelectListItem()
-                        {
-                            Text = lazy.ToString(),
-                            Value = lazy.Id.ToString(),
-                            Selected = (value!=null) && (lazy.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
-                        })
-                    );
+                if (!StyleContext.Current.ReadOnly)
+                {
+                    List<SelectListItem> items = new List<SelectListItem>();
+                    items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
+                    items.AddRange(
+                        Database.RetrieveAllLazy(Reflector.ExtractLazy(type) ?? type)
+                            .Select(lazy => new SelectListItem()
+                            {
+                                Text = lazy.ToString(),
+                                Value = lazy.Id.ToString(),
+                                Selected = (value != null) && (lazy.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
+                            })
+                        );
 
-                sb.Append(helper.DropDownList(
-                    idValueField + TypeContext.Separator + EntityComboKeys.Combo,
-                    items,
-                    new Dictionary<string, object> 
+                    sb.Append(helper.DropDownList(
+                        idValueField + TypeContext.Separator + EntityComboKeys.Combo,
+                        items,
+                        new Dictionary<string, object> 
                     { 
                         {"class","valueLine"},
                         {"onchange","EntityComboOnChange('{0}');".Formato(idValueField)}
                     }));
-                sb.Append("\n");
+                    sb.Append("\n");
+                }
+                else
+                {
+                    sb.Append(helper.Span(idValueField, (value!=null) ? value.ToString() : "", "valueLine"));
+                }
             }
 
             string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/TrySavePartial");

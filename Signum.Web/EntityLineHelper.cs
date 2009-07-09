@@ -30,6 +30,15 @@ namespace Signum.Web
         public EntityLine()
         {
         }
+
+        public override void SetReadOnly()
+        {
+            Find = false;
+            Create = false;
+            Remove = false;
+            Autocomplete = false;
+            Implementations = null;
+        }
     }
 
     public static class EntityLineHelper
@@ -37,6 +46,9 @@ namespace Signum.Web
 
         internal static string InternalEntityLine(this HtmlHelper helper, string idValueField, Type type, object value, EntityLine settings)
         {
+            if (!settings.View)
+                return null;
+
             idValueField = helper.GlobalName(idValueField);
             string divASustituir = helper.GlobalName("divASustituir");
 
@@ -69,6 +81,7 @@ namespace Signum.Web
                        : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id)) + "\n");
 
                 sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                
                 sb.Append(helper.TextBox(
                     idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, 
                     (isIdentifiable) 
@@ -89,7 +102,7 @@ namespace Signum.Web
                                                       (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name,",") : "",
                                                       idValueField + TypeContext.Separator +  TypeContext.Id,
                                                       "Signum/Autocomplete", 1, 5, 500));
-                
+
                 if (settings.Implementations != null) //Interface with several possible implementations
                 {
                     sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" style=\"display:none\" >\n");
@@ -143,39 +156,42 @@ namespace Signum.Web
                         new Dictionary<string, object> { {"style","display:" + ((value==null) ? "none" : "block")}}));
 
             sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
-            
-            string creatingUrl = (settings.Implementations == null) ?
-                "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(type))) :
-                "ChooseImplementation('{0}','{1}',function(){{OnImplementationsOk({2},'{3}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type));
+
             if (settings.Create)
-                sb.Append(
-                    helper.Button(idValueField + "_btnCreate",
-                              "+",
-                              creatingUrl,
-                              "lineButton",
-                              (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
+                {
+                    string creatingUrl = (settings.Implementations == null) ?
+                        "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(type))) :
+                        "ChooseImplementation('{0}','{1}',function(){{OnImplementationsOk({2},'{3}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type));
+
+                    sb.Append(
+                        helper.Button(idValueField + "_btnCreate",
+                                  "+",
+                                  creatingUrl,
+                                  "lineButton",
+                                  (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
+                }
 
             if (settings.Remove)
-                sb.Append(
-                    helper.Button(idValueField + "_btnRemove",
-                              "x",
-                              "RemoveContainedEntity('" + idValueField + "');",
-                              "lineButton",
-                              (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
+                    sb.Append(
+                        helper.Button(idValueField + "_btnRemove",
+                                  "x",
+                                  "RemoveContainedEntity('" + idValueField + "');",
+                                  "lineButton",
+                                  (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Find && (isIdentifiable || isLazy))
-            {
-                string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}');}},function(){{OnSearchCancel('{2}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
-                string findingUrl = (settings.Implementations == null) ?
-                    "Find({0});".Formato(popupFindingParameters) :
-                    "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
-                sb.Append(
-                    helper.Button(idValueField + "_btnFind",
-                                 "O",
-                                 findingUrl,
-                                 "lineButton",
-                                 (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
-            }
+                {
+                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}');}},function(){{OnSearchCancel('{2}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
+                    string findingUrl = (settings.Implementations == null) ?
+                        "Find({0});".Formato(popupFindingParameters) :
+                        "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
+                    sb.Append(
+                        helper.Button(idValueField + "_btnFind",
+                                     "O",
+                                     findingUrl,
+                                     "lineButton",
+                                     (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
+                }
 
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class=\"clearall\"></div>\n");
@@ -202,10 +218,11 @@ namespace Signum.Web
             }
 
             EntityLine el = new EntityLine();
-            Common.FireCommonTasks(el, typeof(T), context);
-
-            if (el.Implementations == null)
+            
+            //if (el.Implementations == null)
                 Navigator.ConfigureEntityBase(el, runtimeType , false);
+
+            Common.FireCommonTasks(el, typeof(T), context);
 
             helper.ViewContext.HttpContext.Response.Write(
                 helper.InternalEntityLine(context.Name, typeof(S), context.Value, el));
@@ -230,10 +247,11 @@ namespace Signum.Web
             }
 
             EntityLine el = new EntityLine();
-            Common.FireCommonTasks(el, typeof(T), context);
-
-            if (el.Implementations == null)
+            
+            //if (el.Implementations == null)
                 Navigator.ConfigureEntityBase(el, runtimeType, false);
+
+            Common.FireCommonTasks(el, typeof(T), context);
 
             settingsModifier(el);
 

@@ -29,6 +29,14 @@ namespace Signum.Web
         public EntityRepeater() 
         { 
         }
+
+        public override void SetReadOnly()
+        {
+            Find = false;
+            Create = false;
+            Remove = false;
+            Implementations = null;
+        }
     }
 
     public static class EntityRepeaterHelper
@@ -36,6 +44,9 @@ namespace Signum.Web
         private static void InternalEntityRepeater<T>(this HtmlHelper helper, string idValueField, MList<T> value, EntityRepeater settings)
             where T : Modifiable
         {
+            if (!settings.View)
+                return;
+
             idValueField = helper.GlobalName(idValueField);
             //string divASustituir = helper.GlobalName("divASustituir");
 
@@ -51,29 +62,14 @@ namespace Signum.Web
             if (settings.Implementations != null) //Interface with several possible implementations
             {
                 throw new ApplicationException("Interfaces are not supported by EntityRepeater yet");
-            //    sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" style=\"display:none\" >\n");
-
-            //    List<SelectListItem> types = new List<SelectListItem> { new SelectListItem { Text = "Select type", Value = "", Selected = true } };
-            //    foreach (Type t in settings.Implementations)
-            //    {
-            //        types.Add(new SelectListItem { Text = t.Name, Value = t.Name });
-            //    }
-            //    string ddlStr = helper.DropDownList(idValueField + TypeContext.Separator + EntityBaseKeys.ImplementationsDDL, types);
-            //    sb.Append(helper.RenderPartialToString(
-            //        "~/Plugin/Signum.Web.dll/Signum.Web.Views.OKCancelPopup.ascx",
-            //        new ViewDataDictionary(value) 
-            //            { 
-            //                { ViewDataKeys.CustomHtml, ddlStr},
-            //                { ViewDataKeys.PopupPrefix, idValueField},
-            //            }
-            //    ));
-            //    sb.Append("</div>\n");
             }
 
-            string creatingUrl = (settings.Implementations == null) ?
-                "javascript:NewRepeaterElement('{0}','{1}','{2}','{3}','{4}','{5}');".Formato("Signum.aspx/PartialView", idValueField, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.RemoveElementLinkText, (settings.maxElements.HasValue ? settings.maxElements.Value.ToString() : "")) :
-                ""; //"ChooseImplementation('{0}','{1}',function(){{OnListImplementationsOk({2},'{3}','{4}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv);
             if (settings.Create)
+            {
+                string creatingUrl = (settings.Implementations == null) ?
+                    "javascript:NewRepeaterElement('{0}','{1}','{2}','{3}','{4}','{5}');".Formato("Signum.aspx/PartialView", idValueField, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.RemoveElementLinkText, (settings.maxElements.HasValue ? settings.maxElements.Value.ToString() : "")) :
+                    ""; //"ChooseImplementation('{0}','{1}',function(){{OnListImplementationsOk({2},'{3}','{4}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv);
+
                 sb.Append(
                     helper.Href(idValueField + "_btnCreate",
                               settings.AddElementLinkText,
@@ -81,6 +77,7 @@ namespace Signum.Web
                               "Nuevo",
                               "lineButton",
                               new Dictionary<string, object>()));
+            }
             
             sb.Append("<div id=\"{0}\" name=\"{0}\">".Formato(idValueField + TypeContext.Separator + EntityRepeaterKeys.EntitiesContainer));
             if (value != null)
@@ -153,38 +150,22 @@ namespace Signum.Web
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.Id)
                        : ((Lazy)(object)value).TryCS(i => i.Id)) + "\n");
-
-                //sb.Append(helper.Div(indexedPrefix + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
-                
-                ////Note this is added to the sbOptions, not to the result sb
-                //sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
-                //                "name=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " + 
-                //                "value=\"\" " +
-                //                "class = valueLine entityListOption\" " +
-                //                ">" + 
-                //                ((isIdentifiable)
-                //                    ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToStr)
-                //                    : ((Lazy)(object)value).TryCC(i => i.ToStr)) + 
-                //                "</option>\n");
             }
-            //else
-            //{
-                //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
-                sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
 
-                EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+            sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
 
-                sb.Append(
-                    helper.RenderPartialToString(
-                        es.PartialViewName,
-                        new ViewDataDictionary(value) 
-                        { 
-                            { ViewDataKeys.PopupPrefix, idValueField + TypeContext.Separator + index.ToString()}
-                        }
-                    )
-                );
-                sb.Append("</div>\n");
-            //}
+            EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+
+            sb.Append(
+                helper.RenderPartialToString(
+                    es.PartialViewName,
+                    new ViewDataDictionary(value) 
+                    { 
+                        { ViewDataKeys.PopupPrefix, idValueField + TypeContext.Separator + index.ToString()}
+                    }
+                )
+            );
+            sb.Append("</div>\n");
 
             sb.Append("<script type=\"text/javascript\">var " + indexedPrefix + "sfEntityTemp = \"\"</script>\n");
 
@@ -201,10 +182,11 @@ namespace Signum.Web
             Type entitiesType = typeof(T);
 
             EntityRepeater el = new EntityRepeater() { EntitiesType = entitiesType };
-            Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
-
-            if (el.Implementations == null)
+            
+            //if (el.Implementations == null)
                 Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(typeof(S)) ?? typeof(S), false);
+
+            Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
 
             helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
         }
@@ -217,12 +199,13 @@ namespace Signum.Web
             Type entitiesType = typeof(T);
 
             EntityRepeater el = new EntityRepeater() { EntitiesType = entitiesType };
+
+            //if (el.Implementations == null)
+            Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(typeof(S)) ?? typeof(S), false);
+            
             Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
 
             settingsModifier(el);
-
-            if (el.Implementations == null)
-                Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(typeof(S)) ?? typeof(S), false);
 
             if (el.StyleContext != null)
             {
