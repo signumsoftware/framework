@@ -16,6 +16,8 @@ namespace Signum.Engine.DynamicQuery
         internal DynamicQueryManager Parent{get; private set;}
         Dictionary<object, IQueryable> queries = new Dictionary<object, IQueryable>();
 
+        public static event Func<object, bool> AllowQuery;
+
         public DynamicQueryManager(DynamicQueryManager parent)
         {
             this.Parent = parent;         
@@ -25,6 +27,8 @@ namespace Signum.Engine.DynamicQuery
         {
             get
             {
+                AssertQueryAllowed(queryName); 
+
                 return TryGet(queryName).ThrowIfNullC(Resources.TheView0IsNotOnQueryManager.Formato(queryName));
             }
             set { queries[queryName] = value; }
@@ -52,7 +56,7 @@ namespace Signum.Engine.DynamicQuery
             if (Parent == null)
                 return queries.Keys.ToList();
 
-            return queries.Keys.Union(Parent.GetQueryNames()).ToList(); 
+            return queries.Keys.Union(Parent.GetQueryNames()).Where(qn=>OnAllowQuery(qn)).ToList(); 
         }
 
         public QueryResult ExecuteQuery(object queryName, List<Filter> filter, int? limit)
@@ -69,6 +73,19 @@ namespace Signum.Engine.DynamicQuery
             {
                 throw te.InnerException;
             }
+        }
+
+        static void AssertQueryAllowed(object queryName)
+        {
+            if (!OnAllowQuery(queryName))
+                throw new ApplicationException("You have no permissions for Query: {0} ".Formato(queryName)); 
+        }
+
+        static bool OnAllowQuery(object queryName)
+        {
+            if (AllowQuery != null)
+                return AllowQuery(queryName);
+            return true;
         }
     }
 }
