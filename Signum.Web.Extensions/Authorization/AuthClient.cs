@@ -23,7 +23,7 @@ namespace Signum.Web.Authorization
                 TypeAuthLogic.AuthorizedTypes().JoinDictionaryForeach(manager.EntitySettings, Authorize);
         }
 
-        static void TaskAuthorize(BaseLine eb, Type type, TypeContext context)
+        static void TaskAuthorize(BaseLine bl, Type type, TypeContext context)
         {
             List<PropertyInfo> contextList = context.GetPath();
 
@@ -40,12 +40,13 @@ namespace Signum.Web.Authorization
                 switch (PropertyAuthLogic.GetPropertyAccess(parentType, path))
                 {
                     case Access.None: 
-                        eb.View = false; 
+                        bl.View = false; 
                         break;
                     case Access.Read:
-                        if (eb.StyleContext == null)
-                            eb.StyleContext = new StyleContext();
-                        eb.StyleContext.ReadOnly = true;
+                        if (bl.StyleContext == null)
+                            bl.StyleContext = new StyleContext();
+                        bl.StyleContext.ReadOnly = true;
+                        bl.SetReadOnly();
                         break;
                     case Access.Modify: 
                         break;
