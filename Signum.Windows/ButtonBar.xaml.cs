@@ -137,6 +137,11 @@ namespace Signum.Windows
                 stackPanel.Children.Add((UIElement)item);
             }
         }
+
+        public static void Start()
+        {
+            ButtonBar.GetButtonBarElement += (obj, mainControl) => mainControl is IHaveToolBarElements ? ((IHaveToolBarElements)mainControl).ToolBarElements : null;
+        }
     }
 
     public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, Control mainControl);

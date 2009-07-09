@@ -9,10 +9,11 @@ using System.Reflection;
 using System.ServiceModel;
 using Signum.Engine;
 using Signum.Engine.Maps;
+using Signum.Entities.Basics;
 
 namespace Signum.Services
 {
-    public abstract class ServerBasic : IBaseServer, IQueryServer
+    public abstract class ServerBasic : IBaseServer, IQueryServer, INotesServer
     {
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
@@ -104,6 +105,16 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
              () => GetQueryManager().GetQueryNames());
+        }
+        #endregion
+
+        #region INotesServer Members
+        public virtual List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lazy)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => (from n in Database.Query<NoteDN>()
+                    where n.Entity == lazy
+                    select n.ToLazy<INoteDN>()).ToList());
         }
         #endregion
     }

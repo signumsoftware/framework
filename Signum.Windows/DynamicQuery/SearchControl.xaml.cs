@@ -161,7 +161,7 @@ namespace Signum.Windows
                 entityIndex = view.Columns.IndexOf(entity);
                 SetValue(EntityTypeKey, Reflector.ExtractLazy(entity.Type));
 
-                EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(EntityType);
+                EntitySettings es = Navigator.Manager.Settings.TryGetC(EntityType);
 
                 if (es != null)
                 {

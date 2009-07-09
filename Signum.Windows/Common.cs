@@ -214,7 +214,7 @@ namespace Signum.Windows
             {
                 var contextList = context.FollowC(a => (a as TypeSubContext).TryCC(t => t.Parent)).ToList();
 
-                if (contextList.Count > 1 && Navigator.NavigationManager.ServerTypes != null)
+                if (contextList.Count > 1 && Navigator.Manager.ServerTypes != null)
                 {
                     var list = contextList.OfType<TypeSubContext>().Select(a => a.PropertyInfo).Reverse().ToList();
                     
@@ -223,7 +223,7 @@ namespace Signum.Windows
 
                     Type type = contextList.Last().Type;
 
-                    if (Navigator.NavigationManager.ServerTypes.ContainsKey(type))
+                    if (Navigator.Manager.ServerTypes.ContainsKey(type))
                         eb.Implementations = Server.Service<IBaseServer>().FindImplementations(type, list.Cast<MemberInfo>().ToArray());
                 }
             }

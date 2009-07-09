@@ -160,7 +160,7 @@ namespace Signum.Windows
                 EntityTemplate = Navigator.FindDataTemplate(this, EntityType);
             }
 
-            EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(cleanType);
+            EntitySettings es = Navigator.Manager.Settings.TryGetC(cleanType);
 
             if (this.NotSet(CreateProperty) && Create && Implementations == null)
                 Create = es == null ? true : es.IsCreable(false);
@@ -202,7 +202,7 @@ namespace Signum.Windows
             {
                 Type rt = (entity as Lazy).TryCC(l => l.RuntimeType) ?? entity.GetType();
 
-                EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(rt);
+                EntitySettings es = Navigator.Manager.Settings.TryGetC(rt);
 
                 return es != null && es.IsViewable(false);
             }

@@ -29,15 +29,28 @@ namespace Signum.Windows
     
     public class ConstructorManager
     {
+        public event Func<Type, Window, object> GeneralConstructor; 
+
         public Dictionary<Type, Func<Window, object>> Constructors;
 
         public virtual object Construct(Type type, Window window)
         {
             Func<Window, object> c = Constructors.TryGetC(type);
+            if (c != null)
+            {
+                object result = c(window);
+                if (result != null)
+                    return result;
+            }
 
-            object result = c != null ? c(window) : DefaultContructor(type, window); 
+            if (GeneralConstructor != null)
+            {
+                object result = GeneralConstructor(type, window);
+                if (result != null)
+                    return result;
+            }
 
-            return result;
+            return DefaultContructor(type, window);
         }
 
         public static object DefaultContructor(Type type, Window window)

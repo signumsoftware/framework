@@ -37,10 +37,10 @@ namespace Signum.Windows
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            var values = Enum.GetValues(Type).Cast<object>();
+            var values = Enum.GetValues(Type).Cast<Enum>();
             if (nicePairs)
             {
-                var valuePairs = values.Select(a => new Tuple<object, string>(a, EnumExtensions.NiceToString(a)));
+                var valuePairs = values.Select(a => new Tuple<Enum, string>(a, EnumExtensions.NiceToString(a)));
                 if (sort)
                     valuePairs = valuePairs.OrderBy(a => a.Second);
 

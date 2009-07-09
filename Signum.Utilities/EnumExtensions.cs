@@ -35,7 +35,7 @@ namespace Signum.Utilities
             return EnumDescriptionCache.Get(a) ?? a.ToString().NiceName();
         }
 
-        public static string NiceToString(object a)
+        public static string NiceToString(Enum a)
         {
             return EnumDescriptionCache.Get(a) ?? a.ToString().NiceName();
         }
@@ -71,12 +71,12 @@ namespace Signum.Utilities
             return Create(typeof(T))[(Enum)(object)value];
         }
 
-        public static string Get(object value)
+        public static string Get(Enum value)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
 
-            return Create(value.GetType())[(Enum)value];
+            return Create(value.GetType())[value];
         }
 
         static Dictionary<Enum, string> Create(Type type)

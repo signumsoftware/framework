@@ -100,7 +100,7 @@ namespace Signum.Windows
         {
             if (e.NewValue != null && cleanType != null)
             {
-                EntitySettings es = Navigator.NavigationManager.Settings.TryGetC(cleanType);
+                EntitySettings es = Navigator.Manager.Settings.TryGetC(cleanType);
                 if (es!= null && es.CollectionViewOperations != null)
                 {
                     var colView = CollectionViewSource.GetDefaultView(e.NewValue);

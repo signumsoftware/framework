@@ -16,16 +16,24 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Services;
 
 namespace Signum.Windows
 {
     public static class Navigator
     {
-        public static NavigationManager NavigationManager;
+        public static NavigationManager Manager {get; private set;}
+
+        public static void Start(NavigationManager navigator)
+        {
+            navigator.Initialize();
+
+            Manager = navigator;
+        }
 
         public static object Find(FindOptions findOptions)
         {
-            return NavigationManager.Find(findOptions);
+            return Manager.Find(findOptions);
         }
 
         public static object Find(object queryName)
@@ -60,27 +68,27 @@ namespace Signum.Windows
 
             ViewButtons vb = lazy != null && (lazy.UntypedEntityOrNull == null || !lazy.UntypedEntityOrNull.IsNew) ? ViewButtons.Save : ViewButtons.OkCancel;
 
-            return NavigationManager.View(entity, new ViewOptions { Buttons = vb, TypeContext = typeContext });
+            return Manager.View(entity, new ViewOptions { Buttons = vb, TypeContext = typeContext });
         }
 
         public static object View(ViewOptions viewOptions, object entity)
         {
-            return NavigationManager.View(entity, viewOptions);
+            return Manager.View(entity, viewOptions);
         }
 
         public static void Admin(AdminOptions adminOptions)
         {
-            NavigationManager.Admin(adminOptions);
+            Manager.Admin(adminOptions);
         }
 
         internal static EntitySettings FindSettings(Type type)
         {
-            return NavigationManager.FindSettings(type);
+            return Manager.FindSettings(type);
         }
 
         internal static bool IsFindable(Type type)
         {
-            return NavigationManager.QuerySetting.ContainsKey(type); 
+            return Manager.QuerySetting.ContainsKey(type); 
         }
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
@@ -108,21 +116,34 @@ namespace Signum.Windows
 
         public static Type SelectType(Type[] implementations)
         {
-            return NavigationManager.SelectTypes(implementations);
+            return Manager.SelectTypes(implementations);
         }
 
         public static string TypeName(Type t)
         {
-            return NavigationManager.ServerTypes.TryGetC(t).TryCC(a => a.FriendlyName) ?? t.FriendlyName();
+            return Manager.ServerTypes.TryGetC(t).TryCC(a => a.FriendlyName) ?? t.FriendlyName();
         }
     }
 
 
     public class NavigationManager
     {
-        public Dictionary<Type, EntitySettings> Settings = new Dictionary<Type, EntitySettings>();
-        public Dictionary<object, QuerySetting> QuerySetting;
-        public Dictionary<Type, TypeDN> ServerTypes;
+        public Dictionary<Type, EntitySettings> Settings{get;set;}
+        public Dictionary<object, QuerySetting> QuerySetting{get;set;}
+        public Dictionary<Type, TypeDN> ServerTypes{get;private set;}
+
+        internal void Initialize()
+        {
+            if (Settings == null)
+                Settings = new Dictionary<Type, EntitySettings>();
+
+            var dic = Server.Service<IQueryServer>().GetQueryNames().ToDictionary(a => a, a => new QuerySetting());
+            dic.SetRange(QuerySetting);
+            QuerySetting = dic;
+
+            ServerTypes = Server.Service<IBaseServer>().ServerTypes(); 
+        }
+
 
         public virtual string SearchTitle(object queryName)
         {
@@ -134,7 +155,7 @@ namespace Signum.Windows
             }
 
             string title = (queryName is Type) ? Navigator.TypeName(((Type)queryName)) :
-                           (queryName is Enum) ? EnumExtensions.NiceToString(queryName) :
+                           (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
                             queryName.ToString();
 
             return Resources.FinderOf0.Formato(title);
@@ -254,17 +275,17 @@ namespace Signum.Windows
         public virtual Type SelectTypes(Type[] implementations)
         {
             if (implementations == null || implementations.Length == 0)
-                throw new ArgumentException("implementations"); 
+                throw new ArgumentException("implementations");
 
             if (implementations.Length == 1)
-                return implementations[0]; 
+                return implementations[0];
 
             TypeSelectorWindow win = new TypeSelectorWindow();
             win.Types = implementations;
-            if (win.ShowDialog() == true)
-                return win.SelectedType;
+            if (win.ShowDialog() != true)
+                return null;
 
-            return null; 
+            return win.SelectedType;
         }
 
 

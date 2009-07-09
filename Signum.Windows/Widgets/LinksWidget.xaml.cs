@@ -62,6 +62,11 @@ namespace Signum.Windows
                 ((Action)b.Tag).Invoke();
             }
         }
+
+        public static void Start()
+        {
+            WidgetPanel.GetWidgets += (obj, mainControl) => mainControl is IHaveQuickLinks ? new LinksWidget() { Control = mainControl } : null;
+        }
     }
 
     /// <summary>
