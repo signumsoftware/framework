@@ -64,8 +64,8 @@
                             if (typeof(Lazy).IsAssignableFrom(colType) && queryResult.Data[row][col]!=null)
                             {
                                 Lazy lazy = (Lazy)queryResult.Data[row][col];
+                                if (Navigator.NavigationManager.EntitySettings[lazy.RuntimeType]. == 
                                 %>
-                                <%--<a href="<%="/View/" + Navigator.TypesToURLNames[lazy.RuntimeType] + "/" + lazy.Id.ToString() %>" title="Navigate"><%=lazy.ToStr %></a>   --%>
                                 <a href="<%=Navigator.ViewRoute(lazy.RuntimeType, lazy.Id) %>" title="Navigate"><%=lazy.ToStr %></a>   
                                 <%
                             }
