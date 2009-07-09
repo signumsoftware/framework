@@ -14,7 +14,12 @@ namespace Signum.Windows
 {
     public static class Constructor
     {
-        public static ConstructorManager ConstructorManager = new ConstructorManager() {  Constructors = new Dictionary<Type,Func<Window,object>>()};
+        public static ConstructorManager ConstructorManager;
+
+        public static void Start(ConstructorManager constructorManager)
+        {
+            ConstructorManager = constructorManager; 
+        }
 
         public static object Construct(Type type, Window window)
         {

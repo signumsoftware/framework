@@ -91,7 +91,7 @@ namespace Signum.Web
             items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
             items.AddRange(
                 Enum.GetValues(enumType.UnNullify())
-                    .Cast<object>()
+                    .Cast<Enum>()
                     .Select(v => new SelectListItem()
                         {
                             Text = EnumExtensions.NiceToString(v),
