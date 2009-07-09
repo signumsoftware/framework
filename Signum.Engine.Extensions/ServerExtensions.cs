@@ -21,7 +21,7 @@ namespace Signum.Services
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer,
         IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer 
     {
-        UserDN currentUser;
+        protected UserDN currentUser;
 
         protected override void Execute(MethodBase mi, Action action)
         {
