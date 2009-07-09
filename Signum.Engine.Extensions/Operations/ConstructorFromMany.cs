@@ -11,7 +11,7 @@ namespace Signum.Engine.Operations
 {
     public interface IConstructorFromManyOperation : IOperation
     {
-        IIdentifiable Construct(List<Lazy> lazy, params object[] parameters);
+        IIdentifiable Construct(List<Lazy> lazies, params object[] parameters);
     }
 
     public class BasicConstructorFromMany<F, T> : IConstructorFromManyOperation

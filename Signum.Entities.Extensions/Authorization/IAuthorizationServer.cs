@@ -8,11 +8,17 @@ using Signum.Entities;
 
 namespace Signum.Services
 {
-    [ServiceContract]
-    public interface IUserServer
+    [ServiceContract(SessionMode = SessionMode.Required)]
+    public interface ILoginServer
     {
         [OperationContract, NetDataContract]
-        UserDN GetCurrentUser(); 
+        void Login(string username, string passwordHash);
+
+        [OperationContract(IsTerminating = false), NetDataContract]
+        void Logout();
+
+        [OperationContract, NetDataContract]
+        UserDN GetCurrentUser();
     }
 
     [ServiceContract]

@@ -23,11 +23,11 @@ namespace Signum.Engine.Authorization
 
         public static void Start(SchemaBuilder sb,  DynamicQueryManager dqm,Type serviceInterface)
         {
-            if (sb.NotDefined<RuleServiceOperationDN>())
+            if (sb.NotDefined<RuleFacadeMethodDN>())
             {
                 AuthLogic.Start(sb,dqm);
                 FacadeMethodLogic.Start(sb, serviceInterface);
-                sb.Include<RuleServiceOperationDN>();
+                sb.Include<RuleFacadeMethodDN>();
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified+= UserAndRoleLogic_RolesModified;
@@ -41,7 +41,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saved(Schema sender, IdentifiableEntity ident)
         {
-            if (ident is RuleServiceOperationDN)
+            if (ident is RuleFacadeMethodDN)
             {
                 Transaction.RealCommit += () => _runtimeRules = null;
             }
@@ -78,12 +78,12 @@ namespace Signum.Engine.Authorization
         public static void SetAllowedRule(List<AllowedRule> rules, Lazy<RoleDN> roleLazy)
         {
             var role = roleLazy.Retrieve();
-            var current = Database.Query<RuleServiceOperationDN>().Where(r => r.Role == role).ToDictionary(a => a.ServiceOperation);
+            var current = Database.Query<RuleFacadeMethodDN>().Where(r => r.Role == role).ToDictionary(a => a.ServiceOperation);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => (FacadeMethodDN)r.Resource);
 
             Synchronizer.Syncronize(current, should,
                 (s, sr) => sr.Delete(),
-                (s, ar) => new RuleServiceOperationDN { ServiceOperation = s, Allowed = ar.Allowed, Role = role }.Save(),
+                (s, ar) => new RuleFacadeMethodDN { ServiceOperation = s, Allowed = ar.Allowed, Role = role }.Save(),
                 (s, sr, ar) => { sr.Allowed = ar.Allowed; sr.Save(); });
 
             _runtimeRules = null; 
@@ -102,7 +102,7 @@ namespace Signum.Engine.Authorization
             {
                 List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
 
-                Dictionary<RoleDN, Dictionary<string, bool>> realRules = Database.RetrieveAll<RuleServiceOperationDN>()
+                Dictionary<RoleDN, Dictionary<string, bool>> realRules = Database.RetrieveAll<RuleFacadeMethodDN>()
                     .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => a.ServiceOperation.Name, a => a.Allowed));
 
                 Dictionary<RoleDN, Dictionary<string, bool>> newRules = new Dictionary<RoleDN, Dictionary<string, bool>>();

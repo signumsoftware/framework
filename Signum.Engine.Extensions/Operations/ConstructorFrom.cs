@@ -9,10 +9,8 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Operations
 {
-    public interface IConstructorFromOperation : IOperation
+    public interface IConstructorFromOperation : IEntityOperation
     {
-        bool CanConstruct(IIdentifiable entity);
-
         IIdentifiable Construct(IIdentifiable entity, params object[] parameters);
         IIdentifiable Construct(Lazy lazy, params object[] parameters);
     }
@@ -36,7 +34,7 @@ namespace Signum.Engine.Operations
             this.Returns = true;
         }
 
-        bool IConstructorFromOperation.CanConstruct(IIdentifiable entity)
+        bool IEntityOperation.CanExecute(IIdentifiable entity)
         {
             return OnCanConstruct(entity) == null;
         }

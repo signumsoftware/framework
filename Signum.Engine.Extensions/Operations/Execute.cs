@@ -10,9 +10,8 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Operations
 {
-    public interface IExecuteOperation : IOperation
+    public interface IExecuteOperation : IEntityOperation
     {
-        bool CanExecute(IIdentifiable entity); 
         void Execute(IIdentifiable entity, params object[] parameters);
     }
 
@@ -35,7 +34,7 @@ namespace Signum.Engine.Operations
             this.Returns = true;
         }
 
-        bool IExecuteOperation.CanExecute(IIdentifiable entity)
+        bool IEntityOperation.CanExecute(IIdentifiable entity)
         {
             return OnCanExecute((T)entity) == null;
         }

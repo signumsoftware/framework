@@ -12,12 +12,34 @@ namespace Signum.Services
     public interface IOperationServer
     {
         [OperationContract, NetDataContract]
-        List<OperationInfo> GetOperationInfos(Lazy lazy);
+        List<OperationInfo> GetEntityOperationInfos(Lazy lazy);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] parameters);
+        List<OperationInfo> GetQueryOperationInfos(Type entityType);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum operationKey, params object[] parameters);
+        List<OperationInfo> GetConstructorOperationInfos(Type entityType);
+
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args);
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum operationKey, params object[] args);
+
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args);
+
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ConstructFrom(IIdentifiable entity, Type type, Enum operationKey, params object[] args);
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ConstructFrom(Lazy lazy, Type type, Enum operationKey, params object[] args);
+
+
+        [OperationContract, NetDataContract]
+        IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args);
     }
 }

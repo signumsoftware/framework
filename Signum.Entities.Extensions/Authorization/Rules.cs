@@ -36,7 +36,7 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class RuleServiceOperationDN : IdentifiableEntity
+    public class RuleFacadeMethodDN : IdentifiableEntity
     {
         RoleDN role;
         [NotNullValidator]

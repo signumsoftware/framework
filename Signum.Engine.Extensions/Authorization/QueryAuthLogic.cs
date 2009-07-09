@@ -35,6 +35,8 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
+
+                DynamicQueryManager.AllowQuery += GetQueryAllowed;
             }
         }
 

@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.Start(sb,dqm);
                 OperationLogic.Start(sb);
 
-                OperationLogic.ExecutingEvent += new ExecuteOperationHandler(OperationLogic_ExecutingEvent);
+                OperationLogic.BeginOperation += new OperationHandler(OperationLogic_BeginOperation); 
 
                 sb.Include<RuleOperationDN>();
                 sb.Schema.Initializing += Schema_Initializing;
@@ -58,10 +58,10 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void OperationLogic_ExecutingEvent(Enum operationKey, IdentifiableEntity entity, object[] parameters)
+        static void OperationLogic_BeginOperation(IOperation operation, IdentifiableEntity entity)
         {
-            if (!GetAllowed(UserDN.Current.Role, operationKey))
-                throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(operationKey));
+            if (!GetAllowed(UserDN.Current.Role, operation.Key))
+                throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(operation.Key));
         }
 
         static bool GetAllowed(RoleDN role, Enum operationKey)
@@ -75,9 +75,11 @@ namespace Signum.Engine.Authorization
                   role.Roles.Select(r => GetAllowed(r, operationKey)).MaxAllowed();
         }
 
-        public static List<OperationInfo> GetActionInfos(RoleDN role, Lazy lazy)
+        public static List<OperationInfo> Filter(List<OperationInfo> operationInfos)
         {
-            return OperationLogic.GetOperationInfos(lazy).Where(ai => GetAllowed(role, ai.Key)).ToList(); 
+            RoleDN role = UserDN.Current.Role;
+
+            return operationInfos.Where(ai => GetAllowed(role, ai.Key)).ToList(); 
         }
 
         public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)
