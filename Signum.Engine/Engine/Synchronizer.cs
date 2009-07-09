@@ -150,7 +150,7 @@ namespace Signum.Engine
 
                 List<string> sms = newOnly.OrderBy(n => sd.Distance(old, n)).ToList();
             retry:
-                Console.WriteLine("'{0}' has been renamed?".Formato(old, replacementsKey));
+                Console.WriteLine("'{0}' has been renamed in {1}?".Formato(old, replacementsKey));
                 sms.Select((s, i) => "- {0}: {1} ".Formato(i, s)).ToConsole();
                 Console.WriteLine();
                 Console.WriteLine("- n: None");
