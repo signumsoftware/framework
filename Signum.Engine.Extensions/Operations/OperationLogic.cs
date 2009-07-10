@@ -29,7 +29,7 @@ namespace Signum.Engine.Operations
     public interface IEntityOperation : IOperation
     {
         bool AllowsNew { get; }
-        bool CanExecute(IIdentifiable entity);
+        bool CanExecute(IIdentifiable entity); 
     }
 
     public static class OperationLogic
@@ -65,7 +65,7 @@ namespace Signum.Engine.Operations
                      OperationKeys,
                      a => a.Key,
                      k => OperationDN.UniqueKey(k),
-                     (a, k) => new { a, k }, "Caching ActionDN").ToDictionary(p => p.k, p => p.a);
+                     (a, k) => new { a, k }, "Caching OperationDN").ToDictionary(p => p.k, p => p.a);
 
                 ToEnum = ToOperation.Keys.ToDictionary(k => OperationDN.UniqueKey(k));
             }
@@ -374,7 +374,7 @@ namespace Signum.Engine.Operations
                 .Select(t => operations.TryGetC(t).TryGetC(operationKey)).FirstOrDefault();
 
             if (result != null)
-                return (IExecuteOperation)result;
+                return result;
 
             List<Type> interfaces = type.GetInterfaces()
                 .Where(t => typeof(IdentifiableEntity).IsAssignableFrom(t) && operations.TryGetC(t).TryGetC(operationKey) != null)

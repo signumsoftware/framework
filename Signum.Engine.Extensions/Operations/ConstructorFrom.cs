@@ -22,16 +22,16 @@ namespace Signum.Engine.Operations
         public Enum Key { get; private set; } 
         public Type Type { get { return typeof(F); } }
         public OperationType OperationType { get { return OperationType.ConstructorFrom; } }
-        public Func<F, object[], T> FromEntity { get; set; }
-        public Func<Lazy<F>, object[], T> FromLazy { get; set; }
+
         public bool Lazy { get; set; }
         public bool Returns { get; set; }
 
         public bool AllowsNew { get; set; }
-        
+
+        public Func<F, object[], T> FromEntity { get; set; }
+        public Func<Lazy<F>, object[], T> FromLazy { get; set; }
         public Func<F, string> CanConstruct { get; set; }
-
-
+        
         public BasicConstructorFrom(Enum key)
         {
             this.Key = key;

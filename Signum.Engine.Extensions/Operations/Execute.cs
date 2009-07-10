@@ -26,8 +26,8 @@ namespace Signum.Engine.Operations
 
         public bool AllowsNew { get; set; }
 
-        public Func<T, string> CanExecute { get; set; }
         public Action<T, object[]> Execute { get; set; }
+        public Func<T, string> CanExecute { get; set; }
 
         public BasicExecute(Enum key)
         {

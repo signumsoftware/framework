@@ -13,6 +13,7 @@ using Win = System.Windows;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Signum.Windows.Operations
 {
@@ -24,13 +25,10 @@ namespace Signum.Windows.Operations
         {
             Manager = operationManager;
 
-            ButtonBar.GetButtonBarElement +=
-                (obj, mainControl) => obj is IdentifiableEntity ?
-                Server.Service<IOperationServer>().GetEntityOperationInfos((IdentifiableEntity)obj)
-                .Select(oi => Manager.GenerateButton(oi, mainControl)).NotNull().ToList() : null;
+            ButtonBar.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
             Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
-        } 
+        }
 
         public static Brush GetBackground(Enum key)
         {
@@ -51,6 +49,18 @@ namespace Signum.Windows.Operations
     public class OperationManager
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
+
+        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, Control mainControl)
+        {
+            if (!(entity is IdentifiableEntity))
+                return null; 
+
+            var list = Server.Service<IOperationServer>().GetEntityOperationInfos((IdentifiableEntity)entity);
+
+            var result =  list.Select(oi => GenerateButton(oi, mainControl)).NotNull().ToList();
+
+            return result;
+        } 
 
         protected internal virtual Win.FrameworkElement GenerateButton(OperationInfo operationInfo, Win.FrameworkElement entityControl)
         {
@@ -198,7 +208,7 @@ namespace Signum.Windows.Operations
 
     public class OperationSettings
     {
-        public static readonly OperationSettings Hidden; 
+        public static readonly OperationSettings Hidden = new OperationSettings(); 
 
         public string Text { get; set; }
         public ImageSource Image { get; set; }

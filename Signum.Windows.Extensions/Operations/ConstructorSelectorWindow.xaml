@@ -1,6 +1,7 @@
 ﻿<Window x:Class="Signum.Windows.Operations.ConstructorSelectorWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:m2="clr-namespace:Signum.Windows.Extensions"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     WindowStartupLocation="CenterOwner"    
     SizeToContent="WidthAndHeight"
@@ -9,7 +10,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock x:Name="tb" Grid.Row="0" Margin="10,10,10,0" FontWeight="bold"/>
         <Border BorderThickness="1" BorderBrush="RoyalBlue" Margin="10" Grid.Row="1" CornerRadius="4" Padding="2">
@@ -18,8 +18,8 @@
                     <DataTemplate>
                         <ToggleButton Checked="ToggleButton_Checked" Padding="3">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="{Binding Converter={x:Static m:Converters.TypeImage}}" Height="16" Width="16"/>
-                                <TextBlock Text="{Binding Converter={x:Static m:Converters.TypeName}}" FontSize="12" Margin="10,0"/>
+                                <Image Source="{Binding Converter={x:Static m2:Converters.OperationImage}}" Height="16" Width="16"/>
+                                <TextBlock Text="{Binding Converter={x:Static m2:Converters.OperationText}}" FontSize="12" Margin="10,0"/>
                             </StackPanel>
                         </ToggleButton>
                     </DataTemplate>
@@ -36,6 +36,5 @@
                 </ItemsControl.Template>
             </ItemsControl>
         </Border>
-        <m:ImageButton x:Name="btCancel"  HorizontalAlignment="Right" Margin="6,4,6,4"  Image="Images\cancel.png" Content="{m:Loc Cancel}" IsCancel="true" Click="btCancel_Click" Grid.Row="2"/>
     </Grid>
 </Window>
