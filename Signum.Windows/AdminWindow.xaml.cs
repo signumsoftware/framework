@@ -53,7 +53,7 @@ namespace Signum.Windows
 
         void AdminWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            entityList.Create = Navigator.FindSettings(type).TryCS(c => c.IsCreable(true)) ?? false;
+            entityList.Create = Navigator.IsCreable(type, true);
 
             Retrieve();
         } 

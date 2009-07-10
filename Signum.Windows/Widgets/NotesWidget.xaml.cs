@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Services;
+using Signum.Windows.Basics;
 
 namespace Signum.Windows
 {
@@ -102,6 +103,8 @@ namespace Signum.Windows
 
             NotesWidget.CreateNote = ei => ei.IsNew ? null : new NoteDN { Entity = ei.ToLazy() };
             NotesWidget.RetrieveNotes = ei => ei == null ? null : Server.Service<INotesServer>().RetrieveNotes(ei.ToLazy());
+
+            Navigator.Manager.Settings.Add(typeof(NoteDN), new EntitySettings(false) { View = () => new Note(), IsCreable = admin => false });
         }
     }
 }

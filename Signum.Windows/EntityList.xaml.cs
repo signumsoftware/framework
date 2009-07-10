@@ -98,13 +98,13 @@ namespace Signum.Windows
 
         public void EntitiesChanged(DependencyPropertyChangedEventArgs e)
         {
-            if (e.NewValue != null && cleanType != null)
+            if (e.NewValue != null && CleanType != null)
             {
-                EntitySettings es = Navigator.Manager.Settings.TryGetC(cleanType);
+                EntitySettings es = Navigator.Manager.Settings.TryGetC(CleanType);
                 if (es!= null && es.CollectionViewOperations != null)
                 {
                     var colView = CollectionViewSource.GetDefaultView(e.NewValue);
-                    es.CollectionViewOperations(cleanLazy, colView);
+                    es.CollectionViewOperations(CleanLazy, colView);
                 }
             }
         }

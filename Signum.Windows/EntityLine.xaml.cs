@@ -101,7 +101,7 @@ namespace Signum.Windows
             if (AutoCompleting != null)
                 value = AutoCompleting(arg);
             else
-                value = Server.FindLazyLike(cleanType, safeImplementations, arg, AutoCompleteElements);  
+                value = Server.FindLazyLike(CleanType, safeImplementations, arg, AutoCompleteElements);  
 
             return value;
         }

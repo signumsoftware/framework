@@ -111,18 +111,18 @@ namespace Signum.Windows
         {
  	        if(typeof(Lazy).IsAssignableFrom(type))
             {
-                cleanLazy = true; 
-                cleanType = EntityType.GetGenericArguments()[0]; 
+                CleanLazy = true;
+                CleanType = Reflector.ExtractLazy(type); 
             }
             else
             {
-                cleanLazy = false; 
-                cleanType = EntityType; 
+                CleanLazy = false; 
+                CleanType = EntityType; 
             }
         }
 
-        protected Type cleanType;
-        protected bool cleanLazy;
+        protected internal Type CleanType { get; private set; }
+        protected internal bool CleanLazy { get; private set; }
 
         protected bool isUserInteraction =false;
 
@@ -155,25 +155,6 @@ namespace Signum.Windows
                 throw new ApplicationException(Properties.Resources.EntityTypeItsNotDeterminedForControl0);
             }
 
-            if (this.NotSet(EntityTemplateProperty))
-            {
-                EntityTemplate = Navigator.FindDataTemplate(this, EntityType);
-            }
-
-            EntitySettings es = Navigator.Manager.Settings.TryGetC(cleanType);
-
-            if (this.NotSet(CreateProperty) && Create && Implementations == null)
-                Create = es == null ? true : es.IsCreable(false);
-
-            if (this.NotSet(ViewProperty) && View && Implementations == null)
-                View = es == null ? false : es.IsViewable(false);
-
-            if (this.NotSet(FindProperty) && Find && Implementations == null)
-                Find = Navigator.IsFindable(cleanType);
-
-            if (this.NotSet(ViewOnCreateProperty) && Implementations == null && (es == null || (es.View == null && es.ViewWindow == null)))
-                ViewOnCreate = false;
-
             UpdateVisibility();
         }
 
@@ -200,11 +181,9 @@ namespace Signum.Windows
 
             if (View && this.NotSet(ViewProperty) && Implementations != null)
             {
-                Type rt = (entity as Lazy).TryCC(l => l.RuntimeType) ?? entity.GetType();
+                Type runtimeType = CleanLazy ? ((Lazy)entity).RuntimeType : entity.GetType();
 
-                EntitySettings es = Navigator.Manager.Settings.TryGetC(rt);
-
-                return es != null && es.IsViewable(false);
+                return Navigator.IsViewable(runtimeType, false);
             }
             else
                 return View;
@@ -236,7 +215,7 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = Implementations == null ? cleanType : Navigator.SelectType(Implementations);
+                Type type = Implementations == null ? CleanType : Navigator.SelectType(Implementations);
                 if (type == null)
                     return null;
 
@@ -266,7 +245,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = Implementations == null ? cleanType : Navigator.SelectType(Implementations);
+                Type type = Implementations == null ? CleanType : Navigator.SelectType(Implementations);
                 if (type == null)
                     return null;
 
@@ -290,7 +269,7 @@ namespace Signum.Windows
                 return null;
 
             if (Viewing == null)
-                return Navigator.View(entity, typeof(EmbeddedEntity).IsAssignableFrom(cleanType) ? Common.GetTypeContext(this) : null);
+                return Navigator.View(entity, typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? Common.GetTypeContext(this) : null);
             else
                 return Viewing(entity);
         }

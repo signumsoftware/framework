@@ -123,6 +123,22 @@ namespace Signum.Windows
         {
             return Manager.ServerTypes.TryGetC(t).TryCC(a => a.FriendlyName) ?? t.FriendlyName();
         }
+
+
+        public static bool IsCreable(Type type, bool admin)
+        {
+            return Manager.IsCreable(type, admin); 
+        }
+
+        public static bool IsReadOnly(Type type, bool admin)
+        {
+            return Manager.IsReadOnly(type, admin); 
+        }
+
+        public static bool IsViewable(Type type, bool admin)
+        {
+            return Manager.IsViewable(type, admin); 
+        }
     }
 
 
@@ -131,6 +147,10 @@ namespace Signum.Windows
         public Dictionary<Type, EntitySettings> Settings{get;set;}
         public Dictionary<object, QuerySetting> QuerySetting{get;set;}
         public Dictionary<Type, TypeDN> ServerTypes{get;private set;}
+
+        public Func<Type, bool> GlobalIsCreable { get; set; }
+        public Func<Type, bool> GlobalIsReadOnly { get; set; }
+        public Func<Type, bool> GlobalIsViewable { get; set; }
 
         internal void Initialize()
         {
@@ -144,7 +164,6 @@ namespace Signum.Windows
 
             ServerTypes = Server.Service<IBaseServer>().ServerTypes(); 
         }
-
 
         public virtual string SearchTitle(object queryName)
         {
@@ -228,7 +247,8 @@ namespace Signum.Windows
 
             win.Icon = EntitySettings.GetIcon(es, EntitySettings.WindowsType.View);
 
-            Common.SetIsReadOnly(win, es.IsReadOnly(viewOptions.Admin)); 
+            if (Navigator.IsReadOnly(entity.GetType(), viewOptions.Admin))
+                Common.SetIsReadOnly(win, true); 
 
             if (viewOptions.Clone && entity is ICloneable)
                 win.DataContext = ((ICloneable)entity).Clone();
@@ -256,6 +276,42 @@ namespace Signum.Windows
             }
 
             return null;
+        }
+
+        internal protected virtual bool IsCreable(Type type, bool admin)
+        {
+            if (GlobalIsCreable != null && !GlobalIsCreable(type))
+                return false;
+
+            EntitySettings es = Settings.TryGetC(type); 
+            if(es == null)
+                return true; 
+            
+            return es.IsCreable(admin);
+        }
+
+        internal protected virtual bool IsReadOnly(Type type, bool admin)
+        {
+            if (GlobalIsReadOnly != null && !GlobalIsReadOnly(type))
+                return false;
+
+            EntitySettings es = Settings.TryGetC(type);
+            if (es == null)
+                return false;
+
+            return es.IsReadOnly(admin);
+        }
+
+        internal protected virtual bool IsViewable(Type type, bool admin)
+        {
+            if (GlobalIsViewable != null && !GlobalIsViewable(type))
+                return false;
+
+            EntitySettings es = Settings.TryGetC(type);
+            if (es == null)
+                return false;
+
+            return es.IsViewable(admin);
         }
 
         public virtual void Admin(AdminOptions adminOptions)

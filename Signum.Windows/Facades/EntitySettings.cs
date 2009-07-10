@@ -17,9 +17,11 @@ namespace Signum.Windows
     {
         public Func<Control> View { get; set; }
         public Func<Window> ViewWindow { get; set; }
+
         public Func<bool, bool> IsCreable { get; set; }
         public Func<bool, bool> IsReadOnly { get; set; }
         public Func<bool, bool> IsViewable { get; set; }
+
         public Action<bool, ICollectionView> CollectionViewOperations { get; set; }
         public DataTemplate DataTemplate { get; set; }
         public Func<ImageSource> Icon { get; set; }

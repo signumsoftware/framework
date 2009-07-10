@@ -62,7 +62,7 @@ namespace Signum.Windows
             {
                 changing = true;
 
-                object newEntity = cleanLazy ? Entity : Server.Convert(Entity, Reflector.GenerateLazy(cleanType ?? EntityType));
+                object newEntity = CleanLazy ? Entity : Server.Convert(Entity, Reflector.GenerateLazy(CleanType ?? EntityType));
 
                 if (!isLoaded)
                     combo.Items.Add(newEntity);
@@ -135,7 +135,7 @@ namespace Signum.Windows
             if (LoadData != null)
                 data = LoadData();
             else 
-                data = Server.RetriveAllLazy(cleanType, safeImplementations);
+                data = Server.RetriveAllLazy(CleanType, safeImplementations);
 
             try
             {
@@ -146,7 +146,7 @@ namespace Signum.Windows
                     combo.Items.Add(o);
                 }
 
-                combo.SelectedItem = !cleanLazy ? Server.Convert(Entity, Reflector.GenerateLazy(EntityType)) : Entity;
+                combo.SelectedItem = !CleanLazy ? Server.Convert(Entity, Reflector.GenerateLazy(EntityType)) : Entity;
             }
             finally
             {

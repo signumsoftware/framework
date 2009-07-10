@@ -44,9 +44,7 @@ namespace Signum.Windows
 
                 Type cleanType = Entity is Lazy ? ((Lazy)Entity).RuntimeType : Entity.GetType(); 
 
-                EntitySettings es = Navigator.Manager.Settings.TryGetC(cleanType);
-
-                btView.IsEnabled = es == null ? false : es.IsViewable(false);
+                btView.IsEnabled = Navigator.IsViewable(cleanType, false);
             }
             else
             {

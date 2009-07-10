@@ -161,16 +161,11 @@ namespace Signum.Windows
                 entityIndex = view.Columns.IndexOf(entity);
                 SetValue(EntityTypeKey, Reflector.ExtractLazy(entity.Type));
 
-                EntitySettings es = Navigator.Manager.Settings.TryGetC(EntityType);
+                if (this.NotSet(ViewProperty) && View)
+                    View = Navigator.IsViewable(EntityType, true);
 
-                if (es != null)
-                {
-                    if (this.NotSet(ViewProperty) && View)
-                        View = es == null ? false : es.IsViewable(true);
-
-                    if (this.NotSet(CreateProperty) && Create)
-                        Create = es == null ? true : es.IsCreable(true);
-                }
+                if (this.NotSet(CreateProperty) && Create)
+                    Create = Navigator.IsCreable(EntityType, true);
             }
 
             var columns = view.Columns.Where(a => a.Filterable).ToList();
@@ -247,19 +242,15 @@ namespace Signum.Windows
      
                 };
 
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type) &&
-                !typeof(Lazy).IsAssignableFrom(type))
-                return null;
+            if (typeof(IdentifiableEntity).IsAssignableFrom(type) || typeof(Lazy).IsAssignableFrom(type))
+                return new DataTemplate(type)
+                {
+                    VisualTree = new FrameworkElementFactory(typeof(LightEntityLine))
+                        .Do(f => f.SetBinding(LightEntityLine.EntityProperty, b))
+                        .Do(f => f.SetValue(LightEntityLine.HorizontalAlignmentProperty, HorizontalAlignment.Left))
+                };
 
-            if (!Navigator.FindSettings(type).TryCS(a => a.IsViewable(false)) ?? false)
-                return null;
-
-            return new DataTemplate(type)
-            {
-                VisualTree = new FrameworkElementFactory(typeof(LightEntityLine))
-                    .Do(f => f.SetBinding(LightEntityLine.EntityProperty, b))
-                    .Do(f => f.SetValue(LightEntityLine.HorizontalAlignmentProperty, HorizontalAlignment.Left))
-            };
+            return null;
         }
 
         private bool IsNumberOrDate(Type type)

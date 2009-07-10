@@ -60,7 +60,7 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty TypeContextProperty =
-        DependencyProperty.RegisterAttached("TypeContext", typeof(TypeContext), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
+            DependencyProperty.RegisterAttached("TypeContext", typeof(TypeContext), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
         public static TypeContext GetTypeContext(DependencyObject obj)
         {
             return (TypeContext)obj.GetValue(TypeContextProperty);
@@ -70,6 +70,18 @@ namespace Signum.Windows
             obj.SetValue(TypeContextProperty, value);
         }
 
+
+        public static readonly DependencyProperty CollapseIfNullProperty =
+            DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
+        public static bool GetCollapseIfNull(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(CollapseIfNullProperty);
+        }
+
+        public static void SetCollapseIfNull(DependencyObject obj, bool value)
+        {
+            obj.SetValue(CollapseIfNullProperty, value);
+        }
 
 
         public static readonly DependencyProperty RouteProperty =
@@ -141,9 +153,31 @@ namespace Signum.Windows
             RouteTask += TaskSetLabelText;
             RouteTask += TaskSetIsReadonly;
             RouteTask += TaskSetImplementations;
+            RouteTask += TaskEntityTemplate;
+            RouteTask += TaskEntityBaseProperties;
+            RouteTask += TaskCollaspeIfNull;
         }
-        
+  
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
+        {
+            DependencyProperty valueProperty = ValueProperty(fe);
+
+            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
+
+            if (!BindingOperations.IsDataBound(fe, valueProperty))
+            {
+                Binding b = new Binding(route)
+                {
+                    Mode = isReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
+                    NotifyOnValidationError = true,
+                    ValidatesOnExceptions = true,
+                    ValidatesOnDataErrors = true,
+                };
+                fe.SetBinding(valueProperty, b);
+            }
+        }
+
+        static DependencyProperty ValueProperty(FrameworkElement fe)
         {
             DependencyProperty valueProp =
                 fe is ValueLine ? ValueLine.ValueProperty :
@@ -152,18 +186,7 @@ namespace Signum.Windows
                 fe is EntityCombo ? EntityCombo.EntityProperty :
                 fe is FileLine ? FileLine.EntityProperty :
                 FrameworkElement.DataContextProperty;
-
-            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
-
-            if (!BindingOperations.IsDataBound(fe, valueProp))
-            {
-                Binding b = new Binding(route);
-                b.Mode = isReadOnly ? BindingMode.OneWay : BindingMode.TwoWay;
-                b.NotifyOnValidationError = true;
-                b.ValidatesOnExceptions = true;
-                b.ValidatesOnDataErrors = true;
-                fe.SetBinding(valueProp, b);
-            }
+            return valueProp;
         }
 
         public static void TaskSetTypeProperty(FrameworkElement fe, string route, TypeContext context)
@@ -227,7 +250,48 @@ namespace Signum.Windows
                         eb.Implementations = Server.Service<IBaseServer>().FindImplementations(type, list.Cast<MemberInfo>().ToArray());
                 }
             }
-        } 
+        }
+
+        public static void TaskEntityTemplate(FrameworkElement fe, string route, TypeContext context)
+        {
+            EntityBase eb = fe as EntityBase;
+            if (eb != null && eb.NotSet(EntityBase.EntityTemplateProperty))
+            {
+                eb.EntityTemplate = Navigator.FindDataTemplate(fe, eb.EntityType);
+            }
+        }
+
+        public static void TaskEntityBaseProperties(FrameworkElement fe, string route, TypeContext context)
+        {
+            EntityBase eb = fe as EntityBase;
+            if (eb is EntityBase)
+            {
+                if (eb.NotSet(EntityBase.CreateProperty) && eb.Create && eb.Implementations == null)
+                    eb.Create = Navigator.IsCreable(eb.CleanType, false);
+
+                if (eb.NotSet(EntityBase.ViewProperty) && eb.View && eb.Implementations == null)
+                    eb.View = Navigator.IsViewable(eb.CleanType, false);
+
+                if (eb.NotSet(EntityBase.FindProperty) && eb.Find && eb.Implementations == null)
+                    eb.Find = Navigator.IsFindable(eb.CleanType);
+
+                if (eb.NotSet(EntityBase.ViewOnCreateProperty) && eb.ViewOnCreate && !eb.View)
+                    eb.ViewOnCreate = false;
+            }
+        }
+
+        static void TaskCollaspeIfNull(FrameworkElement fe, string route, TypeContext context)
+        {
+            if (GetCollapseIfNull(fe) && fe.Visibility == Visibility.Visible)
+            {
+                DependencyProperty valueProperty = ValueProperty(fe);
+
+                object value = fe.GetValue(valueProperty);
+
+                if (value == null)
+                    fe.Visibility = Visibility.Collapsed;
+            }
+        }
         #endregion
 
         public static readonly RoutedEvent ChangeDataContextEvent = EventManager.RegisterRoutedEvent("ChangeDataContext", RoutingStrategy.Bubble, typeof(ChangeDataContextHandler), typeof(Common));
@@ -239,7 +303,6 @@ namespace Signum.Windows
         {
             ((UIElement)d).RemoveHandler(ChangeDataContextEvent, handler);
         }
-
 
         public static bool HasChanges(this FrameworkElement element)
         {
