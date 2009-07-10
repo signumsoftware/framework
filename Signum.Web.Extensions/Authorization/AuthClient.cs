@@ -17,13 +17,18 @@ namespace Signum.Web.Authorization
             manager.EntitySettings.Add(typeof(RoleDN), new EntitySettings(false)); //{ View = () => new Role() });
 
             if (property)
-                Common.CommonTask += new CommonTask(TaskAuthorize);
-            
+                Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
+
             if (types)
-                TypeAuthLogic.AuthorizedTypes().JoinDictionaryForeach(manager.EntitySettings, Authorize);
+            {
+                Navigator.NavigationManager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type) == TypeAccess.Create;
+                Navigator.NavigationManager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type) < TypeAccess.Modify;
+                Navigator.NavigationManager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
+            }
+                //TypeAuthLogic.AuthorizedTypes().JoinDictionaryForeach(manager.EntitySettings, Authorize);
         }
 
-        static void TaskAuthorize(BaseLine bl, Type type, TypeContext context)
+        static void TaskAuthorizeProperties(BaseLine bl, Type type, TypeContext context)
         {
             List<PropertyInfo> contextList = context.GetPath();
 
@@ -54,17 +59,19 @@ namespace Signum.Web.Authorization
             }
         }
 
-        static void Authorize(Type type, TypeAccess typeAccess, EntitySettings settings)
-        {
-            if (typeAccess == TypeAccess.None)
-                settings.IsViewable = admin => false;
+       
 
-            if (typeAccess <= TypeAccess.Read)
-                settings.IsReadOnly = admin => true;
+        //static void Authorize(Type type, TypeAccess typeAccess, EntitySettings settings)
+        //{
+        //    if (typeAccess == TypeAccess.None)
+        //        settings.IsViewable = admin => false;
 
-            if (typeAccess <= TypeAccess.Modify)
-                settings.IsCreable = admin => false;
-        }
+        //    if (typeAccess <= TypeAccess.Read)
+        //        settings.IsReadOnly = admin => true;
+
+        //    if (typeAccess <= TypeAccess.Modify)
+        //        settings.IsCreable = admin => false;
+        //}
 
     }
 }
