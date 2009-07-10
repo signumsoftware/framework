@@ -66,7 +66,6 @@ namespace Signum.Engine.Operations
                     {
                         Operation = OperationLogic.ToOperation[Key],
                         Start = DateTime.Now,
-                        Entity = ((IdentifiableEntity)entity).ToLazy(),
                         User = UserDN.Current
                     };
 
@@ -74,6 +73,7 @@ namespace Signum.Engine.Operations
 
                     ((IdentifiableEntity)entity).Save(); //Nothing happens if allready saved
 
+                    log.Entity = ((IdentifiableEntity)entity).ToLazy(); //in case AllowsNew == true
                     log.End = DateTime.Now;
                     log.Save();
 
