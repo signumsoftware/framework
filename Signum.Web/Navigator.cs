@@ -403,7 +403,7 @@ namespace Signum.Web
         protected virtual string GetQueryName(object queryName)
         { 
             return (queryName is Type) ? (TypesToURLNames.TryGetC<Type, string>((Type)queryName) ?? ((Type)queryName).Name) :
-                   (queryName is Enum) ? EnumExtensions.NiceToString(queryName) :
+                   (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
                    queryName.ToString();
         }
 
