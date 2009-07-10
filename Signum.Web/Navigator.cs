@@ -21,6 +21,8 @@ using System.Configuration;
 
 namespace Signum.Web
 {
+    public delegate bool IsViewableEvent(Type type, bool admin);
+
     public static class Navigator
     {
         private static Func<Type, int, string> viewRoute;
@@ -189,20 +191,27 @@ namespace Signum.Web
             set { NavigationManager.NormalPageUrl = value; }
         }
 
-
         internal static void ConfigureEntityBase(EntityBase el, Type entityType, bool admin)
         {
-            EntitySettings es = NavigationManager.EntitySettings[entityType];
-            if (es.IsCreable != null)
-                el.Create = es.IsCreable(admin);
-
-            if (es.IsViewable != null)
-                el.View = es.IsViewable(admin);
-
+            el.Create = Navigator.IsCreable(entityType, admin);
+            el.View = Navigator.IsViewable(entityType, admin);
             el.Find = NavigationManager.ExistsQuery(TypesToURLNames[entityType]);
         }
-    }
 
+        public static bool IsViewable(Type type, bool admin)
+        {
+            return NavigationManager.IsViewable(type, admin);
+        }
+        public static bool IsReadOnly(Type type, bool admin)
+        {
+            return NavigationManager.IsReadOnly(type, admin);
+        }
+        public static bool IsCreable(Type type, bool admin)
+        {
+            return NavigationManager.IsCreable(type, admin);
+        }
+    }
+    
     public class NavigationManagerSettings
     {
         public Dictionary<Type, EntitySettings> EntitySettings = new Dictionary<Type, EntitySettings>();
@@ -228,6 +237,10 @@ namespace Signum.Web
         protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
 
         protected internal Dictionary<Type, Func<ModifiableEntity>> Constructors;
+
+        public event Func<Type, bool> GlobalIsCreable;
+        public event Func<Type, bool> GlobalIsViewable;
+        public event Func<Type, bool> GlobalIsReadOnly;
 
         internal bool ExistsQuery(string urlQueryName)
         {
@@ -331,8 +344,8 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
             controller.ViewData[ViewDataKeys.Create] =
                 (findOptions.Create.HasValue) ?
-                findOptions.Create.Value :
-                EntitySettings[entitiesType].ThrowIfNullC("Invalid type {0}".Formato(entitiesType.Name)).IsCreable(false);
+                    findOptions.Create.Value :
+                    Navigator.IsCreable(entitiesType, true); ;
 
             return new ViewResult()
             {
@@ -364,8 +377,8 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
             controller.ViewData[ViewDataKeys.Create] =
                 (findOptions.Create.HasValue) ?
-                findOptions.Create.Value :
-                EntitySettings[entitiesType].ThrowIfNullC("Invalid type {0}".Formato(entitiesType.Name)).IsCreable(false);
+                    findOptions.Create.Value :
+                    Navigator.IsCreable(entitiesType, true);
 
             return new PartialViewResult
             {
@@ -390,7 +403,7 @@ namespace Signum.Web
         protected virtual string GetQueryName(object queryName)
         { 
             return (queryName is Type) ? (TypesToURLNames.TryGetC<Type, string>((Type)queryName) ?? ((Type)queryName).Name) :
-                   (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
+                   (queryName is Enum) ? EnumExtensions.NiceToString(queryName) :
                    queryName.ToString();
         }
 
@@ -554,6 +567,30 @@ namespace Signum.Web
                 return Database.Retrieve(type, int.Parse(id));
             else
                 return (IdentifiableEntity)Constructors[type]();
+        }
+
+        protected internal virtual bool IsViewable(Type type, bool admin)
+        {
+            if (GlobalIsViewable != null && !GlobalIsViewable(type))
+                return false;
+
+            return EntitySettings[type].IsViewable(admin);
+        }
+
+        protected internal virtual bool IsReadOnly(Type type, bool admin)
+        {
+            if (GlobalIsReadOnly != null && !GlobalIsReadOnly(type))
+                return false;
+
+            return EntitySettings[type].IsReadOnly(admin);
+        }
+
+        protected internal virtual bool IsCreable(Type type, bool admin)
+        {
+            if (GlobalIsCreable != null && !GlobalIsCreable(type))
+                return false;
+
+            return EntitySettings[type].IsCreable(admin);
         }
     }
 

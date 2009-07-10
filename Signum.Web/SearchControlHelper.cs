@@ -117,7 +117,7 @@ namespace Signum.Web
             helper.ViewData[ViewDataKeys.Create] =
                 (findOptions.Create.HasValue) ?
                 findOptions.Create.Value :
-                Navigator.NavigationManager.EntitySettings[entitiesType].ThrowIfNullC("Invalid type {0}".Formato(entitiesType.Name)).IsCreable(false);
+                Navigator.IsCreable(entitiesType, false);
 
             helper.ViewContext.HttpContext.Response.Write(
                 helper.RenderPartialToString(Navigator.NavigationManager.SearchControlUrl, helper.ViewData));
