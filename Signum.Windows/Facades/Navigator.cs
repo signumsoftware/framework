@@ -138,7 +138,8 @@ namespace Signum.Windows
                 Settings = new Dictionary<Type, EntitySettings>();
 
             var dic = Server.Service<IQueryServer>().GetQueryNames().ToDictionary(a => a, a => new QuerySetting());
-            dic.SetRange(QuerySetting);
+            if (QuerySetting != null)
+                dic.SetRange(QuerySetting);
             QuerySetting = dic;
 
             ServerTypes = Server.Service<IBaseServer>().ServerTypes(); 

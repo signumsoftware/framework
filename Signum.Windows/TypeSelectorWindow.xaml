@@ -10,7 +10,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock x:Name="tb" Grid.Row="0" Margin="10,10,10,0" FontWeight="bold"/>
         <Border BorderThickness="1" BorderBrush="RoyalBlue" Margin="10" Grid.Row="1" CornerRadius="4" Padding="2">
@@ -37,6 +36,5 @@
                 </ItemsControl.Template>
             </ItemsControl>
         </Border>
-        <m:ImageButton x:Name="btCancel"  HorizontalAlignment="Right" Margin="6,4,6,4"  Image="Images\cancel.png" Content="{m:Loc Cancel}" IsCancel="true" Click="btCancel_Click" Grid.Row="2"/>
     </Grid>
 </Window>

@@ -54,11 +54,5 @@ namespace Signum.Windows
             DialogResult = true;
             Close(); 
         }
-
-        private void btCancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close(); 
-        }
     }
 }
