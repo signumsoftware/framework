@@ -13,43 +13,38 @@ namespace Signum.Windows.Authorization
 {
     public static class AuthClient
     {
-        static Dictionary<Type, Dictionary<string, Access>> _runtimeRules;
+        static Dictionary<Type, TypeAccess> typeRules; 
+        static Dictionary<Type, Dictionary<string, Access>> propertyRules;
 
-        static Dictionary<Type, Dictionary<string, Access>> NewCache()
-        {
-            return Server.Service<IPropertyAuthServer>().AuthorizedProperties(); 
-        }
 
         public static void Start(bool types, bool property)
         {
-            Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(true){ View = ()=> new User()});
+            Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(true) { View = () => new User() });
             Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings(false) { View = () => new Role() });
 
             if (property)
             {
-                _runtimeRules = NewCache();
+                propertyRules = Server.Service<IPropertyAuthServer>().AuthorizedProperties();
                 Common.RouteTask += new CommonRouteTask(Common_RouteTask);
             }
 
             if (types)
-                Server.Service<ITypeAuthServer>().AuthorizedTypes().JoinDictionaryForeach(Navigator.Manager.Settings, Authorize);          
+            {
+                typeRules = Server.Service<ITypeAuthServer>().AuthorizedTypes();
+                Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type) == TypeAccess.Create;
+                Navigator.Manager.GlobalIsReadOnly += type => GetTypeAccess(type) < TypeAccess.Modify;
+                Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type) >= TypeAccess.Read;
+            }
         }
 
-        static void Authorize(Type type, TypeAccess typeAccess, EntitySettings settings)
+        static TypeAccess GetTypeAccess(Type type)
         {
-            if (typeAccess == TypeAccess.None)
-                settings.IsViewable = admin => false;
-
-            if (typeAccess <= TypeAccess.Read)
-                settings.IsReadOnly = admin => true;
-
-            if (typeAccess <= TypeAccess.Modify)
-                settings.IsCreable = admin => false;
+           return typeRules.TryGetS(type) ?? TypeAccess.Create;
         }
 
-        static Access GetAccess(Type type, string property)
+        static Access GetPropertyAccess(Type type, string property)
         {
-            return _runtimeRules.TryGetC(type).TryGetS(property) ?? Access.Modify;
+            return propertyRules.TryGetC(type).TryGetS(property) ?? Access.Modify;
         }
 
 
@@ -67,7 +62,7 @@ namespace Signum.Windows.Authorization
 
                 Type type = contextList.Last().Type;
 
-                switch (GetAccess(type, path))
+                switch (GetPropertyAccess(type, path))
                 {
                     case Access.None: fe.Visibility = Visibility.Collapsed; break;
                     case Access.Read: Common.SetIsReadOnly(fe, true); break;
