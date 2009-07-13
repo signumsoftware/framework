@@ -186,7 +186,7 @@ namespace Signum.Windows
 
             if (GetCustomMenuItems != null)
             {
-                MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName)).NotNull().ToArray();
+                MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
                 menu.Items.Clear(); 
                 foreach (MenuItem mi in menus)
                 {
@@ -466,7 +466,7 @@ namespace Signum.Windows
         public static event MenuItemForQueryName GetCustomMenuItems;
     }
 
-    public delegate MenuItem MenuItemForQueryName(object queryName); 
+    public delegate MenuItem MenuItemForQueryName(object queryName, Type entityType); 
 
     public class SearchControlMenuItem : MenuItem
     {

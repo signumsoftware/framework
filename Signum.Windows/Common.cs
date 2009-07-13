@@ -282,14 +282,19 @@ namespace Signum.Windows
 
         static void TaskCollaspeIfNull(FrameworkElement fe, string route, TypeContext context)
         {
-            if (GetCollapseIfNull(fe) && fe.Visibility == Visibility.Visible)
+            if (GetCollapseIfNull(fe) &&  fe.Visibility == Visibility.Visible)
             {
                 DependencyProperty valueProperty = ValueProperty(fe);
 
                 object value = fe.GetValue(valueProperty);
 
-                if (value == null)
-                    fe.Visibility = Visibility.Collapsed;
+                Binding b = new Binding()
+                {
+                    Path = new PropertyPath(valueProperty),
+                    Mode = BindingMode.OneWay,
+                    Converter = Converters.BoolToVisibility
+                };
+                fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }
         }
         #endregion
