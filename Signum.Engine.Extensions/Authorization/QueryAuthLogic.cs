@@ -82,6 +82,8 @@ namespace Signum.Engine.Authorization
 
         public static bool GetQueryAllowed(object queryName)
         {
+            if (!AuthLogic.IsEnabled)
+                return true; 
             return GetAllowed(UserDN.Current.Role, queryName.ToString());
         }
 

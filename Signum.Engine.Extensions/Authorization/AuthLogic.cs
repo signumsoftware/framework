@@ -136,8 +136,9 @@ namespace Signum.Engine.Authorization
 
         public static IDisposable Disable()
         {
+            bool lastValue = temporallyDisabled; 
             temporallyDisabled = true;
-            return new Disposable(() => temporallyDisabled = false);
+            return new Disposable(() => temporallyDisabled = lastValue);
         }
 
         public static bool IsEnabled

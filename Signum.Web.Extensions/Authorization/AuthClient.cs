@@ -11,7 +11,7 @@ namespace Signum.Web.Authorization
 {
     public class AuthClient
     {
-        public static void Start(NavigationManager manager, bool types, bool property)
+        public static void Start(NavigationManager manager, bool types, bool property, bool queries)
         {
             manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(true)); //{ View = () => new User() });
             manager.EntitySettings.Add(typeof(RoleDN), new EntitySettings(false)); //{ View = () => new Role() });
@@ -25,7 +25,9 @@ namespace Signum.Web.Authorization
                 Navigator.NavigationManager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type) < TypeAccess.Modify;
                 Navigator.NavigationManager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
             }
-                //TypeAuthLogic.AuthorizedTypes().JoinDictionaryForeach(manager.EntitySettings, Authorize);
+
+            if (queries)
+                Navigator.NavigationManager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
         }
 
         static void TaskAuthorizeProperties(BaseLine bl, Type type, TypeContext context)
@@ -58,8 +60,6 @@ namespace Signum.Web.Authorization
                 }
             }
         }
-
-       
 
         //static void Authorize(Type type, TypeAccess typeAccess, EntitySettings settings)
         //{
