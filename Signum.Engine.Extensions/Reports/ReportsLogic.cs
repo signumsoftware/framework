@@ -16,7 +16,7 @@ namespace Signum.Engine.Extensions.Reports
             if (excelReport)
             {
                 sb.Include<ExcelReportDN>();
-                dqm[typeof(ExcelReportDN)] = from s in Database.Query<ExcelReportDN>()
+                dqm[typeof(ExcelReportDN)] = (from s in Database.Query<ExcelReportDN>()
                                              select new
                                              {
                                                  Entity = s.ToLazy(),
@@ -25,18 +25,18 @@ namespace Signum.Engine.Extensions.Reports
                                                  s.File.FileName,
                                                  s.DisplayName,
                                                  s.Deleted,
-                                             };
+                                             }).ToDynamic();
                 if (compositeReport)
                 {
                     sb.Include<CompositeReportDN>();
-                    dqm[typeof(CompositeReportDN)] = from e in Database.Query<CompositeReportDN>()
-                                                     select new
-                                                     {
-                                                         Entity = e.ToLazy(),
-                                                         e.Id,
-                                                         e.Nombre,
-                                                         reports = e.ExcelReports.ToString(),                                                     
-                                                     };
+                    dqm[typeof(CompositeReportDN)] = (from e in Database.Query<CompositeReportDN>()
+                                                      select new
+                                                      {
+                                                          Entity = e.ToLazy(),
+                                                          e.Id,
+                                                          e.Nombre,
+                                                          reports = e.ExcelReports.ToString(),
+                                                      }).ToDynamic();
                 }
 
             }

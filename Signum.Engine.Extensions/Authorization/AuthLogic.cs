@@ -34,23 +34,23 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Saved += Schema_Saved;
 
 
-                dqm[typeof(RoleDN)] = from r in Database.Query<RoleDN>()
-                                             select new
-                                             {
-                                                 Entity = r.ToLazy(),
-                                                 r.Id,
-                                                 r.Name,
- 
-                                             };
-                dqm[typeof(UserDN)] = from e in Database.Query<UserDN>()
-                                          select new
-                                          { 
-                                              Entity = e.ToLazy(),
-                                              e.Id,
-                                              e.UserName,
-                                              Rol=e.Role.ToLazy(), 
-                                              Empleado = e.Related.ToString(),
-                                          };
+                dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
+                                       select new
+                                       {
+                                           Entity = r.ToLazy(),
+                                           r.Id,
+                                           r.Name,
+                                       }).ToDynamic();
+
+                dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
+                                       select new
+                                       {
+                                           Entity = e.ToLazy(),
+                                           e.Id,
+                                           e.UserName,
+                                           Rol = e.Role.ToLazy(),
+                                           Empleado = e.Related.ToString(),
+                                       }).ToDynamic();
             }
         }
 
