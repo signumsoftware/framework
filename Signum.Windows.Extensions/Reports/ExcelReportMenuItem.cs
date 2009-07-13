@@ -17,7 +17,7 @@ namespace Signum.Windows.Reports
         {
             base.OnInitialized(e);
             Header = Prop.Resources.ExcelReport;
-            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(new Uri("pack://application:,,,/Signum.Windows.Extensions;component/Images/excel.png", UriKind.Absolute)) };
+            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/excel.png", typeof(ExcelReportMenuItem))) };
         }
 
         protected override void OnClick()

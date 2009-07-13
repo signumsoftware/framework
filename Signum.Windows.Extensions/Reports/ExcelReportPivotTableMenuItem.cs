@@ -22,7 +22,7 @@ namespace Signum.Windows.Reports
         {
             base.OnInitialized(e);
             Header = "Informe Excel";
-            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(new Uri("pack://application:,,,/Signum.Windows.Extensions;component/Images/excelDoc.png", UriKind.Absolute)) };
+            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/excelDoc.png", typeof(ExcelReportPivotTableMenuItem))) };
         }
 
         protected override void Initialize()

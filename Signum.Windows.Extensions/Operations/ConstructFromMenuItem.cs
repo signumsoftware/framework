@@ -27,7 +27,7 @@ namespace Signum.Windows.Operations
         {
             base.OnInitialized(e);
             Header = "Construir Otros";
-            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(new Uri("pack://application:,,,/Signum.Windows.Extensions;component/Images/excelDoc.png", UriKind.Absolute)) };
+            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/excelDoc.png", typeof(ConstructFromMenuItem))) };
         }
 
         protected override void Initialize()

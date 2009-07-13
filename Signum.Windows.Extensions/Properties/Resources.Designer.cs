@@ -22,7 +22,7 @@ namespace Signum.Windows.Extensions.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "2.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Signum.Windows.Extensions.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Signum.Windows.Extensions.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace Signum.Windows.Extensions.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Close.
         /// </summary>
-        internal static string Close {
+        public static string Close {
             get {
                 return ResourceManager.GetString("Close", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Excel XML 2003 Spreadsheet (*.xml)|*.xml.
         /// </summary>
-        internal static string Excel2003XmlSpreadsheet {
+        public static string Excel2003XmlSpreadsheet {
             get {
                 return ResourceManager.GetString("Excel2003XmlSpreadsheet", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx.
         /// </summary>
-        internal static string Excel2007Spreadsheet {
+        public static string Excel2007Spreadsheet {
             get {
                 return ResourceManager.GetString("Excel2007Spreadsheet", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Microsoft Office Excel 97-2003 Spreadsheet (*.xls)|*.xls.
         /// </summary>
-        internal static string Excel97_2003Spreadsheet {
+        public static string Excel97_2003Spreadsheet {
             get {
                 return ResourceManager.GetString("Excel97_2003Spreadsheet", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to To Excel.
         /// </summary>
-        internal static string ExcelReport {
+        public static string ExcelReport {
             get {
                 return ResourceManager.GetString("ExcelReport", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Export Excel Report with Pivot Table.
         /// </summary>
-        internal static string ExportExcelReportPivotTable {
+        public static string ExportExcelReportPivotTable {
             get {
                 return ResourceManager.GetString("ExportExcelReportPivotTable", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Field.
         /// </summary>
-        internal static string Field {
+        public static string Field {
             get {
                 return ResourceManager.GetString("Field", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to File.
         /// </summary>
-        internal static string File {
+        public static string File {
             get {
                 return ResourceManager.GetString("File", resourceCulture);
             }
@@ -135,7 +135,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Find location for Excel Report.
         /// </summary>
-        internal static string FindLocationFoExcelReport {
+        public static string FindLocationFoExcelReport {
             get {
                 return ResourceManager.GetString("FindLocationFoExcelReport", resourceCulture);
             }
@@ -144,7 +144,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
-        internal static string Name {
+        public static string Name {
             get {
                 return ResourceManager.GetString("Name", resourceCulture);
             }
@@ -153,7 +153,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Query Name.
         /// </summary>
-        internal static string QueryName {
+        public static string QueryName {
             get {
                 return ResourceManager.GetString("QueryName", resourceCulture);
             }
@@ -162,7 +162,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Reload.
         /// </summary>
-        internal static string Reload {
+        public static string Reload {
             get {
                 return ResourceManager.GetString("Reload", resourceCulture);
             }
@@ -171,7 +171,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Removed.
         /// </summary>
-        internal static string Removed {
+        public static string Removed {
             get {
                 return ResourceManager.GetString("Removed", resourceCulture);
             }
@@ -180,7 +180,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Save.
         /// </summary>
-        internal static string Save {
+        public static string Save {
             get {
                 return ResourceManager.GetString("Save", resourceCulture);
             }
@@ -189,7 +189,7 @@ namespace Signum.Windows.Extensions.Properties {
         /// <summary>
         ///   Looks up a localized string similar to View.
         /// </summary>
-        internal static string View {
+        public static string View {
             get {
                 return ResourceManager.GetString("View", resourceCulture);
             }
