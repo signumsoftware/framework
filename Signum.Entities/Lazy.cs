@@ -49,7 +49,7 @@ namespace Signum.Entities
         }
 
 
-        public bool PointsTo(T entity)
+        public bool RefersTo(T entity)
         {
             if (entity == null)
                 return false;
