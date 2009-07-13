@@ -53,13 +53,13 @@ namespace Signum.Services
         public List<Lazy> RetrieveAllLazy(Type lazyType, Type[] types)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => DynamicQueryUtils.RetriveAllLazy(lazyType, types));
+             () => AutoCompleteUtils.RetriveAllLazy(lazyType, types));
         }
 
         public List<Lazy> FindLazyLike(Type lazyType, Type[] types, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => DynamicQueryUtils.FindLazyLike(lazyType, types, subString, count));
+             () => AutoCompleteUtils.FindLazyLike(lazyType, types, subString, count));
         }
 
         public Type[] FindImplementations(Type lazyType, MemberInfo[] members)

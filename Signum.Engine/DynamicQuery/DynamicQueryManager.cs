@@ -14,7 +14,7 @@ namespace Signum.Engine.DynamicQuery
     public class DynamicQueryManager
     {
         internal DynamicQueryManager Parent{get; private set;}
-        Dictionary<object, IQueryable> queries = new Dictionary<object, IQueryable>();
+        Dictionary<object, IDynamicQuery> queries = new Dictionary<object, IDynamicQuery>();
 
         public static event Func<object, bool> AllowQuery;
 
@@ -23,7 +23,7 @@ namespace Signum.Engine.DynamicQuery
             this.Parent = parent;         
         }
 
-        public IQueryable this[object queryName]
+        public IDynamicQuery this[object queryName]
         {
             get
             {
@@ -34,7 +34,7 @@ namespace Signum.Engine.DynamicQuery
             set { queries[queryName] = value; }
         }
 
-        public IQueryable TryGet(object queryName)
+        IDynamicQuery TryGet(object queryName)
         {
             var result = queries.TryGetC(queryName);
             if (result != null)
@@ -45,10 +45,15 @@ namespace Signum.Engine.DynamicQuery
 
             return null; 
         }
-    
+
+        public QueryResult ExecuteQuery(object queryName, List<Filter> filter, int? limit)
+        {
+            return this[queryName].ExecuteQuery(filter, limit);
+        }
+
         public QueryDescription QueryDescription(object queryName)
         {
-            return DynamicQueryUtils.ViewDescription(this[queryName]);
+            return this[queryName].Description;
         }
 
         public List<object> GetQueryNames()
@@ -58,23 +63,7 @@ namespace Signum.Engine.DynamicQuery
 
             return queries.Keys.Union(Parent.GetQueryNames()).Where(qn=>OnAllowQuery(qn)).ToList(); 
         }
-
-        public QueryResult ExecuteQuery(object queryName, List<Filter> filter, int? limit)
-        {
-            IQueryable q = this[queryName];
-            Type parameter = DynamicQueryUtils.ExtractQueryType(q);
-
-            MethodInfo mi = DynamicQueryUtils.miExecuteQueryGeneric.MakeGenericMethod(parameter);
-            try
-            {
-                return (QueryResult)mi.Invoke(null, new object[] { q, filter, limit });
-            }
-            catch (TargetInvocationException te)
-            {
-                throw te.InnerException;
-            }
-        }
-
+     
         static void AssertQueryAllowed(object queryName)
         {
             if (!OnAllowQuery(queryName))

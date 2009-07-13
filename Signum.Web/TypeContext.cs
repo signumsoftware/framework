@@ -187,7 +187,7 @@ namespace Signum.Web
 
         public override string FriendlyName
         {
-            get { return Property.FriendlyName(); }
+            get { return Property.NiceName(); }
         }
     }
     #endregion

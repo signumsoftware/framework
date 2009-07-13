@@ -107,7 +107,7 @@ namespace Signum.Web.Controllers
                     implementationTypes[i] = Navigator.ResolveType(implementationsArray[i]);
                 }
             }
-            var result = DynamicQueryUtils.FindLazyLike(type, implementationTypes, input, limit)
+            var result = AutoCompleteUtils.FindLazyLike(type, implementationTypes, input, limit)
                 .ToDictionary(l => l.Id.ToString() + "_" + l.RuntimeType.Name, l => l.ToStr);
 
             return Content(result.ToJSonObject(idAndType => idAndType.Quote(), str => str.Quote()));
