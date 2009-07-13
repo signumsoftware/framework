@@ -39,23 +39,18 @@ namespace Signum.Web
             }
         }
 
-        private static Func<string, string> findRoute;
-        public static Func<string, string> FindRoute
+        private static Func<object, string> findRoute;
+        public static Func<object, string> FindRoute
         {
             get
             {
                 return findRoute ??
-                       (findRoute = (string urlQueryName) => "/Find/{0}".Formato(urlQueryName));
+                       (findRoute = (object queryName) => "/Find/{0}".Formato(NavigationManager.QuerySettings[queryName].UrlName));
             }
             set
             {
                 findRoute = value;
             }
-        }
-
-        public static string FindTypeRoute(Type type)
-        {
-            return findRoute(Navigator.TypesToURLNames[type]);
         }
 
         public static NavigationManager NavigationManager;
@@ -195,7 +190,7 @@ namespace Signum.Web
         {
             el.Create = Navigator.IsCreable(entityType, admin);
             el.View = Navigator.IsViewable(entityType, admin);
-            el.Find = NavigationManager.ExistsQuery(TypesToURLNames[entityType]);
+            el.Find = Navigator.IsFindable(entityType);
         }
 
         public static bool IsViewable(Type type, bool admin)
@@ -209,6 +204,10 @@ namespace Signum.Web
         public static bool IsCreable(Type type, bool admin)
         {
             return NavigationManager.IsCreable(type, admin);
+        }
+        public static bool IsFindable(object queryName)
+        {
+            return NavigationManager.IsFindable(queryName);
         }
     }
     
@@ -241,28 +240,35 @@ namespace Signum.Web
         public event Func<Type, bool> GlobalIsCreable;
         public event Func<Type, bool> GlobalIsViewable;
         public event Func<Type, bool> GlobalIsReadOnly;
-
-        internal bool ExistsQuery(string urlQueryName)
-        {
-            if (UrlQueryNames == null)
-                return false;
-
-            return UrlQueryNames.Count(kvp => kvp.Key == urlQueryName) > 0;
-        }
+        public event Func<object, bool> GlobalIsFindable;
 
         public NavigationManager(NavigationManagerSettings settings)
         {
             Constructors = settings.Constructors;
             EntitySettings = settings.EntitySettings;
-            QuerySettings = settings.QuerySettings;
             Queries = settings.Queries;
             URLNamesToTypes = EntitySettings.ToDictionary(
                 kvp => kvp.Value.UrlName ?? (kvp.Key.Name.EndsWith("DN") ? kvp.Key.Name.Substring(0, kvp.Key.Name.Length - 2) : kvp.Key.Name), 
                 kvp => kvp.Key);
             TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);
-            if (QuerySettings != null)
+            if (settings.QuerySettings != null)
+            {
+                QuerySettings = settings.QuerySettings.ToDictionary(kvp => kvp.Key, kvp => 
+                { 
+                    if (!kvp.Value.UrlName.HasText()) 
+                        kvp.Value.UrlName = GetQueryName(kvp.Key);
+                    return kvp.Value;
+                });
                 UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
+            }
+        }
+
+        protected internal virtual string GetQueryName(object queryName)
+        {
+            return (queryName is Type) ? (TypesToURLNames.TryGetC<Type, string>((Type)queryName) ?? ((Type)queryName).Name) :
+                   (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
+                   queryName.ToString();
         }
 
         protected internal virtual ViewResult View(Controller controller, object obj)
@@ -398,13 +404,6 @@ namespace Signum.Web
             }
 
             return GetQueryName(queryName);
-        }
-
-        protected virtual string GetQueryName(object queryName)
-        { 
-            return (queryName is Type) ? (TypesToURLNames.TryGetC<Type, string>((Type)queryName) ?? ((Type)queryName).Name) :
-                   (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
-                   queryName.ToString();
         }
 
         protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple, string prefix)
@@ -591,6 +590,14 @@ namespace Signum.Web
                 return false;
 
             return EntitySettings[type].IsCreable(admin);
+        }
+
+        protected internal virtual bool IsFindable(object queryName)
+        {
+            if (GlobalIsFindable != null && !GlobalIsFindable(queryName))
+                return false;
+
+            return QuerySettings.ContainsKey(queryName);
         }
     }
 
