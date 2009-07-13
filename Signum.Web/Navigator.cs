@@ -597,6 +597,9 @@ namespace Signum.Web
             if (GlobalIsFindable != null && !GlobalIsFindable(queryName))
                 return false;
 
+            if (QuerySettings == null)
+                return false;
+
             return QuerySettings.ContainsKey(queryName);
         }
     }
