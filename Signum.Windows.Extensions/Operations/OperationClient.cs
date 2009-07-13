@@ -28,6 +28,14 @@ namespace Signum.Windows.Operations
             ButtonBar.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
             Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
+
+            SearchControl.GetCustomMenuItems += (qn, type) =>
+            {
+                var list = Server.Service<IOperationServer>().GetQueryOperationInfos(type).Where(l => Manager.Settings.TryGetC(l.Key) != OperationSettings.Hidden).ToList();
+                if (list == null || list.Count == 0)
+                    return null;
+                return new ConstructFromMenuItem { OperationInfos = list };
+            };
         }
 
         public static Brush GetBackground(Enum key)
@@ -64,7 +72,7 @@ namespace Signum.Windows.Operations
 
         protected internal virtual Win.FrameworkElement GenerateButton(OperationInfo operationInfo, Win.FrameworkElement entityControl)
         {
-            OperationSettings os = Settings.TryGetC(operationInfo.Key);
+            EntityOperationSettings os = (EntityOperationSettings)Settings.TryGetC(operationInfo.Key);
 
             if (os == OperationSettings.Hidden)
                 return null;
@@ -107,7 +115,7 @@ namespace Signum.Windows.Operations
             return EnumExtensions.NiceToString(key); 
         }
 
-        private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, OperationHandlerMethod handler)
+        private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, EntityOperationHandler handler)
         {
             if (!operationInfo.CanExecute)
                 throw new ApplicationException("Action {0} is disabled".Formato(operationInfo.Key));
@@ -116,7 +124,7 @@ namespace Signum.Windows.Operations
 
             if (handler != null)
             {
-                OperationEventArgs oea = new OperationEventArgs
+                EntityOperationEventArgs oea = new EntityOperationEventArgs
                 {
                     Entity = ident,
                     EntityControl = entityControl,
@@ -172,47 +180,36 @@ namespace Signum.Windows.Operations
         {
             var list = Server.Service<IOperationServer>().GetConstructorOperationInfos(type);
 
-            if (list == null || list.Count == 0)
+            var dic = (from oi in list
+                      let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
+                      where os != OperationSettings.Hidden
+                      select new {OperationInfo = oi, OperationSettings = os}).ToDictionary(a=>a.OperationInfo.Key);
+
+
+            if (dic.Count == 0)
                 return null;
 
             Enum selected = null;
             if (list.Count == 1)
             {
-                selected = list[0].Key;
+                selected = dic.Keys.Single();
             }
             else
             {
                 ConstructorSelectorWindow sel = new ConstructorSelectorWindow();
-                sel.ConstructorKeys = list.Select(a => a.Key).ToArray();
+                sel.ConstructorKeys = dic.Keys.ToArray();
                 if (sel.ShowDialog() != true)
                     return null;
 
                 selected = sel.SelectedKey;
             }
 
-            return Server.Service<IOperationServer>().Construct(type, selected);
+            var pair = dic[selected];
+
+            if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
+                return pair.OperationSettings.Constructor(type, pair.OperationInfo);
+            else
+                return Server.Service<IOperationServer>().Construct(type, selected);
         }
-    }
-
-    public delegate IdentifiableEntity OperationHandlerMethod(OperationEventArgs args);
-
-   
-
-    public class OperationEventArgs : EventArgs
-    {
-        public IdentifiableEntity Entity { get; internal set; }
-        public FrameworkElement EntityControl { get; internal set; }
-        public FrameworkElement SenderButton { get; internal set; }
-        public OperationInfo OperationInfo { get; internal set; }
-    }
-
-    public class OperationSettings
-    {
-        public static readonly OperationSettings Hidden = new OperationSettings(); 
-
-        public string Text { get; set; }
-        public ImageSource Image { get; set; }
-        public Color? Color { get; set; }
-        public OperationHandlerMethod Click { get; set; }
     }
 }

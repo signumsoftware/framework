@@ -121,6 +121,8 @@
     <Compile Include="Operations\ConstructorSelectorWindow.xaml.cs">
       <DependentUpon>ConstructorSelectorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Operations\ConstructFromMenuItem.cs" />
+    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="Reports\CompositeReport.xaml.cs">
       <DependentUpon>CompositeReport.xaml</DependentUpon>
     </Compile>

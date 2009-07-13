@@ -16,14 +16,14 @@ namespace Signum.Windows.Reports
         {
             if (toExcel)
             {
-                SearchControl.GetCustomMenuItems += qn => new ExcelReportMenuItem();
+                SearchControl.GetCustomMenuItems += (qn, type) => new ExcelReportMenuItem();
                 Navigator.Manager.Settings.Add(typeof(ExcelReportDN), new EntitySettings(false) { View = () => new ExcelReport() });
             }
             if (excelReport)
             {
                 QueryNames = Server.Service<IQueryServer>().GetQueryNames().ToDictionary(a => a.ToString()); 
 
-                SearchControl.GetCustomMenuItems += qn => qn == typeof(ExcelReportDN) ? null : new ExcelReportPivotTableMenuItem();
+                SearchControl.GetCustomMenuItems += (qn, type) => qn == typeof(ExcelReportDN) ? null : new ExcelReportPivotTableMenuItem();
                 
                 if (compositeReport)
                 {
