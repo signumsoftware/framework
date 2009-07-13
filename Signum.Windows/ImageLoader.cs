@@ -14,7 +14,7 @@ namespace Signum.Windows
     {
         public static BitmapFrame GetImageSortName(string name)
         {
-            var sri = Application.GetResourceStream(new Uri("pack://application:,,,/Signum.Windows;component/Images/" + name, UriKind.Absolute));
+            StreamResourceInfo sri = Application.GetResourceStream(PackUriHelper.Reference("Images/" + name, typeof(Navigator)));
             return BitmapFrame.Create(sri.Stream); 
         }
     }

@@ -57,6 +57,14 @@ namespace Signum.Windows
             InitializeComponent();
         }
 
+        public override void OnLoad(object sender, RoutedEventArgs e)
+        {
+            if(Common.GetIsReadOnly(this))
+                AutoComplete = false;
+
+            base.OnLoad(sender, e);
+        }
+
         protected override void UpdateVisibility()
         {
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
@@ -115,7 +123,7 @@ namespace Signum.Windows
 
         public void ActivateAutoComplete()
         {
-            if (AutoComplete && !Common.GetIsReadOnly(this))
+            if (AutoComplete)
             {
                 autoCompleteTextBox.Visibility = Visibility.Visible;
                 autoCompleteTextBox.Text = Entity.TryCC(a => a.ToString());

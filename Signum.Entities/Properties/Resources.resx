@@ -219,4 +219,7 @@
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
     <value>The lenght of {{0}} has to be equal to {0}</value>
   </data>
+  <data name="_0HasToBeBetween0And1" xml:space="preserve">
+    <value>{{0}} Has to be between {0} and {1}</value>
+  </data>
 </root>

@@ -101,6 +101,9 @@ namespace Signum.Entities
         }
     }
 
+ 
+
+
     public class RegexValidatorAttribute : ValidatorAttribute
     {
         Regex regex;         
@@ -180,7 +183,7 @@ namespace Signum.Entities
     public class NumberIsValidatorAttribute : ValidatorAttribute
     {
         public ComparisonType ComparisonType;
-        public object number;
+        public IComparable number;
 
         public NumberIsValidatorAttribute(ComparisonType comparison, float number)
         {
@@ -189,6 +192,12 @@ namespace Signum.Entities
         }
 
         public NumberIsValidatorAttribute(ComparisonType comparison, double number)
+        {
+            this.ComparisonType = comparison;
+            this.number = number;
+        }
+
+        public NumberIsValidatorAttribute(ComparisonType comparison, byte number)
         {
             this.ComparisonType = comparison;
             this.number = number;
@@ -212,21 +221,15 @@ namespace Signum.Entities
             this.number = number;
         }
 
-        public NumberIsValidatorAttribute(ComparisonType comparison, byte number)
-        {
-            this.ComparisonType = comparison;
-            this.number = number;
-        }
-
         protected override string OverrideError(object value)
         {
-            IComparable val = (IComparable)value;
-
             if (value == null)
                 return null;
 
+            IComparable val = (IComparable)value;
+
             if (number.GetType() != value.GetType())
-                number = Convert.ChangeType(number, value.GetType()); // asi se hace solo una vez 
+                number = (IComparable)Convert.ChangeType(number, value.GetType()); // asi se hace solo una vez 
 
             bool ok = (ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
                       (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
@@ -239,6 +242,68 @@ namespace Signum.Entities
                 return null;
 
             return Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString()); 
+        }
+    }
+
+    public class NumberBetweenValidatorAttribute : ValidatorAttribute
+    {
+        IComparable min;
+        IComparable max;
+
+        public NumberBetweenValidatorAttribute(float min, float max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+
+        public NumberBetweenValidatorAttribute(double min, double max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+
+        public NumberBetweenValidatorAttribute(byte min, byte max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+
+        public NumberBetweenValidatorAttribute(short min, short max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+
+        public NumberBetweenValidatorAttribute(int min, int max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+
+        public NumberBetweenValidatorAttribute(long min, long max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+     
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            IComparable val = (IComparable)value;
+
+            if (min.GetType() != value.GetType())
+            {
+                min = (IComparable)Convert.ChangeType(min, val.GetType()); // asi se hace solo una vez 
+                max = (IComparable)Convert.ChangeType(max, val.GetType());
+            }
+
+            if (min.CompareTo(val) <= 0 &&
+                val.CompareTo(max) <= 0)
+                return null;
+
+            return Resources._0HasToBeBetween0And1.Formato(min, max); 
         }
     }
 
@@ -261,14 +326,12 @@ namespace Signum.Entities
 
             int val = list.Count;
 
-            bool ok = (ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
-                      (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
-                      (ComparisonType == ComparisonType.GreaterThan && val.CompareTo(number) > 0) ||
-                      (ComparisonType == ComparisonType.GreaterThanOrEqual && val.CompareTo(number) >= 0) ||
-                      (ComparisonType == ComparisonType.LessThan && val.CompareTo(number) < 0) ||
-                      (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0);
-
-            if (ok)
+            if ((ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
+                (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
+                (ComparisonType == ComparisonType.GreaterThan && val.CompareTo(number) > 0) ||
+                (ComparisonType == ComparisonType.GreaterThanOrEqual && val.CompareTo(number) >= 0) ||
+                (ComparisonType == ComparisonType.LessThan && val.CompareTo(number) < 0) ||
+                (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0))
                 return null;
 
             return Resources.TheNumberOfElementsOf0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString());

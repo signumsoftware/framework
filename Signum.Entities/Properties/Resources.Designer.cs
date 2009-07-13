@@ -106,6 +106,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {{0}} Has to be between {0} and {1}.
+        /// </summary>
+        internal static string _0HasToBeBetween0And1 {
+            get {
+                return ResourceManager.GetString("_0HasToBeBetween0And1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} has to be lowercase.
         /// </summary>
         internal static string _0HasToBeLowercase {

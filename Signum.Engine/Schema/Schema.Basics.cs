@@ -194,7 +194,7 @@ namespace Signum.Engine.Maps
                 if (current == null)
                     return null; 
 
-                result = current.GetField(members.First(Resources.NoFieldWasGiven), throws);
+                result = current.GetField(mi, throws);
 
                 if (result == null && !throws)
                     return null; 

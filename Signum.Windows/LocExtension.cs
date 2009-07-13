@@ -23,6 +23,7 @@ namespace Signum.Windows
         /// <summary>
         /// Gets or sets the resource key.
         /// </summary>
+        [ConstructorArgument("key")]
         public string Key { get; set; }
 
 

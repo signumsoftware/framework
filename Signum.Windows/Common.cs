@@ -153,9 +153,7 @@ namespace Signum.Windows
             RouteTask += TaskSetLabelText;
             RouteTask += TaskSetIsReadonly;
             RouteTask += TaskSetImplementations;
-            RouteTask += TaskEntityTemplate;
-            RouteTask += TaskEntityBaseProperties;
-            RouteTask += TaskCollaspeIfNull;
+            RouteTask += TaskSetCollaspeIfNull;
         }
   
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
@@ -216,7 +214,7 @@ namespace Signum.Windows
 
             if (labelText != null && fe.NotSet(labelText))
             {
-                fe.SetValue(labelText, (context as TypeSubContext).TryCC(ts => ts.PropertyInfo.Name));
+                fe.SetValue(labelText, (context as TypeSubContext).TryCC(ts => ts.PropertyInfo.NiceName()));
             }
         }
 
@@ -252,35 +250,7 @@ namespace Signum.Windows
             }
         }
 
-        public static void TaskEntityTemplate(FrameworkElement fe, string route, TypeContext context)
-        {
-            EntityBase eb = fe as EntityBase;
-            if (eb != null && eb.NotSet(EntityBase.EntityTemplateProperty))
-            {
-                eb.EntityTemplate = Navigator.FindDataTemplate(fe, eb.EntityType);
-            }
-        }
-
-        public static void TaskEntityBaseProperties(FrameworkElement fe, string route, TypeContext context)
-        {
-            EntityBase eb = fe as EntityBase;
-            if (eb is EntityBase)
-            {
-                if (eb.NotSet(EntityBase.CreateProperty) && eb.Create && eb.Implementations == null)
-                    eb.Create = Navigator.IsCreable(eb.CleanType, false);
-
-                if (eb.NotSet(EntityBase.ViewProperty) && eb.View && eb.Implementations == null)
-                    eb.View = Navigator.IsViewable(eb.CleanType, false);
-
-                if (eb.NotSet(EntityBase.FindProperty) && eb.Find && eb.Implementations == null)
-                    eb.Find = Navigator.IsFindable(eb.CleanType);
-
-                if (eb.NotSet(EntityBase.ViewOnCreateProperty) && eb.ViewOnCreate && !eb.View)
-                    eb.ViewOnCreate = false;
-            }
-        }
-
-        static void TaskCollaspeIfNull(FrameworkElement fe, string route, TypeContext context)
+        static void TaskSetCollaspeIfNull(FrameworkElement fe, string route, TypeContext context)
         {
             if (GetCollapseIfNull(fe) &&  fe.Visibility == Visibility.Visible)
             {

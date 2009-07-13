@@ -109,12 +109,6 @@ namespace Signum.Windows
         {
             if (DesignerProperties.GetIsInDesignMode(this)) return;
 
-            if (this.NotSet(EntityTemplateProperty))
-            {
-                if (!typeof(Lazy).IsAssignableFrom(EntityType)) //It's allways going to be lazy
-                    EntityTemplate = Navigator.FindDataTemplate(this, Reflector.GenerateLazy(EntityType));
-            }
-
             base.OnLoad(sender, e);
 
             combo.IsEnabled = !Common.GetIsReadOnly(this);
@@ -123,7 +117,6 @@ namespace Signum.Windows
                 OnLoadData(sender, e);
             else
                 combo.DropDownOpened += new EventHandler(OnLoadData);
-            
         }
 
         bool isLoaded = false;

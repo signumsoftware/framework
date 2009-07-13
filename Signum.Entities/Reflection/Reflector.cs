@@ -230,7 +230,7 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        public static string FriendlyName(this PropertyInfo pi)
+        public static string NiceName(this PropertyInfo pi)
         {
             return GetPropertyValidators(pi.DeclaringType).TryGetC(pi.Name).TryCC(pp => pp.NiceName) ?? PropertyPack.CalculateNiceName(pi);
         }
@@ -247,7 +247,7 @@ namespace Signum.Entities.Reflection
             NiceName = CalculateNiceName(pi); 
         }
 
-        internal static string CalculateNiceName(PropertyInfo pi)
+        public static string CalculateNiceName(PropertyInfo pi)
         {
             return pi.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description) ?? pi.Name.NiceName();
         }

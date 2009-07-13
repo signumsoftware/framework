@@ -155,6 +155,28 @@ namespace Signum.Windows
                 throw new ApplicationException(Properties.Resources.EntityTypeItsNotDeterminedForControl0);
             }
 
+            if (this.NotSet(EntityBase.EntityTemplateProperty))
+            {
+                var entityType = EntityType;
+
+                if (this is EntityCombo && !typeof(Lazy).IsAssignableFrom(entityType)) //Allways going to be lazy
+                    entityType = Reflector.GenerateLazy(entityType);
+
+                EntityTemplate = Navigator.FindDataTemplate(this, entityType);
+            }
+
+            if (this.NotSet(EntityBase.CreateProperty) && Create && Implementations == null)
+                Create = Navigator.IsCreable(CleanType, false);
+
+            if (this.NotSet(EntityBase.ViewProperty) && View && Implementations == null)
+                View = Navigator.IsViewable(CleanType, false);
+
+            if (this.NotSet(EntityBase.FindProperty) && Find && Implementations == null)
+                Find = Navigator.IsFindable(CleanType);
+
+            if (this.NotSet(EntityBase.ViewOnCreateProperty) && ViewOnCreate && !View)
+                ViewOnCreate = false;
+
             UpdateVisibility();
         }
 
