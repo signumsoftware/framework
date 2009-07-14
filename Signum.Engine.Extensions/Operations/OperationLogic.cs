@@ -315,7 +315,7 @@ namespace Signum.Engine.Operations
         #region ConstructFromMany
         public static IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args)
         {
-            return ConstructFromManyPrivate(Find<IConstructorFromManyOperation>(type, operationKey, true), null, args);
+            return ConstructFromManyPrivate(Find<IConstructorFromManyOperation>(type, operationKey, true), lazies, args);
         }
 
         public static T ConstructFromMany<T>(List<Lazy> lazies, Enum operationKey, params object[] args)
