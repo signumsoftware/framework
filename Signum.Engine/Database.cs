@@ -208,7 +208,7 @@ namespace Signum.Engine
             }
         }
 
-        public static List<IdentifiableEntity> RetrieveFromLazyList(List<Lazy> lazys)
+        public static List<IdentifiableEntity> RetrieveFromListOfLazy(List<Lazy> lazys)
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
@@ -288,5 +288,7 @@ namespace Signum.Engine
                 OverloadingSimplifier.BackManyExpression(Expression.Constant(sourceElement, typeof(S)), route));
         }
         #endregion
+
+        public static int MaxParameters { get { return SqlBuilder.MaxParametersInSQL; } }
     }
 }
