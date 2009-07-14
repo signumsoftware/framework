@@ -157,6 +157,11 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+        public static IQueryable<T> WhereFilters<T>(this IQueryable<T> query, params Filter[] filters)
+        {
+            return WhereFilters(query, filters.NotNull().ToList()); 
+        }
+
         public static IQueryable<T> WhereFilters<T>(this IQueryable<T> query, List<Filter> filters)
         {
             var where = GetWhereExpression<T>(filters);
@@ -164,6 +169,34 @@ namespace Signum.Engine.DynamicQuery
             if (where != null)
                 return query.Where(where);
             return query; 
+        }
+
+        public static IEnumerable<T> WhereFilters<T>(this IEnumerable<T> sequence, params Filter[] filters)
+        {
+            return WhereFilters(sequence, filters.NotNull().ToList()); 
+        }
+
+        public static IEnumerable<T> WhereFilters<T>(this IEnumerable<T> sequence, List<Filter> filters)
+        {
+            var where = GetWhereExpression<T>(filters);
+
+            if (where != null)
+                return sequence.Where(where.Compile());
+            return sequence;
+        }
+
+        public static IQueryable<T> TryTake<T>(this IQueryable<T> query, int? num)
+        {
+            if (num.HasValue)
+                return query.Take(num.Value);
+            return query;
+        }
+
+        public static IEnumerable<T> TryTake<T>(this IEnumerable<T> sequence, int? num)
+        {
+            if (num.HasValue)
+                return sequence.Take(num.Value);
+            return sequence;
         }
     }
 }
