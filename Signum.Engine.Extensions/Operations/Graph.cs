@@ -17,8 +17,6 @@ using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Operations
 {
-    
-
     public class Graph<E, S>
         where E : IdentifiableEntity
         where S : struct
@@ -171,15 +169,19 @@ namespace Signum.Engine.Operations
             Registered = true;
         }
 
-        public DirectedEdgedGraph<S?, Enum> ToDirectedGraph()
+        public DirectedEdgedGraph<string, Enum> ToDirectedGraph()
         {
-            DirectedEdgedGraph<S?, Enum> result = new DirectedEdgedGraph<S?, Enum>(); 
+
+            DirectedEdgedGraph<string, Enum> result = new DirectedEdgedGraph<string, Enum>();
             foreach (var item in Operations)
             {
-                if (item is Goto)
-                    ((Goto)item).FromStates.ForEach(s => result.Add(s, item.TargetState, item.Key));
-                else
-                    result.Add(null, item.TargetState, item.Key);
+                switch (item.OperationType)
+                {
+                    case OperationType.Execute: ((Goto)item).FromStates.ForEach(s => result.Add(s.ToString(), item.TargetState.ToString(), item.Key)); break;
+                    case OperationType.Constructor: result.Add("[New]", item.TargetState.ToString(), item.Key); break;
+                    case OperationType.ConstructorFrom: result.Add("[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()), item.TargetState.ToString(), item.Key); break;
+                    case OperationType.ConstructorFromMany: result.Add("[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()), item.TargetState.ToString(), item.Key); break;
+                }
             }
 
             return result;

@@ -31,9 +31,15 @@ namespace Signum.Windows.Operations
 
             SearchControl.GetCustomMenuItems += (qn, type) =>
             {
-                var list = Server.Service<IOperationServer>().GetQueryOperationInfos(type).Where(l => Manager.Settings.TryGetC(l.Key) != OperationSettings.Hidden).ToList();
-                if (list == null || list.Count == 0)
+                var list = Server.Service<IOperationServer>().GetQueryOperationInfos(type).Where(oi =>
+                {
+                    ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
+                    return set == null || set.IsVisible == null || set.IsVisible(qn, type, oi);
+                }).ToList();
+
+                if (list.Count == 0)
                     return null;
+
                 return new ConstructFromMenuItem { OperationInfos = list };
             };
         }
@@ -74,7 +80,7 @@ namespace Signum.Windows.Operations
         {
             EntityOperationSettings os = (EntityOperationSettings)Settings.TryGetC(operationInfo.Key);
 
-            if (os == OperationSettings.Hidden)
+            if (os != null && os.IsVisible != null && os.IsVisible((IdentifiableEntity)entityControl.DataContext))
                 return null;
 
             ToolBarButton button = new ToolBarButton
@@ -115,7 +121,7 @@ namespace Signum.Windows.Operations
             return EnumExtensions.NiceToString(key); 
         }
 
-        private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, EntityOperationHandler handler)
+        private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, Func<EntityOperationEventArgs, IdentifiableEntity> handler)
         {
             if (!operationInfo.CanExecute)
                 throw new ApplicationException("Action {0} is disabled".Formato(operationInfo.Key));
@@ -181,9 +187,9 @@ namespace Signum.Windows.Operations
             var list = Server.Service<IOperationServer>().GetConstructorOperationInfos(type);
 
             var dic = (from oi in list
-                      let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
-                      where os != OperationSettings.Hidden
-                      select new {OperationInfo = oi, OperationSettings = os}).ToDictionary(a=>a.OperationInfo.Key);
+                       let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
+                       where os == null || os.IsVisible == null || os.IsVisible(type, oi)
+                       select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.Key);
 
 
             if (dic.Count == 0)

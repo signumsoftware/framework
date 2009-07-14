@@ -26,8 +26,8 @@ namespace Signum.Windows.Operations
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            Header = "Construir Otros";
-            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/excelDoc.png", typeof(ConstructFromMenuItem))) };
+            Header = "Construir";
+            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/factory.png", typeof(ConstructFromMenuItem))) };
         }
 
         protected override void Initialize()
@@ -57,7 +57,7 @@ namespace Signum.Windows.Operations
                 MenuItem b = (MenuItem)e.OriginalSource;
                 OperationInfo operationInfo = (OperationInfo)b.Tag;
                 Type entityType = SearchControl.EntityType; 
-
+                object queryName = SearchControl.QueryName;
 
                 var lazies = SearchControl.SelectedItems.TryCC(a=>a.Cast<Lazy>().ToList()); 
 
@@ -67,7 +67,13 @@ namespace Signum.Windows.Operations
                 ConstructorFromManySettings settings = (ConstructorFromManySettings)OperationClient.Manager.Settings.TryGetC(operationInfo.Key);
 
                 if (settings != null && settings.Constructor != null)
-                    settings.Constructor(lazies, entityType, operationInfo);
+                    settings.Constructor(new ConstructorFromManyEventArgs
+                    {
+                        Entities = lazies,
+                        EntityType = entityType,
+                        OperationInfo = operationInfo,
+                        QueryName = queryName
+                    });
 
                 Server.Service<IOperationServer>().ConstructFromMany(lazies, entityType, operationInfo.Key); 
             }
