@@ -34,7 +34,7 @@ namespace Signum.Windows.Operations
                 var list = Server.Service<IOperationServer>().GetQueryOperationInfos(type).Where(oi =>
                 {
                     ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
-                    return set == null || set.IsVisible == null || set.IsVisible(qn, type, oi);
+                    return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
                 }).ToList();
 
                 if (list.Count == 0)
@@ -64,23 +64,25 @@ namespace Signum.Windows.Operations
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, Control mainControl)
+        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, Control entityControl)
         {
-            if (!(entity is IdentifiableEntity))
-                return null; 
+            IdentifiableEntity ident = entity as IdentifiableEntity;
 
-            var list = Server.Service<IOperationServer>().GetEntityOperationInfos((IdentifiableEntity)entity);
+            if (ident == null)
+                return null;
 
-            var result =  list.Select(oi => GenerateButton(oi, mainControl)).NotNull().ToList();
+            var list = Server.Service<IOperationServer>().GetEntityOperationInfos(ident);
+
+            var result = list.Select(oi => GenerateButton(oi, ident, entityControl)).NotNull().ToList();
 
             return result;
         } 
 
-        protected internal virtual Win.FrameworkElement GenerateButton(OperationInfo operationInfo, Win.FrameworkElement entityControl)
+        protected internal virtual Win.FrameworkElement GenerateButton(OperationInfo operationInfo, IdentifiableEntity entity, Win.FrameworkElement entityControl)
         {
             EntityOperationSettings os = (EntityOperationSettings)Settings.TryGetC(operationInfo.Key);
 
-            if (os != null && os.IsVisible != null && os.IsVisible((IdentifiableEntity)entityControl.DataContext))
+            if (os != null && os.IsVisible != null && os.IsVisible(entity))
                 return null;
 
             ToolBarButton button = new ToolBarButton
@@ -188,7 +190,7 @@ namespace Signum.Windows.Operations
 
             var dic = (from oi in list
                        let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
-                       where os == null || os.IsVisible == null || os.IsVisible(type, oi)
+                       where os == null || os.IsVisible == null || os.IsVisible(oi)
                        select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.Key);
 
 
@@ -213,7 +215,7 @@ namespace Signum.Windows.Operations
             var pair = dic[selected];
 
             if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
-                return pair.OperationSettings.Constructor(type, pair.OperationInfo);
+                return pair.OperationSettings.Constructor(pair.OperationInfo, win);
             else
                 return Server.Service<IOperationServer>().Construct(type, selected);
         }

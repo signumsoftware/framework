@@ -16,6 +16,7 @@ using Signum.Services;
 using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Windows.Extensions.Properties;
+using Signum.Windows;
 
 namespace Signum.Windows.Operations
 {
@@ -70,7 +71,7 @@ namespace Signum.Windows.Operations
                     settings.Constructor(new ConstructorFromManyEventArgs
                     {
                         Entities = lazies,
-                        EntityType = entityType,
+                        Window = b.FindCurrentWindow(),
                         OperationInfo = operationInfo,
                         QueryName = queryName
                     });

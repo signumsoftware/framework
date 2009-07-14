@@ -34,22 +34,23 @@ namespace Signum.Windows.Operations
     //Constructor
     public class ConstructorSettings : OperationSettings
     {
-        public Func<Type, OperationInfo, IdentifiableEntity> Constructor { get; set; }
-        public Func<Type, OperationInfo, bool> IsVisible { get; set; } 
+        public Func<OperationInfo, Window, IdentifiableEntity> Constructor { get; set; }
+        public Func<OperationInfo, bool> IsVisible { get; set; } 
     }
 
     //ConsturctorFromMany
     public class ConstructorFromManySettings : OperationSettings
     {
         public Func<ConstructorFromManyEventArgs, IdentifiableEntity> Constructor { get; set; }
-        public Func<object, Type, OperationInfo, bool> IsVisible { get; set; } 
+        public Func<object, OperationInfo, bool> IsVisible { get; set; } 
     }
 
     public class ConstructorFromManyEventArgs : EventArgs
     {
         public object QueryName { get; internal set;  }
         public List<Lazy> Entities { get; internal set; }
-        public Type EntityType { get; internal set; }
+        public Window Window { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; }
+
     }
 }
