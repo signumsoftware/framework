@@ -379,7 +379,7 @@ function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, remo
         success:
                    function(msg) {
                         var container = $("#" + prefix + sfEntitiesContainer);
-                        container.html(container.html() + "\n" +
+                        container.append("\n" +
                         "<div id=\"" + prefix + newIndex + sfRepeaterElement +"\" name=\"" + prefix + newIndex + sfRepeaterElement +"\" class=\"repeaterElement\">\n" +
                         "<a id=\"" + prefix + newIndex + "_btnRemove\" title=\"" + removeLinkText + "\" href=\"javascript:RemoveRepeaterEntity('" + prefix + newIndex + sfRepeaterElement + "');\" class=\"lineButton\">" + removeLinkText + "</a>\n" +
                         "<input type=\"hidden\" id=\"" + prefix + newIndex + sfRuntimeType + "\" name=\"" + prefix + newIndex + sfRuntimeType + "\" value=\"" + runtimeType + "\" />\n" +

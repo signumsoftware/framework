@@ -78,13 +78,16 @@ namespace Signum.Web
                               "lineButton",
                               new Dictionary<string, object>()));
             }
-            
+
             sb.Append("<div id=\"{0}\" name=\"{0}\">".Formato(idValueField + TypeContext.Separator + EntityRepeaterKeys.EntitiesContainer));
-            if (value != null)
+            using (StyleContext sc = new StyleContext() { BreakLine=true, LabelVisible=true, ReadOnly=false, ShowValidationMessage=true})
             {
-                for (int i = 0; i < value.Count; i++)
+                if (value != null)
                 {
-                    sb.Append(InternalRepeaterElement(helper, idValueField, value[i], i, settings));
+                    for (int i = 0; i < value.Count; i++)
+                    {
+                        sb.Append(InternalRepeaterElement(helper, idValueField, value[i], i, settings));
+                    }
                 }
             }
             sb.Append("</div>");
@@ -148,11 +151,11 @@ namespace Signum.Web
                 sb.Append(helper.Hidden(
                     indexedPrefix + TypeContext.Id,
                     (isIdentifiable)
-                       ? ((IIdentifiable)(object)value).TryCS(i => i.Id)
+                       ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
                        : ((Lazy)(object)value).TryCS(i => i.Id)) + "\n");
             }
 
-            sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
+            sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" >\n");
 
             EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
 
