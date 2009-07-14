@@ -21,10 +21,11 @@ namespace Signum.Engine.Operations
         public Enum Key { get; private set; }
         public Type Type { get { return typeof(F); } }
         public OperationType OperationType { get { return OperationType.ConstructorFromMany; } }
-        public Func<List<Lazy<F>>, object[], T> Constructor { get; set; }
+        
         public bool Lazy { get { return true; } }
         public bool Returns { get { return true; } }
-        public Func<T, bool> CanExecute { get; set; }
+
+        public Func<List<Lazy<F>>, object[], T> Constructor { get; set; }
 
         public BasicConstructorFromMany(Enum key)
         {

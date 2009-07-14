@@ -23,7 +23,7 @@ namespace Signum.Engine.Operations
         public Type Type { get { return typeof(F); } }
         public OperationType OperationType { get { return OperationType.ConstructorFrom; } }
 
-        public bool Lazy { get; set; }
+        public bool Lazy { get {return FromLazy != null;} }
         public bool Returns { get; set; }
 
         public bool AllowsNew { get; set; }
@@ -116,16 +116,11 @@ namespace Signum.Engine.Operations
 
         public void AssertIsValid()
         {
-            if (Lazy)
-            {
-                if (FromLazy == null)
-                    throw new ApplicationException("Operation {0} does not have FromLazy initialized".Formato(Key));
-            }
-            else
-            {
-                if (FromEntity == null)
-                    throw new ApplicationException("Operation {0} does not have FromEntity initialized".Formato(Key));
-            }
+            if (FromLazy == null && FromEntity == null)
+                throw new ApplicationException("Operation {0} has neither FromLazy or FromEntity initialized".Formato(Key));
+
+            if (FromLazy != null && FromEntity != null)
+                throw new ApplicationException("Operation {0} has both FromLazy and FromEntity initialized".Formato(Key));
         }
     }
 }
