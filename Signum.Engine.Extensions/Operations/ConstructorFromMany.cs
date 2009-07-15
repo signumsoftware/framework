@@ -46,7 +46,7 @@ namespace Signum.Engine.Operations
                     User = UserDN.Current
                 };
 
-                IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)Constructor(lazies.Select(l=>l.ToLazy<F>()).ToList(), args);
+                IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lazies.Select(l=>l.ToLazy<F>()).ToList(), args);
 
                 result.Save(); //Nothing happens if allready saved
 

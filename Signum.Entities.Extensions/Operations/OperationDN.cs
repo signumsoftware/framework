@@ -56,6 +56,11 @@ namespace Signum.Entities.Operations
         public bool CanExecute { get; set; }
         public bool Lazy { get; set; }
         public bool Returns { get; set; }
+
+        public override string ToString()
+        {
+            return "{0} ({1}) CanExecute = {2}, Lazy = {3}, Returns {4}".Formato(Key, OperationType, CanExecute, Lazy, Returns);
+        }
     }
 
 

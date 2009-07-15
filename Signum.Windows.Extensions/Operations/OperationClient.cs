@@ -82,7 +82,7 @@ namespace Signum.Windows.Operations
         {
             EntityOperationSettings os = (EntityOperationSettings)Settings.TryGetC(operationInfo.Key);
 
-            if (os != null && os.IsVisible != null && os.IsVisible(entity))
+            if (os != null && os.IsVisible != null && !os.IsVisible(entity))
                 return null;
 
             ToolBarButton button = new ToolBarButton

@@ -69,7 +69,7 @@ namespace Signum.Engine.Operations
                         User = UserDN.Current
                     };
 
-                    Execute((T)entity, parameters);
+                    OnExecute((T)entity, parameters);
 
                     ((IdentifiableEntity)entity).Save(); //Nothing happens if allready saved
 
