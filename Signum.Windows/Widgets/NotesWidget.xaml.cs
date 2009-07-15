@@ -78,7 +78,8 @@ namespace Signum.Windows
             if (CreateNote == null)
                 throw new ApplicationException("NotesWidget.RetrieveNotes is null"); 
 
-            if (DataContext == null)
+            IdentifiableEntity entity = DataContext as IdentifiableEntity;
+            if (entity == null || entity.IsNew)
             {
                 lvNotas.ItemsSource = null;
                 return; 
