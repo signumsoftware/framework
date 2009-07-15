@@ -27,7 +27,7 @@ namespace Signum.Web
                 throw new ArgumentNullException("filterContext");
             }
 
-            if (!filterContext.HttpContext.Request.IsSecureConnection)
+            if (!filterContext.HttpContext.Request.IsSecureConnection && !AppSettings.ReadBoolean("development",false) )
             {
                 // request is not SSL-protected, so throw or redirect
                 if (Redirect)
@@ -50,5 +50,32 @@ namespace Signum.Web
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Muestra u oculta los botones de navegación inferiores
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+    public sealed class NavigationButtonsAttribute : FilterAttribute, IActionFilter
+    {
+        public bool Show
+        {
+            get;
+            set;
+        }
+        public void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            filterContext.Controller.ViewData[ViewDataKeys.NavigationButtons] = Show;
+        }
+
+
+        #region IActionFilter Members
+
+        public void OnActionExecuted(ActionExecutedContext filterContext)
+        {
+            //throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

@@ -24,7 +24,7 @@ namespace Signum.Web
         public const string OnCancelS = "sfOnCancelS";
         public const string BtnOkS = "sfBtnOkS";
         public const string BtnCancel = "sfBtnCancel";
-        
+        public const string NavigationButtons = "sfNavigationButtons";
         public const string FilterColumns = "sfFilterColumns";
         public const string FindOptions = "sfFindOptions";
         public const string Top = "sfTop";

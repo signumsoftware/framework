@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{61898D02-521F-49AB-928B-F80615D55CA3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -42,6 +42,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -73,11 +74,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AjaxToolkitExtensions.cs" />
+    <Compile Include="AppSettings.cs" />
     <Compile Include="AssemblyResourceProvider.cs" />
     <Compile Include="CalendarHelper.cs" />
+    <Compile Include="CaptchaClient.cs" />
+    <Compile Include="CaptchaHtmlHelper.cs" />
+    <Compile Include="CaptchaImage.cs" />
+    <Compile Include="CaptchaValidationAttribute.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="ControllerAttributes.cs" />
+    <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="MenuHelper.cs" />
     <Compile Include="LightEntityLineHelper.cs" />
