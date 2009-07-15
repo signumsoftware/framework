@@ -59,6 +59,13 @@ namespace Signum.Web
 		/// <param name="filterContext">The filter filterContext.</param>
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
+            //skip if captcha is disabled in App Settings
+            if (!AppSettings.ReadBoolean(AppSettingsKeys.UseCaptcha, true))
+            {
+                filterContext.ActionParameters["captchaValid"] = true;
+                return;
+            }
+
 			// make sure no values are getting sent in from the outside
 			if (filterContext.ActionParameters.ContainsKey("captchaValid"))
 				filterContext.ActionParameters["captchaValid"] = null;

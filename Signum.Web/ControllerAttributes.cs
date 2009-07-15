@@ -27,7 +27,7 @@ namespace Signum.Web
                 throw new ArgumentNullException("filterContext");
             }
 
-            if (!filterContext.HttpContext.Request.IsSecureConnection && !AppSettings.ReadBoolean("development",false) )
+            if (!filterContext.HttpContext.Request.IsSecureConnection && !AppSettings.ReadBoolean(AppSettingsKeys.Development,false) )
             {
                 // request is not SSL-protected, so throw or redirect
                 if (Redirect)
