@@ -12,10 +12,12 @@ namespace Signum.Web
         public static string Calendar(this HtmlHelper helper, string elementId)
         {
             StringBuilder sb = new StringBuilder();
-            
+            //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
             sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.core.js"));
             sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.datepicker.js"));
             sb.Append(helper.ScriptInclude("Scripts/jqueryui/i18n/ui.datepicker-es.js"));
+            
+            //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
 
             sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.all.css"));
             sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.base.css"));

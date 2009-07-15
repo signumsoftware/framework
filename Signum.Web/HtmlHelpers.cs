@@ -131,41 +131,52 @@ namespace Signum.Web
                 );
         }
 
+        #region Message
+        public static void Message(this HtmlHelper html, string title, string content, MessageType type){
+            Message(html, title, content, type,null);
+        }
+
+        public static void Message(this HtmlHelper html, string name, string title, string content, MessageType type) {
+            Message(html,title,content,type,new {id = name});
+        }
+
         public static void Message(this HtmlHelper html, string title, string content, MessageType type, object attributeList) {
-            string cadena=String.Format("div class='message{0}' {3}><span class='title'>{1}</span><span class='content'>{2}</span></div>",
+            string cadena=String.Format("<div class='message{0}' {3}><span class='title'>{1}</span><span class='content'>{2}</span></div>",
                     Enum.GetName(typeof(MessageType),type),
                     title,
                     content,
                     ToAttributeList(attributeList));
             html.ViewContext.HttpContext.Response.Write(cadena);
-            }
-
-        public static void Message(this HtmlHelper html, string name, string title, string content, MessageType type) {
-
-            string cadena = String.Format("<div class='message{0}' id='{3}'><span class='title'>{1}</span><span class='content'>{2}</span></div>",
-                    Enum.GetName(typeof(MessageType), type),
-                    title,
-                    content,
-                    name);
-            html.ViewContext.HttpContext.Response.Write(cadena);
         }
+        #endregion
 
         #region Combined
         public static string CombinedCssUrl(this HtmlHelper html, params string[] files) {
-            return "Combine.aspx/CSS?files={0}".Formato(String.Join(",", files));
+            return "Combine.aspx/CSS?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
         }
+
+        public static string CombinedCssUrlPath(this HtmlHelper html, string path, params string[] files)
+        {
+         return "Combine.aspx/CSS?f={0}&p={1}".Formato(String.Join(",", files).Replace("/", "%2f"),path.Replace("/", "%2f"));
+        }
+
         public static void CombinedCss(this HtmlHelper html, params string[] files)
         {
-            string cadena = "<link href=\"Combine.aspx/CSS?files={0}\" rel='stylesheet' type='text/css' />".Formato(String.Join(",", files));
+            string cadena = "<link href=\"{0}\" rel='stylesheet' type='text/css' />".Formato(CombinedCssUrl(html,files));
             html.ViewContext.HttpContext.Response.Write(cadena);
+        }
+
+        public static string CombinedJsUrlPath(this HtmlHelper html, string path, params string[] files)
+        {
+            return "Combine.aspx/JS?f={0}&p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
         }
         public static string CombinedJsUrl(this HtmlHelper html, params string[] files)
         {
-            return "Combine.aspx/JS?files={0}".Formato(String.Join(",", files));
+            return "Combine.aspx/JS?f={0}".Formato(String.Join(",", files).Replace("/", "%2f"));
         }
         public static void CombinedJs(this HtmlHelper html, params string[] files)
         {
-            string cadena = "<script type='text/javascript' src=\"Combine.aspx/JS?files={0}\"></script>".Formato(String.Join(",", files));
+            string cadena = "<script type='text/javascript' src=\"{0}\"></script>".Formato(CombinedJsUrl(html,files));
             html.ViewContext.HttpContext.Response.Write(cadena);
         }
         #endregion
@@ -208,5 +219,5 @@ namespace Signum.Web
             return sb.ToString();
         }
    }
-
 }
+
