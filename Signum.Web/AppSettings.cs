@@ -8,23 +8,15 @@ namespace Signum.Web
 {
     public class AppSettings
     {
-        static Dictionary<string, object> dictionary = new Dictionary<string, object>();
-       /* static AppSettings() {
-            dictionary = new Dictionary<string, object>();
-        }*/
-        public static string Read(string key) {
-            if (!dictionary.ContainsKey(key))
-                dictionary.Add(key,ConfigurationSettings.AppSettings[key]);
-            return dictionary[key].ToString();
+        public static string Read(string key)
+        {
+            return (String)ConfigurationManager.AppSettings[key];
         }
 
-        public static bool ReadBoolean (string key, bool defaultValue){
-            if (!dictionary.ContainsKey(key))
-            {
-                string value = ConfigurationSettings.AppSettings[key];
-                dictionary.Add(key,(value == null) ? defaultValue : value == "1");
-            }
-            return (bool)dictionary[key];
+        public static bool ReadBoolean(string key, bool defaultValue)
+        {
+            string value = ConfigurationManager.AppSettings[key];
+            return (value == null) ? defaultValue : value == "1";
         }
     }
 

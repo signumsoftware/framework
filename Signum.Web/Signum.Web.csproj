@@ -42,7 +42,6 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -77,14 +76,9 @@
     <Compile Include="AppSettings.cs" />
     <Compile Include="AssemblyResourceProvider.cs" />
     <Compile Include="CalendarHelper.cs" />
-    <Compile Include="CaptchaClient.cs" />
-    <Compile Include="CaptchaHtmlHelper.cs" />
-    <Compile Include="CaptchaImage.cs" />
-    <Compile Include="CaptchaValidationAttribute.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="ControllerAttributes.cs" />
-    <Compile Include="Controllers\CaptchaController.cs" />
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="MenuHelper.cs" />
     <Compile Include="LightEntityLineHelper.cs" />
