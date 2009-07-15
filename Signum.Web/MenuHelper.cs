@@ -41,7 +41,7 @@ namespace Signum.Web
                 helper.ViewContext.HttpContext.Response.Write(
                     "<li class='menuLI'>\n" +
                     "<a class='menuLIA' onclick=\"$('#ul{0}').toggle();\" title='{1}'>{0}</a>\n".Formato(text, title) +
-                    "<ul id='ul{0}' style='display:none'>".Formato(text)
+                    "<ul class='submenuUL' id='ul{0}' style='display:none'>".Formato(text)
                     );
 
                 foreach (Item mi in children)
