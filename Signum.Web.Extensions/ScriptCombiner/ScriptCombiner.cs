@@ -1,0 +1,249 @@
+﻿using System;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
+using System.Web;
+using System.Text.RegularExpressions;
+using System.Collections;
+using System.Collections.Generic;
+using System.Web.Configuration;
+using System.Security;
+using System.Configuration;
+using System.Security.Permissions;
+
+namespace Signum.Web.ScriptCombiner
+{
+    public class CSSScriptCombiner : ScriptCombiner {
+        public CSSScriptCombiner() {
+            this.contentType = "text/css";
+            this.cacheable = false;
+            this.gzipable = true;
+            this.resourcesFolder = "../Content";
+        }
+
+        protected override string Minify(string content) {
+            content = Regex.Replace(content, "/\\*.+?\\*/", "", RegexOptions.Singleline);
+            content = Regex.Replace(content,"(\\s{2,}|\\t+|\\r+|\\n+)", string.Empty);
+            //content = content.Replace(Environment.NewLine + Environment.NewLine + Environment.NewLine, string.Empty);
+            //content = content.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+            //content = content.Replace(Environment.NewLine, string.Empty);
+            //content = content.Replace("\\t", string.Empty);
+           // content = content.Replace("\t", string.Empty);
+            content = content.Replace(" {", "{");
+            content = content.Replace("{ ", "{");
+            content = content.Replace(" :", ":");
+            content = content.Replace(": ", ":");
+            content = content.Replace(", ", ",");
+            content = content.Replace("; ", ";");
+            content = content.Replace(";}", "}");
+            content = Regex.Replace(content, "/\\*[^\\*]*\\*+([^/\\*]*\\*+)*/", "$1");
+            content = Regex.Replace(content, "(?<=[>])\\s{2,}(?=[<])|(?<=[>])\\s{2,}(?=&nbsp;)|(?<=&ndsp;)\\s{2,}(?=[<])", string.Empty);
+            //content = content.Replace("../", "../Content/");   //Eliminamos rutas relativas
+            //content = content.Replace("../", new System.Web.Mvc.UrlHelper(.Content("~/Content"));
+            content = Regex.Replace(content, "[^\\}]+\\{\\}", string.Empty);  //Eliminamos reglas vacías
+
+            Regex color = new Regex("#([A-Fa-f0-9]{6})");
+            foreach (Match CurrentMatch in color.Matches(content))
+            {
+                string coincidencia = CurrentMatch.Groups[1].Value;
+                if (coincidencia[0] == coincidencia[1]
+                    && coincidencia[2] == coincidencia[3]
+                    && coincidencia[4] == coincidencia[5])
+                    content = content.Replace("#" + coincidencia, ("#" + coincidencia[0] + coincidencia[2] + coincidencia[4]).ToLower());
+            }
+            return content;
+        }
+
+        protected override string Extension { get { return "css"; } }
+    }
+
+    public class JSScriptCombiner : ScriptCombiner {
+        public JSScriptCombiner()
+        {
+            this.contentType = "application/x-javascript";
+            this.cacheable = false;
+            this.gzipable = true;
+            this.resourcesFolder = "../Scripts";
+        }
+        protected override string Extension { get { return "js"; } }
+        protected override string Minify(string content)
+        {
+            var minifier = new JavaScriptMinifier();
+            return minifier.Minify(content);
+        }
+    }
+
+    public abstract class ScriptCombiner
+    {
+        /// <summary>
+        /// Sets the Content-Type HTTP Header
+        /// </summary>
+        protected string contentType;
+
+        /// <summary>
+        /// The folder where the scripts are stored
+        /// </summary>
+        protected string resourcesFolder;
+
+        /// <summary>
+        /// Indicates if the output file should be cached
+        /// </summary>
+        protected bool cacheable;
+
+        /// <summary>
+        /// Indicates if the output stream should be gzipped (depending on client request too)
+        /// </summary>
+        protected bool gzipable;
+
+        /// <summary>
+        /// Current version (increase to get a fresh output file)
+        /// </summary>
+        protected string version;
+
+        /// <summary>
+        /// File extension in order to prevent files reading manipulating the url
+        /// </summary>
+        protected abstract string Extension{get;}
+
+        protected abstract string Minify(string content);
+
+        private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(30);
+        private HttpContextBase context;
+
+        public void Process(string[] files, string path, HttpContextBase context)
+        {
+            this.version = "1.1";
+            if (path != null) resourcesFolder = "../" + path.Replace("%2f", "/");
+
+            this.context = context;
+            // Decide if browser supports compressed response
+            bool isCompressed = gzipable && this.CanGZip(context.Request);
+
+            // If the set has already been cached, write the response directly from
+            // cache. Otherwise generate the response and cache it
+            if (cacheable && !this.WriteFromCache(version,isCompressed) || !cacheable)
+            {
+                using (MemoryStream memoryStream = new MemoryStream(8092))
+                {
+                    // Decide regular stream or gzip stream based on whether the response can be compressed or not
+                    //using (Stream writer = isCompressed ?  (Stream)(new GZipStream(memoryStream, CompressionMode.Compress)) : memoryStream)
+                    using (Stream writer = isCompressed ? (Stream)(new ICSharpCode.SharpZipLib.GZip.GZipOutputStream(memoryStream)) : memoryStream)
+                    {
+                        // Read the files into one big string
+                        StringBuilder allScripts = new StringBuilder();
+                        foreach (string fileName in files)
+                        {
+                            if (fileName.EndsWith(Extension.StartsWith(".") ? Extension : "." + Extension))
+                            {
+                                try
+                                {
+                                    //allScripts.Append(File.ReadAllText(context.Server.MapPath(fileName)));
+                                    allScripts.Append(File.ReadAllText(context.Server.MapPath(this.resourcesFolder + "/" + fileName.Replace("%2f", "/"))));
+                                }
+                                catch (Exception) { }
+                            }
+                        }
+                        string minified = allScripts.ToString();
+                        minified = Minify(minified);
+                        
+                        // Send minfied string to output stream
+                        byte[] bts = Encoding.UTF8.GetBytes(minified);
+                        writer.Write(bts, 0, bts.Length);
+                    }
+
+                    // Cache the combined response so that it can be directly written
+                    // in subsequent calls 
+                    byte[] responseBytes = memoryStream.ToArray();
+                    if (cacheable)
+                        context.Cache.Insert(GetCacheKey(version, isCompressed),
+                        responseBytes, null, System.Web.Caching.Cache.NoAbsoluteExpiration,
+                        CACHE_DURATION);
+
+                    // Generate the response
+                    this.WriteBytes(responseBytes, isCompressed);
+                }
+            }
+        }
+
+        private bool WriteFromCache(string setName, string version, bool isCompressed)
+        {
+            byte[] responseBytes = context.Cache[GetCacheKey(setName, version, isCompressed)] as byte[];
+
+            if (responseBytes == null || responseBytes.Length == 0)
+                return false;
+
+            this.WriteBytes(responseBytes, isCompressed);
+            return true;
+        }
+
+        private bool WriteFromCache(string version, bool isCompressed)
+        {
+            byte[] responseBytes = context.Cache[GetCacheKey(version, isCompressed)] as byte[];
+
+            if (responseBytes == null || responseBytes.Length == 0)
+                return false;
+
+            this.WriteBytes(responseBytes, isCompressed);
+            return true;
+        }
+
+        private void WriteBytes(byte[] bytes, bool isCompressed)
+        {
+            HttpResponseBase response = context.Response;
+
+            response.AppendHeader("Content-Length", bytes.Length.ToString());
+            response.ContentType = contentType;
+            if (isCompressed)
+                response.AppendHeader("Content-Encoding", "gzip");
+            else
+                response.AppendHeader("Content-Encoding", "utf-8");
+
+            context.Response.Cache.SetCacheability(HttpCacheability.Public);
+            context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));
+            context.Response.Cache.SetMaxAge(CACHE_DURATION);
+
+            response.ContentEncoding = Encoding.Unicode;
+            response.OutputStream.Write(bytes, 0, bytes.Length);
+            response.Flush();
+        }
+
+        private bool CanGZip(HttpRequestBase request)
+        {
+            string acceptEncoding = request.Headers["Accept-Encoding"];
+            if (!string.IsNullOrEmpty(acceptEncoding) &&
+                 (acceptEncoding.Contains("gzip") || acceptEncoding.Contains("deflate")))
+                return true;
+            return false;
+        }
+
+        private string GetCacheKey(string setName, string version, bool isCompressed)
+        {
+            return "HttpCombiner." + setName + "." + version + "." + isCompressed;
+        }
+
+        private string GetCacheKey(string version, bool isCompressed)
+        {
+            return "HttpCombiner." + GetUniqueKey(context) + "." + version + "." + isCompressed;
+        }
+
+
+      /*  public static string GetScriptTags(string setName, int version)
+        {
+            string result = null;
+#if (DEBUG)
+            foreach (string fileName in GetScriptFileNames(setName))
+            {
+                result += String.Format("\n<script type=\"text/javascript\" src=\"{0}?v={1}\"></script>", VirtualPathUtility.ToAbsolute(fileName), version);
+            }
+#else
+        result += String.Format("<script type=\"text/javascript\" src=\"ScriptCombiner.axd?s={0}&v={1}\"></script>", setName, version);
+#endif
+            return result;
+        }*/
+
+        public string GetUniqueKey(HttpContextBase context)
+        {
+            return context.Request.Url.PathAndQuery.ToUpperInvariant().GetHashCode().ToString("x", System.Globalization.CultureInfo.InvariantCulture);
+        }    
+    }
+}

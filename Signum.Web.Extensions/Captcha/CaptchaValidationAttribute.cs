@@ -41,7 +41,7 @@ namespace Signum.Web.Captcha
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CaptchaCheckAttribute"/> class.
 		/// </summary>
-		/// <param name="field">The field.</param>
+		/// <param name="field">The field that will be refered through its id to get the value</param>
 		public CaptchaValidationAttribute(string field)
 		{
 			Field = field;
