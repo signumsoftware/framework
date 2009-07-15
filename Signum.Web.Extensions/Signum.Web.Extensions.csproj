@@ -67,6 +67,7 @@
     <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptCombiner\CombineController.cs" />
+    <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
     <Compile Include="ScriptCombiner\ScriptCombiner.cs" />
   </ItemGroup>
