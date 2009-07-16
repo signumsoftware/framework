@@ -23,7 +23,7 @@ namespace Signum.Web
     {
         public static string ValidationSummaryAjax(this HtmlHelper html)
         {
-            return "<div id='sfGlobalValidationSummary' name='sfGlobalValidationSummary'>" + 
+            return "<div id='sfGlobalValidationSummary'>" + 
                    html.ValidationSummary()
                    + "&nbsp;</div>";
         }
