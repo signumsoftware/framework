@@ -7,6 +7,28 @@ namespace Signum.Utilities
 {
     public static class DateTimeExtensions
     {
+        public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
+        {
+            if (firstDate > date || lastDate < date)
+                return false;
+            return true;
+        }
+
+        public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime? lastDate)
+        {
+            if (firstDate > date || (lastDate.HasValue && lastDate < date))
+                return false;
+            return true;
+        }
+
+        public static bool IsInInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate, bool falseOnFirstNull)
+        {
+            if (((firstDate.HasValue && (firstDate > date)) || falseOnFirstNull) 
+                || (lastDate.HasValue && lastDate < date))
+                return false;
+            return true;
+        }
+
         public static int YearsTo(this DateTime min, DateTime max)
         {
             int result = max.Year - min.Year;
