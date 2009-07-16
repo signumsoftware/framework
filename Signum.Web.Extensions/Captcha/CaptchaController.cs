@@ -8,7 +8,7 @@ using System.Web;
 using System.Drawing.Imaging;
 using Signum.Web.Captcha;
 
-namespace Signum.Web.Controllers
+namespace Signum.Web.Captcha
 {
     public class CaptchaController : Controller
     {
@@ -41,12 +41,11 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult Refresh()
         {
-            //this.ViewData.Add(ViewDataKeys.ResourcesRoute, ConfigurationManager.AppSettings["RutaResources"]);
             return new PartialViewResult()
             {
                 ViewData = this.ViewData,
                 TempData = this.TempData,
-                ViewName = "captcha"
+                ViewName = "captchaImage"
             };
         }
     }

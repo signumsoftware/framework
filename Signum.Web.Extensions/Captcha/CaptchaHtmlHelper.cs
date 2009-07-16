@@ -10,12 +10,13 @@ using System.Reflection;
 using System.Text;
 using System.Configuration;
 using System.Web.Caching;
+using Signum.Utilities;
 
 namespace Signum.Web.Captcha
 {
     public static class CaptchaButtonLineHelper
     {
-        public static string CaptchaImage(this HtmlHelper helper, int height, int width,string route)
+        public static string CaptchaImage(this HtmlHelper helper, int height, int width, string route, Dictionary<string, object> htmlAttributes)
         {
             CaptchaImage image = new CaptchaImage
             {
@@ -32,21 +33,13 @@ namespace Signum.Web.Captcha
                 CacheItemPriority.NotRemovable,
                 null);
 
-            StringBuilder stringBuilder = new StringBuilder(256);
-            stringBuilder.Append("<input type=\"hidden\" name=\"captcha-guid\" value=\"");
-            stringBuilder.Append(image.UniqueId);
-            stringBuilder.Append("\" />");
-            stringBuilder.AppendLine();
-            stringBuilder.Append("<img src=\"");
-            //stringBuilder.Append(/*HttpContext.Current.Server.MapPath("~")+*/ConfigurationManager.AppSettings["RoutePrefix"] + "/View/captcha.ashx?guid=" + image.UniqueId);
-            stringBuilder.Append(route + VirtualPathUtility.ToAbsolute("~/" + "Captcha.aspx/Image") + "?guid=" + image.UniqueId);
-            stringBuilder.Append("\" alt=\"CAPTCHA\" width=\"");
-            stringBuilder.Append(width);
-            stringBuilder.Append("\" height=\"");
-            stringBuilder.Append(height);
-            stringBuilder.Append("\" />");
-
-            return stringBuilder.ToString();
+            return "<input type=\"hidden\" name=\"captcha-guid\" value=\"{0}\" />\n".Formato(image.UniqueId) +
+                   "<img src=\"{0}\" alt=\"CAPTCHA\" width=\"{1}\" height=\"{2}\" {3}/>".Formato(
+                       route + VirtualPathUtility.ToAbsolute("~/" + "Captcha.aspx/Image") + "?guid=" + image.UniqueId,
+                       width,
+                       height,
+                       htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")
+                       );
         }
     }
 }

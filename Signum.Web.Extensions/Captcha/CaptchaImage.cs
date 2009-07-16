@@ -30,7 +30,7 @@ namespace Signum.Web.Captcha
 	/// <summary>
 	/// Amount of random font warping to apply to rendered text
 	/// </summary>
-	public enum FontWarpFactor
+    public enum FontWarpFactor
 	{
 		None,
 		Low,
@@ -42,7 +42,7 @@ namespace Signum.Web.Captcha
 	/// <summary>
 	/// Amount of background noise to add to rendered image
 	/// </summary>
-	public enum BackgroundNoiseLevel
+    public enum BackgroundNoiseLevel
 	{
 		None,
 		Low,
@@ -54,7 +54,7 @@ namespace Signum.Web.Captcha
 	/// <summary>
 	/// Amount of curved line noise to add to rendered image
 	/// </summary>
-	public enum LineNoiseLevel
+    public enum LineNoiseLevel
 	{
 		None,
 		Low,
@@ -67,7 +67,7 @@ namespace Signum.Web.Captcha
 	/// CAPTCHA Image
 	/// </summary>
 	/// <seealso href="http://www.codinghorror.com">Original By Jeff Atwood</seealso>
-	public class CaptchaImage
+	internal class CaptchaImage
 	{
 		#region Static
 
@@ -76,7 +76,7 @@ namespace Signum.Web.Captcha
 		/// </summary>
 		/// <param name="guid">The GUID.</param>
 		/// <returns></returns>
-		public static CaptchaImage GetCachedCaptcha(string guid)
+        internal static CaptchaImage GetCachedCaptcha(string guid)
 		{
 			if (String.IsNullOrEmpty(guid))
 				return null;
@@ -87,48 +87,48 @@ namespace Signum.Web.Captcha
 		/// <summary>
 		/// 
 		/// </summary>
-		public static string[] RandomFontFamily = {"arial"};//{ "arial", "arial black", "comic sans ms", "courier new", "estrangelo edessa", "franklin gothic medium", "georgia", "lucida console", "lucida sans unicode", "mangal", "microsoft sans serif", "palatino linotype", "sylfaen", "tahoma", "times new roman", "trebuchet ms", "verdana" };
+        internal static string[] RandomFontFamily = { "arial" };//{ "arial", "arial black", "comic sans ms", "courier new", "estrangelo edessa", "franklin gothic medium", "georgia", "lucida console", "lucida sans unicode", "mangal", "microsoft sans serif", "palatino linotype", "sylfaen", "tahoma", "times new roman", "trebuchet ms", "verdana" };
 
 		/// <summary>
 		/// 
 		/// </summary>
-		public static Color[] RandomColor = { Color.Black };//Color.Red, Color.Green, Color.Blue, Color.Black, Color.Purple, Color.Orange };
+        internal static Color[] RandomColor = { Color.Black };//Color.Red, Color.Green, Color.Blue, Color.Black, Color.Purple, Color.Orange };
 
 		/// <summary>
 		/// Gets or sets a string of available text characters for the generator to use.
 		/// </summary>
 		/// <value>The text chars.</value>
-		public static string TextChars { get; set; }
+        internal static string TextChars { get; set; }
 
 		/// <summary>
 		/// Gets or sets the length of the text.
 		/// </summary>
 		/// <value>The length of the text.</value>
-		public static int? TextLength { get; set; }
+        internal static int? TextLength { get; set; }
 
 		/// <summary>
 		/// Gets and sets amount of random warping to apply to the <see cref="CaptchaImage"/> instance.
 		/// </summary>
 		/// <value>The font warp.</value>
-		public static FontWarpFactor? FontWarp { get; set; }
+        internal static FontWarpFactor? FontWarp { get; set; }
 
 		/// <summary>
 		/// Gets and sets amount of background noise to apply to the <see cref="CaptchaImage"/> instance.
 		/// </summary>
 		/// <value>The background noise.</value>
-		public static BackgroundNoiseLevel? BackgroundNoise { get; set; }
+        internal static BackgroundNoiseLevel? BackgroundNoise { get; set; }
 
 		/// <summary>
 		/// Gets or sets amount of line noise to apply to the <see cref="CaptchaImage"/> instance.
 		/// </summary>
 		/// <value>The line noise.</value>
-		public static LineNoiseLevel? LineNoise { get; set; }
+        internal static LineNoiseLevel? LineNoise { get; set; }
 
 		/// <summary>
 		/// Gets or sets the cache time out.
 		/// </summary>
 		/// <value>The cache time out.</value>
-		public static double? CacheTimeOut { get; set; }
+        internal static double? CacheTimeOut { get; set; }
 
 		#endregion
 
@@ -142,25 +142,25 @@ namespace Signum.Web.Captcha
 		/// Returns a GUID that uniquely identifies this Captcha
 		/// </summary>
 		/// <value>The unique id.</value>
-		public string UniqueId { get; private set; }
+        internal string UniqueId { get; private set; }
 
 		/// <summary>
 		/// Returns the date and time this image was last rendered
 		/// </summary>
 		/// <value>The rendered at.</value>
-		public DateTime RenderedAt { get; private set; }
+        internal DateTime RenderedAt { get; private set; }
 
 		/// <summary>
 		/// Gets the randomly generated Captcha text.
 		/// </summary>
 		/// <value>The text.</value>
-		public string Text { get; private set; }
+        internal string Text { get; private set; }
 
 		/// <summary>
 		/// Width of Captcha image to generate, in pixels
 		/// </summary>
 		/// <value>The width.</value>
-		public int Width
+        internal int Width
 		{
 			get { return _width; }
 			set
@@ -176,7 +176,7 @@ namespace Signum.Web.Captcha
 		/// Height of Captcha image to generate, in pixels
 		/// </summary>
 		/// <value>The height.</value>
-		public int Height
+        internal int Height
 		{
 			get { return _height; }
 			set
@@ -206,7 +206,7 @@ namespace Signum.Web.Captcha
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CaptchaImage"/> class.
 		/// </summary>
-		public CaptchaImage()
+        internal CaptchaImage()
 		{
 			_rand = new Random();
 			Width = 180;
@@ -220,7 +220,7 @@ namespace Signum.Web.Captcha
 		/// Forces a new Captcha image to be generated using current property value settings.
 		/// </summary>
 		/// <returns></returns>
-		public Bitmap RenderImage()
+        internal Bitmap RenderImage()
 		{
 			return GenerateImagePrivate();
 		}
