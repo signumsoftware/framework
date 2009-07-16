@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{86EE7792-96CF-4420-997B-8C811E2B166D}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -97,6 +97,8 @@
     <None Include="ScriptCombiner\csCombiner.cd" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Captcha\captcha.ascx" />
+    <Content Include="Captcha\captchaImage.ascx" />
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
