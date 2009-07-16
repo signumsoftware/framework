@@ -45,7 +45,7 @@ namespace Signum.Web.Captcha
             {
                 ViewData = this.ViewData,
                 TempData = this.TempData,
-                ViewName = "captchaImage"
+                ViewName = CaptchaClient.CaptchaImageUrl
             };
         }
     }

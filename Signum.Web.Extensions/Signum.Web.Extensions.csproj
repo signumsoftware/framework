@@ -97,8 +97,12 @@
     <None Include="ScriptCombiner\csCombiner.cd" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Captcha\captcha.ascx" />
-    <Content Include="Captcha\captchaImage.ascx" />
+    <EmbeddedResource Include="Captcha\captcha.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Captcha\captchaImage.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

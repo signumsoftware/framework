@@ -8,6 +8,9 @@ namespace Signum.Web.Captcha
 {
     public static class CaptchaClient
     {
+        public static string CaptchaUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Captcha.captcha.ascx";
+        public static string CaptchaImageUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Captcha.captchaImage.ascx";
+
         public static FontWarpFactor? fontWarpFactor { set { CaptchaImage.FontWarp = value; } }
         public static BackgroundNoiseLevel? backgroundNoiseLevel { set { CaptchaImage.BackgroundNoise = value; } }
         public static LineNoiseLevel? lineNoiseLevel { set { CaptchaImage.LineNoise = value; } }

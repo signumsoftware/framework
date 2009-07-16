@@ -35,8 +35,8 @@ namespace Signum.Web.Captcha
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CaptchaCheckAttribute"/> class.
 		/// </summary>
-		public CaptchaValidationAttribute() 
-			: this("captcha") { }
+		public CaptchaValidationAttribute()
+            : this("sfCaptcha") { }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CaptchaCheckAttribute"/> class.
@@ -86,7 +86,7 @@ namespace Signum.Web.Captcha
 			string expectedValue = image == null ? String.Empty : image.Text;
 
 			// removes the captch from cache so it cannot be used again
-			filterContext.HttpContext.Cache.Remove(guid);
+			//filterContext.HttpContext.Cache.Remove(guid);
 
 			// validate the captch
 			filterContext.ActionParameters["captchaValid"] =

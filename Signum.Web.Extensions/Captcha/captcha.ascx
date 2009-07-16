@@ -7,7 +7,7 @@
         $('#ajax-loader').show();
         $.ajax({
             type: "POST",
-            url: "Captcha.aspx/Refresh",
+            url: "Captcha.ascx/Refresh",
             data: "",
             async: false,
             dataType: "html",
@@ -28,10 +28,10 @@
 <div id="divCaptcha">
     <label class="labelLine">Escriba estos caracteres:</label>
     <div id="divCaptchaImage">
-        <% Html.RenderPartial("captchaImage"); %>
+        <% Html.RenderPartial(CaptchaClient.CaptchaImageUrl); %>
     </div>
     <%= Html.Href("solicitarNuevoCaptcha", "Solicite un nuevo código", "javascript:solicitarCaptcha();", "Solicite un nuevo código", null, new Dictionary<string, object> { {"style", "float:left" } })%>
     <div class="clearall"></div>
     <label class="labelLine" for="captcha">Aquí:</label>
-    <%= Html.TextBox("captcha", null, new {autocomplete="off"})%>
+    <%= Html.TextBox("sfCaptcha", null, new {autocomplete="off"})%>
 </div>
