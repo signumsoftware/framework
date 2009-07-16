@@ -94,5 +94,12 @@ namespace Signum.Web.Captcha
 				&& !String.IsNullOrEmpty(expectedValue)
 				&& String.Equals(actualValue, expectedValue, StringComparison.OrdinalIgnoreCase);
 		}
+
+       /* public override void OnActionExecuted(ActionExecutedContext filterContext)
+        {
+            if (((ContentResult)filterContext.Result).Content == "") {
+                //No hay errores, comprobamos si captcha es correcto
+            }
+        }*/
 	}
 }

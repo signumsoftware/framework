@@ -16,7 +16,7 @@ namespace Signum.Web.ScriptCombiner
 
         public static string CombinedCssUrlPath(this HtmlHelper html, string path, params string[] files)
         {
-            return "Combine.aspx/CSS?f={0}&p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
+            return "Combine.aspx/CSS?f={0}&amp;p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
         }
 
         public static void CombinedCss(this HtmlHelper html, params string[] files)
@@ -27,7 +27,7 @@ namespace Signum.Web.ScriptCombiner
 
         public static string CombinedJsUrlPath(this HtmlHelper html, string path, params string[] files)
         {
-            return "Combine.aspx/JS?f={0}&p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
+            return "Combine.aspx/JS?f={0}&amp;p={1}".Formato(String.Join(",", files).Replace("/", "%2f"), path.Replace("/", "%2f"));
         }
         public static string CombinedJsUrl(this HtmlHelper html, params string[] files)
         {
