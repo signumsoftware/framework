@@ -56,9 +56,6 @@ namespace Signum.Web
         public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
         {
             return html.Label(id, value, idField, cssClass, null);
-            //String.IsNullOrEmpty(id) ?
-            //    String.Format("<label for='{0}' class='{1}'>{2}</label>", idField, cssClass, value) :
-            //    String.Format("<label for='{0}' id='{3}' class='{1}'>{2}</label>", idField, cssClass, value, id);
         }
 
         public static string Span(this HtmlHelper html, string name, string value, string cssClass)
