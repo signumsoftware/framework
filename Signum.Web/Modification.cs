@@ -354,7 +354,7 @@ namespace Signum.Web
             if (!Reflector.IsMList(staticType))
                 throw new InvalidOperationException("MListModification with staticType {0}".Formato(staticType.TypeName()));
 
-            staticElementType = Reflector.CollectionType(staticType);
+            staticElementType = ReflectionTools.CollectionType(staticType);
 
             Fill(formValues, interval);
         }
