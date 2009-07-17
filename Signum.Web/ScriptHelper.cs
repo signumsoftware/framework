@@ -11,7 +11,7 @@ namespace Signum.Web
     {
         const string resourceKey = "__resources";
 
-        private List<string> _resources;
+        public List<string> _resources;
 
         public ResourceTracker(HttpContextBase context)
         {
@@ -25,16 +25,13 @@ namespace Signum.Web
 
         public void Add(string url)
         {
-            url = url.ToLower();
-            _resources.Add(url);
+            _resources.Add(url.ToLower());
         }
 
-        public bool Contains(string url)
+        internal bool Contains(string url)
         {
-            url = url.ToLower();
-            return _resources.Contains(url);
+            return _resources.Contains(url.ToLower());
         }
-
     }
 
     public static class ScriptExtensions
