@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Signum.Windows
 {
-    public class QuerySetting
+    public class QuerySettings
     {
         public string Title;
     }

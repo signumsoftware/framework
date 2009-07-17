@@ -197,7 +197,7 @@ namespace Signum.Entities.Reflection
         }
 
 
-        public static string FriendlyName(this Type type)
+        public static string NiceName(this Type type)
         {
             return
                 type.SingleAttribute<DescriptionAttribute>().TryCC(da => da.Description) ??
@@ -225,7 +225,7 @@ namespace Signum.Entities.Reflection
                 return validators.GetOrCreate(type, () =>
                     MemberEntryFactory.GenerateIList(type, MemberOptions.Properties | MemberOptions.Getter | MemberOptions.Setters | MemberOptions.Untyped)
                     .Cast<IMemberEntry>()
-                    .Where(p => !Attribute.IsDefined(p.MemberInfo, typeof(DoNotValidateAttribute)))
+                    .Where(p => !Attribute.IsDefined(p.MemberInfo, typeof(HiddenPropertyAttribute)))
                     .ToDictionary(p => p.Name, p => new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter)));
             }
         }

@@ -18,7 +18,7 @@ namespace Signum.Entities
         internal int? id = null; //primary key
         internal string toStr; //no value for new entities
 
-        [DoNotValidate]
+        [HiddenProperty]
         public int Id
         {
             get
@@ -30,12 +30,13 @@ namespace Signum.Entities
             internal set { id = value; }
         }
 
-        [DoNotValidate]
+        [HiddenProperty]
         public int? IdOrNull
         {
             get { return id; }
         }
 
+        [HiddenProperty]
         public string ToStr
         {
             get { return toStr; }
@@ -44,7 +45,7 @@ namespace Signum.Entities
 
         [Ignore]
         bool isNew = true; 
-        [DoNotValidate]
+        [HiddenProperty]
         public bool IsNew 
         {
             get { return isNew; }

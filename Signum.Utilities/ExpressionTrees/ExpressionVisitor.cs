@@ -11,14 +11,14 @@ using Signum.Utilities.DataStructures;
 
 namespace Signum.Utilities.ExpressionTrees
 {
-	internal abstract class ExpressionVisitor
+	public abstract class ExpressionVisitor
 	{
 		// Methods
-		internal ExpressionVisitor()
+        protected ExpressionVisitor()
 		{
 		}
 
-		internal virtual Expression Visit(Expression exp)
+        protected virtual Expression Visit(Expression exp)
 		{
 			if (exp == null)
 			{
@@ -103,7 +103,7 @@ namespace Signum.Utilities.ExpressionTrees
 			throw new Exception("UnhandledExpressionType");
 		}
 
-		internal virtual Expression VisitBinary(BinaryExpression b)
+        protected virtual Expression VisitBinary(BinaryExpression b)
 		{
 			Expression left = this.Visit(b.Left);
 			Expression right = this.Visit(b.Right);
@@ -119,7 +119,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
 		}
 
-		internal virtual MemberBinding VisitBinding(MemberBinding binding)
+        protected virtual MemberBinding VisitBinding(MemberBinding binding)
 		{
 			switch (binding.BindingType)
 			{
@@ -135,7 +135,7 @@ namespace Signum.Utilities.ExpressionTrees
 			throw new Exception("UnhandledBindingType");
 		}
 
-		internal virtual IEnumerable<MemberBinding> VisitBindingList(ReadOnlyCollection<MemberBinding> original)
+		protected virtual IEnumerable<MemberBinding> VisitBindingList(ReadOnlyCollection<MemberBinding> original)
 		{
 			List<MemberBinding> list = null;
 			int num = 0;
@@ -165,7 +165,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return original;
 		}
 
-		internal virtual Expression VisitConditional(ConditionalExpression c)
+        protected virtual Expression VisitConditional(ConditionalExpression c)
 		{
 			Expression test = this.Visit(c.Test);
 			Expression ifTrue = this.Visit(c.IfTrue);
@@ -177,12 +177,12 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.Condition(test, ifTrue, ifFalse);
 		}
 
-		internal virtual Expression VisitConstant(ConstantExpression c)
+        protected virtual Expression VisitConstant(ConstantExpression c)
 		{
 			return c;
 		}
 
-		internal virtual ElementInit VisitElementInitializer(ElementInit initializer)
+        protected virtual ElementInit VisitElementInitializer(ElementInit initializer)
 		{
 			ReadOnlyCollection<Expression> arguments = this.VisitExpressionList(initializer.Arguments);
 			if (arguments != initializer.Arguments)
@@ -192,7 +192,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return initializer;
 		}
 
-		internal virtual IEnumerable<ElementInit> VisitElementInitializerList(ReadOnlyCollection<ElementInit> original)
+        protected virtual IEnumerable<ElementInit> VisitElementInitializerList(ReadOnlyCollection<ElementInit> original)
 		{
 			List<ElementInit> list = null;
 			int num = 0;
@@ -222,7 +222,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return original;
 		}
 
-		internal virtual ReadOnlyCollection<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
+        protected virtual ReadOnlyCollection<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
 		{
 			List<Expression> sequence = null;
 			int num = 0;
@@ -252,8 +252,8 @@ namespace Signum.Utilities.ExpressionTrees
 			return original;
 		}
 
-        private static ReadOnlyCollection<Expression> empty = new ReadOnlyCollection<Expression>(new Expression[0]);
-        internal static ReadOnlyCollection<Expression> ToReadOnlyCollection(IEnumerable<Expression> sequence)
+        static ReadOnlyCollection<Expression> empty = new ReadOnlyCollection<Expression>(new Expression[0]);
+        protected static ReadOnlyCollection<Expression> ToReadOnlyCollection(IEnumerable<Expression> sequence)
         {
             if (sequence == null)
                 return empty;
@@ -263,9 +263,9 @@ namespace Signum.Utilities.ExpressionTrees
 
             return new ReadOnlyCollection<Expression>(sequence.ToArray());
         }
-     
 
-		internal virtual Expression VisitInvocation(InvocationExpression iv)
+
+        protected virtual Expression VisitInvocation(InvocationExpression iv)
 		{
 			IEnumerable<Expression> arguments = this.VisitExpressionList(iv.Arguments);
 			Expression expression = this.Visit(iv.Expression);
@@ -276,7 +276,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.Invoke(expression, arguments);
 		}
 
-		internal virtual Expression VisitLambda(LambdaExpression lambda)
+        protected virtual Expression VisitLambda(LambdaExpression lambda)
 		{
 			Expression body = this.Visit(lambda.Body);
 			if (body != lambda.Body)
@@ -286,7 +286,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return lambda;
 		}
 
-		internal virtual Expression VisitListInit(ListInitExpression init)
+        protected virtual Expression VisitListInit(ListInitExpression init)
 		{
 			NewExpression newExpression = this.VisitNew(init.NewExpression);
 			IEnumerable<ElementInit> initializers = this.VisitElementInitializerList(init.Initializers);
@@ -297,7 +297,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.ListInit(newExpression, initializers);
 		}
 
-		internal virtual Expression VisitMemberAccess(MemberExpression m)
+        protected virtual Expression VisitMemberAccess(MemberExpression m)
 		{
 			Expression expression = this.Visit(m.Expression);
 			if (expression != m.Expression)
@@ -307,7 +307,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return m;
 		}
 
-		internal virtual MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
+        protected virtual MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
 		{
 			Expression expression = this.Visit(assignment.Expression);
 			if (expression != assignment.Expression)
@@ -317,7 +317,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return assignment;
 		}
 
-		internal virtual Expression VisitMemberInit(MemberInitExpression init)
+        protected virtual Expression VisitMemberInit(MemberInitExpression init)
 		{
 			NewExpression newExpression = this.VisitNew(init.NewExpression);
 			IEnumerable<MemberBinding> bindings = this.VisitBindingList(init.Bindings);
@@ -328,7 +328,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.MemberInit(newExpression, bindings);
 		}
 
-		internal virtual MemberListBinding VisitMemberListBinding(MemberListBinding binding)
+        protected virtual MemberListBinding VisitMemberListBinding(MemberListBinding binding)
 		{
 			IEnumerable<ElementInit> initializers = this.VisitElementInitializerList(binding.Initializers);
 			if (initializers != binding.Initializers)
@@ -338,7 +338,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return binding;
 		}
 
-		internal virtual MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding binding)
+        protected virtual MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding binding)
 		{
 			IEnumerable<MemberBinding> bindings = this.VisitBindingList(binding.Bindings);
 			if (bindings != binding.Bindings)
@@ -348,7 +348,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return binding;
 		}
 
-		internal virtual Expression VisitMethodCall(MethodCallExpression m)
+        protected virtual Expression VisitMethodCall(MethodCallExpression m)
 		{
 			Expression instance = this.Visit(m.Object);
 			IEnumerable<Expression> arguments = this.VisitExpressionList(m.Arguments);
@@ -359,7 +359,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.Call(instance, m.Method, arguments);
 		}
 
-		internal virtual NewExpression VisitNew(NewExpression nex)
+        protected virtual NewExpression VisitNew(NewExpression nex)
 		{
 			IEnumerable<Expression> arguments = this.VisitExpressionList(nex.Arguments);
 			if (arguments == nex.Arguments)
@@ -373,7 +373,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.New(nex.Constructor, arguments);
 		}
 
-		internal virtual Expression VisitNewArray(NewArrayExpression na)
+        protected virtual Expression VisitNewArray(NewArrayExpression na)
 		{
 			IEnumerable<Expression> initializers = this.VisitExpressionList(na.Expressions);
 			if (initializers == na.Expressions)
@@ -387,12 +387,12 @@ namespace Signum.Utilities.ExpressionTrees
 			return Expression.NewArrayBounds(na.Type.GetElementType(), initializers);
 		}
 
-		internal virtual Expression VisitParameter(ParameterExpression p)
+        protected virtual Expression VisitParameter(ParameterExpression p)
 		{
 			return p;
 		}
 
-		internal virtual Expression VisitTypeIs(TypeBinaryExpression b)
+        protected virtual Expression VisitTypeIs(TypeBinaryExpression b)
 		{
 			Expression expression = this.Visit(b.Expression);
 			if (expression != b.Expression)
@@ -402,7 +402,7 @@ namespace Signum.Utilities.ExpressionTrees
 			return b;
 		}
 
-		internal virtual Expression VisitUnary(UnaryExpression u)
+        protected virtual Expression VisitUnary(UnaryExpression u)
 		{
 			Expression operand = this.Visit(u.Operand);
 			if (operand != u.Operand)

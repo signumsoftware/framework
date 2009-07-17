@@ -104,7 +104,7 @@ namespace Signum.Engine
                          {
                              ClassName = type.Name,
                              TableName = tab.Name,
-                             FriendlyName = type.FriendlyName()
+                             FriendlyName = type.NiceName()
                          }).ToList();
             return lista;
         }

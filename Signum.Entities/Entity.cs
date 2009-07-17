@@ -9,7 +9,7 @@ namespace Signum.Entities
     public abstract class Entity : IdentifiableEntity
     {
         internal long ticks = 0;
-        [DoNotValidate]
+        [HiddenProperty]
         public long Ticks
         {
             get { return ticks; }

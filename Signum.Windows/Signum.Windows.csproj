@@ -127,6 +127,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Themes\generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Themes\ToolBarButton.generic.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -160,10 +164,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Themes\DateTimePicker.generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -218,10 +218,13 @@
     <Compile Include="Common.cs" />
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
+    <Compile Include="AutoControl.cs" />
     <Compile Include="Facades\Constructor.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
     <Compile Include="Converters\NullableDecimalConverter.cs" />
     <Compile Include="Converters\DoubleListConverter.cs" />
+    <Compile Include="Facades\MenuManager.cs" />
+    <Compile Include="Facades\ShortcutHelper.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
     <Compile Include="Facades\AdminOptions.cs" />
     <Compile Include="Facades\FindOptions.cs" />

@@ -26,7 +26,7 @@ namespace Signum.Entities
 
         internal ModifiableEntity() { }
 
-        [DoNotValidate]
+        [HiddenProperty]
         public override bool SelfModified
         {
             get { return selfModified; }
@@ -75,7 +75,7 @@ namespace Signum.Entities
             Notify("Error");
         }
 
-        [DoNotValidate]
+        [HiddenProperty]
         public string ToStringMethod
         {
             get { return ToString(); }
@@ -158,7 +158,7 @@ namespace Signum.Entities
         #region IDataErrorInfo Members
 
    
-        [DoNotValidate]
+        [HiddenProperty]
         public string Error
         {
             get { return IntegrityCheck(); }
@@ -171,7 +171,7 @@ namespace Signum.Entities
         }
 
         //override for per-property checks
-        [DoNotValidate]
+        [HiddenProperty]
         public virtual string this[string columnName]
         {
             get

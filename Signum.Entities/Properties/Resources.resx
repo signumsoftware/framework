@@ -222,4 +222,7 @@
   <data name="_0HasToBeBetween0And1" xml:space="preserve">
     <value>{{0}} Has to be between {0} and {1}</value>
   </data>
+  <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
+    <value>{{0}} has more than {0} decimal places</value>
+  </data>
 </root>

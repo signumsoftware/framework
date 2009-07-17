@@ -41,6 +41,14 @@ namespace Signum.Windows
             set { SetValue(LabelTextProperty, value); }
         }
 
+        public static readonly DependencyProperty UnitTextProperty =
+            DependencyProperty.Register("UnitText", typeof(string), typeof(ValueLine), new UIPropertyMetadata(null));
+        public string UnitText
+        {
+            get { return (string)GetValue(UnitTextProperty); }
+            set { SetValue(UnitTextProperty, value); }
+        }
+
         public static readonly DependencyProperty ValueProperty =
             DependencyProperty.Register("Value", typeof(object), typeof(ValueLine), new UIPropertyMetadata(null));
         public object Value
@@ -114,7 +122,6 @@ namespace Signum.Windows
             BindingOperations.ClearBinding(this, ValueProperty);
 
             DependencyProperty prop = Configurator.properties[lineType];
-
             Binding b = new Binding(binding.Path.Path)
             {
                 Converter = Configurator.GetConverter(lineType, type, nullable),
@@ -149,6 +156,20 @@ namespace Signum.Windows
 
     public class ValueLineConfigurator
     {
+        static DataTemplate comboDataTemplate;
+
+        static ValueLineConfigurator()
+        {
+            Binding b = new Binding() { Mode = BindingMode.OneTime, Converter = Converters.EnumDescriptionConverter };
+            comboDataTemplate = new DataTemplate
+            {
+                VisualTree = new FrameworkElementFactory(typeof(TextBlock))
+                        .Do(f => f.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Right))
+                        .Do(f => f.SetBinding(TextBlock.TextProperty, b))
+            };
+        }
+
+
         public virtual ValueLineType GetDefaultValueLineType(Type type)
         {
             type = type.UnNullify();
@@ -218,7 +239,7 @@ namespace Signum.Windows
 
         public Dictionary<ValueLineType, Func<Type, bool, Control>> constructor = new Dictionary<ValueLineType, Func<Type, bool, Control>>()
         {
-            {ValueLineType.Enum, (t,b)=>new ComboBox(){ ItemsSource = GetEnums(t,b), VerticalContentAlignment= VerticalAlignment.Center}},
+            {ValueLineType.Enum, (t,b)=>new ComboBox(){ ItemsSource = GetEnums(t,b), ItemTemplate = comboDataTemplate, VerticalContentAlignment= VerticalAlignment.Center}},
             {ValueLineType.Boolean,(t,b)=>new CheckBox(){ VerticalAlignment= VerticalAlignment.Center, HorizontalAlignment= HorizontalAlignment.Left}},
             {ValueLineType.Number, (t,b)=>new NumericTextBox(){ XIncrement= 10, YIncrement = 1, NullableDecimalConverter = NullableDecimalConverter.Integer}},
             {ValueLineType.DecimalNumber, (t,b)=>new NumericTextBox() },
@@ -228,7 +249,8 @@ namespace Signum.Windows
             {ValueLineType.DateTime,(t,b)=> new DateTimePicker()},
             {ValueLineType.Date,(t,b)=> new DateTimePicker(){ DateTimeConverter= DateTimeConverter.DateOnly }},
             {ValueLineType.Color, (t, b) => new ColorPicker()}
-        };
+        };       
+
 
         public virtual IValueConverter GetConverter(ValueLineType lineType, Type type, bool nullable)
         {

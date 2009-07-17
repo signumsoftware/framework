@@ -56,12 +56,6 @@ namespace Signum.Windows
             }
         }
 
-        internal enum WindowsType
-        {
-            View,
-            Find,
-            Admin
-        }
 
         internal static ImageSource GetIcon(EntitySettings es, WindowsType wt)
         {
@@ -79,4 +73,10 @@ namespace Signum.Windows
         }
     }
 
+    public enum WindowsType
+    {
+        View,
+        Find,
+        Admin
+    }
 }

@@ -94,19 +94,37 @@ namespace Signum.Windows
         {
             obj.SetValue(RouteProperty, value);
         }
+
+        [ThreadStatic]
+        static List<Tuple<FrameworkElement, string>> delayedRoutes;
+        public static  IDisposable DelayRoutes()
+        {
+            if (delayedRoutes != null)
+                return null;
+
+            delayedRoutes = new List<Tuple<FrameworkElement, string>>();
+            return new Disposable(() =>
+            {
+                foreach (var tuple in delayedRoutes)
+                {
+                    InititializeRoute(tuple.First, tuple.Second); 
+                }
+
+                delayedRoutes = null;
+            }); 
+        }
      
         static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             FrameworkElement fe = (FrameworkElement)d;
-
-            DependencyProperty labelText =
-                 fe is ValueLine ? ValueLine.LabelTextProperty :
-                 fe is EntityBase ? EntityBase.LabelTextProperty :
-                 null;
-
             if (DesignerProperties.GetIsInDesignMode(fe))
             {
+                DependencyProperty labelText =
+                    fe is ValueLine ? ValueLine.LabelTextProperty :
+                    fe is EntityBase ? EntityBase.LabelTextProperty :
+                    null;
+
                 if (labelText != null && fe.NotSet(labelText))
                 {
                     fe.SetValue(labelText, e.NewValue);
@@ -116,12 +134,20 @@ namespace Signum.Windows
 
             string route = (string)e.NewValue;
 
+            if (delayedRoutes != null)
+                delayedRoutes.Add(Tuple.New(fe, route));
+            else
+                InititializeRoute(fe, route);
+        }
+
+        private static TypeContext InititializeRoute(FrameworkElement fe, string route)
+        {
             TypeContext context = GetTypeContext(fe.Parent);
 
             if (context == null)
                 throw new ApplicationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext);
 
-            string[] steps = route.Replace("/", ".Item.").Split('.').Where(s=>s.Length>0).ToArray();
+            string[] steps = route.Replace("/", ".Item.").Split('.').Where(s => s.Length > 0).ToArray();
 
             foreach (var step in steps)
             {
@@ -138,9 +164,10 @@ namespace Signum.Windows
             SetTypeContext(fe, context);
 
             foreach (CommonRouteTask task in RouteTask.GetInvocationList())
-	        {
-                task(fe, route, context); 
-	        }
+            {
+                task(fe, route, context);
+            }
+            return context;
         }
 
         #region Tasks
@@ -151,10 +178,13 @@ namespace Signum.Windows
             RouteTask += TaskSetTypeProperty;
             RouteTask += TaskSetValueProperty;
             RouteTask += TaskSetLabelText;
+            RouteTask += TaskSetUnitText;
             RouteTask += TaskSetIsReadonly;
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
         }
+
+
   
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
         {
@@ -215,6 +245,18 @@ namespace Signum.Windows
             if (labelText != null && fe.NotSet(labelText))
             {
                 fe.SetValue(labelText, (context as TypeSubContext).TryCC(ts => ts.PropertyInfo.NiceName()));
+            }
+        }
+
+        static void TaskSetUnitText(FrameworkElement fe, string route, TypeContext context)
+        {
+            ValueLine vl = fe as ValueLine;
+            TypeSubContext tsc = context as TypeSubContext; 
+            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && tsc != null)
+            {
+                UnitAttribute ua = tsc.PropertyInfo.SingleAttribute<UnitAttribute>();
+                if (ua != null)
+                    vl.UnitText = ua.UnitName;
             }
         }
 

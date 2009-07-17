@@ -15,7 +15,7 @@ namespace Signum.Entities
         [Ignore]
         protected bool modified = false;
 
-        [DoNotValidate]
+        [HiddenProperty]
         public bool Modified
         {
             get { return modified || SelfModified; }
@@ -31,7 +31,7 @@ namespace Signum.Entities
             }
         }
 
-        [DoNotValidate]
+        [HiddenProperty]
         public abstract bool SelfModified { get; internal set; }
 
         public virtual string IntegrityCheck()

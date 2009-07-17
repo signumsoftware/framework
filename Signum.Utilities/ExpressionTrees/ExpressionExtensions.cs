@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
@@ -55,65 +55,23 @@ namespace Signum.Utilities.ExpressionTrees
 		#endregion
 	}
 
-	/// <summary>
-	/// Contains extension methods for Expression class. These methods
-	/// can be used to 'call' expression tree and can be translated to IQueryable
-	/// </summary>
-	public static class ExpressionExtensions
-	{
-		#region Extension methods
-
-		/// <summary>
-		/// Invoke expression (compile & invoke). If you want to be able to expand
-		/// call to expression you have to use this method for invocation.
-		/// </summary>
-		public static T Expand<A0, T>(this Expression<Func<A0, T>> expr, A0 a0)
-		{
-			return expr.Compile().Invoke(a0);
-		}
-
-		/// <summary>
-		/// Takes expr and replaces all calls to Expand (extension) method by it's implementation 
-		/// (modifies expression tree)
-		/// </summary>
-		public static Expression<Func<A0, T>> Expand<A0, T>(this Expression<Func<A0, T>> expr)
-		{
-			return (Expression<Func<A0, T>>)new ExpressionExpander().Visit(expr);
-		}
-
-		/// <summary>
-		/// Takes expr and replaces all calls to Expand (extension) method by it's implementation 
-		/// (modifies expression tree)
-		/// </summary>
-		public static Expression<Func<A0, A1, T>> Expand<A0, A1, T>(this Expression<Func<A0, A1, T>> expr)
-		{
-			return (Expression<Func<A0, A1, T>>)new ExpressionExpander().Visit(expr);
-		}
-
-		/// <summary>
-		/// Takes expr and replaces all calls to Expand (extension) method by it's implementation 
-		/// (modifies expression tree)
-		/// </summary>
-		public static Expression ExpandUntyped(this Expression expr)
-		{
-			return new ExpressionExpander().Visit(expr);
-		}
-
-		#endregion
-	}
-
 
 	/// <summary>
 	/// Implementation of ExpressionVisiter that does the replacement
 	/// </summary>
-	internal class ExpressionExpander : ExpressionVisitor
+	public class ExpressionExpander : ExpressionVisitor
 	{
+        public static Expression ExpandUntyped(Expression expr)
+        {
+            return new ExpressionExpander().Visit(expr);
+        }
+
 		#region Initialization
         Dictionary<ParameterExpression, Expression> _replaceVars = new Dictionary<ParameterExpression, Expression>();
 		#endregion
 
 		#region Overrides
-		internal override Expression VisitParameter(ParameterExpression p)
+        protected override Expression VisitParameter(ParameterExpression p)
 		{
 			if ((_replaceVars != null) && (_replaceVars.ContainsKey(p)))
 				return Visit(_replaceVars[p]);
@@ -147,7 +105,7 @@ namespace Signum.Utilities.ExpressionTrees
 			throw new Exception("Cannot evaluate expression!");
 		}
 
-		internal override Expression VisitMethodCall(MethodCallExpression m)
+		protected override Expression VisitMethodCall(MethodCallExpression m)
 		{
 			// Expand expression tree 'calls'
 			object[] attrs = m.Method.GetCustomAttributes(typeof(MethodExpanderAttribute), false);

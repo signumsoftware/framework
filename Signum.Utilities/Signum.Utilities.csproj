@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -81,6 +81,7 @@
     <Compile Include="DataStructures\Tuple.cs" />
     <Compile Include="DataStructures\PriorityQueue.cs" />
     <Compile Include="DataStructures\RecentsDictionary.cs" />
+    <Compile Include="ExpressionExpander.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="Reflection\MemberEntryFactory.cs" />

@@ -23,9 +23,6 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
-    /// <summary>
-    /// Interaction logic for UserControl1.xaml
-    /// </summary>
     public partial class EntityCombo : EntityBase
     {
         public static readonly DependencyProperty LoadDataTriggerProperty =

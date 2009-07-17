@@ -212,9 +212,7 @@ namespace Signum.Utilities
 
         public static string Replace(this string str, Dictionary<string, string> replacements)
         {
-            Regex regex = new Regex(replacements.Keys.ToString(a => "(" + Regex.Escape(a) + ")", "|"));
-
-            return regex.Replace(str, m => replacements[m.Value]);
+            return replacements.Aggregate(str, (s, kvp) => s.Replace(kvp.Key, kvp.Value));
         }
 
         public static string Indent(this string str, int numChars)

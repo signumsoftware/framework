@@ -157,6 +157,20 @@ namespace Signum.Utilities
             return t;
         }
 
+        public static string TryToString(this object obj)
+        {
+            if (obj == null)
+                return null;
+            return obj.ToString(); 
+        }
+
+        public static string TryToString(this object obj, string defaultValue)
+        {
+            if (obj == null)
+                return defaultValue;
+            return obj.ToString();
+        }
+
         #region Map Try Do TryDo
         public static R Map<T, R>(this T t, Func<T, R> func)
         {

@@ -11,9 +11,19 @@ using Signum.Entities.Properties;
 namespace Signum.Entities
 {
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
-    public class DoNotValidateAttribute : Attribute
+    public class HiddenPropertyAttribute : Attribute
     {
 
+    }
+
+    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
+    public class UnitAttribute : Attribute
+    {
+        public string UnitName { get; private set; }
+        public UnitAttribute(string unitName)
+        {
+            this.UnitName = unitName; 
+        }
     }
 
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
@@ -38,22 +48,11 @@ namespace Signum.Entities
         protected abstract string OverrideError(object value);
     }
 
-    /*public class NotNullNorEmptyValidatorAttribute : ValidatorAttribute
-    {
-        protected override string OverrideError(object obj)
-        {
-            return String.IsNullOrEmpty((string)obj) ? null : Resources.Property0HasNoValue;
-        }
-    }*/
-
     public class NotNullValidatorAttribute : ValidatorAttribute
     {
         protected override string OverrideError(object obj)
         {
-            //if ((string)obj == String.Empty)
-            //    return String.IsNullOrEmpty((string)obj) ? null : Resources.Property0HasNoValue;
-            //else
-                return obj != null ? null : Resources.Property0HasNoValue;
+            return obj != null ? null : Resources.Property0HasNoValue;
         }
     }
 
@@ -100,8 +99,6 @@ namespace Signum.Entities
             return null; 
         }
     }
-
- 
 
 
     public class RegexValidatorAttribute : ValidatorAttribute
@@ -179,6 +176,37 @@ namespace Signum.Entities
             this.FormatName = "URL";
         }
     }
+
+    public class DecimalsValidatorAttribute : ValidatorAttribute
+    {
+        int decimalPlaces ;
+
+        public DecimalsValidatorAttribute()
+        {
+            decimalPlaces = 2; 
+        }
+
+        public DecimalsValidatorAttribute(int decimalPlaces)
+        {
+            this.decimalPlaces = decimalPlaces; 
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (value is decimal && Math.Round((decimal)value, decimalPlaces) != (decimal)value ||
+                value is float && Math.Round((float)value, decimalPlaces) != (float)value ||
+                value is double && Math.Round((double)value, decimalPlaces) != (double)value)
+            {
+                return Resources._0HasMoreThan0DecimalPlaces.Formato(decimalPlaces);
+            }
+
+            return null;
+        }
+    }
+
 
     public class NumberIsValidatorAttribute : ValidatorAttribute
     {

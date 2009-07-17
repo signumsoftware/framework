@@ -16,6 +16,7 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using Signum.Windows.Properties;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
@@ -29,6 +30,9 @@ namespace Signum.Windows
 
         public static readonly IValueConverter NullableEnumConverter =
             ConverterFactory.New((object v) => v == null ? "-" : v, (object v) => (v as string) == "-" ? null : v);
+
+        public static readonly IValueConverter EnumDescriptionConverter =
+            ConverterFactory.New((object v) => v is Enum ? EnumExtensions.NiceToString((Enum)v) : (string)v);
 
         public static readonly IValueConverter ErrorListToToolTipString =
             ConverterFactory.New((IEnumerable<ValidationError> err) => err.Select(e => e.ErrorContent).FirstOrDefault());
@@ -67,13 +71,13 @@ namespace Signum.Windows
         public static readonly IValueConverter Not = ConverterFactory.New((bool b) => !b, (bool b) => !b);
 
         public static readonly IValueConverter TypeContextName =
-            ConverterFactory.New((FrameworkElement b) =>b.TryCC(fe => Common.GetTypeContext(fe)).TryCC(c => c.Type).TryCC(t => Navigator.TypeName(t)) ?? "??");
+            ConverterFactory.New((FrameworkElement b) =>b.TryCC(fe => Common.GetTypeContext(fe)).TryCC(c => c.Type).TryCC(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter TypeName =
-            ConverterFactory.New((Type type) => type.TryCC(t => Navigator.TypeName(t)) ?? "??");
+            ConverterFactory.New((Type type) => type.TryCC(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter TypeImage =
-            ConverterFactory.New((Type type) => EntitySettings.GetIcon(type.TryCC(t => Navigator.FindSettings(t)), EntitySettings.WindowsType.View));
+            ConverterFactory.New((Type type) => EntitySettings.GetIcon(type.TryCC(t => Navigator.FindSettings(t)), WindowsType.View));
 
         public static readonly IValueConverter ThicknessToCornerRadius =
             ConverterFactory.New((Thickness b) => new CornerRadius

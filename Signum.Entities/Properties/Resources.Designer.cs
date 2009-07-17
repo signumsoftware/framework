@@ -88,6 +88,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {{0}} has more than {0} decimal places.
+        /// </summary>
+        internal static string _0HasMoreThan0DecimalPlaces {
+            get {
+                return ResourceManager.GetString("_0HasMoreThan0DecimalPlaces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} has no correct format.
         /// </summary>
         internal static string _0HasNoCorrectFormat {
