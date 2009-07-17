@@ -84,7 +84,7 @@
     <Compile Include="ExpressionExpander.cs" />
     <Compile Include="ExpressionTrees\ExpressionEvaluator.cs" />
     <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
-    <Compile Include="ExpressionTrees\ExpressionVisitor.old.cs">
+    <Compile Include="ExpressionTrees\ExpressionVisitor.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ExpressionTrees\Query.cs" />
