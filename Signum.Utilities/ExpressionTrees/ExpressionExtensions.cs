@@ -109,26 +109,14 @@ namespace Signum.Utilities.ExpressionTrees
 	internal class ExpressionExpander : ExpressionVisitor
 	{
 		#region Initialization
-
-		Dictionary<ParameterExpression,Expression> _replaceVars;
-
-		internal ExpressionExpander()
-		{
-			_replaceVars = null;
-		}
-
-		private ExpressionExpander(Dictionary<ParameterExpression,Expression> replaceVars)
-		{
-			_replaceVars = replaceVars;
-		}
-
+        Dictionary<ParameterExpression, Expression> _replaceVars = new Dictionary<ParameterExpression, Expression>();
 		#endregion
 
 		#region Overrides
 		internal override Expression VisitParameter(ParameterExpression p)
 		{
 			if ((_replaceVars != null) && (_replaceVars.ContainsKey(p)))
-				return _replaceVars[p];
+				return Visit(_replaceVars[p]);
 			else
 				return base.VisitParameter(p);
 		}
@@ -177,22 +165,19 @@ namespace Signum.Utilities.ExpressionTrees
 			{
 				LambdaExpression lambda = (LambdaExpression)(Evaluate(m.Arguments[0]));
 				
-				Dictionary<ParameterExpression,Expression> replaceVars
-					= new Dictionary<ParameterExpression,Expression>();
 				for (int i = 0; i < lambda.Parameters.Count; i++)
 				{
-					Expression rep = m.Arguments[i + 1];
-					if ((_replaceVars != null) && (rep is ParameterExpression) && (_replaceVars.ContainsKey((ParameterExpression)rep)))
-						replaceVars.Add(lambda.Parameters[i], _replaceVars[(ParameterExpression)rep]);
-					else
-						replaceVars.Add(lambda.Parameters[i], rep);
+				   _replaceVars.Add(lambda.Parameters[i],  m.Arguments[i + 1]);
 				}
-				if (_replaceVars != null)
-				{
-					foreach (KeyValuePair<ParameterExpression, Expression> pair in _replaceVars)
-						replaceVars.Add(pair.Key, pair.Value);
-				}
-				return new ExpressionExpander(replaceVars).Visit(lambda.Body);
+
+                Expression result = Visit(lambda.Body);
+
+                for (int i = 0; i < lambda.Parameters.Count; i++)
+                {
+                    _replaceVars.Remove(lambda.Parameters[i]);
+                }
+
+                return result; 
 			}
 			return base.VisitMethodCall(m);
 		}
