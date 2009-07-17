@@ -78,6 +78,9 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         void SetQueryAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        HashSet<object> AuthorizedQueries();
     }
 
     [ServiceContract]

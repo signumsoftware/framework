@@ -62,7 +62,7 @@ namespace Signum.Engine.Basics
         private static List<PropertyDN> GenerateProperties(TypeDN typeDN, Type type)
         {
             return Reflector.InstancePropertiesInOrder(type)
-                .Where(p => !Attribute.IsDefined(p, typeof(DoNotValidateAttribute)))
+                .Where(p => !Attribute.IsDefined(p, typeof(HiddenPropertyAttribute)))
                 .SelectMany(pi =>
                 {
                     PropertyDN property = new PropertyDN { Type = typeDN, Name = pi.Name };
@@ -90,7 +90,7 @@ namespace Signum.Engine.Basics
         static List<PropertyDN> GenerateAllEmbeddedFields(TypeDN typeDN, Type type, string prefix)
         {
             return Reflector.InstancePropertiesInOrder(type)
-                .Where(p => !Attribute.IsDefined(p, typeof(DoNotValidateAttribute)))
+                .Where(p => !Attribute.IsDefined(p, typeof(HiddenPropertyAttribute)))
                 .SelectMany(pi =>
                 {
                     PropertyDN field = new PropertyDN { Type = typeDN, Name = prefix + pi.Name };

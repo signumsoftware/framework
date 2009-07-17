@@ -201,6 +201,12 @@ namespace Signum.Services
                () => QueryAuthLogic.SetAllowedRule(rules, role));
         }
 
+        public HashSet<object> AuthorizedQueries()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => QueryAuthLogic.AuthorizedQueryNames(GetQueryManager()));
+        }
+
         #endregion
 
         #region IPermissionAuthServer Members
@@ -241,5 +247,6 @@ namespace Signum.Services
         }
 
         #endregion
+
     }
 }

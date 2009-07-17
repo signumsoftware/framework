@@ -8,16 +8,19 @@ using System.Windows;
 using Signum.Services;
 using System.Reflection;
 using System.Collections;
+using Signum.Windows;
+using System.Windows.Controls;
 
 namespace Signum.Windows.Authorization
 {
     public static class AuthClient
     {
+        static HashSet<object> authorizedQueries; 
         static Dictionary<Type, TypeAccess> typeRules; 
         static Dictionary<Type, Dictionary<string, Access>> propertyRules;
 
 
-        public static void Start(bool types, bool property)
+        public static void Start(bool types, bool property, bool queries)
         {
             Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(true) { View = () => new User() });
             Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings(false) { View = () => new Role() });
@@ -34,6 +37,57 @@ namespace Signum.Windows.Authorization
                 Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type) == TypeAccess.Create;
                 Navigator.Manager.GlobalIsReadOnly += type => GetTypeAccess(type) < TypeAccess.Modify;
                 Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type) >= TypeAccess.Read;
+
+                MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
+            }
+
+            if (queries)
+            {
+                authorizedQueries = Server.Service<IQueryAuthServer>().AuthorizedQueries();
+                Navigator.Manager.GlobalIsFindable += qn => GetQueryAceess(qn);
+
+                MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
+            }
+        }
+
+        static void MenuManager_TasksTypes(MenuItem menuItem)
+        {
+            if (menuItem.NotSet(MenuItem.VisibilityProperty))
+            {
+                object tag = menuItem.Tag;
+
+                if (tag == null)
+                    return;
+
+                Type type = tag as Type ?? (tag as AdminOptions).TryCC(a => a.Type);
+
+                if (type != null && Navigator.Manager.Settings.ContainsKey(type))
+                {
+                    if (GetTypeAccess(type) == TypeAccess.None)
+                        menuItem.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
+        static void MenuManager_TasksQueries(MenuItem menuItem)
+        {
+            if (menuItem.NotSet(MenuItem.VisibilityProperty))
+            {
+                object tag = menuItem.Tag;
+
+                if (tag == null)
+                    return;
+
+                object queryName =
+                    tag is Type ? null : //maybe a type but only if in FindOptions
+                    tag is FindOptions ? ((FindOptions)tag).QueryName :
+                    tag;
+
+                if (queryName != null && Navigator.Manager.QuerySetting.ContainsKey(queryName))
+                {
+                    if (!GetQueryAceess(queryName))
+                        menuItem.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -47,6 +101,10 @@ namespace Signum.Windows.Authorization
             return propertyRules.TryGetC(type).TryGetS(property) ?? Access.Modify;
         }
 
+        static bool GetQueryAceess(object queryName)
+        {
+            return authorizedQueries.Contains(queryName); 
+        }
 
         static void Common_RouteTask(FrameworkElement fe, string route, TypeContext context)
         {

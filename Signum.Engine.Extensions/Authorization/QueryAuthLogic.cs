@@ -35,8 +35,6 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
-
-                DynamicQueryManager.AllowQuery += GetQueryAllowed;
             }
         }
 
@@ -58,9 +56,9 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        public static List<object> AuthorizedQueryNames(DynamicQueryManager dqm)
+        public static HashSet<object> AuthorizedQueryNames(DynamicQueryManager dqm)
         {
-            return dqm.GetQueryNames().Where(q => GetAllowed(UserDN.Current.Role, q.ToString())).ToList();
+            return dqm.GetQueryNames().Where(q => GetAllowed(UserDN.Current.Role, q.ToString())).ToHashSet();
         }
 
         public static void AuthorizeQuery(object queryName)
@@ -84,6 +82,7 @@ namespace Signum.Engine.Authorization
         {
             if (!AuthLogic.IsEnabled)
                 return true; 
+
             return GetAllowed(UserDN.Current.Role, queryName.ToString());
         }
 
