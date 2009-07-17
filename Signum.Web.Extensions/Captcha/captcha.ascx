@@ -2,7 +2,7 @@
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Web.Captcha" %>
 
-<script type="text/javascript" language="javascript">
+<script type="text/javascript">
     function solicitarCaptcha() {
         $('#ajax-loader').show();
         $.ajax({
@@ -32,6 +32,6 @@
     </div>
     <%= Html.Href("solicitarNuevoCaptcha", "Solicite un nuevo código", "javascript:solicitarCaptcha();", "Solicite un nuevo código", null, new Dictionary<string, object> { {"style", "float:left" } })%>
     <div class="clearall"></div>
-    <label class="labelLine" for="captcha">Aquí:</label>
+    <label class="labelLine" for="sfCaptcha">Aquí:</label>
     <%= Html.TextBox("sfCaptcha", null, new {autocomplete="off"})%>
 </div>
