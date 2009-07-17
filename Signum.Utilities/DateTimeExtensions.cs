@@ -8,6 +8,9 @@ namespace Signum.Utilities
 {
     public static class DateTimeExtensions
     {
+        /// <summary>
+        /// Checks if the date is inside a C interval defined by the two given dates
+        /// </summary>
         public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
         {
             if (firstDate <= date && date < lastDate)
@@ -15,11 +18,17 @@ namespace Signum.Utilities
             return false;
         }
 
+        /// <summary>
+        /// Checks if the date is inside a C interval defined by the two given dates
+        /// </summary>
         public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime? lastDate)
         {
             return date.IsInInterval(firstDate, lastDate ?? DateTime.MinValue);
         }
 
+        /// <summary>
+        /// Checks if the date is inside a C interval defined by the two given dates
+        /// </summary>
         public static bool IsInInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate)
         {
             return date.IsInInterval(firstDate ?? DateTime.MinValue, lastDate ?? DateTime.MaxValue);
@@ -34,6 +43,9 @@ namespace Signum.Utilities
             }
         }
 
+        /// <summary>
+        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
+        /// </summary>
         public static bool IsInDateInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
         {
             AssertDateOnly(date, firstDate, lastDate);
@@ -42,11 +54,17 @@ namespace Signum.Utilities
             return false;
         }
 
+        /// <summary>
+        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
+        /// </summary>
         public static bool IsInDateInterval(this DateTime date, DateTime firstDate, DateTime? lastDate)
         {
             return date.IsInDateInterval(firstDate, lastDate ?? DateTime.MinValue.Date);
         }
 
+        /// <summary>
+        /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
+        /// </summary>
         public static bool IsInDateInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate)
         {
             return date.IsInDateInterval(firstDate ?? DateTime.MinValue.Date, lastDate ?? DateTime.MaxValue.Date);
