@@ -14,6 +14,7 @@ using Signum.Utilities.Reflection;
 using System.Runtime.Serialization;
 using System.Collections.ObjectModel;
 using Signum.Entities.Reflection;
+using System.Threading;
 
 namespace Signum.Entities
 {
@@ -142,7 +143,9 @@ namespace Signum.Entities
         }
 
         [Ignore]
-        internal int temporalId = MyRandom.Current.Next();
+        internal int temporalId = Guid.NewGuid().GetHashCode(); //Thread.CurrentThread.ManagedThreadId << 32 | currentId++;
+
+        //static int currentId = 0; 
 
         public override int GetHashCode()
         {
