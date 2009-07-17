@@ -8,6 +8,7 @@ using Signum.Entities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
 using Signum.Engine.Maps;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics
 {
@@ -75,7 +76,7 @@ namespace Signum.Engine.Basics
 
                     if (Reflector.IsMList(pi.PropertyType))
                     {
-                        Type colType = Reflector.CollectionType(pi.PropertyType);
+                        Type colType = ReflectionTools.CollectionType(pi.PropertyType);
                         if (Reflector.IsEmbeddedEntity(colType))
                         {
                             var stack = GenerateAllEmbeddedFields(typeDN, colType, pi.Name + "/");
