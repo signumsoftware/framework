@@ -27,19 +27,16 @@ namespace Signum.Services
         {
             try
             {
-                Thread.CurrentPrincipal = currentUser;
+                using (AuthLogic.User(currentUser))
+                {
+                    FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
 
-                FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
-
-                action();
+                    action();
+                }
             }
             catch (Exception e)
             {
                 throw new FaultException(e.Message);
-            }
-            finally
-            {
-                Thread.CurrentPrincipal = null;
             }
         }
 
@@ -75,55 +72,55 @@ namespace Signum.Services
         public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.GetEntityOperationInfos(entity));
+                () => OperationLogic.ServiceGetEntityOperationInfos(entity));
         }
 
         public List<OperationInfo> GetQueryOperationInfos(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.GetQueryOperationInfos(entityType));
+                () => OperationLogic.ServiceGetQueryOperationInfos(entityType));
         }
 
         public List<OperationInfo> GetConstructorOperationInfos(Type entityType)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.GetConstructorOperationInfos(entityType));
+                () => OperationLogic.ServiceGetConstructorOperationInfos(entityType));
         }
 
         public IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-               () => OperationLogic.Execute(entity, operationKey, args));
+               () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
         public IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum type, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.ExecuteLazy(lazy, type, args));
+              () => OperationLogic.ServiceExecuteLazy(lazy, type, args));
         }
 
         public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.Construct(type, operationKey, args));
+              () => OperationLogic.ServiceConstruct(type, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.ConstructFrom(entity, operationKey, args));
+              () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.ConstructFrom(lazy, operationKey, args));
+              () => OperationLogic.ServiceConstructFromLazy(lazy, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.ConstructFromMany(lazies, type, operationKey, args));
+              () => OperationLogic.ServiceConstructFromMany(lazies, type, operationKey, args));
         }
         #endregion
 

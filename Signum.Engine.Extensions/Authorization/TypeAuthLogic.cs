@@ -69,6 +69,8 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Retrieving(Schema sender, Type type, int id)
         {
+           
+            
             if (AuthLogic.IsEnabled)
             {
                 if (UserDN.Current == null)

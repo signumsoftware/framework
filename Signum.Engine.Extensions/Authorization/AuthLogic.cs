@@ -10,6 +10,8 @@ using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using System.Security.Principal;
+using System.Threading;
 
 namespace Signum.Engine.Authorization
 {
@@ -116,6 +118,29 @@ namespace Signum.Engine.Authorization
 
                 return newRoles;
             }
+        }
+
+        public static IDisposable UnsafeUser(string username)
+        {
+            UserDN user; 
+            using (AuthLogic.Disable())
+            {
+                user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
+                if (user == null)
+                    throw new ApplicationException("Username {0} is not valid".Formato(username));
+            }
+
+            return User(user);
+        }
+
+        public static IDisposable User(UserDN user)
+        {
+            IPrincipal old = Thread.CurrentPrincipal;
+            Thread.CurrentPrincipal = user;
+            return new Disposable(() =>
+            {
+                Thread.CurrentPrincipal = old; 
+            });
         }
 
         public static IEnumerable<RoleDN> RolesInOrder()

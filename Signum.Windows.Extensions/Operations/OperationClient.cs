@@ -14,6 +14,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows.Operations
 {
@@ -169,7 +170,7 @@ namespace Signum.Windows.Operations
                 {
                     if (entityControl.LooseChangesIfAny())
                     {
-                        Lazy<IdentifiableEntity> lazy = ident.ToLazy();
+                        Lazy lazy = Lazy.Create(ident.GetType(), ident);
                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLazy(lazy, operationInfo.Key, null);
                         if (operationInfo.Returns)
                             Navigator.View(newIdent);
