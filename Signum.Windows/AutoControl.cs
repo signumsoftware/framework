@@ -95,7 +95,7 @@ namespace Signum.Windows
 
             if (Reflector.IsMList(t))
             {
-                Type et = Reflector.CollectionType(t);
+                Type et = ReflectionTools.CollectionType(t);
                 if (Reflector.IsIIdentifiable(Reflector.ExtractLazy(et) ?? et))
                     return new XElement(xmlns + "GroupBox", new XAttribute("Header", pi.Name),
                         new XElement(m + "EntityList", new XAttribute(m + "Common.Route", pi.Name), new XAttribute("MaxHeight", "150")));

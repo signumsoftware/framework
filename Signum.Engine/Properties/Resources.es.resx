@@ -373,12 +373,6 @@ WRITETEXT</value>
   <data name="TheType0IsNotTheLazyVersionOf1" xml:space="preserve">
     <value>El tipo {0} no es la versiona Lazy de {1}</value>
   </data>
-  <data name="UnhandledExpressionType0" xml:space="preserve">
-    <value>Tipo de expresion no tratado '{0}'</value>
-  </data>
-  <data name="UnhandledBindingType0" xml:space="preserve">
-    <value>Tipo de binding no tratado '{0}'</value>
-  </data>
   <data name="CannotEnumerateMoreThanOnce" xml:space="preserve">
     <value>No se puede enumerar más de una vez</value>
   </data>

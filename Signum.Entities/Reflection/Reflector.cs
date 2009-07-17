@@ -32,19 +32,9 @@ namespace Signum.Entities.Reflection
     {
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        public static Type CollectionType(Type ft)
-        {
-            if (!typeof(IEnumerable).IsAssignableFrom(ft))
-                return null;
-
-            return ft.GetInterfaces().SingleOrDefault(ti => ti.IsGenericType &&
-                ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                .TryCC(ti => ti.GetGenericArguments()[0]);
-        }
-
         public static bool IsMList(Type ft)
         {
-            return CollectionType(ft) != null && IsModifiable(ft);
+            return ReflectionTools.CollectionType(ft) != null && IsModifiable(ft);
         }
 
         public static bool IsModifiable(Type t)

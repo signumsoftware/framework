@@ -303,7 +303,7 @@ namespace Signum.Engine.Linq
 
          private LikeExpression TryLike(Expression expression, Expression pattern)
         {
-            pattern = Evaluator.PartialEval(pattern);
+             pattern = ExpressionEvaluator.PartialEval(pattern);
              Expression newPattern = Visit(pattern); 
              Expression newExpression = Visit(expression);
 

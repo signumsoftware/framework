@@ -40,7 +40,7 @@ namespace Signum.Entities.Reflection
 
             if (Reflector.IsMList(obj.GetType()))
             {
-                Type t = Reflector.CollectionType(obj.GetType());
+                Type t = ReflectionTools.CollectionType(obj.GetType());
                 if (Reflector.IsModifiableOrInterface(t))
                 {
                     IEnumerable col = obj as IEnumerable;
@@ -69,7 +69,7 @@ namespace Signum.Entities.Reflection
 
             if (Reflector.IsMList(obj.GetType()))
             {
-                Type t = Reflector.CollectionType(obj.GetType());
+                Type t = ReflectionTools.CollectionType(obj.GetType());
 
                 if (Reflector.IsModifiableOnly(t))
                 {

@@ -163,12 +163,6 @@
   <data name="TheType0IsNotTheLazyVersionOf1" xml:space="preserve">
     <value>The type {0} is not the Lazy version of {1}</value>
   </data>
-  <data name="UnhandledExpressionType0" xml:space="preserve">
-    <value>Unhandled expression type: '{0}'</value>
-  </data>
-  <data name="UnhandledBindingType0" xml:space="preserve">
-    <value>Unhandled binding type '{0}'</value>
-  </data>
   <data name="CannotEnumerateMoreThanOnce" xml:space="preserve">
     <value>Cannot enumerate more than once</value>
   </data>

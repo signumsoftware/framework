@@ -403,7 +403,7 @@ namespace Signum.Engine.Linq
 
 
             MethodInfo mWhere = miWhereQ.MakeGenericMethod(type);
-            MethodInfo mContains = miContainsE.MakeGenericMethod(Reflector.CollectionType(route.Body.Type));
+            MethodInfo mContains = miContainsE.MakeGenericMethod(ReflectionTools.CollectionType(route.Body.Type));
             LambdaExpression condition = Expression.Lambda(Expression.Call(mContains, route.Body, constantExpression), route.Parameters[0]);
             return Expression.Call(mWhere, source, condition);
             

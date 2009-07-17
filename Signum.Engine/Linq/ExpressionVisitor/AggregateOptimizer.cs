@@ -9,6 +9,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Diagnostics;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {

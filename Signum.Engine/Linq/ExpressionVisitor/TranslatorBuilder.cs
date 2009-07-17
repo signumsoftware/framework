@@ -12,6 +12,7 @@ using Signum.Entities;
 using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {  
@@ -150,8 +151,8 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitMList(MListExpression ml)
             {
-                HasFullObjects = true; 
-                return Expression.Call(row, miGetList.MakeGenericMethod(Reflector.CollectionType(ml.Type)),
+                HasFullObjects = true;
+                return Expression.Call(row, miGetList.MakeGenericMethod(ReflectionTools.CollectionType(ml.Type)),
                     Expression.Constant(ml.RelationalTable),
                     Visit(ml.BackID));
             }

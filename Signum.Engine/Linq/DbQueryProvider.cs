@@ -88,7 +88,7 @@ namespace Signum.Engine.Linq
         private ITranslateResult Translate(Expression expression)
         {
             Expression expand = ExpressionExpander.ExpandUntyped(expression);
-            Expression partialEval = Evaluator.PartialEval(expand);
+            Expression partialEval = ExpressionEvaluator.PartialEval(expand);
             Expression simplified = OverloadingSimplifier.Simplify(partialEval);
             ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(simplified);
             ProjectionExpression projCleaned = (ProjectionExpression)ProjectionCleaner.Clean(binded);

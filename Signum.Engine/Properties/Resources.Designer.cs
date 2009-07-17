@@ -120,8 +120,7 @@ namespace Signum.Engine.Properties {
         ///DUMMY
         ///DUMP
         ///ELSE
-        ///END
-        /// [rest of string was truncated]&quot;;.
+        ///END        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string @__SqlKeywords__ {
             get {
@@ -568,24 +567,6 @@ namespace Signum.Engine.Properties {
         internal static string Types0DoNotImplement1 {
             get {
                 return ResourceManager.GetString("Types0DoNotImplement1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unhandled binding type &apos;{0}&apos;.
-        /// </summary>
-        internal static string UnhandledBindingType0 {
-            get {
-                return ResourceManager.GetString("UnhandledBindingType0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unhandled expression type: &apos;{0}&apos;.
-        /// </summary>
-        internal static string UnhandledExpressionType0 {
-            get {
-                return ResourceManager.GetString("UnhandledExpressionType0", resourceCulture);
             }
         }
     }

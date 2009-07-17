@@ -6,7 +6,8 @@ using System.Linq.Expressions;
 using System.Collections.ObjectModel;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using System.Diagnostics; 
+using System.Diagnostics;
+using Signum.Utilities.ExpressionTrees; 
 
 
 namespace Signum.Engine.Linq

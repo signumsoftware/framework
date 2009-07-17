@@ -73,10 +73,6 @@
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="Linq\DbExpressions.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
-    <Compile Include="Linq\ExpressionVisitor.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Linq\ExpressionVisitorHelper.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateOptimizer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
@@ -86,7 +82,6 @@
     <Compile Include="Linq\ExpressionVisitor\OverloadingSimplifier.cs" />
     <Compile Include="Linq\ExpressionVisitor\ProjectionCleaner.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionVisitor.cs" />
-    <Compile Include="Linq\ExpressionVisitor\Evaluator.cs" />
     <Compile Include="Linq\ExpressionVisitor\Nominator.cs" />
     <Compile Include="Linq\ExpressionVisitor\OrderByRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\ProjectionExpressionFinder.cs" />
@@ -101,10 +96,7 @@
     <Compile Include="Linq\ExpressionVisitor\UnusedColumnRemover.cs" />
     <Compile Include="Linq\DbExpressions.Projection.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />
-    <Compile Include="Linq\Query.cs" />
-    <Compile Include="Linq\QueryProvider.cs" />
     <Compile Include="Linq\TranslateResult.cs" />
-    <Compile Include="Linq\TypeSystem.cs" />
     <Compile Include="Engine\Deleter.cs" />
     <Compile Include="Engine\Saver.cs">
       <SubType>Code</SubType>

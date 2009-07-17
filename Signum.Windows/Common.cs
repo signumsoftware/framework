@@ -231,7 +231,7 @@ namespace Signum.Windows
             {
                 fe.SetValue(typeProperty, context.Type);
                 if (fe is EntityList)
-                    fe.SetValue(EntityList.EntityTypeProperty, Reflector.CollectionType(context.Type));
+                    fe.SetValue(EntityList.EntityTypeProperty, ReflectionTools.CollectionType(context.Type));
             }
         }
 

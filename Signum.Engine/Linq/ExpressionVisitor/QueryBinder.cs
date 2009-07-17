@@ -536,7 +536,7 @@ namespace Signum.Engine.Linq
         private Expression BindGroupBy(Type resultType, Expression source, LambdaExpression keySelector, LambdaExpression elementSelector)
         {
             Type keyType = keySelector.Body.Type;
-            Type elementType = elementSelector.TryCC(es => es.Body.Type) ?? Reflector.CollectionType(source.Type);
+            Type elementType = elementSelector.TryCC(es => es.Body.Type) ?? ReflectionTools.CollectionType(source.Type);
 
             ProjectionExpression projection = this.VisitCastProjection(source);
 
