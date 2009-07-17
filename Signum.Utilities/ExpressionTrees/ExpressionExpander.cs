@@ -79,32 +79,6 @@ namespace Signum.Utilities.ExpressionTrees
 				return base.VisitParameter(p);
 		}
 
-		internal static object Evaluate(Expression e)
-		{
-			if (e is ConstantExpression) return ((ConstantExpression)e).Value;
-			if (e is MemberExpression)
-			{
-				var me = (MemberExpression)e;
-				var obj = Evaluate(me.Expression);
-				var prop = (me.Member as PropertyInfo);
-				if (prop != null) 
-                    return prop.GetValue(obj, new object[0]);
-				var fld = (me.Member as FieldInfo);
-				if (fld != null) 
-                    return fld.GetValue(obj);
-			}
-			if (e is NewArrayExpression)
-			{
-				var ar = (NewArrayExpression)e;
-				var args = ar.Expressions.Select((expr) => Evaluate(expr)).ToArray();
-				var res = Array.CreateInstance(ar.Type.GetElementType(), args.Length);
-				for (int i = 0; i < res.Length; i++)
-					res.SetValue(args[i], i);
-				return res;
-			}
-			throw new Exception("Cannot evaluate expression!");
-		}
-
 		protected override Expression VisitMethodCall(MethodCallExpression m)
 		{
 			// Expand expression tree 'calls'
@@ -121,7 +95,7 @@ namespace Signum.Utilities.ExpressionTrees
 
 			if (m.Method.DeclaringType == typeof(ExpressionExtensions))
 			{
-				LambdaExpression lambda = (LambdaExpression)(Evaluate(m.Arguments[0]));
+				LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
 				
 				for (int i = 0; i < lambda.Parameters.Count; i++)
 				{

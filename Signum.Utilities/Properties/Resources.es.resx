@@ -227,4 +227,10 @@
   <data name="TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond" xml:space="preserve">
     <value>La fecha tiene algún valor asignado en las horas, los minutos, los segundos o los milisegundos</value>
   </data>
+  <data name="UnhandledBindingType0" xml:space="preserve">
+    <value>Tipo de binding no tratado '{0}'</value>
+  </data>
+  <data name="UnhandledExpressionType0" xml:space="preserve">
+    <value>Tipo de expresion no tratado '{0}'</value>
+  </data>
 </root>

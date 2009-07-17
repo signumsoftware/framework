@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
+using System.Collections;
 
 namespace Signum.Utilities.Reflection
 {
@@ -305,6 +306,16 @@ namespace Signum.Utilities.Reflection
             MethodInfo mi = pi.GetSetMethod();
 
             return mi == null || !mi.IsPublic;
+        }
+
+        public static Type CollectionType(Type ft)
+        {
+            if (!typeof(IEnumerable).IsAssignableFrom(ft))
+                return null;
+
+            return ft.GetInterfaces().SingleOrDefault(ti => ti.IsGenericType &&
+                ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .TryCC(ti => ti.GetGenericArguments()[0]);
         }
     }
 }

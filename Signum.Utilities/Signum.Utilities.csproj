@@ -82,6 +82,13 @@
     <Compile Include="DataStructures\PriorityQueue.cs" />
     <Compile Include="DataStructures\RecentsDictionary.cs" />
     <Compile Include="ExpressionExpander.cs" />
+    <Compile Include="ExpressionTrees\ExpressionEvaluator.cs" />
+    <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
+    <Compile Include="ExpressionTrees\ExpressionVisitor.old.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ExpressionTrees\Query.cs" />
+    <Compile Include="ExpressionTrees\QueryProvider.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="Reflection\MemberEntryFactory.cs" />
@@ -91,9 +98,8 @@
     <Compile Include="ExpressionTrees\CSharpTreeVisitor.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GroupExtensions.cs" />
-    <Compile Include="ExpressionTrees\ExpressionExtensions.cs" />
-    <Compile Include="ExpressionTrees\ExpressionVisitor.cs" />
-    <Compile Include="ExpressionTrees\QueryableExtensions.cs" />
+    <Compile Include="ExpressionTrees\ExpressionExpander.cs" />
+    <Compile Include="ExpressionTrees\ExpandableQueryProvider.cs" />
     <Compile Include="ExpressionTrees\Utils.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="MyRandom.cs" />
@@ -107,7 +113,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Reflection\ReflectionUtils.cs" />
+    <Compile Include="Reflection\ReflectionTools.cs" />
     <Compile Include="RegexExtensions.cs" />
     <Compile Include="SafeConsole.cs" />
     <Compile Include="Disposable.cs" />

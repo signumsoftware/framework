@@ -144,7 +144,7 @@ namespace Signum.Utilities.ExpressionTrees
 			string[] vals;
 			try
 			{
-				vals = (string[])ExpressionExpander.Evaluate(parameters.First());
+				vals = (string[])ExpressionEvaluator.Eval(parameters.First());
 				if (vals.Length == 0) throw new Exception();
 			}
 			catch

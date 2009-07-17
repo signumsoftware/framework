@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
@@ -12,7 +13,6 @@ namespace Signum.Utilities
     /// </summary>
     public static class ExpressionExtensions
     {
-        #region Extension methods
 
         /// <summary>
         /// Invoke expression (compile & invoke). If you want to be able to expand
@@ -49,6 +49,13 @@ namespace Signum.Utilities
         {
             return expr.Compile().Invoke(a0, a1, a2, a3);
         }
-        #endregion
+
+        /// <summary>
+        /// Returns wrapper that automatically expands expressions in LINQ queries
+        /// </summary>
+        public static IQueryable<T> ToExpandable<T>(this IQueryable<T> q)
+        {
+            return new ExpandableQueryProvider<T>(q);
+        }
     }
 }
