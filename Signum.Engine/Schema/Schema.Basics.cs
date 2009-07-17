@@ -152,11 +152,18 @@ namespace Signum.Engine.Maps
                 .Combine(Spacing.Triple);
         }
 
+
+        bool initialized = false; 
         internal void Initialize()
         {
+            if (initialized)
+                throw new InvalidOperationException("The Schema has allready been initialized"); 
+
             if (Initializing != null)
                 foreach (InitEventHandler init in Initializing.GetInvocationList())
                     init(this);
+
+            initialized = true; 
         }
         #endregion
 

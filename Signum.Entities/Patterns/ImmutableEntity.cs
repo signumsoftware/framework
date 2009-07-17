@@ -18,7 +18,8 @@ namespace Signum.Entities
             if (!IsNew && SelfModified)
                 throw new ApplicationException("Attempt to save a not new modified ImmutableEntity");
 
-            base.PreSaving();
+            if (IsNew)
+                base.PreSaving(); //Do not re-update
         }
     }
 }
