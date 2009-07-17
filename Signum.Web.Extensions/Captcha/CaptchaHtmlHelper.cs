@@ -35,7 +35,7 @@ namespace Signum.Web.Captcha
 
             return "<input type=\"hidden\" name=\"captcha-guid\" value=\"{0}\" />\n".Formato(image.UniqueId) +
                    "<img src=\"{0}\" alt=\"CAPTCHA\" width=\"{1}\" height=\"{2}\" {3}/>".Formato(
-                       route + VirtualPathUtility.ToAbsolute("~/Captcha.ascx/Image") + "?guid=" + image.UniqueId,
+                       route + VirtualPathUtility.ToAbsolute("~/Captcha.ashx/Image") + "?guid=" + image.UniqueId,
                        width,
                        height,
                        htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")

@@ -2,12 +2,12 @@
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Web.Captcha" %>
 
-<script type="text/javascript">
+<script type="text/javascript" language="javascript">
     function solicitarCaptcha() {
         $('#ajax-loader').show();
         $.ajax({
             type: "POST",
-            url: "Captcha.ascx/Refresh",
+            url: "Captcha.ashx/Refresh",
             data: "",
             async: false,
             dataType: "html",
@@ -19,7 +19,7 @@
             error:
                    function(XMLHttpRequest, textStatus, errorThrown) {
                        $('#ajax-loader').hide();
-                       alert("Error Occured! " + textStatus + " ; " + errorThrown + " ; " + XMLHttpRequest);
+                       ShowError(XMLHttpRequest, textStatus, errorThrown);
                    }
         });
     }
