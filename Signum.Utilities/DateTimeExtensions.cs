@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities.Properties;
 
 namespace Signum.Utilities
 {
@@ -9,24 +10,46 @@ namespace Signum.Utilities
     {
         public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
         {
-            if (firstDate > date || lastDate < date)
-                return false;
-            return true;
+            if (firstDate <= date && date < lastDate)
+                return true;
+            return false;
         }
 
         public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime? lastDate)
         {
-            if (firstDate > date || (lastDate.HasValue && lastDate < date))
-                return false;
-            return true;
+            return date.IsInInterval(firstDate, lastDate ?? DateTime.MinValue);
         }
 
-        public static bool IsInInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate, bool falseOnFirstNull)
+        public static bool IsInInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate)
         {
-            if (((firstDate.HasValue && (firstDate > date)) || falseOnFirstNull) 
-                || (lastDate.HasValue && lastDate < date))
-                return false;
-            return true;
+            return date.IsInInterval(firstDate ?? DateTime.MinValue, lastDate ?? DateTime.MaxValue);
+        }
+
+        private static void AssertDateOnly(params DateTime?[] args)
+        {
+            foreach (DateTime d in args.Where(dt => dt.HasValue))
+            {
+                if (d.Hour != 0 || d.Minute != 0 || d.Second != 0 || d.Millisecond != 0)
+                    throw new ApplicationException(Resources.TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond);
+            }
+        }
+
+        public static bool IsInDateInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
+        {
+            AssertDateOnly(date, firstDate, lastDate);
+            if (firstDate <= date && date <= lastDate)
+                return true;
+            return false;
+        }
+
+        public static bool IsInDateInterval(this DateTime date, DateTime firstDate, DateTime? lastDate)
+        {
+            return date.IsInDateInterval(firstDate, lastDate ?? DateTime.MinValue.Date);
+        }
+
+        public static bool IsInDateInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate)
+        {
+            return date.IsInDateInterval(firstDate ?? DateTime.MinValue.Date, lastDate ?? DateTime.MaxValue.Date);
         }
 
         public static int YearsTo(this DateTime min, DateTime max)
@@ -49,17 +72,17 @@ namespace Signum.Utilities
 
         public static DateSpan DateSpanTo(this DateTime min, DateTime max)
         {
-            return DateSpan.FromToDates(min, max); 
+            return DateSpan.FromToDates(min, max);
         }
 
         public static DateTime Add(this DateTime date, DateSpan dateSpan)
         {
-            return dateSpan.AddTo(date); 
+            return dateSpan.AddTo(date);
         }
 
         public static DateTime Min(DateTime a, DateTime b)
         {
-            return a < b ? a : b;  
+            return a < b ? a : b;
         }
 
         public static DateTime Max(DateTime a, DateTime b)
@@ -78,7 +101,7 @@ namespace Signum.Utilities
         {
             this.Years = years;
             this.Months = months;
-            this.Days = days; 
+            this.Days = days;
         }
 
         public static DateSpan FromToDates(DateTime min, DateTime max)
@@ -87,8 +110,8 @@ namespace Signum.Utilities
 
             int yeas = max.Year - min.Year;
             int months = max.Month - min.Month;
-          
-        
+
+
             if (max.Day < min.Day)
                 months -= 1;
 
@@ -111,7 +134,7 @@ namespace Signum.Utilities
 
         public DateSpan Invert()
         {
-            return new DateSpan(-Years, -Months, -Days); 
+            return new DateSpan(-Years, -Months, -Days);
         }
 
         public override string ToString()

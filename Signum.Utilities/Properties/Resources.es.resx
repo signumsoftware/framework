@@ -224,4 +224,7 @@
  Faltan: {1}
  Sobran: {2}</value>
   </data>
+  <data name="TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond" xml:space="preserve">
+    <value>La fecha tiene algún valor asignado en las horas, los minutos, los segundos o los milisegundos</value>
+  </data>
 </root>
