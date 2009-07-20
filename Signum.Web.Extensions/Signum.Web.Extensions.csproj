@@ -59,7 +59,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthClient.cs" />
+    <Compile Include="Authorization\ChangePassword.aspx.cs">
+      <DependentUpon>ChangePassword.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Authorization\ChangePassword.aspx.designer.cs">
+      <DependentUpon>ChangePassword.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\ChangePasswordSuccess.aspx.cs">
+      <DependentUpon>ChangePasswordSuccess.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Authorization\ChangePasswordSuccess.aspx.designer.cs">
+      <DependentUpon>ChangePasswordSuccess.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\Register.aspx.cs">
+      <DependentUpon>Register.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Authorization\Register.aspx.designer.cs">
+      <DependentUpon>Register.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Captcha\CaptchaClient.cs" />
     <Compile Include="Captcha\CaptchaController.cs" />
     <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
@@ -75,6 +97,10 @@
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
       <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
       <Name>Signum.Engine.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
+      <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
+      <Name>Signum.Engine</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
       <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
@@ -103,6 +129,17 @@
     <EmbeddedResource Include="Captcha\captchaImage.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\ChangePassword.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\ChangePasswordSuccess.aspx" />
+    <EmbeddedResource Include="Authorization\Login.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\LoginUserControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\Register.aspx" />
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

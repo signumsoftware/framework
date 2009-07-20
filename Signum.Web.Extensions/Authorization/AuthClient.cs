@@ -9,8 +9,15 @@ using System.Reflection;
 
 namespace Signum.Web.Authorization
 {
-    public class AuthClient
+    public static class AuthClient
     {
+        public static string CookieName = "sfUser"; 
+        public static string LoginUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Login.aspx";
+        public static string LoginUserControlUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.LoginUserControl.ascx";
+        public static string ChangePasswordUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.ChangePassword.aspx";
+        public static string ChangePasswordSuccessUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.ChangePasswordSuccess.aspx";
+        public static string RegisterUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Register.aspx";
+
         public static void Start(NavigationManager manager, bool types, bool property, bool queries)
         {
             manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(true)); //{ View = () => new User() });
@@ -60,18 +67,5 @@ namespace Signum.Web.Authorization
                 }
             }
         }
-
-        //static void Authorize(Type type, TypeAccess typeAccess, EntitySettings settings)
-        //{
-        //    if (typeAccess == TypeAccess.None)
-        //        settings.IsViewable = admin => false;
-
-        //    if (typeAccess <= TypeAccess.Read)
-        //        settings.IsReadOnly = admin => true;
-
-        //    if (typeAccess <= TypeAccess.Modify)
-        //        settings.IsCreable = admin => false;
-        //}
-
     }
 }
