@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Entities.Operations;
 using Signum.Utilities;
 
-namespace Signum.Entities.Authorization
+namespace Signum.Entities.Processes
 {
     [Serializable]
-    public class PermissionDN : IdentifiableEntity
+    public class ProcessDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;
@@ -32,18 +33,13 @@ namespace Signum.Entities.Authorization
             return name;
         }
 
-        public static PermissionDN FromEnum(Enum permissionKey)
+        public static ProcessDN FromEnum(Enum operationKey)
         {
-            return new PermissionDN
+            return new ProcessDN
             {
-                Key = EnumExtensions.UniqueKey(permissionKey),
-                Name = EnumExtensions.NiceToString(permissionKey)
+                Key = EnumExtensions.UniqueKey(operationKey),
+                Name = EnumExtensions.NiceToString(operationKey)
             };
         }
-    }
-
-    public enum BasicPermissions
-    {
-        AdminRules
     }
 }

@@ -72,6 +72,8 @@
     <Compile Include="Operations\Execute.cs" />
     <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
+    <Compile Include="Processes\PackageLogic.cs" />
+    <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
     <Compile Include="ServerExtensions.cs" />

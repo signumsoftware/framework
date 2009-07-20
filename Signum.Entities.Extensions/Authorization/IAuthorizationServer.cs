@@ -92,4 +92,14 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void SetOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
     }
+
+    [ServiceContract]
+    public interface IProcessAuthServer
+    {
+        [OperationContract, NetDataContract]
+        List<AllowedRule> GetOperationAllowedRules(Lazy<RoleDN> role);
+
+        [OperationContract, NetDataContract]
+        void SetOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+    }
 }

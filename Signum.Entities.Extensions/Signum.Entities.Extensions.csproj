@@ -68,6 +68,9 @@
     <Compile Include="Operations\IOperationServer.cs" />
     <Compile Include="Operations\OperationDN.cs" />
     <Compile Include="Operations\LogOperationDN.cs" />
+    <Compile Include="Processes\ProcessExecutionDN.cs" />
+    <Compile Include="Processes\PackageDN.cs" />
+    <Compile Include="Processes\ProcessDN.cs" />
     <Compile Include="Reports\CompositeReportDN.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

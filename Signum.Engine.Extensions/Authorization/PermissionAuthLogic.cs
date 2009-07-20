@@ -99,13 +99,13 @@ namespace Signum.Engine.Authorization
 
         public static void Authorize(Enum permissionKey)
         {
-            if (!GetAllowed(UserDN.Current.Role, PermissionDN.UniqueKey(permissionKey)))
+            if (!GetAllowed(UserDN.Current.Role, EnumExtensions.UniqueKey(permissionKey)))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
         public static bool IsAuthorizedFor(Enum permissionKey)
         {
-            return GetAllowed(UserDN.Current.Role, PermissionDN.UniqueKey(permissionKey));
+            return GetAllowed(UserDN.Current.Role, EnumExtensions.UniqueKey(permissionKey));
         }
 
         static bool GetAllowed(RoleDN role, string permissionKey)
