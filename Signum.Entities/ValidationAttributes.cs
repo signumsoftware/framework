@@ -7,6 +7,10 @@ using Signum.Utilities;
 using System.Collections;
 using System.Linq.Expressions;
 using Signum.Entities.Properties;
+using System.Reflection;
+using Signum.Utilities.Reflection;
+using Signum.Entities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
@@ -439,6 +443,66 @@ namespace Signum.Entities
                 case ComparisonType.LessThanOrEqual: return Resources.LessThanOrEqual;
             }
             throw new NotImplementedException(); 
+        }
+    }
+
+    public class StateValidator<E, S>: IEnumerable
+        where E : IdentifiableEntity
+        where S : struct
+    {
+        Func<E, S> getState;
+        string[] propertyNames;
+        string[] propertyNiceNames;
+        Func<E, object>[] getters;
+
+        Dictionary<S, bool?[]> dictionary = new Dictionary<S, bool?[]>();
+
+        public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties)
+        {
+            this.getState = getState;
+            PropertyInfo[] pis = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
+            propertyNames = pis.Select(pi => pi.Name).ToArray();
+            propertyNiceNames = pis.Select(pi => pi.NiceName()).ToArray();
+            getters = properties.Select(p => p.Compile()).ToArray();
+        }
+
+        public void Add(S state, params bool?[] necessary)
+        {
+            if (necessary == null && necessary.Length != propertyNames.Length)
+                throw new ApplicationException("The state Validator {0} for state {1} has {2} values insted of {3}"
+                    .Formato(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
+
+            dictionary.Add(state, necessary);
+        }
+
+        public string Validate(E entity, string propertyName)
+        {
+            int index = propertyNames.IndexOf(propertyName);
+            if (index == -1)
+                return null;
+
+            S state = getState(entity);
+
+            bool? necessary = dictionary[state][index];
+
+            if (necessary == null)
+                return null;
+
+            object val = getters[index](entity);
+
+            if (val != null && !necessary.Value)
+                return "{0} is not allowed on state {1}".Formato(propertyNiceNames[index], state);
+
+            if (val == null&& necessary.Value)
+                return "{0} is necessary on state {1}".Formato(propertyNiceNames[index], state);
+
+            return null; 
+        }
+
+
+        public IEnumerator GetEnumerator() //just to use object initializer
+        {
+            throw new NotImplementedException();
         }
     }
 

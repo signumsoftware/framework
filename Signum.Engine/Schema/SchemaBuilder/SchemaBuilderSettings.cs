@@ -62,6 +62,17 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 2}, 
         };
 
+        public bool IsTypeAttributesOverriden<T>()
+        {
+            return IsTypeAttributesOverriden(typeof(T));
+        }
+
+        private bool IsTypeAttributesOverriden(Type type)
+        {
+            var t = types.TryGetC(type);
+            return t != null && t.TypeAttributes != null;
+        }
+
         public void OverrideTypeAttributes<T>(params Attribute[] attributes) where T : IIdentifiable
         {
             OverrideTypeAttributes(typeof(T), attributes); 
@@ -71,6 +82,19 @@ namespace Signum.Engine.Maps
         {
             AssertCorrect(attributes, AttributeTargets.Class);
             types.GetOrCreate(type).TypeAttributes = attributes;
+        }
+
+        public bool IsFieldAttributesOverriden<T>(Expression<Func<T, object>> lambda)
+        {
+            MemberInfo mi = ReflectionTools.GetMemberInfo<T>(lambda);
+            FieldInfo fi = Reflector.FindFieldInfo(mi, true);
+            return IsFieldAttributesOverriden(typeof(T), fi.Name);
+        }
+
+        private bool IsFieldAttributesOverriden(Type type, string fieldName)
+        {
+            var t = types.TryGetC(type);
+            return t != null && t.FieldAttributes.ContainsKey(fieldName);
         }
 
         public void OverrideFieldAttributes<T>(Expression<Func<T, object>> lambda, params Attribute[] attributes)

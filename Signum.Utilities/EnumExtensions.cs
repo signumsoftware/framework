@@ -60,6 +60,11 @@ namespace Signum.Utilities
                 result >>= 1;
             return result;
         }
+
+        public static string UniqueKey(Enum a)
+        {
+            return "{0}.{1}".Formato(a.GetType().Name, a.ToString());
+        }
     }
 
     internal static class EnumDescriptionCache
