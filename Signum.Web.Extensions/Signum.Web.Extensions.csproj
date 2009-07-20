@@ -142,6 +142,9 @@
     <EmbeddedResource Include="Authorization\Register.aspx" />
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Operations\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
