@@ -48,7 +48,6 @@ namespace Signum.Entities
             internal set { entityOrNull = value; }
         }
 
-
         public bool RefersTo(T entity)
         {
             if (entity == null)
@@ -62,6 +61,7 @@ namespace Signum.Entities
             else
                 return object.ReferenceEquals(this.EntityOrNull, entity);
         }
+
 
     }
 

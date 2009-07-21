@@ -225,4 +225,7 @@
   <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
     <value>{{0}} has more than {0} decimal places</value>
   </data>
+  <data name="LockedModificationException" xml:space="preserve">
+    <value>Modification not allowed: the object is locked</value>
+  </data>
 </root>

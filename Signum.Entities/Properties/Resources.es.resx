@@ -219,4 +219,7 @@
   <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
     <value>{{0}} tiene mas de  {0} decimales</value>
   </data>
+  <data name="LockedModificationException" xml:space="preserve">
+    <value>Modificación no permitida: el objeto está bloqueado</value>
+  </data>
 </root>

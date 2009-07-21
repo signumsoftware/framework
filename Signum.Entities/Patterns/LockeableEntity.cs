@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Entities.Properties;
 
 namespace Signum.Entities.Patterns
 {
@@ -18,7 +19,7 @@ namespace Signum.Entities.Patterns
         protected override bool Set<T>(ref T variable, T value, string propertyName)
         {
             if (this.locked)
-                throw new ApplicationException("Modification not allowed: the object is locked");
+                throw new ApplicationException(Resources.LockedModificationException);
 
             return base.Set<T>(ref variable, value, propertyName);
         }
