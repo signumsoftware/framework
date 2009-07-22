@@ -13,8 +13,8 @@ using System.Security.Permissions;
 
 namespace Signum.Web.ScriptCombiner
 {
-    public class CSSScriptCombiner : ScriptCombiner {
-        public CSSScriptCombiner() {
+    public class CssScriptCombiner : ScriptCombiner {
+        public CssScriptCombiner() {
             this.contentType = "text/css";
             this.cacheable = false;
             this.gzipable = true;
@@ -201,6 +201,7 @@ namespace Signum.Web.ScriptCombiner
             context.Response.Cache.SetCacheability(HttpCacheability.Public);
             context.Response.Cache.SetExpires(DateTime.Now.Add(CACHE_DURATION));
             context.Response.Cache.SetMaxAge(CACHE_DURATION);
+            context.Response.Cache.SetValidUntilExpires(true);
 
             response.ContentEncoding = Encoding.Unicode;
             response.OutputStream.Write(bytes, 0, bytes.Length);
