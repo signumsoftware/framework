@@ -25,6 +25,12 @@ namespace Signum.Engine.Authorization
 
         public static event InitEventHandler RolesModified;
 
+        public static void AssertIsStarted(SchemaBuilder sb)
+        {
+            if (!sb.ContainsDefinition<UserDN>())
+                throw new ApplicationException("Call AuthLogic.Start first"); 
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined<UserDN>())
@@ -34,7 +40,6 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saving += Schema_Saving;
                 sb.Schema.Saved += Schema_Saved;
-
 
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
@@ -185,5 +190,7 @@ namespace Signum.Engine.Authorization
                 return user;
             }
         }
+
+      
     }
 }

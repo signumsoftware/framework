@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Entities.Operations;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Operations
 {
@@ -41,7 +42,7 @@ namespace Signum.Engine.Operations
             {
                 LogOperationDN log = new LogOperationDN
                 {
-                    Operation = OperationLogic.ToOperation[Key],
+                    Operation = EnumBag<OperationDN>.ToEntity(Key),
                     Start = DateTime.Now,
                     User = UserDN.Current
                 };
@@ -50,7 +51,7 @@ namespace Signum.Engine.Operations
 
                 result.Save(); //Nothing happens if allready saved
 
-                log.Entity = result.ToLazy();
+                log.Target = result.ToLazy();
                 log.End = DateTime.Now;
                 log.Save();
 

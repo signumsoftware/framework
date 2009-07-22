@@ -117,7 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Deleted" xml:space="preserve">
+  <data name="ProcessOperation_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="ProcessOperation_Execute" xml:space="preserve">
+    <value>Ejecutar</value>
+  </data>
+  <data name="ProcessOperation_FromProcess" xml:space="preserve">
+    <value>Desde Proceso</value>
+  </data>
+  <data name="ProcessOperation_Plan" xml:space="preserve">
+    <value>Planificar</value>
+  </data>
+  <data name="ProcessOperation_Suspend" xml:space="preserve">
+    <value>Suspender</value>
+  </data>
+  <data name="ProcessState_Canceled" xml:space="preserve">
+    <value>Cancelado</value>
+  </data>
+  <data name="ProcessState_Created" xml:space="preserve">
+    <value>Creado</value>
+  </data>
+  <data name="ProcessState_Deleted" xml:space="preserve">
     <value>(Eliminado)</value>
+  </data>
+  <data name="ProcessState_Executing" xml:space="preserve">
+    <value>Ejecutándose</value>
+  </data>
+  <data name="ProcessState_Finished" xml:space="preserve">
+    <value>Finalizado</value>
+  </data>
+  <data name="ProcessState_Planned" xml:space="preserve">
+    <value>Planeado</value>
+  </data>
+  <data name="ProcessState_Queued" xml:space="preserve">
+    <value>Encolado</value>
+  </data>
+  <data name="ProcessState_Suspended" xml:space="preserve">
+    <value>Suspendido</value>
+  </data>
+  <data name="ProcessState_Suspending" xml:space="preserve">
+    <value>Suspendiéndose</value>
   </data>
 </root>

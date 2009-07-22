@@ -117,7 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Deleted" xml:space="preserve">
+  <data name="ProcessState_Deleted" xml:space="preserve">
     <value> (Deleted)</value>
+  </data>
+  <data name="ProcessState_Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="ProcessState_Planned" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="ProcessState_Canceled" xml:space="preserve">
+    <value>Canceled</value>
+  </data>
+  <data name="ProcessState_Queued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="ProcessState_Executing" xml:space="preserve">
+    <value>Executing</value>
+  </data>
+  <data name="ProcessState_Suspending" xml:space="preserve">
+    <value>Suspending</value>
+  </data>
+  <data name="ProcessState_Finished" xml:space="preserve">
+    <value>Finished</value>
+  </data>
+  <data name="ProcessState_Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+  <data name="ProcessOperation_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ProcessOperation_Execute" xml:space="preserve">
+    <value>Execute</value>
+  </data>
+  <data name="ProcessOperation_FromProcess" xml:space="preserve">
+    <value>From Process</value>
+  </data>
+  <data name="ProcessOperation_Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="ProcessOperation_Suspend" xml:space="preserve">
+    <value>Suspend</value>
   </data>
 </root>

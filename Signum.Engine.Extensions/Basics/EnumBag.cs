@@ -1,0 +1,98 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Signum.Entities.Basics;
+using Signum.Engine.Maps;
+using Signum.Utilities;
+using Signum.Engine.Authorization;
+
+namespace Signum.Engine.Basics
+{
+    public static class EnumBag<T>
+        where T:EnumDN, new()
+    {
+        public static HashSet<Enum> Keys { get; set; }
+        static Dictionary<Enum, T> toEntity;
+        static Dictionary<string, Enum> toEnum;
+        static Func<HashSet<Enum>> getKeys;
+
+        public static void Start(SchemaBuilder sb, Func<HashSet<Enum>> getKeys)
+        {
+            if (sb.NotDefined<T>())
+            {
+                sb.Include<T>(); 
+
+                EnumBag<T>.getKeys = getKeys;
+
+                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+                sb.Schema.Generating += Schema_Generating;
+            }
+        }
+
+        static void Schema_Initializing(Schema schema)
+        {
+            using (AuthLogic.Disable())
+            using (new EntityCache(true))
+            {
+                Keys = getKeys();
+
+                toEntity = EnumerableExtensions.JoinStrict(
+                     Database.RetrieveAll<T>(),
+                     Keys,
+                     a => a.Key,
+                     k => EnumDN.UniqueKey(k),
+                     (a, k) => new { a, k }, "Caching {0}".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
+
+                toEnum = toEntity.Keys.ToDictionary(k => EnumDN.UniqueKey(k));
+            }
+        }
+
+        static SqlPreCommand Schema_Generating()
+        {
+            Table table = Schema.Current.Table<T>();
+
+            return GenerateEntities().Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+        }
+
+        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        {
+            Table table = Schema.Current.Table<T>();
+
+            List<T> current = Administrator.TryRetrieveAll<T>(replacements);
+
+            return Synchronizer.SyncronizeReplacing(replacements, typeof(T).Name,
+                current.ToDictionary(c => c.Key),
+                GenerateEntities().ToDictionary(s => s.Key),
+                (k, c) => table.DeleteSqlSync(c),
+                (k, s) => table.InsertSqlSync(s),
+                (k, c, s) =>
+                {
+                    c.Name = s.Name;
+                    c.Key = s.Key;
+                    return table.UpdateSqlSync(c);
+                }, Spacing.Double);
+        }
+
+        static List<T> GenerateEntities()
+        {
+            return getKeys().Select(k=> EnumDN.New<T>(k)).ToList();
+        }
+
+        public static T ToEntity(Enum key)
+        {
+            return toEntity.GetOrThrow(key, "The key {0} is not found in {1} table".Formato(key, typeof(T).Name)); 
+        }
+
+        public static Enum ToEnum(string keyName)
+        {
+            return toEnum.GetOrThrow(keyName, "Not value for {0} is not found in {1} table".Formato(keyName, typeof(T).Name)); 
+        }
+
+        internal static IEnumerable<T> AllEntities()
+        {
+            return toEntity.Values; 
+        }
+    }
+}

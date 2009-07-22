@@ -24,12 +24,12 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined<RuleOperationDN>())
             {
-                AuthLogic.Start(sb,dqm);
-                OperationLogic.Start(sb);
+                AuthLogic.AssertIsStarted(sb);
+                OperationLogic.AssertIsLoaded(sb);
 
                 OperationLogic.BeginOperation += new OperationHandler(OperationLogic_BeginOperation); 
 
@@ -88,12 +88,12 @@ namespace Signum.Engine.Authorization
 
             var queries = Database.RetrieveAll<OperationDN>();
             return (from a in queries
-                   let ak = OperationLogic.ToEnum[a.Key]     
-                   select new AllowedRule(GetBaseAllowed(role, ak))
-                   {
-                       Resource = a,
-                       Allowed = GetAllowed(role, ak),
-                   }).ToList();    
+                    let ak = EnumBag<OperationDN>.ToEnum(a.Key)     
+                    select new AllowedRule(GetBaseAllowed(role, ak))
+                    {
+                        Resource = a,
+                        Allowed = GetAllowed(role, ak),
+                    }).ToList();    
         }
 
         public static void SetAllowedRule(List<AllowedRule> rules, Lazy<RoleDN> roleLazy)
@@ -119,7 +119,7 @@ namespace Signum.Engine.Authorization
                 List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
 
                 Dictionary<RoleDN, Dictionary<Enum, bool>> realRules = Database.RetrieveAll<RuleOperationDN>()
-                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => OperationLogic.ToEnum[a.Operation.Key], a => a.Allowed));
+                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => EnumBag<OperationDN>.ToEnum(a.Operation.Key), a => a.Allowed));
 
                 Dictionary<RoleDN, Dictionary<Enum, bool>> newRules = new Dictionary<RoleDN, Dictionary<Enum, bool>>();
                 foreach (var role in roles)

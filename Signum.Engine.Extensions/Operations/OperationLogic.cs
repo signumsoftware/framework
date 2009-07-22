@@ -13,6 +13,8 @@ using System.Threading;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Operations
 {
@@ -37,66 +39,34 @@ namespace Signum.Engine.Operations
     {
         static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
 
-        internal static HashSet<Enum> OperationKeys; 
-        internal static Dictionary<Enum, OperationDN> ToOperation;
-        internal static Dictionary<string, Enum> ToEnum;
+        internal static void AssertIsLoaded(SchemaBuilder sb)
+        {
+            if (!sb.ContainsDefinition<OperationDN>())
+                throw new ApplicationException("Call OperationLogic.Start first"); 
+        }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined<OperationDN>())
             {
                 sb.Include<OperationDN>();
                 sb.Include<LogOperationDN>();
 
-                sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Synchronizing += Schema_Synchronizing;
-                sb.Schema.Generating += Schema_Generating;
+                EnumBag<OperationDN>.Start(sb, () => operations.Values.SelectMany(b => b.Keys).ToHashSet());
+
+                dqm[typeof(LogOperationDN)] = (from lo in Database.Query<LogOperationDN>()
+                                               select new
+                                               {
+                                                   Entity = lo.ToLazy(),
+                                                   lo.Id,
+                                                   lo.Target,
+                                                   Operation = lo.Operation.ToLazy(),
+                                                   User = lo.User.ToLazy(),
+                                                   lo.Start,
+                                                   lo.End,
+                                                   HasError = lo.Exception != null
+                                               }).ToDynamic();
             }
-        }
-
-        static void Schema_Initializing(Schema sender)
-        {
-            using (AuthLogic.Disable())
-            using (new EntityCache(true))
-            {
-                OperationKeys = operations.Values.SelectMany(b=>b.Keys).ToHashSet();
-
-                ToOperation = EnumerableExtensions.JoinStrict(
-                     Database.RetrieveAll<OperationDN>(),
-                     OperationKeys,
-                     a => a.Key,
-                     k => OperationDN.UniqueKey(k),
-                     (a, k) => new { a, k }, "Caching OperationDN").ToDictionary(p => p.k, p => p.a);
-
-                ToEnum = ToOperation.Keys.ToDictionary(k => OperationDN.UniqueKey(k));
-            }
-        }
-
-        static SqlPreCommand Schema_Generating()
-        {
-            Table table = Schema.Current.Table<OperationDN>();
-
-            return GetOperations().Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
-        }
-
-        const string OperationsKey = "Operations";
-        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
-        {
-            Table table = Schema.Current.Table<OperationDN>();
-
-            List<OperationDN> current = Administrator.TryRetrieveAll<OperationDN>(replacements);
-
-            return Synchronizer.SyncronizeReplacing(replacements, OperationsKey,
-                current.ToDictionary(c => c.Key),
-                GetOperations().ToDictionary(s => s.Key),
-                (k, c) => table.DeleteSqlSync(c),
-                (k, s) => table.InsertSqlSync(s),
-                (k, c, s) =>
-                {
-                    c.Name = s.Name;
-                    c.Key = s.Key;
-                    return table.UpdateSqlSync(c);
-                }, Spacing.Double);
         }
 
         #region Events
@@ -132,10 +102,6 @@ namespace Signum.Engine.Operations
         }
         #endregion
 
-        static List<OperationDN> GetOperations()
-        {
-            return operations.Values.SelectMany(b => b.Keys).ToHashSet().Select(k => OperationDN.FromEnum(k)).ToList();
-        }
 
         public static void Register(IOperation operation)
         {
@@ -158,7 +124,7 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
         {
-            return (from k in OperationKeys
+            return (from k in EnumBag<OperationDN>.Keys
                     let o = TryFind(entityType, k) as IConstructorOperation
                     where o != null && OnAllowOperation(k)
                     select ToOperationInfo(o, true)).ToList();
@@ -166,7 +132,7 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetQueryOperationInfos(Type entityType)
         {
-            return (from k in OperationKeys
+            return (from k in EnumBag<OperationDN>.Keys
                     let cfm = TryFind(entityType, k) as IConstructorFromManyOperation
                     where cfm != null && OnAllowOperation(k)
                     select ToOperationInfo(cfm, true)).ToList();
@@ -174,7 +140,7 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetEntityOperationInfos(IdentifiableEntity entity)
         {
-            return (from k in OperationKeys
+            return (from k in EnumBag<OperationDN>.Keys
                     let eo = TryFind(entity.GetType(), k) as IEntityOperation
                     where eo != null && OnAllowOperation(k)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
@@ -195,7 +161,7 @@ namespace Signum.Engine.Operations
         public static T ExecuteLazy<T>(this Lazy<T> lazy, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ExecutePrivate(Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true), Database.RetrieveAndForget(lazy), args);
+            return (T)(IIdentifiable)ExecutePrivate(Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true), lazy.RetrieveAndForget(), args);
         }
 
         public static T ExecuteLazyBase<T>(this Lazy<T> lazy, Type baseType, Enum operationKey, params object[] args)

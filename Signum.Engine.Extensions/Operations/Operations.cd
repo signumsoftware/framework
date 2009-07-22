@@ -1,55 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="Signum.Engine.Operations.BasicConstructor&lt;T&gt;" BaseTypeListCollapsed="true">
-    <Position X="4.75" Y="4.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAgBEAAAAAAgAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\Constructor.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="Signum.Engine.Operations.BasicConstructorFrom&lt;F, T&gt;" BaseTypeListCollapsed="true">
-    <Position X="6.5" Y="4.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAABAAAAAAAgAAAAABAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
-      <FileName>Operations\ConstructorFrom.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="Signum.Engine.Operations.OperationLogic">
-    <Position X="0.5" Y="2.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAACAAAgAAAAgAAACAAAQLwAgBAAkACAACABA=</HashCode>
-      <FileName>Operations\OperationLogic.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Signum.Engine.Operations.Graph&lt;E, S&gt;" Collapsed="true">
-    <Position X="4.75" Y="2.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAEACAAAAAAAAEAAACAAQAEABAAAAAAIABAAAAAA=</HashCode>
-      <FileName>Operations\Graph.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Interface Name="Signum.Engine.Operations.IConstructOperation" Collapsed="true">
-    <Position X="4.75" Y="3.75" Width="1.5" />
+  <Interface Name="Signum.Engine.Operations.IConstructorOperation">
+    <Position X="0.5" Y="3.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\Constructor.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Signum.Engine.Operations.IConstructorFrom" Collapsed="true">
-    <Position X="6.5" Y="3.75" Width="1.5" />
+  <Interface Name="Signum.Engine.Operations.IConstructorFromOperation">
+    <Position X="5.25" Y="6" Width="3" />
     <TypeIdentifier>
-      <HashCode>AAAABAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\ConstructorFrom.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Signum.Engine.Operations.IOperation" Collapsed="true">
-    <Position X="8.25" Y="3.75" Width="1.5" />
+  <Interface Name="Signum.Engine.Operations.IOperation">
+    <Position X="6" Y="0.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAQAAAAAAAAEQhAAAAAAAA=</HashCode>
+      <FileName>Operations\OperationLogic.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="OperationType" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Signum.Engine.Operations.IExecuteOperation">
+    <Position X="9.75" Y="6" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\Execute.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Signum.Engine.Operations.IConstructorFromManyOperation">
+    <Position X="3.25" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\ConstructorFromMany.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Signum.Engine.Operations.IEntityOperation">
+    <Position X="8.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\OperationLogic.cs</FileName>
     </TypeIdentifier>
   </Interface>
+  <Enum Name="Signum.Entities.Operations.OperationType">
+    <Position X="3" Y="1" Width="1.5" />
+    <TypeIdentifier />
+  </Enum>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

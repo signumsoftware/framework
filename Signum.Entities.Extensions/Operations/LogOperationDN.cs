@@ -11,12 +11,12 @@ namespace Signum.Entities.Operations
     public class LogOperationDN : IdentifiableEntity
     {
         [ImplementedByAll]
-        Lazy<IdentifiableEntity> entity;
+        Lazy<IdentifiableEntity> target;
         [NotNullValidator]
-        public Lazy<IdentifiableEntity> Entity
+        public Lazy<IdentifiableEntity> Target
         {
-            get { return entity; }
-            set { Set(ref entity, value, "Entity"); }
+            get { return target; }
+            set { Set(ref target, value, "Target"); }
         }
 
         OperationDN operation;

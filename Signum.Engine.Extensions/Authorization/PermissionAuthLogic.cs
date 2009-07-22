@@ -24,17 +24,18 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] types)
+        public static void Start(SchemaBuilder sb, params Type[] types)
         {
             if (sb.NotDefined<RulePermissionDN>())
             {
-                AuthLogic.Start(sb, dqm);
+                AuthLogic.AssertIsStarted(sb);
                 permissionTypes = new List<Type>(types);
 
                 sb.Include<RulePermissionDN>();
                 sb.Include<PermissionDN>();
-                sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Synchronizing += SynchronizationScript;
+
+                EnumBag<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet()); 
+
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
@@ -42,41 +43,6 @@ namespace Signum.Engine.Authorization
             {
                 permissionTypes.AddRange(types);
             }
-        }
-
-        static List<PermissionDN> GeneratePermissions()
-        {
-            return (from type in permissionTypes
-                    from item in Enum.GetValues(type).Cast<Enum>()
-                    select PermissionDN.FromEnum(item)).ToList();
-        }
-
-        public static SqlPreCommand GenerateScript()
-        {
-            Table table = Schema.Current.Table<PermissionDN>();
-
-            return GeneratePermissions().Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
-        }
-
-        const string PersmissionKey = "Permissions";
-
-        public static SqlPreCommand SynchronizationScript(Replacements replacements)
-        {
-            Table table = Schema.Current.Table<PermissionDN>();
-
-            List<PermissionDN> current = Administrator.TryRetrieveAll<PermissionDN>(replacements);
-
-            return Synchronizer.SyncronizeReplacing(replacements, PersmissionKey,
-                current.ToDictionary(c => c.Key),
-                GeneratePermissions().ToDictionary(s => s.Key),
-                (k, c) => table.DeleteSqlSync(c),
-                (k, s) => null,
-                (k, c, s) =>
-                {
-                    c.Name = s.Name;
-                    c.Key = s.Key;
-                    return table.UpdateSqlSync(c);
-                }, Spacing.Double);
         }
 
         static void Schema_Initializing(Schema sender)
@@ -99,13 +65,13 @@ namespace Signum.Engine.Authorization
 
         public static void Authorize(Enum permissionKey)
         {
-            if (!GetAllowed(UserDN.Current.Role, EnumExtensions.UniqueKey(permissionKey)))
+            if (!GetAllowed(UserDN.Current.Role, EnumDN.UniqueKey(permissionKey)))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
         public static bool IsAuthorizedFor(Enum permissionKey)
         {
-            return GetAllowed(UserDN.Current.Role, EnumExtensions.UniqueKey(permissionKey));
+            return GetAllowed(UserDN.Current.Role, EnumDN.UniqueKey(permissionKey));
         }
 
         static bool GetAllowed(RoleDN role, string permissionKey)
@@ -119,21 +85,12 @@ namespace Signum.Engine.Authorization
                   role.Roles.Select(r => GetAllowed(r, permissionKey)).MaxAllowed();
         }
 
-        public static List<PermissionDN> RetrieveOrGeneratePermissions()
-        {
-            var current = Database.RetrieveAll<PermissionDN>().ToDictionary(a => a.Name);
-            var total = GeneratePermissions().ToDictionary(a => a.Name);
-
-            total.SetRange(current);
-            return total.Values.ToList();
-        }
-
         public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)
         {
             var role = roleLazy.Retrieve();
 
-            var permissions = RetrieveOrGeneratePermissions();
-            return permissions.Select(p => new AllowedRule(GetBaseAllowed(role, p.Key))
+            return EnumBag<PermissionDN>.AllEntities()
+                    .Select(p => new AllowedRule(GetBaseAllowed(role, p.Key))
                    {
                        Resource = p,
                        Allowed = GetAllowed(role, p.Key),

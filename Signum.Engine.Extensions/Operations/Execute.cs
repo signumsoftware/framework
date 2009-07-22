@@ -7,6 +7,7 @@ using Signum.Entities.Operations;
 using Signum.Entities.Authorization;
 using System.Threading;
 using Signum.Utilities;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Operations
 {
@@ -64,7 +65,7 @@ namespace Signum.Engine.Operations
                 {
                     LogOperationDN log = new LogOperationDN
                     {
-                        Operation = OperationLogic.ToOperation[Key],
+                        Operation = EnumBag<OperationDN>.ToEntity(Key),
                         Start = DateTime.Now,
                         User = UserDN.Current
                     };
@@ -73,7 +74,7 @@ namespace Signum.Engine.Operations
 
                     ((IdentifiableEntity)entity).Save(); //Nothing happens if allready saved
 
-                    log.Entity = ((IdentifiableEntity)entity).ToLazy(); //in case AllowsNew == true
+                    log.Target = ((IdentifiableEntity)entity).ToLazy(); //in case AllowsNew == true
                     log.End = DateTime.Now;
                     log.Save();
 
@@ -88,9 +89,9 @@ namespace Signum.Engine.Operations
                     {
                         new LogOperationDN
                         {
-                            Operation = OperationLogic.ToOperation[Key],
+                            Operation = EnumBag<OperationDN>.ToEntity(Key),
                             Start = DateTime.Now,
-                            Entity = ((IdentifiableEntity)entity).ToLazy(),
+                            Target = ((IdentifiableEntity)entity).ToLazy(),
                             Exception = ex.Message,
                             User = (UserDN)Thread.CurrentPrincipal
                         }.Save();

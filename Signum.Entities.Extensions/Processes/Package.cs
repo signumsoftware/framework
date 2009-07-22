@@ -43,9 +43,8 @@ namespace Signum.Entities.Processes
         }
 
 
-        [SqlDbType(Size = 200)]
+        [SqlDbType(Size = int.MaxValue)]
         string exception;
-        [StringLengthValidator(Max = 200)]
         public string Exception
         {
             get { return exception; }

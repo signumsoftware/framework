@@ -62,15 +62,15 @@
     <Compile Include="Authorization\RoleDN.cs" />
     <Compile Include="Authorization\RuleTypeDN.cs" />
     <Compile Include="Authorization\UserDN.cs" />
-    <Compile Include="Basics\FieldDN.cs" />
+    <Compile Include="Basics\EnumDN.cs" />
+    <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
     <Compile Include="Operations\IOperationServer.cs" />
     <Compile Include="Operations\OperationDN.cs" />
     <Compile Include="Operations\LogOperationDN.cs" />
-    <Compile Include="Processes\ProcessExecutionDN.cs" />
-    <Compile Include="Processes\PackageDN.cs" />
-    <Compile Include="Processes\ProcessDN.cs" />
+    <Compile Include="Processes\Process.cs" />
+    <Compile Include="Processes\Package.cs" />
     <Compile Include="Reports\CompositeReportDN.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -85,6 +85,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Reports\IExcelReportServer.cs" />
+    <Compile Include="Scheduler\CalendarDN.cs" />
+    <Compile Include="Scheduler\ScheduleRule.cs" />
+    <Compile Include="Scheduler\ScheduledTaskDN.cs" />
+    <Compile Include="Scheduler\Task.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
