@@ -120,20 +120,20 @@
   <data name="_0DoesNotHaveAValid0Format" xml:space="preserve">
     <value>{{0}} no tiene formato de {0} correcto</value>
   </data>
-  <data name="GreaterThanOrEqual" xml:space="preserve">
-    <value>mayor o igual que</value>
+  <data name="FilterOperation_GreaterThanOrEqual" xml:space="preserve">
+    <value>Mayor o igual que</value>
   </data>
-  <data name="Contains" xml:space="preserve">
-    <value>contiene</value>
+  <data name="FilterOperation_Contains" xml:space="preserve">
+    <value>Contiene</value>
   </data>
-  <data name="EndsWith" xml:space="preserve">
-    <value>acaba por</value>
+  <data name="FilterOperation_EndsWith" xml:space="preserve">
+    <value>Acaba por</value>
   </data>
-  <data name="Like" xml:space="preserve">
+  <data name="FilterOperation_Like" xml:space="preserve">
     <value>Like</value>
   </data>
-  <data name="StartsWith" xml:space="preserve">
-    <value>empieza por</value>
+  <data name="FilterOperation_StartsWith" xml:space="preserve">
+    <value>Empieza por</value>
   </data>
   <data name="NewEntitiesAreNotAllowed" xml:space="preserve">
     <value>No se puede establecer una entidad nueva</value>
@@ -192,20 +192,20 @@
   <data name="_0DoesNotInheritFromIdentifiableEntity" xml:space="preserve">
     <value>{0} no hereda de IdentifiableEntity</value>
   </data>
-  <data name="DistinctTo" xml:space="preserve">
-    <value>distinto de</value>
+  <data name="FilterOperation_DistinctTo" xml:space="preserve">
+    <value>Distinto de</value>
   </data>
-  <data name="EqualTo" xml:space="preserve">
-    <value>igual a</value>
+  <data name="FilterOperation_EqualTo" xml:space="preserve">
+    <value>Igual a</value>
   </data>
-  <data name="GreaterThan" xml:space="preserve">
-    <value>mayor que</value>
+  <data name="FilterOperation_GreaterThan" xml:space="preserve">
+    <value>Mayor que</value>
   </data>
-  <data name="LessThan" xml:space="preserve">
-    <value>menor que</value>
+  <data name="FilterOperation_LessThan" xml:space="preserve">
+    <value>Menor que</value>
   </data>
-  <data name="LessThanOrEqual" xml:space="preserve">
-    <value>menor o igual que</value>
+  <data name="FilterOperation_LessThanOrEqual" xml:space="preserve">
+    <value>Menor o igual que</value>
   </data>
   <data name="Type0NotSupported" xml:space="preserve">
     <value>Tipo no soportado {0}</value>

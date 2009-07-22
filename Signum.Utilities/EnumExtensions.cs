@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.Properties;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Signum.Utilities
 {
@@ -30,14 +31,9 @@ namespace Signum.Utilities
             return GetValues<T>().Select(x => x.ToString()).ToList();
         }
 
-        public static string NiceToString<T>(T a) where T : struct
+        public static string NiceToString(this Enum a)
         {
-            return EnumDescriptionCache.Get(a) ?? a.ToString().NiceName();
-        }
-
-        public static string NiceToString(Enum a)
-        {
-            return EnumDescriptionCache.Get(a) ?? a.ToString().NiceName();
+            return ReflectionTools.GetDescription(EnumDescriptionCache.Get(a)) ?? a.ToString().NiceName();
         }
 
         public static bool IsDefined<T>(T value) where T : struct
@@ -60,23 +56,13 @@ namespace Signum.Utilities
                 result >>= 1;
             return result;
         }
-
-        public static string UniqueKey(Enum a)
-        {
-            return "{0}.{1}".Formato(a.GetType().Name, a.ToString());
-        }
     }
 
     internal static class EnumDescriptionCache
     {
-        static Dictionary<Type, Dictionary<Enum, string>> dictionary = new Dictionary<Type, Dictionary<Enum, string>>();
+        static Dictionary<Type, Dictionary<Enum, FieldInfo>> dictionary = new Dictionary<Type, Dictionary<Enum, FieldInfo>>();
 
-        public static string Get<T>(T value) where T : struct
-        {
-            return Create(typeof(T))[(Enum)(object)value];
-        }
-
-        public static string Get(Enum value)
+        public static FieldInfo Get(Enum value)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
@@ -84,7 +70,7 @@ namespace Signum.Utilities
             return Create(value.GetType())[value];
         }
 
-        static Dictionary<Enum, string> Create(Type type)
+        static Dictionary<Enum, FieldInfo> Create(Type type)
         {
             if (!type.IsEnum)
                 throw new ApplicationException(Resources.IsNotAnEnum.Formato(type));
@@ -92,7 +78,7 @@ namespace Signum.Utilities
             lock (dictionary)
                 return dictionary.GetOrCreate(type, () => type.GetFields().Skip(1).ToDictionary(
                     fi => (Enum)fi.GetValue(null),
-                    fi => fi.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description)));
+                    fi => fi));
         }
     }
 }

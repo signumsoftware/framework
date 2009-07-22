@@ -90,6 +90,7 @@
     <Compile Include="ExpressionTrees\Query.cs" />
     <Compile Include="ExpressionTrees\QueryProvider.cs" />
     <Compile Include="JsonExtensions.cs" />
+    <Compile Include="LocDescriptionAttribute.cs" />
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="Reflection\MemberEntryFactory.cs" />
     <Compile Include="Serialization.cs" />

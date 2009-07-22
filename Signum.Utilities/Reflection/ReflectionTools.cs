@@ -6,6 +6,9 @@ using System.Reflection;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
 using System.Collections;
+using System.ComponentModel;
+using System.Resources;
+using System.Globalization;
 
 namespace Signum.Utilities.Reflection
 {
@@ -316,6 +319,37 @@ namespace Signum.Utilities.Reflection
             return ft.GetInterfaces().SingleOrDefault(ti => ti.IsGenericType &&
                 ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .TryCC(ti => ti.GetGenericArguments()[0]);
+        }
+
+        public static string GetDescription(MemberInfo memberInfo)
+        {   
+            LocDescriptionAttribute loc = memberInfo.SingleAttribute<LocDescriptionAttribute>(); 
+            if(loc!= null)
+            {
+                if (loc.Auto)
+                {
+                    string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add(memberInfo.Name, "_");
+                    Assembly assembly = (memberInfo.DeclaringType ?? (Type)memberInfo).Assembly;
+                    return assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                }
+                else
+                    return loc.Description;
+            }
+
+            DescriptionAttribute desc = memberInfo.SingleAttribute<DescriptionAttribute>();
+            if(desc != null)
+            {
+                return desc.Description;
+            }
+
+            return null;
+        }
+
+        public static ResourceManager GetDefaultResourceManager(this Assembly assembly)
+        {
+            string[] resourceFiles = assembly.GetManifestResourceNames();
+            string name = resourceFiles.Single(a => a.Contains("Resources.resources"));
+            return new ResourceManager(name.Replace(".resources", ""), assembly);
         }
     }
 }

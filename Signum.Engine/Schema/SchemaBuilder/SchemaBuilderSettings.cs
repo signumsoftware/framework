@@ -67,7 +67,7 @@ namespace Signum.Engine.Maps
             return IsTypeAttributesOverriden(typeof(T));
         }
 
-        private bool IsTypeAttributesOverriden(Type type)
+        public bool IsTypeAttributesOverriden(Type type)
         {
             var t = types.TryGetC(type);
             return t != null && t.TypeAttributes != null;
@@ -119,12 +119,12 @@ namespace Signum.Engine.Maps
                 throw new ApplicationException("The following attributes are not compatible with Targets {0}:  {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
-        internal Attribute[] TypeAttributes(Type type)
+        public Attribute[] TypeAttributes(Type type)
         {
             return types.TryGetC(type).TryCC(a => a.TypeAttributes) ?? type.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
         }
 
-        internal Attribute[] FieldInfoAttributes(Type type, FieldInfo fi)
+        public Attribute[] FieldInfoAttributes(Type type, FieldInfo fi)
         {
             var result = type.For(t => t != fi.DeclaringType.BaseType, t => t.BaseType)
                 .Select(t=>types.TryGetC(t).TryCC(a => a.FieldAttributes.TryGetC(fi.Name)))

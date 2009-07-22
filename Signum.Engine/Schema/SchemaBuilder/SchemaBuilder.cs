@@ -87,6 +87,16 @@ namespace Signum.Engine.Maps
             return loadedModules.Add(moduleName); 
         }
 
+        public bool ContainsDefinition<T>()
+        {
+            return ContainsDefinition(typeof(T).FullName); 
+        }
+
+        public bool ContainsDefinition(string moduleName)
+        {
+            return loadedModules.Contains(moduleName);
+        }
+
         bool notifyFieldsWithoutProperty = true;
         public bool NotifyFieldsWithoutProperty
         {

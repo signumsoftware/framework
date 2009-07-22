@@ -11,6 +11,8 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.ComponentModel;
+using System.Resources;
 
 namespace Signum.Entities
 {
@@ -277,6 +279,7 @@ namespace Signum.Entities
         }
     }
 
+    //Not using C intervals to please user!
     public class NumberBetweenValidatorAttribute : ValidatorAttribute
     {
         IComparable min;
@@ -421,29 +424,18 @@ namespace Signum.Entities
  
     public enum ComparisonType
     {
+        [LocDescription(typeof(Resources), "FilterOperation_EqualTo")]
         EqualTo,
+        [LocDescription(typeof(Resources), "FilterOperation_DistinctTo")]
         DistinctTo,
+        [LocDescription(typeof(Resources), "FilterOperation_GreaterThan")]
         GreaterThan,
+        [LocDescription(typeof(Resources), "FilterOperation_GreaterThanOrEqual")]
         GreaterThanOrEqual,
+        [LocDescription(typeof(Resources), "FilterOperation_LessThan")]
         LessThan,
+        [LocDescription(typeof(Resources), "FilterOperation_LessThanOrEqual")]
         LessThanOrEqual,
-    }
-
-    internal static class ComparisonTypeExtensions
-    {
-        public static string NiceToString(this ComparisonType comp)
-        {
-            switch (comp)
-            {
-                case ComparisonType.EqualTo: return Resources.EqualTo;
-                case ComparisonType.DistinctTo: return Resources.DistinctTo;
-                case ComparisonType.GreaterThan: return Resources.GreaterThan;
-                case ComparisonType.GreaterThanOrEqual: return Resources.GreaterThanOrEqual;
-                case ComparisonType.LessThan: return Resources.LessThan;
-                case ComparisonType.LessThanOrEqual: return Resources.LessThanOrEqual;
-            }
-            throw new NotImplementedException(); 
-        }
     }
 
     public class StateValidator<E, S>: IEnumerable
@@ -498,7 +490,6 @@ namespace Signum.Entities
 
             return null; 
         }
-
 
         public IEnumerator GetEnumerator() //just to use object initializer
         {

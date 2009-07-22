@@ -160,47 +160,11 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Contains.
-        /// </summary>
-        internal static string Contains {
-            get {
-                return ResourceManager.GetString("Contains", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to distinct to.
-        /// </summary>
-        internal static string DistinctTo {
-            get {
-                return ResourceManager.GetString("DistinctTo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Ends with.
-        /// </summary>
-        internal static string EndsWith {
-            get {
-                return ResourceManager.GetString("EndsWith", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Entity do not Match with the Lazy.
         /// </summary>
         internal static string EntitiesDoNotMatch {
             get {
                 return ResourceManager.GetString("EntitiesDoNotMatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to equal to.
-        /// </summary>
-        internal static string EqualTo {
-            get {
-                return ResourceManager.GetString("EqualTo", resourceCulture);
             }
         }
         
@@ -214,47 +178,83 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Contains.
+        /// </summary>
+        internal static string FilterOperation_Contains {
+            get {
+                return ResourceManager.GetString("FilterOperation_Contains", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Distinct to.
+        /// </summary>
+        internal static string FilterOperation_DistinctTo {
+            get {
+                return ResourceManager.GetString("FilterOperation_DistinctTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ends with.
+        /// </summary>
+        internal static string FilterOperation_EndsWith {
+            get {
+                return ResourceManager.GetString("FilterOperation_EndsWith", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to equal to.
+        /// </summary>
+        internal static string FilterOperation_EqualTo {
+            get {
+                return ResourceManager.GetString("FilterOperation_EqualTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to greater than.
         /// </summary>
-        internal static string GreaterThan {
+        internal static string FilterOperation_GreaterThan {
             get {
-                return ResourceManager.GetString("GreaterThan", resourceCulture);
+                return ResourceManager.GetString("FilterOperation_GreaterThan", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to greater than or equal.
         /// </summary>
-        internal static string GreaterThanOrEqual {
+        internal static string FilterOperation_GreaterThanOrEqual {
             get {
-                return ResourceManager.GetString("GreaterThanOrEqual", resourceCulture);
+                return ResourceManager.GetString("FilterOperation_GreaterThanOrEqual", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to less than.
         /// </summary>
-        internal static string LessThan {
+        internal static string FilterOperation_LessThan {
             get {
-                return ResourceManager.GetString("LessThan", resourceCulture);
+                return ResourceManager.GetString("FilterOperation_LessThan", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to less than or equal.
         /// </summary>
-        internal static string LessThanOrEqual {
+        internal static string FilterOperation_LessThanOrEqual {
             get {
-                return ResourceManager.GetString("LessThanOrEqual", resourceCulture);
+                return ResourceManager.GetString("FilterOperation_LessThanOrEqual", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Like.
         /// </summary>
-        internal static string Like {
+        internal static string FilterOperation_Like {
             get {
-                return ResourceManager.GetString("Like", resourceCulture);
+                return ResourceManager.GetString("FilterOperation_Like", resourceCulture);
             }
         }
         
@@ -264,6 +264,15 @@ namespace Signum.Entities.Properties {
         internal static string LockedModificationException {
             get {
                 return ResourceManager.GetString("LockedModificationException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starts with.
+        /// </summary>
+        internal static string FilterOperation_StartsWith {
+            get {
+                return ResourceManager.GetString("FilterOperation_StartsWith", resourceCulture);
             }
         }
         
@@ -309,15 +318,6 @@ namespace Signum.Entities.Properties {
         internal static string RemovingEntityNotAllowedInNewLazies {
             get {
                 return ResourceManager.GetString("RemovingEntityNotAllowedInNewLazies", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Starts with.
-        /// </summary>
-        internal static string StartsWith {
-            get {
-                return ResourceManager.GetString("StartsWith", resourceCulture);
             }
         }
         

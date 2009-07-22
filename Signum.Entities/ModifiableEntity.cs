@@ -184,7 +184,7 @@ namespace Signum.Entities
                     if (pp == null)
                         return null; 
                     object val = pp.GetValue(this);
-                    return pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(pp.NiceName)).FirstOrDefault();
+                    return pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(pp.PropertyInfo.NiceName())).FirstOrDefault();
                 }
             }
         }

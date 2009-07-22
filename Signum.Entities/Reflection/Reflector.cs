@@ -189,8 +189,7 @@ namespace Signum.Entities.Reflection
 
         public static string NiceName(this Type type)
         {
-            return
-                type.SingleAttribute<DescriptionAttribute>().TryCC(da => da.Description) ??
+            return ReflectionTools.GetDescription(type) ??
                 type.Name.Map(n => n.EndsWith("DN") ? n.RemoveRight(2) : n).SpacePascal(true);
         }
 
@@ -222,7 +221,7 @@ namespace Signum.Entities.Reflection
 
         public static string NiceName(this PropertyInfo pi)
         {
-            return GetPropertyValidators(pi.DeclaringType).TryGetC(pi.Name).TryCC(pp => pp.NiceName) ?? PropertyPack.CalculateNiceName(pi);
+            return ReflectionTools.GetDescription(pi) ?? pi.Name.NiceName();
         }
     }
 
@@ -234,18 +233,12 @@ namespace Signum.Entities.Reflection
             Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true).OfType<ValidatorAttribute>().ToReadOnly();
             this.GetValue = getValue;
             this.SetValue = setValue;
-            NiceName = CalculateNiceName(pi); 
-        }
 
-        public static string CalculateNiceName(PropertyInfo pi)
-        {
-            return pi.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description) ?? pi.Name.NiceName();
         }
 
         public readonly Func<object, object> GetValue;
         public readonly Action<object, object> SetValue;
         public readonly PropertyInfo PropertyInfo;
         public readonly ReadOnlyCollection<ValidatorAttribute> Validators;
-        public readonly string NiceName;
     }
 }

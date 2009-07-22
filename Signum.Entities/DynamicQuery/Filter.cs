@@ -32,37 +32,26 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public enum FilterOperation
     {
+        [LocDescription]
         EqualTo,
-        DistinctTo, 
+        [LocDescription]
+        DistinctTo,
+        [LocDescription]
         GreaterThan,
+        [LocDescription]
         GreaterThanOrEqual,
+        [LocDescription]
         LessThan,
+        [LocDescription]
         LessThanOrEqual,
+        [LocDescription]
         Contains,
+        [LocDescription]
         StartsWith,
+        [LocDescription]
         EndsWith,
+        [LocDescription]
         Like,
-    }
-
-    public static class FilterOperationExtensions
-    {
-        public static string NiceToString(this FilterOperation fo)
-        {
-            switch (fo)
-            {
-                case FilterOperation.EqualTo: return Resources.EqualTo;
-                case FilterOperation.DistinctTo: return Resources.DistinctTo;
-                case FilterOperation.GreaterThan: return Resources.GreaterThan;
-                case FilterOperation.GreaterThanOrEqual: return Resources.GreaterThanOrEqual;
-                case FilterOperation.LessThan: return Resources.LessThan;
-                case FilterOperation.LessThanOrEqual: return Resources.LessThanOrEqual;
-                case FilterOperation.Contains: return Resources.Contains;
-                case FilterOperation.StartsWith: return Resources.StartsWith;
-                case FilterOperation.EndsWith: return Resources.EndsWith;
-                case FilterOperation.Like: return Resources.Like;
-            }
-            throw new InvalidOperationException();
-        }
     }
 
     public enum FilterType
@@ -74,6 +63,4 @@ namespace Signum.Entities.DynamicQuery
         Boolean, 
         Enum,
     }
-
-
 }

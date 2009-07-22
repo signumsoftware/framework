@@ -243,6 +243,9 @@ namespace Signum.Entities
     {
         public static Lazy<T> ToLazy<T>(this Lazy lazy) where T : class, IIdentifiable
         {
+            if (lazy is Lazy<T>)
+                return (Lazy<T>)lazy; 
+
             if (lazy.UntypedEntityOrNull != null)
                 return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull);
             else
