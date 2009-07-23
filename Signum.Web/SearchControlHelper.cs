@@ -85,7 +85,8 @@ namespace Signum.Web
                     else if (mi.HtmlProps["style"].ToString().IndexOf("cursor")==-1)
                         mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
 
-                    sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                   // sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                    sb.Append(helper.Button(mi.Id, mi.AltText, onclick, "", mi.HtmlProps));
                 }
             }
             return sb.ToString();
