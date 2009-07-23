@@ -42,7 +42,9 @@
                 %>
                 <td id="<%=Html.GlobalName("tdRowSelection")%>" name="<%=Html.GlobalName("tdRowSelection")%>">
                     <%
-                    if (allowMultiple)
+            if (entityField != null)
+            {
+                        if (allowMultiple)
                     { 
                         %>
                         <input type="checkbox" name="<%=Html.GlobalName("check_" + row.ToString())%>" id="<%=Html.GlobalName("check_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
@@ -50,10 +52,11 @@
                         <input type="radio" name="<%=Html.GlobalName("rowSelection")%>" id="<%=Html.GlobalName("radio_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                         <%
                     }
+        }
                  %>
                  </td>
                 <td id="<%=Html.GlobalName("tdResults")%>" name="<%=Html.GlobalName("tdResults")%>">
-                    <% if (Lazy != null)
+                    <% if (entityField != null)
                        {%>
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Navigate">Ver</a>
                     <%} %>
