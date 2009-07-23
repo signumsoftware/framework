@@ -11,7 +11,7 @@
 <script type="text/javascript">
   $(document).ready(function() {
     //$('.menu ul li .ext').css('display', 'none'); //ocultamos las capas por js, de esta manera, si el usuario navega con el javascript desactivado, verá las capas
-    $('#filtros-header').click(function(){
+    $('#filters-header').click(function(){
 	    var R = $(this).attr('rev');
 	    var D = $('#'+R);
 	    D.toggle('fast');
@@ -22,11 +22,11 @@
     });
   });
 </script>
-<div id="buscar-campos">
-    <div id="lista-campos">
-        <a href="#" id="filtros-header" rev="filtros-body">Ocultar filtros</a>
-        <div id="filtros-body">
-            <label for="campos">Filtrar por campo</label>
+<div id="fields-search">
+    <div id="fields-list">
+        <a href="#" id="filters-header" rev="filters-body">Ocultar filtros</a>
+        <div id="filters-body">
+            <label for="fields">Filtrar por campo</label>
             <select id="<%=Html.GlobalName("ddlNewFilters")%>" name="<%=Html.GlobalName("ddlNewFilters")%>">
 
             <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
@@ -46,7 +46,7 @@
     <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
   
     <div id="filters-list">
-    <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">No se han especificado filtros</span>
+    <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>">No se han especificado filtros</span>
     <table id="<%=Html.GlobalName("tblFilters")%>" name="<%=Html.GlobalName("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
         <thead>
             <tr>

@@ -107,7 +107,14 @@ namespace Signum.Web
 
         public static string DateTimePickerTextbox(this HtmlHelper helper, string idValueField, object value, string dateFormat, Dictionary<string, object> htmlProperties)
         {
-            htmlProperties["class"]+=" maskedEdit";
+            if (htmlProperties.ContainsKey("class"))
+            {
+                htmlProperties["class"] += " maskedEdit";
+            }
+            else {
+                htmlProperties["class"] = " maskedEdit";
+            
+            }
             return helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "",  htmlProperties)+
                    "\n" + 
                    helper.Calendar(idValueField);
