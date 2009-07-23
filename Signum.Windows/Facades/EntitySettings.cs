@@ -30,9 +30,9 @@ namespace Signum.Windows
         static ImageSource DefaultAdmin = ImageLoader.GetImageSortName("admin.png");
         static ImageSource DefaultIcon = ImageLoader.GetImageSortName("entity.png");
 
-        public EntitySettings(bool isSimpleType)
+        public EntitySettings(bool isAdmin)
         {
-            if (isSimpleType)
+            if (isAdmin)
             {
                 IsReadOnly = admin => !admin;
                 IsCreable = admin => admin;

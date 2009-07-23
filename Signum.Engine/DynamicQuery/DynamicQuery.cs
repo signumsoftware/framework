@@ -53,7 +53,7 @@ namespace Signum.Engine.DynamicQuery
 
             description =  new QueryDescription
             {
-                Columns = members.Cast<IMemberEntry>().Select(e => new Column(e.MemberInfo)).ToList()
+                Columns = members.Cast<IMemberEntry>().Select(e => new Column(e.MemberInfo, new Attribute[0])).ToList()
             };
         }
 
@@ -84,9 +84,18 @@ namespace Signum.Engine.DynamicQuery
         {
             return new QueryResult
             {
-                Columns = members.Select(d => new Column(d.MemberInfo)).ToList(),
+                Columns = description.Columns,
                 Data = result.Select(e => members.Select(d => d.Getter(e)).ToArray()).ToArray()
             };
+        }
+
+        public DynamicQuery<T> ChangeColumn(Expression<Func<T, object>> column, Action<Column> change)
+        {
+            MemberInfo member = ReflectionTools.GetMemberInfo(column);
+            Column col = description.Columns.Single(a => a.Name == member.Name);
+            change(col);
+
+            return this;
         }
     }
 

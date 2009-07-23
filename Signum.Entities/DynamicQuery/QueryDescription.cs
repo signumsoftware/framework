@@ -8,6 +8,7 @@ using Signum.Utilities.Reflection;
 using System.Data;
 using System.Reflection;
 using System.Diagnostics;
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -44,13 +45,14 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Column
     {
-        public string Name { get; set; }
-        public Type Type { get; set; }
+        public string Name { get; internal set; }
+        public Type Type { get; internal set; }
 
+        public string DisplayName { get; set; }
         public bool Filterable { get; set; }
         public bool Visible { get; set; }
-      
-        public string DisplayName { get; set; }
+
+        public List<Attribute> Attributes { get; set; }
 
         public const string Entity = "Entity";
         public bool IsEntity
@@ -58,14 +60,12 @@ namespace Signum.Entities.DynamicQuery
             get { return this.Name == Entity;  }
         }
 
-        public Column()
-        {
-        }
-
-        public Column(MemberInfo mi)
+        public Column(MemberInfo mi, Attribute[] attributes)
         {
             Name = mi.Name;
             Type = mi.ReturningType();
+
+            Attributes = attributes.ToList();
 
             if (!(mi is PropertyInfo))
                 Debug.WriteLine("{0} is a {1}, not a PropertyInfo, and is used as a Column".Formato(mi.MemberName(), mi.GetType()));
