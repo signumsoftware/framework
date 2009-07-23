@@ -14,24 +14,6 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Web
 {
-    public class WebMenuItem
-    {
-        public string Id;
-        public string ImgSrc;
-        public string AltText;
-        public string OnClick;
-        /// <summary>
-        /// Controller URL
-        /// </summary>
-        public string OnServerClickAjax;
-        /// <summary>
-        /// Controller URL
-        /// </summary>
-        public string OnServerClickPost;
-
-        public readonly Dictionary<string, object> HtmlProps = new Dictionary<string, object>(0);
-    }
-
     public static class SearchControlHelper
     {
         public delegate WebMenuItem MenuItemForQueryName(object queryName);
@@ -114,12 +96,19 @@ namespace Signum.Web
             helper.ViewData[ViewDataKeys.Top] = Navigator.NavigationManager.QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
             if (helper.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 helper.ViewData[ViewDataKeys.PageTitle] = Navigator.NavigationManager.SearchTitle(findOptions.QueryName);
-            helper.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
-            helper.ViewData[ViewDataKeys.Create] =
-                (findOptions.Create.HasValue) ?
-                findOptions.Create.Value :
-                Navigator.IsCreable(entitiesType, false);
-
+            if (entitiesType != null)
+            {
+                helper.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
+                helper.ViewData[ViewDataKeys.Create] =
+                    (findOptions.Create.HasValue) ?
+                    findOptions.Create.Value :
+                    Navigator.IsCreable(entitiesType, false);
+            }
+            else
+            {
+                helper.ViewData[ViewDataKeys.EntityTypeName] = "";
+                helper.ViewData[ViewDataKeys.Create] = false;
+            }
             helper.ViewContext.HttpContext.Response.Write(
                 helper.RenderPartialToString(Navigator.NavigationManager.SearchControlUrl, helper.ViewData));
         }
@@ -151,7 +140,7 @@ namespace Signum.Web
             sb.Append("</td>\n");
             
             sb.Append("<td>\n");
-            sb.Append(PrintValueField(CreateHtmlHelper(controller), filterType, columnType, prefix + "value_" + index.ToString(), null, searchEntityType, columnName));
+            sb.Append(PrintValueField(CreateHtmlHelper(controller), filterType, columnType, prefix + "value_" + index.ToString(), null, columnName));
             sb.Append("</td>\n");
             
             sb.Append("<td>\n");
@@ -197,7 +186,7 @@ namespace Signum.Web
                 sb.Append("<input type=\"text\" id=\"{0}\" name=\"{0}\" value=\"{1}\" {2}/>\n".Formato(txtId, txtValue, filterOptions.Frozen ? " readonly=\"readonly\"" : ""));
             else
             {
-                sb.Append(PrintValueField(helper, filterType, filterOptions.Column.Type, txtId, filterOptions.Value, searchEntityType, filterOptions.Column.Name));
+                sb.Append(PrintValueField(helper, filterType, filterOptions.Column.Type, txtId, filterOptions.Value, filterOptions.Column.Name));
             }
             sb.Append("</td>\n");
 
@@ -229,7 +218,7 @@ namespace Signum.Web
                         new ViewPage()); 
         }
 
-        private static string PrintValueField(HtmlHelper helper, FilterType filterType, Type columnType, string id, object value, Type searchEntityType, string propertyName)
+        private static string PrintValueField(HtmlHelper helper, FilterType filterType, Type columnType, string id, object value, string propertyName)
         {
             StringBuilder sb = new StringBuilder();
             if (filterType == FilterType.Lazy)
