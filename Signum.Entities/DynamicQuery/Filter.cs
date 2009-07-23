@@ -14,7 +14,10 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Filter
     {
-        public Column Column { get; set; }
+        public string Name { get; set; }
+
+        public Type Type { get; set; }
+
         public FilterOperation Operation { get; set; }
 
         object value;
@@ -24,7 +27,7 @@ namespace Signum.Entities.DynamicQuery
 
             set
             {
-                this.value = ReflectionTools.ChangeType(value, Column.Type); 
+                this.value = ReflectionTools.ChangeType(value, Type); 
             }
         }
     }

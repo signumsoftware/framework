@@ -133,11 +133,11 @@ namespace Signum.Engine.DynamicQuery
 
         static Expression GetCondition(Filter f, ParameterExpression pe, Type type)
         {
-            PropertyInfo pi = type.GetProperty(f.Column.Name)
-                .ThrowIfNullC(Resources.TheProperty0ForType1IsnotFound.Formato(f.Column.Name, type.TypeName()));
+            PropertyInfo pi = type.GetProperty(f.Name)
+                .ThrowIfNullC(Resources.TheProperty0ForType1IsnotFound.Formato(f.Name, type.TypeName()));
 
             Expression left = Expression.MakeMemberAccess(pe, pi);
-            Expression right = Expression.Constant(f.Value, f.Column.Type);
+            Expression right = Expression.Constant(f.Value, f.Type);
 
             switch (f.Operation)
             {
