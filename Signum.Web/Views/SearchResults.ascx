@@ -18,13 +18,13 @@
 <table id="<%=Html.GlobalName("tblResults")%>" name="<%=Html.GlobalName("tblResults")%>">
     <thead>
         <tr>
-            <td></td>
-            <td></td>
+            <th></th>
+            <th></th>
             <%
                 foreach(Column c in queryResult.VisibleColums) 
                 {
                     %>
-                    <td><%= c.DisplayName %></td>
+                    <th><%= c.DisplayName %></th>
                     <%
                 }      
             %>
@@ -35,7 +35,7 @@
         for (int row=0; row<queryResult.Data.Length; row++)
         {
             %>
-            <tr id="<%=Html.GlobalName("trResults_" + row.ToString())%>" name="<%=Html.GlobalName("trResults_" + row.ToString())%>">
+            <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=Html.GlobalName("trResults_" + row.ToString())%>" name="<%=Html.GlobalName("trResults_" + row.ToString())%>">
                 <% Lazy entityField = (Lazy)queryResult.Data[row][EntityColumnIndex.Value]; %>
                 <td id="<%=Html.GlobalName("tdRowSelection")%>" name="<%=Html.GlobalName("tdRowSelection")%>">
                     <%

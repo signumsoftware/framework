@@ -19,10 +19,12 @@
 </div>
 
 <div id="<%=Html.GlobalName("divMenuItems") %>">
+    <label for="<%=Html.GlobalName(ViewDataKeys.Top)%>">Núm.registros</label> <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new {size = "5" })%>
+
     <% if (findOptions.FilterMode != FilterMode.AlwaysHidden){%>
-        <input type="button" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
+        <input type="hidden" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
     <%} %>
-    <input id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="Search('Signum/Search','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
+    <input id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="$('#btnSearch').toggleClass('loading');Search('Signum/Search','{0}',function(){{$('#btnSearch').toggleClass('loading');}});".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
     <%if ((bool)ViewData[ViewDataKeys.Create]){ %>
         <input id="<%=Html.GlobalName("btnCreate")%>" type="button" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato("Signum/PopupView", ViewData[ViewDataKeys.PopupPrefix] ?? "", "Signum/TrySavePartial")%>" value="+" /> 
     <%} %>
