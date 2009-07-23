@@ -230,6 +230,7 @@ namespace Signum.Web
         protected internal string SearchPopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchPopupControl.ascx";
         protected internal string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
         protected internal string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
+        protected internal string SearchResultsUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchResults.ascx";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
@@ -421,7 +422,7 @@ namespace Signum.Web
 
             return new PartialViewResult
             {
-                ViewName = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchResults.ascx",
+                ViewName = SearchResultsUrl,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };

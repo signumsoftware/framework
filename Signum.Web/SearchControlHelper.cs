@@ -84,7 +84,8 @@ namespace Signum.Web
                     .Single("Filter Column {0} not found or found more than once in query description".Formato(opt.ColumnName));
             }
 
-            Type entitiesType = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            Column entityColumn = queryDescription.Columns.SingleOrDefault(a => a.IsEntity);
+            Type entitiesType = entityColumn != null ? Reflector.ExtractLazy(entityColumn.Type) : null;
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
@@ -115,7 +116,7 @@ namespace Signum.Web
 
         public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string entityTypeName, string prefix)
         {
-            Type searchEntityType = Navigator.NameToType[entityTypeName];
+           // Type searchEntityType = Navigator.NameToType[entityTypeName];
 
             StringBuilder sb = new StringBuilder();
             Type columnType = GetType(filterTypeName);

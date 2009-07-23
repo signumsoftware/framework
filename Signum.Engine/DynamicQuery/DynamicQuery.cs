@@ -19,7 +19,7 @@ namespace Signum.Engine.DynamicQuery
         QueryResult ExecuteQuery(List<Filter> filters, int? limit);
     }
 
-    internal class DynamicQuery<T> : IDynamicQuery
+    public class DynamicQuery<T> : IDynamicQuery
     {
         IQueryable<T> query;
         Func<List<Filter>, int?, IEnumerable<T>> execute;
@@ -102,12 +102,12 @@ namespace Signum.Engine.DynamicQuery
 
     public static class DynamicQuery
     {
-        public static IDynamicQuery ToDynamic<T>(this IQueryable<T> query)
+        public static DynamicQuery<T> ToDynamic<T>(this IQueryable<T> query)
         {
             return new DynamicQuery<T>(query); 
         }
 
-        public static IDynamicQuery Manual<T>(Func<List<Filter>, int?, IEnumerable<T>> execute)
+        public static DynamicQuery<T> Manual<T>(Func<List<Filter>, int?, IEnumerable<T>> execute)
         {
             return new DynamicQuery<T>(execute); 
         }

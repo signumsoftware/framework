@@ -155,6 +155,7 @@ function OnListSearchCancel(prefix) {
 }
 
 function AddFilter(urlController, prefix) {
+
     var selectedColumn = $("#"+prefix+"ddlNewFilters option:selected");
     if (selectedColumn.length == 0) return;
     
@@ -198,7 +199,6 @@ function DeleteFilter(index, prefix) {
     
     if ($("#"+prefix+"trFilter_" + index + " select[disabled]").length == 0)
         tr.remove();
-    
     if  ($("#"+prefix+"tblFilters tbody tr").length == 0){
         $("#filters-list .explanation").show();
         $("#filters-list table").hide('fast');

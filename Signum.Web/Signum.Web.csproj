@@ -75,6 +75,7 @@
     <Compile Include="AjaxToolkitExtensions.cs" />
     <Compile Include="AppSettings.cs" />
     <Compile Include="AssemblyResourceProvider.cs" />
+    <Compile Include="ButtonBar.cs" />
     <Compile Include="CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
