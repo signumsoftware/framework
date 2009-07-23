@@ -31,8 +31,17 @@ namespace Signum.Engine.Processes
 
         static Timer timer;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int numberOfThreads)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int numberOfThreads, bool packages)
         {
+            if (packages && sb.NotDefined<PackageDN>())
+            {
+                sb.Include<PackageDN>();
+                sb.Include<PackageLineDN>();
+
+                if (!sb.Settings.IsTypeAttributesOverriden<IProcessData>())
+                    sb.Settings.OverrideTypeAttributes<IProcessData>(new ImplementedByAttribute(typeof(PackageDN)));
+            }
+
             if (sb.NotDefined<ProcessDN>())
             {
                 sb.Include<ProcessDN>();

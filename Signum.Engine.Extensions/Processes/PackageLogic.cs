@@ -12,34 +12,16 @@ using Signum.Engine.Basics;
 
 namespace Signum.Engine.Processes
 {
-    public static class PackageLogic
-    {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
-            if (sb.NotDefined<PackageDN>())
-            {
-                ProcessLogic.Start(sb, dqm, 4);
-
-                sb.Include<PackageDN>();
-                sb.Include<PackageLineDN>();
-
-                if (!sb.Settings.IsTypeAttributesOverriden<IProcessData>())
-                    sb.Settings.OverrideTypeAttributes<IProcessData>(new ImplementedByAttribute(typeof(PackageDN)));
-            }
-        }
-    }
-
-
-    public class Package : IProcessLogic
+    public class PackageLogic : IProcessLogic
     {
         OperationDN operation;
 
-        public Package(OperationDN operation)
+        public PackageLogic(OperationDN operation)
         {
             this.operation = operation;
         }
 
-        public Package(Enum operationKey)
+        public PackageLogic(Enum operationKey)
         {
             this.operation = EnumBag<OperationDN>.ToEntity(operationKey);
         }
