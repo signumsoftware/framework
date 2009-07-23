@@ -8,7 +8,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public abstract class EnumDN : ImmutableEntity
+    public abstract class EnumDN : IdentifiableEntity
     {
         public static T New<T>(Enum key)
             where T:EnumDN, new()
@@ -26,7 +26,7 @@ namespace Signum.Entities.Basics
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            internal set { SetToStr(ref name, value, "Name"); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -35,7 +35,7 @@ namespace Signum.Entities.Basics
         public string Key
         {
             get { return key; }
-            set { Set(ref key, value, "Key"); }
+            internal set { Set(ref key, value, "Key"); }
         }
 
         public override string ToString()
