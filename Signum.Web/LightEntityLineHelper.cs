@@ -15,14 +15,13 @@ namespace Signum.Web
     {
         public static void LightEntityLine(this HtmlHelper helper, Lazy lazy, bool admin)
         {
-            StringBuilder sb = new StringBuilder();
-
-            if (Navigator.IsViewable(lazy.RuntimeType, admin) && lazy != null)
-                sb.Append(helper.Href("", lazy.ToStr, Navigator.ViewRoute(lazy.RuntimeType, lazy.Id), "Ver", "", null));
+            if (lazy == null)
+                return;
+            
+            if (Navigator.IsViewable(lazy.RuntimeType, admin))
+                helper.Write(helper.Href("", lazy.ToStr, Navigator.ViewRoute(lazy.RuntimeType, lazy.Id), "Ver", "", null));
             else
-                sb.Append(helper.Span("", lazy != null ? lazy.ToStr : "", ""));
-
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+                helper.Write(helper.Span("", lazy.ToStr, ""));
         }
     }
 }

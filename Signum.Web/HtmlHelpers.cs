@@ -128,6 +128,11 @@ namespace Signum.Web
                 );
         }
 
+        public static void Write(this HtmlHelper html, string text)
+        {
+            html.ViewContext.HttpContext.Response.Write(text);
+        }
+
         #region Message
         public static void Message(this HtmlHelper html, string title, string content, MessageType type){
             Message(html, title, content, type,null);

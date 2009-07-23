@@ -35,6 +35,7 @@
     </thead>    
     <tbody>
     <%
+        List<Action<HtmlHelper, object>> formatters = (List<Action<HtmlHelper, object>>)ViewData[ViewDataKeys.Formatters];
         for (int row=0; row<queryResult.Data.Length; row++)
         {
             %>
@@ -65,6 +66,7 @@
                 </td>
                 <%
                     }
+                    
                     for (int col = 0; col < queryResult.Data[row].Length; col++)
                 {
                     if (colVisibility[col])
@@ -72,24 +74,8 @@
                         %>
                         <td id="<%=Html.GlobalName("tdResults_" + col.ToString())%>" name="<%=Html.GlobalName("tdResults_" + col.ToString())%>">
                             <%                        
-                            Type colType = queryResult.Columns[col].Type;
-                            if (QueryDecorators.DecoratorsByName.ContainsKey(queryResult.Columns[col].Name))
-                            {%>
-                                <%=QueryDecorators.DecoratorsByName[queryResult.Columns[col].Name](queryResult.Data[row][col])%>
-                            <%}
-                            else
-                            {
-                                if (typeof(Lazy).IsAssignableFrom(colType) && queryResult.Data[row][col] != null)
-                                {
-                                    Lazy lazy = (Lazy)queryResult.Data[row][col];
-                                    Html.LightEntityLine(lazy, false);
-                                }
-                                else
-                                {
+                                formatters[col](Html, queryResult.Data[row][col]);
                             %>
-                                <%=queryResult.Data[row][col]%>
-                            <%  }
-                            } %>
                         </td>
                         <%
                     }

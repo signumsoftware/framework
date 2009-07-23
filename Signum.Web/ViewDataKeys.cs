@@ -33,6 +33,7 @@ namespace Signum.Web
         public const string EntityTypeName = "sfEntityTypeName";
         public const string AllowMultiple = "sfAllowMultiple";
         public const string Create = "sfCreate";
+        public const string Formatters = "sfFormatters";
 
         public static string GlobalName(this HtmlHelper helper, string localName)
         {

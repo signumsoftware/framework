@@ -55,9 +55,9 @@ namespace Signum.Web
 
         public static NavigationManager NavigationManager;
 
-        public static void Start(NavigationManager manager)
+        public static void Start()
         {
-            NavigationManager = manager;
+            NavigationManager.Start();
         }
         
         public static Type ResolveType(string typeName)
@@ -243,18 +243,16 @@ namespace Signum.Web
         public event Func<Type, bool> GlobalIsReadOnly;
         public event Func<object, bool> GlobalIsFindable;
 
-        public NavigationManager(NavigationManagerSettings settings)
+        public void Start()
         {
-            EntitySettings = settings.EntitySettings;
-            Queries = settings.Queries;
             URLNamesToTypes = EntitySettings.ToDictionary(
                 kvp => kvp.Value.UrlName ?? (kvp.Key.Name.EndsWith("DN") ? kvp.Key.Name.Substring(0, kvp.Key.Name.Length - 2) : kvp.Key.Name), 
                 kvp => kvp.Key);
             TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);
-            if (settings.QuerySettings != null)
+            if (QuerySettings != null)
             {
-                QuerySettings = settings.QuerySettings.ToDictionary(kvp => kvp.Key, kvp => 
+                QuerySettings = QuerySettings.ToDictionary(kvp => kvp.Key, kvp => 
                 { 
                     if (!kvp.Value.UrlName.HasText()) 
                         kvp.Value.UrlName = GetQueryName(kvp.Key);
@@ -430,6 +428,9 @@ namespace Signum.Web
                 int entityColumnIndex = queryResult.Columns.IndexOf(c => c.IsEntity);
                 controller.ViewData[ViewDataKeys.EntityColumnIndex] = entityColumnIndex;
             }
+
+            QuerySettings settings = QuerySettings[queryName];
+            controller.ViewData[ViewDataKeys.Formatters] = queryResult.Columns.Select(c =>settings.GetFormatter(c)).ToList();
 
             return new PartialViewResult
             {
