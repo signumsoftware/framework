@@ -70,16 +70,23 @@
                         <td id="<%=Html.GlobalName("tdResults_" + col.ToString())%>" name="<%=Html.GlobalName("tdResults_" + col.ToString())%>">
                             <%                        
                             Type colType = queryResult.Columns[col].Type;
-                            if (typeof(Lazy).IsAssignableFrom(colType) && queryResult.Data[row][col]!=null)
-                            {
-                                Lazy lazy = (Lazy)queryResult.Data[row][col];
-                                Html.LightEntityLine(lazy, false);
-                            }
+                            if (QueryDecorators.DecoratorsByName.ContainsKey(queryResult.Columns[col].Name))
+                            {%>
+                                <%=QueryDecorators.DecoratorsByName[queryResult.Columns[col].Name](queryResult.Data[row][col])%>
+                            <%}
                             else
                             {
+                                if (typeof(Lazy).IsAssignableFrom(colType) && queryResult.Data[row][col] != null)
+                                {
+                                    Lazy lazy = (Lazy)queryResult.Data[row][col];
+                                    Html.LightEntityLine(lazy, false);
+                                }
+                                else
+                                {
                             %>
                                 <%=queryResult.Data[row][col]%>
-                            <%} %>
+                            <%  }
+                            } %>
                         </td>
                         <%
                     }
