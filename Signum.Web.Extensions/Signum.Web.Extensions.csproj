@@ -87,6 +87,8 @@
     <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
     <Compile Include="Captcha\CaptchaImage.cs" />
     <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
+    <Compile Include="Operations\OperationClient.cs" />
+    <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptCombiner\CombineController.cs" />
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
