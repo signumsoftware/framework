@@ -13,32 +13,14 @@ namespace Signum.Entities.Scheduler
         Execute
     }
 
-    [ImplementedBy(typeof(CustomTaskDN), typeof(ProcessTaskDN))]
-    public interface ITask: IIdentifiable
+    [ImplementedBy(typeof(CustomTaskDN), typeof(ProcessDN))]
+    public interface ITaskDN : IIdentifiable
     {
-
     }
 
     [Serializable]
-    public class CustomTaskDN : EnumDN, ITask
+    public class CustomTaskDN : EnumDN
     {
         
-    }
-
-    [Serializable]
-    public class ProcessTaskDN: IdentifiableEntity
-    {
-        ProcessDN process;
-        [NotNullValidator]
-        public ProcessDN Process
-        {
-            get { return process; }
-            set { Set(ref process, value, "Process"); }
-        }
-
-        public override string ToString()
-        {
-            return base.ToString();
-        }
     }
 }

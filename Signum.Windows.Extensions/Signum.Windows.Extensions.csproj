@@ -123,6 +123,22 @@
     </Compile>
     <Compile Include="Operations\ConstructFromMenuItem.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
+    <Compile Include="Operations\LogOperation.xaml.cs">
+      <DependentUpon>LogOperation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Package.xaml.cs">
+      <DependentUpon>Package.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\PackageLine.xaml.cs">
+      <DependentUpon>PackageLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Process.xaml.cs">
+      <DependentUpon>Process.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\ProcessClient.cs" />
+    <Compile Include="Processes\ProcessExecution.xaml.cs">
+      <DependentUpon>ProcessExecution.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Reports\CompositeReport.xaml.cs">
       <DependentUpon>CompositeReport.xaml</DependentUpon>
     </Compile>
@@ -155,6 +171,28 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Reports\ReportClient.cs" />
+    <Compile Include="Scheduler\Calendar.xaml.cs">
+      <DependentUpon>Calendar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\CustomTask.xaml.cs">
+      <DependentUpon>CustomTask.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\Hour.xaml.cs">
+      <DependentUpon>Hour.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduledTask.xaml.cs">
+      <DependentUpon>ScheduledTask.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\SchedulerClient.cs" />
+    <Compile Include="Scheduler\ScheduleRuleDaily.xaml.cs">
+      <DependentUpon>ScheduleRuleDaily.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduleRuleWeekDays.xaml.cs">
+      <DependentUpon>ScheduleRuleWeekDays.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduleRuleWeekly.xaml.cs">
+      <DependentUpon>ScheduleRuleWeekly.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Shapes\Arrow.cs" />
     <Compile Include="ZoomViewer.cs" />
     <EmbeddedResource Include="Properties\Resources.es.resx">
@@ -242,6 +280,26 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Operations\LogOperation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Processes\Package.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Processes\PackageLine.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Processes\Process.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Processes\ProcessExecution.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Reports\CompositeReport.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -249,6 +307,34 @@
     <Page Include="Reports\ExcelReport.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Scheduler\Calendar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scheduler\CustomTask.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scheduler\Hour.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Scheduler\ScheduledTask.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scheduler\ScheduleRuleDaily.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scheduler\ScheduleRuleWeekDays.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scheduler\ScheduleRuleWeekly.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\generic.xaml">
       <Generator>MSBuild:Compile</Generator>

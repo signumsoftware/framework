@@ -13,6 +13,7 @@ using System.Threading;
 using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Engine.Authorization;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Scheduler
 {
@@ -37,17 +38,16 @@ namespace Signum.Engine.Scheduler
             return new Disposable(() => isSafeSave = lastSafe); 
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined<Schema>())
             {
-                TaskLogic.Start(sb);
+                TaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
                 sb.Schema.Saved += new EntityEventHandler(Schema_Saved);
             }
         }
-
 
         static void Schema_Initializing(Schema sender)
         {

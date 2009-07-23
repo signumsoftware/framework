@@ -142,6 +142,13 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref saturday, value, "Saturday"); }
         }
 
+        CalendarDN calendar;
+        public CalendarDN Calendar
+        {
+            get { return calendar; }
+            set { if (Set(ref calendar, value, "Calendar")) holiday = calendar == null ? (bool?)null : false; }
+        }
+
         bool? holiday;
         public bool? Holiday
         {
@@ -151,13 +158,6 @@ namespace Signum.Entities.Scheduler
                 if (value == null || calendar != null)
                     Set(ref holiday, value, "Holiday");
             }
-        }
-
-        CalendarDN calendar;
-        public CalendarDN Calendar
-        {
-            get { return calendar; }
-            set { if (Set(ref calendar, value, "Calendar")) holiday = calendar == null ? (bool?)null : false; }
         }
 
         public override DateTime Next(DateTime dt)

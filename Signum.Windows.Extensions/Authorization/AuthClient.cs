@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Collections;
 using Signum.Windows;
 using System.Windows.Controls;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Authorization
 {
@@ -22,16 +23,19 @@ namespace Signum.Windows.Authorization
 
         public static void Start(bool types, bool property, bool queries)
         {
-            Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(true) { View = () => new User() });
-            Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings(false) { View = () => new Role() });
+            if (Navigator.Manager.NotDefined<UserDN>())
+            {
+                Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(true) { View = () => new User() });
+                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings(false) { View = () => new Role() });
+            }
 
-            if (property)
+            if (property && Navigator.Manager.NotDefined<RulePropertyDN>())
             {
                 propertyRules = Server.Service<IPropertyAuthServer>().AuthorizedProperties();
                 Common.RouteTask += new CommonRouteTask(Common_RouteTask);
             }
 
-            if (types)
+            if (types && Navigator.Manager.NotDefined<RuleTypeDN>())
             {
                 typeRules = Server.Service<ITypeAuthServer>().AuthorizedTypes();
                 Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type) == TypeAccess.Create;
@@ -41,7 +45,7 @@ namespace Signum.Windows.Authorization
                 MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
             }
 
-            if (queries)
+            if (queries && Navigator.Manager.NotDefined<RuleQueryDN>())
             {
                 authorizedQueries = Server.Service<IQueryAuthServer>().AuthorizedQueries();
                 Navigator.Manager.GlobalIsFindable += qn => GetQueryAceess(qn);

@@ -48,77 +48,79 @@ namespace Signum.Engine.Processes
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
 
-                dqm[typeof(ProcessDN)] = (from p in Database.Query<ProcessDN>()
-                                          join pe in Database.Query<ProcessExecutionDN>().DefaultIfEmpty() on p equals pe.Process into g
-                                          select new
-                                          {
-                                              Entity = p.ToLazy(),
-                                              p.Id,
-                                              p.Name,
-                                              NumExecutions = g.Count(),
-                                              LastExecution = Database.Query<ProcessExecutionDN>().SingleOrDefault(pe => pe.Id == g.Max(a => a.Id)).ToLazy()
-                                          }).ToDynamic();
+                dqm[typeof(ProcessDN)] = 
+                             (from p in Database.Query<ProcessDN>()
+                              join pe in Database.Query<ProcessExecutionDN>().DefaultIfEmpty() on p equals pe.Process into g
+                              select new
+                              {
+                                  Entity = p.ToLazy(),
+                                  p.Id,
+                                  p.Name,
+                                  NumExecutions = g.Count(),
+                                  LastExecution = Database.Query<ProcessExecutionDN>().SingleOrDefault(pe => pe.Id == g.Max(a => a.Id)).ToLazy()
+                              }).ToDynamic();
 
-                dqm[typeof(ProcessDN)] = (from pe in Database.Query<ProcessExecutionDN>()
-                                          select new
-                                          {
-                                              Entity = pe.ToLazy(),
-                                              pe.Id,
-                                              Resume = pe.ToStr,
-                                              Process = pe.Process.ToLazy(),
-                                              State = pe.State,
-                                              pe.CreationDate,
-                                              pe.PlannedDate,
-                                              pe.CancelationDate,
-                                              pe.QueuedDate,
-                                              pe.ExecutionStart,
-                                              pe.ExecutionEnd,
-                                              pe.SuspendDate,
-                                              pe.ErrorDate,
-                                          }).ToDynamic();
+                dqm[typeof(ProcessExecutionDN)] = 
+                             (from pe in Database.Query<ProcessExecutionDN>()
+                              select new
+                              {
+                                  Entity = pe.ToLazy(),
+                                  pe.Id,
+                                  Resume = pe.ToStr,
+                                  Process = pe.Process.ToLazy(),
+                                  State = pe.State,
+                                  pe.CreationDate,
+                                  pe.PlannedDate,
+                                  pe.CancelationDate,
+                                  pe.QueuedDate,
+                                  pe.ExecutionStart,
+                                  pe.ExecutionEnd,
+                                  pe.SuspendDate,
+                                  pe.ErrorDate,
+                              }).ToDynamic();
 
                 dqm[ProcessQueries.CurrentExecutions] =
-                                         (from pe in Database.Query<ProcessExecutionDN>()
-                                          where
-                                              pe.State == ProcessState.Queued ||
-                                              pe.State == ProcessState.Executing ||
-                                              pe.State == ProcessState.Suspending ||
-                                              pe.State == ProcessState.Suspended
-                                          select new
-                                          {
-                                              Entity = pe.ToLazy(),
-                                              pe.Id,
-                                              Resume = pe.ToStr,
-                                              Process = pe.Process.ToLazy(),
-                                              State = pe.State,
-                                              pe.QueuedDate,
-                                              pe.ExecutionStart,
-                                              pe.ExecutionEnd,
-                                              pe.Progress,
-                                              pe.SuspendDate,
-                                          }).ToDynamic();
+                             (from pe in Database.Query<ProcessExecutionDN>()
+                              where
+                                  pe.State == ProcessState.Queued ||
+                                  pe.State == ProcessState.Executing ||
+                                  pe.State == ProcessState.Suspending ||
+                                  pe.State == ProcessState.Suspended
+                              select new
+                              {
+                                  Entity = pe.ToLazy(),
+                                  pe.Id,
+                                  Resume = pe.ToStr,
+                                  Process = pe.Process.ToLazy(),
+                                  State = pe.State,
+                                  pe.QueuedDate,
+                                  pe.ExecutionStart,
+                                  pe.ExecutionEnd,
+                                  pe.Progress,
+                                  pe.SuspendDate,
+                              }).ToDynamic();
 
                 dqm[ProcessQueries.ErrorExecutions] =
-                         (from pe in Database.Query<ProcessExecutionDN>()
-                          where
-                              pe.State == ProcessState.Error
-                          select new
-                          {
-                              Entity = pe.ToLazy(),
-                              pe.Id,
-                              Resume = pe.ToStr,
-                              Process = pe.Process.ToLazy(),
-                              pe.CreationDate,
-                              pe.PlannedDate,
-                              pe.CancelationDate,
-                              pe.QueuedDate,
-                              pe.ExecutionStart,
-                              pe.ExecutionEnd,
-                              pe.Progress,
-                              pe.SuspendDate,
-                              pe.ErrorDate,
-                              pe.Exception
-                          }).ToDynamic(); 
+                             (from pe in Database.Query<ProcessExecutionDN>()
+                              where
+                                  pe.State == ProcessState.Error
+                              select new
+                              {
+                                  Entity = pe.ToLazy(),
+                                  pe.Id,
+                                  Resume = pe.ToStr,
+                                  Process = pe.Process.ToLazy(),
+                                  pe.CreationDate,
+                                  pe.PlannedDate,
+                                  pe.CancelationDate,
+                                  pe.QueuedDate,
+                                  pe.ExecutionStart,
+                                  pe.ExecutionEnd,
+                                  pe.Progress,
+                                  pe.SuspendDate,
+                                  pe.ErrorDate,
+                                  pe.Exception
+                              }).ToDynamic(); 
             }
         }
 

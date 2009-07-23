@@ -11,11 +11,12 @@ using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Processes
 {
     [Serializable]
-    public class ProcessDN : EnumDN
+    public class ProcessDN : EnumDN, ITaskDN
     {
     }
 
@@ -217,7 +218,9 @@ namespace Signum.Entities.Processes
 
     public enum ProcessQueries
     {
+        [LocDescription]
         CurrentExecutions,
+        [LocDescription]
         ErrorExecutions,
     }
 }

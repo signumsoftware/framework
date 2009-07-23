@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="Signum.Windows.Processes.Package"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.Processes;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="d:PackageDN"
+    x:Name="ctrl"
+    MinWidth="300">
+    <StackPanel>
+        <m:EntityCombo m:Common.Route="Operation" />
+        <GroupBox Header="Lines">
+            <m:SearchControl Mode="Hidden" QueryName="{x:Type d:PackageLineDN}">
+                <m:SearchControl.FilterOptions>
+                    <m:FilterOptions ColumnName="Package" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}"/>
+                </m:SearchControl.FilterOptions>
+            </m:SearchControl>
+        </GroupBox>
+    </StackPanel>
+</UserControl>

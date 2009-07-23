@@ -17,8 +17,8 @@ namespace Signum.Entities.Scheduler
             set { Set(ref rule, value, "Rule"); }
         }
 
-        ITask task;
-        public ITask Task
+        CustomTaskDN task;
+        public CustomTaskDN Task
         {
             get { return task; }
             set { Set(ref task, value, "Task"); }

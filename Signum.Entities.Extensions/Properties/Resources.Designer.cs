@@ -61,6 +61,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  (Deleted).
+        /// </summary>
+        internal static string Deleted {
+            get {
+                return ResourceManager.GetString("Deleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         internal static string ProcessOperation_Cancel {
@@ -106,6 +115,24 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current Executions.
+        /// </summary>
+        internal static string ProcessQueries_CurrentExecutions {
+            get {
+                return ResourceManager.GetString("ProcessQueries_CurrentExecutions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error Executons.
+        /// </summary>
+        internal static string ProcessQueries_ErrorExecutions {
+            get {
+                return ResourceManager.GetString("ProcessQueries_ErrorExecutions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Canceled.
         /// </summary>
         internal static string ProcessState_Canceled {
@@ -120,15 +147,6 @@ namespace Signum.Entities.Extensions.Properties {
         internal static string ProcessState_Created {
             get {
                 return ResourceManager.GetString("ProcessState_Created", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to  (Deleted).
-        /// </summary>
-        internal static string ProcessState_Deleted {
-            get {
-                return ResourceManager.GetString("ProcessState_Deleted", resourceCulture);
             }
         }
         

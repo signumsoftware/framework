@@ -46,7 +46,7 @@ namespace Signum.Entities.Reports
 
         public override string ToString()
         {
-            return displayName + (deleted ? Resources.ProcessState_Deleted : "");
+            return displayName + (deleted ? Resources.Deleted : "");
         }
     }
 }

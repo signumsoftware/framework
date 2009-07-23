@@ -9,6 +9,8 @@ using Signum.Engine.Maps;
 using Signum.Engine.Basics;
 using Signum.Utilities;
 using Signum.Entities.Processes;
+using Signum.Entities;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Scheduler
 {
@@ -16,27 +18,25 @@ namespace Signum.Engine.Scheduler
     {
         static Dictionary<Enum, Action> customTask = new Dictionary<Enum, Action>();
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined<ITask>())
+            if (sb.NotDefined<CustomTaskDN>())
             {
                 EnumBag<CustomTaskDN>.Start(sb, () => customTask.Keys.ToHashSet());
 
-                sb.Include<ProcessTaskDN>();
-
-                OperationLogic.Register(new BasicExecute<ITask>(TaskOperation.Execute) 
-                { 
-                    Execute = (_, __) => { throw new NotImplementedException(); } 
-                });
-
-                OperationLogic.Register(new BasicExecute<ProcessTaskDN>(TaskOperation.Execute) 
-                { 
-                    Execute = (pt, _) => ProcessLogic.Create(pt.Process).ExecuteLazy(ProcessOperation.Execute) 
+                OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.Execute)
+                {
+                    Execute = (ct, _) => { throw new NotImplementedException(); }
                 });
 
                 OperationLogic.Register(new BasicExecute<CustomTaskDN>(TaskOperation.Execute)
                 {
                     Execute = (ct, _) => ExecuteCustomTask(EnumBag<CustomTaskDN>.ToEnum(ct.Key))
+                });
+
+                OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.Execute)
+                {
+                    Execute = (pc, _) => ProcessLogic.Create(pc).ExecuteLazy(ProcessOperation.Execute)
                 });
             }
         }
@@ -45,5 +45,16 @@ namespace Signum.Engine.Scheduler
         {
             customTask[key]();
         }
+
+        public static void RegisterCustomTask(Enum taskKey, Action actionKey)
+        {
+            if (taskKey == null)
+                throw new ArgumentNullException("taskKey");
+
+            if (actionKey == null)
+                throw new ArgumentNullException("actionKey");
+
+            customTask.Add(taskKey, actionKey); 
+        }      
     }
 }
