@@ -23,4 +23,38 @@ namespace Signum.Entities.Scheduler
     {
         
     }
+
+    [Serializable]
+    public class CustomTaskExecutionDN : IdentifiableEntity
+    {
+        CustomTaskDN customTask;
+        public CustomTaskDN CustomTask
+        {
+            get { return customTask; }
+            set { Set(ref customTask, value, "CustomTask"); }
+        }
+
+        DateTime startTime;
+        public DateTime StartTime
+        {
+            get { return startTime; }
+            set { Set(ref startTime, value, "StartTime"); }
+        }
+
+        DateTime? endTime;
+        public DateTime? EndTime
+        {
+            get { return endTime; }
+            set { Set(ref endTime, value, "EndTime"); }
+        }
+
+
+        [SqlDbType(Size = int.MaxValue)]
+        string exception;
+        public string Exception
+        {
+            get { return exception; }
+            set { Set(ref exception, value, "Exception"); }
+        }
+    }
 }

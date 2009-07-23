@@ -147,12 +147,12 @@ namespace Signum.Engine.Operations
         }
 
         #region Execute
-        public static IdentifiableEntity ServiceExecuteLazy(this Lazy lazy, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceExecuteLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
             return ExecutePrivate(Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true), Database.RetrieveAndForget(lazy), args);
         }
 
-        public static IdentifiableEntity ServiceExecute(this IIdentifiable entity, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceExecute(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return ExecutePrivate(Find<IExecuteOperation>(entity.GetType(), operationKey, false), entity, args);
         }
@@ -246,7 +246,7 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFrom
-        public static IdentifiableEntity ServiceConstructFrom(this IIdentifiable entity, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return ConstructFromPrivate(Find<IConstructorFromOperation>(entity.GetType(), operationKey, false), (IdentifiableEntity)entity, args);
         }
@@ -283,7 +283,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        public static IdentifiableEntity ServiceConstructFromLazy(this Lazy lazy, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
             return ConstructFromLazyPrivate(Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true), lazy, args);
         }

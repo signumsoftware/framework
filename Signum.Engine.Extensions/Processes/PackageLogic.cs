@@ -36,7 +36,7 @@ namespace Signum.Engine.Processes
             lazies.Select(lazy => new PackageLineDN
             {
                 Package = package.ToLazy(),
-                Entity = lazy.ToLazy<IdentifiableEntity>()
+                Target = lazy.ToLazy<IdentifiableEntity>()
             }).SaveList();
 
             return package;
@@ -67,7 +67,7 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        OperationLogic.ServiceExecuteLazy(pl.Entity, key);
+                        OperationLogic.ServiceExecuteLazy(pl.Target, key);
                         pl.FinishTime = DateTime.Now;
                         pl.Save();
                         tr.Commit();

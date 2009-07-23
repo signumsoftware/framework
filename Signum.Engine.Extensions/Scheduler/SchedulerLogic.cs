@@ -46,6 +46,21 @@ namespace Signum.Engine.Scheduler
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
                 sb.Schema.Saved += new EntityEventHandler(Schema_Saved);
+
+                dqm[typeof(CustomTaskDN)] =
+                     (from ct in Database.Query<CustomTaskDN>()
+                      join cte in Database.Query<CustomTaskExecutionDN>().DefaultIfEmpty() on ct equals cte.CustomTask into g
+                      select new
+                      {
+                          Entity = ct.ToLazy(),
+                          ct.Id,
+                          ct.Name,
+                          NumExecutions = g.Count(),
+                          LastExecution = (from cte2 in Database.Query<CustomTaskExecutionDN>()
+                                           where cte2.Id == g.Max(a => a.Id)
+                                           select cte2.ToLazy()).FirstOrDefault()
+                      }).ToDynamic();
+
             }
         }
 
@@ -70,7 +85,6 @@ namespace Signum.Engine.Scheduler
 
         public static void ReloadPlan()
         {
-            using (AuthLogic.Disable())
             using (new EntityCache(true))
             lock(priorityQueue)
             {

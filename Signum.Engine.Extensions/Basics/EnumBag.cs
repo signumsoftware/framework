@@ -19,7 +19,7 @@ namespace Signum.Engine.Basics
 
         public static void Start(SchemaBuilder sb, Func<HashSet<Enum>> getKeys)
         {
-            if (sb.NotDefined<T>())
+            if (sb.NotDefined("Enum<{0}>".Formato(typeof(T).FullName)))
             {
                 sb.Include<T>(); 
 
@@ -33,7 +33,6 @@ namespace Signum.Engine.Basics
 
         static void Schema_Initializing(Schema schema)
         {
-            using (AuthLogic.Disable())
             using (new EntityCache(true))
             {
                 Keys = getKeys();
@@ -53,7 +52,9 @@ namespace Signum.Engine.Basics
         {
             Table table = Schema.Current.Table<T>();
 
-            return GenerateEntities().Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+            List<T> should = GenerateEntities(); 
+
+            return should.Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
         }
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
@@ -61,10 +62,11 @@ namespace Signum.Engine.Basics
             Table table = Schema.Current.Table<T>();
 
             List<T> current = Administrator.TryRetrieveAll<T>(replacements);
+            List<T> should = GenerateEntities(); 
 
             return Synchronizer.SyncronizeReplacing(replacements, typeof(T).Name,
                 current.ToDictionary(c => c.Key),
-                GenerateEntities().ToDictionary(s => s.Key),
+                should.ToDictionary(s => s.Key),
                 (k, c) => table.DeleteSqlSync(c),
                 (k, s) => table.InsertSqlSync(s),
                 (k, c, s) =>

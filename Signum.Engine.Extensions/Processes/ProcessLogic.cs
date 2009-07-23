@@ -40,6 +40,21 @@ namespace Signum.Engine.Processes
 
                 if (!sb.Settings.IsTypeAttributesOverriden<IProcessData>())
                     sb.Settings.OverrideTypeAttributes<IProcessData>(new ImplementedByAttribute(typeof(PackageDN)));
+
+                dqm[typeof(PackageLineDN)] =
+                    (from pl in Database.Query<PackageLineDN>()
+                     select new
+                     {
+                         Entity = pl.ToLazy(),
+                         pl.Id,
+                         pl.Package,
+                         pl.Target,
+                         pl.FinishTime,
+                         pl.Exception
+                     }).ToDynamic(); 
+
+
+
             }
 
             if (sb.NotDefined<ProcessDN>())
@@ -66,7 +81,9 @@ namespace Signum.Engine.Processes
                                   p.Id,
                                   p.Name,
                                   NumExecutions = g.Count(),
-                                  LastExecution = Database.Query<ProcessExecutionDN>().SingleOrDefault(pe => pe.Id == g.Max(a => a.Id)).ToLazy()
+                                  LastExecution = (from pe2 in Database.Query<ProcessExecutionDN>()
+                                                   where pe2.Id == g.Max(a => a.Id)
+                                                   select pe2.ToLazy()).FirstOrDefault()
                               }).ToDynamic();
 
                 dqm[typeof(ProcessExecutionDN)] = 
@@ -167,7 +184,6 @@ namespace Signum.Engine.Processes
 
         static void Schema_Initializing(Schema sender)
         {
-            using (AuthLogic.Disable())
             using (new EntityCache(true))
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()

@@ -28,11 +28,11 @@ namespace Signum.Entities.Processes
         }
 
         [ImplementedByAll]
-        Lazy<IdentifiableEntity> entity;
-        public Lazy<IdentifiableEntity> Entity
+        Lazy<IdentifiableEntity> target;
+        public Lazy<IdentifiableEntity> Target
         {
-            get { return entity; }
-            set { Set(ref entity, value, "Entity"); }
+            get { return target; }
+            set { Set(ref target, value, "Target"); }
         }
 
         DateTime? finishTime;

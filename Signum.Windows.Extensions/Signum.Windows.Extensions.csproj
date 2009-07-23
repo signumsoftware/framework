@@ -177,6 +177,9 @@
     <Compile Include="Scheduler\CustomTask.xaml.cs">
       <DependentUpon>CustomTask.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Scheduler\CustomTaskExecution.xaml.cs">
+      <DependentUpon>CustomTaskExecution.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Scheduler\Hour.xaml.cs">
       <DependentUpon>Hour.xaml</DependentUpon>
     </Compile>
@@ -313,6 +316,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Scheduler\CustomTask.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scheduler\CustomTaskExecution.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
