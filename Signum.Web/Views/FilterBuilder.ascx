@@ -46,7 +46,7 @@
     <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
   
     <div id="filters-list">
-    <span class="explanation" style="style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">No se han especificado filtros</span>
+    <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">No se han especificado filtros</span>
     <table id="<%=Html.GlobalName("tblFilters")%>" name="<%=Html.GlobalName("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
         <thead>
             <tr>
