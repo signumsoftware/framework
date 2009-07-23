@@ -53,6 +53,37 @@ namespace Signum.Web.ScriptCombiner
             }
             return content;
         }
+        public override string ProcessFile(string fileName)
+        {
+
+            return File.ReadAllText(fileName);
+
+            string[] folders = fileName.Replace("\\\\", "\\").Split('\\');
+            //allScripts.Append(File.ReadAllText(context.Server.MapPath(this.resourcesFolder + "/" + fileName.Replace("%2f", "/"))));
+
+            string content = File.ReadAllText(fileName);
+            //convert relative paths to absolute paths
+            //we get all the paths
+            string pattern = @"url\(([^\)]*)\)";
+            Match match = Regex.Match(content, pattern);
+
+            while (match.Success){
+                string path=match.Groups[1].Value;
+                int parents=0;
+                while (path.StartsWith("../")){
+                    parents++;
+                    path = path.Substring(3);
+                }
+                string absolutePath = String.Empty;
+                for (int i=0; i<(folders.Length-1-parents);i++){
+                    absolutePath += folders[i] + "/";
+                }
+                content = content.Replace(match.Groups[0].Value, "url(" + absolutePath + path + ")");
+                match = Regex.Match(content, pattern);
+            }
+            return String.Empty;
+
+        }
 
         protected override string Extension { get { return "css"; } }
     }
@@ -110,6 +141,11 @@ namespace Signum.Web.ScriptCombiner
         private readonly static TimeSpan CACHE_DURATION = TimeSpan.FromDays(30);
         private HttpContextBase context;
 
+        public virtual string ProcessFile(string fileName)
+        {
+            return File.ReadAllText(fileName);
+        }
+
         public void Process(string[] files, string path, HttpContextBase context)
         {
             this.version = "1.1";
@@ -138,7 +174,8 @@ namespace Signum.Web.ScriptCombiner
                                 try
                                 {
                                     //allScripts.Append(File.ReadAllText(context.Server.MapPath(fileName)));
-                                    allScripts.Append(File.ReadAllText(context.Server.MapPath(this.resourcesFolder + "/" + fileName.Replace("%2f", "/"))));
+                                    allScripts.Append(
+                                        ProcessFile(context.Server.MapPath(resourcesFolder + "/" + fileName.Replace("%2f", "/"))));
                                 }
                                 catch (Exception) { }
                             }
