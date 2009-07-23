@@ -52,7 +52,7 @@ namespace Signum.Web
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, (Reflector.ExtractLazy(type) ?? type).Name));
 
             if (StyleContext.Current.LabelVisible)
-                sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
+                sb.Append(helper.Label(idValueField + "lbl", settings.LabelText ?? "", idValueField+ "_" + EntityComboKeys.Combo, TypeContext.CssLineLabel));
 
             string runtimeType = "";
             if (value != null)

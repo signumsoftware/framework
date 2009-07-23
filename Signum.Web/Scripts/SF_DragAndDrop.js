@@ -7,9 +7,11 @@ function carga() {
     // Otros
     else navegador = 1;
 }
-
+var _id;
 function comienzoMovimiento(event, id) {
     elMovimiento = document.getElementById(id);
+    $('#'+id).css("cursor", "move");	
+    _id=id;
     // Obtengo la posicion del cursor
     if (navegador == 0) {
         cursorComienzoX = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
@@ -72,5 +74,6 @@ function finMovimiento(event) {
         document.removeEventListener("mousemove", enMovimiento, true);
         document.removeEventListener("mouseup", finMovimiento, true);
     }
+    $('#'+_id).css("cursor", "auto");	
 }
 

@@ -20,7 +20,7 @@ namespace Signum.Web
                 return null;
 
             StringBuilder sb = new StringBuilder();
-
+            sb.Append("<div class='field'>");
             idValueField = helper.GlobalName(idValueField);
 
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("<div class='valueFirst'>");
@@ -76,6 +76,8 @@ namespace Signum.Web
             }
 
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("</div>");
+
+            sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class='clearall'></div>\n");
 

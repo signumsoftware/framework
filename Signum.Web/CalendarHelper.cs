@@ -13,17 +13,17 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
             //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
-            sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.core.js"));
-            sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.datepicker.js"));
-            sb.Append(helper.ScriptInclude("Scripts/jqueryui/i18n/ui.datepicker-es.js"));
+            sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.core.js",
+                "Scripts/jqueryui/ui.datepicker.js",
+                "Scripts/jqueryui/i18n/ui.datepicker-es.js"));
             
             //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
 
-            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.all.css"));
-            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.base.css"));
-            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.core.css"));
-            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.datepicker.css"));
-            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.theme.css"));
+            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.all.css",
+                "Scripts/jqueryui/ui.base.css",
+                "Scripts/jqueryui/ui.core.css",
+                "Scripts/jqueryui/ui.datepicker.css",
+                "Scripts/jqueryui/ui.theme.css"));
 
             sb.Append(
                 "<script type=\"text/javascript\">\n" + 

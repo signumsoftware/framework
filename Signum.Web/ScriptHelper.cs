@@ -41,35 +41,42 @@ namespace Signum.Web
             var tracker = new ResourceTracker(helper.ViewContext.HttpContext);
 
             var sb = new StringBuilder();
+            bool print = (!AppSettings.ReadBoolean(AppSettingsKeys.MergeScriptsBottom,false));
             foreach (var item in url)
             {
                 if (!tracker.Contains(item))
                 {
                     tracker.Add(item);
-                    sb.AppendFormat("<script type='text/javascript' src='{0}'></script>", item);
-                    sb.AppendLine();
+                    if (print)
+                    {
+                        sb.AppendFormat("<script type='text/javascript' src='{0}'></script>", item);
+                        sb.AppendLine();
+                    }
                 }
             }
             return sb.ToString();
         }
 
-        public static string DynamicCssInclude(this HtmlHelper helper, string url)
+        public static string DynamicCssInclude(this HtmlHelper helper, params string[] url)
         {
             var tracker = new ResourceTracker(helper.ViewContext.HttpContext);
-            if (tracker.Contains(url))
-                return String.Empty;
+            //if (tracker.Contains(url))
+            //    return String.Empty;
 
-            var sb = new StringBuilder();
-            sb.AppendLine("<script type='text/javascript'>");
-            sb.AppendLine("var link=document.createElement('link')");
-            sb.AppendLine("link.setAttribute('rel', 'stylesheet');");
-            sb.AppendLine("link.setAttribute('type', 'text/css');");
-            sb.AppendFormat("link.setAttribute('href', '{0}');", url);
-            sb.AppendLine();
-            sb.AppendLine("var head = document.getElementsByTagName('head')[0];");
-            sb.AppendLine("head.appendChild(link);");
-            sb.AppendLine("</script>");
-            return sb.ToString();
+             bool print = (!AppSettings.ReadBoolean(AppSettingsKeys.MergeScriptsBottom,false));
+             var sb = new StringBuilder();
+             foreach (var item in url)
+             {
+                 if (!tracker.Contains(item))
+                 {
+                     tracker.Add(item);
+                     if (print)
+                     {
+                         sb.AppendLine(helper.CssDynamic(item));
+                     }
+                 }
+             }
+             return sb.ToString();
         }
     }
 }

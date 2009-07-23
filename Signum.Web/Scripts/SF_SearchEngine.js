@@ -161,6 +161,9 @@ function AddFilter(urlController, prefix) {
     var tableFilters = $("#"+prefix+"tblFilters");
     if (tableFilters.length == 0) return;
 
+    $("#filters-list .explanation").hide();
+    $("#filters-list table").show('fast');
+
     var filterType = selectedColumn.val();
     var optionId = selectedColumn[0].id;
     var filterName = optionId.substring(optionId.indexOf("__") + 2, optionId.length);
@@ -195,6 +198,11 @@ function DeleteFilter(index, prefix) {
     
     if ($("#"+prefix+"trFilter_" + index + " select[disabled]").length == 0)
         tr.remove();
+    
+    if  ($("#"+prefix+"tblFilters tbody tr").length == 0){
+        $("#filters-list .explanation").show();
+        $("#filters-list table").hide('fast');
+    }
 }
 
 function ClearAllFilters(prefix) {
@@ -203,7 +211,7 @@ function ClearAllFilters(prefix) {
         });
     }
 
-    function Search(urlController, prefix) {
+    function Search(urlController, prefix, callBack) {
         var top = $("#" + prefix + sfTop).val();
         var allowMultiple = $("#" + prefix + sfAllowMultiple).val();
         var serializedFilters = SerializeFilters(prefix);
@@ -216,10 +224,12 @@ function ClearAllFilters(prefix) {
             success:
                    function(msg) {
                        $("#" + prefix + "divResults").html(msg);
+                       if (callBack != undefined) callBack();
                    },
             error:
                    function(XMLHttpRequest, textStatus, errorThrown) {
                        ShowError(XMLHttpRequest, textStatus, errorThrown);
+                       if (callBack != undefined) callBack();
                    }
         });
 }

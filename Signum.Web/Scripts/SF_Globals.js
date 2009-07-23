@@ -47,18 +47,16 @@ function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     window.alert("Error: " + error);
 }
 
-$(function() {
-    initAroundDivs();
- }); 
-
 // establece clase "focused" al div alrededor del campo con foco
 function initAroundDivs() {
     $('.valueLine,.rbValueLine').each(function() {
     var elementID = $("#" + this.id);
     var around = elementID.parents('div[class=around]');
     if (around.length > 0) {
-        elementID.focus(function() { around.addClass('focused') });
-        elementID.blur(function() { around.removeClass('focused') });
+        elementID.focus(function() { around.addClass('focused'); });
+        elementID.blur(function() { around.removeClass('focused'); });
     }
     });
 }
+
+$(function() { initAroundDivs(); }); 

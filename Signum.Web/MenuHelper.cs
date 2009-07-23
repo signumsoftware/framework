@@ -26,8 +26,8 @@ namespace Signum.Web
 
             if (Navigator.IsFindable(menuItem.QueryName))
                 sb.Append(
-                    "<li class='menuLI'>" +
-                    "<a class='menuLIA' href='{0}' title='{1}'>'{2}'</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text) +
+                    "<li>" +
+                    "<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text) +
                     "</li>\n"
                     );
 
@@ -39,9 +39,9 @@ namespace Signum.Web
             if (children.Exists(mi => Navigator.IsFindable(mi.QueryName)))
             {
                 helper.ViewContext.HttpContext.Response.Write(
-                    "<li class='menuLI'>\n" +
-                    "<a class='menuLIA' onclick=\"$('#ul{0}').toggle();\" title='{1}'>{0}</a>\n".Formato(text, title) +
-                    "<ul class='submenuUL' id='ul{0}' style='display:none'>".Formato(text)
+                    "<li>\n" +
+                    "<a onclick=\"$('#ul{0}').toggle();(this.className == 'active') ? this.className='' : this.className='active';\" title='{1}'>{0}</a>\n".Formato(text, title) +
+                    "<ul class='submenu' id='ul{0}' style='display:none'>".Formato(text)
                     );
 
                 foreach (Item mi in children)
