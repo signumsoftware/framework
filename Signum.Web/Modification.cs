@@ -14,6 +14,7 @@ using Signum.Entities.Reflection;
 using System.Reflection;
 using System.Collections;
 using System.Diagnostics;
+using System.Web.Mvc;
 
 namespace Signum.Web
 {
@@ -40,7 +41,7 @@ namespace Signum.Web
             this.ControlID = controlID;
         }
 
-        public abstract object ApplyChanges(NavigationManager navigationManager, object obj);
+        public abstract object ApplyChanges(Controller controller, object obj);
 
         public abstract void Validate(object entity, Dictionary<string, List<string>> errors);
 
@@ -104,7 +105,7 @@ namespace Signum.Web
             }
         }
 
-        public override object ApplyChanges(NavigationManager navigationManager, object obj)
+        public override object ApplyChanges(Controller controller, object obj)
         {
             return Value;
         }
@@ -192,18 +193,18 @@ namespace Signum.Web
             }
         }
 
-        public override object ApplyChanges(NavigationManager navigationManager, object obj)
+        public override object ApplyChanges(Controller controller, object obj)
         {
             ModifiableEntity entity;
             if (AvoidChange)
                 entity = (ModifiableEntity)obj;
             else
-                entity = Change((ModifiableEntity)obj, navigationManager);
+                entity = Change(controller, (ModifiableEntity)obj);
 
             foreach (var ppm in Properties.Values)
             {
                 object oldValue = ppm.PropertyPack.GetValue(entity);
-                object newValue = ppm.Modification.ApplyChanges(navigationManager, oldValue);
+                object newValue = ppm.Modification.ApplyChanges(controller, oldValue);
                 try
                 {
                     ppm.PropertyPack.SetValue(entity, newValue);
@@ -217,13 +218,13 @@ namespace Signum.Web
             return entity;
         }
 
-        private ModifiableEntity Change(ModifiableEntity entity, NavigationManager navigationManager)
+        private ModifiableEntity Change(Controller controller, ModifiableEntity entity)
         {
             if (RuntimeType == null)
                 return null;
 
             if (IsNew)
-                return (ModifiableEntity)navigationManager.Constructors[RuntimeType]();
+                return (ModifiableEntity)Constructor.Construct(RuntimeType, controller);
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(RuntimeType))
                 return entity;
@@ -296,13 +297,13 @@ namespace Signum.Web
                 EntityModification = null;
         }
 
-        public override object ApplyChanges(NavigationManager navigationManager, object obj)
+        public override object ApplyChanges(Controller controller, object obj)
         {
             if (RuntimeType == null)
                 return null;
 
             if (IsNew)
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, null));
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null));
 
             Lazy lazy = (Lazy)obj;
 
@@ -313,14 +314,14 @@ namespace Signum.Web
                 else
                     return Lazy.Create(CleanType,
                         (IdentifiableEntity)EntityModification.ApplyChanges(
-                           navigationManager, 
+                           controller, 
                            Database.Retrieve(RuntimeType, EntityId.Value)));
             }
 
             if (EntityId == null)
             {
-                Debug.Assert(lazy.IdOrNull == null && RuntimeType == lazy.GetType() && EntityModification != null); 
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, lazy.UntypedEntityOrNull));
+                Debug.Assert(lazy.IdOrNull == null && RuntimeType == lazy.GetType() && EntityModification != null);
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull));
             }
             else
             {
@@ -329,10 +330,10 @@ namespace Signum.Web
                     if (EntityModification == null)
                         return lazy;
                     else
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, Database.Retrieve(lazy)));
+                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lazy)));
                 }
                 else
-                    return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(navigationManager, Database.Retrieve(RuntimeType, EntityId.Value)));
+                    return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(RuntimeType, EntityId.Value)));
             }
         }
 
@@ -403,7 +404,7 @@ namespace Signum.Web
         }
 
 
-        public override object ApplyChanges(NavigationManager navigationManager, object obj)
+        public override object ApplyChanges(Controller controller, object obj)
         {
             IList old = (IList)obj;
 
@@ -411,9 +412,9 @@ namespace Signum.Web
             foreach (var item in modifications)
             {
                 if (item.Second.HasValue)
-                    list.Add(item.First.ApplyChanges(navigationManager, old[item.Second.Value]));
+                    list.Add(item.First.ApplyChanges(controller, old[item.Second.Value]));
                 else
-                    list.Add(item.First.ApplyChanges(navigationManager, null));
+                    list.Add(item.First.ApplyChanges(controller, null));
             }
             return list;
         }

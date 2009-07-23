@@ -54,6 +54,11 @@ namespace Signum.Web
         }
 
         public static NavigationManager NavigationManager;
+
+        public static void Start(NavigationManager manager)
+        {
+            NavigationManager = manager;
+        }
         
         public static Type ResolveType(string typeName)
         {
@@ -130,41 +135,39 @@ namespace Signum.Web
             return formValues;
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(NameValueCollection form, string prefixToIgnore, ref T obj)
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, string prefixToIgnore, ref T obj)
         {
-            SortedList<string, object> formValues = ToSortedList(form, prefixToIgnore);
+            SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefixToIgnore);
 
-            return NavigationManager.ApplyChangesAndValidate(formValues, ref obj, null);
+            return NavigationManager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(SortedList<string, object> formValues, ref T obj)
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj)
         {
-            return NavigationManager.ApplyChangesAndValidate(formValues, ref obj, null);
+            return NavigationManager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(SortedList<string, object> formValues, ref T obj, string prefix)
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix)
             where T:Modifiable
         {
-            return NavigationManager.ApplyChangesAndValidate(formValues, ref obj, prefix);
+            return NavigationManager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
         }
 
-        public static IdentifiableEntity ExtractEntity(NameValueCollection form)
+        public static IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
         {
-            return NavigationManager.ExtractEntity(form, null);
+            return NavigationManager.ExtractEntity(controller, form, null);
         }
 
-        public static IdentifiableEntity ExtractEntity(NameValueCollection form, string prefix)
+        public static IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
-            return NavigationManager.ExtractEntity(form, prefix);
+            return NavigationManager.ExtractEntity(controller, form, prefix);
         }
 
-        public static ModifiableEntity CreateInstance(Type type)
+        public static ModifiableEntity CreateInstance(Controller controller, Type type)
         {
-            lock (NavigationManager.Constructors)
+            lock (Constructor.ConstructorManager)
             {
-                return NavigationManager.Constructors
-                    .GetOrCreate(type, () => ReflectionTools.CreateConstructor<ModifiableEntity>(type))
-                    .Invoke();
+                return (ModifiableEntity)Constructor.Construct(type, controller);
             }
         }
 
@@ -216,7 +219,6 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings = new Dictionary<Type, EntitySettings>();
         public Dictionary<object, QuerySettings> QuerySettings;
         public DynamicQueryManager Queries { get; set; }
-        public Dictionary<Type, Func<ModifiableEntity>> Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
     }
 
     public class NavigationManager
@@ -236,8 +238,6 @@ namespace Signum.Web
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
         protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
 
-        protected internal Dictionary<Type, Func<ModifiableEntity>> Constructors;
-
         public event Func<Type, bool> GlobalIsCreable;
         public event Func<Type, bool> GlobalIsViewable;
         public event Func<Type, bool> GlobalIsReadOnly;
@@ -245,7 +245,6 @@ namespace Signum.Web
 
         public NavigationManager(NavigationManagerSettings settings)
         {
-            Constructors = settings.Constructors;
             EntitySettings = settings.EntitySettings;
             Queries = settings.Queries;
             URLNamesToTypes = EntitySettings.ToDictionary(
@@ -263,6 +262,18 @@ namespace Signum.Web
                 });
                 UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
             }
+        }
+
+        HashSet<string> loadedModules = new HashSet<string>();
+
+        public bool NotDefined<T>()
+        {
+            return NotDefined(typeof(T).FullName);
+        }
+
+        public bool NotDefined(string moduleName)
+        {
+            return loadedModules.Add(moduleName);
         }
 
         protected internal virtual string GetQueryName(object queryName)
@@ -471,7 +482,8 @@ namespace Signum.Web
 
                 result.Add(new Filter
                 {
-                    Column = new Column() { Name = name, Type = type },
+                    Name = name, 
+                    Type = type,
                     Operation = filterOperation,
                     Value = value,
                 });
@@ -520,11 +532,11 @@ namespace Signum.Web
             return type;
         }
 
-        protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(SortedList<string, object> formValues, ref T obj, string prefix)
+        protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix)
         {
             Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
 
-            obj = (T)modification.ApplyChanges(this, obj);
+            obj = (T)modification.ApplyChanges(controller, obj);
 
             return GenerateErrors((Modifiable)(object)obj, modification);
         }
@@ -554,7 +566,7 @@ namespace Signum.Web
             return Modification.Create(obj.GetType(), formValues, interval, prefix);
         }
 
-        protected internal virtual IdentifiableEntity ExtractEntity(NameValueCollection form, string prefix)
+        protected internal virtual IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
             string typeName = form[(prefix ?? "") + TypeContext.Separator + TypeContext.RuntimeType];
             string id = form[(prefix ?? "") + TypeContext.Separator + TypeContext.Id];
@@ -564,7 +576,7 @@ namespace Signum.Web
             if (!string.IsNullOrEmpty(id))
                 return Database.Retrieve(type, int.Parse(id));
             else
-                return (IdentifiableEntity)Constructors[type]();
+                return (IdentifiableEntity)Constructor.Construct(type, controller);
         }
 
         protected internal virtual bool IsViewable(Type type, bool admin)

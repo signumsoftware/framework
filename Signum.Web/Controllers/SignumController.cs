@@ -34,7 +34,7 @@ namespace Signum.Web.Controllers
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
-                entity = Navigator.CreateInstance(type);
+                entity = Navigator.CreateInstance(this, type);
 
             return Navigator.PopupView(this, entity, prefix);
         }
@@ -48,7 +48,7 @@ namespace Signum.Web.Controllers
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
-                entity = Navigator.CreateInstance(type);
+                entity = Navigator.CreateInstance(this, type);
 
             return Navigator.PartialView(this, entity, prefix);
         }
@@ -57,9 +57,9 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult TrySave(string prefixToIgnore)
         {   
-            Modifiable entity = Navigator.ExtractEntity(Request.Form);
+            Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
 
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(Request.Form, prefixToIgnore, ref entity);
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefixToIgnore, ref entity);
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
@@ -78,11 +78,11 @@ namespace Signum.Web.Controllers
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
-                entity = Navigator.CreateInstance(type);
+                entity = Navigator.CreateInstance(this, type);
 
             var sortedList = Navigator.ToSortedList(Request.Form, prefixToIgnore);
             
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(sortedList, ref entity, prefix);
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, sortedList, ref entity, prefix);
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
@@ -158,9 +158,9 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult DoPostBack(string prefixToIgnore)
         {
-            Modifiable entity = Navigator.ExtractEntity(Request.Form);
+            Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
 
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(Request.Form, prefixToIgnore, ref entity);
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefixToIgnore, ref entity);
 
             this.ModelState.FromDictionary(errors, Request.Form);
             

@@ -55,7 +55,8 @@ namespace Signum.Web
         {
             return new Filter
             {
-                Column = Column,
+                Name = Column.Name,
+                Type = Column.Type,
                 Operation = Operation,
                 Value = Value 
             };
