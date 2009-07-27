@@ -26,8 +26,8 @@ namespace Signum.Web
             set { this.filterOptions = value; }
         }
 
-        private bool allowMultiple = true;
-        public bool AllowMultiple
+        private bool? allowMultiple = true;
+        public bool? AllowMultiple
         {
             get { return allowMultiple; }
             set { allowMultiple = value; }

@@ -70,7 +70,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult TrySavePartial(string prefix, string prefixToIgnore, string sfStaticType, int? sfId)
+        public ContentResult TrySavePartial(string prefix, string prefixToIgnore, string sfStaticType, int? sfId, bool? save)
         {
             Type type = Navigator.ResolveType(sfStaticType);
 
@@ -80,14 +80,14 @@ namespace Signum.Web.Controllers
             else
                 entity = Navigator.CreateInstance(this, type);
 
-            var sortedList = Navigator.ToSortedList(Request.Form, prefixToIgnore);
+            var sortedList = Navigator.ToSortedList(Request.Form, prefix, prefixToIgnore);
             
             Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, sortedList, ref entity, prefix);
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
-            //if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
-            //    Database.Save((IdentifiableEntity)entity);
+            if (entity is IdentifiableEntity && (errors == null || errors.Count == 0) && save.HasValue && save.Value)
+                Database.Save((IdentifiableEntity)entity);
 
             return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
         }
@@ -133,14 +133,13 @@ namespace Signum.Web.Controllers
 
             FindOptions findOptions = new FindOptions(queryName);
 
-            if (allowMultiple.HasValue)
-                findOptions.AllowMultiple = allowMultiple.Value;
+            findOptions.AllowMultiple = allowMultiple;
 
             return Navigator.PartialFind(this, findOptions, prefix, prefixEnd);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop, bool sfAllowMultiple, string sfPrefix)
+        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop, bool? sfAllowMultiple, string sfPrefix)
         {
             object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
 

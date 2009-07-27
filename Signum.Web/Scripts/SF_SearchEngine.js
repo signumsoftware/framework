@@ -47,7 +47,7 @@ function SearchCreate(urlController, prefix, onOk, onCancel) {
 
 function OnSearchCreateOK(urlController, prefix) {
     var typeName = $('#' + prefix + sfEntityTypeName).val();
-    if (TypedTrySavePartial(urlController, prefix, "", true, "", typeName, "panelPopup")) {
+    if (TypedTrySavePartial(urlController, prefix, "", true, "", typeName, "panelPopup", true)) {
         OnSearchCreateCancel(prefix);  
     }
 }

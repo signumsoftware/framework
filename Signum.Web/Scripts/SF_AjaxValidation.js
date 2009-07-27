@@ -74,7 +74,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
         if (runtimeType != null && runtimeType != "") {
             typeName = runtimeType;
         }
-        return TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName);
+        return TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, false);
     }
 
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages
@@ -84,11 +84,11 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
         if (runtimeType != null && runtimeType != "") {
             typeName = runtimeType;
         }
-        return TypedTrySavePartial(urlController, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName);
+        return TypedTrySavePartial(urlController, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, false);
     }
 
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-    function TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
+    function TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey, save) {
         if (panelPopupKey == "" || panelPopupKey == undefined)
             panelPopupKey = "panelPopup"
         var formChildren = $('#' + prefix + panelPopupKey + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
@@ -103,7 +103,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
             type: "POST",
             url: urlController,
             async: false,
-            data: formChildren.serialize() + "&prefix=" + prefix + "&" + sfPrefixToIgnore + "=" + prefixToIgnore + "&sfStaticType=" + staticType + idQueryParam,
+            data: formChildren.serialize() + "&prefix=" + prefix + "&" + sfPrefixToIgnore + "=" + prefixToIgnore + "&sfStaticType=" + staticType + "&save=" + save + idQueryParam,
             success:
             function(result) {
                 eval('var result=' + result);

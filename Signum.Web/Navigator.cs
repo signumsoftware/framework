@@ -31,7 +31,7 @@ namespace Signum.Web
             get 
             {
                 return viewRoute ??
-                       (viewRoute = (Type type, int id) => "/View/{0}/{1}".Formato(Navigator.TypesToURLNames[type], id));
+                       (viewRoute = (Type type, int id) => "View/{0}/{1}".Formato(Navigator.TypesToURLNames[type], id));
             }
             set 
             {
@@ -45,7 +45,7 @@ namespace Signum.Web
             get
             {
                 return findRoute ??
-                       (findRoute = (object queryName) => "/Find/{0}".Formato(NavigationManager.QuerySettings[queryName].UrlName));
+                       (findRoute = (object queryName) => "Find/{0}".Formato(NavigationManager.QuerySettings[queryName].UrlName));
             }
             set
             {
@@ -110,7 +110,7 @@ namespace Signum.Web
             return NavigationManager.PartialFind(controller, findOptions, prefix, prefixEnd);
         }
 
-        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple, string prefix)
+        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool? allowMultiple, string prefix)
         {
             return NavigationManager.Search(controller, queryName, filters, resultsLimit, allowMultiple, prefix);
         }
@@ -118,6 +118,21 @@ namespace Signum.Web
         internal static List<Filter> ExtractFilters(NameValueCollection form, object queryName, string prefix)
         {
             return NavigationManager.ExtractFilters(form, queryName); //, prefix);
+        }
+
+        public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixFilter, string prefixToIgnore)
+        {
+            SortedList<string, object> formValues = new SortedList<string, object>(form.Count);
+            foreach (string key in form.Keys)
+            {
+                if (!string.IsNullOrEmpty(key) && key != "prefixToIgnore" && (string.IsNullOrEmpty(prefixFilter) || key.StartsWith(prefixFilter)))
+                {
+                    if (string.IsNullOrEmpty(prefixToIgnore) || !key.StartsWith(prefixToIgnore))
+                        formValues.Add(key, form[key]);
+                }
+            }
+            
+            return formValues;
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixToIgnore)
@@ -131,7 +146,7 @@ namespace Signum.Web
                         formValues.Add(key, form[key]);
                 }
             }
-            
+
             return formValues;
         }
 
@@ -250,16 +265,18 @@ namespace Signum.Web
                 kvp => kvp.Key);
             TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);
-            if (QuerySettings != null)
-            {
-                QuerySettings = QuerySettings.ToDictionary(kvp => kvp.Key, kvp => 
-                { 
-                    if (!kvp.Value.UrlName.HasText()) 
-                        kvp.Value.UrlName = GetQueryName(kvp.Key);
-                    return kvp.Value;
-                });
-                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
+
+            if (QuerySettings == null)
+                QuerySettings = new Dictionary<object, QuerySettings>();
+            foreach(object o in Queries.GetQueryNames())
+            { 
+                if (!QuerySettings.ContainsKey(o)) 
+                    QuerySettings.Add(o, new QuerySettings() { Top = 5 });
+                if (!QuerySettings[o].UrlName.HasText())
+                    QuerySettings[o].UrlName = GetQueryName(o);
             }
+            
+            UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
         }
 
         HashSet<string> loadedModules = new HashSet<string>();
@@ -414,7 +431,7 @@ namespace Signum.Web
             return GetQueryName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool allowMultiple, string prefix)
+        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool? allowMultiple, string prefix)
         {
             QueryResult queryResult = Queries.ExecuteQuery(queryName, filters, resultsLimit);
 

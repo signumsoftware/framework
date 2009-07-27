@@ -8,7 +8,7 @@
 
 <%  QueryResult queryResult = (QueryResult)ViewData[ViewDataKeys.Results];
     int? EntityColumnIndex = (int?)ViewData[ViewDataKeys.EntityColumnIndex];
-    bool allowMultiple = (bool)ViewData[ViewDataKeys.AllowMultiple];
+    bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
     Dictionary<int, bool> colVisibility = new Dictionary<int, bool>();
     for (int i = 0; i < queryResult.Columns.Count; i++)
     {
@@ -19,8 +19,11 @@
     <thead>
         <tr>
             <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
-              { %>
-            <th></th>
+              {
+                  if (allowMultiple.HasValue)
+                  {%>
+                  <th></th>
+                  <%} %>
             <th></th>
             <%} %>
             <%
@@ -45,11 +48,13 @@
                        entityField = (Lazy)queryResult.Data[row][EntityColumnIndex.Value];
                    if (entityField != null)
                    {
+                       if (allowMultiple.HasValue)
+                       {
                 %>
                 <td id="<%=Html.GlobalName("tdRowSelection")%>" name="<%=Html.GlobalName("tdRowSelection")%>">
                     <%
             
-                    if (allowMultiple)
+                    if (allowMultiple.Value)
                     { 
                         %>
                         <input type="checkbox" name="<%=Html.GlobalName("check_" + row.ToString())%>" id="<%=Html.GlobalName("check_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
@@ -61,6 +66,7 @@
                     }
                  %>
                  </td>
+                 <%} %>
                 <td id="<%=Html.GlobalName("tdResults")%>" name="<%=Html.GlobalName("tdResults")%>">
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Navigate">Ver</a>
                 </td>
