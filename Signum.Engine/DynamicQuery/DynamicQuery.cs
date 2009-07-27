@@ -64,20 +64,18 @@ namespace Signum.Engine.DynamicQuery
 
         public QueryResult ExecuteQuery(List<Filter> filters, int? limit)
         {
-            IEnumerable<T> result;
             if (execute != null)
-                result = execute(filters, limit);
+                return ToQueryResult(execute(filters, limit));
             else
             {
-                query = query.WhereFilters(filters); 
+                IQueryable<T> result = query.WhereFilters(filters); 
 
                 if (limit != null)
-                    query = query.Take(limit.Value);
+                    result = result.Take(limit.Value);
 
-                result = query;
+                return ToQueryResult(result);
             }
 
-            return ToQueryResult(result);
         }
 
         QueryResult ToQueryResult(IEnumerable<T> result)
