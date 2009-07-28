@@ -102,28 +102,38 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
         $("#" + prefix + "_sfEntity").show();
     }
     else {
+        $("#" + prefix + "_sfEntity").show();
+        
         $('#' + prefix + modalBackgroundKey).width(document.documentElement.clientWidth);
         $('#' + prefix + modalBackgroundKey).height(document.documentElement.clientHeight);
-        $('#' + prefix + globalKey).show();
+        $('#' + prefix + modalBackgroundKey).hide();
+        
         //Read offsetWidth and offsetHeight after display=block or otherwise it's 0
         var popup = $('#' + prefix + panelPopupKey)[0];
         var parentDiv = $("#" + prefix + "_sfEntity").parent();
         var left;
         var top;
-        if (parentDiv.length > 0 && parentDiv[0].id.indexOf(panelPopupKey) > -1) {
+        var popupWidth = 500;
+        /*if (parentDiv.length > 0 && parentDiv[0].id.indexOf(panelPopupKey) > -1) {
             left = "25px";
             top = "25px";
+            
         }
-        else {
-            var popupWidth = popup.offsetWidth;
+        else {*/
+            popupWidth = popup.offsetWidth;
             var bodyWidth = document.body.clientWidth;
             left = ((bodyWidth - popupWidth) / 2) + "px";
             var popupHeight = popup.offsetHeight;
             var bodyHeight = document.documentElement.clientHeight;
             top = ((bodyHeight - popupHeight) / 2) + "px";
-        }
+       // }
+        $('#' + prefix + globalKey).hide();
         popup.style.left = left;
         popup.style.top = top;
+        popup.style.width = popupWidth + "px";
+        $('#' + prefix + globalKey).show('fast');
+        $('#' + prefix + modalBackgroundKey)[0].style.left=0;
+        $('#' + prefix + modalBackgroundKey).css('filter','alpha(opacity=40)').fadeIn('slow');
     }
 }
 
