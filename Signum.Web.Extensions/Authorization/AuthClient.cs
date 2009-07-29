@@ -28,13 +28,13 @@ namespace Signum.Web.Authorization
 
             if (types)
             {
-                Navigator.NavigationManager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type) == TypeAccess.Create;
-                Navigator.NavigationManager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type) < TypeAccess.Modify;
-                Navigator.NavigationManager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
+                Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type) == TypeAccess.Create;
+                Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type) < TypeAccess.Modify;
+                Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
             }
 
             if (queries)
-                Navigator.NavigationManager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
+                Navigator.Manager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
         }
 
         static void TaskAuthorizeProperties(BaseLine bl, Type type, TypeContext context)

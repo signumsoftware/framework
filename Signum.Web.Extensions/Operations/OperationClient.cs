@@ -60,7 +60,28 @@ namespace Signum.Web.Operations
             }
             else
             {
-                throw new ApplicationException("Not implemented: Todavía no se permiten varios constructores");
+                StringBuilder sb = new StringBuilder();
+                string onOk = controller.Request.Params[ViewDataKeys.OnOk];
+                string onCancel = controller.Request.Params[ViewDataKeys.OnCancel];
+                string prefix = controller.Request.Params["prefix"];
+                string onClick = "";
+                foreach (OperationInfo oi in list)
+                {
+                    if (dic[oi.Key].OperationSettings.OnServerClickAjax != "")
+                        onClick = "javascript:CallServer('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickAjax, onOk, onCancel, prefix);
+                    else if (dic[oi.Key].OperationSettings.OnServerClickPost != "")
+                        onClick= "javascript:PostServer('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickPost, onOk, onCancel, prefix);
+                    sb.AppendLine("<input type='button' value='{0}' onclick=\"{1}\"/><br />".Formato(oi.Key.ToString(), onClick));
+                }
+                controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+                controller.ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
+                return new PartialViewResult
+                {
+                    ViewName = Navigator.Manager.OKCancelPopulUrl,
+                    ViewData = controller.ViewData,
+                    TempData = controller.TempData
+                };
+                //throw new ApplicationException("Not implemented: Todavía no se permiten varios constructores");
                 //ConstructorSelectorWindow sel = new ConstructorSelectorWindow();
                 //sel.ConstructorKeys = dic.Keys.ToArray();
                 //if (sel.ShowDialog() != true)
