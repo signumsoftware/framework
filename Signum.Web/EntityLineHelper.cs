@@ -129,7 +129,7 @@ namespace Signum.Web
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
                 sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
 
-                EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type);
+                EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type);
             
                 sb.Append(
                     helper.RenderPartialToString(
@@ -181,7 +181,7 @@ namespace Signum.Web
 
             if (settings.Find && (isIdentifiable || isLazy))
                 {
-                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}');}},function(){{OnSearchCancel('{2}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
+                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}');}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir);
                     string findingUrl = (settings.Implementations == null) ?
                         "Find({0});".Formato(popupFindingParameters) :
                         "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);

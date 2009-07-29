@@ -48,7 +48,7 @@ function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, ty
     var containedEntity = $('#' + prefix + sfEntity).html();
     if (containedEntity != null && containedEntity != "") { //Already have the containedEntity loaded => show it
         window[prefix + sfEntityTemp] = containedEntity;
-        ShowPopup(prefix, sfEntity, "modalBackground", "panelPopup", detailDiv);
+        ShowPopup(prefix, prefix + sfEntity, "modalBackground", "panelPopup", detailDiv);
         $('#' + prefix + sfBtnOk).unbind('click').click(onOk);
         $('#' + prefix + sfBtnCancel).unbind('click').click(onCancel);
         return;
@@ -73,14 +73,14 @@ function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, ty
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "sfStaticType=" + typeName + "&prefix=" + prefix + idQueryParam,
+        data: "sfStaticType=" + typeName + "&sfOnOk=" + onOk + "&sfOnCancel=" + onCancel + "&prefix=" + prefix + idQueryParam,
         async: false,
         dataType: "html",
         success:
                    function(msg) {
                        window[prefix + sfEntityTemp] = containedEntity;
                        $('#' + prefix + sfEntity).html(msg);
-                       ShowPopup(prefix, sfEntity, "modalBackground", "panelPopup", detailDiv);
+                       ShowPopup(prefix, prefix + sfEntity, "modalBackground", "panelPopup", detailDiv);
                        $('#' + prefix + sfBtnOk).click(onOk);
                        $('#' + prefix + sfBtnCancel).click(onCancel);
                    },
@@ -92,7 +92,7 @@ function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, ty
 }
 
 function ChooseImplementation(divASustituir, prefix, onOk, onCancel) {
-    ShowPopup(prefix, sfImplementations, "modalBackground", "panelPopup", null);
+    ShowPopup(prefix, prefix + sfImplementations, "modalBackground", "panelPopup", null);
     $('#' + prefix + sfBtnOk).unbind('click').click(onOk);
     $('#' + prefix + sfBtnCancel).unbind('click').click(onCancel);
 }
@@ -102,7 +102,8 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
         $("#" + prefix + "_sfEntity").show();
     }
     else {
-        $("#" + prefix + "_sfEntity").show();
+        //$("#" + prefix + "_sfEntity").show();
+        $("#" + globalKey).show();
         
         $('#' + prefix + modalBackgroundKey).width(document.documentElement.clientWidth);
         $('#' + prefix + modalBackgroundKey).height(document.documentElement.clientHeight);
@@ -127,11 +128,13 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
             var bodyHeight = document.documentElement.clientHeight;
             top = ((bodyHeight - popupHeight) / 2) + "px";
        // }
-        $('#' + prefix + globalKey).hide();
+        //$('#' + prefix + globalKey).hide();
+        $('#' + globalKey).hide();
         popup.style.left = left;
         popup.style.top = top;
         popup.style.width = popupWidth + "px";
-        $('#' + prefix + globalKey).show('fast');
+        //$('#' + prefix + globalKey).show('fast');
+        $('#' + globalKey).show('fast');
         $('#' + prefix + modalBackgroundKey)[0].style.left=0;
         $('#' + prefix + modalBackgroundKey).css('filter','alpha(opacity=40)').fadeIn('slow');
     }

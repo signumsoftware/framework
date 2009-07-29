@@ -59,4 +59,8 @@ function initAroundDivs() {
     });
 }
 
-$(function() { initAroundDivs(); }); 
+$(function() { initAroundDivs(); });
+
+function singleQuote(myfunction) {
+    return myfunction.toString().replace(/"/g, "'");
+}

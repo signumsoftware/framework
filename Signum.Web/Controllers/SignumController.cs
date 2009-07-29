@@ -26,7 +26,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PopupView(string sfStaticType, int? sfId, string prefix)
+        public PartialViewResult PopupView(string sfStaticType, int? sfId, string sfOnOk, string sfOnCancel, string prefix)
         {
             Type type = Navigator.ResolveType(sfStaticType);
 
@@ -34,7 +34,15 @@ namespace Signum.Web.Controllers
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
-                entity = Navigator.CreateInstance(this, type);
+            {
+                object result = Navigator.CreateInstance(this, type);
+                if (result.GetType() == typeof(PartialViewResult))
+                    return (PartialViewResult)result;
+                else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
+                    entity = (ModifiableEntity)result;
+                else
+                    throw new ApplicationException("Invalid result type for a Constructor");
+            }
 
             return Navigator.PopupView(this, entity, prefix);
         }
@@ -48,7 +56,15 @@ namespace Signum.Web.Controllers
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
-                entity = Navigator.CreateInstance(this, type);
+            {
+                object result = Navigator.CreateInstance(this, type);
+                if (result.GetType() == typeof(PartialViewResult))
+                    return (PartialViewResult)result;
+                else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
+                    entity = (ModifiableEntity)result;
+                else
+                    throw new ApplicationException("Invalid result type for a Constructor");
+            }
 
             return Navigator.PartialView(this, entity, prefix);
         }
@@ -78,7 +94,7 @@ namespace Signum.Web.Controllers
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
-                entity = Navigator.CreateInstance(this, type);
+                entity = (ModifiableEntity)Navigator.CreateInstance(this, type);
 
             var sortedList = Navigator.ToSortedList(Request.Form, prefix, prefixToIgnore);
             

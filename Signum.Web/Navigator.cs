@@ -45,7 +45,7 @@ namespace Signum.Web
             get
             {
                 return findRoute ??
-                       (findRoute = (object queryName) => "Find/{0}".Formato(NavigationManager.QuerySettings[queryName].UrlName));
+                       (findRoute = (object queryName) => "Find/{0}".Formato(Manager.QuerySettings[queryName].UrlName));
             }
             set
             {
@@ -53,46 +53,46 @@ namespace Signum.Web
             }
         }
 
-        public static NavigationManager NavigationManager;
+        public static NavigationManager Manager;
 
         public static void Start()
         {
-            NavigationManager.Start();
+            Manager.Start();
         }
         
         public static Type ResolveType(string typeName)
         {
-            return NavigationManager.ResolveType(typeName);
+            return Manager.ResolveType(typeName);
         }
 
         public static Type ResolveTypeFromUrlName(string typeUrlName)
         {
-            return NavigationManager.ResolveTypeFromUrlName(typeUrlName); 
+            return Manager.ResolveTypeFromUrlName(typeUrlName); 
         }
 
         public static object ResolveQueryFromUrlName(string queryUrlName)
         {
-            return NavigationManager.ResolveQueryFromUrlName(queryUrlName);
+            return Manager.ResolveQueryFromUrlName(queryUrlName);
         }
 
         public static object ResolveQueryFromToStr(string queryNameToStr)
         {
-            return NavigationManager.ResolveQueryFromToStr(queryNameToStr);
+            return Manager.ResolveQueryFromToStr(queryNameToStr);
         }
 
         public static ViewResult View(this Controller controller, object obj)
         {
-            return NavigationManager.View(controller, obj); 
+            return Manager.View(controller, obj); 
         }
 
         public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix)
         {
-            return NavigationManager.PopupView(controller, entity, prefix);
+            return Manager.PopupView(controller, entity, prefix);
         }
 
         public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix)
         {
-            return NavigationManager.PartialView(controller, entity, prefix);
+            return Manager.PartialView(controller, entity, prefix);
         }
 
         public static ViewResult Find(Controller controller, object queryName)
@@ -102,22 +102,22 @@ namespace Signum.Web
 
         public static ViewResult Find(Controller controller, FindOptions findOptions)
         {
-            return NavigationManager.Find(controller, findOptions);
+            return Manager.Find(controller, findOptions);
         }
 
         public static PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string prefixEnd)
         {
-            return NavigationManager.PartialFind(controller, findOptions, prefix, prefixEnd);
+            return Manager.PartialFind(controller, findOptions, prefix, prefixEnd);
         }
 
         public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool? allowMultiple, string prefix)
         {
-            return NavigationManager.Search(controller, queryName, filters, resultsLimit, allowMultiple, prefix);
+            return Manager.Search(controller, queryName, filters, resultsLimit, allowMultiple, prefix);
         }
 
         internal static List<Filter> ExtractFilters(NameValueCollection form, object queryName, string prefix)
         {
-            return NavigationManager.ExtractFilters(form, queryName); //, prefix);
+            return Manager.ExtractFilters(form, queryName); //, prefix);
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixFilter, string prefixToIgnore)
@@ -154,35 +154,35 @@ namespace Signum.Web
         {
             SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefixToIgnore);
 
-            return NavigationManager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
+            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
         }
 
         public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj)
         {
-            return NavigationManager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
+            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
         }
 
         public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix)
             where T:Modifiable
         {
-            return NavigationManager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
+            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
         }
 
         public static IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
         {
-            return NavigationManager.ExtractEntity(controller, form, null);
+            return Manager.ExtractEntity(controller, form, null);
         }
 
         public static IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
-            return NavigationManager.ExtractEntity(controller, form, prefix);
+            return Manager.ExtractEntity(controller, form, prefix);
         }
 
-        public static ModifiableEntity CreateInstance(Controller controller, Type type)
+        public static object CreateInstance(Controller controller, Type type)
         {
             lock (Constructor.ConstructorManager)
             {
-                return (ModifiableEntity)Constructor.Construct(type, controller);
+                return Constructor.Construct(type, controller);
             }
         }
 
@@ -195,13 +195,7 @@ namespace Signum.Web
 
         public static Dictionary<Type, string> TypesToURLNames
         {
-            get { return NavigationManager.TypesToURLNames; }
-        }
-
-        public static string NormalPageUrl
-        {
-            get { return NavigationManager.NormalPageUrl; }
-            set { NavigationManager.NormalPageUrl = value; }
+            get { return Manager.TypesToURLNames; }
         }
 
         internal static void ConfigureEntityBase(EntityBase el, Type entityType, bool admin)
@@ -213,41 +207,35 @@ namespace Signum.Web
 
         public static bool IsViewable(Type type, bool admin)
         {
-            return NavigationManager.IsViewable(type, admin);
+            return Manager.IsViewable(type, admin);
         }
         public static bool IsReadOnly(Type type, bool admin)
         {
-            return NavigationManager.IsReadOnly(type, admin);
+            return Manager.IsReadOnly(type, admin);
         }
         public static bool IsCreable(Type type, bool admin)
         {
-            return NavigationManager.IsCreable(type, admin);
+            return Manager.IsCreable(type, admin);
         }
         public static bool IsFindable(object queryName)
         {
-            return NavigationManager.IsFindable(queryName);
+            return Manager.IsFindable(queryName);
         }
     }
     
-    public class NavigationManagerSettings
-    {
-        public Dictionary<Type, EntitySettings> EntitySettings = new Dictionary<Type, EntitySettings>();
-        public Dictionary<object, QuerySettings> QuerySettings;
-        public DynamicQueryManager Queries { get; set; }
-    }
-
     public class NavigationManager
     {
         public Dictionary<Type, EntitySettings> EntitySettings;
         public Dictionary<object, QuerySettings> QuerySettings;
         public DynamicQueryManager Queries { get; set; }
         
-        protected internal string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
-        protected internal string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";
-        protected internal string SearchPopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchPopupControl.ascx";
-        protected internal string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
-        protected internal string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
-        protected internal string SearchResultsUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchResults.ascx";
+        public string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
+        public string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";
+        public string OKCancelPopulUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.OKCancelPopup.ascx";
+        public string SearchPopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchPopupControl.ascx";
+        public string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
+        public string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
+        public string SearchResultsUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchResults.ascx";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
@@ -266,17 +254,20 @@ namespace Signum.Web
             TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);
 
-            if (QuerySettings == null)
-                QuerySettings = new Dictionary<object, QuerySettings>();
-            foreach(object o in Queries.GetQueryNames())
-            { 
-                if (!QuerySettings.ContainsKey(o)) 
-                    QuerySettings.Add(o, new QuerySettings() { Top = 5 });
-                if (!QuerySettings[o].UrlName.HasText())
-                    QuerySettings[o].UrlName = GetQueryName(o);
+            if (Queries != null)
+            {
+                if (QuerySettings == null)
+                    QuerySettings = new Dictionary<object, QuerySettings>();
+                foreach (object o in Queries.GetQueryNames())
+                {
+                    if (!QuerySettings.ContainsKey(o))
+                        QuerySettings.Add(o, new QuerySettings() { Top = 5 });
+                    if (!QuerySettings[o].UrlName.HasText())
+                        QuerySettings[o].UrlName = GetQueryName(o);
+                }
+
+                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
             }
-            
-            UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
         }
 
         HashSet<string> loadedModules = new HashSet<string>();
@@ -300,7 +291,7 @@ namespace Signum.Web
 
         protected internal virtual ViewResult View(Controller controller, object obj)
         {
-            EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
             
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             IdentifiableEntity entity = (IdentifiableEntity)obj;
@@ -319,7 +310,7 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix)
         {
-            EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
 
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
@@ -337,7 +328,7 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix)
         {
-            EntitySettings es = Navigator.NavigationManager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
 
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;

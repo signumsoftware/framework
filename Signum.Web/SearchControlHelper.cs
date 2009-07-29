@@ -76,7 +76,7 @@ namespace Signum.Web
 
         public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, string prefixEnd)
         {
-            QueryDescription queryDescription = Navigator.NavigationManager.Queries.QueryDescription(findOptions.QueryName);
+            QueryDescription queryDescription = Navigator.Manager.Queries.QueryDescription(findOptions.QueryName);
 
             foreach (FilterOptions opt in findOptions.FilterOptions)
             {
@@ -94,9 +94,9 @@ namespace Signum.Web
 
             helper.ViewData[ViewDataKeys.FilterColumns] = columns;
             helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            helper.ViewData[ViewDataKeys.Top] = Navigator.NavigationManager.QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
+            helper.ViewData[ViewDataKeys.Top] = Navigator.Manager.QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
             if (helper.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
-                helper.ViewData[ViewDataKeys.PageTitle] = Navigator.NavigationManager.SearchTitle(findOptions.QueryName);
+                helper.ViewData[ViewDataKeys.PageTitle] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             if (entitiesType != null)
             {
                 helper.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
@@ -111,7 +111,7 @@ namespace Signum.Web
                 helper.ViewData[ViewDataKeys.Create] = false;
             }
             helper.ViewContext.HttpContext.Response.Write(
-                helper.RenderPartialToString(Navigator.NavigationManager.SearchControlUrl, helper.ViewData));
+                helper.RenderPartialToString(Navigator.Manager.SearchControlUrl, helper.ViewData));
         }
 
         public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string entityTypeName, string prefix)

@@ -106,13 +106,24 @@ namespace Signum.Web
                 }
             }
 
-            string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/TrySavePartial");
+            string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/TrySavePartial");
             sb.Append(helper.Button(
                         idValueField + TypeContext.Separator + "_btnView",
                         "->",
                         viewingUrl,
                         "",
                         new Dictionary<string, object> { {"style","display:" + ((value==null) ? "none" : "block")}}));
+
+            if (settings.Create)
+            {
+                string creatingUrl = "javascript:NewPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/TrySavePartial", (typeof(EmbeddedEntity).IsAssignableFrom(type)));
+                sb.Append(
+                    helper.Button(idValueField + "_btnCreate",
+                              "+",
+                              creatingUrl,
+                              "lineButton",
+                              (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
+            }
 
             sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
             
