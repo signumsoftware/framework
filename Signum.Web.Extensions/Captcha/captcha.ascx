@@ -2,7 +2,7 @@
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Web.Captcha" %>
 
-<script type="text/javascript" language="javascript">
+<script type="text/javascript">
     function solicitarCaptcha() {
         $('#ajax-loader').show();
         $.ajax({
