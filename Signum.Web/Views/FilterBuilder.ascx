@@ -26,7 +26,7 @@
     <div id="fields-list">
         <a href="#" id="filters-header" rev="filters-body">Ocultar filtros</a>
         <div id="filters-body">
-            <label for="fields">Filtrar por campo</label>
+            <label for="<%=Html.GlobalName("ddlNewFilters")%>">Filtrar por campo</label>
             <select id="<%=Html.GlobalName("ddlNewFilters")%>" name="<%=Html.GlobalName("ddlNewFilters")%>">
 
             <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
@@ -47,7 +47,7 @@
   
     <div id="filters-list">
     <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>">No se han especificado filtros</span>
-    <table id="<%=Html.GlobalName("tblFilters")%>" name="<%=Html.GlobalName("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
+    <table id="<%=Html.GlobalName("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
         <thead>
             <tr>
                 <th>Campo</th>
