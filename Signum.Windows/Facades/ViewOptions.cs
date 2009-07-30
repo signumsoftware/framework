@@ -8,7 +8,7 @@ namespace Signum.Windows
 {
     public class ViewOptions : MarkupExtension
     {
-        ViewButtons buttons = ViewButtons.OkCancel;
+        ViewButtons buttons = ViewButtons.Ok;
         public ViewButtons Buttons
         {
             get { return buttons; }
@@ -18,13 +18,13 @@ namespace Signum.Windows
         bool? clone;
         public bool Clone
         {
-            get { return clone ?? Buttons == ViewButtons.OkCancel; }
+            get { return clone ?? Buttons == ViewButtons.Ok; }
             set { clone = value; }
         }
 
         public bool Modal
         {
-            get { return Buttons == ViewButtons.OkCancel; }
+            get { return Buttons == ViewButtons.Ok; }
         }
 
         public EventHandler Closed { get; set; }
@@ -42,8 +42,7 @@ namespace Signum.Windows
 
     public enum ViewButtons
     {
-        OkCancel,
-        //OkCancelSaving, //Accepts with save behaviour
+        Ok,
         Save,
     }
 

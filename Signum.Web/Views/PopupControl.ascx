@@ -12,11 +12,7 @@
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup" + sufix)%>');" class="dragHandle">
-        <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
-            <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk + sufix)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
-         <%} else{ %>
-            <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk + sufix)%>" value="OK" />
-            <%}%>
+        <%= Html.GetButtonBarElements(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
     </div>
     
     <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>

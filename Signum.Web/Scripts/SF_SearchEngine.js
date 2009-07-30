@@ -158,31 +158,6 @@ function CallServer(urlController, onOk, onCancel, prefix) {
     });
 }
 
-function CallServerWithSelected(urlController, onOk, onCancel, prefix) {
-    var ids = GetSelectedElements(prefix);
-    if (ids == "")
-        return;
-    var newPrefix = prefix + "New";
-    $.ajax({
-        type: "POST",
-        url: urlController,
-        data: "sfIds=" + ids + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel) + "&prefix=" + newPrefix,
-        async: false,
-        dataType: "html",
-        success:
-                   function(msg) {
-                       $('#' + prefix + "divASustituir").html(msg);
-                       ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
-                       $('#' + newPrefix + sfBtnOk).click(onOk);
-                       $('#' + newPrefix + sfBtnCancel).click(onCancel);
-                   },
-        error:
-                   function(XMLHttpRequest, textStatus, errorThrown) {
-                       ShowError(XMLHttpRequest, textStatus, errorThrown);
-                   }
-    });
-}
-
 function PostServer(urlController, prefix) {
     var ids = GetSelectedElements(prefix);
     if (ids == "")

@@ -103,11 +103,15 @@
     <Compile Include="QuerySettings.cs" />
     <Compile Include="RadioButtonLine.cs" />
     <Compile Include="ScriptHelper.cs" />
+    <Compile Include="ScriptManager.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="SearchControlHelper.cs" />
     <Compile Include="SignumViewEngine.cs" />
     <Compile Include="StringResponseFilter.cs" />
     <Compile Include="StyleContext.cs" />
     <Compile Include="TypeContext.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="ValueLineHelper.cs" />
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>

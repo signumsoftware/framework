@@ -205,6 +205,19 @@ namespace Signum.Web
             sb.AppendLine("</script>");
             return sb.ToString();
         }
+
+        public static string GetScriptRegistrationCode(string url){
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("<script type='text/javascript'>");
+            sb.AppendLine("var script=document.createElement('script')");
+            sb.AppendLine("script.setAttribute('type', 'text/javascript');");
+            sb.AppendFormat("script.setAttribute('src', '{0}');", url);
+            sb.AppendLine();
+            sb.AppendLine("var head = document.getElementsByTagName('head')[0];");
+            sb.AppendLine("head.appendChild(script);");
+            sb.AppendLine("</script>");
+            return sb.ToString();
+        }
    }
 }
 

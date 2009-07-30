@@ -21,6 +21,7 @@ namespace Signum.Windows
         public Func<bool, bool> IsCreable { get; set; }
         public Func<bool, bool> IsReadOnly { get; set; }
         public Func<bool, bool> IsViewable { get; set; }
+        public Func<bool, bool> ShowOkSave { get; set; }
 
         public Action<bool, ICollectionView> CollectionViewOperations { get; set; }
         public DataTemplate DataTemplate { get; set; }

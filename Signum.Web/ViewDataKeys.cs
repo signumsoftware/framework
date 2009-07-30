@@ -47,6 +47,8 @@ namespace Signum.Web
         {
             return helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix);
         }
+
+        
     }
 
     

@@ -20,14 +20,6 @@ namespace Signum.Windows
     /// </summary>
     public partial class ButtonBar : UserControl
     {
-        public static readonly DependencyProperty FixedElementsProperty =
-            DependencyProperty.Register("FixedElements", typeof(List<FrameworkElement>), typeof(ButtonBar), new UIPropertyMetadata(null));
-        public List<FrameworkElement> FixedElements
-        {
-            get { return (List<FrameworkElement>)GetValue(FixedElementsProperty); }
-            set { SetValue(FixedElementsProperty, value); }
-        }
-
         public static event GetButtonBarElementDelegate GetButtonBarElement;
 
         public static readonly DependencyProperty MainControlProperty =
@@ -44,14 +36,6 @@ namespace Signum.Windows
         {
             get { return (bool)GetValue(OkVisibleProperty); }
             set { SetValue(OkVisibleProperty, value); }
-        }
-
-        public static readonly DependencyProperty CancelVisibleProperty =
-            DependencyProperty.Register("CancelVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
-        public bool CancelVisible
-        {
-            get { return (bool)GetValue(CancelVisibleProperty); }
-            set { SetValue(CancelVisibleProperty, value); }
         }
 
         public static readonly DependencyProperty SaveVisibleProperty =
@@ -76,12 +60,6 @@ namespace Signum.Windows
             remove { btOk.Click -= value; }
         }
 
-        public event RoutedEventHandler CancelClick
-        {
-            add { btCancel.Click += value; }
-            remove { btCancel.Click -= value; }
-        }
-
         public event RoutedEventHandler SaveClick
         {
             add { btSave.Click += value; }
@@ -99,11 +77,6 @@ namespace Signum.Windows
             get { return btOk; }
         }
 
-        public Button CancelButton
-        {
-            get { return btCancel; }
-        }
-
         public Button SaveButton
         {
             get { return btSave; }
@@ -117,13 +90,12 @@ namespace Signum.Windows
         public ButtonBar()
         {
             InitializeComponent();
-            FixedElements = new List<FrameworkElement>(); 
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ToolBar_DataContextChanged);
         }
 
         void ToolBar_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            List<FrameworkElement> elements = new List<FrameworkElement>(FixedElements);
+            List<FrameworkElement> elements = new List<FrameworkElement>();
             if (GetButtonBarElement != null)
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()

@@ -9,12 +9,9 @@
         </LinearGradientBrush>
     </UserControl.Background>
     <StackPanel Orientation="Horizontal">
-
         <m:ToolBarButton x:Name="btOk" Image="Images\ok.png"  Background="Green" Content="{m:Loc Ok}"  Visibility="{Binding OkVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" Width="{Binding Path=ActualWidth, ElementName=btCancel}" IsDefault="true"/>
-        <m:ToolBarButton x:Name="btCancel" Image="Images\cancel.png"  Background="Red" Content="{m:Loc Cancel}" Visibility="{Binding CancelVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" IsCancel="true"/>
         <m:ToolBarButton x:Name="btSave" Image="Images\save.png" Background="Blue" Content="{m:Loc Save}" Visibility="{Binding SaveVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
-        <m:ToolBarButton x:Name="btReload" Image="Images\reload.png" Background="RoyalBlue" Content="{m:Loc Reload}" Visibility="{Binding ReloadVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
-
         <StackPanel x:Name="stackPanel" Orientation="Horizontal"/>
+        <m:ToolBarButton x:Name="btReload" Image="Images\reload.png" Background="RoyalBlue" Content="{m:Loc Reload}" Visibility="{Binding ReloadVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
     </StackPanel>
 </UserControl>

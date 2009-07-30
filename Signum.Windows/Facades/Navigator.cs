@@ -66,7 +66,7 @@ namespace Signum.Windows
         {
             Lazy lazy = entity as Lazy;
 
-            ViewButtons vb = lazy != null && (lazy.UntypedEntityOrNull == null || !lazy.UntypedEntityOrNull.IsNew) ? ViewButtons.Save : ViewButtons.OkCancel;
+            ViewButtons vb = lazy != null && (lazy.UntypedEntityOrNull == null || !lazy.UntypedEntityOrNull.IsNew) ? ViewButtons.Save : ViewButtons.Ok;
 
             return Manager.View(entity, new ViewOptions { Buttons = vb, TypeContext = typeContext });
         }
@@ -263,7 +263,18 @@ namespace Signum.Windows
                 if (viewOptions.TypeContext != null)
                     Common.SetTypeContext(ctrl, viewOptions.TypeContext);
 
-                NormalWindow nw = new NormalWindow() { Buttons = viewOptions.Buttons, MainControl = ctrl};
+                NormalWindow nw = new NormalWindow() 
+                { 
+                    MainControl = ctrl
+                };
+
+                if (ShowOkSave(entity.GetType(), viewOptions.Admin))
+                {
+                    if (viewOptions.Buttons == ViewButtons.Ok)
+                        nw.ButtonBar.OkVisible = true;
+                    else
+                        nw.ButtonBar.SaveVisible = true;
+                }
 
                 win = nw;
             }
@@ -336,6 +347,15 @@ namespace Signum.Windows
                 return false;
 
             return es.IsViewable(admin);
+        }
+
+        internal protected virtual bool ShowOkSave(Type type, bool admin)
+        {
+            EntitySettings es = Settings.TryGetC(type);
+            if (es != null || es.ShowOkSave != null)
+                return es.ShowOkSave(admin);
+
+            return true;
         }
 
         internal protected virtual bool IsFindable(object queryName)

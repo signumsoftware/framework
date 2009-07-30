@@ -27,20 +27,16 @@ namespace Signum.Windows
             get { return (Control)GetValue(MainControlProperty); }
             set { SetValue(MainControlProperty, value); }
         }
-        
-        public static readonly DependencyProperty ButtonsProperty =
-            DependencyProperty.Register("Buttons", typeof(ViewButtons), typeof(NormalWindow), new FrameworkPropertyMetadata(ViewButtons.OkCancel, FrameworkPropertyMetadataOptions.None, new PropertyChangedCallback(ButtonsChanged)));
-        public ViewButtons Buttons
+
+        public ButtonBar ButtonBar
         {
-            get { return (ViewButtons)GetValue(ButtonsProperty); }
-            set { SetValue(ButtonsProperty, value); }
+            get { return this.buttonBar; }
         }
 
 		public NormalWindow()
 		{
 			this.InitializeComponent();
 
-            OnButtonsChanged();
             this.DataContextChanged+=new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
 
             Common.AddChangeDataContextHandler(this, ChangeDataContext_DataContextChanged);
@@ -69,33 +65,15 @@ namespace Signum.Windows
 
         protected override void OnPreviewKeyDown(System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == Key.S && (e.KeyboardDevice.Modifiers & ModifierKeys.Control) != 0 && Buttons == ViewButtons.Save)
+            if (e.Key == Key.S && (e.KeyboardDevice.Modifiers & ModifierKeys.Control) != 0 && buttonBar.SaveVisible)
             {
                 Save(); 
             }
         }
 
-        public static void ButtonsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            ((NormalWindow) d).OnButtonsChanged();
-        }
-
-        private void OnButtonsChanged()
-        {
-            ViewButtons b = this.Buttons;
-            buttonBar.OkVisible = b == ViewButtons.OkCancel;
-            buttonBar.CancelVisible = b == ViewButtons.OkCancel;
-            buttonBar.SaveVisible = b == ViewButtons.Save;
-        }
-
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             base.DialogResult = true;
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            base.DialogResult = false;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -128,7 +106,7 @@ namespace Signum.Windows
         {
             base.OnClosing(e);
 
-            if (Buttons == ViewButtons.Save && this.HasChanges())
+            if (buttonBar.SaveVisible && this.HasChanges())
             {
                 var result = MessageBox.Show(Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
                     MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
