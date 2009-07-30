@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Signum.Windows.Scheduler
 {
     public static class SchedulerClient
     {
-        public static void Start(bool customTask, bool processTask, bool dialy, bool weekly, bool weekdays)
+        public static void Start(bool customTask, bool processTask, bool dialy, bool weekly, bool weekDays)
         {
             if(Navigator.Manager.NotDefined<ScheduledTaskDN>())
             {
@@ -25,6 +26,7 @@ namespace Signum.Windows.Scheduler
             if (customTask && Navigator.Manager.NotDefined<CustomTaskDN>())
             {
                 Navigator.Manager.Settings.Add(typeof(CustomTaskDN), new EntitySettings(true) { View = () => new CustomTask() });
+                Navigator.Manager.Settings.Add(typeof(CustomTaskExecutionDN), new EntitySettings(false) { View = () => new CustomTaskExecution() });
             }
 
             if (dialy && Navigator.Manager.NotDefined<ScheduleRuleDailyDN>())
@@ -37,9 +39,10 @@ namespace Signum.Windows.Scheduler
                 Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeeklyDN), new EntitySettings(false) { View = () => new ScheduleRuleWeekly() });
             }
 
-            if (weekdays && Navigator.Manager.NotDefined<ScheduleRuleWeekDaysDN>())
+            if (weekDays && Navigator.Manager.NotDefined<ScheduleRuleWeekDaysDN>())
             {
                 Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeekDaysDN), new EntitySettings(false) { View = () => new ScheduleRuleWeekDays() });
+                Navigator.Manager.Settings.Add(typeof(CalendarDN), new EntitySettings(false) { View = () => new Calendar() });
             }
         }
     }

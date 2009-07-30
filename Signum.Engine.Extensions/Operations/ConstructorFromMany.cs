@@ -42,7 +42,7 @@ namespace Signum.Engine.Operations
             {
                 LogOperationDN log = new LogOperationDN
                 {
-                    Operation = EnumBag<OperationDN>.ToEntity(Key),
+                    Operation = EnumLogic<OperationDN>.ToEntity(Key),
                     Start = DateTime.Now,
                     User = UserDN.Current
                 };

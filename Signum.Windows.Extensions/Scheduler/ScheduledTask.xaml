@@ -5,13 +5,20 @@
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="d:ScheduledTaskDN"
     MinWidth="300">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
     <StackPanel>
-        <m:EntityCombo m:Common.Route="Task" />
-        <GroupBox>
+        <m:EntityCombo m:Common.Route="Task" Find="False" View="False" Create="False"/>
+        <GroupBox Style="{DynamicResource EntityGroupBox}">
             <GroupBox.Header>
                 <m:EntityLine m:Common.Route="Rule" AutoComplete="False" Find="False" View="False" />
             </GroupBox.Header>
-            <m:DataBorder AutoChild="True" m:Common.Route="Rule"/>
+            <m:DataBorder m:Common.Route="Rule" AutoChild="True"/>
         </GroupBox>
         <m:ValueLine m:Common.Route="NextDate" />
         <m:ValueLine m:Common.Route="Suspended" />

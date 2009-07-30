@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Operations;
+using Signum.Utilities;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable]
+    [Serializable, LocDescription]
     public class PackageDN : IdentifiableEntity, IProcessData
     {
         OperationDN operation;
@@ -17,10 +18,11 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable]
+    [Serializable, LocDescription]
     public class PackageLineDN : IdentifiableEntity
     {
         Lazy<PackageDN> package;
+        [LocDescription]
         public Lazy<PackageDN> Package
         {
             get { return package; }
@@ -29,6 +31,7 @@ namespace Signum.Entities.Processes
 
         [ImplementedByAll]
         Lazy<IdentifiableEntity> target;
+        [LocDescription]
         public Lazy<IdentifiableEntity> Target
         {
             get { return target; }
@@ -36,6 +39,7 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? finishTime;
+        [LocDescription]
         public DateTime? FinishTime
         {
             get { return finishTime; }
@@ -45,6 +49,7 @@ namespace Signum.Entities.Processes
 
         [SqlDbType(Size = int.MaxValue)]
         string exception;
+        [LocDescription]
         public string Exception
         {
             get { return exception; }

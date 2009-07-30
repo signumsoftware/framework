@@ -12,23 +12,18 @@ using Signum.Engine.Basics;
 
 namespace Signum.Engine.Processes
 {
-    public class PackageLogic : IProcessLogic
+    public class PackageAlgorithm: IProcessAlgorithm
     {
-        OperationDN operation;
+        Enum operationKey;
 
-        public PackageLogic(OperationDN operation)
+        public PackageAlgorithm(Enum operationKey)
         {
-            this.operation = operation;
-        }
-
-        public PackageLogic(Enum operationKey)
-        {
-            this.operation = EnumBag<OperationDN>.ToEntity(operationKey);
+            this.operationKey = operationKey;
         }
 
         public virtual IProcessData CreateData(object[] args)
         {
-            PackageDN package = new PackageDN { Operation = operation };
+            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(operationKey) };
             package.Save();
 
             List<Lazy> lazies = (List<Lazy>)args[0];
@@ -46,8 +41,6 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
-            Enum key = EnumBag<OperationDN>.ToEnum(package.Operation.Key);
-
             List<Lazy<PackageLineDN>> lines =
                 (from pl in Database.Query<PackageLineDN>()
                  where pl.Package == package.ToLazy() && pl.FinishTime == null && pl.Error == null
@@ -61,13 +54,13 @@ namespace Signum.Engine.Processes
                 if (executingProcess.Suspended)
                     return FinalState.Suspended;
 
-                PackageLineDN pl = lines[i].Retrieve();
+                PackageLineDN pl = lines[i].RetrieveAndForget();
 
                 try
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        OperationLogic.ServiceExecuteLazy(pl.Target, key);
+                        OperationLogic.ServiceExecuteLazy(pl.Target, operationKey);
                         pl.FinishTime = DateTime.Now;
                         pl.Save();
                         tr.Commit();

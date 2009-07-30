@@ -34,14 +34,14 @@ namespace Signum.Engine.Extensions.Reports
                                                       {
                                                           Entity = e.ToLazy(),
                                                           e.Id,
-                                                          e.Nombre,
-                                                          reports = e.ExcelReports.ToString(),
+                                                          Nombre = e.Name,
+                                                          Reports = e.ExcelReports.Count(),
                                                       }).ToDynamic();
                 }
 
             }
             else if (compositeReport)
-                throw new ApplicationException("No es posible pedir un compositeReport sin excelReport");
+                throw new InvalidOperationException("ExcelReport is necessary for CompositeReports");
         }
 
     }

@@ -5,9 +5,10 @@
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
     xmlns:sws="clr-namespace:Signum.Windows.Scheduler"
     m:Common.TypeContext="d:ScheduleRuleWeeklyDN"
-    MinWidth="300">
+    Padding="2">
     <StackPanel>
         <m:ValueLine m:Common.Route="DayOfTheWeek" />
         <sws:Hour/>
+        <m:ValueLine m:Common.Route="StartingOn"/>
     </StackPanel>
 </UserControl>

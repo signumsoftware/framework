@@ -9,7 +9,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
-using Signum.Utilities; 
+using Signum.Utilities;
+using Signum.Entities.DynamicQuery; 
 
 namespace Signum.Engine.Authorization
 {
@@ -21,7 +22,7 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, bool queries)
         {
             if (sb.NotDefined<RulePropertyDN>())
             {
@@ -31,7 +32,25 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
                 sb.Schema.Saved += new EntityEventHandler(Schema_Saved);
                 AuthLogic.RolesModified += new InitEventHandler(UserAndRoleLogic_RolesModified);
+
+                if(queries)
+                    DynamicQuery.DynamicQuery.IsAllowed += new Func<Meta, bool>(DynamicQuery_IsAllowed);
             }
+        }
+
+        static bool DynamicQuery_IsAllowed(Meta meta)
+        {
+            if (!AuthLogic.IsEnabled)
+                return true;
+
+            if (meta == null)
+                return true;
+
+            CleanMeta cleanMeta = meta as CleanMeta;
+            if (cleanMeta != null)
+                return GetPropertyAccess(cleanMeta.Type, cleanMeta.PropertyName) > Access.None;
+
+            return ((DirtyMeta)meta).Properties.All(cm => GetPropertyAccess(cm.Type, cm.Member.Name) > Access.None); 
         }
 
         static void Schema_Initializing(Schema sender)

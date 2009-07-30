@@ -9,12 +9,12 @@ using System.Security.Cryptography;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, LocDescription]
     public class UserDN : Entity, IPrincipal
     {
         [NotNullable, UniqueIndex, SqlDbType(Size = 100)]
         string userName;
-        [StringLengthValidator(AllowNulls = false, Min = 4, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 4, Max = 100), LocDescription]
         public string UserName
         {
             get { return userName; }
@@ -23,7 +23,7 @@ namespace Signum.Entities.Authorization
 
         [NotNullable]
         string passwordHash;
-        [NotNullValidator]
+        [NotNullValidator, LocDescription]
         public string PasswordHash
         {
             get { return passwordHash; }
@@ -32,6 +32,7 @@ namespace Signum.Entities.Authorization
 
         //ImplementedBy this
         Lazy<IEmployee> related;
+        [LocDescription]
         public Lazy<IEmployee> Related
         {
             get { return related; }
@@ -39,7 +40,7 @@ namespace Signum.Entities.Authorization
         }
 
         RoleDN role;
-        [NotNullValidator]
+        [NotNullValidator, LocDescription]
         public RoleDN Role
         {
             get { return role; }
@@ -47,19 +48,19 @@ namespace Signum.Entities.Authorization
         }
 
         string email;
-        [EmailValidator]
+        [EmailValidator, LocDescription]
         public string EMail
         {
             get { return email; }
             set { Set(ref email, value, "EMail"); }
         }
-    
-        public IIdentity Identity
+
+        IIdentity IPrincipal.Identity
         {
             get { return null; }
         }
 
-        public bool IsInRole(string role)
+        bool IPrincipal.IsInRole(string role)
         {
             return this.role.BreathFirst(a=>a.Roles).Any(a => a.Name == role); 
         }

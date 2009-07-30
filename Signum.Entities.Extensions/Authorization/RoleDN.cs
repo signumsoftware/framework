@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable]
+    [Serializable, LocDescription]
     public class RoleDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100), LocDescription]
         public string Name
         {
             get { return name; }
@@ -18,6 +19,7 @@ namespace Signum.Entities.Authorization
         }
 
         MList<RoleDN> roles;
+        [LocDescription]
         public MList<RoleDN> Roles
         {
             get { return roles; }

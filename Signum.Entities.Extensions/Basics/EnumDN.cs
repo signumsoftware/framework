@@ -22,7 +22,7 @@ namespace Signum.Entities.Basics
 
         [NotNullable, SqlDbType(Size = 100)]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), LocDescription]
         public string Name
         {
             get { return name; }
@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string key;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), LocDescription]
         public string Key
         {
             get { return key; }

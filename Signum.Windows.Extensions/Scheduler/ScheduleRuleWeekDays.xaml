@@ -3,9 +3,17 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
+    xmlns:m2 ="clr-namespace:Signum.Windows.Extensions"
     xmlns:sws="clr-namespace:Signum.Windows.Scheduler"
     m:Common.TypeContext="d:ScheduleRuleWeekDaysDN"
-    MinWidth="300">
+    Padding="2">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
     <StackPanel>
 
         <Grid>
@@ -28,13 +36,17 @@
             <m:ValueLine m:Common.Route="Friday" Grid.Row="4"/>
             <m:ValueLine m:Common.Route="Saturday" Grid.Row="0" Grid.Column="1" />
             <m:ValueLine m:Common.Route="Sunday" Grid.Row="1" Grid.Column="1"/>
-            <GroupBox Grid.Row="2" Grid.RowSpan="3" Grid.Column="1" VerticalAlignment="Center">
+            <GroupBox Grid.Row="2" Grid.RowSpan="3" Grid.Column="1" Style="{DynamicResource EntityGroupBox}" VerticalAlignment="Center">
                 <GroupBox.Header>
-                    <m:EntityLine m:Common.Route="Calendar" />
+                    <TextBlock Text="Holidays Calendar" FontWeight="bold" FontSize="13" HorizontalAlignment="Center"/>
                 </GroupBox.Header>
-                <m:ValueLine m:Common.Route="Holiday" />
+                <StackPanel>
+                    <m:EntityCombo m:Common.Route="Calendar" m:Common.LabelVisible="False"  Create="True" Remove="True"/>
+                    <m:ValueLine m:Common.Route="Holiday" IsEnabled="{Binding Calendar, Converter={x:Static m2:Converters.NotNull}}" />
+                </StackPanel>
             </GroupBox>
         </Grid>
         <sws:Hour/>
+        <m:ValueLine m:Common.Route="StartingOn"/>
     </StackPanel>
 </UserControl>

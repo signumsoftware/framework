@@ -6,10 +6,10 @@
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     m:Common.TypeContext="d:UserDN" MinWidth="300">
     <StackPanel >
-    	<m:ValueLine LabelText="_UserName" m:Common.Route="UserName"/>
+    	<m:ValueLine m:Common.Route="UserName"/>
     	<auth:DoublePassword PasswordHash="{Binding Path=PasswordHash}"/>
-        <m:EntityLine LabelText="_Role" m:Common.Route="Role"  />
-        <m:ValueLine LabelText="_EMail" m:Common.Route="EMail"  />
-        <m:EntityLine LabelText="_Related" m:Common.Route="Related"/>
+        <m:EntityLine m:Common.Route="Role"  />
+        <m:ValueLine m:Common.Route="EMail"  />
+        <m:EntityLine m:Common.Route="Related"/>
     </StackPanel>
 </UserControl>

@@ -17,6 +17,9 @@ namespace Signum.Windows.Extensions
         public static readonly IValueConverter AutoScroll = ConverterFactory.New(
             (bool auto) => auto ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Visible);
 
+        public static readonly IValueConverter NotNull = ConverterFactory.New(
+            (object obj) => obj != null);
+
         public static readonly IValueConverter Exponential100 = ConverterFactory.New(
             (double d) => Math.Pow(10, d * 2),
             (double d) => Math.Log10(d) / 2);

@@ -26,5 +26,14 @@ namespace Signum.Windows.Scheduler
         {
             InitializeComponent();
         }
+
+        private object EntityList_Creating()
+        {
+            CalendarDN cal = ((CalendarDN)DataContext);
+            if (cal == null || cal.Holidays == null || cal.Holidays.Count == 0)
+                return new HolidayDN { Date = DateTime.Today };
+            else
+                return new HolidayDN { Date = cal.Holidays.Max(a => a.Date) }; 
+        }
     }
 }

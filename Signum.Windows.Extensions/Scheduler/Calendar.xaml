@@ -3,18 +3,17 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="d:CalendarDN"
-    MinWidth="300">
+    m:Common.TypeContext="d:CalendarDN">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
-        <GroupBox Header="Holydais">
+        <GroupBox m:Common.Route="$Holidays">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" MinWidth="200" />
+                    <ColumnDefinition Width="*" MinWidth="200"/>
                 </Grid.ColumnDefinitions>
-                <m:EntityList m:Common.Route="Holydais" ViewOnCreate="False" Grid.Column="0" />
-                <m:DataBorder m:Common.Route="Holydais/" Grid.Column="1">
+                <m:EntityList m:Common.Route="Holidays" ViewOnCreate="False" Grid.Column="0" Creating="EntityList_Creating" />
+                <m:DataBorder m:Common.Route="Holidays/" Grid.Column="1">
                     <StackPanel>
                         <m:ValueLine m:Common.Route="Date" />
                         <m:ValueLine m:Common.Route="Name" />

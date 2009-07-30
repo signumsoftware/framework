@@ -39,7 +39,7 @@ namespace Signum.Engine.Operations
     {
         static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
 
-        internal static void AssertIsLoaded(SchemaBuilder sb)
+        public static void AssertIsLoaded(SchemaBuilder sb)
         {
             if (!sb.ContainsDefinition<OperationDN>())
                 throw new ApplicationException("Call OperationLogic.Start first"); 
@@ -52,7 +52,7 @@ namespace Signum.Engine.Operations
                 sb.Include<OperationDN>();
                 sb.Include<LogOperationDN>();
 
-                EnumBag<OperationDN>.Start(sb, () => operations.Values.SelectMany(b => b.Keys).ToHashSet());
+                EnumLogic<OperationDN>.Start(sb, () => operations.Values.SelectMany(b => b.Keys).ToHashSet());
 
                 dqm[typeof(LogOperationDN)] = (from lo in Database.Query<LogOperationDN>()
                                                select new
@@ -64,7 +64,7 @@ namespace Signum.Engine.Operations
                                                    User = lo.User.ToLazy(),
                                                    lo.Start,
                                                    lo.End,
-                                                   HasError = lo.Exception != null
+                                                   lo.Exception
                                                }).ToDynamic();
             }
         }
@@ -124,7 +124,7 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
         {
-            return (from k in EnumBag<OperationDN>.Keys
+            return (from k in EnumLogic<OperationDN>.Keys
                     let o = TryFind(entityType, k) as IConstructorOperation
                     where o != null && OnAllowOperation(k)
                     select ToOperationInfo(o, true)).ToList();
@@ -132,7 +132,7 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetQueryOperationInfos(Type entityType)
         {
-            return (from k in EnumBag<OperationDN>.Keys
+            return (from k in EnumLogic<OperationDN>.Keys
                     let cfm = TryFind(entityType, k) as IConstructorFromManyOperation
                     where cfm != null && OnAllowOperation(k)
                     select ToOperationInfo(cfm, true)).ToList();
@@ -140,7 +140,7 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetEntityOperationInfos(IdentifiableEntity entity)
         {
-            return (from k in EnumBag<OperationDN>.Keys
+            return (from k in EnumLogic<OperationDN>.Keys
                     let eo = TryFind(entity.GetType(), k) as IEntityOperation
                     where eo != null && OnAllowOperation(k)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
@@ -362,10 +362,10 @@ namespace Signum.Engine.Operations
                 throw new ApplicationException("Operation {0} not found for Type {1}".Formato(operationKey, type));
 
             if (isLazy && !result.Lazy)
-                throw new ApplicationException("Operation {0} is not allowed for lazies");
+                throw new ApplicationException("Operation {0} is not allowed for lazies".Formato(operationKey));
 
             if (!isLazy && result.Lazy)
-                throw new ApplicationException("Operation {0} needs a Lazy");
+                throw new ApplicationException("Operation {0} needs a Lazy".Formato(operationKey));
 
             if (!(result is T))
                 throw new ApplicationException("Operation {0} is a {1} not a {2}, use '{3}' instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),

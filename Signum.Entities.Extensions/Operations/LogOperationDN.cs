@@ -12,7 +12,7 @@ namespace Signum.Entities.Operations
     {
         [ImplementedByAll]
         Lazy<IdentifiableEntity> target;
-        [NotNullValidator]
+        [NotNullValidator, LocDescription]
         public Lazy<IdentifiableEntity> Target
         {
             get { return target; }
@@ -20,7 +20,7 @@ namespace Signum.Entities.Operations
         }
 
         OperationDN operation;
-        [NotNullValidator]
+        [NotNullValidator, LocDescription]
         public OperationDN Operation
         {
             get { return operation; }
@@ -28,7 +28,7 @@ namespace Signum.Entities.Operations
         }
 
         UserDN user;
-        [NotNullValidator]
+        [NotNullValidator, LocDescription]
         public UserDN User
         {
             get { return user; }
@@ -36,6 +36,7 @@ namespace Signum.Entities.Operations
         }
 
         DateTime start;
+        [LocDescription]
         public DateTime Start
         {
             get { return start; }
@@ -43,6 +44,7 @@ namespace Signum.Entities.Operations
         }
 
         DateTime? end;
+        [LocDescription]
         public DateTime? End
         {
             get { return end; }
@@ -50,6 +52,7 @@ namespace Signum.Entities.Operations
         }
 
         string exception;
+        [LocDescription]
         public string Exception
         {
             get { return exception; }

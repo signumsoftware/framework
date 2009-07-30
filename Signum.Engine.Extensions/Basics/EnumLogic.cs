@@ -9,7 +9,7 @@ using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Basics
 {
-    public static class EnumBag<T>
+    public static class EnumLogic<T>
         where T:EnumDN, new()
     {
         public static HashSet<Enum> Keys { get; set; }
@@ -23,7 +23,7 @@ namespace Signum.Engine.Basics
             {
                 sb.Include<T>(); 
 
-                EnumBag<T>.getKeys = getKeys;
+                EnumLogic<T>.getKeys = getKeys;
 
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Synchronizing += Schema_Synchronizing;

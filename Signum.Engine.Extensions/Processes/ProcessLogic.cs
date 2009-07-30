@@ -15,6 +15,8 @@ using Signum.Utilities.DataStructures;
 using System.Diagnostics;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Engine.Extensions.Properties;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Processes
 {
@@ -24,12 +26,21 @@ namespace Signum.Engine.Processes
 
         static ImmutableAVLTree<int, ExecutingProcess> currentProcesses = ImmutableAVLTree<int, ExecutingProcess>.Empty;
 
-        static Dictionary<Enum, IProcessLogic> registeredProcesses = new Dictionary<Enum, IProcessLogic>();
+        static Dictionary<Enum, IProcessAlgorithm> registeredProcesses = new Dictionary<Enum, IProcessAlgorithm>();
 
         static Thread[] threads;
         static int numberOfThreads;
 
         static Timer timer;
+
+        public static void AssertIsLoaded(SchemaBuilder sb, bool packages)
+        {
+            if (!sb.ContainsDefinition<ProcessDN>())
+                throw new ApplicationException("Call ProcessLogic.Start first");
+
+            if (!sb.ContainsDefinition<PackageDN>())
+                throw new ApplicationException("Call ProcessLogic.Start first with packages = true");
+        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int numberOfThreads, bool packages)
         {
@@ -40,6 +51,21 @@ namespace Signum.Engine.Processes
 
                 if (!sb.Settings.IsTypeAttributesOverriden<IProcessData>())
                     sb.Settings.OverrideTypeAttributes<IProcessData>(new ImplementedByAttribute(typeof(PackageDN)));
+
+                OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.Execute)
+                {
+                    Execute = (pc, _) => ProcessLogic.Create(pc).ExecuteLazy(ProcessOperation.Execute)
+                });
+
+                dqm[typeof(PackageDN)] =
+                     (from p in Database.Query<PackageDN>()
+                      select new
+                      {
+                          Entity = p.ToLazy(),
+                          p.Id,
+                          Operation = p.Operation.ToLazy(),
+                          Lines = (int?)Database.Query<PackageLineDN>().Count(pl=>pl.Package == p.ToLazy())
+                      }).ToDynamic(); 
 
                 dqm[typeof(PackageLineDN)] =
                     (from pl in Database.Query<PackageLineDN>()
@@ -52,9 +78,6 @@ namespace Signum.Engine.Processes
                          pl.FinishTime,
                          pl.Exception
                      }).ToDynamic(); 
-
-
-
             }
 
             if (sb.NotDefined<ProcessDN>())
@@ -64,7 +87,7 @@ namespace Signum.Engine.Processes
 
                 ProcessLogic.numberOfThreads = numberOfThreads;
 
-                EnumBag<ProcessDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
+                EnumLogic<ProcessDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertIsLoaded(sb); 
                 new ExecutingProcessGraph().Register();   
@@ -72,7 +95,7 @@ namespace Signum.Engine.Processes
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
 
-                dqm[typeof(ProcessDN)] = 
+                dqm[typeof(ProcessDN)] =
                              (from p in Database.Query<ProcessDN>()
                               join pe in Database.Query<ProcessExecutionDN>().DefaultIfEmpty() on p equals pe.Process into g
                               select new
@@ -80,11 +103,13 @@ namespace Signum.Engine.Processes
                                   Entity = p.ToLazy(),
                                   p.Id,
                                   p.Name,
-                                  NumExecutions = g.Count(),
+                                  NumExecutions = (int?)g.Count(),
                                   LastExecution = (from pe2 in Database.Query<ProcessExecutionDN>()
-                                                   where pe2.Id == g.Max(a => a.Id)
+                                                   where pe2.Id == g.Max(a => (int?)a.Id)
                                                    select pe2.ToLazy()).FirstOrDefault()
-                              }).ToDynamic();
+                              }).ToDynamic()
+                              .ChangeColumn(a => a.NumExecutions, a => a.DisplayName = Resources.Executions)
+                              .ChangeColumn(a => a.LastExecution, a => a.DisplayName = Resources.LastExecution);
 
                 dqm[typeof(ProcessExecutionDN)] = 
                              (from pe in Database.Query<ProcessExecutionDN>()
@@ -188,7 +213,8 @@ namespace Signum.Engine.Processes
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
                            where pe.State == ProcessState.Executing ||
-                                 pe.State == ProcessState.Queued
+                                 pe.State == ProcessState.Queued ||
+                                 pe.State == ProcessState.Suspending
                            select pe).AsEnumerable().OrderByDescending(pe => pe.State).ToArray();
 
                 foreach (var pe in pes)
@@ -211,7 +237,9 @@ namespace Signum.Engine.Processes
 
         static void RefreshPlan()
         {
-            DateTime? next = Database.Query<ProcessExecutionDN>().Where(pe => pe.State == ProcessState.Planned).Min(pe => pe.PlannedDate);
+            DateTime? next = Database.Query<ProcessExecutionDN>()
+                .Where(pe => pe.State == ProcessState.Planned)
+                .Min(pe => pe.PlannedDate);
             if (next == null)
             {
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
@@ -254,7 +282,7 @@ namespace Signum.Engine.Processes
             RefreshPlan();
         }
 
-        public static void Register(Enum processKey, IProcessLogic logic)
+        public static void Register(Enum processKey, IProcessAlgorithm logic)
         {
             if (processKey == null)
                 throw new ArgumentNullException("processKey");
@@ -269,7 +297,7 @@ namespace Signum.Engine.Processes
         {
             return new ExecutingProcess
             {
-                Logic = registeredProcesses[EnumBag<ProcessDN>.ToEnum(pe.Process.Key)],
+                Algorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(pe.Process.Key)],
                 Data = pe.ProcessData,
                 Execution = pe,
             };
@@ -308,8 +336,8 @@ namespace Signum.Engine.Processes
                              }
                              else 
                              {
-                                 IProcessLogic processLogic = registeredProcesses[EnumBag<ProcessDN>.ToEnum(process.Key)]; 
-                                 data = processLogic.CreateData(args); 
+                                 IProcessAlgorithm processAlgorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(process.Key)]; 
+                                 data = processAlgorithm.CreateData(args); 
                              } 
 
                              return new ProcessExecutionDN(process)
@@ -364,12 +392,12 @@ namespace Signum.Engine.Processes
 
         internal static Lazy<ProcessExecutionDN> Create(Enum processKey, params object[] args)
         {
-            return Create(EnumBag<ProcessDN>.ToEntity(processKey), args);
+            return Create(EnumLogic<ProcessDN>.ToEntity(processKey), args);
         }
 
         internal static Lazy<ProcessExecutionDN> Create(Enum processKey, IProcessData processData)
         {
-            return Create(EnumBag<ProcessDN>.ToEntity(processKey), processData);
+            return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processData);
         }
 
         internal static Lazy<ProcessExecutionDN> Create(ProcessDN process, params object[] args)
@@ -383,7 +411,7 @@ namespace Signum.Engine.Processes
         }
     }
 
-    public interface IProcessLogic
+    public interface IProcessAlgorithm
     {
         IProcessData CreateData(object[] args);
         FinalState Execute(IExecutingProcess executingProcess);
@@ -405,7 +433,7 @@ namespace Signum.Engine.Processes
     internal class ExecutingProcess : IExecutingProcess
     {
         public ProcessExecutionDN Execution { get; set; }
-        public IProcessLogic Logic { get; set; }
+        public IProcessAlgorithm Algorithm { get; set; }
         public IProcessData Data { get; set; }
 
         public bool Suspended { get; private set; }
@@ -425,7 +453,7 @@ namespace Signum.Engine.Processes
             try
             {
 
-                FinalState state = Logic.Execute(this);
+                FinalState state = Algorithm.Execute(this);
 
                 if (state == FinalState.Finished)
                 {

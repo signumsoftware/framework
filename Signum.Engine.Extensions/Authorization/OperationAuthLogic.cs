@@ -88,7 +88,7 @@ namespace Signum.Engine.Authorization
 
             var queries = Database.RetrieveAll<OperationDN>();
             return (from a in queries
-                    let ak = EnumBag<OperationDN>.ToEnum(a.Key)     
+                    let ak = EnumLogic<OperationDN>.ToEnum(a.Key)     
                     select new AllowedRule(GetBaseAllowed(role, ak))
                     {
                         Resource = a,
@@ -119,7 +119,7 @@ namespace Signum.Engine.Authorization
                 List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
 
                 Dictionary<RoleDN, Dictionary<Enum, bool>> realRules = Database.RetrieveAll<RuleOperationDN>()
-                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => EnumBag<OperationDN>.ToEnum(a.Operation.Key), a => a.Allowed));
+                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => EnumLogic<OperationDN>.ToEnum(a.Operation.Key), a => a.Allowed));
 
                 Dictionary<RoleDN, Dictionary<Enum, bool>> newRules = new Dictionary<RoleDN, Dictionary<Enum, bool>>();
                 foreach (var role in roles)

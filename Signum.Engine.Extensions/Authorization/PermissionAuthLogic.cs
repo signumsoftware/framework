@@ -34,7 +34,7 @@ namespace Signum.Engine.Authorization
                 sb.Include<RulePermissionDN>();
                 sb.Include<PermissionDN>();
 
-                EnumBag<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet()); 
+                EnumLogic<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet()); 
 
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
@@ -89,7 +89,7 @@ namespace Signum.Engine.Authorization
         {
             var role = roleLazy.Retrieve();
 
-            return EnumBag<PermissionDN>.AllEntities()
+            return EnumLogic<PermissionDN>.AllEntities()
                     .Select(p => new AllowedRule(GetBaseAllowed(role, p.Key))
                    {
                        Resource = p,

@@ -12,11 +12,15 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System.Security.Principal;
 using System.Threading;
+using Signum.Services;
 
 namespace Signum.Engine.Authorization
 {
     public static class AuthLogic
     {
+        public static UserDN SystemUser { get; set; }
+        public static string SystemUserName { get; set; }
+
         static DirectedGraph<RoleDN> _roles;
         static DirectedGraph<RoleDN> Roles
         {
@@ -31,10 +35,12 @@ namespace Signum.Engine.Authorization
                 throw new ApplicationException("Call AuthLogic.Start first"); 
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName)
         {
             if (sb.NotDefined<UserDN>())
             {
+                SystemUserName = systemUserName; 
+
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
                 sb.Schema.Initializing += Schema_Initializing;
@@ -61,9 +67,17 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Initializing(Schema sender)
+  
+        static void Schema_Initializing(Schema schema)
         {
             _roles = Cache();
+
+            if (SystemUserName != null)
+                using (new EntityCache())
+                using (AuthLogic.Disable())
+                {
+                    SystemUser = Database.Query<UserDN>().SingleOrDefault(a => a.UserName == SystemUserName);
+                }
         }
 
         static void Schema_Saving(Schema sender, IdentifiableEntity ident)
@@ -190,7 +204,5 @@ namespace Signum.Engine.Authorization
                 return user;
             }
         }
-
-      
     }
 }

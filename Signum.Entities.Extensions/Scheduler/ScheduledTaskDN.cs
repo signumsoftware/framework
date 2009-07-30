@@ -1,30 +1,35 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable]
+    [Serializable, LocDescription]
     public class ScheduledTaskDN : IdentifiableEntity
     {
         IScheduleRule rule;
+        [NotNullValidator, LocDescription]
         public IScheduleRule Rule
         {
             get { return rule; }
             set { Set(ref rule, value, "Rule"); }
         }
 
-        CustomTaskDN task;
-        public CustomTaskDN Task
+        ITaskDN task;
+        [NotNullValidator, LocDescription]
+        public ITaskDN Task
         {
             get { return task; }
             set { Set(ref task, value, "Task"); }
         }
 
         DateTime? nextDate = DateTime.Now;
+        [LocDescription]
         public DateTime? NextDate
         {
             get { return nextDate; }
@@ -32,6 +37,7 @@ namespace Signum.Entities.Scheduler
         }
 
         bool suspended;
+        [LocDescription]
         public bool Suspended
         {
             get { return suspended; }
@@ -46,12 +52,12 @@ namespace Signum.Entities.Scheduler
 
         public void NewPlan()
         {
-            NextDate = suspended ? (DateTime?)null : rule.Next(DateTime.Now); 
+            NextDate = suspended ? (DateTime?)null : rule.Next(); 
         }
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(task, rule) + (suspended ? " [Suspended]" : "");
+            return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(Resources.ScheduledTaskDN_Suspended) : "");
         }
     }
 }

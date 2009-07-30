@@ -63,7 +63,7 @@
     <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\PropertyAuthLogic.cs" />
-    <Compile Include="Basics\EnumBag.cs" />
+    <Compile Include="Basics\EnumLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
@@ -74,12 +74,22 @@
     <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Processes\BlockingQueue.cs" />
-    <Compile Include="Processes\PackageLogic.cs" />
+    <Compile Include="Processes\PackageAlgorithm.cs" />
     <Compile Include="Processes\ProcessLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.es.Designer.cs">
+      <DependentUpon>Resources.es.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Reports\ReportsLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
-    <Compile Include="Scheduler\TaskLogic.cs" />
+    <Compile Include="Scheduler\CustomTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +112,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Operations\Operations.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

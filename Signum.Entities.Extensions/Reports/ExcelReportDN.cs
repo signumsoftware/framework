@@ -5,15 +5,16 @@ using System.Text;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Extensions.Properties;
+using Signum.Utilities;
 
 namespace Signum.Entities.Reports
 {
-    [Serializable]
+    [Serializable, LocDescription]
     public class ExcelReportDN : IdentifiableEntity
     {
         [NotNullable]
         string queryName;
-        [StringLengthValidator(Min = 3)]
+        [StringLengthValidator(Min = 3), LocDescription]
         public string QueryName
         {
             get { return queryName; }
@@ -22,7 +23,7 @@ namespace Signum.Entities.Reports
 
         [NotNullable]
         string displayName;
-        [StringLengthValidator(Min = 3)]
+        [StringLengthValidator(Min = 3), LocDescription]
         public string DisplayName
         {
             get { return displayName; }
@@ -30,7 +31,7 @@ namespace Signum.Entities.Reports
         }
 
         FileDN file;
-        [NotNullValidator]
+        [NotNullValidator, LocDescription]
         public FileDN File
         {
             get { return file; }
@@ -38,6 +39,7 @@ namespace Signum.Entities.Reports
         }
 
         bool deleted;
+        [LocDescription]
         public bool Deleted
         {
             get { return deleted; }

@@ -187,6 +187,9 @@ namespace Signum.Windows.Operations
 
         internal object ConstructorManager_GeneralConstructor(Type type, Window win)
         {
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                return null; 
+
             var list = Server.Service<IOperationServer>().GetConstructorOperationInfos(type);
 
             var dic = (from oi in list

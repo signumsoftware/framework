@@ -32,7 +32,8 @@ namespace Signum.Windows.Authorization
             if (property && Navigator.Manager.NotDefined<RulePropertyDN>())
             {
                 propertyRules = Server.Service<IPropertyAuthServer>().AuthorizedProperties();
-                Common.RouteTask += new CommonRouteTask(Common_RouteTask);
+                Common.RouteTask += Common_RouteTask;
+                Common.PseudoRouteTask += Common_RouteTask;
             }
 
             if (types && Navigator.Manager.NotDefined<RuleTypeDN>())

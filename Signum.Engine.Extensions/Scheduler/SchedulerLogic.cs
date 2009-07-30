@@ -42,25 +42,26 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined<Schema>())
             {
-                TaskLogic.Start(sb, dqm);
+                OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.Execute)
+                {
+                    Execute = (ct, _) => { throw new NotImplementedException(); }
+                });
+
+                CustomTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
                 sb.Schema.Saved += new EntityEventHandler(Schema_Saved);
 
-                dqm[typeof(CustomTaskDN)] =
-                     (from ct in Database.Query<CustomTaskDN>()
-                      join cte in Database.Query<CustomTaskExecutionDN>().DefaultIfEmpty() on ct equals cte.CustomTask into g
-                      select new
-                      {
-                          Entity = ct.ToLazy(),
-                          ct.Id,
-                          ct.Name,
-                          NumExecutions = g.Count(),
-                          LastExecution = (from cte2 in Database.Query<CustomTaskExecutionDN>()
-                                           where cte2.Id == g.Max(a => a.Id)
-                                           select cte2.ToLazy()).FirstOrDefault()
-                      }).ToDynamic();
-
+                dqm[typeof(ScheduledTaskDN)] =
+                    (from st in Database.Query<ScheduledTaskDN>()
+                     select new
+                     {
+                         Entity = st.ToLazy(),
+                         st.Id,
+                         st.ToStr,
+                         st.NextDate,
+                         st.Suspended,
+                     }).ToDynamic();
             }
         }
 
@@ -86,6 +87,7 @@ namespace Signum.Engine.Scheduler
         public static void ReloadPlan()
         {
             using (new EntityCache(true))
+            using (AuthLogic.Disable())
             lock(priorityQueue)
             {
                 List<ScheduledTaskDN> schTasks = Database.Query<ScheduledTaskDN>().Where(st => !st.Suspended).ToList();
@@ -125,6 +127,8 @@ namespace Signum.Engine.Scheduler
 
         static void DispatchEvents(object obj) // obj ignored
         {
+            using (new EntityCache(true))
+            using (AuthLogic.Disable())
             lock (priorityQueue)
             {
                 if (priorityQueue.Empty)
@@ -135,7 +139,11 @@ namespace Signum.Engine.Scheduler
                     st.Save();
                 priorityQueue.Push(st);
 
-                new Thread(() => st.Task.Execute(TaskOperation.Execute)).Start();
+                new Thread(() =>
+                {
+                    using (AuthLogic.User(AuthLogic.SystemUser))
+                        st.Task.ToLazy().ExecuteLazy(TaskOperation.Execute);
+                }).Start();
 
                 SetTimer(); 
             }

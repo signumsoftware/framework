@@ -7,34 +7,34 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable]
+    [Serializable, LocDescription]
     public class CalendarDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), LocDescription]
         public string Name
         {
             get { return name; }
             set { SetToStr(ref name, value, "Name"); }
         }
 
-        MList<HolidayDN> holydais;
-        [NotNullValidator]
-        public MList<HolidayDN> Holydais
+        MList<HolidayDN> holidays;
+        [NotNullValidator, LocDescription]
+        public MList<HolidayDN> Holidays
         {
-            get { return holydais; }
-            set { Set(ref holydais, value, "Holydais"); }
+            get { return holidays; }
+            set { Set(ref holidays, value, "Holidays"); }
         }
 
         public void CleanOldHolidays()
         {
-            holydais.RemoveAll(h => h.Date < DateTime.Now); 
+            holidays.RemoveAll(h => h.Date < DateTime.Now); 
         }
 
         public bool IsHoliday(DateTime date)
         {
-            return holydais.Any(h => h.Date == date); 
+            return holidays.Any(h => h.Date == date); 
         }
 
         public override string this[string columnName]
@@ -43,9 +43,9 @@ namespace Signum.Entities.Scheduler
             {
                 string result = base[columnName];
 
-                if (columnName == "Holydais" && holydais != null)
+                if (columnName == "Holydais" && holidays != null)
                 {
-                    string rep = (from h in holydais
+                    string rep = (from h in holidays
                                   group 1 by h.Date into g
                                   where g.Count() > 2
                                   select new { Date = g.Key, Num = g.Count() }).ToString(g => "{0} ({1})".Formato(g.Date, g.Num), ", ");

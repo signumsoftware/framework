@@ -24,7 +24,7 @@ namespace Signum.Windows.Scheduler
     {
         public ScheduledTask()
         {
-            InitializeComponent();
+                InitializeComponent();
         }
     }
 }

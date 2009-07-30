@@ -5,22 +5,24 @@ using System.Text;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Extensions.Properties;
+using Signum.Utilities;
 
 namespace Signum.Entities.Reports
 {
-    [Serializable]
+    [Serializable, LocDescription]
     public class CompositeReportDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 200)]
-        string nombre;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200)]
-        public string Nombre
+        string name;
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200), LocDescription]
+        public string Name
         {
-            get { return nombre; }
-            set { Set(ref nombre, value, "Nombre"); }
+            get { return name; }
+            set { Set(ref name, value, "Name"); }
         }
         
         MList<Lazy<ExcelReportDN>> excelReports;
+        [LocDescription]
         public MList<Lazy<ExcelReportDN>> ExcelReports
         {
             get { return excelReports; }
@@ -29,7 +31,7 @@ namespace Signum.Entities.Reports
 
         public override string ToString()
         {
-            return nombre ;
+            return name ;
         }
     }
 }
