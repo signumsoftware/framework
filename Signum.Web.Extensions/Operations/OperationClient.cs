@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using Signum.Engine.Operations;
 using Signum.Entities.Operations;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Web.Operations
 {
@@ -17,7 +18,7 @@ namespace Signum.Web.Operations
         {
             Manager = operationManager;
 
-            //ButtonBarHelper.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
+            ButtonBarHelper.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
 
             Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
 
@@ -40,6 +41,43 @@ namespace Signum.Web.Operations
     public class OperationManager
     {
         public Dictionary<Enum, WebMenuItem> Settings = new Dictionary<Enum, WebMenuItem>();
+
+        internal List<WebMenuItem> ButtonBar_GetButtonBarElement(object entity, string mainControlUrl)
+        {
+            IdentifiableEntity ident = entity as IdentifiableEntity;
+
+            if (ident == null)
+                return null;
+
+            var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
+
+            var dic = (from oi in list
+                       let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
+                       where os == null || os.IsVisible == null || os.IsVisible(oi)
+                       select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.Key);
+
+            if (dic.Count == 0)
+                return null;
+            List<WebMenuItem> items = new List<WebMenuItem>();
+
+            foreach (OperationInfo oi in list)
+            {
+                WebMenuItem item = new WebMenuItem 
+                {
+                    AltText = dic[oi.Key].OperationSettings.AltText,
+                    Id = dic[oi.Key].OperationSettings.Id,
+                    ImgSrc = dic[oi.Key].OperationSettings.ImgSrc,
+                    OnClick = dic[oi.Key].OperationSettings.OnClick,
+                    OnServerClickAjax = dic[oi.Key].OperationSettings.OnServerClickAjax,
+                    OnServerClickPost = dic[oi.Key].OperationSettings.OnServerClickPost
+                };
+                item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.HtmlProps);
+
+                items.Add(item);
+            }
+            
+            return items;
+        }
 
         internal object ConstructorManager_GeneralConstructor(Type type, Controller controller)
         {
