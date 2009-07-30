@@ -24,8 +24,6 @@ namespace Signum.Entities
         [Ignore]
         protected bool selfModified = true;
 
-        internal ModifiableEntity() { }
-
         [HiddenProperty]
         public override bool SelfModified
         {
@@ -142,8 +140,15 @@ namespace Signum.Entities
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        static long temporalIdCounter = 0;
+
         [Ignore]
-        internal int temporalId = Guid.NewGuid().GetHashCode(); //Thread.CurrentThread.ManagedThreadId << 32 | currentId++;
+        internal int temporalId;
+
+        internal ModifiableEntity()
+        {
+            temporalId = unchecked((int)Interlocked.Increment(ref temporalIdCounter));
+        }
 
         //static int currentId = 0; 
 
