@@ -39,8 +39,8 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("expression Type is not IQueryable");
 
             Expression expand = ExpressionExpander.ExpandUntyped(expression);
-            Expression partialEval = ExpressionEvaluator.PartialEval(expand);
-            Expression simplified = OverloadingSimplifier.Simplify(partialEval);
+            //Expression partialEval = ExpressionEvaluator.PartialEval(expand);
+            Expression simplified = OverloadingSimplifier.Simplify(expand);
 
             MetaProjectorExpression meta = new MetadataVisitor().Visit(simplified) as MetaProjectorExpression;
 
@@ -261,7 +261,12 @@ namespace Signum.Engine.Linq
 
         private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector)
         {
-            return AsProjection(Visit(source)).Projector;
+            MetaProjectorExpression mp = AsProjection(Visit(source));
+            if (selector == null)
+                return mp.Projector;
+
+            Expression projector = MapAndVisit(selector, mp);
+            return projector; 
         }
 
         private Expression BindWhere(Type resultType, Expression source, LambdaExpression predicate)

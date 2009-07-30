@@ -356,7 +356,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression.Type.IsGenericType && m.Expression.Type.GetGenericTypeDefinition() == typeof(MList<>) && m.Member is PropertyInfo && m.Member.Name == "Count")
+            if (m.Expression != null && m.Expression.Type.IsGenericType && m.Expression.Type.GetGenericTypeDefinition() == typeof(MList<>) && m.Member is PropertyInfo && m.Member.Name == "Count")
             {
                 Type[] paramTypes = m.Expression.Type.GetGenericArguments();
 
