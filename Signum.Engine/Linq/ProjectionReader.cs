@@ -15,7 +15,6 @@ namespace Signum.Engine.Linq
     internal interface IProjectionRow
     {
         S GetValue<S>(string alias, string name);
-        IEnumerable<S> ExecuteSubQuery<S>(TranslateResult<S> tr);
 
         Retriever Retriever { get; }
 
@@ -48,12 +47,11 @@ namespace Signum.Engine.Linq
         IProjectionRow previous;
         string alias;
 
-        internal ProjectionRowEnumerator(DataTable dt, Expression<Func<IProjectionRow, T>> projectorExpression, DbQueryProvider provider, bool HasFullObjects, IProjectionRow previous, string alias)
+        internal ProjectionRowEnumerator(DataTable dt, Expression<Func<IProjectionRow, T>> projectorExpression, bool HasFullObjects, IProjectionRow previous, string alias)
         {
             this.dt = dt;
             this.projectorExpression = projectorExpression;
             this.projector = projectorExpression.Compile();
-            this.provider = provider;
             this.previous = previous;
            
             this.alias = alias;
@@ -74,11 +72,6 @@ namespace Signum.Engine.Linq
                 return result;
             }
             return previous.GetValue<S>(alias, name); 
-        }
-
-        public IEnumerable<S> ExecuteSubQuery<S>(TranslateResult<S> tr)
-        {
-            return provider.ExecuteReader(tr, this).ToList();
         }
 
         public T Current
@@ -175,16 +168,11 @@ namespace Signum.Engine.Linq
         }
     }
 
-    /// <summary>
-    /// ProjectionReader is an implemention of IEnumerable that converts data from DbDataReader into
-    /// objects via a projector function,
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    internal class ProjectionRowReader<T> : IEnumerable<T>, IEnumerable
+    internal class ProjectionRowEnumerable<T> : IEnumerable<T>, IEnumerable
     {
         ProjectionRowEnumerator<T> enumerator;
 
-        internal ProjectionRowReader(ProjectionRowEnumerator<T> enumerator)
+        internal ProjectionRowEnumerable(ProjectionRowEnumerator<T> enumerator)
         {
             this.enumerator = enumerator;
         }

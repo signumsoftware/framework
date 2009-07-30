@@ -86,6 +86,12 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => TypeLogic.TypeToDN);
         }
+
+        public DateTime ServerNow()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => DateTime.Now);
+        }
         #endregion
 
         #region IQueryServer

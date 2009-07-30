@@ -81,16 +81,19 @@ namespace Signum.Windows
             Manager.Admin(adminOptions);
         }
 
-        internal static EntitySettings FindSettings(Type type)
+        internal static EntitySettings GetEntitySettings(Type type)
         {
-            return Manager.FindSettings(type);
+            return Manager.GetEntitySettings(type);
         }
 
-
+        internal static QuerySettings GetQuerySettings(object queryName)
+        {
+            return Manager.GetQuerySettings(queryName);
+        }
 
         public static DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
         {
-            DataTemplate template = FindSettings(entityType).TryCC(ess => ess.DataTemplate);
+            DataTemplate template = GetEntitySettings(entityType).TryCC(ess => ess.DataTemplate);
             if (template != null)
                 return template;
 
@@ -190,8 +193,8 @@ namespace Signum.Windows
             if (vs != null && vs.Title != null)
                 return vs.Title; 
 
-            string title = (queryName is Type) ? ((Type)queryName).TypeName() :
-                           (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
+            string title = (queryName is Type) ? ((Type)queryName).NiceName() :
+                           (queryName is Enum) ? ((Enum)queryName).NiceToString() :
                             queryName.ToString();
 
             return Resources.FinderOf0.Formato(title);
@@ -352,7 +355,7 @@ namespace Signum.Windows
         internal protected virtual bool ShowOkSave(Type type, bool admin)
         {
             EntitySettings es = Settings.TryGetC(type);
-            if (es != null || es.ShowOkSave != null)
+            if (es != null && es.ShowOkSave != null)
                 return es.ShowOkSave(admin);
 
             return true;
@@ -403,10 +406,14 @@ namespace Signum.Windows
             return win.SelectedType;
         }
 
-
-        public EntitySettings FindSettings(Type type)
+        public EntitySettings GetEntitySettings(Type type)
         {
             return Settings.TryGetC(type);
+        }
+
+        public QuerySettings GetQuerySettings(object queryName)
+        {
+            return QuerySetting.TryGetC(queryName);
         }
 
         HashSet<string> loadedModules = new HashSet<string>();

@@ -182,7 +182,7 @@ namespace Signum.Utilities.ExpressionTrees
         protected virtual Expression VisitMethodCall(MethodCallExpression m)
         {
             Expression obj = this.Visit(m.Object);
-            IEnumerable<Expression> args = this.VisitExpressionList(m.Arguments);
+            ReadOnlyCollection<Expression> args = this.VisitExpressionList(m.Arguments);
             if (obj != m.Object || args != m.Arguments)
             {
                 MethodInfo mi = m.Method;
@@ -253,7 +253,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual NewExpression VisitNew(NewExpression nex)
         {
-            IEnumerable<Expression> args = this.VisitExpressionList(nex.Arguments);
+            ReadOnlyCollection<Expression> args = this.VisitExpressionList(nex.Arguments);
             if (args != nex.Arguments)
             {
                 var expr = args.Zip(nex.Constructor.GetParameters(), (e, p) => e.TryConvert(p.ParameterType));
@@ -291,7 +291,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual Expression VisitNewArray(NewArrayExpression na)
         {
-            IEnumerable<Expression> exprs = this.VisitExpressionList(na.Expressions);
+            ReadOnlyCollection<Expression> exprs = this.VisitExpressionList(na.Expressions);
             if (exprs != na.Expressions)
             {
                 if (na.NodeType == ExpressionType.NewArrayInit)
@@ -308,7 +308,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected virtual Expression VisitInvocation(InvocationExpression iv)
         {
-            IEnumerable<Expression> args = this.VisitExpressionList(iv.Arguments);
+            ReadOnlyCollection<Expression> args = this.VisitExpressionList(iv.Arguments);
             Expression expr = this.Visit(iv.Expression);
             if (args != iv.Arguments || expr != iv.Expression)
             {

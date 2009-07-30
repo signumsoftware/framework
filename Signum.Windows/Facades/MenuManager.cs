@@ -47,7 +47,7 @@ namespace Signum.Windows
                     o = ((AdminOptions)o).Type;
 
                 if (o is Enum)
-                    menuItem.Header = EnumExtensions.NiceToString((Enum)o);
+                    menuItem.Header = ((Enum)o).NiceToString();
                 else if (o is Type)
                     menuItem.Header = ((Type)o).NiceName();
             }

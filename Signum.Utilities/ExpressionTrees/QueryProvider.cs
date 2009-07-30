@@ -39,19 +39,15 @@ namespace Signum.Utilities.ExpressionTrees
 
         S IQueryProvider.Execute<S>(Expression expression)
         {
-            return (S)this.ExecutePrivate<S>(expression);
+            return (S)this.Execute(expression);
         }
-
-        MethodInfo mi = typeof(QueryProvider).GetMethod("ExecutePrivate");
 
         object IQueryProvider.Execute(Expression expression)
         {
-            return mi.MakeGenericMethod(expression.Type).Invoke(null, new[] { expression });
+            return this.Execute(expression);
         }
 
         public abstract string GetQueryText(Expression expression);
-        public abstract object ExecutePrivate<S>(Expression expression);
+        public abstract object Execute(Expression expression);
     }
-
-  
 }

@@ -148,10 +148,14 @@ namespace Signum.Windows
             remove { RemoveHandler(QueryResultChangedEvent, value); }
         }
 
+        QuerySettings settings; 
+
         void SearchWindow_Loaded(object sender, RoutedEventArgs e)
         {
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
+
+            settings = Navigator.GetQuerySettings(QueryName); 
 
             QueryDescription view = Server.Service<IQueryServer>().GetQueryDescription(QueryName);
 
@@ -219,63 +223,14 @@ namespace Signum.Windows
                 if (!c.Visible) return;
 
                 Binding b = new Binding("[{0}]".Formato(i)) { Mode = BindingMode.OneTime };
-                DataTemplate dt = CreateDataTemplate(c.Type, b);
+                DataTemplate dt = settings.GetFormatter(c)(b);
                 gvResults.Columns.Add(
                 new GridViewColumn
                 {
                     Header = c.DisplayName,
-                    DisplayMemberBinding = dt == null ? b : null,
-                     
                     CellTemplate = dt,
                 });
             });
-        }
-
-        private DataTemplate CreateDataTemplate(Type type, Binding b)
-        {
-            if (IsNumberOrDate(type))
-                return new DataTemplate
-                {
-                    VisualTree = new FrameworkElementFactory(typeof(TextBlock))
-                            .Do(f => f.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Right))
-                            .Do(f => f.SetBinding(TextBlock.TextProperty, b))
-     
-                };
-
-            if (typeof(IdentifiableEntity).IsAssignableFrom(type) || typeof(Lazy).IsAssignableFrom(type))
-                return new DataTemplate(type)
-                {
-                    VisualTree = new FrameworkElementFactory(typeof(LightEntityLine))
-                        .Do(f => f.SetBinding(LightEntityLine.EntityProperty, b))
-                        .Do(f => f.SetValue(LightEntityLine.HorizontalAlignmentProperty, HorizontalAlignment.Left))
-                };
-
-            return null;
-        }
-
-        private bool IsNumberOrDate(Type type)
-        {
-            type = type.UnNullify();
-            if (type.IsEnum)
-                return false;
-
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Byte:
-                case TypeCode.DateTime:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.Single:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    return true; 
-            }
-            return false; 
         }
 
         private void FilterBuilder_SearchClicked(object sender, RoutedEventArgs e)

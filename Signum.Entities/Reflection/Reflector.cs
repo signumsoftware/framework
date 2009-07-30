@@ -11,6 +11,7 @@ using Signum.Utilities.DataStructures;
 using System.ComponentModel;
 using Signum.Entities.Properties;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace Signum.Entities.Reflection
 {
@@ -222,6 +223,92 @@ namespace Signum.Entities.Reflection
         public static string NiceName(this PropertyInfo pi)
         {
             return ReflectionTools.GetDescription(pi) ?? pi.Name.NiceName();
+        }
+
+        public static Func<IFormattable, string> GetPropertyFormatter(string format, string unitName)
+        {
+            if (format != null)
+            {
+                if (unitName != null)
+                    return a => a == null ? null : a.ToString(format, CultureInfo.CurrentCulture) + " " + unitName;
+                else
+                    return a => a == null ? null : a.ToString(format, CultureInfo.CurrentCulture);
+            }
+            else
+            {
+                if (unitName != null)
+                    return a => a == null ? null : a.ToString() + " " + unitName;
+                else
+                    return a => a == null ? null : a.ToString();
+            }
+        }
+
+        public static string FormatString(PropertyInfo property)
+        {
+            FormatAttribute format = property.SingleAttribute<FormatAttribute>();
+            if(format != null)
+                return format.Format; 
+
+            DateOnlyValidatorAttribute dateOnly = property.SingleAttribute<DateOnlyValidatorAttribute>();
+            if (dateOnly != null)
+                return "d"; 
+
+            DecimalsValidatorAttribute decimals = property.SingleAttribute<DecimalsValidatorAttribute>();
+            if(decimals != null)
+                return "N" + decimals.DecimalPlaces;
+
+            return FormatString(property.PropertyType);
+        }
+
+        public static string FormatString(Type type)
+        {
+            type = type.UnNullify();
+            if (type.IsEnum)
+                return null;
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.DateTime:
+                    return CultureInfo.CurrentCulture.DateTimeFormat.Map(dt => dt.ShortDatePattern + " " + dt.ShortTimePattern);
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return "D"; 
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return "N2"; 
+            }
+            return null;
+        }
+
+        public static bool IsNumber(Type type)
+        {
+            type = type.UnNullify();
+            if (type.IsEnum)
+                return false;
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.Single:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return true;
+            }
+            return false;
         }
     }
 

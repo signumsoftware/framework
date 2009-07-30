@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
 
         public QueryDescription QueryDescription(object queryName)
         {
-            return this[queryName].Description;
+            return this[queryName].GetDescription();
         }
 
         public List<object> GetQueryNames()

@@ -38,5 +38,8 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         Dictionary<Type, TypeDN> ServerTypes();
+
+        [OperationContract, NetDataContract]
+        DateTime ServerNow(); 
     }
 }

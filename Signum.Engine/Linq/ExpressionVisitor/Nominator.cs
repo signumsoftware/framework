@@ -10,6 +10,7 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Engine.Properties;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq
 {
@@ -63,7 +64,7 @@ namespace Signum.Engine.Linq
         {
             if (existingAliases == null)
             {
-                IEnumerable<Expression> args = this.VisitExpressionList(nex.Arguments);
+                ReadOnlyCollection<Expression> args = this.VisitExpressionList(nex.Arguments);
                 if (args != nex.Arguments)
                 {
                     if (nex.Members != null)

@@ -20,7 +20,6 @@ namespace Signum.Windows
             set { SetValue(AutoChildProperty, value); }
         }
 
-
         public DataBorder()
         {
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(DataBorder_DataContextChanged);
@@ -44,7 +43,6 @@ namespace Signum.Windows
             To = 1,
         };
 
-
         private void RecalculateVisibility(object oldValue, object newValue)
         {
             if(AutoChild)
@@ -53,7 +51,7 @@ namespace Signum.Windows
                     Child = null;
                 else
                 {
-                    EntitySettings setting = Navigator.FindSettings(newValue.GetType());
+                    EntitySettings setting = Navigator.GetEntitySettings(newValue.GetType());
                     if (setting == null ||setting.View == null)
                         Child = new TextBox
                         {

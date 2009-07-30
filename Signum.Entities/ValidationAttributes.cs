@@ -33,6 +33,16 @@ namespace Signum.Entities
     }
 
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
+    public class FormatAttribute : Attribute
+    {
+        public string Format { get; private set; }
+        public FormatAttribute(string format)
+        {
+            this.Format = format;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
     public abstract class ValidatorAttribute : Attribute
     {
         public bool DisableOnCorrupt { get; set; }
@@ -185,16 +195,16 @@ namespace Signum.Entities
 
     public class DecimalsValidatorAttribute : ValidatorAttribute
     {
-        int decimalPlaces ;
+        public int DecimalPlaces {get;set;}
 
         public DecimalsValidatorAttribute()
         {
-            decimalPlaces = 2; 
+            DecimalPlaces = 2; 
         }
 
         public DecimalsValidatorAttribute(int decimalPlaces)
         {
-            this.decimalPlaces = decimalPlaces; 
+            this.DecimalPlaces = decimalPlaces; 
         }
 
         protected override string OverrideError(object value)
@@ -202,11 +212,11 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (value is decimal && Math.Round((decimal)value, decimalPlaces) != (decimal)value ||
-                value is float && Math.Round((float)value, decimalPlaces) != (float)value ||
-                value is double && Math.Round((double)value, decimalPlaces) != (double)value)
+            if (value is decimal && Math.Round((decimal)value, DecimalPlaces) != (decimal)value ||
+                value is float && Math.Round((float)value, DecimalPlaces) != (float)value ||
+                value is double && Math.Round((double)value, DecimalPlaces) != (double)value)
             {
-                return Resources._0HasMoreThan0DecimalPlaces.Formato(decimalPlaces);
+                return Resources._0HasMoreThan0DecimalPlaces.Formato(DecimalPlaces);
             }
 
             return null;

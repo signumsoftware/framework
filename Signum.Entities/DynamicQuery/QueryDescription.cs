@@ -52,7 +52,12 @@ namespace Signum.Entities.DynamicQuery
         public bool Filterable { get; set; }
         public bool Visible { get; set; }
 
-        public List<Attribute> Attributes { get; set; }
+        [field:NonSerialized]
+        internal Meta Meta{ get; set; }
+
+        public PropertyInfo TwinProperty { get; set; }
+
+        public string Format { get; set; }
 
         public const string Entity = "Entity";
         public bool IsEntity
@@ -60,34 +65,41 @@ namespace Signum.Entities.DynamicQuery
             get { return this.Name == Entity;  }
         }
 
-        public Column(MemberInfo mi, Attribute[] attributes)
+        public Column(MemberInfo mi, Meta meta)
         {
             Name = mi.Name;
             Type = mi.ReturningType();
-
-            Attributes = attributes.ToList();
-
-            if (!(mi is PropertyInfo))
-                Debug.WriteLine("{0} is a {1}, not a PropertyInfo, and is used as a Column".Formato(mi.MemberName(), mi.GetType()));
+            Meta = meta;
 
             if (typeof(IdentifiableEntity).IsInstanceOfType(Type))
                 Debug.Write("{0} column returns subtype of IdentifiableEntity, use a Lazy instead!!".Formato(mi.MemberName()));
+
+            TwinProperty = (meta as CleanMeta).TryCC(cm => (PropertyInfo)cm.Member);
+
+            if (TwinProperty != null && mi.Name == TwinProperty.Name)
+            {
+                DisplayName = TwinProperty.NiceName();
+                Format = Reflector.FormatString(TwinProperty);
+            }
+            else
+            {
+                DisplayName = Name
+                   .Replace("_nf_", "")
+                   .Replace("_nv_", "")
+                   .Replace("_p_", ".")
+                   .Replace("_", " ");
+                Format = Reflector.FormatString(Type); 
+            }
 
             if (IsEntity)
             {
                 Visible = false;
                 Filterable = false;
-                DisplayName = Name;
             }
             else
             {
                 Visible = !mi.Name.Contains("_nv_") && !IsEntity;
                 Filterable = !mi.Name.Contains("_nf_") && !IsEntity;
-                DisplayName = Name
-                    .Replace("_nf_", "")
-                    .Replace("_nv_", "")
-                    .Replace("_p_", ".")
-                    .Replace("_", " ");
             }
         }
 

@@ -12,19 +12,19 @@ namespace Signum.Windows
     public class DateTimeConverter : ValidationRule, IValueConverter
     {
         public static readonly DateTimeConverter DateAndTime = new DateTimeConverter(CultureInfo.CurrentCulture.DateTimeFormat.Map(dt => dt.ShortDatePattern + " " + dt.ShortTimePattern));
-        public static readonly DateTimeConverter DateOnly = new DateTimeConverter(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+        public static readonly DateTimeConverter Date = new DateTimeConverter("d");
 
-        string format;
+        public string Format { get; set; }
         public DateTimeConverter(string format)
         {
-            this.format = format;
+            this.Format = format;
         }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             DateTime? dt = (DateTime?)value;
             if (dt.HasValue)
-                return dt.Value.ToString(format, culture);
+                return dt.Value.ToString(Format, culture);
             else
                 return null;
         }
@@ -33,7 +33,7 @@ namespace Signum.Windows
         {
             string str = (string)value;
             if (!string.IsNullOrEmpty(str))
-                return DateTime.ParseExact(str, format, culture);
+                return DateTime.ParseExact(str, Format, culture);
             else
                 return null;
         }
@@ -43,7 +43,7 @@ namespace Signum.Windows
             string str = (string)value;
 
             DateTime result;
-            if (str.HasText() && !DateTime.TryParseExact(str, format, cultureInfo, DateTimeStyles.None, out result))
+            if (str.HasText() && !DateTime.TryParseExact(str, Format, cultureInfo, DateTimeStyles.None, out result))
                 return new ValidationResult(false, Properties.Resources.InvalidDateFormat);
             return new ValidationResult(true, null);
         }

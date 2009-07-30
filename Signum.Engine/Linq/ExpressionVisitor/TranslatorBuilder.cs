@@ -55,7 +55,7 @@ namespace Signum.Engine.Linq
                 GetParameters = createParams.Compile(),
                 GetParametersExpression = createParams,
 
-                UniqueFunction = proj.UniqueFunction,
+                Unique = proj.UniqueFunction,
 
                 HasFullObjects = hasFullObjects,
             };
@@ -77,7 +77,7 @@ namespace Signum.Engine.Linq
             public PropertyInfo piToStrLazy = ReflectionTools.GetPropertyInfo<Lazy>(l => l.ToStr);
 
             static MethodInfo miGetValue = typeof(IProjectionRow).GetMethod("GetValue");
-            static MethodInfo miExecuteSubQuery = typeof(IProjectionRow).GetMethod("ExecuteSubQuery");
+            //static MethodInfo miExecuteSubQuery = typeof(IProjectionRow).GetMethod("ExecuteSubQuery");
 
             bool HasFullObjects;
 
@@ -118,12 +118,13 @@ namespace Signum.Engine.Linq
                     Expression.Constant(column.Name));
             }
 
+            MethodInfo mi = ReflectionTools.GetMethodInfo<ITranslateResult>(it => it.Execute(null));
+
             protected override Expression VisitProjection(ProjectionExpression proj)
             {
                 ITranslateResult tr = TranslatorBuilder.Build(proj, prevAliases);
                 HasFullObjects |= tr.HasFullObjects;
-                MethodInfo mi = miExecuteSubQuery.MakeGenericMethod(tr.ElementType);
-                return Expression.Call(this.row, mi, Expression.Constant(tr));
+                return Expression.Convert(Expression.Call(Expression.Constant(tr), mi, this.row), proj.Type);
             }
 
             protected override Expression VisitLazyLiteral(LazyLiteralExpression lazy)

@@ -65,7 +65,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ShowAnchorProperty =
-            DependencyProperty.Register("ShowAnchor", typeof(bool), typeof(NumericTextBox), new FrameworkPropertyMetadata(true, (d,e)=>((NumericTextBox)d).UpdateVisibility()));
+            DependencyProperty.Register("ShowAnchor", typeof(bool), typeof(NumericTextBox), new FrameworkPropertyMetadata(false, (d,e)=>((NumericTextBox)d).UpdateVisibility()));
         public bool ShowAnchor
         {
             get { return (bool)GetValue(ShowAnchorProperty); }

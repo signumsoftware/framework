@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.Data.SqlClient;
+using System.Data;
 
 namespace Signum.Engine.Linq
 {
@@ -11,43 +12,61 @@ namespace Signum.Engine.Linq
     {
         Type ElementType { get; }
         string CommandText { get; }
-        UniqueFunction? UniqueFunction { get; }
+        UniqueFunction? Unique { get; }
         bool HasFullObjects { get; }
+
+        object Execute(IProjectionRow pr); 
     }
 
-    internal class TranslateResult<T> : ITranslateResult
+    class TranslateResult<T> : ITranslateResult
     {
-        internal string CommandText;
+        public string CommandText { get; set; }
+        public UniqueFunction? Unique { get; set; }
+        public bool HasFullObjects { get; set; }
+        public Type ElementType { get { return typeof(T); } }
 
         internal Expression<Func<IProjectionRow, SqlParameter[]>> GetParametersExpression;
         internal Func<IProjectionRow, SqlParameter[]> GetParameters;
-
         internal Expression<Func<IProjectionRow, T>> ProjectorExpression;
-
-        internal UniqueFunction? UniqueFunction;
+     
         internal string Alias;
 
-        internal bool HasFullObjects; 
-
-        public Type ElementType
+        public object Execute(IProjectionRow pr)
         {
-            get { return typeof(T); }
-        }
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters(pr).ToList());
 
-        string ITranslateResult.CommandText
-        {
-            get { return CommandText; }
-        }
+            DataTable dt = Executor.ExecuteDataTable(command);
 
-        UniqueFunction? ITranslateResult.UniqueFunction
-        {
-            get { return UniqueFunction; }
-        }
+            ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(dt, ProjectorExpression, HasFullObjects, pr, Alias);
 
-        bool ITranslateResult.HasFullObjects
-        {
-            get { return HasFullObjects; }
-        }
+            IEnumerable<T> reader = new ProjectionRowEnumerable<T>(enumerator);
 
+            if (Unique == UniqueFunction.SingleIsZero || Unique == UniqueFunction.SingleGreaterThanZero)
+            {
+                int count = (int)(object)reader.Single();
+                if (Unique == UniqueFunction.SingleGreaterThanZero)
+                    return count > 0;
+                else
+                    return count == 0;
+            }
+            else
+            {
+                if (Unique.HasValue)
+                    switch (Unique.Value)
+                    {
+                        case UniqueFunction.First: return reader.First();
+                        case UniqueFunction.FirstOrDefault: return reader.FirstOrDefault();
+                        case UniqueFunction.Single: return reader.Single();
+                        case UniqueFunction.SingleOrDefault: return reader.SingleOrDefault();
+                        default:
+                            throw new InvalidOperationException();
+                    }
+                else
+                    if (HasFullObjects || pr != null)
+                        return reader.ToList();
+                    else
+                        return reader;
+            }
+        }
     }
 }

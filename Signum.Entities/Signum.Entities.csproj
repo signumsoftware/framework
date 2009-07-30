@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F2B51D08-498D-4C9F-8112-9521A7762B02}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -62,6 +62,7 @@
     <Compile Include="Attributes.cs" />
     <Compile Include="Basics\ColorDN.cs" />
     <Compile Include="Basics\FileDN.cs" />
+    <Compile Include="DynamicQuery\Meta.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />
     <Compile Include="DynamicQuery\FilterOperationsUtils.cs" />

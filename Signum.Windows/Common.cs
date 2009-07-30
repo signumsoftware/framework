@@ -140,12 +140,16 @@ namespace Signum.Windows
                 InititializeRoute(fe, route);
         }
 
-        private static TypeContext InititializeRoute(FrameworkElement fe, string route)
+        private static void InititializeRoute(FrameworkElement fe, string route)
         {
             TypeContext context = GetTypeContext(fe.Parent);
 
             if (context == null)
                 throw new ApplicationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext);
+
+            bool pseudoRoute = route.StartsWith("$");
+            if (pseudoRoute)
+                route = route.Substring(1); 
 
             string[] steps = route.Replace("/", ".Item.").Split('.').Where(s => s.Length > 0).ToArray();
 
@@ -161,17 +165,24 @@ namespace Signum.Windows
                 context = new TypeSubContext(pi, context);
             }
 
-            SetTypeContext(fe, context);
-
-            foreach (CommonRouteTask task in RouteTask.GetInvocationList())
+            if (!pseudoRoute)
             {
-                task(fe, route, context);
+                SetTypeContext(fe, context);
+
+                foreach (CommonRouteTask task in RouteTask.GetInvocationList())
+                    task(fe, route, context);
             }
-            return context;
+            else
+            {
+                foreach (CommonRouteTask task in PseudoRouteTask.GetInvocationList())
+                    task(fe, route, context);
+            }
         }
 
         #region Tasks
         public static event CommonRouteTask RouteTask;
+
+        public static event CommonRouteTask PseudoRouteTask;
 
         static Common()
         {
@@ -179,12 +190,13 @@ namespace Signum.Windows
             RouteTask += TaskSetValueProperty;
             RouteTask += TaskSetLabelText;
             RouteTask += TaskSetUnitText;
+            RouteTask += TaskSetFormatText;
             RouteTask += TaskSetIsReadonly;
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
+
+            PseudoRouteTask += TaskSetLabelText;
         }
-
-
   
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
         {
@@ -240,6 +252,7 @@ namespace Signum.Windows
             DependencyProperty labelText =
                fe is ValueLine ? ValueLine.LabelTextProperty :
                fe is EntityBase ? EntityBase.LabelTextProperty :
+               fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty:
                null;
 
             if (labelText != null && fe.NotSet(labelText))
@@ -257,6 +270,18 @@ namespace Signum.Windows
                 UnitAttribute ua = tsc.PropertyInfo.SingleAttribute<UnitAttribute>();
                 if (ua != null)
                     vl.UnitText = ua.UnitName;
+            }
+        }
+
+        static void TaskSetFormatText(FrameworkElement fe, string route, TypeContext context)
+        {
+            ValueLine vl = fe as ValueLine;
+            TypeSubContext tsc = context as TypeSubContext;
+            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && tsc != null)
+            {
+                string format = Reflector.FormatString(tsc.PropertyInfo); 
+                if (format != null)
+                    vl.Format = format;
             }
         }
 

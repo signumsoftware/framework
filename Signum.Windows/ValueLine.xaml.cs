@@ -49,6 +49,14 @@ namespace Signum.Windows
             set { SetValue(UnitTextProperty, value); }
         }
 
+        public static readonly DependencyProperty FormatProperty =
+         DependencyProperty.Register("Format", typeof(string), typeof(ValueLine), new UIPropertyMetadata(null));
+        public string Format
+        {
+            get { return (string)GetValue(FormatProperty); }
+            set { SetValue(FormatProperty, value); }
+        }
+
         public static readonly DependencyProperty ValueProperty =
             DependencyProperty.Register("Value", typeof(object), typeof(ValueLine), new UIPropertyMetadata(null));
         public object Value
@@ -113,7 +121,7 @@ namespace Signum.Windows
             Type nType = Nullable.GetUnderlyingType(type);
             bool nullable = nType != null;
             type = nType ?? type;
-            Control control = Configurator.constructor[lineType](type, nullable);
+            Control control = Configurator.constructor[lineType](type, nullable, Format);
             control.Style = (Style)FindResource("toolTip"); 
 
             BindingExpression bindingExpression = BindingOperations.GetBindingExpression(this, ValueProperty);
@@ -187,7 +195,6 @@ namespace Signum.Windows
                     case TypeCode.Double:
                     case TypeCode.Decimal:
                     case TypeCode.Single:
-                        return ValueLineType.DecimalNumber;
                     case TypeCode.Byte:
                     case TypeCode.SByte:
                     case TypeCode.Int16:
@@ -214,12 +221,8 @@ namespace Signum.Windows
             {ValueLineType.Enum, ComboBox.SelectedItemProperty},
             {ValueLineType.Boolean,CheckBox.IsCheckedProperty},
             {ValueLineType.Number, NumericTextBox.ValueProperty},
-            {ValueLineType.DecimalNumber, NumericTextBox.ValueProperty},
-            {ValueLineType.Currency, NumericTextBox.ValueProperty},
-            {ValueLineType.HighPrecisionNumber, NumericTextBox.ValueProperty},
             {ValueLineType.String, TextBox.TextProperty},
             {ValueLineType.DateTime, DateTimePicker.SelectedDateProperty},
-            {ValueLineType.Date, DateTimePicker.SelectedDateProperty},
             {ValueLineType.Color, ColorPicker.SelectedColorProperty},
         };
 
@@ -228,27 +231,43 @@ namespace Signum.Windows
             {ValueLineType.Enum, ComboBox.IsEnabledProperty},
             {ValueLineType.Boolean,CheckBox.IsEnabledProperty},
             {ValueLineType.Number, NumericTextBox.IsReadOnlyProperty},
-            {ValueLineType.DecimalNumber, NumericTextBox.IsReadOnlyProperty},
-            {ValueLineType.Currency, NumericTextBox.IsReadOnlyProperty},
-            {ValueLineType.HighPrecisionNumber, NumericTextBox.IsReadOnlyProperty},
             {ValueLineType.String, TextBox.IsReadOnlyProperty},
             {ValueLineType.DateTime, DateTimePicker.IsReadOnlyProperty},
-            {ValueLineType.Date, DateTimePicker.IsReadOnlyProperty},
             {ValueLineType.Color, ColorPicker.IsReadOnlyProperty}
         };
 
-        public Dictionary<ValueLineType, Func<Type, bool, Control>> constructor = new Dictionary<ValueLineType, Func<Type, bool, Control>>()
+        public Dictionary<ValueLineType, Func<Type, bool, string, Control>> constructor = new Dictionary<ValueLineType, Func<Type, bool, string, Control>>()
         {
-            {ValueLineType.Enum, (t,b)=>new ComboBox(){ ItemsSource = GetEnums(t,b), ItemTemplate = comboDataTemplate, VerticalContentAlignment= VerticalAlignment.Center}},
-            {ValueLineType.Boolean,(t,b)=>new CheckBox(){ VerticalAlignment= VerticalAlignment.Center, HorizontalAlignment= HorizontalAlignment.Left}},
-            {ValueLineType.Number, (t,b)=>new NumericTextBox(){ XIncrement= 10, YIncrement = 1, NullableDecimalConverter = NullableDecimalConverter.Integer}},
-            {ValueLineType.DecimalNumber, (t,b)=>new NumericTextBox() },
-            {ValueLineType.Currency, (t,b)=>new NumericTextBox(){ XIncrement= 1000, YIncrement = 1, NullableDecimalConverter = NullableDecimalConverter.Currency}},
-            {ValueLineType.HighPrecisionNumber, (t,b)=>new NumericTextBox(){ XIncrement= 1, YIncrement = 0.01m, NullableDecimalConverter = NullableDecimalConverter.HighPrecisionNumber}},
-            {ValueLineType.String, (t,b)=> new TextBox()},
-            {ValueLineType.DateTime,(t,b)=> new DateTimePicker()},
-            {ValueLineType.Date,(t,b)=> new DateTimePicker(){ DateTimeConverter= DateTimeConverter.DateOnly }},
-            {ValueLineType.Color, (t, b) => new ColorPicker()}
+            {ValueLineType.Enum, (t,n,f)=>new ComboBox(){ ItemsSource = GetEnums(t,n), ItemTemplate = comboDataTemplate, VerticalContentAlignment = VerticalAlignment.Center}},
+            {ValueLineType.Boolean, (t,n,f)=>new CheckBox(){ VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left}},
+            {ValueLineType.Number, (t,n,f)=>
+            {
+                var nt = new NumericTextBox(){ XIncrement = 10, YIncrement = 1};
+                if(f != null)
+                {
+                    f = NullableDecimalConverter.NormalizeToDecimal(f);
+
+                    nt.NullableDecimalConverter = 
+                        f == NullableDecimalConverter.Integer.Format?  NullableDecimalConverter.Integer:
+                        f == NullableDecimalConverter.Number.Format?  NullableDecimalConverter.Number:
+                        new NullableDecimalConverter(f); 
+                }
+                return nt;
+            }},
+            {ValueLineType.String, (t,n,f)=> new TextBox()},
+            {ValueLineType.DateTime, (t,n,f)=> 
+            {
+                var dt = new DateTimePicker(); 
+                if(f!= null) 
+                {
+                    dt.DateTimeConverter = 
+                        f == DateTimeConverter.DateAndTime.Format?  DateTimeConverter.DateAndTime:
+                        f == DateTimeConverter.Date.Format?  DateTimeConverter.Date:
+                        new DateTimeConverter(f); 
+                }
+                return dt;
+            }},
+            {ValueLineType.Color, (t,n,f) => new ColorPicker()}
         };       
 
 
@@ -297,12 +316,8 @@ namespace Signum.Windows
         Enum,
         Boolean,
         Number,
-        DecimalNumber,
-        Currency,
-        HighPrecisionNumber, 
         String,
         DateTime,
-        Date,
         Color
     };
 }

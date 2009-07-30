@@ -63,7 +63,7 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public IEnumerator<T> GetEnumerator()
         {
-            return ((IEnumerable<T>)this.provider.ExecutePrivate<T>(this.expression)).GetEnumerator();
+            return ((IEnumerable<T>)this.provider.Execute(this.expression)).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -73,7 +73,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         public override string ToString()
         {
-            return GetType().TypeName(); 
+            return provider.GetQueryText(expression); 
         }
 
     }

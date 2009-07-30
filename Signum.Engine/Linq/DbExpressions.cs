@@ -130,7 +130,6 @@ namespace Signum.Engine.Linq
         Min,
         Max,
         Sum,
-        GroupKey,
     }
 
 

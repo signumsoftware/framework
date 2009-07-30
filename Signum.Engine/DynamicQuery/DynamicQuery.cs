@@ -10,12 +10,13 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using Signum.Engine.Properties;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine.DynamicQuery
 {
     public interface IDynamicQuery
     {
-        QueryDescription Description { get; }
+        QueryDescription GetDescription();
         QueryResult ExecuteQuery(List<Filter> filters, int? limit);
     }
 
@@ -24,8 +25,10 @@ namespace Signum.Engine.DynamicQuery
         IQueryable<T> query;
         Func<List<Filter>, int?, IEnumerable<T>> execute;
 
-        QueryDescription description;
-        List<MemberEntry<T>> members; 
+        List<Column> columns; 
+        List<MemberEntry<T>> members;
+
+        Dictionary<string, Meta> metas;
 
         public DynamicQuery(IQueryable<T> query)
         {
@@ -34,6 +37,7 @@ namespace Signum.Engine.DynamicQuery
 
             this.query = query;
 
+            metas = DynamicQuery.QueryMetadata(query); 
             Initialize();
         }
 
@@ -51,15 +55,13 @@ namespace Signum.Engine.DynamicQuery
         {
             members = MemberEntryFactory.GenerateList<T>();
 
-            description =  new QueryDescription
-            {
-                Columns = members.Cast<IMemberEntry>().Select(e => new Column(e.MemberInfo, new Attribute[0])).ToList()
-            };
+            columns = members.Cast<IMemberEntry>().Select(e =>
+                    new Column(e.MemberInfo, metas.TryGetC(e.MemberInfo.Name))).ToList();
         }
 
-        public QueryDescription Description
+        public QueryDescription GetDescription()
         {
-            get { return description; }
+            return new QueryDescription { Columns = columns.Where(DynamicQuery.ColumnIsAllowed).ToList() };
         }
 
         public QueryResult ExecuteQuery(List<Filter> filters, int? limit)
@@ -80,17 +82,21 @@ namespace Signum.Engine.DynamicQuery
 
         QueryResult ToQueryResult(IEnumerable<T> result)
         {
+            bool[] allowed = columns.Select(c=>DynamicQuery.ColumnIsAllowed(c)).ToArray();
+
+            List<MemberEntry<T>> allowedMembers= members.Where((m, i) => allowed[i]).ToList();
+
             return new QueryResult
             {
-                Columns = description.Columns,
-                Data = result.Select(e => members.Select(d => d.Getter(e)).ToArray()).ToArray()
+                Columns = columns.Where((c,i) => allowed[i]).ToList(),
+                Data = result.Select(e => allowedMembers.Select(d => d.Getter(e)).ToArray()).ToArray()
             };
         }
 
         public DynamicQuery<T> ChangeColumn(Expression<Func<T, object>> column, Action<Column> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
-            Column col = description.Columns.Single(a => a.Name == member.Name);
+            Column col = columns.Single(a => a.Name == member.Name);
             change(col);
 
             return this;
@@ -100,6 +106,15 @@ namespace Signum.Engine.DynamicQuery
 
     public static class DynamicQuery
     {
+        public static event Func<Meta, bool> IsAllowed;
+
+        internal static bool ColumnIsAllowed(Column column)
+        {
+            if (IsAllowed != null)
+                return IsAllowed(column.Meta);
+            return true;    
+        }
+
         public static DynamicQuery<T> ToDynamic<T>(this IQueryable<T> query)
         {
             return new DynamicQuery<T>(query); 
@@ -204,6 +219,11 @@ namespace Signum.Engine.DynamicQuery
             if (num.HasValue)
                 return sequence.Take(num.Value);
             return sequence;
+        }
+
+        public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
+        {
+            return MetadataVisitor.GatherMetadata(query.Expression); 
         }
     }
 }
