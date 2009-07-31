@@ -21,6 +21,7 @@
         <%} else{ %>
             <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" />
          <%} %>    
+            <span id="windowTitle">Título de la ventana</span>
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), prefix) %>
     </div>

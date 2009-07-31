@@ -15,7 +15,7 @@
         colVisibility.Add(i, queryResult.Columns[i].Visible);
     }
  %>
-<table id="<%=Html.GlobalName("tblResults")%>" name="<%=Html.GlobalName("tblResults")%>">
+<table id="<%=Html.GlobalName("tblResults")%>" name="<%=Html.GlobalName("tblResults")%>" class="tblResults">
     <thead>
         <tr>
             <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
