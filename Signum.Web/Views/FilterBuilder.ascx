@@ -27,7 +27,7 @@
         <a href="#" id="filters-header" rev="filters-body">Ocultar filtros</a>
         <div id="filters-body">
             <label for="<%=Html.GlobalName("ddlNewFilters")%>">Filtrar por campo</label>
-            <select id="<%=Html.GlobalName("ddlNewFilters")%>" name="<%=Html.GlobalName("ddlNewFilters")%>">
+            <select id="<%=Html.GlobalName("ddlNewFilters")%>">
 
             <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
                {
@@ -37,11 +37,12 @@
                <%
                } 
             %>
+           </select> 
            <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum.aspx/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
            <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "Eliminar Filtros", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
        <!--    <span class="separator"></span>
            <label for="<%=Html.GlobalName(ViewDataKeys.Top)%>">Núm.registros</label> <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new {size = "5" })%>
-        --></select>
+        -->
         </div>
     <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
   
