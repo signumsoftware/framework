@@ -7,6 +7,8 @@ using Signum.Engine.Operations;
 using Signum.Entities.Operations;
 using Signum.Utilities;
 using Signum.Entities;
+using System.Web;
+using Signum.Entities.Basics;
 
 namespace Signum.Web.Operations
 {
@@ -42,7 +44,7 @@ namespace Signum.Web.Operations
     {
         public Dictionary<Enum, WebMenuItem> Settings = new Dictionary<Enum, WebMenuItem>();
 
-        internal List<WebMenuItem> ButtonBar_GetButtonBarElement(object entity, string mainControlUrl)
+        internal List<WebMenuItem> ButtonBar_GetButtonBarElement(HttpContextBase httpContext, object entity, string mainControlUrl)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -52,8 +54,8 @@ namespace Signum.Web.Operations
             var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
 
             var dic = (from oi in list
-                       let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
-                       where os == null || os.IsVisible == null || os.IsVisible(oi)
+                       let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
+                       where os == null || os.IsVisible == null || os.IsVisible(ident)
                        select new { OperationInfo = oi, OperationSettings = os }).ToDictionary(a => a.OperationInfo.Key);
 
             if (dic.Count == 0)
@@ -62,21 +64,55 @@ namespace Signum.Web.Operations
 
             foreach (OperationInfo oi in list)
             {
-                WebMenuItem item = new WebMenuItem 
+                if (dic.ContainsKey(oi.Key))
                 {
-                    AltText = dic[oi.Key].OperationSettings.AltText,
-                    Id = dic[oi.Key].OperationSettings.Id,
-                    ImgSrc = dic[oi.Key].OperationSettings.ImgSrc,
-                    OnClick = dic[oi.Key].OperationSettings.OnClick,
-                    OnServerClickAjax = dic[oi.Key].OperationSettings.OnServerClickAjax,
-                    OnServerClickPost = dic[oi.Key].OperationSettings.OnServerClickPost
-                };
-                item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.HtmlProps);
+                    WebMenuItem item = new WebMenuItem
+                    {
+                        AltText = GetText(oi.Key, dic[oi.Key].OperationSettings),
+                        Id = dic[oi.Key].OperationSettings.TryCC(os => os.Id),
+                        ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
+                        OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
+                        OnServerClickAjax = GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationSettings, ident),
+                        OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
+                    };
+                    item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps));
 
-                items.Add(item);
+                    items.Add(item);
+                }
             }
             
             return items;
+        }
+
+        protected internal virtual string GetText(Enum key, EntityOperationSettings os)
+        {
+            if (os != null && os.AltText != null)
+                return os.AltText;
+
+            return EnumExtensions.NiceToString(key);
+        }
+
+        protected internal virtual string GetImage(Enum key, EntityOperationSettings os)
+        {
+            if (os != null && os.ImgSrc != null)
+                return os.ImgSrc;
+
+            return null;
+        }
+
+        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, EntityOperationSettings os, IdentifiableEntity ident)
+        {
+            if (os != null && os.OnServerClickAjax.HasText())
+                return os.OnServerClickAjax;
+
+            return "javascript:OperationExecute('OperationExecute','{0}','{1}','{2}','{3}','{4}','{5}');".Formato(
+                ident.GetType(), 
+                ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
+                EnumDN.UniqueKey(key),
+                httpContext.Request.Params["prefix"] ?? "",
+                httpContext.Request.Params[ViewDataKeys.OnOk] ?? "",
+                httpContext.Request.Params[ViewDataKeys.OnCancel] ?? ""
+                );
         }
 
         internal object ConstructorManager_GeneralConstructor(Type type, Controller controller)
