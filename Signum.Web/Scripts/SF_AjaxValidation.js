@@ -74,7 +74,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
         if (runtimeType != null && runtimeType != "") {
             typeName = runtimeType;
         }
-        return TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, false);
+        return TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "", false);
     }
 
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages
@@ -84,7 +84,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
         if (runtimeType != null && runtimeType != "") {
             typeName = runtimeType;
         }
-        return TypedTrySavePartial(urlController, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, false);
+        return TypedTrySavePartial(urlController, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "", false);
     }
 
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages

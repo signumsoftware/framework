@@ -158,6 +158,25 @@ function CallServer(urlController, onOk, onCancel, prefix) {
     });
 }
 
+function OperationExecute(urlController, typeName, id, operationKey, prefix, onOk, onCancel) {
+    var formChildren = $('#' + prefix + "panelPopup *");
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: formChildren.serialize() + "sfTypeName=" + typeName + "&sfId=" + id + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel),
+        async: false,
+        dataType: "html",
+        success:
+                   function(msg) {
+                       $('#' + prefix + "externalPopupDiv").html(msg);
+                   },
+        error:
+                   function(XMLHttpRequest, textStatus, errorThrown) {
+                       ShowError(XMLHttpRequest, textStatus, errorThrown);
+                   }
+    });
+}
+
 function PostServer(urlController, prefix) {
     var ids = GetSelectedElements(prefix);
     if (ids == "")

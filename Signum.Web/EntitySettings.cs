@@ -10,10 +10,11 @@ namespace Signum.Web
         public string PartialViewName;
         public string UrlName;
 
-        public Func<bool, bool> IsCreable;
-        public Func<bool, bool> IsViewable;
-        public Func<bool, bool> IsReadOnly;
-        
+        public Func<bool, bool> IsCreable { get; set; }
+        public Func<bool, bool> IsViewable { get; set; }
+        public Func<bool, bool> IsReadOnly { get; set; }
+        public Func<bool, bool> ShowOkSave { get; set; }
+
         public EntitySettings(bool isSimpleType)
         {
             if (isSimpleType)

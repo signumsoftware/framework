@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Web.Mvc;
+using System.Web;
 
 namespace Signum.Web
 {
@@ -25,12 +26,10 @@ namespace Signum.Web
         public readonly Dictionary<string, object> HtmlProps = new Dictionary<string, object>(0);
     }
 
-    public delegate List<WebMenuItem> GetButtonBarElementDelegate(object entity, string mainControlUrl);
+    public delegate List<WebMenuItem> GetButtonBarElementDelegate(HttpContextBase httpContext, object entity, string mainControlUrl);
 
     public static class ButtonBarHelper
     {
-        static List<WebMenuItem> FixedElements;
-
         public static event GetButtonBarElementDelegate GetButtonBarElement;
 
         public static void Start()
@@ -38,13 +37,13 @@ namespace Signum.Web
 
         }
 
-        public static string GetButtonBarElements(this HtmlHelper helper, object entity, string mainControlUrl, object prefix)
+        public static string GetButtonBarElements(this HtmlHelper helper, object entity, string mainControlUrl, string prefix)
         {
-            List<WebMenuItem> elements = new List<WebMenuItem>(FixedElements);
+            List<WebMenuItem> elements = new List<WebMenuItem>();
             if (GetButtonBarElement != null)
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(entity, mainControlUrl))
+                    .Select(d => d(helper.ViewContext.HttpContext, entity, mainControlUrl))
                     .NotNull().SelectMany(d => d).ToList());
 
             StringBuilder sb = new StringBuilder();
@@ -73,7 +72,7 @@ namespace Signum.Web
                 {
                     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
                         throw new ArgumentException("The custom Menu Item {0} cannot have both OnServerClickAjax and another Click defined".Formato(mi.Id));
-                    onclick = "CallServer('{0}',{1});".Formato(mi.OnServerClickAjax, strPrefix);
+                    onclick = mi.OnServerClickAjax;
                 }
 
                 //Constructo OnServerClick
@@ -90,7 +89,13 @@ namespace Signum.Web
                 else if (mi.HtmlProps["style"].ToString().IndexOf("cursor") == -1)
                     mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
 
-                sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                if (mi.ImgSrc.HasText())
+                    sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                else
+                {
+                    mi.HtmlProps.Add("onclick", onclick);
+                    sb.Append(helper.Div(mi.Id, mi.AltText, "", mi.HtmlProps));
+                }
             }
 
             return sb.ToString();

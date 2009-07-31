@@ -130,6 +130,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\OKCancelPopup.ascx">
+      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\PopupControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
@@ -186,6 +187,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
+    <EmbeddedResource Include="Views\SearchPopupControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

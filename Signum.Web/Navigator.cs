@@ -394,9 +394,11 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
             controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
+            //controller.ViewData[ViewDataKeys.QuerySettings] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString()));
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
+            controller.ViewData[ViewDataKeys.EntityType] = entitiesType;
             controller.ViewData[ViewDataKeys.Create] =
                 (findOptions.Create.HasValue) ?
                     findOptions.Create.Value :
@@ -404,7 +406,7 @@ namespace Signum.Web
 
             return new PartialViewResult
             {
-                ViewName = PopupControlUrl,
+                ViewName = SearchPopupControlUrl,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
@@ -621,6 +623,24 @@ namespace Signum.Web
                 return false;
 
             return QuerySettings.ContainsKey(queryName);
+        }
+
+        public virtual bool ShowOkSave(Type type, bool admin)
+        {
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es != null && es.ShowOkSave != null)
+                return es.ShowOkSave(admin);
+
+            return true;
+        }
+
+        public virtual bool ShowSearchOkButton(object queryName, bool admin)
+        {
+            QuerySettings qs = QuerySettings.TryGetC(queryName);
+            if (qs != null && qs.ShowOkButton != null)
+                return qs.ShowOkButton(admin);
+
+            return true;
         }
     }
 
