@@ -40,8 +40,8 @@ namespace Signum.Web
             {
                 helper.ViewContext.HttpContext.Response.Write(
                     "<li>\n" +
-                    "<a onclick=\"$('#ul{0}').toggle();(this.className == 'active') ? this.className='' : this.className='active';\" title='{1}'>{0}</a>\n".Formato(text, title) +
-                    "<ul class='submenu' id='ul{0}' style='display:none'>".Formato(text)
+                    "<span onclick=\"$('#ul{0}').toggle();(this.className == 'active') ? this.className='' : this.className='active';\" title='{1}'>{0}</span>\n".Formato(text, title) +
+                    "<ul class='submenu' id='ul{0}'>".Formato(text)
                     );
 
                 foreach (Item mi in children)
