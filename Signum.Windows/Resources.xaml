@@ -637,8 +637,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
-                    <Border BorderBrush="White" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Grid.RowSpan="2" Grid.Row="0" >
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3">
+                    <Border BorderBrush="#FF8CACCC" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Grid.RowSpan="2" Grid.Row="0" >
+                        <Border BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" BorderBrush="#FFC9E4FF">
                             <Grid SnapsToDevicePixels="true">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -647,7 +647,7 @@
                                 <Border x:Name="Header" Padding="1" Grid.Row="0">
                                     <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" ContentSource="Header" RecognizesAccessKey="True"/>
                                 </Border>
-                                <Border Grid.RowSpan="2" Grid.Row="1" Background="#22000000">
+                                <Border Grid.RowSpan="2" Grid.Row="1" Background="#44C9E4FF">
                                     <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Margin="{TemplateBinding Padding}"  />
                                 </Border>
                             </Grid>

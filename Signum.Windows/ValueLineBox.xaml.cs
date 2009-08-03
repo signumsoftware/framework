@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using System.Windows.Controls.Primitives;
+
+namespace Signum.Windows
+{
+    /// <summary>
+    /// Interaction logic for TypeSelectorWindow.xaml
+    /// </summary>
+    public partial class ValueLineBox : Window
+    {
+
+        public ValueLineBox()
+        {
+            InitializeComponent();        
+        }
+
+
+        private void btAccept_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+            Close(); 
+        }
+
+        public static bool Show<T>(ref T value, string title, string text, string labelText, string format, string unitText, Window owner)
+        {
+            object obj = value;
+            if (ShowUntyped(typeof(T), ref obj, title, text, labelText, format, unitText, owner))
+            {
+                value = (T)obj;
+                return true;
+            }
+            return false;
+        }
+
+        public static bool ShowUntyped(Type valueType, ref object value, string title, string text, string labelText, string format, string unitText, Window owner)
+        {
+            ValueLineBox vlb = new ValueLineBox();
+            vlb.Title = title ?? "Choose a value";
+
+            vlb.tb.Text = text ?? "Please, choose a value to continue:";
+
+            vlb.valueLine.ValueType = valueType;
+
+            if (labelText == null)
+                Common.SetLabelVisible(vlb.valueLine, false);
+            else
+                vlb.valueLine.LabelText = labelText;
+
+            vlb.valueLine.Format = format;
+            vlb.valueLine.UnitText = unitText;
+            vlb.valueLine.Value = value;
+
+            vlb.Owner = owner;
+
+            if (vlb.ShowDialog() == true)
+            {
+                value = vlb.valueLine.Value;
+                return true;
+            }
+            return false;
+        }
+
+
+    }
+}

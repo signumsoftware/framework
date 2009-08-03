@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
+using System.Windows.Media;
 
 namespace Signum.Windows
 {
@@ -17,9 +18,11 @@ namespace Signum.Windows
         {
             Tasks += TaskCollapseSubMenuParent;
             Tasks += TaskSetHeader;
+            Tasks += TaskSetIcon;
             Tasks += TaskKeyboardShortcut;
         }
 
+     
         public static void TaskKeyboardShortcut(MenuItem menuItem)
         {
             ShortcutHelper.SetMenuItemShortcuts(menuItem);
@@ -46,10 +49,26 @@ namespace Signum.Windows
                 else if (o is AdminOptions)
                     o = ((AdminOptions)o).Type;
 
-                if (o is Enum)
-                    menuItem.Header = ((Enum)o).NiceToString();
-                else if (o is Type)
-                    menuItem.Header = ((Type)o).NiceName();
+                menuItem.Header =
+                    o is Enum ? ((Enum)o).NiceToString() :
+                    o is Type ? ((Type)o).NiceName() : null;
+            }
+        }
+
+        static void TaskSetIcon(MenuItem menuItem)
+        {
+            if (menuItem.NotSet(MenuItem.IconProperty))
+            {
+                object o = menuItem.Tag;
+
+                if (o == null)
+                    return;
+
+                ImageSource source = 
+                    o is FindOptions ? Navigator.Manager.GetFindIcon(((FindOptions)o).QueryName, false) :
+                    o is AdminOptions ? Navigator.Manager.GetAdminIcon(((AdminOptions)o).Type, false) : null;
+
+                menuItem.Icon = new Image { Source = source, Stretch = Stretch.None }; 
             }
         }
 

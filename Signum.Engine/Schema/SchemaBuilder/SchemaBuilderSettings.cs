@@ -23,7 +23,7 @@ namespace Signum.Engine.Maps
 
         Dictionary<Type, SchemaBuilderTypeSettings> types = new Dictionary<Type,SchemaBuilderTypeSettings>();
 
-        Dictionary<Type, SqlDbType> typeValues = new Dictionary<Type, SqlDbType>
+        internal static Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
         {
             {typeof(bool), SqlDbType.Bit},
 
@@ -192,7 +192,7 @@ namespace Signum.Engine.Maps
         {
             SqlDbTypeAttribute att = FieldInfoAttributes(type, fi).OfType<SqlDbTypeAttribute>().SingleOrDefault();
 
-            return att.TryCS(a => a.HasSqlDbType ? a.SqlDbType : (SqlDbType?)null) ?? typeValues.TryGetS(fieldType.UnNullify());
+            return att.TryCS(a => a.HasSqlDbType ? a.SqlDbType : (SqlDbType?)null) ?? TypeValues.TryGetS(fieldType.UnNullify());
         }
 
         internal int? GetSqlSize(Type type, FieldInfo fi, SqlDbType sqlDbType)

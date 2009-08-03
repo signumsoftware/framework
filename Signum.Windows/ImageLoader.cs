@@ -12,10 +12,14 @@ namespace Signum.Windows
 {
     public static class ImageLoader
     {
-        public static BitmapFrame GetImageSortName(string name)
+        internal static BitmapFrame GetImageSortName(string name)
         {
-            StreamResourceInfo sri = Application.GetResourceStream(PackUriHelper.Reference("Images/" + name, typeof(Navigator)));
-            return BitmapFrame.Create(sri.Stream); 
+            return LoadIcon(PackUriHelper.Reference("Images/" + name, typeof(Navigator))); 
+        }
+
+        public static BitmapFrame LoadIcon(Uri uri)
+        {
+            return BitmapFrame.Create(Application.GetResourceStream(uri).Stream);
         }
     }
 }

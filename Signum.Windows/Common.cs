@@ -200,7 +200,13 @@ namespace Signum.Windows
   
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
         {
-            DependencyProperty valueProperty = ValueProperty(fe);
+            DependencyProperty valueProperty =
+                fe is ValueLine ? ValueLine.ValueProperty :
+                fe is EntityLine ? EntityLine.EntityProperty :
+                fe is EntityList ? EntityList.EntitiesProperty :
+                fe is EntityCombo ? EntityCombo.EntityProperty :
+                fe is FileLine ? FileLine.EntityProperty :
+                FrameworkElement.DataContextProperty;
 
             bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
 
@@ -217,17 +223,6 @@ namespace Signum.Windows
             }
         }
 
-        static DependencyProperty ValueProperty(FrameworkElement fe)
-        {
-            DependencyProperty valueProp =
-                fe is ValueLine ? ValueLine.ValueProperty :
-                fe is EntityLine ? EntityLine.EntityProperty :
-                fe is EntityList ? EntityList.EntitiesProperty :
-                fe is EntityCombo ? EntityCombo.EntityProperty :
-                fe is FileLine ? FileLine.EntityProperty :
-                FrameworkElement.DataContextProperty;
-            return valueProp;
-        }
 
         public static void TaskSetTypeProperty(FrameworkElement fe, string route, TypeContext context)
         {
@@ -319,17 +314,12 @@ namespace Signum.Windows
 
         static void TaskSetCollaspeIfNull(FrameworkElement fe, string route, TypeContext context)
         {
-            if (GetCollapseIfNull(fe) &&  fe.Visibility == Visibility.Visible)
+            if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
-                DependencyProperty valueProperty = ValueProperty(fe);
-
-                object value = fe.GetValue(valueProperty);
-
-                Binding b = new Binding()
+                Binding b = new Binding(route)
                 {
-                    Path = new PropertyPath(valueProperty),
                     Mode = BindingMode.OneWay,
-                    Converter = Converters.BoolToVisibility
+                    Converter = Converters.NullToVisibility
                 };
                 fe.SetBinding(FrameworkElement.VisibilityProperty, b);
             }

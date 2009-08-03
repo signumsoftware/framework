@@ -237,7 +237,7 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = Implementations == null ? CleanType : Navigator.SelectType(Implementations);
+                Type type = Implementations == null ? CleanType : Navigator.SelectType(this.FindCurrentWindow(), Implementations);
                 if (type == null)
                     return null;
 
@@ -267,7 +267,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = Implementations == null ? CleanType : Navigator.SelectType(Implementations);
+                Type type = Implementations == null ? CleanType : Navigator.SelectType(this.FindCurrentWindow(), Implementations);
                 if (type == null)
                     return null;
 

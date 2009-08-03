@@ -171,10 +171,17 @@ namespace Signum.Engine.Linq
                 m.Method.Name == "Truncate"))
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
-            var a = this.Visit(m.Object);
-            var list = this.VisitExpressionList(m.Arguments);
-
-            return MakeDirtyMeta(m.Type, list.PreAnd(a).ToArray());
+            if (m.Object != null)
+            {
+                var a = this.Visit(m.Object);
+                var list = this.VisitExpressionList(m.Arguments);
+                return MakeDirtyMeta(m.Type, list.PreAnd(a).ToArray());
+            }
+            else
+            {
+                var list = this.VisitExpressionList(m.Arguments);
+                return MakeDirtyMeta(m.Type, list.ToArray());
+            }
         }
 
         private Expression MapAndVisit(LambdaExpression lambda, params MetaProjectorExpression[] projs)

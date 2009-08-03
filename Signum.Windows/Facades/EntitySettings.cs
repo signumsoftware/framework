@@ -25,51 +25,44 @@ namespace Signum.Windows
 
         public Action<bool, ICollectionView> CollectionViewOperations { get; set; }
         public DataTemplate DataTemplate { get; set; }
-        public Func<ImageSource> Icon { get; set; }
+        public ImageSource Icon { get; set; }
 
-        static ImageSource DefaultFind = ImageLoader.GetImageSortName("find.png");
-        static ImageSource DefaultAdmin = ImageLoader.GetImageSortName("admin.png");
-        static ImageSource DefaultIcon = ImageLoader.GetImageSortName("entity.png");
-
-        public EntitySettings(bool isAdmin)
+        public EntitySettings()
+            : this(EntityType.Default)
         {
-            if (isAdmin)
-            {
-                IsReadOnly = admin => !admin;
-                IsCreable = admin => admin;
-                IsViewable = admin => admin;
-                CollectionViewOperations = (isLazy,cv) =>
-                {
-                    ListCollectionView lcv = cv as ListCollectionView;
-                    if (lcv != null)
-                        lcv.CustomSort = isLazy ?
-                            (IComparer)new LambdaComparer<Lazy, int>(la => la.IdOrNull ?? int.MaxValue) :
-                            (IComparer)new LambdaComparer<IdentifiableEntity, int>(ie => ie.IdOrNull ?? int.MaxValue);
-                    else
-                        cv.SortDescriptions.Add(new SortDescription("IdOrNull", ListSortDirection.Ascending));
-                };
-            }
-            else
-            {
-                IsReadOnly = admin => false;
-                IsCreable = admin => true;
-                IsViewable = admin => true;
-            }
         }
 
-
-        internal static ImageSource GetIcon(EntitySettings es, WindowsType wt)
+        public EntitySettings(EntityType entityType)
         {
-            switch (wt)
+            switch (entityType)
             {
-                case WindowsType.View:
-                    return es != null && es.Icon != null ? es.Icon() : DefaultIcon;
-                case WindowsType.Find:
-                    return DefaultFind;
-                case WindowsType.Admin:
-                    return DefaultAdmin;
+                case EntityType.Default:
+                    break;
+                case EntityType.Admin:
+                    IsReadOnly = admin => !admin;
+                    IsCreable = admin => admin;
+                    IsViewable = admin => admin;
+                    CollectionViewOperations = (isLazy, cv) =>
+                    {
+                        ListCollectionView lcv = cv as ListCollectionView;
+                        if (lcv != null)
+                            lcv.CustomSort = isLazy ?
+                                (IComparer)new LambdaComparer<Lazy, int>(la => la.IdOrNull ?? int.MaxValue) :
+                                (IComparer)new LambdaComparer<IdentifiableEntity, int>(ie => ie.IdOrNull ?? int.MaxValue);
+                        else
+                            cv.SortDescriptions.Add(new SortDescription("IdOrNull", ListSortDirection.Ascending));
+                    };
+                    break;
+                case EntityType.NotSaving:
+                    ShowOkSave = admin => false; 
+                    break;
+                case EntityType.ServerOnly:
+                    IsReadOnly = admin => true;
+                    ShowOkSave = admin => false; 
+                    IsCreable = admin => false;
+                    break;
                 default:
-                    throw new InvalidOperationException();
+                    break;
             }
         }
     }
@@ -79,5 +72,13 @@ namespace Signum.Windows
         View,
         Find,
         Admin
+    }
+
+    public enum EntityType
+    {
+        Admin,
+        Default,
+        NotSaving,
+        ServerOnly,
     }
 }

@@ -114,9 +114,9 @@ namespace Signum.Windows
             return null;
         }
 
-        public static Type SelectType(Type[] implementations)
+        public static Type SelectType(Window parent, Type[] implementations)
         {
-            return Manager.SelectTypes(implementations);
+            return Manager.SelectTypes(parent, implementations);
         }
 
         internal static bool IsFindable(object queryName)
@@ -152,7 +152,11 @@ namespace Signum.Windows
         public event Func<Type, bool> GlobalIsViewable;
         public event Func<object, bool> GlobalIsFindable;
 
-        public event Action<Window, EntitySettings, WindowsType> TaskViewWindow; 
+        public event Action<Window, WindowsType, object> TaskViewWindow;
+
+        public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");
+        public ImageSource DefaultAdminIcon = ImageLoader.GetImageSortName("admin.png");
+        public ImageSource DefaultEntityIcon = ImageLoader.GetImageSortName("entity.png");
 
         public NavigationManager()
         {
@@ -160,17 +164,60 @@ namespace Signum.Windows
             TaskViewWindow += TaskSetLabelShortcuts;
         }
 
-        public static void TaskSetSetIcon(Window windows, EntitySettings es, WindowsType winType)
+        public void TaskSetSetIcon(Window windows, WindowsType winType, object typeOrQueryName)
         {
-            windows.Icon = EntitySettings.GetIcon(es, WindowsType.View);
+            switch (winType)
+            {
+                case WindowsType.View: windows.Icon = GetEntityIcon((Type)typeOrQueryName, true); break;
+                case WindowsType.Find: windows.Icon = GetFindIcon(typeOrQueryName, true); break;
+                case WindowsType.Admin: windows.Icon = GetEntityIcon((Type)typeOrQueryName, true); break;
+                default:
+                    break;
+            }
         }
 
-        public static void TaskSetLabelShortcuts(Window windows, EntitySettings es, WindowsType winType)
+        public void TaskSetLabelShortcuts(Window windows, WindowsType winType, object typeOrQueryName)
         {
             if (winType == WindowsType.Find)
                 return;
 
             ShortcutHelper.SetLabelShortcuts(windows);
+        }
+
+
+        public ImageSource GetEntityIcon(Type type, bool useDefault)
+        {
+            EntitySettings es = Settings.TryGetC(type);
+            if (es != null && es.Icon != null)
+                return es.Icon;
+
+            return useDefault ? DefaultEntityIcon : null;
+        }
+
+
+        public ImageSource GetFindIcon(object queryName, bool useDefault)
+        {
+            var qs = QuerySetting.TryGetC(queryName);
+            if (qs != null && qs.Icon != null)
+                return qs.Icon;
+
+            if (queryName is Type)
+            {
+                EntitySettings es = Settings.TryGetC((Type)queryName);
+                if (es != null && es.Icon != null)
+                    return es.Icon;
+            }
+
+            return useDefault ?  DefaultFindIcon: null;
+        }
+
+        public ImageSource GetAdminIcon(Type entityType, bool useDefault)
+        {
+            EntitySettings es = Settings.TryGetC(entityType);
+            if (es != null && es.Icon != null)
+                return es.Icon;
+
+            return useDefault ? DefaultAdminIcon : null;
         }
 
         internal void Initialize()
@@ -189,10 +236,6 @@ namespace Signum.Windows
 
         public virtual string SearchTitle(object queryName)
         {
-            QuerySettings vs = QuerySetting.TryGetC(queryName);
-            if (vs != null && vs.Title != null)
-                return vs.Title; 
-
             string title = (queryName is Type) ? ((Type)queryName).NiceName() :
                            (queryName is Enum) ? ((Enum)queryName).NiceToString() :
                             queryName.ToString();
@@ -218,7 +261,7 @@ namespace Signum.Windows
 
             EntitySettings es = (findOptions.QueryName as Type).TryCC(t => Settings.TryGetC(t)); 
             if(TaskViewWindow != null)
-                TaskViewWindow(sw, es, WindowsType.Find);
+                TaskViewWindow(sw, WindowsType.Find, findOptions.QueryName);
 
             if (findOptions.Modal)
             {
@@ -286,7 +329,7 @@ namespace Signum.Windows
                 Common.SetIsReadOnly(win, true);
 
             if (TaskViewWindow != null)
-                TaskViewWindow(win, es, WindowsType.View);
+                TaskViewWindow(win, WindowsType.View, entity.GetType());
 
             if (viewOptions.Clone && entity is ICloneable)
                 win.DataContext = ((ICloneable)entity).Clone();
@@ -321,8 +364,8 @@ namespace Signum.Windows
             if (GlobalIsCreable != null && !GlobalIsCreable(type))
                 return false;
 
-            EntitySettings es = Settings.TryGetC(type); 
-            if(es == null)
+            EntitySettings es = Settings.TryGetC(type);
+            if (es == null || es.IsCreable == null)
                 return true; 
             
             return es.IsCreable(admin);
@@ -330,11 +373,11 @@ namespace Signum.Windows
 
         internal protected virtual bool IsReadOnly(Type type, bool admin)
         {
-            if (GlobalIsReadOnly != null && !GlobalIsReadOnly(type))
-                return false;
+            if (GlobalIsReadOnly != null && GlobalIsReadOnly(type))
+                return true;
 
             EntitySettings es = Settings.TryGetC(type);
-            if (es == null)
+            if (es == null || es.IsReadOnly == null)
                 return false;
 
             return es.IsReadOnly(admin);
@@ -348,6 +391,9 @@ namespace Signum.Windows
             EntitySettings es = Settings.TryGetC(type);
             if (es == null)
                 return false;
+
+            if (es.IsViewable == null)
+                return true;
 
             return es.IsViewable(admin);
         }
@@ -385,12 +431,12 @@ namespace Signum.Windows
             };
 
             if (TaskViewWindow != null)
-                TaskViewWindow(nw, es, WindowsType.Admin);
+                TaskViewWindow(nw, WindowsType.Admin, type);
 
             nw.Show();
         }
 
-        public virtual Type SelectTypes(Type[] implementations)
+        public virtual Type SelectTypes(Window parent, Type[] implementations)
         {
             if (implementations == null || implementations.Length == 0)
                 throw new ArgumentException("implementations");
@@ -398,7 +444,7 @@ namespace Signum.Windows
             if (implementations.Length == 1)
                 return implementations[0];
 
-            TypeSelectorWindow win = new TypeSelectorWindow();
+            TypeSelectorWindow win = new TypeSelectorWindow { Owner = parent };
             win.Types = implementations;
             if (win.ShowDialog() != true)
                 return null;

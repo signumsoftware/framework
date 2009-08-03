@@ -11,6 +11,8 @@ using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
+using System.Data;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.Linq
 {
@@ -37,11 +39,23 @@ namespace Signum.Engine.Linq
             return "@p" + (parameter++);
         }
 
-        ConstructorInfo cons = typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(object) });
+        ConstructorInfo cons = typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(SqlDbType) });
+        PropertyInfo piValue = ReflectionTools.GetPropertyInfo<SqlParameter>(s => s.Value);
+        PropertyInfo piIsNullable = ReflectionTools.GetPropertyInfo<SqlParameter>(s => s.IsNullable); 
 
         public Expression CreateParameter(string name, Expression value)
         {
-            return Expression.New(cons, Expression.Constant(name), Expression.Convert(value, typeof(object)));
+            bool nullable = value.Type.IsClass || value.Type.IsNullable();
+            SqlDbType sqlDbType = SchemaBuilderSettings.TypeValues.TryGetS(value.Type.UnNullify()) ?? SqlDbType.Variant;
+
+            Expression valExpression = value.Type.IsNullable() ? 
+                Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
+                (Expression)Expression.Convert(value, typeof(object));
+
+            return Expression.MemberInit(
+                Expression.New(cons, Expression.Constant(name), Expression.Constant(sqlDbType)),
+                Expression.Bind(piIsNullable, Expression.Constant(nullable)),
+                Expression.Bind(piValue, valExpression));
         }
 
         private QueryFormatter() { }

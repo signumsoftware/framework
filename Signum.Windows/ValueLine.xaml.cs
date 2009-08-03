@@ -124,25 +124,41 @@ namespace Signum.Windows
             Control control = Configurator.constructor[lineType](type, nullable, Format);
             control.Style = (Style)FindResource("toolTip"); 
 
+            Binding b; 
             BindingExpression bindingExpression = BindingOperations.GetBindingExpression(this, ValueProperty);
-            Binding binding = bindingExpression.ParentBinding;
-            Validation.ClearInvalid(bindingExpression);
-            BindingOperations.ClearBinding(this, ValueProperty);
-
-            DependencyProperty prop = Configurator.properties[lineType];
-            Binding b = new Binding(binding.Path.Path)
+            if (bindingExpression != null) // is something is binded to ValueProperty, bind the new control to there
             {
-                Converter = Configurator.GetConverter(lineType, type, nullable),
-                UpdateSourceTrigger = binding.UpdateSourceTrigger,
-                Mode = binding.Mode,
-                ValidatesOnExceptions = true,
-                ValidatesOnDataErrors = true,
-                NotifyOnValidationError= true,
-            };
+                Binding binding = bindingExpression.ParentBinding;
+                Validation.ClearInvalid(bindingExpression);
+                BindingOperations.ClearBinding(this, ValueProperty);
+                b = new Binding(binding.Path.Path)
+                {
+                    UpdateSourceTrigger = binding.UpdateSourceTrigger,
+                    Mode = binding.Mode,
+                    ValidatesOnExceptions = true,
+                    ValidatesOnDataErrors = true,
+                    NotifyOnValidationError = true,
+                };
+            }
+            else //otherwise bind to value property
+            {
+                b = new Binding()
+                {
+                    Path = new PropertyPath(ValueLine.ValueProperty),
+                    Source = this,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    Mode = BindingMode.TwoWay,
+                };
+            }
+
+            b.Converter = Configurator.GetConverter(lineType, type, nullable);
 
             ValidationRule validation = Configurator.GetValidation(lineType, type, nullable);
             if (validation != null)
-                b.ValidationRules.Add(validation); 
+                b.ValidationRules.Add(validation);
+
+            DependencyProperty prop = Configurator.properties[lineType];
+       
             control.SetBinding(prop, b);
 
             Binding rb = new Binding

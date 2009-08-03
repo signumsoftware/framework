@@ -77,7 +77,7 @@ namespace Signum.Windows
             ConverterFactory.New((Type type) => type.TryCC(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter TypeImage =
-            ConverterFactory.New((Type type) => EntitySettings.GetIcon(type.TryCC(t => Navigator.GetEntitySettings(t)), WindowsType.View));
+            ConverterFactory.New((Type type) => type.TryCC(t => Navigator.Manager.GetEntityIcon(type, true)));
 
         public static readonly IValueConverter ThicknessToCornerRadius =
             ConverterFactory.New((Thickness b) => new CornerRadius

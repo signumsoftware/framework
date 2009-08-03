@@ -11,13 +11,14 @@ using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
 using System.Globalization;
+using System.Windows.Media;
 
 namespace Signum.Windows
 {
     public class QuerySettings
     {
-        public string Title { get; set; }
         public int? Top { get; set; }
+        public ImageSource Icon { get; set; }
 
         private Dictionary<string, Func<Binding, DataTemplate>> formatters;
         public Dictionary<string, Func<Binding, DataTemplate>> Formatters

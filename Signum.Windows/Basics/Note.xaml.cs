@@ -30,7 +30,7 @@ namespace Signum.Windows.Basics
             NotesWidget.CreateNote = ei => ei.IsNew ? null : new NoteDN { Entity = ei.ToLazy() };
             NotesWidget.RetrieveNotes = ei => ei == null ? null : Server.Service<INotesServer>().RetrieveNotes(ei.ToLazy());
 
-            Navigator.Manager.Settings.Add(typeof(NoteDN), new EntitySettings(false) { View = () => new Note(), IsCreable = admin => false, Icon = () => BitmapFrame.Create(PackUriHelper.Reference("/Images/note.png", typeof(NotesWidget))) });
+            Navigator.Manager.Settings.Add(typeof(NoteDN), new EntitySettings { View = () => new Note(), IsCreable = admin => false, Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/note.png", typeof(NotesWidget))) });
         }
 	}
 }
