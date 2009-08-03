@@ -28,7 +28,7 @@ namespace Signum.Web.Operations
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
             else
-                entity = (IdentifiableEntity)Navigator.CreateInstance(this, type);
+                entity = (IdentifiableEntity)Navigator.CreateInstance(type);
 
             Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "", ref entity);
 

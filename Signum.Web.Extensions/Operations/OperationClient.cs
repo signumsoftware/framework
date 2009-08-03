@@ -102,11 +102,13 @@ namespace Signum.Web.Operations
 
         protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, EntityOperationSettings os, IdentifiableEntity ident)
         {
+            string controllerUrl = "Operation.aspx/OperationExecute";
             if (os != null && os.OnServerClickAjax.HasText())
-                return os.OnServerClickAjax;
+                controllerUrl = os.OnServerClickAjax;
 
-            return "javascript:OperationExecute('OperationExecute','{0}','{1}','{2}','{3}','{4}','{5}');".Formato(
-                ident.GetType(), 
+            return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}',{5},{6});".Formato(
+                controllerUrl,
+                ident.GetType().Name, 
                 ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
                 EnumDN.UniqueKey(key),
                 httpContext.Request.Params["prefix"] ?? "",
