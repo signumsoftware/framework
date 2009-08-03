@@ -109,12 +109,12 @@ namespace Signum.Entities.Processes
             set { Set(ref suspendDate, value, "SuspendDate"); }
         }
 
-        DateTime? errorDate;
+        DateTime? exceptionDate;
         [LocDescription]
-        public DateTime? ErrorDate
+        public DateTime? ExceptionDate
         {
-            get { return errorDate; }
-            set { Set(ref errorDate, value, "ErrorDate"); }
+            get { return exceptionDate; }
+            set { Set(ref exceptionDate, value, "ExceptionDate"); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -135,11 +135,11 @@ namespace Signum.Entities.Processes
         }
 
         static StateValidator<ProcessExecutionDN, ProcessState> stateValidator = new StateValidator<ProcessExecutionDN, ProcessState>
-        (e => e.State, e=>e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e=>e.ErrorDate, e=>e.Exception)
+        (e => e.State, e=>e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e=>e.ExceptionDate, e=>e.Exception)
         {
        {ProcessState.Created,   false,   false,                  false,             false,                 false,               false,              false,            false,         false}, 
        {ProcessState.Planned,   true,    null,                   null,              null,                  false,               null,               null,             null,          null}, 
-       {ProcessState.Canceled,  true,    true,                   null,              null,                  false,               null,               null,             null,          null}, 
+       {ProcessState.Canceled,  null,    true,                   null,              null,                  false,               null,               null,             null,          null}, 
        {ProcessState.Queued,    null,    null,                   true,              false,                 false,               false,              false,            false,         false},
        {ProcessState.Executing, null,    null,                   true,              true,                  false,               false,              true,             false,         false},
        {ProcessState.Suspending,null,    null,                   true,              true,                  false,               true,               true,             false,         false},
@@ -184,6 +184,18 @@ namespace Signum.Entities.Processes
                 case ProcessState.Error: return "{0} {1} on {2}".Formato(process, ProcessState.Error.NiceToString(), executionEnd);
                 default: return "{0} ??".Formato(process);
             }
+        }
+
+        public void Queue()
+        {
+            State = ProcessState.Queued;
+            QueuedDate = DateTime.Now;
+            ExecutionStart = null;
+            ExecutionEnd = null;
+            SuspendDate = null;
+            Progress = null;
+            Exception = null;
+            ExceptionDate = null;
         }
     }
 

@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.Processes;
+using System.Windows.Threading;
 
 namespace Signum.Windows.Processes
 {
@@ -22,9 +23,32 @@ namespace Signum.Windows.Processes
     /// </summary>
     public partial class ProcessExecution : UserControl
     {
+        DispatcherTimer timer;
+
         public ProcessExecution()
         {
             InitializeComponent();
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(2);
+            timer.IsEnabled = false;
+            timer.Tick += new EventHandler(timer_Tick);
+            this.DataContextChanged+=new DependencyPropertyChangedEventHandler(ProcessExecution_DataContextChanged);
+        }
+
+        void timer_Tick(object sender, EventArgs e)
+        {
+            ProcessExecutionDN pe = DataContext as ProcessExecutionDN;
+            if (pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending))
+            {
+                ProcessExecutionDN npe = pe.ToLazy().RetrieveLazyThin();
+                RaiseEvent(new ChangeDataContextEventArgs(npe));
+            }
+        }
+
+        void ProcessExecution_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            ProcessExecutionDN pe = e.NewValue as ProcessExecutionDN;
+            timer.IsEnabled = pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending); 
         }
     }
 }

@@ -76,7 +76,10 @@ namespace Signum.Windows.Operations
                         QueryName = queryName
                     });
 
-                Server.Service<IOperationServer>().ConstructFromMany(lazies, entityType, operationInfo.Key); 
+               IdentifiableEntity entity = Server.Service<IOperationServer>().ConstructFromMany(lazies, entityType, operationInfo.Key);
+
+               if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
+                   Navigator.View(entity); 
             }
         }
     }

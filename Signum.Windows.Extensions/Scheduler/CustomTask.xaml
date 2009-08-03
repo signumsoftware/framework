@@ -4,9 +4,16 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="d:CustomTaskDN"
-    MinWidth="300">
+    MinWidth="300" x:Name="ctrl">
     <StackPanel m:Common.IsReadOnly="True">
         <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="Key" />
+        <GroupBox Header="Executions">
+            <m:SearchControl Mode="Hidden" QueryName="{x:Type d:CustomTaskExecutionDN}" MaxHeight="400">
+                <m:SearchControl.FilterOptions>
+                    <m:FilterOptions ColumnName="CustomTask" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
+                </m:SearchControl.FilterOptions>
+            </m:SearchControl>
+        </GroupBox>
     </StackPanel>
 </UserControl>

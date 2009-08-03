@@ -6,8 +6,8 @@
     m:Common.TypeContext="d:PackageLineDN"
     MinWidth="300">
     <StackPanel>
-        <m:EntityCombo m:Common.Route="Package" />
-        <m:EntityCombo m:Common.Route="Entity" />
+        <m:EntityLine m:Common.Route="Package" />
+        <m:EntityLine m:Common.Route="Target" />
         <m:ValueLine m:Common.Route="FinishTime" />
         <m:ValueLine m:Common.Route="Exception" />
     </StackPanel>

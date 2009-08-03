@@ -16,6 +16,25 @@ namespace Signum.Entities.Processes
             get { return operation; }
             set { Set(ref operation, value, "Operation"); }
         }
+
+        int numLines;
+        public int NumLines
+        {
+            get { return numLines; }
+            set { Set(ref numLines, value, "NumLines"); }
+        }
+
+        int numErrors;
+        public int NumErrors
+        {
+            get { return numErrors; }
+            set { Set(ref numErrors, value, "NumErrors"); }
+        }
+
+        public override string ToString()
+        {
+            return "Package ({0} lines{1})".Formato(numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
+        }
     }
 
     [Serializable, LocDescription]

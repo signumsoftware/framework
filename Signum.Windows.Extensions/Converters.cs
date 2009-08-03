@@ -37,5 +37,8 @@ namespace Signum.Windows.Extensions
         public static readonly IValueConverter OperationBackground =
            ConverterFactory.New((Enum key) => OperationClient.GetBackground(key));
 
+        public static readonly IValueConverter DecimalOrZero =
+            ConverterFactory.New((decimal? val) => val ?? 0);
+
     }
 }

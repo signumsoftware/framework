@@ -29,7 +29,7 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined<RuleOperationDN>())
             {
                 AuthLogic.AssertIsStarted(sb);
-                OperationLogic.AssertIsLoaded(sb);
+                OperationLogic.AssertIsStarted(sb);
 
                 OperationLogic.BeginOperation += new OperationHandler(OperationLogic_BeginOperation); 
 

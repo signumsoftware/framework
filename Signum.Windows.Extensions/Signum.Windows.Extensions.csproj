@@ -397,6 +397,24 @@
   <ItemGroup>
     <Resource Include="Images\factory.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\pause.png" />
+    <Resource Include="Images\plan.png" />
+    <Resource Include="Images\play.png" />
+    <Resource Include="Images\stop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\execute.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\clock.png" />
+    <Resource Include="Images\customTask.png" />
+    <Resource Include="Images\customTaskExecution.png" />
+    <Resource Include="Images\package.png" />
+    <Resource Include="Images\packageLine.png" />
+    <Resource Include="Images\process.png" />
+    <Resource Include="Images\processExecution.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

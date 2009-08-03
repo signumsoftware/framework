@@ -42,7 +42,10 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined<Schema>())
             {
-                OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.Execute)
+                AuthLogic.AssertIsStarted(sb);
+                OperationLogic.AssertIsStarted(sb); 
+
+                OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
                 {
                     Execute = (ct, _) => { throw new NotImplementedException(); }
                 });
@@ -142,7 +145,7 @@ namespace Signum.Engine.Scheduler
                 new Thread(() =>
                 {
                     using (AuthLogic.User(AuthLogic.SystemUser))
-                        st.Task.ToLazy().ExecuteLazy(TaskOperation.Execute);
+                        st.Task.ToLazy().ExecuteLazy(TaskOperation.ExecutePrivate);
                 }).Start();
 
                 SetTimer(); 

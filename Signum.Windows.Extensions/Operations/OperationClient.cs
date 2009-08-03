@@ -110,8 +110,8 @@ namespace Signum.Windows.Operations
 
         protected internal virtual ImageSource GetImage(Enum key, OperationSettings os)
         {
-            if (os != null && os.Image != null)
-                return os.Image;
+            if (os != null && os.Icon != null)
+                return os.Icon;
 
             return null; 
         }

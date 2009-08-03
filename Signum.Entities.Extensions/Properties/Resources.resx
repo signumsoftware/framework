@@ -151,7 +151,7 @@
     <value>Execute</value>
   </data>
   <data name="ProcessOperation_FromProcess" xml:space="preserve">
-    <value>From Process</value>
+    <value>New Execution</value>
   </data>
   <data name="ProcessOperation_Plan" xml:space="preserve">
     <value>Plan</value>
@@ -438,8 +438,8 @@
   <data name="CustomTaskExecutionDN_StartTime" xml:space="preserve">
     <value>Start Time</value>
   </data>
-  <data name="TaskOperation_Execute" xml:space="preserve">
-    <value>Execute</value>
+  <data name="CustomTaskOperation_Execute" xml:space="preserve">
+    <value>New Execute</value>
   </data>
   <data name="ScheduleRuleDayDN_StartingOn" xml:space="preserve">
     <value>Starting On</value>

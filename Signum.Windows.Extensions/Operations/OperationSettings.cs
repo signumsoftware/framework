@@ -12,7 +12,7 @@ namespace Signum.Windows.Operations
     public abstract class OperationSettings
     {
         public string Text { get; set; }
-        public ImageSource Image { get; set; }
+        public ImageSource Icon { get; set; }
         public Color? Color { get; set; }
     }
 

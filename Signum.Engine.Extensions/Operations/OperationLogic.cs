@@ -39,7 +39,7 @@ namespace Signum.Engine.Operations
     {
         static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
 
-        public static void AssertIsLoaded(SchemaBuilder sb)
+        public static void AssertIsStarted(SchemaBuilder sb)
         {
             if (!sb.ContainsDefinition<OperationDN>())
                 throw new ApplicationException("Call OperationLogic.Start first"); 

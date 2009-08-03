@@ -25,8 +25,8 @@ namespace Signum.Windows.Authorization
         {
             if (Navigator.Manager.NotDefined<UserDN>())
             {
-                Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(true) { View = () => new User() });
-                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings(false) { View = () => new Role() });
+                Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin) { View = () => new User() });
+                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings { View = () => new Role() });
             }
 
             if (property && Navigator.Manager.NotDefined<RulePropertyDN>())

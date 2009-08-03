@@ -16,9 +16,17 @@ namespace Signum.Engine.Processes
     {
         Enum operationKey;
 
+        Func<List<Lazy>> getLazies;
+
         public PackageAlgorithm(Enum operationKey)
         {
             this.operationKey = operationKey;
+        }
+
+        public PackageAlgorithm(Enum operationKey, Func<List<Lazy>> getLazies)
+        {
+            this.operationKey = operationKey;
+            this.getLazies = getLazies;
         }
 
         public virtual IProcessData CreateData(object[] args)
@@ -26,8 +34,16 @@ namespace Signum.Engine.Processes
             PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(operationKey) };
             package.Save();
 
-            List<Lazy> lazies = (List<Lazy>)args[0];
 
+            List<Lazy> lazies = 
+                args != null && args.Length > 0? (List<Lazy>)args[0]: 
+                getLazies != null? getLazies(): null;
+
+            if (lazies == null)
+                throw new ApplicationException("No entities to process found");
+
+            package.NumLines = lazies.Count; 
+            
             lazies.Select(lazy => new PackageLineDN
             {
                 Package = package.ToLazy(),
@@ -43,12 +59,10 @@ namespace Signum.Engine.Processes
 
             List<Lazy<PackageLineDN>> lines =
                 (from pl in Database.Query<PackageLineDN>()
-                 where pl.Package == package.ToLazy() && pl.FinishTime == null && pl.Error == null
+                 where pl.Package == package.ToLazy() && pl.FinishTime == null && pl.Exception == null
                  select pl.ToLazy()).ToList();
 
-
             int lastPercentage = 0;
-
             for (int i = 0; i < lines.Count; i++)
             {
                 if (executingProcess.Suspended)
@@ -73,6 +87,9 @@ namespace Signum.Engine.Processes
                         pl.Exception = e.Message;
                         pl.Save();
                         tr.Commit();
+
+                        package.NumErrors++;
+                        package.Save();
                     }
                 }
 

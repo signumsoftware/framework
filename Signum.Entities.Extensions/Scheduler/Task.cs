@@ -11,8 +11,13 @@ namespace Signum.Entities.Scheduler
 {
     public enum TaskOperation
     {
+        ExecutePrivate
+    }
+
+    public enum CustomTaskOperation
+    {
         [LocDescription]
-        Execute
+        Execute,
     }
 
     [ImplementedBy(typeof(CustomTaskDN), typeof(ProcessDN)), ]
@@ -52,7 +57,6 @@ namespace Signum.Entities.Scheduler
             get { return endTime; }
             set { Set(ref endTime, value, "EndTime"); }
         }
-
 
         [SqlDbType(Size = int.MaxValue)]
         string exception;

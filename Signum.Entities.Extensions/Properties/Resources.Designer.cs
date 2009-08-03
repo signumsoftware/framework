@@ -169,6 +169,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New Execute.
+        /// </summary>
+        internal static string CustomTaskOperation_Execute {
+            get {
+                return ResourceManager.GetString("CustomTaskOperation_Execute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  (Deleted).
         /// </summary>
         internal static string Deleted {
@@ -556,7 +565,7 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to From Process.
+        ///   Looks up a localized string similar to New Execution.
         /// </summary>
         internal static string ProcessOperation_FromProcess {
             get {
@@ -984,15 +993,6 @@ namespace Signum.Entities.Extensions.Properties {
         internal static string ScheduleRuleWeeklyDN_DayOfTheWeek {
             get {
                 return ResourceManager.GetString("ScheduleRuleWeeklyDN_DayOfTheWeek", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Execute.
-        /// </summary>
-        internal static string TaskOperation_Execute {
-            get {
-                return ResourceManager.GetString("TaskOperation_Execute", resourceCulture);
             }
         }
         
