@@ -25,5 +25,6 @@ namespace Signum.Web
         public const string UseCaptcha = "sfUseCaptcha";    //"1" if we wish to use captcha
         public const string Development = "sfDevelopment";  //"1" if development scenario
         public const string MergeScriptsBottom = "sfMergeScriptsBottom"; //"1" if we want to merge the scripts included by controls and partial views merged at bottom
+        public const string GoogleAnalytics = "sfGoogleAnalytics"; //Contains the UA-* value
     }
 }
