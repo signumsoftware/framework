@@ -38,7 +38,6 @@ namespace Signum.Engine.Linq
         T current;
         Func<IProjectionRow, T> projector; 
         Expression<Func<IProjectionRow, T>> projectorExpression;
-        DbQueryProvider provider;
 
         Retriever retriever;
         EntityCache objectCache; 

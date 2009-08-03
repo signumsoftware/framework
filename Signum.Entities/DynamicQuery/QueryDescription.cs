@@ -52,8 +52,13 @@ namespace Signum.Entities.DynamicQuery
         public bool Filterable { get; set; }
         public bool Visible { get; set; }
 
-        [field:NonSerialized]
-        internal Meta Meta{ get; set; }
+        [NonSerialized]
+        Meta meta;
+        internal Meta Meta
+        {
+            get { return meta; }
+            set { meta = value; }
+        }
 
         public PropertyInfo TwinProperty { get; set; }
 
