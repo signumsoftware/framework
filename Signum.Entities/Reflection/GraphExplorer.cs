@@ -66,7 +66,7 @@ namespace Signum.Entities.Reflection
         public static string Integrity(DirectedGraph<Modifiable> modifiable)
         {
             var problems = (from m in modifiable.OfType<IdentifiableEntity>()
-                            group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? m.temporalId} into g
+                            group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId} into g
                             where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
                             select g).ToList();
 

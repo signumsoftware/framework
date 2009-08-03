@@ -15,6 +15,7 @@ using System.Runtime.Serialization;
 using System.Collections.ObjectModel;
 using Signum.Entities.Reflection;
 using System.Threading;
+using System.Collections;
 
 namespace Signum.Entities
 {
@@ -36,16 +37,30 @@ namespace Signum.Entities
             if (EqualityComparer<T>.Default.Equals(variable, value))
                 return false;
 
-            if (variable is INotifyCollectionChanged && NotifyCollectionChangedAttribute.HasToNotify(GetType(), propertyName))
-                ((INotifyCollectionChanged)variable).CollectionChanged -= ChildCollectionChanged;
+            if (variable is INotifyCollectionChanged)
+            {
+                if(NotifyCollectionChangedAttribute.HasToNotify(GetType(), propertyName))
+                    ((INotifyCollectionChanged)variable).CollectionChanged -= ChildCollectionChanged;
+
+                if(NotifyPropertyChangedAttribute.HasToNotify(GetType(), propertyName))
+                    foreach (INotifyPropertyChanged item in (IEnumerable)variable)
+                        item.PropertyChanged -= ChildItemPropertyChanged;
+            }
 
             if (variable is INotifyPropertyChanged && NotifyPropertyChangedAttribute.HasToNotify(GetType(), propertyName))
                 ((INotifyPropertyChanged)variable).PropertyChanged -= ChildItemPropertyChanged; 
 
             variable = value;
 
-            if (variable is INotifyCollectionChanged && NotifyCollectionChangedAttribute.HasToNotify(GetType(), propertyName))
-                ((INotifyCollectionChanged)variable).CollectionChanged += ChildCollectionChanged;
+            if (variable is INotifyCollectionChanged)
+            {
+                if (NotifyCollectionChangedAttribute.HasToNotify(GetType(), propertyName))
+                    ((INotifyCollectionChanged)variable).CollectionChanged += ChildCollectionChanged;
+
+                if (NotifyPropertyChangedAttribute.HasToNotify(GetType(), propertyName))
+                    foreach (INotifyPropertyChanged item in (IEnumerable)variable)
+                        item.PropertyChanged += ChildItemPropertyChanged;
+            }
 
             if (variable is INotifyPropertyChanged && NotifyPropertyChangedAttribute.HasToNotify(GetType(), propertyName))
                 ((INotifyPropertyChanged)variable).PropertyChanged += ChildItemPropertyChanged; 
@@ -109,9 +124,21 @@ namespace Signum.Entities
 
             foreach (Func<object, object> getter in NotifyPropertyChangedAttribute.FieldsToNotify(GetType()))
             {
-                INotifyPropertyChanged notify = (INotifyPropertyChanged)getter(this);
-                if (notify != null)
-                    notify.PropertyChanged += ChildItemPropertyChanged;
+                object obj = getter(this); 
+ 
+                if(obj == null)
+                    continue; 
+
+                var entity = obj as INotifyPropertyChanged;
+                if(entity != null)
+                {
+                    entity.PropertyChanged += ChildItemPropertyChanged;
+                }
+                else
+                {
+                    foreach (INotifyPropertyChanged item in (IEnumerable)obj)
+                        item.PropertyChanged  += ChildItemPropertyChanged;
+                }
             }
         }
 
@@ -125,12 +152,17 @@ namespace Signum.Entities
 
         protected virtual void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-
+            if (NotifyPropertyChangedAttribute.FieldsToNotify(GetType()).Any(f => f(this) == sender))
+            {
+                if (args.NewItems != null)
+                    args.NewItems.Cast<INotifyPropertyChanged>().ForEach(p => p.PropertyChanged += ChildItemPropertyChanged);
+                if (args.OldItems != null)
+                    args.OldItems.Cast<INotifyPropertyChanged>().ForEach(p => p.PropertyChanged -= ChildItemPropertyChanged);
+            }
         }
 
         protected virtual void ChildItemPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-
         }
         #endregion
 
