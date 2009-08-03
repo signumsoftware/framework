@@ -31,6 +31,17 @@ namespace Signum.Web
         {
             return (T)Construct(typeof(T), controller);
         }
+
+        public static ModifiableEntity ConstructStrict(Type type)
+        {
+            return ConstructorManager.ConstructStrict(type);
+        }
+
+        public static T ConstructStrict<T>() where T : ModifiableEntity
+        {
+            return (T)ConstructStrict(typeof(T));
+        }
+
     }
     
     public class ConstructorManager
@@ -56,10 +67,23 @@ namespace Signum.Web
                     return result;
             }
 
-            return DefaultContructor(type, controller);
+            return DefaultContructor(type);
         }
 
-        public static object DefaultContructor(Type type, Controller controller)
+        public virtual ModifiableEntity ConstructStrict(Type type)
+        {
+            Func<Controller, object> c = Constructors.TryGetC(type);
+            if (c != null)
+            {
+                object result = c(null);
+                if (result != null)
+                    return (ModifiableEntity)result;
+            }
+
+            return (ModifiableEntity)DefaultContructor(type);
+        }
+
+        public static object DefaultContructor(Type type)
         {
             object result = Activator.CreateInstance(type);
 

@@ -186,6 +186,14 @@ namespace Signum.Web
             }
         }
 
+        public static ModifiableEntity CreateInstance(Type type)
+        {
+            lock (Constructor.ConstructorManager)
+            {
+                return Constructor.ConstructStrict(type);
+            }
+        }
+
         static Dictionary<string, Type> nameToType;
         public static Dictionary<string, Type> NameToType
         {

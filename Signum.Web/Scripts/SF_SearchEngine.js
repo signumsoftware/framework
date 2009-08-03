@@ -1,4 +1,5 @@
 ﻿function Find(urlController, queryUrlName, allowMultiple, onOk, onCancel, divASustituir, prefix) {
+    var a = 0;
     $.ajax({
         type: "POST",
         url: urlController,
@@ -9,8 +10,8 @@
                    function(msg) {
                        $('#' + divASustituir).html(msg);
                        ShowPopup(prefix, divASustituir, "modalBackgroundS", "panelPopupS");
-                       $('#' + prefix + sfBtnOkS).click(onOk);
-                       $('#' + prefix + sfBtnCancelS).click(onCancel);
+                       $('#' + prefix + sfBtnOk).click(onOk);
+                       $('#' + prefix + sfBtnCancel).click(onCancel);
                    },
         error:
                    function(XMLHttpRequest, textStatus, errorThrown) {
@@ -159,23 +160,43 @@ function CallServer(urlController, onOk, onCancel, prefix) {
 }
 
 function OperationExecute(urlController, typeName, id, operationKey, prefix, onOk, onCancel) {
-    var formChildren = $('#' + prefix + "panelPopup *");
-    $.ajax({
-        type: "POST",
-        url: urlController,
-        data: formChildren.serialize() + "sfTypeName=" + typeName + "&sfId=" + id + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel),
-        async: false,
-        dataType: "html",
-        success:
-                   function(msg) {
-                       $('#' + prefix + "externalPopupDiv").html(msg);
-                   },
-        error:
-                   function(XMLHttpRequest, textStatus, errorThrown) {
-                       ShowError(XMLHttpRequest, textStatus, errorThrown);
-                   }
-    });
+        var formChildren = $('#' + prefix + "panelPopup *");
+        $.ajax({
+            type: "POST",
+            url: urlController,
+            data: formChildren.serialize() + "&sfTypeName=" + typeName + "&sfId=" + id + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel),
+            async: false,
+            dataType: "html",
+            success:
+                       function(msg) {
+                           $('#' + prefix + "externalPopupDiv").html(msg);
+                       },
+            error:
+                       function(XMLHttpRequest, textStatus, errorThrown) {
+                           ShowError(XMLHttpRequest, textStatus, errorThrown);
+                       }
+        });
+    
 }
+
+//function FacturaCreadaOperationExecute(urlController, typeName, id, operationKey, prefix, onOk, onCancel) {
+//        var formChildren = $('#' + prefix + "panelPopup *");
+//        $.ajax({
+//            type: "POST",
+//            url: urlController,
+//            data: formChildren.serialize() + "&sfTypeName=" + typeName + "&sfId=" + id + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel),
+//            async: false,
+//            dataType: "html",
+//            success:
+//                       function(msg) {
+//                           $('#' + prefix + "externalPopupDiv").html(msg);
+//                       },
+//            error:
+//                       function(XMLHttpRequest, textStatus, errorThrown) {
+//                           ShowError(XMLHttpRequest, textStatus, errorThrown);
+//                       }
+//        });
+//}
 
 function PostServer(urlController, prefix) {
     var ids = GetSelectedElements(prefix);

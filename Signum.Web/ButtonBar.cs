@@ -89,12 +89,18 @@ namespace Signum.Web
                 else if (mi.HtmlProps["style"].ToString().IndexOf("cursor") == -1)
                     mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
 
+                mi.HtmlProps.Add("title", mi.AltText);
+
                 if (mi.ImgSrc.HasText())
-                    sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                {
+                    mi.HtmlProps["style"] = "background:transparent url(" + mi.ImgSrc + ")  no-repeat scroll left top; " + mi.HtmlProps["style"].ToString();
+                    //sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                    sb.Append(helper.Div(mi.Id, "", "OperationDiv", mi.HtmlProps));
+                }
                 else
                 {
                     mi.HtmlProps.Add("onclick", onclick);
-                    sb.Append(helper.Div(mi.Id, mi.AltText, "", mi.HtmlProps));
+                    sb.Append(helper.Div(mi.Id, mi.AltText, "OperationDiv", mi.HtmlProps));
                 }
             }
 
