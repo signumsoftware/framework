@@ -17,6 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Services;
+using System.Windows.Threading;
 
 namespace Signum.Windows
 {
@@ -29,6 +30,25 @@ namespace Signum.Windows
             navigator.Initialize();
 
             Manager = navigator;
+
+            //Looking for a better place to do this
+            EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
+        }
+
+        static void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            Dispatcher.CurrentDispatcher.BeginInvoke
+            (
+                DispatcherPriority.ContextIdle,
+                new Action
+                (
+                    () =>
+                    {
+                        (sender as TextBox).SelectAll();
+                        (sender as TextBox).ReleaseMouseCapture();
+                    }
+                )
+            );
         }
 
         public static object Find(FindOptions findOptions)
