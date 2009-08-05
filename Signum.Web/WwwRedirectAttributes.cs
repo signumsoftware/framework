@@ -19,7 +19,8 @@ namespace Signum.Web
             }
 
             if (!filterContext.HttpContext.Request.Url.Host.StartsWith("www")
-                    && !filterContext.HttpContext.Request.Url.Host.StartsWith("localhost"))
+                    && !filterContext.HttpContext.Request.Url.Host.StartsWith("localhost")
+                    && !AppSettings.ReadBoolean(AppSettingsKeys.Development,false))
             {
 
                 // form new URL
