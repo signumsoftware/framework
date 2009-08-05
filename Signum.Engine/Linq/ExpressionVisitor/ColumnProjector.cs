@@ -59,7 +59,7 @@ namespace Signum.Engine.Linq
             {
                 newAlias = newAlias,
                 existingAliases = existingAliases,
-                candidates = Nominator.Nominate(projector, existingAliases, out newProj)
+                candidates = DbExpressionNominator.Nominate(projector, existingAliases, out newProj)
             };
 
             Expression e = cp.Visit(newProj);
@@ -104,7 +104,7 @@ namespace Signum.Engine.Linq
                     string columnName = this.GetNextColumnName();
                     int ordinal = this.columns.Count;
                     if (ConditionsRewriter.IsBooleanExpression(expression))
-                        expression = Nominator.ConditionsRewriter.MakeSqlValue(expression);
+                        expression = DbExpressionNominator.ConditionsRewriter.MakeSqlValue(expression);
                     this.columns.Add(new ColumnDeclaration(columnName, expression));
                     return new ColumnExpression(expression.Type, this.newAlias, columnName);
                 }

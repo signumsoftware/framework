@@ -61,6 +61,10 @@ namespace Signum.Windows
                     ShowOkSave = admin => false; 
                     IsCreable = admin => false;
                     break;
+                case EntityType.Content:
+                    IsCreable = admin => false;
+                    IsViewable = admin => false;
+                    break;
                 default:
                     break;
             }
@@ -80,5 +84,6 @@ namespace Signum.Windows
         Default,
         NotSaving,
         ServerOnly,
+        Content,
     }
 }

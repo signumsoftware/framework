@@ -24,7 +24,7 @@ namespace Signum.Windows
 
         public bool Modal
         {
-            get { return Buttons == ViewButtons.Ok; }
+            get { return  Buttons == ViewButtons.Ok; }
         }
 
         public EventHandler Closed { get; set; }

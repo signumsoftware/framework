@@ -337,7 +337,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
             Expression where = null;
             if (predicate != null)
-                where = Nominator.FullNominate(RetryMapAndVisit(predicate, ref projection), true);
+                where = DbExpressionNominator.FullNominate(RetryMapAndVisit(predicate, ref projection), true);
 
             string alias = this.GetNextAlias();
             Expression top = function == UniqueFunction.First || function ==  UniqueFunction.FirstOrDefault? Expression.Constant(1):null;
@@ -375,7 +375,7 @@ namespace Signum.Engine.Linq
         private Expression BindAll(Type resultType, Expression source, LambdaExpression predicate)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-            Expression where = Nominator.FullNominate(RetryMapAndVisit(predicate, ref projection), true);
+            Expression where = DbExpressionNominator.FullNominate(RetryMapAndVisit(predicate, ref projection), true);
 
             SelectExpression sourceSelect = projection.Source;
 
@@ -415,7 +415,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
             
 
-            Expression where = Nominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem), true);
+            Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem), true);
 
             string alias = this.GetNextAlias();
             ColumnDeclaration cd = new ColumnDeclaration(GetNextColumn(), new AggregateExpression(typeof(int), null, AggregateFunction.Count));
@@ -431,7 +431,7 @@ namespace Signum.Engine.Linq
             Expression aggregateSelector = null;
             if (selector != null)
             {
-                aggregateSelector = Nominator.FullNominate(RetryMapAndVisit(selector, ref projection), false);
+                aggregateSelector = DbExpressionNominator.FullNominate(RetryMapAndVisit(selector, ref projection), false);
             }
             else
             {
@@ -449,7 +449,7 @@ namespace Signum.Engine.Linq
         private Expression BindWhere(Type resultType, Expression source, LambdaExpression predicate)
         {
             ProjectionExpression projection = this.VisitCastProjection(source);
-            Expression where = Nominator.FullNominate(RetryMapAndVisit(predicate, ref projection), true);
+            Expression where = DbExpressionNominator.FullNominate(RetryMapAndVisit(predicate, ref projection), true);
 
             string alias = this.GetNextAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Source.Alias);
@@ -518,7 +518,7 @@ namespace Signum.Engine.Linq
             Clean(innerKey);
             Clean(resultSelector);
 
-            Expression condition = Nominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr), true);
+            Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr), true);
 
             JoinType jt = rightOuter && leftOuter ? JoinType.FullOuterJoin :
                           rightOuter ? JoinType.RightOuterJoin :
@@ -540,7 +540,7 @@ namespace Signum.Engine.Linq
 
             ProjectionExpression projection = this.VisitCastProjection(source);
 
-            Expression getKey = Nominator.FullNominate(ProjectionCleaner.Clean(RetryMapAndVisit(keySelector, ref projection)), false);
+            Expression getKey = DbExpressionNominator.FullNominate(ProjectionCleaner.Clean(RetryMapAndVisit(keySelector, ref projection)), false);
 
             Expression elementProjector;
             if (elementSelector != null)
@@ -580,14 +580,14 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             List<OrderExpression> orderings = new List<OrderExpression>();
-            orderings.Add(new OrderExpression(orderType, Nominator.FullNominate(RetryMapAndVisit(orderSelector, ref projection), false)));
+            orderings.Add(new OrderExpression(orderType, DbExpressionNominator.FullNominate(RetryMapAndVisit(orderSelector, ref projection), false)));
 
             if (myThenBys != null)
             {
                 for (int i = myThenBys.Count - 1; i >= 0; i--)
                 {
                     OrderExpression tb = myThenBys[i];
-                    orderings.Add(new OrderExpression(tb.OrderType, Nominator.FullNominate(RetryMapAndVisit((LambdaExpression)tb.Expression, ref projection), false)));
+                    orderings.Add(new OrderExpression(tb.OrderType, DbExpressionNominator.FullNominate(RetryMapAndVisit((LambdaExpression)tb.Expression, ref projection), false)));
                 }
             }
 

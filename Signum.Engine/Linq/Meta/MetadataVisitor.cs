@@ -39,8 +39,8 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("expression Type is not IQueryable");
 
             Expression expand = ExpressionExpander.ExpandUntyped(expression);
-            //Expression partialEval = ExpressionEvaluator.PartialEval(expand);
-            Expression simplified = OverloadingSimplifier.Simplify(expand);
+            Expression partialEval = MetaEvaluator.PartialEval(expand);
+            Expression simplified = OverloadingSimplifier.Simplify(partialEval);
 
             MetaProjectorExpression meta = new MetadataVisitor().Visit(simplified) as MetaProjectorExpression;
 
@@ -85,7 +85,7 @@ namespace Signum.Engine.Linq
             return new MetaExpression(type, new DirtyMeta(metas));
         }
 
-        Expression MakeVoidMeta(Type type)
+        static internal Expression MakeVoidMeta(Type type)
         {
             return new MetaExpression(type, new DirtyMeta(new Meta[0]));
         }

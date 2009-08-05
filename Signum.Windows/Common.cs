@@ -344,7 +344,11 @@ namespace Signum.Windows
 
         public static bool AssertErrors(this FrameworkElement element)
         {
-            Modifiable mod = (Modifiable)element.DataContext;
+            return AssertErrors((Modifiable)element.DataContext);
+        }
+
+        public static bool AssertErrors(Modifiable mod)
+        {
             GraphExplorer.PreSaving(GraphExplorer.FromRoot(mod));
             string error = GraphExplorer.Integrity(GraphExplorer.FromRoot(mod));
 

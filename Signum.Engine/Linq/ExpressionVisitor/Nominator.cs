@@ -18,25 +18,25 @@ namespace Signum.Engine.Linq
     /// Nominator is a class that walks an expression tree bottom up, determining the set of 
     /// candidate expressions that are possible columns of a select expression
     /// </summary>
-    internal class Nominator : DbExpressionVisitor
+    internal class DbExpressionNominator : DbExpressionVisitor
     {
         public static ConditionsRewriter ConditionsRewriter = new ConditionsRewriter();
 
         string[] existingAliases;
         HashSet<Expression> candidates = new HashSet<Expression>();
 
-        private Nominator() { }
+        private DbExpressionNominator() { }
 
         static internal HashSet<Expression> Nominate(Expression expression, string[] existingAliases, out Expression newExpression)
         {
-            Nominator n = new Nominator { existingAliases = existingAliases };
+            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
 
         static internal Expression FullNominate(Expression expression, bool isCondition)
         {
-            Nominator n = new Nominator { existingAliases = null };
+            DbExpressionNominator n = new DbExpressionNominator { existingAliases = null };
             Expression result = n.Visit(expression);
             if (!n.candidates.Contains(result))
                 throw new ApplicationException(Resources.TheExpressionCanTBeTranslatedToSQL + expression.ToString());
