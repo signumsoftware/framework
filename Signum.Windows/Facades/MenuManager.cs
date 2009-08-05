@@ -100,7 +100,7 @@ namespace Signum.Windows
 
         static void Process(MenuItem menuItem)
         {
-            foreach (MenuItem item in menuItem.Items)
+            foreach (MenuItem item in menuItem.Items.OfType<MenuItem>())
             {
                 Process(item);
             }

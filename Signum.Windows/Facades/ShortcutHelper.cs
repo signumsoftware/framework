@@ -23,7 +23,7 @@ namespace Signum.Windows
 
         public static void SetMenuItemShortcuts(MenuItem menuItem)
         {
-            List<MenuItem> menus = menuItem.Items.Cast<MenuItem>().Where(a => a.Header is string).ToList();
+            List<MenuItem> menus = menuItem.Items.OfType<MenuItem>().Where(a => a.Header is string).ToList();
 
             SetShortcuts(menus, m => (string)m.Header, (m, s) => m.Header = s);
         }
