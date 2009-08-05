@@ -120,6 +120,9 @@
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="CustomReport" xml:space="preserve">
+    <value>Custom Report</value>
+  </data>
   <data name="Excel2003XmlSpreadsheet" xml:space="preserve">
     <value>Excel XML 2003 Spreadsheet (*.xml)|*.xml</value>
   </data>
@@ -130,10 +133,7 @@
     <value>Microsoft Office Excel 97-2003 Spreadsheet (*.xls)|*.xls</value>
   </data>
   <data name="ExcelReport" xml:space="preserve">
-    <value>To Excel</value>
-  </data>
-  <data name="ExportExcelReportPivotTable" xml:space="preserve">
-    <value>Export Excel Report with Pivot Table</value>
+    <value>Excel Report</value>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>

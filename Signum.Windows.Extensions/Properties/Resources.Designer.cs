@@ -70,6 +70,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Custom Report.
+        /// </summary>
+        public static string CustomReport {
+            get {
+                return ResourceManager.GetString("CustomReport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Excel XML 2003 Spreadsheet (*.xml)|*.xml.
         /// </summary>
         public static string Excel2003XmlSpreadsheet {
@@ -97,20 +106,11 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To Excel.
+        ///   Looks up a localized string similar to Excel Report.
         /// </summary>
         public static string ExcelReport {
             get {
                 return ResourceManager.GetString("ExcelReport", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Export Excel Report with Pivot Table.
-        /// </summary>
-        public static string ExportExcelReportPivotTable {
-            get {
-                return ResourceManager.GetString("ExportExcelReportPivotTable", resourceCulture);
             }
         }
         

@@ -13,6 +13,7 @@ using Microsoft.Win32;
 using Signum.Entities.Reports;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
+using System.Windows.Documents;
 
 namespace Signum.Windows.Reports
 {
@@ -21,7 +22,7 @@ namespace Signum.Windows.Reports
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            Header = "Informe Excel";
+            Header = Prop.Resources.CustomReport;
             Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/excelDoc.png", typeof(ExcelReportPivotTableMenuItem))) };
         }
 
@@ -32,15 +33,22 @@ namespace Signum.Windows.Reports
             this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
 
             List<Lazy<ExcelReportDN>> reports = Server.Service<IExcelReportServer>().GetExcelReports(SearchControl.QueryName.ToString());
-            foreach (Lazy<ExcelReportDN> report in reports)
+            
+            if (reports.Count > 0)
             {
-                MenuItem mi = new MenuItem()
+                Header = new TextBlock { Inlines = { new Run(Prop.Resources.CustomReport), new Bold(new Run(" (" + reports.Count + ")")) } };
+
+                foreach (Lazy<ExcelReportDN> report in reports)
                 {
-                    Header = report.ToStr,
-                    Tag = report,
-                };
-                Items.Add(mi);
-            }
+                    MenuItem mi = new MenuItem()
+                    {
+                        Header = report.ToStr,
+                        Tag = report,
+                    };
+                    Items.Add(mi);
+                }
+            }          
+           
 
             Items.Add(new Separator());
 
