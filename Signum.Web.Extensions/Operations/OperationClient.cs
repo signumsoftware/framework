@@ -24,19 +24,7 @@ namespace Signum.Web.Operations
 
             Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
 
-            //SearchControl.GetCustomMenuItems += (qn, type) =>
-            //{
-            //    var list = OperationLogic.ServiceGetConstructorOperationInfosnfos(type).Where(oi =>
-            //    {
-            //        ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
-            //        return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
-            //    }).ToList();
-
-            //    if (list.Count == 0)
-            //        return null;
-
-            //    return new ConstructFromMenuItem { OperationInfos = list };
-            //};
+            ButtonBarHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
         }
     }
 
@@ -53,6 +41,9 @@ namespace Signum.Web.Operations
 
             var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
 
+            if (list == null || list.Count == 0)
+                return null;
+
             var dic = (from oi in list
                        let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
                        where os == null || os.IsVisible == null || os.IsVisible(ident)
@@ -60,6 +51,7 @@ namespace Signum.Web.Operations
 
             if (dic.Count == 0)
                 return null;
+
             List<WebMenuItem> items = new List<WebMenuItem>();
 
             foreach (OperationInfo oi in list)
@@ -84,7 +76,49 @@ namespace Signum.Web.Operations
             return items;
         }
 
-        protected internal virtual string GetText(Enum key, EntityOperationSettings os)
+        internal List<WebMenuItem> ButtonBar_GetButtonBarForQueryName(HttpContextBase httpContext, object queryName, Type entityType)
+        {
+            if (entityType == null || queryName == null)
+                return null;
+
+            var list = OperationLogic.ServiceGetConstructorOperationInfos(entityType);
+
+            if (list == null || list.Count == 0)
+                return null;
+
+            var dic = (from oi in list
+                       let os = (ConstructorFromManySettings)Settings.TryGetC(oi.Key)
+                       where os == null || os.IsVisible == null || os.IsVisible(queryName, oi)
+                       select new {OperationInfo = oi, OperationSettings = os}).ToDictionary(a => a.OperationInfo.Key);
+
+            if (dic.Count == 0)
+                return null;
+
+            List<WebMenuItem> items = new List<WebMenuItem>();
+
+            foreach (OperationInfo oi in list)
+            {
+                if (dic.ContainsKey(oi.Key))
+                {
+                    WebMenuItem item = new WebMenuItem
+                    {
+                        AltText = GetText(oi.Key, dic[oi.Key].OperationSettings),
+                        Id = dic[oi.Key].OperationSettings.TryCC(os => os.Id),
+                        ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
+                        OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
+                        //OnServerClickAjax = GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationSettings, ident),
+                        OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
+                    };
+                    item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps));
+
+                    items.Add(item);
+                }
+            }
+
+            return items;
+        }
+
+        protected internal virtual string GetText(Enum key, WebMenuItem os)
         {
             if (os != null && os.AltText != null)
                 return os.AltText;
@@ -92,7 +126,7 @@ namespace Signum.Web.Operations
             return EnumExtensions.NiceToString(key);
         }
 
-        protected internal virtual string GetImage(Enum key, EntityOperationSettings os)
+        protected internal virtual string GetImage(Enum key, WebMenuItem os)
         {
             if (os != null && os.ImgSrc != null)
                 return os.ImgSrc;
@@ -100,7 +134,7 @@ namespace Signum.Web.Operations
             return null;
         }
 
-        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, EntityOperationSettings os, IdentifiableEntity ident)
+        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, WebMenuItem os, IdentifiableEntity ident)
         {
             string controllerUrl = "Operation.aspx/OperationExecute";
             if (os != null && os.OnServerClickAjax.HasText())
@@ -119,6 +153,9 @@ namespace Signum.Web.Operations
 
         internal object ConstructorManager_GeneralConstructor(Type type, Controller controller)
         {
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                return null;
+
             List<OperationInfo> list = OperationLogic.ServiceGetConstructorOperationInfos(type);
 
             var dic = (from oi in list
@@ -157,19 +194,12 @@ namespace Signum.Web.Operations
                     ViewData = controller.ViewData,
                     TempData = controller.TempData
                 };
-                //throw new ApplicationException("Not implemented: Todavía no se permiten varios constructores");
-                //ConstructorSelectorWindow sel = new ConstructorSelectorWindow();
-                //sel.ConstructorKeys = dic.Keys.ToArray();
-                //if (sel.ShowDialog() != true)
-                //    return null;
-
-                //selected = sel.SelectedKey;
             }
 
             var pair = dic[selected];
 
             if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
-                return pair.OperationSettings.Constructor(pair.OperationInfo, controller);
+                return pair.OperationSettings.Constructor(pair.OperationInfo, controller.HttpContext);
             else
                 return Constructor.Construct(type, controller);
         }   
