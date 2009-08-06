@@ -21,6 +21,8 @@
     
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>
     <div id="<%=Html.GlobalName("divASustituir")%>"></div>
+    <br />
+    <%= Html.ValidationSummaryAjax(prefix) %>
 </div>
 </div>
 

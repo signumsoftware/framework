@@ -28,6 +28,8 @@
     
     <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
     <div id="<%=Html.GlobalName("divASustituir" + sufix)%>"></div>
+    <br />
+    <%= Html.ValidationSummaryAjax(prefix) %>
 </div>
 </div>
 

@@ -28,6 +28,13 @@ namespace Signum.Web
                    + "&nbsp;</div>";
         }
 
+        public static string ValidationSummaryAjax(this HtmlHelper html, string prefix)
+        {
+            return "<div id='{0}sfGlobalValidationSummary'>".Formato(prefix) +
+                   html.ValidationSummary()
+                   + "&nbsp;</div>";
+        }
+
         /// <summary>
         /// Returns a "label" label that is used to show the name of a field in a form
         /// </summary>

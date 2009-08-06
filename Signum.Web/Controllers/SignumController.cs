@@ -29,7 +29,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult PopupView(string sfStaticType, int? sfId, string sfOnOk, string sfOnCancel, string prefix)
         {
             Type type = Navigator.ResolveType(sfStaticType);
-
+             
             ModifiableEntity entity = null;
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);

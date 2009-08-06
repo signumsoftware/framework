@@ -169,7 +169,10 @@ function OperationExecute(urlController, typeName, id, operationKey, prefix, onO
             dataType: "html",
             success:
                        function(msg) {
-                           $('#' + prefix + "externalPopupDiv").html(msg);
+                            eval('var result=' + msg);
+                            var modelState = result["ModelState"];
+                            if (ShowErrorMessages(prefix, modelState, true, ""))
+                                $('#' + prefix + "externalPopupDiv").html(msg);
                        },
             error:
                        function(XMLHttpRequest, textStatus, errorThrown) {

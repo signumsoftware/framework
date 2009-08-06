@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web
 {
@@ -12,41 +13,11 @@ namespace Signum.Web
             if (string.IsNullOrEmpty(functionText))
                 return functionText;
 
-            string body = functionText.Trim();
-            if (string.IsNullOrEmpty(body))
-                return functionText;
+            Match m = Regex.Match(functionText, @"^\s*function\s*\(\s*\)\s*{\s*(?<codigo>.*)\s*}\s*$");
+            if (m != null)
+                return m.Groups["codigo"].Value;
 
-            if (!body.StartsWith("function"))
-                return functionText;
-            body = body.Substring(8, body.Length - 8).Trim();
-            if (string.IsNullOrEmpty(body))
-                return functionText;
-
-            if (!body.StartsWith("("))
-                return functionText;
-            body = body.Substring(1, body.Length - 1).Trim();
-            if (string.IsNullOrEmpty(body))
-                return functionText;
-
-            if (!body.StartsWith(")"))
-                return functionText;
-            body = body.Substring(1, body.Length - 1).Trim();
-            if (string.IsNullOrEmpty(body))
-                return functionText;
-
-            if (!body.StartsWith("{"))
-                return functionText;
-            body = body.Substring(1, body.Length - 1).Trim();
-            if (string.IsNullOrEmpty(body))
-                return functionText;
-
-            if (!body.EndsWith("}"))
-                return functionText;
-            body = body.Substring(0, body.Length - 1).Trim();
-            if (string.IsNullOrEmpty(body))
-                return functionText;
-
-            return body;
+            return functionText; 
         }
     }
 }

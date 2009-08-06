@@ -107,8 +107,6 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
             success:
             function(result) {
                 eval('var result=' + result);
-                var modelState = result["ModelState"];
-
                 var toStr = result[sfToStr];
                 var link = $("#" + prefix + sfLink);
                 if (link.length > 0)
@@ -123,52 +121,8 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
                             $('#' + prefix + sfCombo + " option:selected").html(toStr);
                     }
                 }
-
-                //Remove previous errors
-                $('.' + sfFieldErrorClass).replaceWith("");
-                $('.' + sfInputErrorClass).removeClass(sfInputErrorClass);
-                $('.' + sfSummaryErrorClass).replaceWith("");
-
-                var allErrors = "";
-                var inlineErrorStart = "&nbsp;<span class=\"" + sfFieldErrorClass + "\">";
-                var inlineErrorEnd = "</span>"
-
-                for (var controlID in modelState) {
-                    var errorsArray = modelState[controlID];
-                    var errorMessage = "";
-                    for (var j = 0; j < errorsArray.length; j++) {
-                        errorMessage += errorsArray[j];
-                        allErrors += "<li>" + errorsArray[j] + "</li>\n";
-                    }
-                    if (controlID != sfGlobalErrorsKey && controlID != "") {
-                        var control = $('#' + controlID);
-                        control.addClass(sfInputErrorClass);
-                        if (showInlineError && control.hasClass(sfInlineErrorVal)) {
-                            if (control.next().hasClass("ui-datepicker-trigger")) {
-                                if (fixedInlineErrorText == "")
-                                    $('#' + controlID).next().after(inlineErrorStart + errorMessage + inlineErrorEnd);
-                                else
-                                    $('#' + controlID).next().after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
-                            }
-                            else {
-                                if (fixedInlineErrorText == "")
-                                    $('#' + controlID).after(inlineErrorStart + errorMessage + inlineErrorEnd);
-                                else
-                                    $('#' + controlID).after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
-                            }
-                        }
-                    }
-                }
-
-                if (allErrors != "") {
-                    $('#' + prefix + sfToStr).addClass(sfInputErrorClass);
-                    $('#' + prefix + sfLink).addClass(sfInputErrorClass);
-                    if (document.getElementById(sfGlobalValidationSummary) != null) {
-                        document.getElementById(sfGlobalValidationSummary).innerHTML = "<br /><ul class=\"" + sfSummaryErrorClass + "\">\n" + allErrors + "</ul><br />\n";
-                    }
-                    return;
-                }
-                returnValue = true;
+                var modelState = result["ModelState"];
+                returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
                 return;
             },
             error:
@@ -179,5 +133,52 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
         return returnValue;
     }
 
+    function ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText) {
+        //Remove previous errors
+        $('.' + sfFieldErrorClass).replaceWith("");
+        $('.' + sfInputErrorClass).removeClass(sfInputErrorClass);
+        $('.' + sfSummaryErrorClass).replaceWith("");
+
+        var allErrors = "";
+        var inlineErrorStart = "&nbsp;<span class=\"" + sfFieldErrorClass + "\">";
+        var inlineErrorEnd = "</span>"
+
+        for (var controlID in modelState) {
+            var errorsArray = modelState[controlID];
+            var errorMessage = "";
+            for (var j = 0; j < errorsArray.length; j++) {
+                errorMessage += errorsArray[j];
+                allErrors += "<li>" + errorsArray[j] + "</li>\n";
+            }
+            if (controlID != sfGlobalErrorsKey && controlID != "") {
+                var control = $('#' + controlID);
+                control.addClass(sfInputErrorClass);
+                if (showInlineError && control.hasClass(sfInlineErrorVal)) {
+                    if (control.next().hasClass("ui-datepicker-trigger")) {
+                        if (fixedInlineErrorText == "")
+                            $('#' + controlID).next().after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                        else
+                            $('#' + controlID).next().after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                    }
+                    else {
+                        if (fixedInlineErrorText == "")
+                            $('#' + controlID).after(inlineErrorStart + errorMessage + inlineErrorEnd);
+                        else
+                            $('#' + controlID).after(inlineErrorStart + fixedInlineErrorText + inlineErrorEnd);
+                    }
+                }
+            }
+        }
+
+        if (allErrors != "") {
+            $('#' + prefix + sfToStr).addClass(sfInputErrorClass);
+            $('#' + prefix + sfLink).addClass(sfInputErrorClass);
+            if (document.getElementById(prefix + sfGlobalValidationSummary) != null) {
+                document.getElementById(prefix + sfGlobalValidationSummary).innerHTML = "<br /><ul class=\"" + sfSummaryErrorClass + "\">\n" + allErrors + "</ul><br />\n";
+            }
+            return false;
+        }
+        return true;
+    }
 
     

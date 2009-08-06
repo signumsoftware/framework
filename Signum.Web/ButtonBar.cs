@@ -27,15 +27,12 @@ namespace Signum.Web
     }
 
     public delegate List<WebMenuItem> GetButtonBarElementDelegate(HttpContextBase httpContext, object entity, string mainControlUrl);
+    public delegate List<WebMenuItem> GetButtonBarForQueryNameDelegate(HttpContextBase httpContext, object queryName, Type entityType); 
 
     public static class ButtonBarHelper
     {
+        public static event GetButtonBarForQueryNameDelegate GetButtonBarForQueryName;
         public static event GetButtonBarElementDelegate GetButtonBarElement;
-
-        public static void Start()
-        {
-
-        }
 
         public static string GetButtonBarElements(this HtmlHelper helper, object entity, string mainControlUrl, string prefix)
         {
@@ -46,6 +43,23 @@ namespace Signum.Web
                     .Select(d => d(helper.ViewContext.HttpContext, entity, mainControlUrl))
                     .NotNull().SelectMany(d => d).ToList());
 
+            return ListMenuItemsToString(helper, elements, prefix);
+        }
+
+        public static string GetButtonBarElementsForQuery(this HtmlHelper helper, object queryName, Type entityType, string prefix)
+        {
+            List<WebMenuItem> elements = new List<WebMenuItem>();
+            if (GetButtonBarElement != null)
+                elements.AddRange(GetButtonBarElement.GetInvocationList()
+                    .Cast<GetButtonBarForQueryNameDelegate>()
+                    .Select(d => d(helper.ViewContext.HttpContext, queryName, entityType))
+                    .NotNull().SelectMany(d => d).ToList());
+
+            return ListMenuItemsToString(helper, elements, prefix);
+        }
+
+        private static string ListMenuItemsToString(HtmlHelper helper, List<WebMenuItem> elements, string prefix)
+        {
             StringBuilder sb = new StringBuilder();
 
             foreach (WebMenuItem mi in elements)
