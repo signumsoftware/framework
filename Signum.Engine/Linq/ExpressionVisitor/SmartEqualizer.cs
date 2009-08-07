@@ -38,6 +38,22 @@ namespace Signum.Engine.Linq
             return EntityEquals(e1, e2) ?? EqualNullable(e1, e2);
         }
 
+        internal static Expression EntityIn(Expression newItem, Expression[] expression)
+        {
+            if(newItem is LazyReferenceExpression)
+            {
+                newItem = ((LazyReferenceExpression)newItem).Reference;
+                expression = expression.Cast<LazyReferenceExpression>().Select(l=>l.Reference).ToArray(); 
+            }
+
+            FieldInitExpression fie = newItem as FieldInitExpression;
+            if (fie != null)
+                return new InExpression(fie.ExternalId, expression.Cast<FieldInitExpression>().Where(fi => fi.Type == fie.Type).Select(a => ((ConstantExpression)a.ExternalId).Value).ToArray());
+
+
+            return expression.Select(e => EntityEquals(newItem, e)).Where(e => e != False).Aggregate((a, b) => Expression.Or(a, b)); 
+        }
+
         public static Expression EntityEquals(Expression e1, Expression e2)
         {   
             var tE1 = (DbExpressionType)e1.NodeType;
@@ -136,5 +152,7 @@ namespace Signum.Engine.Linq
         {
             return EqualNullable(exp, Expression.Constant(null, typeof(int?)));
         }
+
+        
     }
 }

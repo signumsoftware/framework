@@ -149,17 +149,9 @@ namespace Signum.Engine.Linq
 
                 return Expression.Convert((ColumnExpression)fi.ExternalId, m.Method.DeclaringType.GetGenericArguments()[0]);            
             }
-            else if (m.Object != null && typeof(IList).IsAssignableFrom(m.Object.Type) && m.Method.Name == "Contains" && m.Object is ConstantExpression)
+            else if (m.Object != null && m.Object is ConstantExpression && m.Method.Name == "Contains" && (typeof(IList).IsAssignableFrom(m.Object.Type)))
             {
-                IList values = (IList)((ConstantExpression)m.Object).Value;
-
-                Expression arg = Visit(m.Arguments[0]);
-
-                var expList = values.Cast<object>().Select(a => Expression.Equal(arg, Visit(Expression.Constant(a, arg.Type)))).ToList();
-
-                Expression expr = expList.Count == 0 ? Expression.Constant(false) : (Expression)expList.Aggregate((e1, e2) => Expression.Or(e1, e2));
-
-                return expr;
+                 return this.BindContains(m.Type, m.Object, m.Arguments[0]);   
             }
             return base.VisitMethodCall(m);
         }
@@ -407,13 +399,22 @@ namespace Signum.Engine.Linq
             if (source.NodeType == ExpressionType.Constant && typeof(IEnumerable).IsAssignableFrom(source.Type) && !typeof(IQueryable).IsAssignableFrom(source.Type))
             {
                 ConstantExpression ce = (ConstantExpression)source;
-                IEnumerable ie = (IEnumerable)ce.Value;
-                
-                return new InExpression(newItem, ie== null ? new object[0]: ie.Cast<object>().ToArray());
+                IEnumerable col = (IEnumerable)ce.Value;
+
+                Type colType = ReflectionTools.CollectionType(source.Type); 
+                if (typeof(IIdentifiable).IsAssignableFrom(colType))
+                {
+                    return SmartEqualizer.EntityIn(newItem, col.Cast<IIdentifiable>().Select(ie => ToFieldInitExpression(colType, ie)).ToArray()); 
+                }
+                else if (typeof(Lazy).IsAssignableFrom(colType))
+                {
+                    return SmartEqualizer.EntityIn(newItem, col.Cast<Lazy>().Select(lazy => ToLazyReferenceExpression(colType, lazy)).ToArray()); 
+                }
+
+                return new InExpression(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());                
             }
 
-            ProjectionExpression projection = this.VisitCastProjection(source);
-            
+            ProjectionExpression projection = this.VisitCastProjection(source);            
 
             Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem), true);
 
@@ -678,22 +679,29 @@ namespace Signum.Engine.Linq
                 return GetTableProjection(type);
             if (typeof(IIdentifiable).IsAssignableFrom(c.Type))
             {
-                IdentifiableEntity ei = (IdentifiableEntity)c.Value; // podria ser null y lo meteriamos igualmente
-                if (ei == null)
-                    return new FieldInitExpression(c.Type, null, Expression.Constant(null, typeof(int?)));
-
-                return new FieldInitExpression(ei.GetType(), null, Expression.Constant(ei.Id));
+                return ToFieldInitExpression(c.Type, (IdentifiableEntity)c.Value);// podria ser null y lo meteriamos igualmente
             }
             else if (typeof(Lazy).IsAssignableFrom(c.Type))
             {
-                Lazy lazy = (Lazy)c.Value;
-
-                if (lazy == null)
-                    return new LazyReferenceExpression(c.Type, new FieldInitExpression(Reflector.ExtractLazy(c.Type), null, Expression.Constant(null, typeof(int?)))); //puede dar problemas con lazy de tipo interface
-
-                return new LazyReferenceExpression(c.Type, new FieldInitExpression(lazy.RuntimeType, null, Expression.Constant(lazy.IdOrNull ?? int.MinValue)));
+                return ToLazyReferenceExpression(c.Type, (Lazy)c.Value);
             }
             return c;
+        }
+
+        private static Expression ToLazyReferenceExpression(Type lazyType, Lazy lazy)
+        {
+            if (lazy == null)
+                return new LazyReferenceExpression(lazyType, new FieldInitExpression(Reflector.ExtractLazy(lazyType), null, Expression.Constant(null, typeof(int?)))); //puede dar problemas con lazy de tipo interface
+
+            return new LazyReferenceExpression(lazyType, new FieldInitExpression(lazy.RuntimeType, null, Expression.Constant(lazy.IdOrNull ?? int.MinValue)));
+        }
+
+        private static Expression ToFieldInitExpression(Type entityType, IIdentifiable ei)
+        {
+            if (ei == null)
+                return new FieldInitExpression(entityType, null, Expression.Constant(null, typeof(int?)));
+
+            return new FieldInitExpression(ei.GetType(), null, Expression.Constant(ei.Id));
         }
 
         protected override Expression VisitParameter(ParameterExpression p)
