@@ -82,7 +82,12 @@ namespace Signum.Web
 
         public static ViewResult View(this Controller controller, object obj)
         {
-            return Manager.View(controller, obj); 
+            return Manager.View(controller, obj, null); 
+        }
+
+        public static ViewResult View(this Controller controller, object obj, string partialViewName)
+        {
+            return Manager.View(controller, obj, partialViewName);
         }
 
         public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix)
@@ -304,11 +309,11 @@ namespace Signum.Web
                    queryName.ToString();
         }
 
-        protected internal virtual ViewResult View(Controller controller, object obj)
+        protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName)
         {
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
-            
-            controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
+
+            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? es.PartialViewName;
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
             if (controller.ViewData.Keys.Count(s => s==ViewDataKeys.PageTitle)==0)
