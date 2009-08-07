@@ -38,7 +38,27 @@ namespace Signum.Web.Operations
                 return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
             }
 
-            entity = OperationLogic.Execute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+            entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+
+            return Navigator.PopupView(this, entity, prefix);
+        }
+
+        public ActionResult ConstructFromManyExecute(string sfTypeName, string sfQueryName, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        {
+            Type type = Navigator.ResolveType(sfTypeName);
+
+            List<Lazy> sourceEntities = null;
+            if (sfIds.HasText())
+            {
+                string[] ids = sfIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (ids == null || ids.Length == 0)
+                    throw new ArgumentException("Construct From Many Operation needs source Ids as parameter");
+                sourceEntities = ids.Select(idstr => Lazy.Create(type, int.Parse(idstr))).ToList();
+            }
+            if (sourceEntities == null)
+                throw new ArgumentException("Construct From Many Operation needs source Lazies");
+
+            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
 
             return Navigator.PopupView(this, entity, prefix);
         }

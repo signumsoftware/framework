@@ -81,7 +81,7 @@ namespace Signum.Web.Operations
             if (entityType == null || queryName == null)
                 return null;
 
-            var list = OperationLogic.ServiceGetConstructorOperationInfos(entityType);
+            var list = OperationLogic.ServiceGetQueryOperationInfos(entityType);
 
             if (list == null || list.Count == 0)
                 return null;
@@ -106,7 +106,7 @@ namespace Signum.Web.Operations
                         Id = dic[oi.Key].OperationSettings.TryCC(os => os.Id),
                         ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
                         OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
-                        //OnServerClickAjax = GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationSettings, ident),
+                        OnServerClickAjax = GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationSettings, queryName, entityType),
                         OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
                     };
                     item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps));
@@ -151,6 +151,23 @@ namespace Signum.Web.Operations
                 );
         }
 
+        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, WebMenuItem os, object queryName, Type entityType)
+        {
+            string controllerUrl = "Operation.aspx/ConstructFromManyExecute";
+            if (os != null && os.OnServerClickAjax.HasText())
+                controllerUrl = os.OnServerClickAjax;
+
+            return "javascript:ConstructFromManyExecute('{0}','{1}','{2}','{3}','{4}',{5},{6});".Formato(
+                controllerUrl,
+                entityType.Name,
+                queryName.ToString(),
+                EnumDN.UniqueKey(key),
+                httpContext.Request.Params["prefix"] ?? "",
+                httpContext.Request.Params[ViewDataKeys.OnOk] ?? "''",
+                httpContext.Request.Params[ViewDataKeys.OnCancel] ?? "''"
+                );
+        }
+
         internal object ConstructorManager_GeneralConstructor(Type type, Controller controller)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
@@ -181,7 +198,7 @@ namespace Signum.Web.Operations
                 foreach (OperationInfo oi in list)
                 {
                     if (dic[oi.Key].OperationSettings.OnServerClickAjax != "")
-                        onClick = "javascript:CallServer('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickAjax, onOk, onCancel, prefix);
+                        onClick = "javascript:CloseChooser('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickAjax, onOk, onCancel, prefix);
                     else if (dic[oi.Key].OperationSettings.OnServerClickPost != "")
                         onClick= "javascript:PostServer('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickPost, onOk, onCancel, prefix);
                     sb.AppendLine("<input type='button' value='{0}' onclick=\"{1}\"/><br />".Formato(oi.Key.ToString(), onClick));
