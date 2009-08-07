@@ -20,6 +20,12 @@ namespace Signum.Web
             set;
         }
 
+        public bool Www
+        {
+            get;
+            set;
+        }
+
         public void OnAuthorization(AuthorizationContext filterContext)
         {
             if (filterContext == null)
@@ -36,7 +42,11 @@ namespace Signum.Web
                     UriBuilder builder = new UriBuilder()
                     {
                         Scheme = "https",
-                        Host = filterContext.HttpContext.Request.Url.Host,
+                        Host =  (Www && !filterContext.HttpContext.Request.Url.Host.StartsWith("www")
+                    && !filterContext.HttpContext.Request.Url.Host.StartsWith("localhost")) ? 
+                    
+                    "www." + filterContext.HttpContext.Request.Url.Host :                        
+                        filterContext.HttpContext.Request.Url.Host,
                         // use the RawUrl since it works with URL Rewriting
                         Path = filterContext.HttpContext.Request.RawUrl
                     };

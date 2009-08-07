@@ -46,8 +46,8 @@ namespace Signum.Entities
     public abstract class ValidatorAttribute : Attribute
     {
         public bool DisableOnCorrupt { get; set; }
-
-
+        public string ErrorMessage { get; set; }
+       
         public string Error(object value)
         {
             if (DisableOnCorrupt && !Corruption.Strict)
@@ -66,9 +66,10 @@ namespace Signum.Entities
 
     public class NotNullValidatorAttribute : ValidatorAttribute
     {
+      
         protected override string OverrideError(object obj)
         {
-            return obj != null ? null : Resources.Property0HasNoValue;
+            return obj != null ? null : (ErrorMessage ?? Resources.Property0HasNoValue);
         }
     }
 
@@ -101,16 +102,16 @@ namespace Signum.Entities
             string val = (string)value;
 
             if (string.IsNullOrEmpty(val))
-                return  allowNulls? null: Resources.Property0HasNoValue;
+                return allowNulls ? null : ErrorMessage ?? Resources.Property0HasNoValue;
 
             if (min == max && min != -1 && val.Length != min)
-                return Resources.TheLenghtOf0HasToBeEqualTo0.Formato(min);
+                return ErrorMessage ?? Resources.TheLenghtOf0HasToBeEqualTo0.Formato(min);
 
             if (min != -1 && val.Length < min)
-                return Resources.TheLengthOf0HasToBeGreaterOrEqualTo0.Formato(min);
+                return ErrorMessage ?? Resources.TheLengthOf0HasToBeGreaterOrEqualTo0.Formato(min);
 
             if (max != -1 && val.Length > max)
-                return Resources.TheLengthOf0HasToBeLesserOrEqualTo0.Formato(max);
+                return ErrorMessage ?? Resources.TheLengthOf0HasToBeLesserOrEqualTo0.Formato(max);
 
             return null; 
         }
@@ -142,9 +143,9 @@ namespace Signum.Entities
                 return null;
 
             if (formatName == null)
-                return Resources._0HasNoCorrectFormat;
+                return ErrorMessage ?? Resources._0HasNoCorrectFormat;
             else
-                return Resources._0DoesNotHaveAValid0Format.Formato(formatName);
+                return ErrorMessage ?? Resources._0DoesNotHaveAValid0Format.Formato(formatName);
         }
     }
 
@@ -216,7 +217,7 @@ namespace Signum.Entities
                 value is float && Math.Round((float)value, DecimalPlaces) != (float)value ||
                 value is double && Math.Round((double)value, DecimalPlaces) != (double)value)
             {
-                return Resources._0HasMoreThan0DecimalPlaces.Formato(DecimalPlaces);
+                return ErrorMessage ?? Resources._0HasMoreThan0DecimalPlaces.Formato(DecimalPlaces);
             }
 
             return null;
@@ -285,7 +286,7 @@ namespace Signum.Entities
             if (ok)
                 return null;
 
-            return Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString()); 
+            return ErrorMessage ?? Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString()); 
         }
     }
 
@@ -348,7 +349,7 @@ namespace Signum.Entities
                 val.CompareTo(max) <= 0)
                 return null;
 
-            return Resources._0HasToBeBetween0And1.Formato(min, max); 
+            return ErrorMessage ?? Resources._0HasToBeBetween0And1.Formato(min, max); 
         }
     }
 
@@ -379,7 +380,7 @@ namespace Signum.Entities
                 (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0))
                 return null;
 
-            return Resources.TheNumberOfElementsOf0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString());
+            return ErrorMessage ?? Resources.TheNumberOfElementsOf0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString());
         }
     }
 
@@ -389,7 +390,7 @@ namespace Signum.Entities
         {
             DateTime? dt = (DateTime?)value;
             if (dt.HasValue && dt.Value != dt.Value.Date)
-                return Resources._0HasHoursMinutesAndSeconds;
+                return ErrorMessage ?? Resources._0HasHoursMinutesAndSeconds;
             
             return null;
         }
@@ -416,10 +417,10 @@ namespace Signum.Entities
                 string str = (string)value;
                 
                 if ((this.textCase == Case.Uppercase) && (str != str.ToUpper()))
-                    return Resources._0HasToBeUppercase;
+                    return ErrorMessage ?? Resources._0HasToBeUppercase;
                 
                 if ((this.textCase == Case.Lowercase) && (str != str.ToLower()))
-                    return Resources._0HasToBeLowercase;
+                    return ErrorMessage ?? Resources._0HasToBeLowercase;
             }
             return null;            
         }

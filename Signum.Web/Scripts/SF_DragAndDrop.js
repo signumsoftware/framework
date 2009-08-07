@@ -1,4 +1,4 @@
-﻿window.onload = carga;
+﻿$(document).ready(function() {  carga();});
 
 function carga() {
     posicion = 0;

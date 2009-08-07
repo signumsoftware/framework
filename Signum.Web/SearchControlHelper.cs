@@ -156,7 +156,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
 
-            Type searchEntityType = Navigator.NameToType[entityTypeName];
+            //Type searchEntityType = Navigator.NameToType[entityTypeName];
 
             FilterType filterType = FilterOperationsUtils.GetFilterType(filterOptions.Column.Type);
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
