@@ -50,7 +50,7 @@ namespace Signum.Web
         {
             List<WebMenuItem> elements = new List<WebMenuItem>();
             if (GetButtonBarElement != null)
-                elements.AddRange(GetButtonBarElement.GetInvocationList()
+                elements.AddRange(GetButtonBarForQueryName.GetInvocationList()
                     .Cast<GetButtonBarForQueryNameDelegate>()
                     .Select(d => d(helper.ViewContext.HttpContext, queryName, entityType))
                     .NotNull().SelectMany(d => d).ToList());

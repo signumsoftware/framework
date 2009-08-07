@@ -225,7 +225,7 @@ namespace Signum.Web
             Common.FireCommonTasks(el, typeof(T), context);
 
             helper.ViewContext.HttpContext.Response.Write(
-                helper.InternalEntityLine(context.Name, typeof(S), context.Value, el));
+                SetEntityLineOptions<S>(helper, context, el));
         }
 
         public static void EntityLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityLine> settingsModifier)
@@ -256,7 +256,18 @@ namespace Signum.Web
             settingsModifier(el);
 
             helper.ViewContext.HttpContext.Response.Write(
-                helper.InternalEntityLine(context.Name, typeof(S), context.Value, el));
+                SetEntityLineOptions<S>(helper, context, el));
+        }
+
+        private static string SetEntityLineOptions<S>(HtmlHelper helper, TypeContext<S> context, EntityLine el)
+        {
+            if (el != null && el.StyleContext != null)
+            {
+                using (el.StyleContext)
+                    return helper.InternalEntityLine(context.Name, typeof(S), context.Value, el);
+            }
+            else
+                return helper.InternalEntityLine(context.Name, typeof(S), context.Value, el);
         }
 
     }

@@ -157,6 +157,13 @@ namespace Signum.Web
             return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
         }
 
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, string prefix, string prefixToIgnore, ref T obj)
+        {
+            SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
+
+            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
+        }
+
         public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj)
         {
             return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
@@ -372,6 +379,7 @@ namespace Signum.Web
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
+            controller.ViewData[ViewDataKeys.EntityType] = entitiesType;
             controller.ViewData[ViewDataKeys.Create] =
                 (findOptions.Create.HasValue) ?
                     findOptions.Create.Value :

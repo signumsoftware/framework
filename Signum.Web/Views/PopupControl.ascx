@@ -15,13 +15,16 @@
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup" + sufix)%>');" class="dragHandle">
+        <span id="windowTitle">Título de la ventana</span>
+    </div>
+    <div class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
             <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
         <%} else{ %>
             <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" />
          <%} %>    
-            <span id="windowTitle">Título de la ventana</span>
+            
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), prefix) %>
     </div>

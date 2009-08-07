@@ -12,17 +12,17 @@
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalName("divPopupDragHandle")%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup")%>');">
-        <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
+        &nbsp;
+        <%--<% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
             <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
         <%} else{ %>
             <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" />
-        <%} %>    
+        <%} %>   --%> 
     </div>
     
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>
     <div id="<%=Html.GlobalName("divASustituir")%>"></div>
-    <br />
-    <%= Html.ValidationSummaryAjax(prefix) %>
+    <%= Html.ValidationSummaryAjax((string)ViewData[ViewDataKeys.PopupPrefix])%>
 </div>
 </div>
 

@@ -139,18 +139,21 @@ function CallServer(urlController, prefix) {
     });
 }
 
-function CallServer(urlController, onOk, onCancel, prefix) {
-    var newPrefix = prefix + "New";
+function CloseChooser(urlController, onOk, onCancel, prefix) {
+    var container = $('#' + prefix + "externalPopupDiv").parent();
+    $('#' + prefix + sfBtnCancel).click();
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel) + "&prefix=" + newPrefix,
+        data: "sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel) + "&prefix=" + prefix,
         async: false,
         dataType: "html",
         success:
                    function(msg) {
-                        $('#' + prefix + "divASustituir").html(msg);
-                        ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+                        container.html(msg);
+                        ShowPopup(prefix, container[0].id, "modalBackground", "panelPopup");
+                       //$('#' + prefix + "divASustituir").html(msg);
+                       //ShowPopup(prefix, prefix + "divASustituir", "modalBackground", "panelPopup");
                    },
         error:
                    function(XMLHttpRequest, textStatus, errorThrown) {
@@ -182,24 +185,30 @@ function OperationExecute(urlController, typeName, id, operationKey, prefix, onO
     
 }
 
-//function FacturaCreadaOperationExecute(urlController, typeName, id, operationKey, prefix, onOk, onCancel) {
-//        var formChildren = $('#' + prefix + "panelPopup *");
-//        $.ajax({
-//            type: "POST",
-//            url: urlController,
-//            data: formChildren.serialize() + "&sfTypeName=" + typeName + "&sfId=" + id + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel),
-//            async: false,
-//            dataType: "html",
-//            success:
-//                       function(msg) {
-//                           $('#' + prefix + "externalPopupDiv").html(msg);
-//                       },
-//            error:
-//                       function(XMLHttpRequest, textStatus, errorThrown) {
-//                           ShowError(XMLHttpRequest, textStatus, errorThrown);
-//                       }
-//        });
-//}
+function ConstructFromManyExecute(urlController, typeName, queryName, operationKey, prefix, onOk, onCancel) {
+    var ids = GetSelectedElements(prefix);
+    if (ids == "")
+        return;
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: "sfIds=" + ids + "&sfTypeName=" + typeName + "&sfQueryName=" + queryName + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel),
+        async: false,
+        dataType: "html",
+        success:
+                       function(msg) {
+                            $('#' + prefix + "divASustituir").html(msg);
+                            ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+                            $('#' + newPrefix + sfBtnOk).click(onOk);
+                            $('#' + newPrefix + sfBtnCancel).click(onCancel);
+                       },
+        error:
+                       function(XMLHttpRequest, textStatus, errorThrown) {
+                           ShowError(XMLHttpRequest, textStatus, errorThrown);
+                       }
+    });
+
+}
 
 function PostServer(urlController, prefix) {
     var ids = GetSelectedElements(prefix);

@@ -18,7 +18,10 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
-        <input type="button" onclick="<%="TrySave('Signum/TrySave');" %>" value="Guardar" />     
+        <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
+            <input type="button" onclick="<%="TrySave('Signum/TrySave');" %>" value="Guardar" />   
+        <%} %>
+        <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), "") %>  
         <br />
         <%= Html.ValidationSummaryAjax() %>
         <br />

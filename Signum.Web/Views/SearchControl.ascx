@@ -28,7 +28,7 @@
     <%if ((bool)ViewData[ViewDataKeys.Create]){ %>
         <input id="<%=Html.GlobalName("btnCreate")%>" type="button" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato("Signum.aspx/PopupView", ViewData[ViewDataKeys.PopupPrefix] ?? "", "Signum.aspx/TrySavePartial")%>" value="+" /> 
     <%} %>
-    <%=Html.GetMenuItems(findOptions.QueryName, ViewData[ViewDataKeys.PopupPrefix]) %>
+    <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], (string)ViewData[ViewDataKeys.PopupPrefix])%> 
 </div>
 
 <div id="<%=Html.GlobalName("divResults")%>" name="<%=Html.GlobalName("divResults")%>">
