@@ -18,15 +18,16 @@
     <%Html.RenderPartial("~/Plugin/Signum.Web.dll/Signum.Web.Views.FilterBuilder.ascx", ViewData); %>
 </div>
 
-<div id="<%=Html.GlobalName("divMenuItems") %>">
-    <label for="<%=Html.GlobalName(ViewDataKeys.Top)%>">Núm.registros</label> <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new {size = "5" })%>
+<div id="<%=Html.GlobalName("divMenuItems") %>" class="buttonBar">
+    <label class="OperationDiv" for="<%=Html.GlobalName(ViewDataKeys.Top)%>">Núm.registros</label> 
+    <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new Dictionary<string, object>{{"size","5"},{"class","OperationDiv"}})%>
 
     <% if (findOptions.FilterMode != FilterMode.AlwaysHidden){%>
-        <input type="hidden" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
+        <input class="OperationDiv" type="hidden" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
     <%} %>
-        <input id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="$('#{0}').toggleClass('loading');Search('Signum.aspx/Search','{1}',function(){{$('#{0}').toggleClass('loading');}});".Formato(Html.GlobalName("btnSearch"),ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
+        <input class="OperationDiv" id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="$('#{0}').toggleClass('loading');Search('Signum.aspx/Search','{1}',function(){{$('#{0}').toggleClass('loading');}});".Formato(Html.GlobalName("btnSearch"),ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
     <%if ((bool)ViewData[ViewDataKeys.Create]){ %>
-        <input id="<%=Html.GlobalName("btnCreate")%>" type="button" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato("Signum.aspx/PopupView", ViewData[ViewDataKeys.PopupPrefix] ?? "", "Signum.aspx/TrySavePartial")%>" value="+" /> 
+        <input class="OperationDiv" id="<%=Html.GlobalName("btnCreate")%>" type="button" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato("Signum.aspx/PopupView", ViewData[ViewDataKeys.PopupPrefix] ?? "", "Signum.aspx/TrySavePartial")%>" value="+" /> 
     <%} %>
     <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], (string)ViewData[ViewDataKeys.PopupPrefix])%> 
 </div>
