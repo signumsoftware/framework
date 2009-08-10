@@ -45,6 +45,13 @@ namespace Signum.Web
             return localName;
         }
 
+        public static string ParentPrefix(this HtmlHelper helper)
+        {
+            if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
+                return helper.ViewData[ViewDataKeys.PopupPrefix].ToString();
+            return "";
+        }
+
         public static bool IsContainedEntity(this HtmlHelper helper)
         {
             return helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix);

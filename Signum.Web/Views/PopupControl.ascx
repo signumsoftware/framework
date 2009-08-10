@@ -15,7 +15,7 @@
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup" + sufix)%>');" class="dragHandle">
-        <span id="windowTitle">Título de la ventana</span>
+        <span id="windowTitle"><%= (Model != null) ? Model.ToString() : "" %></span>
     </div>
     <div class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
@@ -28,8 +28,9 @@
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), prefix) %>
     </div>
-    
-    <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
+    <div id="<%=Html.GlobalName("divMainControl" + sufix)%>">
+        <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
+    </div>
     <div id="<%=Html.GlobalName("divASustituir" + sufix)%>"></div>
     <br />
     <%= Html.ValidationSummaryAjax(prefix) %>

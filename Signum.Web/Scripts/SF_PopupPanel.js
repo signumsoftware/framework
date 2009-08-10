@@ -140,8 +140,8 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
     }
 }
 
-function OnPopupOK(urlController, prefix) {
-    TrySavePartial(urlController, prefix, "", true, "*");
+function OnPopupOK(urlController, prefix, urlReloadController, parentPrefix) {
+    var correcto = TrySavePartial(urlController, prefix, "", true, "*");
 
     //Clean panelPopup
     window[prefix + sfEntityTemp] = "";
@@ -152,6 +152,34 @@ function OnPopupOK(urlController, prefix) {
         runtimeType.val($('#' + prefix + sfStaticType).val());
 
     toggleButtonsDisplay(prefix, true);
+
+    if (correcto) {
+        if (urlReloadController != null && urlReloadController != undefined && urlReloadController != "")
+            ReloadEntity(urlReloadController, parentPrefix);
+    }
+}
+
+function ReloadEntity(urlController, prefix) {
+    var formChildren;
+    if ($('#' + prefix + "panelPopup").length != 0)
+        formChildren = $('#' + prefix + "panelPopup *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
+    else
+        formChildren = $("form");
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: formChildren.serialize() + "&prefix=" + prefix,
+        async: false,
+        dataType: "html",
+        success:
+                   function(msg) {
+                       $('#' + prefix + "divMainControl").html(msg);
+                   },
+        error:
+                   function(XMLHttpRequest, textStatus, errorThrown) {
+                       ShowError(XMLHttpRequest, textStatus, errorThrown);
+                   }
+    });
 }
 
 function OnListPopupOK(urlController, prefix, btnOkId) {
@@ -281,7 +309,7 @@ function RemoveListContainedEntity(select) {
     window[prefixSelected + sfEntityTemp] = "";
 }
 
-function RemoveContainedEntity(prefix) {
+function RemoveContainedEntity(prefix, urlReloadController, parentPrefix) {
     $('#' + prefix + sfToStr).val("");
     $('#' + prefix + sfToStr).html("");
     $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
@@ -293,7 +321,9 @@ function RemoveContainedEntity(prefix) {
     $('#' + prefix + sfEntity).html("");
     $('#' + prefix + sfId).val("");
     toggleButtonsDisplay(prefix, false);
-    return;
+
+    if (urlReloadController != null && urlReloadController != undefined && urlReloadController != "")
+        ReloadEntity(urlReloadController, parentPrefix);
 }
 
 var autocompleteOnSelected = function(extendedControlName, newIdAndType, newValue, hasEntity) {

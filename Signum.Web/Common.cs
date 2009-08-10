@@ -25,6 +25,7 @@ namespace Signum.Web
             CommonTask += new CommonTask(TaskSetReadOnly);
             CommonTask += new CommonTask(TaskSetValueLineType);
             CommonTask += new CommonTask(TaskSetHtmlProperties);
+            CommonTask += new CommonTask(TaskSetReloadOnChange);
         }
 
         internal static void FireCommonTasks(BaseLine eb, Type parent, TypeContext context)
@@ -99,6 +100,19 @@ namespace Signum.Web
                             });
                         }
                     }
+                }
+            }
+        }
+
+        public static void TaskSetReloadOnChange(BaseLine eb, Type parent, TypeContext context)
+        {
+            if (eb is EntityLine)
+            {
+                if (eb != null)
+                {
+                    var atribute = context.Property.SingleAttribute<ReloadEntityOnChange>();
+                    if (atribute != null)
+                        ((EntityLine)eb).ReloadOnChange = true;
                 }
             }
         }

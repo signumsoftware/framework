@@ -51,7 +51,7 @@ function OnSearchCreateOK(urlController, prefix) {
     var typeName = $('#' + prefix + sfEntityTypeName).val();
     var newPrefix = prefix + "New";
     if (TypedTrySavePartial(urlController, newPrefix, "", true, "", typeName, "panelPopup", true)) {
-        OnSearchCreateCancel(prefix);  
+        OnSearchCreateCancel(prefix);
     }
 }
 
@@ -63,7 +63,7 @@ function OnSearchCreateCancel(prefix) {
     $('#' + newPrefix + sfIsNew).remove();
 }
 
-function OnSearchOk(prefix, divASustituir) {
+function OnSearchOk(prefix, divASustituir, urlReloadController, parentPrefix) {
     var entitySelected = $("input:radio[name="+prefix+"rowSelection]:checked").val();
     if (entitySelected == undefined)
         return;
@@ -78,6 +78,9 @@ function OnSearchOk(prefix, divASustituir) {
     toggleButtonsDisplay(prefix, true);
     //$('#' + prefix + sfEntity).hide().html("");
     $('#' + divASustituir).hide().html("");
+
+    if (urlReloadController != null && urlReloadController != undefined && urlReloadController != "")
+        ReloadEntity(urlReloadController, parentPrefix);
 }
 
 function OnListSearchOk(prefix, divASustituir) {
@@ -174,7 +177,7 @@ function OperationExecute(urlController, typeName, id, operationKey, prefix, onO
                        function(msg) {
                             eval('var result=' + msg);
                             var modelState = result["ModelState"];
-                            if (ShowErrorMessages(prefix, modelState, true, ""))
+                            if (ShowErrorMessages(prefix, modelState, true, "*"))
                                 $('#' + prefix + "externalPopupDiv").html(msg);
                        },
             error:

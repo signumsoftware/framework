@@ -51,7 +51,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix)
         {
             Type type = Navigator.ResolveType(sfStaticType);
-
+            
             ModifiableEntity entity = null;
             if (sfId.HasValue)
                 entity = Database.Retrieve(type, sfId.Value);
@@ -69,6 +69,17 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, entity, prefix);
         }
 
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult ReloadEntity(string prefix)
+        {
+            ModifiableEntity entity = Navigator.ExtractEntity(this, Request.Form, prefix)
+                .ThrowIfNullC("PartialView: Type was not possible to extract");
+
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefix, "", ref entity);
+
+            return Navigator.PartialView(this, entity, prefix);
+        }
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult TrySave(string prefixToIgnore)

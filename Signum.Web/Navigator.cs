@@ -180,12 +180,12 @@ namespace Signum.Web
             return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
         }
 
-        public static IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
+        public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
         {
             return Manager.ExtractEntity(controller, form, null);
         }
 
-        public static IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
+        public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
             return Manager.ExtractEntity(controller, form, prefix);
         }
@@ -332,7 +332,6 @@ namespace Signum.Web
         {
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
 
-            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
 
@@ -350,7 +349,6 @@ namespace Signum.Web
         {
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
 
-            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;
 
@@ -598,7 +596,7 @@ namespace Signum.Web
             return Modification.Create(obj.GetType(), formValues, interval, prefix);
         }
 
-        protected internal virtual IdentifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
+        protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
             string typeName = form[(prefix ?? "") + TypeContext.Separator + TypeContext.RuntimeType];
             string id = form[(prefix ?? "") + TypeContext.Separator + TypeContext.Id];
@@ -608,7 +606,7 @@ namespace Signum.Web
             if (!string.IsNullOrEmpty(id))
                 return Database.Retrieve(type, int.Parse(id));
             else
-                return (IdentifiableEntity)Constructor.Construct(type, controller);
+                return (ModifiableEntity)Constructor.Construct(type, controller);
         }
 
         protected internal virtual bool IsViewable(Type type, bool admin)

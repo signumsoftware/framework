@@ -16,6 +16,11 @@ using System.ComponentModel;
 
 namespace Signum.Entities
 {
+    [AttributeUsage(AttributeTargets.Property)]
+    public sealed class ReloadEntityOnChange : Attribute
+    { 
+    
+    }
 
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class NoIndexAttribute : Attribute
