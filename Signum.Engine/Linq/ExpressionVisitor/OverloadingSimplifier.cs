@@ -101,7 +101,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             Type decType = m.Method.DeclaringType; 
-            if (decType == typeof(Queryable) || decType == typeof(Enumerable) || decType == typeof(Database))
+            if (m.Method.IsGenericMethod && ( decType == typeof(Queryable) || decType == typeof(Enumerable) || decType == typeof(Database)))
             {
                 Type[] paramTypes = m.Method.GetGenericArguments();
                 MethodInfo mi = m.Method.GetGenericMethodDefinition();

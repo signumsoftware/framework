@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using Signum.Entities.Properties;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
+using System.ComponentModel;
 
 namespace Signum.Entities
 {
@@ -105,7 +106,7 @@ namespace Signum.Entities
         }
     }
 
-    public interface IIdentifiable
+    public interface IIdentifiable: INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
         int Id { get; }
         int? IdOrNull { get; }
