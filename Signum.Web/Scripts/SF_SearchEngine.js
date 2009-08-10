@@ -63,7 +63,7 @@ function OnSearchCreateCancel(prefix) {
     $('#' + newPrefix + sfIsNew).remove();
 }
 
-function OnSearchOk(prefix, divASustituir, urlReloadController, parentPrefix) {
+function OnSearchOk(prefix, divASustituir, reloadOnChangeFunction) {
     var entitySelected = $("input:radio[name="+prefix+"rowSelection]:checked").val();
     if (entitySelected == undefined)
         return;
@@ -79,8 +79,8 @@ function OnSearchOk(prefix, divASustituir, urlReloadController, parentPrefix) {
     //$('#' + prefix + sfEntity).hide().html("");
     $('#' + divASustituir).hide().html("");
 
-    if (urlReloadController != null && urlReloadController != undefined && urlReloadController != "")
-        ReloadEntity(urlReloadController, parentPrefix);
+    if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "")
+        reloadOnChangeFunction();
 }
 
 function OnListSearchOk(prefix, divASustituir) {

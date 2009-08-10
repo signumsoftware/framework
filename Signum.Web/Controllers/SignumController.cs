@@ -69,7 +69,6 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, entity, prefix);
         }
 
-
         [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult ReloadEntity(string prefix)
         {
@@ -78,6 +77,7 @@ namespace Signum.Web.Controllers
 
             Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefix, "", ref entity);
 
+            this.ViewData[ViewDataKeys.LoadAll] = true; //Prevents losing unsaved changes of the UI when reloading control
             return Navigator.PartialView(this, entity, prefix);
         }
 

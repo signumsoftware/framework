@@ -10,7 +10,7 @@ $(document).ready(function() {
 });
 
 function CreateAutocomplete(ddlName, extendedControlName, entityTypeName, implementations, 
-                    entityIdFieldName, controllerUrl, numCharacters, numResults, delay) {
+                    entityIdFieldName, controllerUrl, numCharacters, numResults, delay, AutoKeyDowned) {
     $('#' + extendedControlName).bind(
             "keyup", function(e) {
                 clearTimeout(timerID);
@@ -22,10 +22,10 @@ function CreateAutocomplete(ddlName, extendedControlName, entityTypeName, implem
                                   ((e.which) ? e.which : e.keyCode)+")",
                     delay);
             });
-    $('#' + extendedControlName).bind(
+            $('#' + extendedControlName).bind(
             "keydown", function(e) {
                 clearTimeout(timerID);
-                AutoKeyDown(ddlName, extendedControlName, entityIdFieldName, e);
+                AutoKeyDown(ddlName, extendedControlName, entityIdFieldName, e, AutoKeyDowned);
             });
     $("body").bind( "click", function() { $('#' + ddlName).hide(); });
 }
@@ -77,13 +77,13 @@ function Autocomplete(ddlName, extendedControlName, entityTypeName, implementati
     });
 }
 
-function AutoKeyDown(ddlName, extendedControlName, entityIdFieldName, evt) {
+function AutoKeyDown(ddlName, extendedControlName, entityIdFieldName, evt, AutoKeyDowned) {
 
     var key = (evt.which) ? evt.which : evt.keyCode;
     if (key == 13) { //Enter
         var selectedOption = $('.ddlAutoOn');
         if(selectedOption.length > 0) {
-            AutocompleteOnOk(selectedOption.html(), GetIdFromOption(selectedOption[0].id, ddlName), ddlName, extendedControlName, entityIdFieldName);
+            AutocompleteOnOk(selectedOption.html(), GetIdFromOption(selectedOption[0].id, ddlName), ddlName, extendedControlName, entityIdFieldName, AutoKeyDowned);
         }
         return;
     }
@@ -108,7 +108,7 @@ function optionOnMouseOver(extendedControlName, option) {
 function AutocompleteOnClick(ddlName, extendedControlName, entityIdFieldName, evt) {
     var target = evt.srcElement || evt.target;
     if (target != null) {
-        AutocompleteOnOk(target.innerHTML, GetIdFromOption(target.id, ddlName), ddlName, extendedControlName, entityIdFieldName);
+        AutocompleteOnOk(target.innerHTML, GetIdFromOption(target.id, ddlName), ddlName, extendedControlName, entityIdFieldName, "");
     }
     $('#' + ddlName).hide();
 }
@@ -118,7 +118,7 @@ function GetIdFromOption(optionId, ddlName)
     return optionId.substr(3 + ddlName.length, optionId.length);
 }
 
-function AutocompleteOnOk(newValue, newIdAndType, ddlName, extendedControlName, entityIdFieldName) {
+function AutocompleteOnOk(newValue, newIdAndType, ddlName, extendedControlName, entityIdFieldName, AutoKeyDowned) {
     var id = newIdAndType.substr(0, newIdAndType.indexOf("_"));
     $('#' + extendedControlName).val(newValue);
     $('#' + extendedControlName)[0].focus();
@@ -126,12 +126,8 @@ function AutocompleteOnOk(newValue, newIdAndType, ddlName, extendedControlName, 
     $('#' + ddlName).hide();
     //TODO: Borrar campo _sfEntity
     autocompleteOnSelected(extendedControlName, newIdAndType, newValue, true);
-}
-
-function ChangeEntityLine(extendedControlName) {
-    $('#' + extendedControlName).val(newValue);
-    $()
-    
+    if (AutoKeyDowned != null && AutoKeyDowned != undefined && AutoKeyDowned != "")
+        AutoKeyDowned();
 }
 
 function MoveDown(ddlName, extendedControlName) {

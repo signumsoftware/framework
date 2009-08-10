@@ -172,7 +172,8 @@ namespace Signum.Web
         }
         public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string extendedControlName, 
                                                   string entityTypeName, string implementations, string entityIdFieldName,
-                                                  string controllerUrl, int numCharacters, int numResults, int delayMiliseconds)
+                                                  string controllerUrl, int numCharacters, int numResults, int delayMiliseconds, 
+                                                  string AutoKeyDowned)
         {                   
             StringBuilder sb = new StringBuilder();
             sb.Append(html.Div(
@@ -184,7 +185,7 @@ namespace Signum.Web
                             { "onclick", "AutocompleteOnClick('" + ddlName + "','" + 
                                                               extendedControlName + "','" + 
                                                               entityIdFieldName + 
-                                                              "', event);" }, 
+                                                              "', event); {0}".Formato(Utils.Specify(AutoKeyDowned)) }, 
                         }));
             sb.Append("<script type=\"text/javascript\">CreateAutocomplete('" + ddlName + 
                                                               "','" + extendedControlName + 
@@ -195,6 +196,7 @@ namespace Signum.Web
                                                               "'," + numCharacters +
                                                               "," + numResults +
                                                               "," + delayMiliseconds +
+                                                              "," + AutoKeyDowned +
                                                               ");</script>\n");
             return sb.ToString();
         }

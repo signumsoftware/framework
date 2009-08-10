@@ -96,6 +96,11 @@ namespace Signum.Web
             set { removing = value; }
         }
 
-
+        string reloadOnChangeFunction = null;
+        public string ReloadOnChangeFunction
+        {
+            get { return reloadOnChangeFunction; }
+            set {reloadOnChangeFunction = value; }
+        }
     }
 }

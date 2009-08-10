@@ -108,7 +108,7 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
         $('#' + prefix + modalBackgroundKey).width(document.documentElement.clientWidth);
         $('#' + prefix + modalBackgroundKey).height(document.documentElement.clientHeight);
         $('#' + prefix + modalBackgroundKey).hide();
-        
+
         //Read offsetWidth and offsetHeight after display=block or otherwise it's 0
         var popup = $('#' + prefix + panelPopupKey)[0];
         var parentDiv = $("#" + prefix + "_sfEntity").parent();
@@ -140,7 +140,7 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
     }
 }
 
-function OnPopupOK(urlController, prefix, urlReloadController, parentPrefix) {
+function OnPopupOK(urlController, prefix, reloadOnChangeFunction) {
     var correcto = TrySavePartial(urlController, prefix, "", true, "*");
 
     //Clean panelPopup
@@ -154,8 +154,8 @@ function OnPopupOK(urlController, prefix, urlReloadController, parentPrefix) {
     toggleButtonsDisplay(prefix, true);
 
     if (correcto) {
-        if (urlReloadController != null && urlReloadController != undefined && urlReloadController != "")
-            ReloadEntity(urlReloadController, parentPrefix);
+        if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "")
+            reloadOnChangeFunction();
     }
 }
 
@@ -309,7 +309,7 @@ function RemoveListContainedEntity(select) {
     window[prefixSelected + sfEntityTemp] = "";
 }
 
-function RemoveContainedEntity(prefix, urlReloadController, parentPrefix) {
+function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
     $('#' + prefix + sfToStr).val("");
     $('#' + prefix + sfToStr).html("");
     $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
@@ -322,8 +322,8 @@ function RemoveContainedEntity(prefix, urlReloadController, parentPrefix) {
     $('#' + prefix + sfId).val("");
     toggleButtonsDisplay(prefix, false);
 
-    if (urlReloadController != null && urlReloadController != undefined && urlReloadController != "")
-        ReloadEntity(urlReloadController, parentPrefix);
+    if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "")
+        reloadOnChangeFunction();
 }
 
 var autocompleteOnSelected = function(extendedControlName, newIdAndType, newValue, hasEntity) {

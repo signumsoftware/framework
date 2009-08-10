@@ -57,11 +57,12 @@ namespace Signum.Web
                 return null;
 
             idValueField = helper.GlobalName(idValueField);
+            //string divASustituir = helper.ViewData[ViewDataKeys.DivASustituir].TryCC(d => d.ToString()) ?? helper.GlobalName("divASustituir");
             string divASustituir = helper.GlobalName("divASustituir");
 
             StringBuilder sb = new StringBuilder();
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, (Reflector.ExtractLazy(type) ?? type).Name));
-
+             
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Label(idValueField + "lbl", settings.LabelText ?? "", idValueField + "_sfToStr", TypeContext.CssLineLabel));
 
@@ -75,11 +76,11 @@ namespace Signum.Web
             }
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.RuntimeType, runtimeType));
 
-            string urlReloaderController = "";
-            if (settings.ReloadOnChange)
-                urlReloaderController = "Signum.aspx/ReloadEntity";
+            string reloadOnChangeFunction = "''";
+            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
 
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}','{4}','{5}');}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/TrySavePartial", urlReloaderController, helper.ParentPrefix());
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}',{4});}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/TrySavePartial", reloadOnChangeFunction);
 
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(type);
             bool isLazy = typeof(Lazy).IsAssignableFrom(type);
@@ -91,7 +92,27 @@ namespace Signum.Web
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("")
                        : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()) + "\n");
 
-                sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                if (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null)
+                {
+                    //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
+                    sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
+
+                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(isIdentifiable ? type : Reflector.ExtractLazy(type)).ThrowIfNullC("No hay una vista asociada al tipo: " + type);
+
+                    sb.Append(
+                        helper.RenderPartialToString(
+                            "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx",
+                            new ViewDataDictionary(value) 
+                        { 
+                            { ViewDataKeys.MainControlUrl, es.PartialViewName},
+                            { ViewDataKeys.PopupPrefix, idValueField}
+                        }
+                        )
+                    );
+                    sb.Append("</div>\n");
+                }
+                else
+                    sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 
                 sb.Append(helper.TextBox(
                     idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, 
@@ -106,14 +127,14 @@ namespace Signum.Web
                     }));
                 sb.Append("\n");
 
-                if(settings.Autocomplete)
+                if (settings.Autocomplete)
                     sb.Append(helper.AutoCompleteExtender(idValueField + TypeContext.Separator + EntityLineKeys.DDL,
                                                       idValueField + TypeContext.Separator + EntityBaseKeys.ToStr,
-                                                      (Reflector.ExtractLazy(type) ?? type).Name, 
-                                                      (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name,",") : "",
-                                                      idValueField + TypeContext.Separator +  TypeContext.Id,
-                                                      "Signum/Autocomplete", 1, 5, 500));
-
+                                                      (Reflector.ExtractLazy(type) ?? type).Name,
+                                                      (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name, ",") : "",
+                                                      idValueField + TypeContext.Separator + TypeContext.Id,
+                                                      "Signum/Autocomplete", 1, 5, 500, reloadOnChangeFunction));
+                
                 if (settings.Implementations != null) //Interface with several possible implementations
                 {
                     sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" style=\"display:none\" >\n");
@@ -186,13 +207,13 @@ namespace Signum.Web
                     sb.Append(
                         helper.Button(idValueField + "_btnRemove",
                                   "x",
-                                  "RemoveContainedEntity('{0}','{1}','{2}');".Formato(idValueField, urlReloaderController, helper.ParentPrefix()),
+                                  "RemoveContainedEntity('{0}',{1});".Formato(idValueField, reloadOnChangeFunction),
                                   "lineButton",
                                   (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Find && (isIdentifiable || isLazy))
                 {
-                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}','{4}','{5}');}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir, urlReloaderController, helper.ParentPrefix());
+                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir, reloadOnChangeFunction);
                     string findingUrl = (settings.Implementations == null) ?
                         "Find({0});".Formato(popupFindingParameters) :
                         "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);

@@ -35,11 +35,6 @@ namespace Signum.Web
 
             if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
             {
-                //string mPrefix = tc.Name;
-
-                //if (tc.Name.Right(Signum.Web.TypeContext.Separator.Length) != Signum.Web.TypeContext.Separator)
-                //    mPrefix = tc.Name + Signum.Web.TypeContext.Separator;
-
                 IdentifiableEntity id = (IdentifiableEntity)(object)value;
 
                 if (!helper.IsContainedEntity())
@@ -49,6 +44,11 @@ namespace Signum.Web
                     helper.ViewContext.HttpContext.Response.Write(
                         helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
                 }
+            }
+            else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
+            {
+                helper.ViewContext.HttpContext.Response.Write(
+                        helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
             }
 
             return tc;
