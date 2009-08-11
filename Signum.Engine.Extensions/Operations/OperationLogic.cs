@@ -327,10 +327,11 @@ namespace Signum.Engine.Operations
             return ConstructFromManyPrivate(Find<IConstructorFromManyOperation>(type, operationKey, true), lazies, args);
         }
 
-        public static T ConstructFromMany<T>(List<Lazy> lazies, Enum operationKey, params object[] args)
+        public static T ConstructFromMany<F, T>(List<Lazy<F>> lazies, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
+            where F : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ConstructFromManyPrivate(Find<IConstructorFromManyOperation>(typeof(T), operationKey, true), null, args);
+            return (T)(IIdentifiable)ConstructFromManyPrivate(Find<IConstructorFromManyOperation>(typeof(F), operationKey, true), lazies.Cast<Lazy>().ToList(), args);
         }
 
         static IdentifiableEntity ConstructFromManyPrivate(IConstructorFromManyOperation operation, List<Lazy> lazies, params object[] parameters)
