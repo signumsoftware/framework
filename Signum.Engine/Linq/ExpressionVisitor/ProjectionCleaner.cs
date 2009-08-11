@@ -51,10 +51,10 @@ namespace Signum.Engine.Linq
                         Table = tableExpression
                     });
 
-                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId, toStr );
+                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId, toStr);
                 }
                 else
-                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId,  fie.Bindings.ToStrColumn() );
+                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId, fie.Bindings.ToStrColumn());
             }
             
             return base.VisitLazyReference(lazy);

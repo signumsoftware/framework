@@ -138,6 +138,11 @@ namespace Signum.Engine.Linq
                     Expression.Constant(lazy.RuntimeType), id, toStr);
             }
 
+            protected override Expression VisitNullEntity(NullEntityExpression ne)
+            {
+                return Expression.Constant(null, ne.Type); 
+            }
+
             protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
             {
                 if (typeof(IdentifiableEntity).IsAssignableFrom(fieldInit.Type))
@@ -185,6 +190,7 @@ namespace Signum.Engine.Linq
                 HasFullObjects = true;
                 Type lazyType = Reflector.ExtractLazy(lazy.Type);
                 Expression reference = lazy.Reference;
+
                 switch ((DbExpressionType)reference.NodeType)
                 {
                     case DbExpressionType.FieldInit:
@@ -202,6 +208,8 @@ namespace Signum.Engine.Linq
                         return Expression.Call(row, miGetLazyImplementedByAll.MakeGenericMethod(lazyType),
                             Visit(NullifyColumn(rba.ID)),
                             Visit(NullifyColumn(rba.TypeID)).Nullify());
+                    case DbExpressionType.NullEntity:
+                        return Expression.Constant(null, lazy.Type);                   
                     default:
                         throw new NotSupportedException();
                 }

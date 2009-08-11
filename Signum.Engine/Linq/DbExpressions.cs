@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
         FieldInit,
         ImplementedBy,
         ImplementedByAll,
-        //Enum,
+        NullEntity,
         LazyReference,
         LazyLiteral, 
         MList,

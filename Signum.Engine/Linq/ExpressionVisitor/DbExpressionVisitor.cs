@@ -56,7 +56,9 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.ImplementedBy:
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
                 case DbExpressionType.ImplementedByAll:
-                    return this.VisitImplementedByAll((ImplementedByAllExpression)exp);       
+                    return this.VisitImplementedByAll((ImplementedByAllExpression)exp);     
+                case DbExpressionType.NullEntity:
+                    return this.VisitNullEntity((NullEntityExpression)exp); 
                 case  DbExpressionType.LazyReference:
                     return this.VisitLazyReference((LazyReferenceExpression)exp);
                 case DbExpressionType.LazyLiteral:
@@ -69,12 +71,18 @@ namespace Signum.Engine.Linq
             }
         }
 
+     
         protected virtual Expression VisitMList(MListExpression ml)
         {
             var newBackID = Visit(ml.BackID);
             if (newBackID != ml.BackID)
                 return new MListExpression(ml.Type, newBackID, ml.RelationalTable);
             return ml;
+        }
+
+        protected virtual Expression VisitNullEntity(NullEntityExpression ne)
+        {
+            return ne;
         }
 
         protected virtual Expression VisitLazyReference(LazyReferenceExpression lazy)

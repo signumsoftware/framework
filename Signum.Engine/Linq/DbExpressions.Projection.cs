@@ -18,18 +18,6 @@ using System.Diagnostics;
 
 namespace Signum.Engine.Linq
 {
-    //internal class BaseReferenceExpression : Expression
-    //{
-
-
-    //    public BaseReferenceExpression(DbExpressionType expressionType, Type type, string alias, Expression id)
-    //        : base((ExpressionType)expressionType, type)
-    //    {
-    //        this.ID = id;
-    //        this.Alias = alias;
-    //    }
-    //}
-
     internal class FieldInitExpression : Expression
     {
         public readonly Expression ExternalId;
@@ -146,9 +134,19 @@ namespace Signum.Engine.Linq
         }
     }
 
+    internal class NullEntityExpression : Expression
+    {
+        public NullEntityExpression(Type type)
+            : base((ExpressionType)DbExpressionType.NullEntity, type)
+        {
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                throw new ApplicationException("Impossible to create a NullEntity of type {0}".Formato(type)); 
+        }
+    }
+
     internal class LazyReferenceExpression: Expression
     {
-        public readonly Expression Reference;
+        public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to null
 
         public LazyReferenceExpression(Type type, Expression reference): 
             base((ExpressionType)DbExpressionType.LazyReference, type)
@@ -192,6 +190,8 @@ namespace Signum.Engine.Linq
             return "new Lazy<{0}>({1}, {2})".Formato(Reflector.ExtractLazy(Type).Name, ID, ToStr);
         }
     }
+
+    
 
     internal class MListExpression : Expression
     {

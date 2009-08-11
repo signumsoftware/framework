@@ -675,8 +675,10 @@ namespace Signum.Engine.Linq
         protected override Expression VisitConstant(ConstantExpression c)
         {
             Type type = TableType(c.Value);
+            
             if (type != null)
                 return GetTableProjection(type);
+
             if (typeof(IIdentifiable).IsAssignableFrom(c.Type))
             {
                 return ToFieldInitExpression(c.Type, (IdentifiableEntity)c.Value);// podria ser null y lo meteriamos igualmente
@@ -691,7 +693,7 @@ namespace Signum.Engine.Linq
         private static Expression ToLazyReferenceExpression(Type lazyType, Lazy lazy)
         {
             if (lazy == null)
-                return new LazyReferenceExpression(lazyType, new FieldInitExpression(Reflector.ExtractLazy(lazyType), null, Expression.Constant(null, typeof(int?)))); //puede dar problemas con lazy de tipo interface
+                return new LazyReferenceExpression(lazyType, new NullEntityExpression(Reflector.ExtractLazy(lazyType)));
 
             return new LazyReferenceExpression(lazyType, new FieldInitExpression(lazy.RuntimeType, null, Expression.Constant(lazy.IdOrNull ?? int.MinValue)));
         }
@@ -699,9 +701,9 @@ namespace Signum.Engine.Linq
         private static Expression ToFieldInitExpression(Type entityType, IIdentifiable ei)
         {
             if (ei == null)
-                return new FieldInitExpression(entityType, null, Expression.Constant(null, typeof(int?)));
+                return new NullEntityExpression(entityType);
 
-            return new FieldInitExpression(ei.GetType(), null, Expression.Constant(ei.Id));
+            return new FieldInitExpression(ei.GetType(), null, Expression.Constant(ei.IdOrNull ?? int.MinValue));
         }
 
         protected override Expression VisitParameter(ParameterExpression p)
