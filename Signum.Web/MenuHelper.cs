@@ -16,42 +16,64 @@ namespace Signum.Web
         public object QueryName;
         public string Title;
         public string Text;
+        public List<Item> SubItems;
     }
 
     public static class MenuHelper
     {
-        public static void MenuLI(this HtmlHelper helper, Item menuItem)
+        public static string MenuLI(this HtmlHelper helper, Item menuItem, string prefix)
         {
             StringBuilder sb = new StringBuilder();
 
-            if (Navigator.IsFindable(menuItem.QueryName))
-                sb.Append(
-                    "<li>" +
-                    "<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text) +
-                    "</li>\n"
-                    );
+            string idUL = prefix + "_" + "ul" + menuItem.Text.Replace(" ", "");
+            string idLI = prefix + "_" + "li" + menuItem.Text.Replace(" ", "");
+            if (menuItem.SubItems != null && menuItem.SubItems.Count > 0 && menuItem.SubItems.Exists(mi => Navigator.IsFindable(mi.QueryName)))
+            {
+                sb.AppendLine("<li id='{0}'>".Formato(idLI));
+                sb.AppendLine("<span title='{1}'>{2}</span>".Formato(idUL, menuItem.Title, menuItem.Text));
+                sb.AppendLine("<ul id='{0}'>".Formato(idUL));
+                foreach (Item mi in menuItem.SubItems)
+                    sb.Append(helper.MenuLI(mi, idUL));
+                sb.AppendLine("</ul>");
+                sb.AppendLine("</li>");
+            }
+            else
+            {
+                if (Navigator.IsFindable(menuItem.QueryName))
+                    sb.Append(
+                        "<li id='{0}'>".Formato(idLI) +
+                        "<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text) +
+                        "</li>\n"
+                        );
+            }
 
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+            return sb.ToString();
         }
 
         public static void MenuLI(this HtmlHelper helper, string text, string title, List<Item> children)
         {
+            StringBuilder sb = new StringBuilder();
+
             if (children.Exists(mi => Navigator.IsFindable(mi.QueryName)))
             {
-                helper.ViewContext.HttpContext.Response.Write(
-                    "<li>\n" +
-                    "<span onclick=\"$('#ul{0}').toggle();(this.className == 'active') ? this.className='' : this.className='active';\" title='{1}'>{0}</span>\n".Formato(text, title) +
-                    "<ul class='submenu' id='ul{0}'>".Formato(text)
+                string idUL = "ul" + text.Replace(" ", "");
+
+                sb.Append(
+                    "<li id='{0}'>\n".Formato("li" + text.Replace(" ", "")) +
+                    "<span title='{1}'>{2}</span>\n".Formato(idUL, title, text) +
+                    "<ul class='submenu' id='{0}'>".Formato(idUL)
                     );
 
                 foreach (Item mi in children)
-                    helper.MenuLI(mi);
+                    sb.Append(helper.MenuLI(mi, idUL));
 
-                helper.ViewContext.HttpContext.Response.Write(
+                sb.Append(
                     "</ul>\n" + 
                     "</li>\n"
                     );
             }
+
+            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
         }
     }
 }
