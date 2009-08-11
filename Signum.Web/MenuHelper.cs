@@ -13,6 +13,7 @@ namespace Signum.Web
 {
     public class Item
     {
+        public string HrefManualString;
         public object QueryName;
         public string Title;
         public string Text;
@@ -27,7 +28,7 @@ namespace Signum.Web
 
             string idUL = prefix + "_" + "ul" + menuItem.Text.Replace(" ", "");
             string idLI = prefix + "_" + "li" + menuItem.Text.Replace(" ", "");
-            if (menuItem.SubItems != null && menuItem.SubItems.Count > 0 && menuItem.SubItems.Exists(mi => Navigator.IsFindable(mi.QueryName)))
+            if (menuItem.SubItems != null && menuItem.SubItems.Count > 0 && menuItem.SubItems.Exists(mi => (mi.QueryName==null && menuItem.HrefManualString.HasText()) || Navigator.IsFindable(mi.QueryName)))
             {
                 sb.AppendLine("<li id='{0}'>".Formato(idLI));
                 sb.AppendLine("<span title='{1}'>{2}</span>".Formato(idUL, menuItem.Title, menuItem.Text));
@@ -39,12 +40,15 @@ namespace Signum.Web
             }
             else
             {
-                if (Navigator.IsFindable(menuItem.QueryName))
-                    sb.Append(
-                        "<li id='{0}'>".Formato(idLI) +
-                        "<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text) +
-                        "</li>\n"
-                        );
+                if ((menuItem.QueryName == null && menuItem.HrefManualString.HasText()) || Navigator.IsFindable(menuItem.QueryName))
+                {
+                    sb.AppendLine("<li id='{0}'>".Formato(idLI));
+                    if (menuItem.HrefManualString.HasText())
+                        sb.AppendLine(menuItem.HrefManualString);
+                    else 
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text));
+                    sb.AppendLine("</li>");
+                }
             }
 
             return sb.ToString();
@@ -54,7 +58,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
 
-            if (children.Exists(mi => Navigator.IsFindable(mi.QueryName)))
+            if (children.Exists(mi => (mi.QueryName == null && mi.HrefManualString.HasText()) || Navigator.IsFindable(mi.QueryName)))
             {
                 string idUL = "ul" + text.Replace(" ", "");
 
