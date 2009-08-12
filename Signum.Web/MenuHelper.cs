@@ -13,38 +13,66 @@ namespace Signum.Web
 {
     public class Item
     {
-        public string HrefManualString;
-        public object QueryName;
-        public string Title;
-        public string Text;
+        public string ManualA {get; set;} //Specify all the tag string <a href='http://www.signumframework.com'>Signum</a>
+        public string ManualHref {get; set;} //Specify the href element to be inserted in an A tag with the specified Title and Text
+        public object QueryName {get; set;}
+        
+        string text;
+        public string Text
+        {
+            get
+            { 
+                return text ??
+                       ((QueryName != null) ?
+                            (Navigator.Manager.QuerySettings[QueryName].TryCC(qs => qs.UrlName) ?? "") :
+                            ""); 
+            }
+            set { text = value; }
+        }
+
+        string title;
+        public string Title
+        {
+            get { return title ?? Text; }
+            set { title = value; }
+        }
+
         public List<Item> SubItems;
+
+        public bool IsVisible()
+        { 
+            if (QueryName != null)
+                return Navigator.IsFindable(QueryName);
+
+            return ManualHref.HasText() || ManualA.HasText();
+        }
     }
 
     public static class MenuHelper
     {
-        public static string MenuLI(this HtmlHelper helper, Item menuItem, string prefix)
+        public static string MenuLI(this HtmlHelper helper, Item menuItem)
         {
             StringBuilder sb = new StringBuilder();
 
-            string idUL = prefix + "_" + "ul" + menuItem.Text.Replace(" ", "");
-            string idLI = prefix + "_" + "li" + menuItem.Text.Replace(" ", "");
-            if (menuItem.SubItems != null && menuItem.SubItems.Count > 0 && menuItem.SubItems.Exists(mi => (mi.QueryName==null && menuItem.HrefManualString.HasText()) || Navigator.IsFindable(mi.QueryName)))
+            if (menuItem.SubItems != null && menuItem.SubItems.Count > 0 && menuItem.SubItems.Exists(mi => mi.IsVisible()))
             {
-                sb.AppendLine("<li id='{0}'>".Formato(idLI));
-                sb.AppendLine("<span title='{1}'>{2}</span>".Formato(idUL, menuItem.Title, menuItem.Text));
-                sb.AppendLine("<ul id='{0}'>".Formato(idUL));
+                sb.AppendLine("<li>");
+                sb.AppendLine("<span title='{0}'>{1}</span>".Formato(menuItem.Title, menuItem.Text));
+                sb.AppendLine("<ul>");
                 foreach (Item mi in menuItem.SubItems)
-                    sb.Append(helper.MenuLI(mi, idUL));
+                    sb.Append(helper.MenuLI(mi));
                 sb.AppendLine("</ul>");
                 sb.AppendLine("</li>");
             }
             else
             {
-                if ((menuItem.QueryName == null && menuItem.HrefManualString.HasText()) || Navigator.IsFindable(menuItem.QueryName))
+                if (menuItem.IsVisible())
                 {
-                    sb.AppendLine("<li id='{0}'>".Formato(idLI));
-                    if (menuItem.HrefManualString.HasText())
-                        sb.AppendLine(menuItem.HrefManualString);
+                    sb.AppendLine("<li>");
+                    if (menuItem.ManualHref.HasText())
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(menuItem.ManualHref, menuItem.Title, menuItem.Text));
+                    else if (menuItem.ManualA.HasText())
+                        sb.AppendLine(menuItem.ManualA);
                     else 
                         sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text));
                     sb.AppendLine("</li>");
@@ -54,27 +82,19 @@ namespace Signum.Web
             return sb.ToString();
         }
 
-        public static void MenuLI(this HtmlHelper helper, string text, string title, List<Item> children)
+        public static void MenuLI(this HtmlHelper helper, string text, List<Item> children)
         {
             StringBuilder sb = new StringBuilder();
 
-            if (children.Exists(mi => (mi.QueryName == null && mi.HrefManualString.HasText()) || Navigator.IsFindable(mi.QueryName)))
+            if (children.Exists(mi => (mi.QueryName == null && mi.ManualHref.HasText()) || Navigator.IsFindable(mi.QueryName)))
             {
-                string idUL = "ul" + text.Replace(" ", "");
-
-                sb.Append(
-                    "<li id='{0}'>\n".Formato("li" + text.Replace(" ", "")) +
-                    "<span title='{1}'>{2}</span>\n".Formato(idUL, title, text) +
-                    "<ul class='submenu' id='{0}'>".Formato(idUL)
-                    );
-
+                sb.AppendLine("<li>");
+                sb.AppendLine("<span title='{0}'>{0}</span>".Formato(text));
+                sb.AppendLine("<ul class='submenu'>");
                 foreach (Item mi in children)
-                    sb.Append(helper.MenuLI(mi, idUL));
-
-                sb.Append(
-                    "</ul>\n" + 
-                    "</li>\n"
-                    );
+                    sb.Append(helper.MenuLI(mi));
+                sb.AppendLine("</ul>");
+                sb.AppendLine("</li>");
             }
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
