@@ -4,7 +4,7 @@
     if (Session["usuario"] != null) 
     {
 %>
-        Usuario: <b><%=Html.Encode(ViewData["usuario"])%></b>
+        Usuario: <b><%=Html.Encode(Session["usuario"])%></b>
         [ <%= Html.ActionLink("Logout", "Logout", "Auth") %> ]
 <%
     }
