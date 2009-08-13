@@ -18,6 +18,14 @@ using System.Web.Mvc;
 
 namespace Signum.Web
 {
+    public static class CustomModificationBinders
+    {
+        public delegate Modification ModificationBinder(SortedList<string, object> formValues, MinMax<int> interval, string controlID);
+
+        public static Dictionary<Type, ModificationBinder> binders = new Dictionary<Type, ModificationBinder>();
+        public static Dictionary<Type, ModificationBinder> Binders { get { return binders; } }
+    }
+
     public abstract class Modification
     {
         public string ControlID { get; private set; }
@@ -44,8 +52,7 @@ namespace Signum.Web
         public abstract object ApplyChanges(Controller controller, object obj);
 
         public abstract void Validate(object entity, Dictionary<string, List<string>> errors);
-
-
+        
         public static MinMax<int> FindSubInterval(SortedList<string, object> formValues, string prefix)
         {
             return FindSubInterval(formValues, new MinMax<int>(0, formValues.Count), 0, prefix);
@@ -70,6 +77,9 @@ namespace Signum.Web
 
         public static Modification Create(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
         {
+            var binder = CustomModificationBinders.Binders.TryGetC(staticType);
+            if(binder!= null)
+                return binder(formValues, interval, controlID);
             if (typeof(ModifiableEntity).IsAssignableFrom(staticType)  || typeof(IIdentifiable).IsAssignableFrom(staticType))
                 return new EntityModification(staticType, formValues, interval, controlID);
             else if (typeof(Lazy).IsAssignableFrom(staticType))
@@ -122,20 +132,24 @@ namespace Signum.Web
         }
     }
 
-    class EntityModification : Modification
+    public class EntityModification : Modification
     {
-        Type RuntimeType; 
-        int? EntityId; //optional
-        bool IsNew;
-        bool AvoidChange = false; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
+        public Type RuntimeType { get; set; }
+        public int? EntityId { get; set; } //optional
+        public bool IsNew { get; set; }
+        public bool AvoidChange = false; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
 
-        internal class PropertyPackModification
+        public class PropertyPackModification
         {
             public PropertyPack PropertyPack; 
             public Modification Modification; 
         }
 
-        internal Dictionary<string, PropertyPackModification> Properties { get; private set; }
+        public Dictionary<string, PropertyPackModification> Properties { get; private set; }
+
+        public EntityModification(Type staticType, string controlID)
+            : base(staticType, controlID) 
+        { }
 
         public EntityModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
             : base(staticType, controlID)
@@ -184,13 +198,19 @@ namespace Signum.Web
                     continue;
 
                 string commonSubControlID = subControlID.Substring(0, propertyEnd);
-                PropertyPack pp = propertyValidators.GetOrThrow(propertyName, Resource.NoPropertyWithName0FoundInType0.Formato(propertyName, RuntimeType));
 
-                MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(i, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
-                Modification mod = Modification.Create(pp.PropertyInfo.PropertyType, formValues, subInterval, commonSubControlID);
-                Properties.Add(propertyName, new PropertyPackModification { Modification = mod, PropertyPack = pp });
-                i = subInterval.Max - 1;
+                i = GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, i, propertyValidators);
             }
+        }
+
+        protected virtual int GeneratePropertyModification(SortedList<string, object> formValues, MinMax<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
+        { 
+            PropertyPack pp = propertyValidators.GetOrThrow(propertyName, Resource.NoPropertyWithName0FoundInType0.Formato(propertyName, RuntimeType));
+
+            MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
+            Modification mod = Modification.Create(pp.PropertyInfo.PropertyType, formValues, subInterval, commonSubControlID);
+            Properties.Add(propertyName, new PropertyPackModification { Modification = mod, PropertyPack = pp });
+            return subInterval.Max - 1;
         }
 
         public override object ApplyChanges(Controller controller, object obj)
@@ -201,21 +221,29 @@ namespace Signum.Web
             else
                 entity = Change(controller, (ModifiableEntity)obj);
 
-            foreach (var ppm in Properties.Values)
-            {
-                object oldValue = ppm.PropertyPack.GetValue(entity);
-                object newValue = ppm.Modification.ApplyChanges(controller, oldValue);
-                try
-                {
-                    ppm.PropertyPack.SetValue(entity, newValue);
-                }
-                catch (Exception ex)
-                {
-                    ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(ex.Message);
-                }
-            }
+            ApplyChangesOfProperties(controller, entity);
 
             return entity;
+        }
+
+        protected void ApplyChangesOfProperties(Controller controller, ModifiableEntity entity)
+        {
+            if (Properties != null)
+            {
+                foreach (var ppm in Properties.Values)
+                {
+                    object oldValue = ppm.PropertyPack.GetValue(entity);
+                    object newValue = ppm.Modification.ApplyChanges(controller, oldValue);
+                    try
+                    {
+                        ppm.PropertyPack.SetValue(entity, newValue);
+                    }
+                    catch (Exception ex)
+                    {
+                        ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(ex.Message);
+                    }
+                }
+            }
         }
 
         private ModifiableEntity Change(Controller controller, ModifiableEntity entity)
@@ -242,13 +270,16 @@ namespace Signum.Web
 
         public override void Validate(object entity, Dictionary<string, List<string>> errors)
         {
-            foreach (var ppm in Properties.Values)
+            if (Properties != null)
             {
-                ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors);
+                foreach (var ppm in Properties.Values)
+                {
+                    ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors);
 
-                string error = ((ModifiableEntity)entity)[ppm.PropertyPack.PropertyInfo.Name];
-                if (error != null)
-                    errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
+                    string error = ((ModifiableEntity)entity)[ppm.PropertyPack.PropertyInfo.Name];
+                    if (error != null)
+                        errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
+                }
             }
 
             if (!string.IsNullOrEmpty(BindingError))

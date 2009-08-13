@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Signum.Web
 {
-    internal static class EntityBaseKeys
+    public static class EntityBaseKeys
     {
         public const string Implementations = "sfImplementations"; 
         public const string ImplementationsDDL = "sfImplementationsDDL";

@@ -8,6 +8,7 @@ namespace Signum.Web
 {
     public static class ViewDataKeys
     {
+        public const string TypeContextKey = "sfTypeContextKey";
         public const string ResourcesRoute = "sfResourcesRoute";
         public const string SearchResourcesRoute = "sfSearchResourcesRoute";
         public const string PopupPrefix = "sfPrefix";

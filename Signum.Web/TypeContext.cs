@@ -26,6 +26,9 @@ namespace Signum.Web
 
         public static TypeContext<T> TypeContext<T>(this HtmlHelper helper, string viewDataKeyAndPrefix)
         {
+            if (!viewDataKeyAndPrefix.HasText())
+                return TypeContext<T>(helper);
+
             return helper.BeginContext<T>((T)helper.ViewData[viewDataKeyAndPrefix], viewDataKeyAndPrefix);
         }
 
