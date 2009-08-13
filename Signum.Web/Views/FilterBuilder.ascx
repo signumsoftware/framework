@@ -10,7 +10,6 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
-    //$('.menu ul li .ext').css('display', 'none'); //ocultamos las capas por js, de esta manera, si el usuario navega con el javascript desactivado, verá las capas
     $('#filters-header').click(function(){
 	    var R = $(this).attr('rev');
 	    var D = $('#'+R);

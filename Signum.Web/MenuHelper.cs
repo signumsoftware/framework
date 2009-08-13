@@ -50,36 +50,9 @@ namespace Signum.Web
 
     public static class MenuHelper
     {
-        public static string MenuLI(this HtmlHelper helper, Item menuItem)
+        public static void MenuLI(this HtmlHelper helper, Item menuItem)
         {
-            StringBuilder sb = new StringBuilder();
-
-            if (menuItem.SubItems != null && menuItem.SubItems.Count > 0 && menuItem.SubItems.Exists(mi => mi.IsVisible()))
-            {
-                sb.AppendLine("<li>");
-                sb.AppendLine("<span title='{0}'>{1}</span>".Formato(menuItem.Title, menuItem.Text));
-                sb.AppendLine("<ul>");
-                foreach (Item mi in menuItem.SubItems)
-                    sb.Append(helper.MenuLI(mi));
-                sb.AppendLine("</ul>");
-                sb.AppendLine("</li>");
-            }
-            else
-            {
-                if (menuItem.IsVisible())
-                {
-                    sb.AppendLine("<li>");
-                    if (menuItem.ManualHref.HasText())
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(menuItem.ManualHref, menuItem.Title, menuItem.Text));
-                    else if (menuItem.ManualA.HasText())
-                        sb.AppendLine(menuItem.ManualA);
-                    else 
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text));
-                    sb.AppendLine("</li>");
-                }
-            }
-
-            return sb.ToString();
+            helper.ViewContext.HttpContext.Response.Write(MenuItemToString(menuItem));
         }
 
         public static void MenuLI(this HtmlHelper helper, string text, List<Item> children)
@@ -92,12 +65,44 @@ namespace Signum.Web
                 sb.AppendLine("<span title='{0}'>{0}</span>".Formato(text));
                 sb.AppendLine("<ul class='submenu'>");
                 foreach (Item mi in children)
-                    sb.Append(helper.MenuLI(mi));
+                    sb.Append(MenuItemToString(mi));
                 sb.AppendLine("</ul>");
                 sb.AppendLine("</li>");
             }
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+        }
+
+        private static string MenuItemToString(Item menuItem)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (menuItem.SubItems != null && menuItem.SubItems.Count > 0 && menuItem.SubItems.Exists(mi => mi.IsVisible()))
+            {
+                sb.AppendLine("<li>");
+                sb.AppendLine("<span title='{0}'>{1}</span>".Formato(menuItem.Title, menuItem.Text));
+                sb.AppendLine("<ul class='submenu'>");
+                foreach (Item mi in menuItem.SubItems)
+                    sb.Append(MenuItemToString(mi));
+                sb.AppendLine("</ul>");
+                sb.AppendLine("</li>");
+            }
+            else
+            {
+                if (menuItem.IsVisible())
+                {
+                    sb.AppendLine("<li>");
+                    if (menuItem.ManualHref.HasText())
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(menuItem.ManualHref, menuItem.Title, menuItem.Text));
+                    else if (menuItem.ManualA.HasText())
+                        sb.AppendLine(menuItem.ManualA);
+                    else
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text));
+                    sb.AppendLine("</li>");
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }
