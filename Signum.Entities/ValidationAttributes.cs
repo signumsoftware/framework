@@ -194,6 +194,15 @@ namespace Signum.Entities
         }
     }
 
+    public class FileNameValidatorAttribute : RegexValidatorAttribute
+    {
+        const string FileNameRegex = @"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:\"";|/]+$";
+        public FileNameValidatorAttribute() : base(FileNameRegex)
+        {
+            this.FormatName = Resources.FileName;
+        }
+    }
+
     public class DecimalsValidatorAttribute : ValidatorAttribute
     {
         public int DecimalPlaces {get;set;}

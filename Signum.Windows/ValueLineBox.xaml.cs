@@ -43,14 +43,14 @@ namespace Signum.Windows
             return false;
         }
 
-        public static bool ShowUntyped(Type valueType, ref object value, string title, string text, string labelText, string format, string unitText, Window owner)
+        public static bool ShowUntyped(Type type, ref object value, string title, string text, string labelText, string format, string unitText, Window owner)
         {
             ValueLineBox vlb = new ValueLineBox();
             vlb.Title = title ?? "Choose a value";
 
             vlb.tb.Text = text ?? "Please, choose a value to continue:";
 
-            vlb.valueLine.ValueType = valueType;
+            vlb.valueLine.Type = type;
 
             if (labelText == null)
                 Common.SetLabelVisible(vlb.valueLine, false);

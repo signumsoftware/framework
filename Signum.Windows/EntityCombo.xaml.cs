@@ -59,7 +59,7 @@ namespace Signum.Windows
             {
                 changing = true;
 
-                object newEntity = CleanLazy ? Entity : Server.Convert(Entity, Reflector.GenerateLazy(CleanType ?? EntityType));
+                object newEntity = CleanLazy ? Entity : Server.Convert(Entity, Reflector.GenerateLazy(CleanType ?? Type));
 
                 if (!isLoaded || newEntity != null && !combo.Items.Contains(newEntity))
                     combo.Items.Add(newEntity);
@@ -79,7 +79,7 @@ namespace Signum.Windows
             {
                 changing = true;
 
-                SetEntityUserInteraction(Server.Convert(combo.SelectedItem, EntityType));
+                SetEntityUserInteraction(Server.Convert(combo.SelectedItem, Type));
             }
             finally
             {
@@ -136,7 +136,7 @@ namespace Signum.Windows
                     combo.Items.Add(o);
                 }
 
-                var selectedItem = !CleanLazy ? Server.Convert(Entity, Reflector.GenerateLazy(EntityType)) : Entity;
+                var selectedItem = !CleanLazy ? Server.Convert(Entity, Reflector.GenerateLazy(Type)) : Entity;
 
                 if (selectedItem != null && !combo.Items.Contains(selectedItem))
                     combo.Items.Add(selectedItem);

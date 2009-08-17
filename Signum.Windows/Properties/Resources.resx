@@ -258,9 +258,6 @@
   <data name="ParentWindowNotFound" xml:space="preserve">
     <value>Parent window not found</value>
   </data>
-  <data name="EntityTypeItsNotDeterminedForControl0" xml:space="preserve">
-    <value>EntityType not determined for control with Label {0}</value>
-  </data>
   <data name="FinderOf0" xml:space="preserve">
     <value>Finder of {0}</value>
   </data>
@@ -308,5 +305,8 @@
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
+  </data>
+  <data name="TypePropertyItsNotDeterminedForControl0" xml:space="preserve">
+    <value>Type Property is not determined for control with Label {0}</value>
   </data>
 </root>

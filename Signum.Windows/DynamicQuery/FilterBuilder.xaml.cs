@@ -92,7 +92,7 @@ namespace Signum.Windows
                 Type cleanType = typeof(Lazy).IsAssignableFrom(type) ? Reflector.ExtractLazy(type) : type;
                 if (Reflector.IsLowPopulation(cleanType))
                 {
-                    EntityCombo ec = new EntityCombo { EntityType = type, LoadDataTrigger = LoadDataTrigger.OnLoad, Style = (Style)FindResource("toolTip") };
+                    EntityCombo ec = new EntityCombo { Type = type, LoadDataTrigger = LoadDataTrigger.OnLoad, Style = (Style)FindResource("toolTip") };
                     ec.SetBinding(EntityCombo.EntityProperty, new Binding
                     {
                         Path = new PropertyPath(FilterOptions.RealValueProperty),
@@ -104,7 +104,7 @@ namespace Signum.Windows
                 }
                 else
                 {
-                    EntityLine el = new EntityLine { EntityType = type, Create = false, HideAutoCompleteOnLostFocus = false };
+                    EntityLine el = new EntityLine { Type = type, Create = false, HideAutoCompleteOnLostFocus = false };
                     el.SetBinding(EntityLine.EntityProperty, new Binding
                     {
                         Path = new PropertyPath(FilterOptions.RealValueProperty),
@@ -117,7 +117,7 @@ namespace Signum.Windows
             }
             else
             {
-                ValueLine vl = new ValueLine() { ValueType = type };
+                ValueLine vl = new ValueLine() { Type = type };
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
                     Path = new PropertyPath("RealValue"),

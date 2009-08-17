@@ -11,16 +11,11 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
-    public class EntityBase : UserControl
-    {
-        public static readonly DependencyProperty LabelTextProperty =
-            DependencyProperty.Register("LabelText", typeof(string), typeof(EntityBase), new UIPropertyMetadata("Property"));
-        public string LabelText
-        {
-            get { return (string)GetValue(LabelTextProperty); }
-            set { SetValue(LabelTextProperty, value); }
-        }
+   
 
+
+    public class EntityBase : LineBase
+    {
         public static readonly DependencyProperty EntityProperty =
             DependencyProperty.Register("Entity", typeof(object), typeof(EntityBase), new FrameworkPropertyMetadata(null,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityBase)d).OnEntityChanged(e.OldValue, e.NewValue)));
@@ -33,15 +28,6 @@ namespace Signum.Windows
                 SetValue(EntityProperty, value);
             }
         }
-
-        public static readonly DependencyProperty EntityTypeProperty =
-         DependencyProperty.Register("EntityType", typeof(Type), typeof(EntityBase), new UIPropertyMetadata((d, e) => ((EntityBase)d).SetEntityType((Type)e.NewValue)));
-        public Type EntityType
-        {
-            get { return (Type)GetValue(EntityTypeProperty); }
-            set { SetValue(EntityTypeProperty, value); }
-        }
-
 
         protected Type[] safeImplementations;
         public static readonly DependencyProperty ImplementationsProperty =
@@ -105,64 +91,64 @@ namespace Signum.Windows
         public event Func<object, object> Viewing;
         public event Func<object, bool> Removing;
 
-        public event EntityChangedEventHandler EntityChanged; 
+        public event EntityChangedEventHandler EntityChanged;
 
-        private void SetEntityType(Type type)
+        static EntityBase()
         {
- 	        if(typeof(Lazy).IsAssignableFrom(type))
+            LineBase.TypeProperty.OverrideMetadata(typeof(EntityBase), 
+                new UIPropertyMetadata((d, e) => ((EntityBase)d).SetType((Type)e.NewValue)));
+        }
+
+        protected internal override DependencyProperty CommonRouteValue()
+        {
+            return EntityProperty;
+        }
+
+        private void SetType(Type type)
+        {
+            if (typeof(Lazy).IsAssignableFrom(type))
             {
                 CleanLazy = true;
-                CleanType = Reflector.ExtractLazy(type); 
+                CleanType = Reflector.ExtractLazy(type);
             }
             else
             {
-                CleanLazy = false; 
-                CleanType = EntityType; 
+                CleanLazy = false;
+                CleanType = type;
             }
         }
 
         protected internal Type CleanType { get; private set; }
         protected internal bool CleanLazy { get; private set; }
 
-        protected bool isUserInteraction =false;
+        protected bool isUserInteraction = false;
 
         protected void SetEntityUserInteraction(object entity)
         {
             try
             {
                 isUserInteraction = true;
-                Entity = entity; 
+                Entity = entity;
             }
             finally
             {
                 isUserInteraction = false;
             }
         }
+        
 
-  
-        public EntityBase()
+        public override void OnLoad(object sender, RoutedEventArgs e)
         {
-            this.Loaded += new RoutedEventHandler(OnLoad);
-        }
-
-        public virtual void OnLoad(object sender, RoutedEventArgs e)
-        {
-            if (DesignerProperties.GetIsInDesignMode(this))
-                return;
-
-            if (this.EntityType == null)
-            {
-                throw new ApplicationException(Properties.Resources.EntityTypeItsNotDeterminedForControl0);
-            }
-
+            base.OnLoad(sender, e);
+   
             if (this.NotSet(EntityBase.EntityTemplateProperty))
             {
-                var entityType = EntityType;
+                var type = Type;
 
-                if (this is EntityCombo && !typeof(Lazy).IsAssignableFrom(entityType)) //Allways going to be lazy
-                    entityType = Reflector.GenerateLazy(entityType);
+                if (this is EntityCombo && !typeof(Lazy).IsAssignableFrom(type)) //Allways going to be lazy
+                    type = Reflector.GenerateLazy(type);
 
-                EntityTemplate = Navigator.FindDataTemplate(this, entityType);
+                EntityTemplate = Navigator.FindDataTemplate(this, type);
             }
 
             if (this.NotSet(EntityBase.CreateProperty) && Create && Implementations == null)
@@ -243,7 +229,7 @@ namespace Signum.Windows
 
                 object entity = Constructor.Construct(type, this.FindCurrentWindow());
 
-                value = Server.Convert(entity, EntityType);
+                value = Server.Convert(entity, Type);
             }
             else
                 value = Creating();
@@ -280,9 +266,9 @@ namespace Signum.Windows
                 return null;
 
             if (value is object[])
-                return ((object[])value).Select(o => Server.Convert(o, EntityType)).ToArray();
+                return ((object[])value).Select(o => Server.Convert(o, Type)).ToArray();
             else
-                return Server.Convert(value, EntityType);
+                return Server.Convert(value, Type);
         }
 
         protected object OnViewing(object entity)

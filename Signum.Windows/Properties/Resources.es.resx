@@ -276,9 +276,6 @@
   <data name="ParentWindowNotFound" xml:space="preserve">
     <value>No se ha encontrado la ventana padre</value>
   </data>
-  <data name="EntityTypeItsNotDeterminedForControl0" xml:space="preserve">
-    <value>No se ha determinado el EntityType para el control con Label {0}</value>
-  </data>
   <data name="Finder" xml:space="preserve">
     <value>Buscador</value>
   </data>
@@ -308,5 +305,8 @@
   </data>
   <data name="Field" xml:space="preserve">
     <value>Campo</value>
+  </data>
+  <data name="TypePropertyItsNotDeterminedForControl0" xml:space="preserve">
+    <value>La propiedd Type no está establecida para el control con Label {0}</value>
   </data>
 </root>

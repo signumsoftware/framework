@@ -59,10 +59,10 @@ namespace Signum.Windows
 
         public override void OnLoad(object sender, RoutedEventArgs e)
         {
+            base.OnLoad(sender, e);
+
             if(Common.GetIsReadOnly(this))
                 AutoComplete = false;
-
-            base.OnLoad(sender, e);
         }
 
         protected override void UpdateVisibility()
@@ -116,7 +116,7 @@ namespace Signum.Windows
 
         private void autoCompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
         {
-            SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, EntityType));
+            SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
             autoCompleteTextBox.Visibility = Visibility.Hidden;
             cc.Focus();
         }

@@ -36,7 +36,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty EntitiesTypeProperty =
-          DependencyProperty.Register("EntitiesType", typeof(Type), typeof(EntityList), new UIPropertyMetadata(null));
+          DependencyProperty.Register("EntitiesType", typeof(Type), typeof(EntityList), new UIPropertyMetadata((d, e) => ((EntityList)d).Type = ReflectionTools.CollectionType((Type)e.NewValue)));
         public Type EntitiesType
         {
             get { return (Type)GetValue(EntitiesTypeProperty); }
@@ -67,6 +67,21 @@ namespace Signum.Windows
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
             btUp.Visibility = Move ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
             btDown.Visibility = Move ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
+        }
+
+        protected internal override DependencyProperty CommonRouteLabelText()
+        {
+            return null;
+        }
+
+        protected internal override DependencyProperty CommonRouteValue()
+        {
+            return EntitiesProperty;
+        }
+
+        protected internal override DependencyProperty CommonRouteType()
+        {
+            return EntitiesTypeProperty;
         }
 
         private bool CanMoveUp()

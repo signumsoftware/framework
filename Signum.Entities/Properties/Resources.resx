@@ -228,4 +228,7 @@
   <data name="LockedModificationException" xml:space="preserve">
     <value>Modification not allowed: the object is locked</value>
   </data>
+  <data name="FileName" xml:space="preserve">
+    <value>file name</value>
+  </data>
 </root>

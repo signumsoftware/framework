@@ -31,16 +31,8 @@ namespace Signum.Windows
     /// Utiliza una deduccion de propiedades muy agresiva:
     /// Value (binding) -> ValueType -> ValueLineType -> ValueControl
     /// </summary>
-    public partial class ValueLine : UserControl
+    public partial class ValueLine : LineBase
     {
-        public static readonly DependencyProperty LabelTextProperty =
-            DependencyProperty.Register("LabelText", typeof(string), typeof(ValueLine), new UIPropertyMetadata("Property"));
-        public string LabelText
-        {
-            get { return (string)GetValue(LabelTextProperty); }
-            set { SetValue(LabelTextProperty, value); }
-        }
-
         public static readonly DependencyProperty UnitTextProperty =
             DependencyProperty.Register("UnitText", typeof(string), typeof(ValueLine), new UIPropertyMetadata(null));
         public string UnitText
@@ -65,14 +57,6 @@ namespace Signum.Windows
             set { SetValue(ValueProperty, value); }
         }
 
-        public static readonly DependencyProperty ValueTypeProperty =
-            DependencyProperty.Register("ValueType", typeof(Type), typeof(ValueLine), new UIPropertyMetadata(null));
-        public Type ValueType
-        {
-            get { return (Type)GetValue(ValueTypeProperty); }
-            set { SetValue(ValueTypeProperty, value); }
-        }
-
         public static readonly DependencyProperty ValueLineTypeProperty =
             DependencyProperty.Register("ValueLineType", typeof(ValueLineType), typeof(ValueLine), new UIPropertyMetadata(ValueLineType.String));
         public ValueLineType ValueLineType
@@ -92,26 +76,31 @@ namespace Signum.Windows
         public ValueLine()
         {
             InitializeComponent();
-            Loaded += new RoutedEventHandler(ValueLine_Loaded);
         }
 
-        void ValueLine_Loaded(object sender, RoutedEventArgs e)
+        public override void OnLoad(object sender, RoutedEventArgs e)
         {
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 
-            if (this.ValueControl == null)
-            {
-                if (this.ValueType == null)
-                    throw new ApplicationException(Properties.Resources.TypeForValueLineNotDetermined.Formato(this.LabelText));
+            base.OnLoad(sender, e);
 
-                if (this.NotSet(ValueLineTypeProperty))
-                    this.ValueLineType = Configurator.GetDefaultValueLineType(this.ValueType);
+            if (this.Type == null)
+                throw new ApplicationException(Properties.Resources.TypeForValueLineNotDetermined.Formato(this.LabelText));
 
-                this.ValueControl = this.CreateControl(this.ValueLineType, this.ValueType);
-            }
+            if (this.NotSet(ValueLineTypeProperty))
+                this.ValueLineType = Configurator.GetDefaultValueLineType(this.Type);
+
+            this.ValueControl = this.CreateControl(this.ValueLineType, this.Type);
+
             this.label.Target = this.ValueControl;
         }
+
+        protected internal override DependencyProperty CommonRouteValue()
+        {
+            return ValueProperty;
+        }
+
 
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator(); 
 
@@ -200,7 +189,7 @@ namespace Signum.Windows
 
             if (type.IsEnum)
                 return ValueLineType.Enum;
-            else if (type == typeof(ColorDN))
+            else if (type == typeof(Color))
                 return ValueLineType.Color;
             else
             {

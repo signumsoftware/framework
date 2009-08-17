@@ -178,6 +178,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to file name.
+        /// </summary>
+        internal static string FileName {
+            get {
+                return ResourceManager.GetString("FileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contains.
         /// </summary>
         internal static string FilterOperation_Contains {
@@ -259,20 +268,20 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Modification not allowed: the object is locked.
-        /// </summary>
-        internal static string LockedModificationException {
-            get {
-                return ResourceManager.GetString("LockedModificationException", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Starts with.
         /// </summary>
         internal static string FilterOperation_StartsWith {
             get {
                 return ResourceManager.GetString("FilterOperation_StartsWith", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Modification not allowed: the object is locked.
+        /// </summary>
+        internal static string LockedModificationException {
+            get {
+                return ResourceManager.GetString("LockedModificationException", resourceCulture);
             }
         }
         

@@ -201,11 +201,11 @@ namespace Signum.Windows
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
         {
             DependencyProperty valueProperty =
-                fe is ValueLine ? ValueLine.ValueProperty :
-                fe is EntityLine ? EntityLine.EntityProperty :
-                fe is EntityList ? EntityList.EntitiesProperty :
-                fe is EntityCombo ? EntityCombo.EntityProperty :
-                fe is FileLine ? FileLine.EntityProperty :
+                fe is LineBase ? ((LineBase)fe).CommonRouteValue() : 
+                //fe is LineBase ? ValueLine.ValueProperty :
+                //fe is EntityLine ? EntityLine.EntityProperty :
+                //fe is EntityList ? EntityList.EntitiesProperty :
+                //fe is EntityCombo ? EntityCombo.EntityProperty :
                 FrameworkElement.DataContextProperty;
 
             bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
@@ -227,26 +227,19 @@ namespace Signum.Windows
         public static void TaskSetTypeProperty(FrameworkElement fe, string route, TypeContext context)
         {
             DependencyProperty typeProperty =
-                fe is ValueLine ? ValueLine.ValueTypeProperty :
-                fe is EntityLine ? EntityLine.EntityTypeProperty :
-                fe is EntityList ? EntityList.EntitiesTypeProperty :
-                fe is EntityCombo ? EntityCombo.EntityTypeProperty :
-                fe is FileLine ? FileLine.EntityTypeProperty :
+                fe is LineBase ? ((LineBase)fe).CommonRouteType() : 
                 null;
 
             if (typeProperty != null && fe.NotSet(typeProperty))
             {
                 fe.SetValue(typeProperty, context.Type);
-                if (fe is EntityList)
-                    fe.SetValue(EntityList.EntityTypeProperty, ReflectionTools.CollectionType(context.Type));
             }
         }
 
         public static void TaskSetLabelText(FrameworkElement fe, string route, TypeContext context)
         {
             DependencyProperty labelText =
-               fe is ValueLine ? ValueLine.LabelTextProperty :
-               fe is EntityBase ? EntityBase.LabelTextProperty :
+               fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() : 
                fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty:
                null;
 
@@ -284,7 +277,7 @@ namespace Signum.Windows
         {
             bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
 
-            if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty)  && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is FileLine))
+            if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty)  && (fe is ValueLine || fe is EntityLine || fe is EntityCombo))
             {
                 Common.SetIsReadOnly(fe, isReadOnly);
             }

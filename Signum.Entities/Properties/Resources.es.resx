@@ -222,4 +222,7 @@
   <data name="LockedModificationException" xml:space="preserve">
     <value>Modificación no permitida: el objeto está bloqueado</value>
   </data>
+  <data name="FileName" xml:space="preserve">
+    <value>nombre de archivo</value>
+  </data>
 </root>
