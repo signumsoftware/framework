@@ -216,6 +216,18 @@ namespace Signum.Web.Controllers
             return Navigator.View(this, entity);
         }
 
-        
+
+        public static HtmlHelper CreateHtmlHelper(Controller c)
+        {
+            return new HtmlHelper(
+                        new ViewContext(
+                            c.ControllerContext,
+                            new WebFormView(c.ControllerContext.RequestContext.HttpContext.Request.FilePath),
+                            c.ViewData,
+                            c.TempData),
+
+            new ViewPage());
+        }
+
     }
 }

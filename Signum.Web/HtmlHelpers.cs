@@ -150,7 +150,7 @@ namespace Signum.Web
         }
 
         public static void Message(this HtmlHelper html, string title, string content, MessageType type, object attributeList) {
-            string cadena=String.Format("<div class='message{0}' {3}><span class='title'>{1}</span><span class='content'>{2}</span></div>",
+            string cadena=String.Format("<div class='message{0}' {3}><p class='title'>{1}</p><p class='content'>{2}</p></div>",
                     Enum.GetName(typeof(MessageType),type),
                     title,
                     content,
@@ -227,6 +227,7 @@ namespace Signum.Web
             sb.AppendLine("</script>");
             return sb.ToString();
         }
+
    }
 }
 
