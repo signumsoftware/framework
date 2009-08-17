@@ -10,16 +10,6 @@ namespace Signum.Entities.Basics
     [Serializable]
     public abstract class EnumDN : IdentifiableEntity
     {
-        public static T New<T>(Enum key)
-            where T:EnumDN, new()
-        {
-            return new T
-            {
-                Key = UniqueKey(key),
-                Name = key.NiceToString(),
-            }; 
-        }
-
         [NotNullable, SqlDbType(Size = 100)]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), LocDescription]

@@ -123,4 +123,10 @@
   <data name="Executions" xml:space="preserve">
     <value>Executions</value>
   </data>
+  <data name="SufixNotSet" xml:space="preserve">
+    <value>The physical filename has not been set</value>
+  </data>
+  <data name="RepositoryNotSet" xml:space="preserve">
+    <value>The file repository has not been set</value>
+  </data>
 </root>

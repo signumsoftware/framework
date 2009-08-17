@@ -444,4 +444,31 @@
   <data name="ScheduleRuleDayDN_StartingOn" xml:space="preserve">
     <value>Starting On</value>
   </data>
+  <data name="FilePathDN_FileName" xml:space="preserve">
+    <value>FileName</value>
+  </data>
+  <data name="FilePathDN_FileType" xml:space="preserve">
+    <value>FileType</value>
+  </data>
+  <data name="FilePathDN_Repository" xml:space="preserve">
+    <value>Repository</value>
+  </data>
+  <data name="FilePathDN_Sufix" xml:space="preserve">
+    <value>Sufix</value>
+  </data>
+  <data name="FileRepositoryDN" xml:space="preserve">
+    <value>FileRepository</value>
+  </data>
+  <data name="FileRepositoryDN_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="FileRepositoryDN_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="FileRepositoryDN_PhysicalPrefix" xml:space="preserve">
+    <value>PhysicalPrefix</value>
+  </data>
+  <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
+    <value>WebPrefix</value>
+  </data>
 </root>

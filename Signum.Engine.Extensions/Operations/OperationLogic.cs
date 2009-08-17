@@ -402,6 +402,17 @@ namespace Signum.Engine.Operations
 
             return operations[interfaces.Single()][operationKey];
         }
+
+        public static T GetArg<T>(this object[] args, int pos)
+        {
+            if (pos < 0)
+                throw new ArgumentException("pos");
+
+            if (args == null || args.Length <= pos || !(args[pos] is T))
+                throw new ApplicationException("The operation needs a {0} in the argument number {1}".Formato(typeof(T), pos));
+
+            return (T)args[pos];
+        }
     }
 
     public delegate void OperationHandler(IOperation operation, IdentifiableEntity entity);

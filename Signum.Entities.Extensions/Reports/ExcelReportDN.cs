@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Extensions.Properties;
 using Signum.Utilities;
+using Signum.Entities.Files;
 
 namespace Signum.Entities.Reports
 {
@@ -30,9 +31,9 @@ namespace Signum.Entities.Reports
             set { SetToStr(ref displayName, value, "DisplayName"); }
         }
 
-        FileDN file;
+        EmbeddedFileDN file;
         [NotNullValidator, LocDescription]
-        public FileDN File
+        public EmbeddedFileDN File
         {
             get { return file; }
             set { Set(ref file, value, "File"); }

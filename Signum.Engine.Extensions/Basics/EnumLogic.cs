@@ -79,7 +79,11 @@ namespace Signum.Engine.Basics
 
         static List<T> GenerateEntities()
         {
-            return getKeys().Select(k=> EnumDN.New<T>(k)).ToList();
+            return getKeys().Select(k => new T
+            {
+                Key = EnumDN.UniqueKey(k),
+                Name = k.NiceToString(),
+            }).ToList();
         }
 
         public static T ToEntity(Enum key)

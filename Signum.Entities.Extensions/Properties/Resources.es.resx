@@ -444,4 +444,31 @@
   <data name="CustomTaskOperation_Execute" xml:space="preserve">
     <value>Nueva Ejecución</value>
   </data>
+  <data name="FilePathDN_FileName" xml:space="preserve">
+    <value>Nombre de Archivo</value>
+  </data>
+  <data name="FilePathDN_FileType" xml:space="preserve">
+    <value>Tipo de Archivo</value>
+  </data>
+  <data name="FilePathDN_Repository" xml:space="preserve">
+    <value>Repositorio</value>
+  </data>
+  <data name="FilePathDN_Sufix" xml:space="preserve">
+    <value>Sufijo</value>
+  </data>
+  <data name="FileRepositoryDN" xml:space="preserve">
+    <value>Repositorio de Archivos</value>
+  </data>
+  <data name="FileRepositoryDN_Active" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="FileRepositoryDN_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="FileRepositoryDN_PhysicalPrefix" xml:space="preserve">
+    <value>Prefijo Físico</value>
+  </data>
+  <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
+    <value>Prefijo Web</value>
+  </data>
 </root>

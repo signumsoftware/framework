@@ -16,7 +16,7 @@
 	</Window.Resources>
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
-        <m:EntityLine VerticalAlignment="Top"  LabelText="Role" m:Common.IsReadOnly="True" EntityType="{m:Lazy authdn:RoleDN}" Entity="{Binding Role, ElementName=me}" DockPanel.Dock="Top"/>
+        <m:EntityLine VerticalAlignment="Top"  LabelText="Role" m:Common.IsReadOnly="True" Type="{m:Lazy authdn:RoleDN}" Entity="{Binding Role, ElementName=me}" DockPanel.Dock="Top"/>
         <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
