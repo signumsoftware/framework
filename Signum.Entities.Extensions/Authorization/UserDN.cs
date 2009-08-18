@@ -67,11 +67,28 @@ namespace Signum.Entities.Authorization
         }
 
 
+        DateTime? anulationDate;
+        public DateTime? AnulationDate
+        {
+            get { return anulationDate; }
+            set { Set(ref anulationDate, value, "AnulationDate"); }
+        } 
+
         UserState state;
         public UserState State
         {
             get { return state; }
             set { Set(ref state, value, "State"); }
+        }
+
+
+        protected override void PreSaving()
+        {
+
+            if (anulationDate != null && state != UserState.Anulado)
+                throw new ApplicationException("The user state must be Anulated {0}".Formato(this.ToString()));
+            
+            base.PreSaving();
         }
 
         public override string ToString()
