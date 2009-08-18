@@ -189,10 +189,8 @@ namespace Signum.Engine
                 try
                 {
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
-
                     DataSet result = new DataSet();
                     da.Fill(result);
-
                     return tr.Commit(result);
                 }
                 catch (SqlException ex)
