@@ -6,6 +6,7 @@ using System.Security.Principal;
 using Signum.Utilities;
 using System.Threading;
 using System.Security.Cryptography;
+using System.ComponentModel;
 
 namespace Signum.Entities.Authorization
 {
@@ -65,6 +66,14 @@ namespace Signum.Entities.Authorization
             return this.role.BreathFirst(a=>a.Roles).Any(a => a.Name == role); 
         }
 
+
+        UserState state;
+        public UserState State
+        {
+            get { return state; }
+            set { Set(ref state, value, "State"); }
+        }
+
         public override string ToString()
         {
             return userName;
@@ -74,6 +83,15 @@ namespace Signum.Entities.Authorization
         {
             get { return Thread.CurrentPrincipal as UserDN; }
         }
+    }
+
+
+    public enum UserState
+    {
+        [Description("Creado")]
+        Creado,
+        [Description("Anulado")]
+        Anulado,
     }
 
     public interface IEmployee:IIdentifiable
