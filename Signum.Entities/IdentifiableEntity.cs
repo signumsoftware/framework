@@ -32,6 +32,7 @@ namespace Signum.Entities
         }
 
         [HiddenProperty]
+        [Description("Id")]
         public int? IdOrNull
         {
             get { return id; }

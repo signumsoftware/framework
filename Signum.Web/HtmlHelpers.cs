@@ -121,7 +121,7 @@ namespace Signum.Web
                    "id=\"" + name + "\" " +
                    "value=\"" + value + "\" " +
                    "class=\"" + cssClass + "\" " +
-                   htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") +
+                   ((htmlAttributes != null) ? htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") : "") +
                    "onclick=\"" + onclick + "\" " +
                    "/>\n";
         }

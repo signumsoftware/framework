@@ -142,6 +142,8 @@ function CallServer(urlController, prefix) {
     });
 }
 
+
+
 function CloseChooser(urlController, onOk, onCancel, prefix) {
     var container = $('#' + prefix + "externalPopupDiv").parent();
     $('#' + prefix + sfBtnCancel).click();
@@ -185,7 +187,6 @@ function OperationExecute(urlController, typeName, id, operationKey, prefix, onO
                            ShowError(XMLHttpRequest, textStatus, errorThrown);
                        }
         });
-    
 }
 
 function ConstructFromManyExecute(urlController, typeName, queryName, operationKey, prefix, onOk, onCancel) {

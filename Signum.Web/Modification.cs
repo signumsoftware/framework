@@ -30,7 +30,7 @@ namespace Signum.Web
     {
         public string ControlID { get; private set; }
         public Type StaticType { get; private set; }
-        public string BindingError { get; internal set; }
+        public string BindingError { get; set; }
 
         protected static readonly string[] specialProperties = new[] { 
             TypeContext.RuntimeType, 
@@ -91,9 +91,13 @@ namespace Signum.Web
         }
     }
 
-    class ValueModification : Modification
+    public class ValueModification : Modification
     {
-        object Value;
+        public object Value;
+
+        public ValueModification(Type staticType, string controlID)
+            : base(staticType, controlID) 
+        { }
 
         public ValueModification(Type staticType, SortedList<string, object> formValues, string controlID)
             : base(staticType, controlID)
@@ -226,7 +230,7 @@ namespace Signum.Web
             return entity;
         }
 
-        protected void ApplyChangesOfProperties(Controller controller, ModifiableEntity entity)
+        protected virtual void ApplyChangesOfProperties(Controller controller, ModifiableEntity entity)
         {
             if (Properties != null)
             {
@@ -246,7 +250,7 @@ namespace Signum.Web
             }
         }
 
-        private ModifiableEntity Change(Controller controller, ModifiableEntity entity)
+        protected virtual ModifiableEntity Change(Controller controller, ModifiableEntity entity)
         {
             if (RuntimeType == null)
                 return null;
@@ -270,7 +274,7 @@ namespace Signum.Web
 
         public override void Validate(object entity, Dictionary<string, List<string>> errors)
         {
-            if (Properties != null)
+            if (entity!=null && Properties != null)
             {
                 foreach (var ppm in Properties.Values)
                 {
@@ -313,17 +317,27 @@ namespace Signum.Web
         public LazyModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
             : base(staticType, controlID)
         {
-            string runtimeTypeName = (string)formValues[controlID + TypeContext.Separator + TypeContext.RuntimeType];
-            RuntimeType = runtimeTypeName.HasText() ? Navigator.ResolveType(runtimeTypeName) : null;
+            if (formValues.ContainsKey(controlID + TypeContext.Separator + TypeContext.RuntimeType))
+            {
+                string runtimeTypeName = (string)formValues[controlID + TypeContext.Separator + TypeContext.RuntimeType];
+                RuntimeType = (runtimeTypeName.HasText()) ? Navigator.ResolveType(runtimeTypeName) : null;
+            }
 
-            string id = (string)formValues[controlID + TypeContext.Separator + TypeContext.Id];
-            EntityId = id.HasText() ? int.Parse(id) : (int?)null;
+            if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType) && formValues.ContainsKey(controlID + TypeContext.Separator + TypeContext.Id))
+            {
+                string id = (string)formValues[controlID + TypeContext.Separator + TypeContext.Id];
+                EntityId = id.HasText() ? int.Parse(id) : (int?)null;
+            }
 
             IsNew = formValues.ContainsKey(controlID + TypeContext.Separator + EntityBaseKeys.IsNew);
 
-            CleanType = Reflector.ExtractLazy(staticType); 
+            CleanType = Reflector.ExtractLazy(staticType);
 
-            EntityModification = new EntityModification(CleanType, formValues, interval, controlID);
+            if (CustomModificationBinders.Binders.ContainsKey(CleanType))
+                EntityModification = (EntityModification)CustomModificationBinders.Binders[CleanType](formValues, interval, controlID);
+            else
+                EntityModification = new EntityModification(CleanType, formValues, interval, controlID);
+            
             if (EntityModification.Properties.Count == 0)
                 EntityModification = null;
         }
@@ -371,7 +385,7 @@ namespace Signum.Web
         public override void Validate(object entity, Dictionary<string, List<string>> errors)
         {
             if (EntityModification != null)
-                EntityModification.Validate(((Lazy)entity).UntypedEntityOrNull, errors); 
+                EntityModification.Validate(((Lazy)entity).TryCC(l => l.UntypedEntityOrNull), errors); 
         }
     }
 

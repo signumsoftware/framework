@@ -42,7 +42,7 @@ namespace Signum.Web
 
         internal static string InternalEntityCombo(this HtmlHelper helper, string idValueField, Type type, object value, EntityCombo settings)
         {
-            if (!settings.View)
+            if (!settings.Visible)
                 return null;
 
             idValueField = helper.GlobalName(idValueField);
@@ -106,13 +106,16 @@ namespace Signum.Web
                 }
             }
 
-            string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/TrySavePartial");
-            sb.Append(helper.Button(
-                        idValueField + TypeContext.Separator + "_btnView",
-                        "->",
-                        viewingUrl,
-                        "",
-                        new Dictionary<string, object> { {"style","display:" + ((value==null) ? "none" : "block")}}));
+            if (settings.View)
+            {
+                string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/TrySavePartial");
+                sb.Append(helper.Button(
+                            idValueField + TypeContext.Separator + "_btnView",
+                            "->",
+                            viewingUrl,
+                            "",
+                            new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+            }
 
             if (settings.Create)
             {
@@ -136,7 +139,7 @@ namespace Signum.Web
         public static void EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
             where S : Modifiable 
         {
-            TypeContext<S> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             Type runtimeType = typeof(S);
             if (context.Value != null)
@@ -158,13 +161,13 @@ namespace Signum.Web
             //    Navigator.ConfigureEntityBase(el, runtimeType , false);
 
             helper.ViewContext.HttpContext.Response.Write(
-                helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec));
+                SetEntityComboOptions(helper, context, ec));
         }
 
         public static void EntityCombo<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityCombo> settingsModifier)
             where S : Modifiable
         {
-            TypeContext<S> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             Type runtimeType = typeof(S);
             if (context.Value != null)
@@ -188,7 +191,18 @@ namespace Signum.Web
             settingsModifier(ec);
 
             helper.ViewContext.HttpContext.Response.Write(
-                helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec));
+                SetEntityComboOptions(helper, context, ec));
+        }
+
+        private static string SetEntityComboOptions<S>(HtmlHelper helper, TypeContext<S> context, EntityCombo ec)
+        {
+            if (ec != null && ec.StyleContext != null)
+            {
+                using (ec.StyleContext)
+                    return helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec);
+            }
+            else
+                return helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec);
         }
 
     }

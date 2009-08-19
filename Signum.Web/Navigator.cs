@@ -352,6 +352,9 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;
 
+            if (controller.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
+                controller.Response.Write("<input type=\"hidden\" id=\"{0}\" name=\"{0}\" value=\"\" />".Formato(prefix + TypeContext.Separator + EntityBaseKeys.IsNew)); 
+
             return new PartialViewResult
             {
                 ViewName = es.PartialViewName,

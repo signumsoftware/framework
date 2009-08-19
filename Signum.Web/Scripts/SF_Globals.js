@@ -30,6 +30,7 @@ var sfBtnOkS = "sfBtnOkS";
 var sfTop = "sfTop";
 var sfAllowMultiple = "sfAllowMultiple";
 var sfEntityTypeName = "sfEntityTypeName";
+var sfEmbedControl = "sfEmbedControl";
 
 function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     var error;
@@ -63,4 +64,22 @@ $(function() { initAroundDivs(); });
 
 function singleQuote(myfunction) {
     return myfunction.toString().replace(/"/g, "'");
+}
+
+function numbersOnly(event) {
+    return (
+        (event.keyCode >= 48 && event.keyCode <= 57) || //0-9
+        (event.keyCode >= 96 && event.keyCode <= 105) ||  //NumPad 0-9
+        (event.keyCode == 8) || //BackSpace
+        (event.keyCode == 9) || //Tab
+        (event.keyCode == 12) || //Clear
+        (event.keyCode == 27) || //Escape
+        (event.keyCode == 37) || //Left
+        (event.keyCode == 39) || //Right
+        (event.keyCode == 46) || //Delete
+        (event.keyCode == 36) || //Home
+        (event.keyCode == 35) ||//End
+        (event.keyCode == 109) || //NumPad -
+        (event.keyCode == 189)
+    );
 }

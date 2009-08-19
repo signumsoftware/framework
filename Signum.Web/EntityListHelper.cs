@@ -41,7 +41,7 @@ namespace Signum.Web
         private static void InternalEntityList<T>(this HtmlHelper helper, string idValueField, MList<T> value, EntityList settings)
             where T : Modifiable
         {
-            if (!settings.View)
+            if (!settings.Visible)
                 return;
 
             idValueField = helper.GlobalName(idValueField);
@@ -216,7 +216,7 @@ namespace Signum.Web
         public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
             where S : Modifiable 
         {
-            TypeContext<MList<S>> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
             Type entitiesType = typeof(T);
 
@@ -233,7 +233,7 @@ namespace Signum.Web
         public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityList> settingsModifier)
             where S : Modifiable
         {
-            TypeContext<MList<S>> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
             Type entitiesType = typeof(T);
 

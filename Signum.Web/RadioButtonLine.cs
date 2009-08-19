@@ -128,7 +128,7 @@ namespace Signum.Web
 
         public static string RadioButtonLine<T>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, bool?>> property, RadioButtonLine options)
         {
-            TypeContext<bool?> context = (TypeContext<bool?>)Common.WalkExpression(tc, CastToObject(property));
+            TypeContext<bool?> context = (TypeContext<bool?>)Common.WalkExpression(tc, property);
             
             if (options == null)
                 return helper.InternalRadioButtonLine(context.Name, context.Value, "true", "false", context.FriendlyName, null, null);
@@ -153,14 +153,6 @@ namespace Signum.Web
             options.ValueHtmlProps.Add("onclick", onclick);
 
             return helper.RadioButtonLine(tc, property, options);
-        }
-
-        private static Expression<Func<T, object>> CastToObject<T, S>(Expression<Func<T, S>> property)
-        {
-            // Add the boxing operation, but get a weakly typed expression
-            Expression converted = Expression.Convert(property.Body, typeof(object));
-            // Use Expression.Lambda to get back to strong typing
-            return Expression.Lambda<Func<T, object>>(converted, property.Parameters);
         }
     }
 }

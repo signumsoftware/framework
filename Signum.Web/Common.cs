@@ -60,7 +60,7 @@ namespace Signum.Web
         {
             if (vl != null)
             {
-                if (context.Property.IsReadOnly())
+                if (context.LastProperty.IsReadOnly())
                 {
                     if (vl.StyleContext == null)
                         vl.StyleContext = new StyleContext();
@@ -75,7 +75,7 @@ namespace Signum.Web
             {
                 if (vl != null)
                 {
-                    if (context.Property.HasAttribute<DateOnlyValidatorAttribute>())
+                    if (context.LastProperty.HasAttribute<DateOnlyValidatorAttribute>())
                         ((ValueLine)vl).ValueLineType = ValueLineType.Date;
                 }
             }
@@ -87,7 +87,7 @@ namespace Signum.Web
             {
                 if (vl != null)
                 {
-                    var atribute = context.Property.SingleAttribute<StringLengthValidatorAttribute>();
+                    var atribute = context.LastProperty.SingleAttribute<StringLengthValidatorAttribute>();
                     if (atribute != null)
                     {
                         int max = atribute.Max; //-1 if not set
@@ -110,7 +110,7 @@ namespace Signum.Web
             {
                 if (eb != null)
                 {
-                    var atribute = context.Property.SingleAttribute<ReloadEntityOnChange>();
+                    var atribute = context.LastProperty.SingleAttribute<ReloadEntityOnChange>();
                     if (atribute != null)
                         ((EntityLine)eb).ReloadOnChange = true;
                 }
@@ -118,18 +118,16 @@ namespace Signum.Web
         }
 #endregion
 
-        internal static TypeContext<S> WalkExpressionGen<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
-            where S: Modifiable
+        internal static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
-            return (TypeContext<S>)WalkExpression(tc, GetMemberList(Expression.Lambda<Func<T, object>>(lambda.Body, lambda.Parameters)));
+            PropertyInfo[] pi = GetMemberList(lambda).Cast<PropertyInfo>().ToArray();
+
+            S value = lambda.Compile()(tc.Value); 
+
+            return new TypeSubContext<S>(value, tc, pi); 
         }
 
-        internal static TypeContext WalkExpression<T>(TypeContext<T> tc, Expression<Func<T, object>> lambda)
-        {
-            return WalkExpression(tc, GetMemberList(lambda));
-        }
-
-        internal static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField)
+        internal static MemberInfo[] GetMemberList(LambdaExpression lambdaToField)
         {
             Expression e = lambdaToField.Body;
 
@@ -146,6 +144,7 @@ namespace Signum.Web
         {
             switch (e.NodeType)
             {
+                case ExpressionType.Convert: return ((UnaryExpression)e).Operand;
                 case ExpressionType.MemberAccess: return ((MemberExpression)e).Expression;
                 case ExpressionType.Parameter: return null;
                 default: throw new InvalidCastException("{0} Not Supported".Formato(e.NodeType));
@@ -156,47 +155,15 @@ namespace Signum.Web
         {
             switch (e.NodeType)
             {
-                case ExpressionType.MemberAccess: return ((MemberExpression)e).Member;
+                case ExpressionType.MemberAccess:
+                    MemberExpression me = (MemberExpression)e;
+                    if (typeof(Lazy).IsAssignableFrom(me.Expression.Type) && me.Member.Name == "EntityOrNull")
+                        return null;
+                    return me.Member;
                 case ExpressionType.Parameter: return null;
+                case ExpressionType.Convert: return null;
                 default: throw new InvalidCastException("{0} Not Supported".Formato(e.NodeType));
             }
         }
-
-        private static TypeContext WalkExpression(TypeContext tc, MemberInfo[] member)
-        {
-            if (member == null)
-                throw new ArgumentNullException("member");
-
-            var properties = member.Cast<PropertyInfo>().ToArray();
-
-            TypeContext result = tc;
-
-            foreach (PropertyInfo pi in properties)
-            {
-                PropertyPack pp = Reflector.GetPropertyValidators(pi.DeclaringType).TryGetC(pi.Name);
-                if (pp != null)
-                {
-                    Func<object, object> getter = pp.GetValue;
-                    result = TypeContext.Create(pi.PropertyType, getter(result.UntypedValue), result, pi);
-                }
-                else
-                {
-                    result = TypeContext.Create(pi.PropertyType, pi.GetValue(result.UntypedValue, null), result, pi);
-                }
-            }
-
-            return result;
-        }
-
-        //Not necesary any more: Replaced by TaskSetImplementations
-        //public static void FindImplementations<T, S>(EntityBase settings, Expression<Func<T, S>> property) 
-        //    where S : ModifiableEntity
-        //{
-        //    if (settings != null && settings.Implementations != null)
-        //        return;
-
-        //    MemberInfo[] memberList = GetMemberList(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
-        //    settings.Implementations = Schema.Current.FindImplementations(typeof(T), memberList);
-        //} 
     }
 }

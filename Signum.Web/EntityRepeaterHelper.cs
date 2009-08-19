@@ -44,11 +44,10 @@ namespace Signum.Web
         private static void InternalEntityRepeater<T>(this HtmlHelper helper, string idValueField, MList<T> value, EntityRepeater settings)
             where T : Modifiable
         {
-            if (!settings.View)
+            if (!settings.Visible)
                 return;
 
             idValueField = helper.GlobalName(idValueField);
-            //string divASustituir = helper.GlobalName("divASustituir");
 
             StringBuilder sb = new StringBuilder();
 
@@ -180,7 +179,7 @@ namespace Signum.Web
         public static void EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
             where S : Modifiable 
         {
-            TypeContext<MList<S>> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
             Type entitiesType = typeof(T);
 
@@ -197,7 +196,7 @@ namespace Signum.Web
         public static void EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityRepeater> settingsModifier)
             where S : Modifiable
         {
-            TypeContext<MList<S>> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
             Type entitiesType = typeof(T);
 

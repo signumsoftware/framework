@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
@@ -12,6 +13,7 @@ namespace Signum.Web
         public const string ResourcesRoute = "sfResourcesRoute";
         public const string SearchResourcesRoute = "sfSearchResourcesRoute";
         public const string PopupPrefix = "sfPrefix";
+        public const string EmbeddedControl = "sfEmbeddedControl";
         public const string PopupSufix = "sfSufix";
         //public const string DivASustituir = "sfDivASustituir";
         public const string LoadAll = "sfLoadAll";
@@ -45,6 +47,20 @@ namespace Signum.Web
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
                 return helper.ViewData[ViewDataKeys.PopupPrefix].ToString() + localName;
 
+            //if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
+            //    return helper.ViewData[ViewDataKeys.TypeContextKey].ToString() + localName;
+
+            return localName;
+        }
+
+        public static string GlobalPrefixedName(this HtmlHelper helper, string localName)
+        {
+            if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
+                return helper.ViewData[ViewDataKeys.PopupPrefix].ToString() + localName;
+
+            if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
+                return helper.ViewData[ViewDataKeys.TypeContextKey].ToString() + localName;
+
             return localName;
         }
 
@@ -55,13 +71,13 @@ namespace Signum.Web
             return "";
         }
 
-        public static bool IsContainedEntity(this HtmlHelper helper)
+        public static bool WriteIdAndRuntime(this HtmlHelper helper)
         {
-            return helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix);
+            if (helper.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
+                return true;
+
+            return !helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix);
+                // || !((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText();
         }
-
-        
     }
-
-    
 }

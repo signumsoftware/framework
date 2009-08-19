@@ -21,7 +21,21 @@ namespace Signum.Web
             if (helper.ViewData.Model is TypeContext<T>)
                 return (TypeContext<T>)helper.ViewData.Model;
 
-            return helper.BeginContext<T>((T)helper.ViewData.Model, null);
+            if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
+                return helper.BeginContext<T>((T)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()], helper.ViewData[ViewDataKeys.TypeContextKey].ToString(), true);
+
+            return helper.BeginContext<T>((T)helper.ViewData.Model, null, true);
+        }
+
+        public static TypeContext<T> TypeContext<T>(this HtmlHelper helper, bool writeIdAndRuntime)
+        {
+            if (helper.ViewData.Model is TypeContext<T>)
+                return (TypeContext<T>)helper.ViewData.Model;
+
+            if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
+                return helper.BeginContext<T>((T)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()], helper.ViewData[ViewDataKeys.TypeContextKey].ToString(), writeIdAndRuntime);
+
+            return helper.BeginContext<T>((T)helper.ViewData.Model, null, writeIdAndRuntime);
         }
 
         public static TypeContext<T> TypeContext<T>(this HtmlHelper helper, string viewDataKeyAndPrefix)
@@ -29,38 +43,67 @@ namespace Signum.Web
             if (!viewDataKeyAndPrefix.HasText())
                 return TypeContext<T>(helper);
 
-            return helper.BeginContext<T>((T)helper.ViewData[viewDataKeyAndPrefix], viewDataKeyAndPrefix);
+            return helper.BeginContext<T>((T)helper.ViewData[viewDataKeyAndPrefix], viewDataKeyAndPrefix, true);
         }
 
-        static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix)
+        public static TypeContext<T> TypeContext<T>(this HtmlHelper helper, string viewDataKeyAndPrefix, bool writeIdAndRuntime)
+        {
+            if (!viewDataKeyAndPrefix.HasText())
+                return TypeContext<T>(helper, writeIdAndRuntime);
+
+            return helper.BeginContext<T>((T)helper.ViewData[viewDataKeyAndPrefix], viewDataKeyAndPrefix, writeIdAndRuntime);
+        }
+
+        static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool writeIdAndRuntime)
         {
             TypeContext<T> tc = new TypeContext<T>(value, prefix);
 
-            if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
+            if (writeIdAndRuntime)
             {
-                IdentifiableEntity id = (IdentifiableEntity)(object)value;
+                if (prefix == null)
+                    prefix = "";
+                if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
+                {
+                    IdentifiableEntity id = (IdentifiableEntity)(object)value;
 
-                if (!helper.IsContainedEntity())
+                    if (helper.WriteIdAndRuntime())
+                    {
+                        if (tc.Value != null)
+                            helper.ViewContext.HttpContext.Response.Write(
+                                helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
+                        else
+                            helper.ViewContext.HttpContext.Response.Write(
+                                helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.StaticType), typeof(T).Name) + "\n");
+                        helper.ViewContext.HttpContext.Response.Write(
+                            helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
+                    }
+                }
+                else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
                 {
                     helper.ViewContext.HttpContext.Response.Write(
-                        helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
-                    helper.ViewContext.HttpContext.Response.Write(
-                        helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
+                            helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
                 }
-            }
-            else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
-            {
-                helper.ViewContext.HttpContext.Response.Write(
-                        helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
             }
 
             return tc;
         }
 
+        //public static void WriteRuntimeAndId<T>(this HtmlHelper helper, TypeContext<T> tc, string prefix)
+        //{
+        //    helper.Write(
+        //        helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
+
+        //    if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
+        //    {
+        //        IdentifiableEntity id = (IdentifiableEntity)(object)tc.Value;
+        //        helper.Write(
+        //            helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
+        //    }
+        //}
+
         public static TypeContext<S> TypeContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            Expression<Func<T, object>> expression = Expression.Lambda<Func<T, object>>(property.Body, property.Parameters);
-            return (TypeContext<S>)Common.WalkExpression(parent, expression);
+            return Common.WalkExpression(parent, property);
         }
     }
     #endregion
@@ -81,32 +124,11 @@ namespace Signum.Web
         public abstract string FriendlyName { get; }
         public abstract Type ContextType { get; }
         public abstract List<PropertyInfo> GetPath();
-        public abstract PropertyInfo Property { get; }
+        public abstract PropertyInfo LastProperty { get; }
 
         public virtual void Dispose()
         {
             //Do nothing
-        }
-
-        static Dictionary<Type, Func<object, TypeContext, PropertyInfo, TypeContext>> typeSubContextCache = new Dictionary<Type, Func<object, TypeContext, PropertyInfo, TypeContext>>();
-
-        internal static TypeContext Create(Type type, object value, TypeContext parent, PropertyInfo pi)
-        {
-            Func<object, TypeContext, PropertyInfo, TypeContext> constructor = null;
-            lock (typeSubContextCache)
-                constructor = typeSubContextCache.GetOrCreate(type, () =>
-                {
-                    ParameterExpression peO = Expression.Parameter(typeof(object), "o");
-                    ParameterExpression peTC = Expression.Parameter(typeof(TypeContext), "tc");
-                    ParameterExpression pePI = Expression.Parameter(typeof(PropertyInfo), "pi");
-                    return Expression.Lambda<Func<object, TypeContext, PropertyInfo, TypeContext>>(
-                            Expression.New(
-                             typeof(TypeSubContext<>).MakeGenericType(type).GetConstructor(new[] { type, typeof(TypeContext), typeof(PropertyInfo) }),
-                             Expression.Convert(peO, type), peTC, pePI),
-                            peO, peTC, pePI).Compile();
-                });
-
-            return constructor(value, parent, pi);
         }
     }
     #endregion
@@ -114,7 +136,7 @@ namespace Signum.Web
     #region TypeContext<T>
     public class TypeContext<T> : TypeContext
     {
-        public T Value { get; private set; }
+        public T Value { get; set; }
         string prefix;
 
         public override List<PropertyInfo> GetPath() 
@@ -140,7 +162,10 @@ namespace Signum.Web
 
         public override string Name
         {
-            get { return  TypeContext.Separator + prefix; }
+            get 
+            {
+                return prefix.HasText() ? prefix : TypeContext.Separator; //TypeContext.Separator + prefix; 
+            }
         }
 
         public override string FriendlyName
@@ -148,7 +173,7 @@ namespace Signum.Web
             get { throw new NotImplementedException("TypeContext has no DisplayName"); }
         }
 
-        public override PropertyInfo Property
+        public override PropertyInfo LastProperty
         {
 	         get { throw new NotImplementedException("TypeContext has no Property"); }
         }
@@ -163,34 +188,39 @@ namespace Signum.Web
     #region TypeSubContext<T>
     internal class TypeSubContext<T> : TypeContext<T>, IDisposable
     {
-        PropertyInfo property; 
+        PropertyInfo[] properties; 
         internal TypeContext Parent { get; private set; }
 
-        public TypeSubContext(T value, TypeContext parent, PropertyInfo property)
+        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties)
             : base(value)
         {
-            this.property = property;
+            this.properties = properties;
             Parent = parent;
         }
 
-        public override PropertyInfo Property
+        public PropertyInfo[] Properties
         {
-	         get { return property; }
-        }        
+            get { return properties; }
+        }
+
+        public override PropertyInfo LastProperty
+        {
+            get { return properties.Last(); }
+        }
 
         public override List<PropertyInfo> GetPath()
         {
-            return Parent.GetPath().Do(l => l.Add(Property));
+            return Parent.GetPath().Do(l => l.AddRange(properties));
         }
 
         public override string Name
         {
-            get { return ((Parent.Name == TypeContext.Separator) ? "" : Parent.Name) + TypeContext.Separator + Property.Name; }
+            get { return ((Parent.Name == TypeContext.Separator) ? "" : Parent.Name) + TypeContext.Separator + properties.ToString(p => p.Name, TypeContext.Separator); }
         }
 
         public override string FriendlyName
         {
-            get { return Property.NiceName(); }
+            get { return LastProperty.NiceName(); }
         }
     }
     #endregion

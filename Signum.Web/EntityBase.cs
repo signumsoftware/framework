@@ -22,12 +22,12 @@ namespace Signum.Web
         public StyleContext StyleContext;
         public string LabelText;
         public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string, object>(0);
-        
-        bool view = true;
-        public bool View
+
+        public bool visible = true;
+        public bool Visible
         {
-            get { return view; }
-            set { view = value; }
+            get { return visible; }
+            set { visible = value; }
         }
     }
 
@@ -45,6 +45,13 @@ namespace Signum.Web
         {
             get { return runtimeType; }
             set { runtimeType = value; }
+        }
+
+        bool view = true;
+        public bool View
+        {
+            get { return view; }
+            set { view = value; }
         }
 
         bool create = true;

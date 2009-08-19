@@ -16,7 +16,7 @@ namespace Signum.Web
 
         private static string ManualValueLine<T>(this HtmlHelper helper, string idValueField, T value, ValueLine settings)
         {
-            if (!settings.View)
+            if (!settings.Visible)
                 return null;
 
             StringBuilder sb = new StringBuilder();
@@ -153,7 +153,7 @@ namespace Signum.Web
         public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
             Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
+            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
             ValueLine vl = new ValueLine();
             Common.FireCommonTasks(vl, typeof(T), context);
@@ -164,7 +164,7 @@ namespace Signum.Web
         public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
             Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, CastToObject(property));
+            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
             ValueLine vl = new ValueLine();
             Common.FireCommonTasks(vl, typeof(T), context);
@@ -183,14 +183,6 @@ namespace Signum.Web
             }
             else
                 return helper.ManualValueLine(context.Name, context.Value, vl);
-        }
-
-        private static Expression<Func<T, object>> CastToObject<T, S>(Expression<Func<T, S>> property)
-        {
-            // Add the boxing operation, but get a weakly typed expression
-            Expression converted = Expression.Convert(property.Body, typeof(object));
-            // Use Expression.Lambda to get back to strong typing
-            return Expression.Lambda<Func<T, object>>(converted, property.Parameters);
         }
     }
 

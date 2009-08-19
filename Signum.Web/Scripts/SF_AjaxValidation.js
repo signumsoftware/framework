@@ -1,4 +1,11 @@
-﻿//fixedInlineErrorText = "" for it to be populated from ModelState error messages
+﻿function TrySaveAndPostServer(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
+    if (TrySave('Signum/Validate', prefixToIgnore, showInlineError, fixedInlineErrorText)) {
+        document.forms[0].action = urlController;
+        document.forms[0].submit();
+    }
+}
+
+//fixedInlineErrorText = "" for it to be populated from ModelState error messages
 function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText) {
     var returnValue = false;
     $.ajax({

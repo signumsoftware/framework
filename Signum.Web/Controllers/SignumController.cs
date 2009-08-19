@@ -48,7 +48,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix)
+        public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix, bool? sfEmbedControl)
         {
             Type type = Navigator.ResolveType(sfStaticType);
             
@@ -65,6 +65,9 @@ namespace Signum.Web.Controllers
                 else
                     throw new ApplicationException("Invalid result type for a Constructor");
             }
+
+            if (sfEmbedControl != null && sfEmbedControl.Value)
+                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
 
             return Navigator.PartialView(this, entity, prefix);
         }
@@ -92,6 +95,18 @@ namespace Signum.Web.Controllers
 
             if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
                 Database.Save((IdentifiableEntity)entity);
+
+            return Content(this.ModelState.ToJsonData());
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult Validate(string prefixToIgnore)
+        {
+            Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
+
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefixToIgnore, ref entity);
+
+            this.ModelState.FromDictionary(errors, Request.Form);
 
             return Content(this.ModelState.ToJsonData());
         }

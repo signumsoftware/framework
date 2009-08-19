@@ -53,7 +53,7 @@ namespace Signum.Web
 
         internal static string InternalEntityLine(this HtmlHelper helper, string idValueField, Type type, object value, EntityLine settings)
         {
-            if (!settings.View)
+            if (!settings.Visible)
                 return null;
 
             idValueField = helper.GlobalName(idValueField);
@@ -178,16 +178,19 @@ namespace Signum.Web
                 sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
-            string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters +");";
-            sb.Append(
-                    helper.Href(idValueField + TypeContext.Separator + EntityBaseKeys.ToStrLink,
-                        (value!=null) ? value.ToString() : "&nbsp;",
-                        viewingUrl,
-                        "View",
-                        "valueLine",
-                        new Dictionary<string, object> { {"style","display:" + ((value==null) ? "none" : "block")}}));
+            if (settings.View)
+            {
+                string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters + ");";
+                sb.Append(
+                        helper.Href(idValueField + TypeContext.Separator + EntityBaseKeys.ToStrLink,
+                            (value != null) ? value.ToString() : "&nbsp;",
+                            viewingUrl,
+                            "View",
+                            "valueLine",
+                            new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
 
-            sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
+                sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
+            }
 
             if (settings.Create)
                 {
@@ -234,7 +237,7 @@ namespace Signum.Web
         public static void EntityLine<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
             where S : Modifiable 
         {
-            TypeContext<S> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             Type runtimeType = typeof(S);
             if (context.Value != null)
@@ -263,7 +266,7 @@ namespace Signum.Web
         public static void EntityLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityLine> settingsModifier)
             where S : Modifiable
         {
-            TypeContext<S> context = Common.WalkExpressionGen(tc, property);
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             Type runtimeType = typeof(S);
             if (context.Value != null)
