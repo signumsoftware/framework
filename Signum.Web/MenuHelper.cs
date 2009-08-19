@@ -40,7 +40,10 @@ namespace Signum.Web
         public List<Item> SubItems;
 
         public bool IsVisible()
-        { 
+        {
+            if (SubItems != null && SubItems.Count > 0)
+                return SubItems.Exists(mi => mi.IsVisible());
+
             if (QueryName != null)
                 return Navigator.IsFindable(QueryName);
 
