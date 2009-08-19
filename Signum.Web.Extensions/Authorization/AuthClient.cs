@@ -11,16 +11,18 @@ namespace Signum.Web.Authorization
 {
     public static class AuthClient
     {
+        public static string ViewPrefix = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.";
+
         public static string CookieName = "sfUser"; 
-        public static string LoginUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Login.aspx";
-        public static string LoginUserControlUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.LoginUserControl.ascx";
-        public static string ChangePasswordUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.ChangePassword.aspx";
-        public static string ChangePasswordSuccessUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.ChangePasswordSuccess.aspx";
-        public static string RegisterUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Register.aspx";
+        public static string LoginUrl = ViewPrefix + "Login.aspx";
+        public static string LoginUserControlUrl = ViewPrefix + "LoginUserControl.ascx";
+        public static string ChangePasswordUrl = ViewPrefix + "ChangePassword.aspx";
+        public static string ChangePasswordSuccessUrl = ViewPrefix + "ChangePasswordSuccess.aspx";
+        //public static string RegisterUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Register.aspx";
 
         public static void Start(NavigationManager manager, bool types, bool property, bool queries)
         {
-            manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(true)); //{ View = () => new User() });
+            manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(true)); //{ PartialViewName= ViewPrefix + "UserIU.ascx" }); 
             manager.EntitySettings.Add(typeof(RoleDN), new EntitySettings(false)); //{ View = () => new Role() });
 
             if (property)
@@ -35,6 +37,8 @@ namespace Signum.Web.Authorization
 
             if (queries)
                 Navigator.Manager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
+
+            CustomModificationBinders.Binders.Add(typeof(UserDN), (formValues, interval, controlID) => new UserIUModification(typeof(UserDN), formValues, interval, controlID));
         }
 
         static void TaskAuthorizeProperties(BaseLine bl, Type type, TypeContext context)
@@ -54,7 +58,7 @@ namespace Signum.Web.Authorization
                 switch (PropertyAuthLogic.GetPropertyAccess(parentType, path))
                 {
                     case Access.None: 
-                        bl.View = false; 
+                        bl.Visible = false; 
                         break;
                     case Access.Read:
                         if (bl.StyleContext == null)
