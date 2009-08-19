@@ -22,7 +22,7 @@
             <%
                 if (user.Value != null && user.Value.IdOrNull == null)
                 {
-                    Response.Write("<script type=\"text/javascript\" language=\"javascript\">\n" +
+                    Response.Write("<script type=\"text/javascript\">\n" +
                         "$(document).ready(function() {\n" +
                         "$('#" + user.Name + "DivNew').show();\n" +
                         "});\n" +
