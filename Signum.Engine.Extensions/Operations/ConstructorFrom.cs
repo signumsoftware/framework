@@ -18,13 +18,13 @@ namespace Signum.Engine.Operations
 
     public class BasicConstructorFrom<F, T> : IConstructorFromOperation
         where T : class, IIdentifiable
-        where F: class, IIdentifiable
+        where F : class, IIdentifiable
     {
-        public Enum Key { get; private set; } 
+        public Enum Key { get; private set; }
         public Type Type { get { return typeof(F); } }
         public OperationType OperationType { get { return OperationType.ConstructorFrom; } }
 
-        public bool Lazy { get {return FromLazy != null;} }
+        public bool Lazy { get { return FromLazy != null; } }
         public bool Returns { get; set; }
 
         public bool AllowsNew { get; set; }
@@ -32,7 +32,7 @@ namespace Signum.Engine.Operations
         public Func<F, object[], T> FromEntity { get; set; }
         public Func<Lazy<F>, object[], T> FromLazy { get; set; }
         public Func<F, string> CanConstruct { get; set; }
-        
+
         public BasicConstructorFrom(Enum key)
         {
             this.Key = key;
@@ -59,7 +59,7 @@ namespace Signum.Engine.Operations
         {
             string error = OnCanConstruct(entity);
             if (error != null)
-                throw new ApplicationException(error); 
+                throw new ApplicationException(error);
 
             using (Transaction tr = new Transaction())
             {
@@ -72,11 +72,18 @@ namespace Signum.Engine.Operations
 
                 IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnFromEntity((F)entity, args);
 
-                result.Save(); //Nothing happens if allready saved
+                // TODO: olmo porque hay que guardar aqui????
 
-                log.Target = result.ToLazy();
-                log.End = DateTime.Now;
-                log.Save();
+                //result.Save(); //Nothing happens if allready saved
+
+                if (!result.IsNew)
+                {
+                    log.Target = result.ToLazy();
+                    log.End = DateTime.Now;
+                    log.Save();
+                }
+
+
 
                 return tr.Commit(result);
             }
