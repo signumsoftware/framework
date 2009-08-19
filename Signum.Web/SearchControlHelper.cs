@@ -156,8 +156,6 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
 
-            //Type searchEntityType = Navigator.NameToType[entityTypeName];
-
             FilterType filterType = FilterOperationsUtils.GetFilterType(filterOptions.Column.Type);
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
 
@@ -186,9 +184,7 @@ namespace Signum.Web
             if (filterOptions.Frozen)
                 sb.Append("<input type=\"text\" id=\"{0}\" name=\"{0}\" value=\"{1}\" {2}/>\n".Formato(txtId, txtValue, filterOptions.Frozen ? " readonly=\"readonly\"" : ""));
             else
-            {
                 sb.Append(PrintValueField(helper, filterType, filterOptions.Column.Type, txtId, filterOptions.Value, filterOptions.Column.Name));
-            }
             sb.Append("</td>\n");
 
             sb.Append("<td>\n");
@@ -228,7 +224,12 @@ namespace Signum.Web
                 Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(columnType) ?? columnType, false);
                 el.Create = false;
 
-                // Convert.ChangeType(value, columnType)
+                if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix) && ((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText())
+                {
+                    string prefix = helper.ViewData[ViewDataKeys.PopupPrefix].ToString();
+                    if (id.StartsWith(prefix))
+                        id = id.RemoveLeft(prefix.Length); //We call GlobalName with it in EntityLine
+                }
                 string result = (string)EntityLineHelper.InternalEntityLine(helper, id, columnType, value, el);
                 sb.Append(result);
             }

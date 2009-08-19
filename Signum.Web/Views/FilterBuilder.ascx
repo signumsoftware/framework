@@ -39,10 +39,7 @@
            </select> 
            <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum.aspx/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
            <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "Eliminar Filtros", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
-       <!--    <span class="separator"></span>
-           <label for="<%=Html.GlobalName(ViewDataKeys.Top)%>">Núm.registros</label> <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new {size = "5" })%>
-        -->
-        </div>
+       </div>
     <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
   
     <div id="filters-list">
