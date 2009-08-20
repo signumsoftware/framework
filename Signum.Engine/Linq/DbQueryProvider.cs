@@ -23,7 +23,7 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// Stateless query provider 
     /// </summary>
-    public class DbQueryProvider : QueryProvider
+    internal class DbQueryProvider : QueryProvider
     {       
         public static readonly DbQueryProvider Single = new DbQueryProvider();
 

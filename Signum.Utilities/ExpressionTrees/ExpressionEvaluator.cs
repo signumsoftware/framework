@@ -62,50 +62,5 @@ namespace Signum.Utilities.ExpressionTrees
         }
     }
 
-    /// <summary>
-    /// Performs bottom-up analysis to determine which nodes can possibly
-    /// be part of an evaluated sub-tree.
-    /// </summary>
-    public class ExpressionNominator : ExpressionVisitor
-    {
-        HashSet<Expression> candidates = new HashSet<Expression>();
-        bool hasDependencies;
-
-        private ExpressionNominator() { }
-
-        public static HashSet<Expression> Nominate(Expression expression)
-        {
-            ExpressionNominator n = new ExpressionNominator();
-            n.Visit(expression);
-            return n.candidates;
-        }
-
-        private bool ExpressionHasDependencies(Expression expression)
-        {
-            return
-                expression.NodeType == ExpressionType.Parameter ||
-                (expression.NodeType == ExpressionType.Call && ((MethodCallExpression)expression).Method.DeclaringType == typeof(Queryable)) ||
-                expression.NodeType == ExpressionType.Lambda || // why? 
-                !EnumExtensions.IsDefined(expression.NodeType);
-        }
-
-        protected override Expression Visit(Expression expression)
-        {
-            if (expression != null)
-            {
-                bool saveHasDependencies = this.hasDependencies;
-                this.hasDependencies = false;
-                base.Visit(expression);
-                if (!this.hasDependencies)
-                {
-                    if (ExpressionHasDependencies(expression))
-                        this.hasDependencies = true;
-                    else
-                        this.candidates.Add(expression);
-                }
-                this.hasDependencies |= saveHasDependencies;
-            }
-            return expression;
-        }
-    }
+  
 }

@@ -23,6 +23,13 @@ namespace Signum.Engine.Linq
         public static ConditionsRewriter ConditionsRewriter = new ConditionsRewriter();
 
         string[] existingAliases;
+
+        // existingAliases is null when used in QueryBinder, not ColumnProjector
+        // this allows to make function changes in where clausules but keeping the full expression (not compressing it in one column
+        bool tempFullNominate = false;
+
+        bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
+
         HashSet<Expression> candidates = new HashSet<Expression>();
 
         private DbExpressionNominator() { }
@@ -51,11 +58,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-
-            if (existingAliases == null || 
-                // existingAliases is null when used in QueryBinder, not ColumnProjector
-                // this allows to make function changes in where clausules but keeping the full expression (not compressing it in one column)
-                existingAliases.Contains(column.Alias))
+            if (IsFullNominate || existingAliases.Contains(column.Alias))
                 candidates.Add(column);
             return column;
         }
@@ -85,7 +88,8 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            candidates.Add(c);
+            if (IsFullNominate)
+                candidates.Add(c);
             return c;
         }
 
@@ -158,11 +162,9 @@ namespace Signum.Engine.Linq
             if (!candidates.Contains(left))
                 return null;
 
-
             Expression right = Visit(be.Right);
             if (!candidates.Contains(right))
                 return null;
-
 
             SqlFunctionExpression result = new SqlFunctionExpression(type, SqlFunction.DATEDIFF.ToString(), new Expression[]{
                 new SqlEnumExpression(sqlEnums), right, left});
@@ -179,9 +181,9 @@ namespace Signum.Engine.Linq
                 return null;
 
             Expression result = DateAdd(SqlEnums.hour, MinusDatePart(SqlEnums.hour, expr),
-                                    DateAdd(SqlEnums.minute, MinusDatePart(SqlEnums.minute, expr),
-                                        DateAdd(SqlEnums.second, MinusDatePart(SqlEnums.second, expr),
-                                            DateAdd(SqlEnums.millisecond, MinusDatePart(SqlEnums.millisecond, expr), expr))));
+                                 DateAdd(SqlEnums.minute, MinusDatePart(SqlEnums.minute, expr),
+                                  DateAdd(SqlEnums.second, MinusDatePart(SqlEnums.second, expr),
+                                   DateAdd(SqlEnums.millisecond, MinusDatePart(SqlEnums.millisecond, expr), expr))));
 
             candidates.Add(result);
             return result; 
@@ -200,12 +202,9 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            if (existingAliases == null)
-            {
-                var nuevo = Transform(b);
-                if (nuevo != null)
-                    return Visit(nuevo);
-            }
+            var transformed = Transform(b);
+            if (transformed != null)
+                return Visit(transformed);
 
             Expression left = this.Visit(b.Left);
             Expression right = this.Visit(b.Right);
@@ -320,50 +319,52 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            Expression newM = new Switch<string, Expression>(m.Member.DeclaringType.TypeName() + "." + m.Member.Name)
-                            .Case("string.Length", a => TrySqlFunction(SqlFunction.LEN, m.Type, m.Expression))
-                            .Case("Math.PI", a => TrySqlFunction(SqlFunction.PI, m.Type))
-                            .Case("DateTime.Now", a => TrySqlFunction(SqlFunction.GETDATE, m.Type))
-                            .Case("DateTime.Year", a => TrySqlFunction(SqlFunction.YEAR, m.Type, m.Expression))
-                            .Case("DateTime.Month", a => TrySqlFunction(SqlFunction.MONTH, m.Type, m.Expression))
-                            .Case("DateTime.Day", a => TrySqlFunction(SqlFunction.DAY, m.Type, m.Expression))
-                            .Case("DateTime.DayOfYear", a => TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.dayofyear), m.Expression))
-                            .Case("DateTime.Hour", a => TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression))
-                            .Case("DateTime.Minute", a => TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression))
-                            .Case("DateTime.Second", a => TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression))
-                            .Case("DateTime.Millisecond", a => TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression))
-                            .Case("DateTime.Date", a=>TrySqlDate(m.Expression))
-                            .Case("TimeSpan.TotalDays", a=> TrySqlDifference(SqlEnums.day, m.Type, m.Expression))
-                            .Case("TimeSpan.TotalHours", a=> TrySqlDifference(SqlEnums.hour, m.Type, m.Expression))
-                            .Case("TimeSpan.TotalMilliseconds", a=> TrySqlDifference(SqlEnums.millisecond, m.Type, m.Expression))
-                            .Case("TimeSpan.TotalSeconds", a=> TrySqlDifference(SqlEnums.second, m.Type, m.Expression))
-                            .Case("TimeSpan.TotalMinutes", a=> TrySqlDifference(SqlEnums.minute, m.Type, m.Expression))
-                            .Default((Expression)null);
-
-             if (newM != null)
-                return newM;
-     
             if (m.Expression.Type.IsNullable() && (m.Member.Name == "Value" || m.Member.Name == "HasValue"))
             {
                 Expression expression = this.Visit(m.Expression);
-
+                Expression nullable; 
                 if (m.Member.Name == "Value")
-                    newM = Expression.Convert(expression, m.Expression.Type.UnNullify());
+                    nullable = Expression.Convert(expression, m.Expression.Type.UnNullify());
                 else
-                    newM = Expression.NotEqual(expression, Expression.Constant(null));
+                    nullable = Expression.NotEqual(expression, Expression.Constant(null));
 
                 if (candidates.Contains(expression))
-                    candidates.Add(newM);
+                    candidates.Add(nullable);
 
-                return newM;
+                return nullable;
             }
+
+            Expression hardResult = HardCodedMembers(m);
+            if (hardResult != null)
+                return hardResult; 
 
             return base.VisitMemberAccess(m);
         }
 
-       
-
-
+        public Expression HardCodedMembers(MemberExpression m)
+        {
+            switch (m.Member.DeclaringType.TypeName() + "." + m.Member.Name)
+            {
+                case "string.Length": return TrySqlFunction(SqlFunction.LEN, m.Type, m.Expression);
+                case "Math.PI": return TrySqlFunction(SqlFunction.PI, m.Type);
+                case "DateTime.Now": return TrySqlFunction(SqlFunction.GETDATE, m.Type);
+                case "DateTime.Year": return TrySqlFunction(SqlFunction.YEAR, m.Type, m.Expression);
+                case "DateTime.Month": return TrySqlFunction(SqlFunction.MONTH, m.Type, m.Expression);
+                case "DateTime.Day": return TrySqlFunction(SqlFunction.DAY, m.Type, m.Expression);
+                case "DateTime.DayOfYear": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.dayofyear), m.Expression);
+                case "DateTime.Hour": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.hour), m.Expression);
+                case "DateTime.Minute": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.minute), m.Expression);
+                case "DateTime.Second": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.second), m.Expression);
+                case "DateTime.Millisecond": return TrySqlFunction(SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.Expression);
+                case "DateTime.Date": return TrySqlDate(m.Expression);
+                case "TimeSpan.TotalDays": return TrySqlDifference(SqlEnums.day, m.Type, m.Expression);
+                case "TimeSpan.TotalHours": return TrySqlDifference(SqlEnums.hour, m.Type, m.Expression);
+                case "TimeSpan.TotalMilliseconds": return TrySqlDifference(SqlEnums.millisecond, m.Type, m.Expression);
+                case "TimeSpan.TotalSeconds": return TrySqlDifference(SqlEnums.second, m.Type, m.Expression);
+                case "TimeSpan.TotalMinutes": return TrySqlDifference(SqlEnums.minute, m.Type, m.Expression);
+                default: return null;
+            }
+        }
 
         static MethodInfo c = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });
 
@@ -371,59 +372,91 @@ namespace Signum.Engine.Linq
         {
             SqlMethodAttribute sma = m.Method.SingleAttribute<SqlMethodAttribute>();
             if (sma != null)
-                return TrySqlFunction(sma.Name?? m.Method.Name, m.Type, m.Arguments.ToArray()); 
+                return TrySqlFunction(sma.Name?? m.Method.Name, m.Type, m.Arguments.ToArray());
 
-            Expression newM = new Switch<string, Expression>(m.Method.DeclaringType.TypeName() + "." + m.Method.MethodName())
-                            .Case("string.IndexOf", a => TrySqlFunction(SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, m.TryGetArgument("startIndex").TryCC(e => Expression.Add(e, Expression.Constant(1)))).TryCC(e => Expression.Subtract(e, Expression.Constant(1))))
-                            .Case("string.ToLower", a => TrySqlFunction(SqlFunction.LOWER, m.Type, m.Object))
-                            .Case("string.ToUpper", a => TrySqlFunction(SqlFunction.UPPER, m.Type, m.Object))
-                            .Case("string.TrimStart", a => TrySqlFunction(SqlFunction.LTRIM, m.Type, m.Object))
-                            .Case("string.TrimEnd", a => TrySqlFunction(SqlFunction.RTRIM, m.Type, m.Object))
-                            .Case("string.Replace", a => TrySqlFunction(SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue")))
-                            .Case("string.Substring", a => TrySqlFunction(SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), Expression.Constant(1)), m.TryGetArgument("length") ?? Expression.Constant(int.MaxValue)))
-                            // escapar los patrones es muy complicado en expresiones generales (hacerlo en SQL)
-                            .Case("string.Contains", a=>TryLike(m.Object, Expression.Add(Expression.Add( Expression.Constant("%"), m.GetArgument("value"), c), Expression.Constant("%"), c))) 
-                            .Case("string.StartsWith", a => TryLike(m.Object, Expression.Add(m.GetArgument("value"), Expression.Constant("%"), c)))
-                            .Case("string.EndsWith", a => TryLike(m.Object, Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c)))
-                          
-                            .Case("StringExtensions.Left", a => TrySqlFunction(SqlFunction.LEFT, m.Type, m.GetArgument("s"), m.GetArgument("numChars")))
-                            .Case("StringExtensions.Right", a => TrySqlFunction(SqlFunction.RIGHT, m.Type, m.GetArgument("s"), m.GetArgument("numChars")))
-                            .Case("StringExtensions.Replicate", a => TrySqlFunction(SqlFunction.REPLICATE, m.Type, m.GetArgument("s"), m.GetArgument("times")))
-                            .Case("StringExtensions.Reverse", a => TrySqlFunction(SqlFunction.REVERSE, m.Type, m.GetArgument("s")))
-                            .Case("StringExtensions.Like", a=>TryLike(m.GetArgument("s"), m.GetArgument("pattern"))) 
+            Expression result = HardCodedMethods(m);
+            if (result != null)
+                return result;
 
-                            .Case("DateTime.AddDays", a=>TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.day), m.GetArgument("value"), m.Object))
-                            .Case("DateTime.AddHours", a=>TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.hour), m.GetArgument("value"), m.Object))
-                            .Case("DateTime.AddMilliseconds", a=>TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.GetArgument("value"), m.Object))
-                            .Case("DateTime.AddMinutes", a=>TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.minute), m.GetArgument("value"), m.Object))
-                            .Case("DateTime.AddMonths", a=>TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("value"), m.Object))
-                            .Case("DateTime.AddSeconds", a=>TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.second), m.GetArgument("value"), m.Object))
-                            .Case("DateTime.AddYears", a=>TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("value"), m.Object))
+            return base.VisitMethodCall(m);
+        }
 
-                            .Case("Math.Sign", a => TrySqlFunction(SqlFunction.SIGN, m.Type, m.GetArgument("value")))
-                            .Case("Math.Abs", a => TrySqlFunction(SqlFunction.ABS, m.Type, m.GetArgument("value")))
-                            .Case("Math.Sin", a => TrySqlFunction(SqlFunction.SIN, m.Type, m.GetArgument("a")))
-                            .Case("Math.Asin", a => TrySqlFunction(SqlFunction.ASIN, m.Type, m.GetArgument("d")))
-                            .Case("Math.Cos", a => TrySqlFunction(SqlFunction.COS, m.Type, m.GetArgument("d")))
-                            .Case("Math.Acos", a => TrySqlFunction(SqlFunction.ACOS, m.Type, m.GetArgument("d")))
-                            .Case("Math.Tan", a => TrySqlFunction(SqlFunction.TAN, m.Type, m.GetArgument("a")))
-                            .Case("Math.Pow", a => TrySqlFunction(SqlFunction.POWER, m.Type, m.GetArgument("x"), m.GetArgument("y")))
-                            .Case("Math.Sqrt", a => TrySqlFunction(SqlFunction.SQRT, m.Type, m.GetArgument("d")))
-                            .Case("Math.Exp", a => TrySqlFunction(SqlFunction.EXP, m.Type, m.GetArgument("d")))
-                            .Case("Math.Floor", a => TrySqlFunction(SqlFunction.FLOOR, m.Type, m.GetArgument("d")))
-                            .Case("Math.Log10", a => TrySqlFunction(SqlFunction.Log10, m.Type, m.GetArgument("d")))
-                            .Case("Math.Ceiling", a => TrySqlFunction(SqlFunction.CEILING, m.Type, m.TryGetArgument("d") ?? m.GetArgument("a")))
-                            .Case("Math.Round", a => TrySqlFunction(SqlFunction.ROUND, m.Type,
-                                m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
-                                m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? Expression.Constant(0)))
-                            .Default((Expression)null);
+        private Expression HardCodedMethods(MethodCallExpression m)
+        {
+            switch (m.Method.DeclaringType.TypeName() + "." + m.Method.Name)
+            {
+                case "string.IndexOf":
+                    {
+                        Expression startIndex = m.TryGetArgument("startIndex").TryCC(e => Expression.Add(e, Expression.Constant(1).InSqlExpression()));
 
-            return newM ?? base.VisitMethodCall(m);
+                        Expression charIndex = TrySqlFunction(SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex);
+                        if (charIndex == null)
+                            return null;
+                        Expression result = Expression.Subtract(charIndex, Expression.Constant(1));
+                        if (candidates.Contains(charIndex))
+                            candidates.Add(result);
+                        return result;
+                    }
+                case "string.ToLower": return TrySqlFunction(SqlFunction.LOWER, m.Type, m.Object);
+                case "string.ToUpper": return TrySqlFunction(SqlFunction.UPPER, m.Type, m.Object);
+                case "string.TrimStart": return TrySqlFunction(SqlFunction.LTRIM, m.Type, m.Object);
+                case "string.TrimEnd": return TrySqlFunction(SqlFunction.RTRIM, m.Type, m.Object);
+                case "string.Replace": return TrySqlFunction(SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
+                case "string.Substring": return TrySqlFunction(SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), Expression.Constant(1).InSqlExpression()), m.TryGetArgument("length") ?? Expression.Constant(int.MaxValue).InSqlExpression());
+                case "string.Contains": return TryLike(m.Object, Expression.Add(Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c), Expression.Constant("%"), c));
+                case "string.StartsWith": return TryLike(m.Object, Expression.Add(m.GetArgument("value"), Expression.Constant("%"), c));
+                case "string.EndsWith": return TryLike(m.Object, Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c));
+
+                case "StringExtensions.Left": return TrySqlFunction(SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.Right": return TrySqlFunction(SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
+                case "StringExtensions.Replicate": return TrySqlFunction(SqlFunction.REPLICATE, m.Type, m.GetArgument("str"), m.GetArgument("times"));
+                case "StringExtensions.Reverse": return TrySqlFunction(SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
+                case "StringExtensions.Like": return TryLike(m.GetArgument("str"), m.GetArgument("pattern"));
+
+                case "DateTime.AddDays": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.day), m.GetArgument("value"), m.Object);
+                case "DateTime.AddHours": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.hour), m.GetArgument("value"), m.Object);
+                case "DateTime.AddMilliseconds": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.millisecond), m.GetArgument("value"), m.Object);
+                case "DateTime.AddMinutes": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.minute), m.GetArgument("value"), m.Object);
+                case "DateTime.AddMonths": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("value"), m.Object);
+                case "DateTime.AddSeconds": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.second), m.GetArgument("value"), m.Object);
+                case "DateTime.AddYears": return TrySqlFunction(SqlFunction.DATEADD, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("value"), m.Object);
+
+                case "Math.Sign": return TrySqlFunction(SqlFunction.SIGN, m.Type, m.GetArgument("value"));
+                case "Math.Abs": return TrySqlFunction(SqlFunction.ABS, m.Type, m.GetArgument("value"));
+                case "Math.Sin": return TrySqlFunction(SqlFunction.SIN, m.Type, m.GetArgument("a"));
+                case "Math.Asin": return TrySqlFunction(SqlFunction.ASIN, m.Type, m.GetArgument("d"));
+                case "Math.Cos": return TrySqlFunction(SqlFunction.COS, m.Type, m.GetArgument("d"));
+                case "Math.Acos": return TrySqlFunction(SqlFunction.ACOS, m.Type, m.GetArgument("d"));
+                case "Math.Tan": return TrySqlFunction(SqlFunction.TAN, m.Type, m.GetArgument("a"));
+                case "Math.Atan": return TrySqlFunction(SqlFunction.ATAN, m.Type, m.GetArgument("d"));
+                case "Math.Atan2": return TrySqlFunction(SqlFunction.ATN2, m.Type, m.GetArgument("y"), m.GetArgument("x"));
+                case "Math.Pow": return TrySqlFunction(SqlFunction.POWER, m.Type, m.GetArgument("x"), m.GetArgument("y"));
+                case "Math.Sqrt": return TrySqlFunction(SqlFunction.SQRT, m.Type, m.GetArgument("d"));
+                case "Math.Exp": return TrySqlFunction(SqlFunction.EXP, m.Type, m.GetArgument("d"));
+                case "Math.Floor": return TrySqlFunction(SqlFunction.FLOOR, m.Type, m.GetArgument("d"));
+                case "Math.Log10": return TrySqlFunction(SqlFunction.LOG10, m.Type, m.GetArgument("d"));
+                case "Math.Ceiling": return TrySqlFunction(SqlFunction.CEILING, m.Type, m.TryGetArgument("d") ?? m.GetArgument("a"));
+                case "Math.Round": return TrySqlFunction(SqlFunction.ROUND, m.Type,
+                    m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
+                    m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? Expression.Constant(0).InSqlExpression());
+
+                case "LinqProviderExtensions.InSql":
+                    bool oldTemp = tempFullNominate;
+                    tempFullNominate = true;
+                    Expression expression = Visit(m.GetArgument("value"));
+                    tempFullNominate = oldTemp;
+
+                    if (!candidates.Contains(expression))
+                        throw new ApplicationException("Impossible to translate to SQL: " + expression.ToString());
+
+                    return expression; 
+                default: return null; 
+            }
         }
 
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)
         {
-            if (existingAliases != null)
+            if (!IsFullNominate)
                 return base.VisitImplementedBy(reference); 
 
             var newImple = reference.Implementations
@@ -440,7 +473,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
-            if (existingAliases != null || reference.Implementations != null && reference.Implementations.Count > 0)
+            if (!IsFullNominate|| reference.Implementations != null && reference.Implementations.Count > 0)
                 return base.VisitImplementedByAll(reference); 
 
             var id = (ColumnExpression)Visit(reference.ID);
@@ -457,13 +490,14 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
         {
-            if (existingAliases != null || fieldInit.Bindings != null && fieldInit.Bindings.Count > 0)
+            if (!IsFullNominate || fieldInit.Bindings != null && fieldInit.Bindings.Count > 0)
                 return base.VisitFieldInit(fieldInit);
 
             var id = Visit(fieldInit.ExternalId);
             var alias = VisitFieldInitAlias(fieldInit.Alias);
-            if (fieldInit.ExternalId != id)
-                fieldInit = new FieldInitExpression(fieldInit.Type, alias, id);
+            var other = Visit(fieldInit.OtherCondition);
+            if (fieldInit.ExternalId != id || fieldInit.OtherCondition != other || fieldInit.Alias != alias)
+                fieldInit = new FieldInitExpression(fieldInit.Type, alias, id, other);
 
             if (candidates.Contains(id))
                 candidates.Add(fieldInit);
@@ -471,4 +505,20 @@ namespace Signum.Engine.Linq
             return fieldInit;
         }
     }
+
+
+    public static class LinqProviderExtensions
+    {
+        static MethodInfo miInSql = ReflectionTools.GetMethodInfo<int>(i => i.InSql()).GetGenericMethodDefinition();
+
+        public static T InSql<T>(this T value)
+        {
+            return value;
+        }
+
+        internal static MethodCallExpression InSqlExpression(this Expression expression)
+        {
+            return Expression.Call(null, miInSql.MakeGenericMethod(expression.Type), expression); 
+        }
+    }        
 }

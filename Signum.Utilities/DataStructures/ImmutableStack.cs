@@ -38,12 +38,10 @@ namespace Signum.Utilities.DataStructures
 
         }
 
-        static readonly ImmutableStack<T> empty = new ImmutableStack<T>();
+        public static readonly ImmutableStack<T> Empty = new ImmutableStack<T>();
 
         private ImmutableStack(){}
 
-        public static ImmutableStack<T> Empty { get { return empty; } }
-     
         public virtual bool IsEmpty { get { return true; } }
         public virtual T Peek() { throw new InvalidOperationException(Resources.EmptyStack); }
         public virtual ImmutableStack<T> Push(T value) { return new ImmutableFullStack(value, this); }

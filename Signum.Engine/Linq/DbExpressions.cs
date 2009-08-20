@@ -10,6 +10,8 @@ using System.Reflection;
 using Signum.Engine;
 using Signum.Entities;
 using System.Diagnostics;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 
 namespace Signum.Engine.Linq
@@ -89,13 +91,12 @@ namespace Signum.Engine.Linq
     {
         public readonly string Alias;
         public readonly string Name;
-        //public readonly int Ordinal;
+
         internal ColumnExpression(Type type, string alias, string name/*, int ordinal*/)
             : base((ExpressionType)DbExpressionType.Column, type)
         {
             this.Alias = alias;
             this.Name = name;
-            //this.Ordinal = ordinal;
         }
 
         public override string ToString()
@@ -113,6 +114,8 @@ namespace Signum.Engine.Linq
         public readonly Expression Expression;
         internal ColumnDeclaration(string name, Expression expression)
         {
+            if (expression == null) throw new ArgumentNullException("expression");
+
             this.Name = name;
             this.Expression = expression;
         }
@@ -123,7 +126,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    public enum AggregateFunction
+    internal enum AggregateFunction
     {
         Average,
         Count,
@@ -140,6 +143,8 @@ namespace Signum.Engine.Linq
         public AggregateExpression(Type type, Expression source, AggregateFunction aggregateFunction)
             : base((ExpressionType)DbExpressionType.Aggregate, type)
         {
+            if (source == null && aggregateFunction != AggregateFunction.Count) throw new ArgumentNullException("source");
+
             this.Source = source;
             this.AggregateFunction = aggregateFunction;
         }
@@ -169,6 +174,8 @@ namespace Signum.Engine.Linq
 
         internal OrderExpression(OrderType orderType, Expression expression)
         {
+            if (expression == null) throw new ArgumentNullException("expression");
+
             this.OrderType = orderType;
             this.Expression = expression;
         }
@@ -209,6 +216,8 @@ namespace Signum.Engine.Linq
             Expression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy, string groupOf)
             : base((ExpressionType)DbExpressionType.Select, type, alias)
         {
+            if (from == null) throw new ArgumentNullException("from");
+
             this.Distinct = distinct;
             this.Top = top; 
             this.Columns = columns.ToReadOnly();
@@ -282,7 +291,13 @@ namespace Signum.Engine.Linq
         internal JoinExpression(Type type, JoinType joinType, Expression left, Expression right, Expression condition, bool isSingleRow)
             : base((ExpressionType)DbExpressionType.Join, type)
         {
-            Debug.Assert(!IsSingleRow || IsSingleRow && joinType == JoinType.LeftOuterJoin); 
+            if (left == null) throw new ArgumentNullException("left");
+            if (right == null) throw new ArgumentNullException("right");
+            if (condition == null && JoinType != JoinType.CrossApply && JoinType != JoinType.CrossJoin) throw new ArgumentNullException("condition");
+
+            if (isSingleRow && joinType != JoinType.LeftOuterJoin)
+                throw new ArgumentException("{0} not allowed if isSingleRow is true".Formato(joinType));
+
             this.JoinType = joinType;
             this.Left = left;
             this.Right = right;
@@ -310,22 +325,29 @@ namespace Signum.Engine.Linq
         RTRIM,
         SUBSTRING,
         UPPER,
+        
         ABS,
         PI,
         SIN,
+        ASIN,
+        COS,
         ACOS,
+        TAN,
+        ATAN,
+        ATN2,
         POWER,
         SQRT,
-        ASIN,
+     
         EXP,
-        SQUARE,
-        CEILING, 
+        SQUARE, 
+        LOG10, 
+        LOG,
+
         FLOOR,
-        TAN,
-        COS,
-        Log10, 
+        CEILING, 
         ROUND,
         SIGN,
+
         DAY,
         MONTH,
         YEAR,
@@ -461,11 +483,8 @@ namespace Signum.Engine.Linq
         public InExpression(Expression expression, object[] values)
             : base((ExpressionType)DbExpressionType.In, typeof(bool))
         {
-            if (expression == null)
-                throw new ArgumentException("expression");
-
-            if (values == null)
-                throw new ArgumentException("values"); 
+            if (expression == null)throw new ArgumentNullException("expression");
+            if (values == null) throw new ArgumentNullException("values"); 
        
             this.Expression = expression;
             this.Values = values;
@@ -511,6 +530,9 @@ namespace Signum.Engine.Linq
         public SetOperationExpression(Type type, string alias, SetOperation setOperation, SelectExpression left, SelectExpression right)
             :base((ExpressionType)DbExpressionType.SetOperation, type, alias)
         {
+            if (left == null) throw new ArgumentNullException("left");
+            if (right == null) throw new ArgumentNullException("right");
+
             this.SetOperation = setOperation; 
             this.Left = left;
             this.Right = right;
@@ -522,7 +544,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    public enum UniqueFunction
+    internal enum UniqueFunction
     {
         First, 
         FirstOrDefault,
@@ -544,12 +566,23 @@ namespace Signum.Engine.Linq
 
         internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction)
             : this(source.Type, source, projector, uniqueFunction)
-        {  
-        }
+        {  }
 
         internal ProjectionExpression(Type type, SelectExpression source, Expression projector, UniqueFunction? uniqueFunction)
             : base((ExpressionType)DbExpressionType.Projection, type)
         {
+            Type elemType = ReflectionTools.CollectionType(type);
+
+            if ((uniqueFunction == null) == (elemType == null))
+                throw new ApplicationException("uniqueFunction is {0} but type is {1}".Formato(uniqueFunction.TryToString("[null]"), type.TypeName()));
+
+            if ( uniqueFunction != Signum.Engine.Linq.UniqueFunction.SingleIsZero &&
+                 uniqueFunction != Signum.Engine.Linq.UniqueFunction.SingleGreaterThanZero &&
+                 !(elemType ?? type).IsAssignableFrom(projector.Type))
+                throw new ApplicationException("ProjectionExpression Type is {0} but projector type is {1}".Formato(type.TypeName(), projector.Type.TypeName()));
+
+            //not very strict about source type
+
             this.Source = source;
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;

@@ -94,7 +94,7 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(string alias)
         {
-            return this.MaybeLazy(new FieldInitExpression(Reflector.ExtractLazy(FieldType) ?? FieldType, alias, new ColumnExpression(this.ReferenceType(), alias, Name))); 
+            return this.MaybeLazy(new FieldInitExpression(Reflector.ExtractLazy(FieldType) ?? FieldType, alias, new ColumnExpression(this.ReferenceType(), alias, Name), null)); 
         } 
     }
 
@@ -124,7 +124,7 @@ namespace Signum.Engine.Maps
                 FieldInfo fi = FieldType.GetField(kvp.Key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic); 
                 fb.Add(new FieldBinding(fi, kvp.Value.Field.GetExpression(alias))); 
             }
-            return new FieldInitExpression(this.FieldType, alias, null) { Bindings = fb.NotNull().ToReadOnly() }; 
+            return new FieldInitExpression(this.FieldType, alias, null, null) { Bindings = fb.NotNull().ToReadOnly() }; 
         }
     }
 
@@ -136,7 +136,7 @@ namespace Signum.Engine.Maps
             foreach (var kvp in ImplementationColumns)
 	        {
                 ri.Add(new ImplementationColumnExpression(kvp.Key,
-                    new FieldInitExpression(kvp.Key, new ColumnExpression(kvp.Value.ReferenceType(), alias, kvp.Value.Name))));
+                    new FieldInitExpression(kvp.Key, alias, new ColumnExpression(kvp.Value.ReferenceType(), alias, kvp.Value.Name), null)));
             }
 
             return this.MaybeLazy(new ImplementedByExpression(Reflector.ExtractLazy(FieldType)??FieldType, ri.NotNull().ToReadOnly())); 

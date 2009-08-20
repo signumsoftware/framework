@@ -64,11 +64,11 @@ namespace Signum.Engine.Linq
         {
             if (typeof(IdentifiableEntity).IsAssignableFrom(fieldInit.Type))
             {
-                ColumnExpression newID = (ColumnExpression)Visit(fieldInit.ExternalId);
+                Expression newID = Visit(fieldInit.ExternalId);
                 if (newID != fieldInit.ExternalId)
                 {
                     Debug.Assert(false, "FieldInit has identity"); 
-                    return new FieldInitExpression(fieldInit.Type, fieldInit.Alias, newID); // eliminamos los bindings
+                    return new FieldInitExpression(fieldInit.Type, fieldInit.Alias, newID, null); // eliminamos los bindings
                 }
                 else
                 {

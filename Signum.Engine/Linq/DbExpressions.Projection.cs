@@ -21,23 +21,18 @@ namespace Signum.Engine.Linq
     internal class FieldInitExpression : Expression
     {
         public readonly Expression ExternalId;
+        public readonly Expression OtherCondition; //Used for IBA only, 
         public readonly string Alias; 
 
         // no es readonly!!!
         public ReadOnlyCollection<FieldBinding> Bindings;
 
-        public FieldInitExpression(Type type, string alias, Expression externalId)
+        public FieldInitExpression(Type type, string alias, Expression externalId, Expression otherCondition)
             : base((ExpressionType)DbExpressionType.FieldInit, type)
         {
             this.Alias = alias;
-            this.ExternalId = externalId; 
-        }
-
-        public FieldInitExpression(Type type, ColumnExpression externalId)
-            : base((ExpressionType)DbExpressionType.FieldInit, type)
-        {
-            this.Alias = externalId.Alias;
-            this.ExternalId = externalId; 
+            this.ExternalId = externalId;
+            this.OtherCondition = otherCondition; 
         }
 
         public override string ToString()
@@ -62,7 +57,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    public class FieldBinding
+    internal class FieldBinding
     {
         public readonly FieldInfo FieldInfo;
         public readonly Expression Binding;
@@ -146,7 +141,7 @@ namespace Signum.Engine.Linq
 
     internal class LazyReferenceExpression: Expression
     {
-        public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to null
+        public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
 
         public LazyReferenceExpression(Type type, Expression reference): 
             base((ExpressionType)DbExpressionType.LazyReference, type)

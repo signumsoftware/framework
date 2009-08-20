@@ -66,21 +66,21 @@ namespace Signum.Engine.Linq
         static MetaExpression MakeCleanMeta(Type type, Expression expression)
         {
             MetaExpression meta = expression as MetaExpression;
-            if (meta != null)
-            {
+            //if (meta != null)
+            //{
                 return new MetaExpression(type, meta.Meta); 
-            }
+            //}
 
-            return new MetaExpression(type, null); 
+            //return new MetaExpression(type, null); 
         }
 
         static MetaExpression MakeDirtyMeta(Type type, params Expression[] expression)
         {
             var metas = expression.OfType<MetaExpression>().Select(a => a.Meta).NotNull().ToArray();
-            if (metas.Length != expression.Length)
-            {
-                metas = metas;
-            }
+            //if (metas.Length != expression.Length)
+            //{
+            //    metas = metas;
+            //}
 
             return new MetaExpression(type, new DirtyMeta(metas));
         }

@@ -149,7 +149,7 @@ namespace Signum.Engine.Linq
 
                 return Expression.Convert((ColumnExpression)fi.ExternalId, m.Method.DeclaringType.GetGenericArguments()[0]);            
             }
-            else if (m.Object != null && m.Object is ConstantExpression && m.Method.Name == "Contains" && (typeof(IList).IsAssignableFrom(m.Object.Type)))
+            else if (m.Object != null && typeof(IList).IsAssignableFrom(m.Object.Type) && m.Method.Name == "Contains")
             {
                  return this.BindContains(m.Type, m.Object, m.Arguments[0]);   
             }
@@ -200,9 +200,11 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, oldAliases);
 
             JoinExpression source = (JoinExpression)allProjections.Aggregate((Expression)projection.Source, (e, p) =>
-                new JoinExpression(type, JoinType.LeftOuterJoin, e, p.Table,
-                  SmartEqualizer.EqualNullable(p.FieldInit.ExternalId, p.FieldInit.Bindings.IDColumn()),
-                true));
+            {
+                Expression equal = SmartEqualizer.EqualNullable(p.FieldInit.ExternalId, p.FieldInit.Bindings.IDColumn());
+                Expression condition = p.FieldInit.OtherCondition == null ? equal : Expression.And(p.FieldInit.OtherCondition, equal);
+                return new JoinExpression(type, JoinType.LeftOuterJoin, e, p.Table, condition, true);
+            });
 
             projection = new ProjectionExpression(
                 new SelectExpression(projection.Source.Type, newAlias, false, null, pc.Columns, source, null, null, null, null),
@@ -659,7 +661,7 @@ namespace Signum.Engine.Linq
             TableExpression tableExpression = new TableExpression(resultType, tableAlias, table.Name);
 
             var bindings = table.CreateBindings(tableAlias);
-            FieldInitExpression fie = new FieldInitExpression(type, tableAlias, table.IsView ? null : bindings.IDColumn()) { Bindings = bindings };
+            FieldInitExpression fie = new FieldInitExpression(type, tableAlias, table.IsView ? null : bindings.IDColumn(), null) { Bindings = bindings };
 
             string selectAlias = this.GetNextAlias();
 
@@ -695,7 +697,7 @@ namespace Signum.Engine.Linq
             if (lazy == null)
                 return new LazyReferenceExpression(lazyType, new NullEntityExpression(Reflector.ExtractLazy(lazyType)));
 
-            return new LazyReferenceExpression(lazyType, new FieldInitExpression(lazy.RuntimeType, null, Expression.Constant(lazy.IdOrNull ?? int.MinValue)));
+            return new LazyReferenceExpression(lazyType, new FieldInitExpression(lazy.RuntimeType, null, Expression.Constant(lazy.IdOrNull ?? int.MinValue), null));
         }
 
         private static Expression ToFieldInitExpression(Type entityType, IIdentifiable ei)
@@ -703,7 +705,7 @@ namespace Signum.Engine.Linq
             if (ei == null)
                 return new NullEntityExpression(entityType);
 
-            return new FieldInitExpression(ei.GetType(), null, Expression.Constant(ei.IdOrNull ?? int.MinValue));
+            return new FieldInitExpression(ei.GetType(), null, Expression.Constant(ei.IdOrNull ?? int.MinValue), null);
         }
 
         protected override Expression VisitParameter(ParameterExpression p)
@@ -796,21 +798,19 @@ namespace Signum.Engine.Linq
 
                     if (imp == null)
                     {
-                        int idType = Schema.Current.IDsForType.GetOrThrow(u.Type, Resources.TheType0IsNotInTheTypesTable.Formato(u.Type.TypeName()));
+                       int idType = Schema.Current.IDsForType.GetOrThrow(u.Type, Resources.TheType0IsNotInTheTypesTable.Formato(u.Type.TypeName()));
 
-                        Expression column = new CaseExpression(
-                                        new[] { new When(SmartEqualizer.EqualNullable(riba.TypeID, Expression.Constant(idType)), riba.ID) },
-                                        Expression.Constant(null, typeof(int?)));
+                       Expression other = SmartEqualizer.EqualNullable(riba.TypeID, Expression.Constant(idType));
 
-                        FieldInitExpression result = new FieldInitExpression(u.Type, riba.TypeID.Alias, column);
-                        riba.Implementations.Add(new ImplementationColumnExpression(u.Type, result));
-                        return result;
+                       FieldInitExpression result = new FieldInitExpression(u.Type, riba.TypeID.Alias, riba.ID, other); //Delay riba.TypeID to FillFie to make the SQL more beauty
+                       riba.Implementations.Add(new ImplementationColumnExpression(u.Type, result));
+                       return result;
                     }
                     else
                         return imp.Field;
                 }
-                else if (typeof(IIdentifiable).IsAssignableFrom(u.Type))
-                    return operand;
+                //else if (typeof(IIdentifiable).IsAssignableFrom(u.Type))
+                //    return operand;
                 else if (operand != u.Operand)
                     return Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
                 else

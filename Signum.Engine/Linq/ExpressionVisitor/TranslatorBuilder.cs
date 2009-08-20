@@ -22,7 +22,13 @@ namespace Signum.Engine.Linq
         {
             try
             {
-                return (ITranslateResult)mi.MakeGenericMethod(proj.Projector.Type).Invoke(null, new object[] { proj, prevAliases });
+                Type type =
+                    proj.UniqueFunction == null ? ReflectionTools.CollectionType(proj.Type) :
+                    proj.UniqueFunction == UniqueFunction.SingleIsZero ? typeof(int) :
+                    proj.UniqueFunction == UniqueFunction.SingleGreaterThanZero ? typeof(int) :
+                    proj.Type;
+
+                return (ITranslateResult)miBuildPrivate.MakeGenericMethod(type).Invoke(null, new object[] { proj, prevAliases });
             }
             catch (TargetInvocationException ex)
             {
@@ -30,7 +36,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        static MethodInfo mi = typeof(TranslatorBuilder).GetMethod("BuildPrivate", BindingFlags.NonPublic | BindingFlags.Static);
+        static MethodInfo miBuildPrivate = typeof(TranslatorBuilder).GetMethod("BuildPrivate", BindingFlags.NonPublic | BindingFlags.Static);
 
         static internal TranslateResult<T> BuildPrivate<T>(ProjectionExpression proj, ImmutableStack<string> prevAliases)
         {
@@ -118,13 +124,15 @@ namespace Signum.Engine.Linq
                     Expression.Constant(column.Name));
             }
 
-            MethodInfo mi = ReflectionTools.GetMethodInfo<ITranslateResult>(it => it.Execute(null));
+            MethodInfo miExecute = ReflectionTools.GetMethodInfo<ITranslateResult>(it => it.Execute(null));
 
             protected override Expression VisitProjection(ProjectionExpression proj)
             {
                 ITranslateResult tr = TranslatorBuilder.Build(proj, prevAliases);
                 HasFullObjects |= tr.HasFullObjects;
-                return Expression.Convert(Expression.Call(Expression.Constant(tr), mi, this.row), proj.Type);
+                Type listType = typeof(IEnumerable<>).MakeGenericType(ReflectionTools.CollectionType(proj.Type));
+
+                return Expression.Convert(Expression.Call(Expression.Constant(tr), miExecute, this.row), listType);
             }
 
             protected override Expression VisitLazyLiteral(LazyLiteralExpression lazy)

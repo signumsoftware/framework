@@ -146,9 +146,10 @@ namespace Signum.Engine.Linq
             var newFields = fieldInit.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
             var id = Visit(fieldInit.ExternalId);
             var alias = VisitFieldInitAlias(fieldInit.Alias);
-            if (fieldInit.Bindings != newFields || fieldInit.ExternalId != id)
+            var other = Visit(fieldInit.OtherCondition);
+            if (fieldInit.Bindings != newFields || fieldInit.ExternalId != id || fieldInit.Alias != alias || fieldInit.OtherCondition != other)
             {
-                return new FieldInitExpression(fieldInit.Type, alias, id) { Bindings = newFields };
+                return new FieldInitExpression(fieldInit.Type, alias, id, other) { Bindings = newFields };
             }
             return fieldInit;
         }
@@ -210,10 +211,10 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
             ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
-                if (top != select.Top ||from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-            {
+
+            if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
                 return new SelectExpression(select.Type, select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy, select.GroupOf);
-            }
+
             return select;
         }
 

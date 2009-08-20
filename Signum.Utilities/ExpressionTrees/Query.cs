@@ -73,8 +73,12 @@ namespace Signum.Utilities.ExpressionTrees
 
         public override string ToString()
         {
-            return provider.GetQueryText(expression); 
+            return this.GetType().TypeName().CleanIdentifiers();
         }
 
+        public string QueryText
+        {
+            get { return provider.GetQueryText(expression); }
+        }
     }
 }

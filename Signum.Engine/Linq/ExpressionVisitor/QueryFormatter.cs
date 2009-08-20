@@ -144,21 +144,21 @@ namespace Signum.Engine.Linq
         protected override Expression VisitSetOperation(SetOperationExpression setOperationExp)
         {
             sb.Append("(");
-            AppendNewLine(Indentation.Inner);
 
+            AppendNewLine(Indentation.Inner);
             Visit(setOperationExp.Left);
-
             AppendNewLine(Indentation.Outer);
-            sb.Append(new Switch<SetOperation, string>(setOperationExp.SetOperation)
-                .Case(SetOperation.Union, "UNION")
-                .Case(SetOperation.Concat, "UNION ALL")
-                .Case(SetOperation.Intersect, "INTERSECT")
-                .Case(SetOperation.Except, "EXCEPT").Default(""));
+
+            sb.Append(
+                setOperationExp.SetOperation == SetOperation.Union ? "UNION":
+                setOperationExp.SetOperation == SetOperation.Concat ? "UNION ALL":
+                setOperationExp.SetOperation == SetOperation.Intersect ? "INTERSECT":
+                setOperationExp.SetOperation == SetOperation.Except ? "EXCEPT": "");
+
             AppendNewLine(Indentation.Inner);
-
             Visit(setOperationExp.Right);
-
             AppendNewLine(Indentation.Outer);
+
             sb.Append(")");
 
             return setOperationExp;
@@ -401,16 +401,20 @@ namespace Signum.Engine.Linq
                 sb.Append(") "); 
             }
 
-            for (int i = 0, n = select.Columns.Count; i < n; i++)
-            {
-                ColumnDeclaration column = select.Columns[i];
-                if (i > 0)
+            if (select.Columns.Count == 0)
+                sb.Append("0"); 
+            else
+                for (int i = 0, n = select.Columns.Count; i < n; i++)
                 {
-                    sb.Append(", ");
+                    ColumnDeclaration column = select.Columns[i];
+                    if (i > 0)
+                    {
+                        sb.Append(", ");
+                    }
+
+                    AppendColumn(column);
                 }
-                
-                AppendColumn(column);
-            }
+
             if (select.From != null)
             {
                 this.AppendNewLine(Indentation.Same);

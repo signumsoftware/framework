@@ -42,6 +42,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSelect(SelectExpression select)
         {
+            Expression top = this.Visit(select.Top);
             Expression from = this.VisitSource(select.From);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
@@ -49,8 +50,8 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
             string newAlias = aliasMap.TryGetC(select.Alias) ?? select.Alias;
 
-            if (from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy || newAlias != select.Alias)
-                return new SelectExpression(select.Type, newAlias, false, null, columns, from, where, orderBy, groupBy, null);
+            if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy || newAlias != select.Alias)
+                return new SelectExpression(select.Type, newAlias, false, top, columns, from, where, orderBy, groupBy, null);
 
             return select;
         }

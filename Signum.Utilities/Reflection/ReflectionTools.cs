@@ -316,7 +316,7 @@ namespace Signum.Utilities.Reflection
             if (!typeof(IEnumerable).IsAssignableFrom(ft))
                 return null;
 
-            return ft.GetInterfaces().SingleOrDefault(ti => ti.IsGenericType &&
+            return ft.GetInterfaces().PreAnd(ft).SingleOrDefault(ti => ti.IsGenericType &&
                 ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .TryCC(ti => ti.GetGenericArguments()[0]);
         }

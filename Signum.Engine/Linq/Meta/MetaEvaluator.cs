@@ -34,7 +34,7 @@ namespace Signum.Engine.Linq
             {
                 return null;
             }
-            if (this.candidates.Contains(exp))
+            if (this.candidates.Contains(exp) && exp.NodeType != ExpressionType.Constant)
             {
                 return (ConstantExpression)GetType().GetMethod("Constant", BindingFlags.Static| BindingFlags.NonPublic).MakeGenericMethod(exp.Type).Invoke(null, null); 
             }

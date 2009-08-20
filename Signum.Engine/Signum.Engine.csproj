@@ -82,7 +82,7 @@
     <Compile Include="Linq\ExpressionVisitor\OverloadingSimplifier.cs" />
     <Compile Include="Linq\ExpressionVisitor\ProjectionCleaner.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionVisitor.cs" />
-    <Compile Include="Linq\ExpressionVisitor\Nominator.cs" />
+    <Compile Include="Linq\ExpressionVisitor\DbExpressionNominator.cs" />
     <Compile Include="Linq\ExpressionVisitor\OrderByRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\ProjectionExpressionFinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryBinder.cs" />

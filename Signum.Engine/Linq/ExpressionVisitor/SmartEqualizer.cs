@@ -11,7 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
-    public static class SmartEqualizer
+    internal static class SmartEqualizer
     {
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
@@ -41,17 +41,27 @@ namespace Signum.Engine.Linq
         internal static Expression EntityIn(Expression newItem, Expression[] expression)
         {
             if(newItem is LazyReferenceExpression)
-            {
-                newItem = ((LazyReferenceExpression)newItem).Reference;
-                expression = expression.Cast<LazyReferenceExpression>().Select(l=>l.Reference).ToArray(); 
-            }
+                return EntityIn(((LazyReferenceExpression)newItem).Reference, expression.Cast<LazyReferenceExpression>().Select(l=>l.Reference).ToArray()); 
+
+            Dictionary<Type, object[]> entityIDs = expression.Cast<FieldInitExpression>().AgGroupToDictionary(a=>a.Type, gr=> gr.Select(a=>((ConstantExpression)a.ExternalId).Value??int.MaxValue).ToArray()); 
 
             FieldInitExpression fie = newItem as FieldInitExpression;
             if (fie != null)
-                return new InExpression(fie.ExternalId, expression.OfType<FieldInitExpression>().Where(fi => fi.Type == fie.Type).Select(a => ((ConstantExpression)a.ExternalId).Value).ToArray());
+                return new InExpression(fie.ExternalId, entityIDs.TryGetC(fie.Type) ?? new object[0]);
 
+            ImplementedByExpression ib = newItem as ImplementedByExpression;
+            if (ib != null)
+                return ib.Implementations.ToDictionary(a => a.Type, a => a.Field).JoinDictionary(entityIDs, (t, f, values) => Expression.And(
+                    Expression.NotEqual(f.ExternalId, Expression.Constant(null, typeof(int?))),
+                    new InExpression(f.ExternalId, values))).Values.Aggregate((a, b) => Expression.Or(a, b));
 
-            return expression.Select(e => EntityEquals(newItem, e)).Where(e => e != False).Aggregate((a, b) => Expression.Or(a, b)); 
+            ImplementedByAllExpression iba = newItem as ImplementedByAllExpression;
+            if (iba != null)
+                return entityIDs.Select(kvp => Expression.And(
+                    EqualNullable(Expression.Constant(Schema.Current.IDsForType[kvp.Key]), iba.TypeID),
+                    new InExpression(iba.ID, kvp.Value))).Aggregate((a, b) => Expression.Or(a, b));
+
+            throw new InvalidOperationException("EntityIn not defined for newItem of type  {0}".Formato(newItem.Type.Name));
         }
 
         public static Expression EntityEquals(Expression e1, Expression e2)
