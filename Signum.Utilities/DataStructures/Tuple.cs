@@ -40,9 +40,10 @@ namespace Signum.Utilities.DataStructures
 
         public override int GetHashCode()
         {
-            int num = -722197669;
-            num = (-1521134295 * num) + EqualityComparer<F>.Default.GetHashCode(this.First);
-            return (-1521134295 * num) + EqualityComparer<S>.Default.GetHashCode(this.Second);
+            int num = 0;
+            num ^= EqualityComparer<F>.Default.GetHashCode(this.First);
+            num ^= EqualityComparer<S>.Default.GetHashCode(this.Second);
+            return num;
         }
 
         public Tuple(SerializationInfo info, StreamingContext context)
@@ -93,10 +94,11 @@ namespace Signum.Utilities.DataStructures
 
         public override int GetHashCode()
         {
-            int num = -722197669;
-            num = (-1521134295 * num) + EqualityComparer<F>.Default.GetHashCode(this.First);
-            num = (-1521134295 * num) + EqualityComparer<S>.Default.GetHashCode(this.Second);
-            return (-1521134295 * num) + EqualityComparer<T>.Default.GetHashCode(this.Third);
+            int num = 0;
+            num ^= EqualityComparer<F>.Default.GetHashCode(this.First);
+            num ^= EqualityComparer<S>.Default.GetHashCode(this.Second);
+            num ^= EqualityComparer<T>.Default.GetHashCode(this.Third);
+            return num;
         }
 
         public Tuple(SerializationInfo info, StreamingContext context)
@@ -124,6 +126,8 @@ namespace Signum.Utilities.DataStructures
         public static Tuple<F, S, T> New<F, S, T>(F first, S second, T third)
         {
             return new Tuple<F, S, T>(first, second, third);
-        }
+        }    
     }
 }
+
+
