@@ -595,7 +595,7 @@ namespace Signum.Web
             return errors;
         }
 
-        protected internal virtual Modification GenerateModification(SortedList<string, object> formValues, Modifiable obj, string prefix)
+        public virtual Modification GenerateModification(SortedList<string, object> formValues, Modifiable obj, string prefix)
         {
             MinMax<int> interval = Modification.FindSubInterval(formValues, prefix);
 

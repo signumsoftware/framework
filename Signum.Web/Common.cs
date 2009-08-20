@@ -9,6 +9,8 @@ using Signum.Utilities.Reflection;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Web
 {
@@ -120,50 +122,60 @@ namespace Signum.Web
 
         internal static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
-            PropertyInfo[] pi = GetMemberList(lambda).Cast<PropertyInfo>().ToArray();
+            PropertyInfo[] pi = MemberAccessGatherer.GetMemberList(lambda).Cast<PropertyInfo>().ToArray();
 
             S value = lambda.Compile()(tc.Value); 
 
             return new TypeSubContext<S>(value, tc, pi); 
         }
 
+        //internal static MemberInfo[] GetMemberList(LambdaExpression lambdaToField)
+        //{
+        //    Expression e = lambdaToField.Body;
+
+        //    UnaryExpression ue = e as UnaryExpression;
+        //    if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
+        //        e = ue.Operand;
+
+        //    MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a)).NotNull().ToArray();
+
+        //    return result;
+        //}
+    }
+    
+    internal class MemberAccessGatherer : ExpressionVisitor
+    {
+        ImmutableStack<MemberInfo> members = ImmutableStack<MemberInfo>.Empty;
+
         internal static MemberInfo[] GetMemberList(LambdaExpression lambdaToField)
         {
-            Expression e = lambdaToField.Body;
-
-            UnaryExpression ue = e as UnaryExpression;
-            if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
-                e = ue.Operand;
-
-            MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a)).NotNull().Reverse().ToArray();
-
-            return result;
+            var mag = new MemberAccessGatherer();
+            mag.Visit(lambdaToField);
+            return mag.members.ToArray(); 
         }
 
-        static Expression NextExpression(Expression e)
+        protected override Expression VisitMemberAccess(MemberExpression me)
         {
-            switch (e.NodeType)
-            {
-                case ExpressionType.Convert: return ((UnaryExpression)e).Operand;
-                case ExpressionType.MemberAccess: return ((MemberExpression)e).Expression;
-                case ExpressionType.Parameter: return null;
-                default: throw new InvalidCastException("{0} Not Supported".Formato(e.NodeType));
-            }
+            if (!typeof(Lazy).IsAssignableFrom(me.Expression.Type) && me.Member.Name != "EntityOrNull")
+                members = members.Push(me.Member);
+
+            Expression exp = this.Visit(me.Expression);
+
+            return me; 
         }
 
-        static MemberInfo GetMember(Expression e)
+        static string[] tryies =new string[]{"TryCC", "TryCS", "TrySS", "TrySC"};
+
+        protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            switch (e.NodeType)
+            if(m.Method.DeclaringType == typeof(Extensions) && tryies.Contains(m.Method.Name))
             {
-                case ExpressionType.MemberAccess:
-                    MemberExpression me = (MemberExpression)e;
-                    if (typeof(Lazy).IsAssignableFrom(me.Expression.Type) && me.Member.Name == "EntityOrNull")
-                        return null;
-                    return me.Member;
-                case ExpressionType.Parameter: return null;
-                case ExpressionType.Convert: return null;
-                default: throw new InvalidCastException("{0} Not Supported".Formato(e.NodeType));
+                Visit(m.Arguments[1]);
+                Visit(m.Arguments[0]);
+                return m;
             }
+
+            return base.VisitMethodCall(m); 
         }
     }
 }

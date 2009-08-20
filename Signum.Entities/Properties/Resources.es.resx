@@ -121,7 +121,7 @@
     <value>{{0}} no tiene formato de {0} correcto</value>
   </data>
   <data name="FilterOperation_GreaterThanOrEqual" xml:space="preserve">
-    <value>Mayor o igual que</value>
+    <value>mayor o igual que</value>
   </data>
   <data name="FilterOperation_Contains" xml:space="preserve">
     <value>Contiene</value>
@@ -175,7 +175,7 @@
     <value>{0} no tiene el formato correcto</value>
   </data>
   <data name="_0HasToBe0Than1" xml:space="preserve">
-    <value>{{0}} ha de ser {0} que {1}</value>
+    <value>{{0}} ha de ser {0} {1}</value>
   </data>
   <data name="TheNumberOfElementsOf0HasToBe0Than1" xml:space="preserve">
     <value>El número de elementos en {{0}} ha de ser {0} que {1}</value>
@@ -196,16 +196,16 @@
     <value>Distinto de</value>
   </data>
   <data name="FilterOperation_EqualTo" xml:space="preserve">
-    <value>Igual a</value>
+    <value>igual a</value>
   </data>
   <data name="FilterOperation_GreaterThan" xml:space="preserve">
-    <value>Mayor que</value>
+    <value>mayor que</value>
   </data>
   <data name="FilterOperation_LessThan" xml:space="preserve">
-    <value>Menor que</value>
+    <value>menor que</value>
   </data>
   <data name="FilterOperation_LessThanOrEqual" xml:space="preserve">
-    <value>Menor o igual que</value>
+    <value>menor o igual que</value>
   </data>
   <data name="Type0NotSupported" xml:space="preserve">
     <value>Tipo no soportado {0}</value>
