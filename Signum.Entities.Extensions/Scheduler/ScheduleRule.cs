@@ -10,13 +10,13 @@ using Signum.Entities.Extensions.Properties;
 namespace Signum.Entities.Scheduler
 {
     [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN))]
-    public interface IScheduleRule: IIdentifiable
+    public interface IScheduleRuleDN : IIdentifiable
     {
         DateTime Next();
     }
 
     [Serializable]
-    public abstract class ScheduleRuleDayDN : Entity, IScheduleRule
+    public abstract class ScheduleRuleDayDN : Entity, IScheduleRuleDN
     {
         int hour;
         [NumberBetweenValidator(0, 23), Format("00"), LocDescription]

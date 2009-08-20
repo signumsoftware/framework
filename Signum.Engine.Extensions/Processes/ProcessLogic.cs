@@ -52,8 +52,8 @@ namespace Signum.Engine.Processes
                 sb.Include<PackageDN>();
                 sb.Include<PackageLineDN>();
 
-                if (!sb.Settings.IsTypeAttributesOverriden<IProcessData>())
-                    sb.Settings.OverrideTypeAttributes<IProcessData>(new ImplementedByAttribute(typeof(PackageDN)));
+                if (!sb.Settings.IsTypeAttributesOverriden<IProcessDataDN>())
+                    sb.Settings.OverrideTypeAttributes<IProcessDataDN>(new ImplementedByAttribute(typeof(PackageDN)));
 
                 OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
                 {
@@ -342,10 +342,10 @@ namespace Signum.Engine.Processes
                     {
                          FromEntity = (process, args)=>
                          {
-                             IProcessData data;
-                             if(args != null && args.Length != 0 && args[0] is IProcessData)
+                             IProcessDataDN data;
+                             if(args != null && args.Length != 0 && args[0] is IProcessDataDN)
                              {
-                                 data = (IProcessData)args[0];  
+                                 data = (IProcessDataDN)args[0];  
                              }
                              else 
                              {
@@ -405,7 +405,7 @@ namespace Signum.Engine.Processes
             return Create(EnumLogic<ProcessDN>.ToEntity(processKey), args);
         }
 
-        public static Lazy<ProcessExecutionDN> Create(Enum processKey, IProcessData processData)
+        public static Lazy<ProcessExecutionDN> Create(Enum processKey, IProcessDataDN processData)
         {
             return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processData);
         }
@@ -415,7 +415,7 @@ namespace Signum.Engine.Processes
             return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, args).ToLazy(); 
         }
 
-        public static Lazy<ProcessExecutionDN> Create(ProcessDN process, IProcessData processData)
+        public static Lazy<ProcessExecutionDN> Create(ProcessDN process, IProcessDataDN processData)
         {
             return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, processData).ToLazy();
         }
@@ -423,13 +423,13 @@ namespace Signum.Engine.Processes
 
     public interface IProcessAlgorithm
     {
-        IProcessData CreateData(object[] args);
+        IProcessDataDN CreateData(object[] args);
         FinalState Execute(IExecutingProcess executingProcess);
     }
 
     public interface IExecutingProcess
     {
-        IProcessData Data { get; }
+        IProcessDataDN Data { get; }
         bool Suspended { get; }
         void ProgressChanged(decimal progress);
     }
@@ -444,7 +444,7 @@ namespace Signum.Engine.Processes
     {
         public ProcessExecutionDN Execution { get; set; }
         public IProcessAlgorithm Algorithm { get; set; }
-        public IProcessData Data { get; set; }
+        public IProcessDataDN Data { get; set; }
 
         public bool Suspended { get; private set; }
 

@@ -8,7 +8,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Processes
 {
     [Serializable, LocDescription]
-    public class PackageDN : IdentifiableEntity, IProcessData
+    public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
         OperationDN operation;
         public OperationDN Operation

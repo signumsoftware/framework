@@ -37,9 +37,9 @@ namespace Signum.Entities.Processes
             get { return process; }
         }
 
-        IProcessData processData;
+        IProcessDataDN processData;
         [LocDescription]
-        public IProcessData ProcessData
+        public IProcessDataDN ProcessData
         {
             get { return processData; }
             set { Set(ref processData, value, "ProcessData"); }
@@ -199,7 +199,7 @@ namespace Signum.Entities.Processes
         }
     }
 
-    public interface IProcessData : IIdentifiable
+    public interface IProcessDataDN : IIdentifiable
     {
 
     }

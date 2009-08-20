@@ -29,7 +29,7 @@ namespace Signum.Engine.Processes
             this.getLazies = getLazies;
         }
 
-        public virtual IProcessData CreateData(object[] args)
+        public virtual IProcessDataDN CreateData(object[] args)
         {
             PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(operationKey) };
             package.Save();

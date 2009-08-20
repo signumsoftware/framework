@@ -12,9 +12,9 @@ namespace Signum.Entities.Scheduler
     [Serializable, LocDescription]
     public class ScheduledTaskDN : IdentifiableEntity
     {
-        IScheduleRule rule;
+        IScheduleRuleDN rule;
         [NotNullValidator, LocDescription]
-        public IScheduleRule Rule
+        public IScheduleRuleDN Rule
         {
             get { return rule; }
             set { Set(ref rule, value, "Rule"); }
