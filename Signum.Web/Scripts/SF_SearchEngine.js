@@ -10,8 +10,8 @@
                    function(msg) {
                        $('#' + divASustituir).html(msg);
                        ShowPopup(prefix, divASustituir, "modalBackgroundS", "panelPopupS");
-                       $('#' + prefix + sfBtnOk).click(onOk);
-                       $('#' + prefix + sfBtnCancel).click(onCancel);
+                       $('#' + prefix + sfBtnOkS).click(onOk);
+                       $('#' + prefix + sfBtnCancelS).click(onCancel);
                    },
         error:
                    function(XMLHttpRequest, textStatus, errorThrown) {
@@ -346,14 +346,15 @@ function SerializeFilter(index, prefix){
     return "&name" + index + "=" + columnName + "&sel" + index + "=" + selector.val() + "&val" + index + "=" + value; 
 }
 
-function OnSearchImplementationsOk(urlController, queryUrlName, allowMultiple, onOk, onCancel, divASustituir, prefix) { 
-    var selectedType = $('#' + prefix + sfImplementationsDDL + " > option:selected");
-    if (selectedType.length == 0 || selectedType.val() == "")
+function OnSearchImplementationsOk(urlController, queryUrlNameToIgnore, allowMultiple, onOk, onCancel, divASustituir, prefix, selectedType) { 
+    //var selectedType = $('#' + prefix + sfImplementationsDDL + " > option:selected");
+    //if (selectedType.length == 0 || selectedType.val() == "")
+    if (selectedType==null || selectedType==undefined || selectedType=="")
         return;
 
     $('#' + prefix + sfImplementations).hide();
 
-    Find(urlController, selectedType.val(), allowMultiple, onOk, onCancel, divASustituir, prefix);
+    Find(urlController, selectedType, allowMultiple, onOk, onCancel, divASustituir, prefix);
 }
 
 function toggleVisibility(elementId) {

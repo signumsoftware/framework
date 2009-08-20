@@ -195,11 +195,12 @@ function OnListPopupOK(urlController, prefix, btnOkId) {
         runtimeType.val($('#' + itemPrefix + sfStaticType).val());
 }
 
-function OnImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded) {
-    var selectedType = $('#' + prefix + sfImplementationsDDL + " > option:selected");
-    if (selectedType.length == 0 || selectedType.val() == "")
+function OnImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, selectedType) {
+    //var selectedType = $('#' + prefix + sfImplementationsDDL + " > option:selected");
+    //if (selectedType.length == 0 || selectedType.val() == "")
+    if (selectedType == null || selectedType == undefined || selectedType == "")
         return;
-    $('#' + prefix + sfRuntimeType).val(selectedType.val());
+    $('#' + prefix + sfRuntimeType).val(selectedType);
     $('#' + prefix + sfImplementations).hide();
     NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded);
 }

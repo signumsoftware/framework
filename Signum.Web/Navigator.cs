@@ -220,9 +220,12 @@ namespace Signum.Web
 
         internal static void ConfigureEntityBase(EntityBase el, Type entityType, bool admin)
         {
-            el.Create = Navigator.IsCreable(entityType, admin);
-            el.View = Navigator.IsViewable(entityType, admin);
-            el.Find = Navigator.IsFindable(entityType);
+            if (Manager.EntitySettings.ContainsKey(entityType))
+            {
+                el.Create = Navigator.IsCreable(entityType, admin);
+                el.View = Navigator.IsViewable(entityType, admin);
+                el.Find = Navigator.IsFindable(entityType);
+            }
         }
 
         public static bool IsViewable(Type type, bool admin)

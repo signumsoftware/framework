@@ -82,7 +82,7 @@ namespace Signum.Web
 
             string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}',{4});}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/TrySavePartial", reloadOnChangeFunction);
 
-            bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(type);
+            bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(type);
             bool isLazy = typeof(Lazy).IsAssignableFrom(type);
             if (isIdentifiable || isLazy)
             {
@@ -139,17 +139,18 @@ namespace Signum.Web
                 {
                     sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" style=\"display:none\" >\n");
 
-                    List<SelectListItem> types = new List<SelectListItem>{new SelectListItem{Text="Select type",Value="",Selected=true}};
+                    //List<SelectListItem> types = new List<SelectListItem>{new SelectListItem{Text="Select type",Value="",Selected=true}};
+                    string strButtons = "";
                     foreach(Type t in settings.Implementations)
                     {
-                        types.Add(new SelectListItem{Text=t.Name,Value=t.Name});
+                        strButtons += "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(t.Name, Navigator.TypesToURLNames.TryGetC(t) ?? t.Name);
                     }
-                    string ddlStr = helper.DropDownList(idValueField + TypeContext.Separator + EntityBaseKeys.ImplementationsDDL, types);
+                    //string ddlStr = helper.DropDownList(idValueField + TypeContext.Separator + EntityBaseKeys.ImplementationsDDL, types);
                     sb.Append(helper.RenderPartialToString(
                         "~/Plugin/Signum.Web.dll/Signum.Web.Views.OKCancelPopup.ascx",
                         new ViewDataDictionary(value) 
                         { 
-                            { ViewDataKeys.CustomHtml, ddlStr},
+                            { ViewDataKeys.CustomHtml, strButtons},
                             { ViewDataKeys.PopupPrefix, idValueField},
                         }
                     ));
@@ -178,7 +179,7 @@ namespace Signum.Web
                 sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
-            if (settings.View)
+            if (settings.Implementations != null || settings.View)
             {
                 string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters + ");";
                 sb.Append(
@@ -192,11 +193,16 @@ namespace Signum.Web
                 sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
             }
 
-            if (settings.Create)
+            if (settings.Implementations != null || settings.Create)
                 {
                     string creatingUrl = (settings.Implementations == null) ?
                         "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(type))) :
-                        "ChooseImplementation('{0}','{1}',function(){{OnImplementationsOk({2},'{3}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type));
+                        "$('#{0} :button').each(function(){{".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) +
+                            "$('#' + this.id).unbind('click').click(function(){" +
+                                "OnImplementationsOk({0},'{1}',this.id);".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type)) +
+                            "});" +
+                        "});" +
+                        "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField);
 
                     sb.Append(
                         helper.Button(idValueField + "_btnCreate",
@@ -206,7 +212,7 @@ namespace Signum.Web
                                   (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
                 }
 
-            if (settings.Remove)
+            if (settings.Implementations != null || settings.Remove)
                     sb.Append(
                         helper.Button(idValueField + "_btnRemove",
                                   "x",
@@ -214,12 +220,18 @@ namespace Signum.Web
                                   "lineButton",
                                   (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
-            if (settings.Find && (isIdentifiable || isLazy))
+            if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLazy)))
                 {
-                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames[Reflector.ExtractLazy(type) ?? type], idValueField, divASustituir, reloadOnChangeFunction);
+                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLazy(type) ?? type), idValueField, divASustituir, reloadOnChangeFunction);
                     string findingUrl = (settings.Implementations == null) ?
                         "Find({0});".Formato(popupFindingParameters) :
-                        "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
+                        "$('#{0} :button').each(function(){{".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) +
+                            "$('#' + this.id).unbind('click').click(function(){" +
+                                "OnSearchImplementationsOk({0},this.id);".Formato(popupFindingParameters) +
+                            "});" +
+                        "});" +
+                        "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField);
+                        
                     sb.Append(
                         helper.Button(idValueField + "_btnFind",
                                      "O",
@@ -235,7 +247,7 @@ namespace Signum.Web
         }
 
         public static void EntityLine<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
-            where S : Modifiable 
+            //where S : Modifiable 
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
@@ -264,7 +276,7 @@ namespace Signum.Web
         }
 
         public static void EntityLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EntityLine> settingsModifier)
-            where S : Modifiable
+            //where S : Modifiable
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
