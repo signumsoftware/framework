@@ -160,7 +160,7 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult Autocomplete(string typeName, string implementations, string input, int limit)
         {
-            Type type = Navigator.ResolveType(typeName);
+            Type type = Navigator.NameToType[typeName];
 
             Type[] implementationTypes = null;
             if (!string.IsNullOrEmpty(implementations))
@@ -169,7 +169,9 @@ namespace Signum.Web.Controllers
                 implementationTypes = new Type[implementationsArray.Length];
                 for (int i=0; i<implementationsArray.Length;i++)
                 {
-                    implementationTypes[i] = Navigator.ResolveType(implementationsArray[i]);
+                    Type t = Navigator.NameToType.TryGetC(implementationsArray[i]) ?? null;
+                    if (t != null)
+                        implementationTypes[i] = t;
                 }
             }
             var result = AutoCompleteUtils.FindLazyLike(type, implementationTypes, input, limit)

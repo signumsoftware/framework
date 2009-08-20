@@ -127,7 +127,7 @@ namespace Signum.Web
                     }));
                 sb.Append("\n");
 
-                if (settings.Autocomplete)
+                if (settings.Autocomplete && Navigator.NameToType.ContainsKey((Reflector.ExtractLazy(type) ?? type).Name))
                     sb.Append(helper.AutoCompleteExtender(idValueField + TypeContext.Separator + EntityLineKeys.DDL,
                                                       idValueField + TypeContext.Separator + EntityBaseKeys.ToStr,
                                                       (Reflector.ExtractLazy(type) ?? type).Name,
