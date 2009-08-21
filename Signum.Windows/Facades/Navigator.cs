@@ -23,7 +23,7 @@ namespace Signum.Windows
 {
     public static class Navigator
     {
-        public static NavigationManager Manager {get; private set;}
+        public static NavigationManager Manager { get; private set; }
 
         public static void Start(NavigationManager navigator)
         {
@@ -58,14 +58,14 @@ namespace Signum.Windows
 
         public static object Find(object queryName)
         {
-            return Find(new FindOptions(queryName));   
+            return Find(new FindOptions(queryName));
         }
 
         public static object Find(object queryName, string columnName, object value)
         {
             return Find(new FindOptions(queryName)
             {
-                SearchOnLoad = true,
+                OnLoadMode = OnLoadMode.Search,
                 Buttons = SearchButtons.Close,
                 FilterOptions = new List<FilterOptions>
                 {
@@ -79,7 +79,7 @@ namespace Signum.Windows
 
         public static object View(object entity)
         {
-            return View(entity, null); 
+            return View(entity, null);
         }
 
         public static object View(object entity, TypeContext typeContext)
@@ -146,26 +146,26 @@ namespace Signum.Windows
 
         public static bool IsCreable(Type type, bool admin)
         {
-            return Manager.IsCreable(type, admin); 
+            return Manager.IsCreable(type, admin);
         }
 
         public static bool IsReadOnly(Type type, bool admin)
         {
-            return Manager.IsReadOnly(type, admin); 
+            return Manager.IsReadOnly(type, admin);
         }
 
         public static bool IsViewable(Type type, bool admin)
         {
-            return Manager.IsViewable(type, admin); 
+            return Manager.IsViewable(type, admin);
         }
     }
 
 
     public class NavigationManager
     {
-        public Dictionary<Type, EntitySettings> Settings{get;set;}
-        public Dictionary<object, QuerySettings> QuerySetting{get;set;}
-        public Dictionary<Type, TypeDN> ServerTypes{get;private set;}
+        public Dictionary<Type, EntitySettings> Settings { get; set; }
+        public Dictionary<object, QuerySettings> QuerySetting { get; set; }
+        public Dictionary<Type, TypeDN> ServerTypes { get; private set; }
 
         public event Func<Type, bool> GlobalIsCreable;
         public event Func<Type, bool> GlobalIsReadOnly;
@@ -228,7 +228,7 @@ namespace Signum.Windows
                     return es.Icon;
             }
 
-            return useDefault ?  DefaultFindIcon: null;
+            return useDefault ? DefaultFindIcon : null;
         }
 
         public ImageSource GetAdminIcon(Type entityType, bool useDefault)
@@ -250,7 +250,7 @@ namespace Signum.Windows
                 dic.SetRange(QuerySetting);
             QuerySetting = dic;
 
-            ServerTypes = Server.Service<IBaseServer>().ServerTypes(); 
+            ServerTypes = Server.Service<IBaseServer>().ServerTypes();
 
         }
 
@@ -266,21 +266,20 @@ namespace Signum.Windows
         public virtual object Find(FindOptions findOptions)
         {
             if (!IsFindable(findOptions.QueryName))
-                throw new ApplicationException("The query {0} is not allowed".Formato(findOptions.QueryName)); 
+                throw new ApplicationException("The query {0} is not allowed".Formato(findOptions.QueryName));
 
-            SearchWindow sw = new SearchWindow()
+            SearchWindow sw = new SearchWindow(findOptions.OnLoadMode)
             {
                 QueryName = findOptions.QueryName,
                 Buttons = findOptions.Buttons,
                 MultiSelection = findOptions.AllowMultiple,
                 FilterOptions = new FreezableCollection<FilterOptions>(findOptions.FilterOptions),
-                SearchOnLoad = findOptions.SearchOnLoad,
                 Mode = findOptions.FilterMode,
-                Title = SearchTitle(findOptions.QueryName),
+                Title = SearchTitle(findOptions.QueryName)
             };
 
-            EntitySettings es = (findOptions.QueryName as Type).TryCC(t => Settings.TryGetC(t)); 
-            if(TaskViewWindow != null)
+            EntitySettings es = (findOptions.QueryName as Type).TryCC(t => Settings.TryGetC(t));
+            if (TaskViewWindow != null)
                 TaskViewWindow(sw, WindowsType.Find, findOptions.QueryName);
 
             if (findOptions.Modal)
@@ -295,7 +294,7 @@ namespace Signum.Windows
             return null;
         }
 
-      
+
         public virtual object View(object entity, ViewOptions viewOptions)
         {
             if (entity == null)
@@ -311,9 +310,9 @@ namespace Signum.Windows
             }
 
             if (!IsViewable(entity.GetType(), true))
-                throw new ApplicationException("Viewing {0} is not allowed".Formato(entity.GetType())); 
+                throw new ApplicationException("Viewing {0} is not allowed".Formato(entity.GetType()));
 
-            EntitySettings es = Settings.GetOrThrow(entity.GetType(), Resources.NoEntitySettingsForType0);             
+            EntitySettings es = Settings.GetOrThrow(entity.GetType(), Resources.NoEntitySettingsForType0);
 
             Window win = null;
             if (es.ViewWindow != null)
@@ -329,8 +328,8 @@ namespace Signum.Windows
                 if (viewOptions.TypeContext != null)
                     Common.SetTypeContext(ctrl, viewOptions.TypeContext);
 
-                NormalWindow nw = new NormalWindow() 
-                { 
+                NormalWindow nw = new NormalWindow()
+                {
                     MainControl = ctrl
                 };
 
@@ -356,7 +355,7 @@ namespace Signum.Windows
             else
                 win.DataContext = entity;
 
-            win.Closed += viewOptions.Closed; 
+            win.Closed += viewOptions.Closed;
 
             if (viewOptions.Modal)
             {
@@ -386,8 +385,8 @@ namespace Signum.Windows
 
             EntitySettings es = Settings.TryGetC(type);
             if (es == null || es.IsCreable == null)
-                return true; 
-            
+                return true;
+
             return es.IsCreable(admin);
         }
 
@@ -445,9 +444,9 @@ namespace Signum.Windows
 
             EntitySettings es = Settings.GetOrThrow(type, Resources.NoEntitySettingsForType0);
 
-            AdminWindow nw = new AdminWindow(type) 
-            { 
-                MainControl = es.View.ThrowIfNullC(Resources.NoAdminControlFor0.Formato(type))(),    
+            AdminWindow nw = new AdminWindow(type)
+            {
+                MainControl = es.View.ThrowIfNullC(Resources.NoAdminControlFor0.Formato(type))(),
             };
 
             if (TaskViewWindow != null)
@@ -496,7 +495,7 @@ namespace Signum.Windows
 
         public bool ContainsDefinition(string moduleName)
         {
-            return loadedModules.Contains(moduleName); 
+            return loadedModules.Contains(moduleName);
         }
 
         public bool ContainsDefinition<T>()

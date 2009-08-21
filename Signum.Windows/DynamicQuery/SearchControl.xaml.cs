@@ -133,7 +133,7 @@ namespace Signum.Windows
             this.InitializeComponent();
 
             FilterOptions = new FreezableCollection<FilterOptions>();
-            this.Loaded += new RoutedEventHandler(SearchWindow_Loaded);
+            this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
         }
 
         int entityIndex;
@@ -150,7 +150,7 @@ namespace Signum.Windows
 
         QuerySettings settings; 
 
-        void SearchWindow_Loaded(object sender, RoutedEventArgs e)
+        void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;

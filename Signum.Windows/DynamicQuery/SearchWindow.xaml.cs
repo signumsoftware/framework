@@ -20,8 +20,8 @@ using Signum.Entities.DynamicQuery;
 
 namespace Signum.Windows
 {
-	public partial class SearchWindow
-	{
+    public partial class SearchWindow
+    {
         public static readonly DependencyProperty QueryNameProperty =
             DependencyProperty.Register("QueryName", typeof(object), typeof(SearchWindow), new UIPropertyMetadata(null));
         public object QueryName
@@ -71,44 +71,75 @@ namespace Signum.Windows
             set { SetValue(ModeProperty, value); }
         }
 
-        public static readonly DependencyProperty SearchOnLoadProperty =
-          DependencyProperty.Register("SearchOnLoad", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(false));
-        public bool SearchOnLoad
+
+        public static readonly DependencyProperty OnLoadProperty =
+            DependencyProperty.Register("OnLoad", typeof(OnLoadMode), typeof(SearchWindow), new FrameworkPropertyMetadata(OnLoadMode.None ));
+        public OnLoadMode OnLoad
         {
-            get { return (bool)GetValue(SearchOnLoadProperty); }
-            set { SetValue(SearchOnLoadProperty, value); }
+            get { return (OnLoadMode)GetValue(OnLoadProperty); }
+            set { SetValue(OnLoadProperty, value); }
         }
 
+        public SearchWindow(OnLoadMode onLoad):this()
+        {
+            OnLoad = onLoad;
+            switch (onLoad)
+            {
+                case OnLoadMode.None:
+                    break;
+                case OnLoadMode.Search:
+                    searchControl.SearchOnLoad = true;
+                    break;
+                case OnLoadMode.SearchAndReturnIfOne:
+                    {
+                        searchControl.QueryResultChanged += new RoutedEventHandler(searchControl_QueryResultChanged);
+                        searchControl.SearchOnLoad = true;
+                        break;
+                    }
+            }
+           
+        }
 
         public SearchWindow()
-		{
-			this.InitializeComponent();
+        {
+            this.InitializeComponent();
             ButtonsChanged();
-			// Insert code required on object creation below this point.
-		}
+        }
+
+        void searchControl_QueryResultChanged(object sender, RoutedEventArgs e)
+        {
+            if (this.OnLoad == OnLoadMode.SearchAndReturnIfOne && searchControl.QueryResult != null)
+            {
+                if (searchControl.QueryResult.Data.Length <= 1)
+                    OkAndClose();
+                else
+                    searchControl.QueryResultChanged -= new RoutedEventHandler(searchControl_QueryResultChanged);
+
+            }
+        }
 
         public List<Filter> CurrentFilters()
         {
-            return searchControl.CurrentFilters(); 
+            return searchControl.CurrentFilters();
         }
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             if (e.Key == Key.F5)
             {
-                searchControl.Search(); 
+                searchControl.Search();
 
-                e.Handled = true; 
+                e.Handled = true;
             }
             base.OnPreviewKeyDown(e);
         }
 
-        private void Accept_Click(object sender, RoutedEventArgs e)
+        private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            AceptAndClose();
+            OkAndClose();
         }
 
-        private void AceptAndClose()
+        private void OkAndClose()
         {
             if (MultiSelection)
                 Result = searchControl.SelectedItems;
@@ -130,12 +161,12 @@ namespace Signum.Windows
 
         private void ButtonsChanged()
         {
-            bool acceptCancel = Buttons == SearchButtons.OkCancel;
+            bool okCancel = Buttons == SearchButtons.OkCancel;
 
-            btAccept.Visibility = acceptCancel ? Visibility.Visible : Visibility.Collapsed;
-            btCancel.Visibility = acceptCancel ? Visibility.Visible : Visibility.Collapsed;
-            btClose.Visibility = !acceptCancel ? Visibility.Visible : Visibility.Collapsed;
-            if (acceptCancel)
+            btOk.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
+            btCancel.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
+            btClose.Visibility = !okCancel ? Visibility.Visible : Visibility.Collapsed;
+            if (okCancel)
             {
                 searchControl.DoubleClick += new Action(searchControl_DoubleClick);
             }
@@ -148,7 +179,7 @@ namespace Signum.Windows
 
         void searchControl_DoubleClick()
         {
-            AceptAndClose(); 
+            OkAndClose();
         }
     }
 }

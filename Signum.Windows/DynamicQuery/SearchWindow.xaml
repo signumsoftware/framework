@@ -18,10 +18,9 @@
                          QueryName="{Binding QueryName, ElementName=me}"
                          FilterOptions="{Binding FilterOptions, ElementName=me}"
                          MultiSelection="{Binding MultiSelection, ElementName=me}"
-                         Mode="{Binding Mode, ElementName=me}" 
-						 SearchOnLoad="{Binding SearchOnLoad, ElementName=me}" />
+                         Mode="{Binding Mode, ElementName=me}"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,6"  VerticalAlignment="Bottom" > 
-			 <m:ImageButton x:Name="btAccept" Margin="6,0,6,0" Image="..\Images\ok.png" Content="{m:Loc Ok}"  Width="70" IsDefault="True" Click="Accept_Click" />
+			 <m:ImageButton x:Name="btOk" Margin="6,0,6,0" Image="..\Images\ok.png" Content="{m:Loc Ok}"  Width="70" IsDefault="True" Click="Ok_Click" />
 			 <m:ImageButton x:Name="btCancel" Margin="6,0,6,0" Image="..\Images\cancel.png" Content="{m:Loc Cancel}"  Width="70" IsCancel="True" Click="Cancel_Click" />
 			 <m:ImageButton x:Name="btClose" Margin="6,0,0,0" Image="..\Images\close.png" Content="{m:Loc Close}"  Width="70" IsCancel="True" Click="Close_Click" />
 		</StackPanel>

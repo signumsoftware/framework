@@ -47,7 +47,7 @@ namespace Signum.Windows
 
         public object QueryName { get; set; }
 
-        public bool SearchOnLoad { get; set; }
+        public OnLoadMode OnLoadMode { get; set; }
 
         FilterMode filterMode = FilterMode.Visible;
         public FilterMode FilterMode
@@ -115,4 +115,12 @@ namespace Signum.Windows
         OkCancel,
         Close
     }
+
+    public enum OnLoadMode
+    {
+        None,
+        Search,
+        SearchAndReturnIfOne,
+    }
+
 }
