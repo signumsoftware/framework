@@ -232,7 +232,7 @@ namespace Signum.Web
 
         protected virtual void ApplyChangesOfProperties(Controller controller, ModifiableEntity entity)
         {
-            if (entity != null && Properties != null)
+            if (Properties != null)
             {
                 foreach (var ppm in Properties.Values)
                 {
