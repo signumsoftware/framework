@@ -20,27 +20,43 @@ namespace Signum.Web.Operations
     [HandleError]
     public class OperationController : Controller
     {
-        public ActionResult OperationExecute(string sfTypeName, int? sfId, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult OperationExecute(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLazy, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfTypeName);
 
             IdentifiableEntity entity = null;
-            if (sfId.HasValue)
-                entity = Database.Retrieve(type, sfId.Value);
-            else
-                entity = (IdentifiableEntity)Navigator.CreateInstance(type);
-
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "", ref entity);
-
-            if (errors != null && errors.Count > 0)
+            if (isLazy)
             {
-                this.ModelState.FromDictionary(errors, Request.Form);
-                return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+                if (sfId.HasValue)
+                {
+                    Lazy lazy = Lazy.Create(type, sfId.Value);
+                    entity = OperationLogic.ServiceExecuteLazy((Lazy)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                }
+                else
+                    throw new ArgumentException("Could not create Lazy without an id to call Operation {{{0}}}".Formato(sfOperationFullKey));
+            }
+            else
+            {
+                if (sfId.HasValue)
+                    entity = Database.Retrieve(type, sfId.Value);
+                else
+                    entity = (IdentifiableEntity)Navigator.CreateInstance(type);
+
+                Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "", ref entity);
+
+                if (errors != null && errors.Count > 0)
+                {
+                    this.ModelState.FromDictionary(errors, Request.Form);
+                    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+                }
+
+                entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
             }
 
-            entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
-
-            return Navigator.PopupView(this, entity, prefix);
+            if (prefix.HasText()) 
+                return Navigator.PopupView(this, entity, prefix);
+            else //NormalWindow
+                return Navigator.View(this, entity);
         }
 
         public ActionResult ConstructFromManyExecute(string sfTypeName, string sfQueryName, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)

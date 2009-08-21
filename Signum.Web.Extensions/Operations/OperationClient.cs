@@ -64,7 +64,7 @@ namespace Signum.Web.Operations
                         Id = dic[oi.Key].OperationSettings.TryCC(os => os.Id),
                         ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
                         OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
-                        OnServerClickAjax = GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationSettings, ident),
+                        OnServerClickAjax = GetServerClickAjax(httpContext, oi, dic[oi.Key].OperationSettings, ident),
                         OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
                     };
                     item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps));
@@ -134,20 +134,21 @@ namespace Signum.Web.Operations
             return null;
         }
 
-        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, WebMenuItem os, IdentifiableEntity ident)
+        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, OperationInfo oi, WebMenuItem os, IdentifiableEntity ident)
         {
             string controllerUrl = "Operation.aspx/OperationExecute";
             if (os != null && os.OnServerClickAjax.HasText())
                 controllerUrl = os.OnServerClickAjax;
 
-            return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}',{5},{6});".Formato(
+            return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7});".Formato(
                 controllerUrl,
                 ident.GetType().Name, 
                 ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
-                EnumDN.UniqueKey(key),
+                EnumDN.UniqueKey(oi.Key),
+                oi.Lazy,
                 httpContext.Request.Params["prefix"] ?? "",
-                httpContext.Request.Params[ViewDataKeys.OnOk] ?? "",
-                httpContext.Request.Params[ViewDataKeys.OnCancel] ?? ""
+                ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
+                ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
                 );
         }
 
@@ -163,8 +164,8 @@ namespace Signum.Web.Operations
                 queryName.ToString(),
                 EnumDN.UniqueKey(key),
                 httpContext.Request.Params["prefix"] ?? "",
-                httpContext.Request.Params[ViewDataKeys.OnOk] ?? "''",
-                httpContext.Request.Params[ViewDataKeys.OnCancel] ?? "''"
+                ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
+                ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
                 );
         }
 
