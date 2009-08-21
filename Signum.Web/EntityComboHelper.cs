@@ -21,6 +21,13 @@ namespace Signum.Web
 
     public class EntityCombo : EntityBase
     {
+        public readonly Dictionary<string, object> ComboHtmlProperties = new Dictionary<string, object>(0);
+        bool preload=true;
+        public bool Preload
+        {
+            get { return preload; }
+            set { preload=value; }
+        }
         public EntityCombo()
         {
             Create = false;
@@ -80,24 +87,30 @@ namespace Signum.Web
                 {
                     List<SelectListItem> items = new List<SelectListItem>();
                     items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
-                    items.AddRange(
-                        Database.RetrieveAllLazy(Reflector.ExtractLazy(type) ?? type)
-                            .Select(lazy => new SelectListItem()
-                            {
-                                Text = lazy.ToString(),
-                                Value = lazy.Id.ToString(),
-                                Selected = (value != null) && (lazy.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
-                            })
-                        );
+                    if (settings.Preload)
+                    {
+                        items.AddRange(
+                            Database.RetrieveAllLazy(Reflector.ExtractLazy(type) ?? type)
+                                .Select(lazy => new SelectListItem()
+                                {
+                                    Text = lazy.ToString(),
+                                    Value = lazy.Id.ToString(),
+                                    Selected = (value != null) && (lazy.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
+                                })
+                            );
+                    }
+
+                    settings.ComboHtmlProperties.Add("class","valueLine");
+
+                    if (settings.ComboHtmlProperties.ContainsKey("onchange"))
+                        settings.ComboHtmlProperties["onchange"] = "EntityComboOnChange('{0}'); ".Formato(idValueField) + settings.ComboHtmlProperties["onchange"];
+                    else
+                        settings.ComboHtmlProperties.Add("onchange", "EntityComboOnChange('{0}');".Formato(idValueField));
 
                     sb.Append(helper.DropDownList(
                         idValueField + TypeContext.Separator + EntityComboKeys.Combo,
                         items,
-                        new Dictionary<string, object> 
-                    { 
-                        {"class","valueLine"},
-                        {"onchange","EntityComboOnChange('{0}');".Formato(idValueField)}
-                    }));
+                        settings.ComboHtmlProperties));
                     sb.Append("\n");
                 }
                 else
