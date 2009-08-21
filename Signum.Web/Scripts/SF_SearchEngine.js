@@ -167,20 +167,40 @@ function CloseChooser(urlController, onOk, onCancel, prefix) {
     });
 }
 
-function OperationExecute(urlController, typeName, id, operationKey, prefix, onOk, onCancel) {
-        var formChildren = $('#' + prefix + "panelPopup *");
+function OperationExecute(urlController, typeName, id, operationKey, isLazy, prefix, onOk, onCancel) {
+        var formChildren = "";
+        if (isLazy == false || isLazy == "false" || isLazy == "False")
+            formChildren = $('#' + prefix + "panelPopup *").serialize();
         $.ajax({
             type: "POST",
             url: urlController,
-            data: formChildren.serialize() + "&sfTypeName=" + typeName + "&sfId=" + id + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel),
+            data: "isLazy=" + isLazy + "&sfTypeName=" + typeName + "&sfId=" + id + "&sfOperationFullKey=" + operationKey + "&prefix=" + prefix + "&sfOnOk=" + singleQuote(onOk) + "&sfOnCancel=" + singleQuote(onCancel) + formChildren,
             async: false,
             dataType: "html",
             success:
                        function(msg) {
-                            eval('var result=' + msg);
-                            var modelState = result["ModelState"];
-                            if (ShowErrorMessages(prefix, modelState, true, "*"))
-                                $('#' + prefix + "externalPopupDiv").html(msg);
+                           if (prefix != "") { //PopupWindow
+                               if (msg.indexOf("ModelState") > 0) {
+                                   eval('var result=' + msg);
+                                   var modelState = result["ModelState"];
+                                   ShowErrorMessages(prefix, modelState, true, "*");
+                               }
+                               else {
+                                   $('#' + prefix + "externalPopupDiv").html(msg);
+                               }
+                           }
+                           else { //NormalWindow
+                               if (msg.indexOf("ModelState") > 0) {
+                                   eval('var result=' + msg);
+                                   var modelState = result["ModelState"];
+                                   ShowErrorMessages(prefix, modelState, true, "*");
+                               }
+                               else {
+                                   //var newForm = new RegExp("<form[\w\W]*</form>");
+                                   //$('form').html(newForm.exec(msg));
+                                   $('form').html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                               }
+                           }
                        },
             error:
                        function(XMLHttpRequest, textStatus, errorThrown) {
