@@ -102,7 +102,7 @@ namespace Signum.Windows.Reports
         {
             Navigator.Find(new FindOptions(typeof(ExcelReportDN))
             {
-                SearchOnLoad = true,
+                OnLoadMode = OnLoadMode.Search,
                 FilterMode = FilterMode.AlwaysHidden,
                 FilterOptions = new List<FilterOptions>
                 {

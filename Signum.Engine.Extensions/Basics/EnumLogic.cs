@@ -91,6 +91,11 @@ namespace Signum.Engine.Basics
             return toEntity.GetOrThrow(key, "The key {0} is not found in {1} table".Formato(key, typeof(T).Name)); 
         }
 
+        public static Enum ToEnum(T entity)
+        {
+            return ToEnum(entity.Key);
+        }
+
         public static Enum ToEnum(string keyName)
         {
             return toEnum.GetOrThrow(keyName, "Not value for {0} is not found in {1} table".Formato(keyName, typeof(T).Name)); 
