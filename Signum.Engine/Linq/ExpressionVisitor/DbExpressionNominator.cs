@@ -139,12 +139,17 @@ namespace Signum.Engine.Linq
             expression = expression.NotNull().ToArray();
             Expression[] newExpressions = new Expression[expression.Length];
 
+            bool oldTemp = tempFullNominate;
+            tempFullNominate = true;
+            
             for (int i = 0; i < expression.Length; i++)
             {
                 newExpressions[i] = Visit(expression[i]);
                 if (!candidates.Contains(newExpressions[i]))
                     return null;
             }
+
+            tempFullNominate = oldTemp;
 
             var result = new SqlFunctionExpression(type, sqlFunction.ToString(), newExpressions);
             candidates.Add(result);

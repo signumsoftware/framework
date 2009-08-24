@@ -51,7 +51,6 @@ namespace Signum.Web
     public static class EmbeddedControlHelper
     {
         public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
-            where S : Modifiable
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
@@ -68,7 +67,11 @@ namespace Signum.Web
                 runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
             }
 
-            string prefixedName = helper.GlobalPrefixedName(context.Name);
+            string prefixedName = context.Name;
+            if (!helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey) ||
+                !((string)helper.ViewData[ViewDataKeys.TypeContextKey]).HasText() ||
+                !prefixedName.StartsWith((string)helper.ViewData[ViewDataKeys.TypeContextKey]))
+            prefixedName = helper.GlobalPrefixedName(context.Name);
 
             ViewDataDictionary vdd = new ViewDataDictionary()
             {

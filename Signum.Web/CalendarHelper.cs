@@ -3,13 +3,87 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
+    public class DatePickerOptions
+    {
+        bool changeMonth = true;
+        public bool ChangeMonth
+        {
+            get { return changeMonth; }
+            set { changeMonth = value; }
+        }
+
+        bool changeYear = true;
+        public bool ChangeYear
+        {
+            get { return changeYear; }
+            set { changeYear = value; }
+        }
+
+        int firstDay = 1;
+        public int FirstDay
+        {
+            get { return firstDay; }
+            set { firstDay = value; }
+        }
+
+        string yearRange = "-90:+10";
+        public string YearRange
+        {
+            get { return yearRange; }
+            set { yearRange = value; }
+        }
+
+        string showOn = "button";
+        public string ShowOn
+        {
+            get { return showOn; }
+            set { showOn = value; }
+        }
+
+        bool buttonImageOnly = true;
+        public bool ButtonImageOnly
+        {
+            get { return buttonImageOnly; }
+            set { buttonImageOnly = value; }
+        }
+
+        string buttonText = "Mostrar calendario";
+        public string ButtonText
+        {
+            get { return buttonText; }
+            set { buttonText = value; }
+        }
+
+        string buttonImageSrc = "Scripts/jqueryui/images/calendar.png";
+        public string ButtonImageSrc
+        {
+            get { return buttonImageSrc; }
+            set { buttonImageSrc = value; }
+        }
+
+        string minDate;
+        public string MinDate
+        {
+            get { return minDate; }
+            set { minDate = value; }
+        }
+
+        string maxDate;
+        public string MaxDate
+        {
+            get { return maxDate; }
+            set { maxDate = value; }
+        }
+    }
+
     public static class CalendarHelper
     {
         //jQuery ui DatePicker
-        public static string Calendar(this HtmlHelper helper, string elementId)
+        public static string Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
             StringBuilder sb = new StringBuilder();
             //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
@@ -28,11 +102,30 @@ namespace Signum.Web
             sb.Append(
                 "<script type=\"text/javascript\">\n" + 
                 "$(document).ready(function(){\n" +
-                "$(\"#" + elementId + "\").datepicker({ changeMonth:true, changeYear:true, firstDay:1, yearRange:'-90:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png' });\n" + 
+                "$(\"#" + elementId + "\").datepicker({ " + OptionsToString(settings) +" });\n" + 
                 "});\n" + 
                 "</script>\n");
 
             return sb.ToString();
+        }
+
+        private static string OptionsToString(DatePickerOptions settings)
+        { 
+            if (settings == null)
+                return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'-90:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png'";
+
+            return "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}'{8}{9}".Formato(
+                settings.ChangeMonth ? "true" : "false",
+                settings.ChangeYear ? "true" : "false",
+                settings.FirstDay,
+                settings.YearRange,
+                settings.ShowOn,
+                settings.ButtonImageOnly ? "true" : "false",
+                settings.ButtonText,
+                settings.ButtonImageSrc,
+                (settings.MinDate.HasText() ? ", minDate: " + settings.MinDate : ""),
+                (settings.MaxDate.HasText() ? ", maxDate: " + settings.MaxDate : "")
+                );
         }
 
         //Ajax control toolkit calendar

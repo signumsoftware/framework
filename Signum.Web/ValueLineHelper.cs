@@ -51,7 +51,7 @@ namespace Signum.Web
                         settings.ValueHtmlProps["class"] = "valueLine inlineVal " + settings.ValueHtmlProps["class"];
                     else
                         settings.ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings.ValueHtmlProps, typeof(T))));
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings.ValueHtmlProps, settings.DatePickerOptions, typeof(T), settings.EnumComboItems)));
                     sb.Append("\n");
                     sb.Append("&nbsp;");
                     sb.Append(helper.ValidationMessage(idValueField));
@@ -63,7 +63,7 @@ namespace Signum.Web
                         settings.ValueHtmlProps["class"] = "valueLine inlineVal " + settings.ValueHtmlProps["class"];
                     else
                         settings.ValueHtmlProps.Add("class", "valueLine");
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings.ValueHtmlProps, typeof(T))));
+                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings.ValueHtmlProps, settings.DatePickerOptions, typeof(T), settings.EnumComboItems)));
                     sb.Append("\r\n");
                 }
             }
@@ -86,26 +86,29 @@ namespace Signum.Web
             return idValueField;
         }
 
-        public static string EnumComboBox(this HtmlHelper helper, string idValueField, Type enumType, object value, Dictionary<string, object> htmlProperties) 
+        public static string EnumComboBox(this HtmlHelper helper, string idValueField, Type enumType, object value, Dictionary<string, object> htmlProperties, List<SelectListItem> enumComboItems) 
         {
             StringBuilder sb = new StringBuilder();
-            List<SelectListItem> items = new List<SelectListItem>();
-            items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
-            items.AddRange(
-                Enum.GetValues(enumType.UnNullify())
-                    .Cast<Enum>()
-                    .Select(v => new SelectListItem()
-                        {
-                            Text = EnumExtensions.NiceToString(v),
-                            Value = v.ToString(), 
-                            Selected = object.Equals(value,v),
-                        })
-                );
-            
+            List<SelectListItem> items = enumComboItems;
+            if (items == null)
+            {
+                items = new List<SelectListItem>();
+                items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
+                items.AddRange(
+                    Enum.GetValues(enumType.UnNullify())
+                        .Cast<Enum>()
+                        .Select(v => new SelectListItem()
+                            {
+                                Text = EnumExtensions.NiceToString(v),
+                                Value = v.ToString(),
+                                Selected = object.Equals(value, v),
+                            })
+                    );
+            }
             return helper.DropDownList(idValueField, items, htmlProperties);
         }
 
-        public static string DateTimePickerTextbox(this HtmlHelper helper, string idValueField, object value, string dateFormat, Dictionary<string, object> htmlProperties)
+        public static string DateTimePickerTextbox(this HtmlHelper helper, string idValueField, object value, string dateFormat, Dictionary<string, object> htmlProperties, DatePickerOptions datepickerOptions)
         {
             if (htmlProperties.ContainsKey("class"))
             {
@@ -117,7 +120,7 @@ namespace Signum.Web
             }
             return helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "",  htmlProperties)+
                    "\n" + 
-                   helper.Calendar(idValueField);
+                   helper.Calendar(idValueField, datepickerOptions);
         }
 
         public static string TextboxInLine(this HtmlHelper helper, string idValueField, string valueStr, Dictionary<string, object> htmlProperties)
@@ -190,7 +193,8 @@ namespace Signum.Web
     { 
         public readonly Dictionary<string, object> ValueHtmlProps = new Dictionary<string, object>(0);
         public ValueLineType? ValueLineType;
-
+        public List<SelectListItem> EnumComboItems;
+        public DatePickerOptions DatePickerOptions;
         public override void SetReadOnly()
         {
         }
@@ -240,9 +244,9 @@ namespace Signum.Web
         {
             {ValueLineType.TextBox, (helper, valueLineData) => helper.TextboxInLine(valueLineData.IdValueField, (string)valueLineData.Value, valueLineData.HtmlProperties)},
             {ValueLineType.Boolean, (helper, valueLineData) => helper.CheckBox(valueLineData.IdValueField, (bool?)valueLineData.Value, valueLineData.HtmlProperties)},
-            {ValueLineType.Combo, (helper, valueLineData) => helper.EnumComboBox(valueLineData.IdValueField, valueLineData.EnumType, valueLineData.Value, valueLineData.HtmlProperties)},
-            {ValueLineType.DateTime, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy HH:mm:ss", valueLineData.HtmlProperties)},
-            {ValueLineType.Date, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy", valueLineData.HtmlProperties)},
+            {ValueLineType.Combo, (helper, valueLineData) => helper.EnumComboBox(valueLineData.IdValueField, valueLineData.EnumType, valueLineData.Value, valueLineData.HtmlProperties, valueLineData.EnumComboItems)},
+            {ValueLineType.DateTime, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy HH:mm:ss", valueLineData.HtmlProperties, valueLineData.DatePickerOptions)},
+            {ValueLineType.Date, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy", valueLineData.HtmlProperties, valueLineData.DatePickerOptions)},
             {ValueLineType.Number, (helper, valueLineData) => 
                 {
                     valueLineData.HtmlProperties.Add("onkeydown", onKeyDownNumber);
@@ -292,20 +296,26 @@ namespace Signum.Web
         public Dictionary<string, object> HtmlProperties { get; private set; }
         
         public Type EnumType { get; private set; }
+        public List<SelectListItem> EnumComboItems { get; private set; }
 
-        public ValueLineData(string idValueField, object value, Dictionary<string, object> htmlProperties)
+        public DatePickerOptions DatePickerOptions;
+
+        public ValueLineData(string idValueField, object value, Dictionary<string, object> htmlProperties, DatePickerOptions datePickerOptions)
         {
             IdValueField = idValueField;
             Value = value;
             HtmlProperties = htmlProperties;
+            DatePickerOptions = datePickerOptions;
         }
 
-        public ValueLineData(string idValueField, object value, Dictionary<string, object> htmlProperties, Type enumType)
+        public ValueLineData(string idValueField, object value, Dictionary<string, object> htmlProperties, DatePickerOptions datePickerOptions, Type enumType, List<SelectListItem> enumComboItems)
         {
             IdValueField = idValueField;
             Value = value;
             HtmlProperties = htmlProperties;
+            DatePickerOptions = datePickerOptions;
             EnumType = enumType;
+            EnumComboItems = enumComboItems;
         }
     }
 

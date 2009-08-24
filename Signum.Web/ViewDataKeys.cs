@@ -47,9 +47,6 @@ namespace Signum.Web
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
                 return helper.ViewData[ViewDataKeys.PopupPrefix].ToString() + localName;
 
-            //if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
-            //    return helper.ViewData[ViewDataKeys.TypeContextKey].ToString() + localName;
-
             return localName;
         }
 
@@ -77,7 +74,6 @@ namespace Signum.Web
                 return true;
 
             return !helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix);
-                // || !((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText();
         }
     }
 }

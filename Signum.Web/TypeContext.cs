@@ -83,6 +83,9 @@ namespace Signum.Web
                     helper.ViewContext.HttpContext.Response.Write(
                             helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
                 }
+                //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them
+                if (helper.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
+                    helper.ViewData.Remove(ViewDataKeys.EmbeddedControl);
             }
 
             return tc;
