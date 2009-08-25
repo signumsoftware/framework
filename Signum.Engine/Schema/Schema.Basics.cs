@@ -157,7 +157,7 @@ namespace Signum.Engine.Maps
         internal void Initialize()
         {
             if (initialized)
-                throw new InvalidOperationException("The Schema has allready been initialized"); 
+                throw new InvalidOperationException("The Schema has already been initialized"); 
 
             if (Initializing != null)
                 foreach (InitEventHandler init in Initializing.GetInvocationList())

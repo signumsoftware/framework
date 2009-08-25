@@ -358,11 +358,11 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The length of {{0}} has to be lesser than or equal to {0}.
+        ///   Looks up a localized string similar to The length of {{0}} has to be less than or equal to {0}.
         /// </summary>
-        internal static string TheLengthOf0HasToBeLesserOrEqualTo0 {
+        internal static string TheLengthOf0HasToBeLessOrEqualTo0 {
             get {
-                return ResourceManager.GetString("TheLengthOf0HasToBeLesserOrEqualTo0", resourceCulture);
+                return ResourceManager.GetString("TheLengthOf0HasToBeLessOrEqualTo0", resourceCulture);
             }
         }
         

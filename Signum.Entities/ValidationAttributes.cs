@@ -111,7 +111,7 @@ namespace Signum.Entities
                 return ErrorMessage ?? Resources.TheLengthOf0HasToBeGreaterOrEqualTo0.Formato(min);
 
             if (max != -1 && val.Length > max)
-                return ErrorMessage ?? Resources.TheLengthOf0HasToBeLesserOrEqualTo0.Formato(max);
+                return ErrorMessage ?? Resources.TheLengthOf0HasToBeLessOrEqualTo0.Formato(max);
 
             return null; 
         }

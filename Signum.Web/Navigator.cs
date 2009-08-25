@@ -564,7 +564,7 @@ namespace Signum.Web
                 type = Navigator.NameToType[typeName];
             
             if (type == null)
-                throw new ArgumentException(Resource.Type0NotFoundInTheSchema);
+                throw new ArgumentException(Resource.Type0NotFoundInTheSchema.Formato(typeName));
             return type;
         }
 

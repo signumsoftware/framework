@@ -168,7 +168,7 @@
   <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
     <value>La longitud de {{0}} ha de ser mayor o igual a {0}</value>
   </data>
-  <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
+  <data name="TheLengthOf0HasToBeLessOrEqualTo0" xml:space="preserve">
     <value>La longitud de {{0}} ha de ser menor o igual a {0}</value>
   </data>
   <data name="_0HasNoCorrectFormat" xml:space="preserve">

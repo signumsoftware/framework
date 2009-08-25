@@ -322,7 +322,7 @@ WRITETEXT</value>
     <value>FieldInitExpression binding debe estar vacío</value>
   </data>
   <data name="TheTransactionIsRolledBack" xml:space="preserve">
-    <value>Se ha hecho Rollback de la transaccion (un Transaction previo no se ha confirmado)</value>
+    <value>Se ha hecho Rollback de la transacción (un Transaction previo no se ha confirmado)</value>
   </data>
   <data name="TransactionRollbacked" xml:space="preserve">
     <value>Se ha hecho un ROLLBACK!</value>
@@ -338,7 +338,7 @@ WRITETEXT</value>
 </value>
   </data>
   <data name="SetOperationsAreNotAllowedOnQueriesWithNonSingleCellProjections" xml:space="preserve">
-    <value>Operaciones de conjuntos no están permitidas en consultas de mas de una celda</value>
+    <value>Operaciones de conjuntos no están permitidas en consultas de más de una celda</value>
   </data>
   <data name="Table0NotLoadedInSchema" xml:space="preserve">
     <value>La tabla para el tipo {0} no está cargada en el Schema actual</value>
@@ -362,7 +362,7 @@ WRITETEXT</value>
     <value>El operador binario '{0}' no está soportado</value>
   </data>
   <data name="TheConstantFor0IsNotSupported" xml:space="preserve">
-    <value>La constante  '{0}' no está soportada</value>
+    <value>La constante '{0}' no está soportada</value>
   </data>
   <data name="ReferenceToUndefinedColumn" xml:space="preserve">
     <value>Referencia a columna no definida</value>
@@ -380,7 +380,7 @@ WRITETEXT</value>
     <value>No se ha encontrado la entidad de tipo {0} e id {1}</value>
   </data>
   <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
-    <value>No se ha eliminado todas las entidades de tipo {0} e ids: {1}</value>
+    <value>No se han eliminado todas las entidades de tipo {0} e ids: {1}</value>
   </data>
   <data name="NoSeHanEncontrado0ConId1" xml:space="preserve">
     <value>No se han encontrado {0} con Id {1}</value>
@@ -434,7 +434,7 @@ WRITETEXT</value>
     <value>El tipo {0} no es de ninguno de los tipos mapeados: {1}</value>
   </data>
   <data name="ThereIsADiferentInstanceOfTheSameObjectOnObjectCache" xml:space="preserve">
-    <value>Ya existe un objeto con mismo id y tipo en la cache, pero es una instancia distinta</value>
+    <value>Ya existe un objeto con mismo id y tipo en la caché, pero es una instancia distinta</value>
   </data>
   <data name="ErrorCatchingTypesTableFrom0TablesInSchemaButNotIn01TablesIn0ButNotInSchema2" xml:space="preserve">
     <value>Error cacheando la tabla de Tipos desde {0}:
@@ -466,9 +466,9 @@ WRITETEXT</value>
     <value>Imposible incluir en el Schema:</value>
   </data>
   <data name="CachingTypesTableFrom0" xml:space="preserve">
-    <value>cachenado la tabla de tipos desde {0}</value>
+    <value>cacheando la tabla de tipos desde {0}</value>
   </data>
   <data name="Fields0AreSetAtTheSameTime" xml:space="preserve">
-    <value>Los campos {0} estan estableclidos al mismo tiempo</value>
+    <value>Los campos {0} están establecidos al mismo tiempo</value>
   </data>
 </root>

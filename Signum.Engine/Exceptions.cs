@@ -39,7 +39,7 @@ namespace Signum.Engine.Exceptions
                 string fieldStr = Fields.Length == 1 ? Fields[0] :
                         Fields.Take(Fields.Length - 1).ToString(", ") + " and " + Fields[Fields.Length - 1]; 
 
-                return "There's allready a {0} with the same {1}".Formato(TableName, fieldStr);
+                return "There's already a {0} with the same {1}".Formato(TableName, fieldStr);
             }
         }
     }

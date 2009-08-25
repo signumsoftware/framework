@@ -151,7 +151,7 @@
     <value>The length of {{0}} has to be greater than or equal to {0}</value>
   </data>
   <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
-    <value>The length of {{0}} has to be lesser than or equal to {0}</value>
+    <value>The length of {{0}} has to be less than or equal to {0}</value>
   </data>
   <data name="_0HasNoCorrectFormat" xml:space="preserve">
     <value>{0} has no correct format</value>
