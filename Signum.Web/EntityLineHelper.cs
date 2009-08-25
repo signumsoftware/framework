@@ -208,7 +208,7 @@ namespace Signum.Web
                         helper.Button(idValueField + "_btnCreate",
                                   "+",
                                   creatingUrl,
-                                  "lineButton",
+                                  "lineButton create",
                                   (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
                 }
 
@@ -217,7 +217,7 @@ namespace Signum.Web
                         helper.Button(idValueField + "_btnRemove",
                                   "x",
                                   "RemoveContainedEntity('{0}',{1});".Formato(idValueField, reloadOnChangeFunction),
-                                  "lineButton",
+                                  "lineButton remove",
                                   (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLazy)))
@@ -236,7 +236,7 @@ namespace Signum.Web
                         helper.Button(idValueField + "_btnFind",
                                      "O",
                                      findingUrl,
-                                     "lineButton",
+                                     "lineButton find",
                                      (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
                 }
 

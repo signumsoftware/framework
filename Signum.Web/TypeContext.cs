@@ -24,7 +24,7 @@ namespace Signum.Web
             if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
                 return helper.BeginContext<T>((T)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()], helper.ViewData[ViewDataKeys.TypeContextKey].ToString(), true);
 
-            return helper.BeginContext<T>((T)helper.ViewData.Model, null, true);
+            return helper.BeginContext<T>((T)helper.ViewData.Model, null, false);
         }
 
         public static TypeContext<T> TypeContext<T>(this HtmlHelper helper, bool writeIdAndRuntime)

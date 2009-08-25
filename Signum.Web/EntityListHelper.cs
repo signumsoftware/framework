@@ -105,7 +105,7 @@ namespace Signum.Web
                         helper.Button(idValueField + "_btnCreate",
                                   "+",
                                   creatingUrl,
-                                  "lineButton",
+                                  "lineButton create",
                                   new Dictionary<string, object>()));
             }
 
@@ -114,8 +114,8 @@ namespace Signum.Web
                     helper.Button(idValueField + "_btnRemove",
                               "x",
                               "RemoveListContainedEntity('{0}');".Formato(idValueField),
-                              "lineButton",
-                              new Dictionary<string, object>()));
+                              "lineButton remove",
+                              (value == null || value.Count == 0) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Find && !typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))
             {
@@ -127,7 +127,7 @@ namespace Signum.Web
                             helper.Button(idValueField + "_btnFind",
                                         "O",
                                         findingUrl,
-                                        "lineButton",
+                                        "lineButton find",
                                         new Dictionary<string, object>()));
             }
 

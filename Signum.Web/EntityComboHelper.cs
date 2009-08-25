@@ -137,7 +137,7 @@ namespace Signum.Web
                     helper.Button(idValueField + "_btnCreate",
                               "+",
                               creatingUrl,
-                              "lineButton",
+                              "lineButton create",
                               (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
             }
 

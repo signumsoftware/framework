@@ -74,7 +74,7 @@ namespace Signum.Web
                               settings.AddElementLinkText,
                               creatingUrl,
                               "Nuevo",
-                              "lineButton",
+                              "lineButton create",
                               new Dictionary<string, object>()));
             }
 
@@ -130,7 +130,7 @@ namespace Signum.Web
                               settings.RemoveElementLinkText,
                               "javascript:RemoveRepeaterEntity('{0}');".Formato(indexedPrefix + EntityRepeaterKeys.RepeaterElement),
                               settings.RemoveElementLinkText,
-                              "lineButton",
+                              "lineButton remove",
                               new Dictionary<string, object>()));
 
             string runtimeType = "";

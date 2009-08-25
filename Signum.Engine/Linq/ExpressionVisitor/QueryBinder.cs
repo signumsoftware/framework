@@ -809,8 +809,8 @@ namespace Signum.Engine.Linq
                     else
                         return imp.Field;
                 }
-                //else if (typeof(IIdentifiable).IsAssignableFrom(u.Type))
-                //    return operand;
+                else if (typeof(IIdentifiable).IsAssignableFrom(u.Type))
+                    return operand;
                 else if (operand != u.Operand)
                     return Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
                 else
