@@ -74,7 +74,7 @@ namespace Signum.Engine.Operations
 
                 // TODO: olmo porque hay que guardar aqui????
 
-                //result.Save(); //Nothing happens if allready saved
+                //result.Save(); //Nothing happens if already saved
 
                 if (!result.IsNew)
                 {
@@ -107,7 +107,7 @@ namespace Signum.Engine.Operations
 
                 IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnFromLazy((Lazy<F>)lazy, args);
 
-                result.Save(); //Nothing happens if allready saved
+                result.Save(); //Nothing happens if already saved
 
                 log.Target = result.ToLazy();
                 log.End = DateTime.Now;

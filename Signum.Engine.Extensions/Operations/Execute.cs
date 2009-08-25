@@ -72,7 +72,7 @@ namespace Signum.Engine.Operations
 
                     OnExecute((T)entity, parameters);
 
-                    ((IdentifiableEntity)entity).Save(); //Nothing happens if allready saved
+                    ((IdentifiableEntity)entity).Save(); //Nothing happens if already saved
 
                     log.Target = ((IdentifiableEntity)entity).ToLazy(); //in case AllowsNew == true
                     log.End = DateTime.Now;

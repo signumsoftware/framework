@@ -152,7 +152,7 @@ namespace Signum.Engine.Operations
         public void Register()
         {
             if (Registered)
-                throw new ApplicationException("A {0} have allready been registered".Formato(typeof(Graph<E, S>).TypeName()));
+                throw new ApplicationException("A {0} have already been registered".Formato(typeof(Graph<E, S>).TypeName()));
 
             var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
 

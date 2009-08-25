@@ -49,7 +49,7 @@ namespace Signum.Engine.Operations
 
                 IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lazies.Select(l=>l.ToLazy<F>()).ToList(), args);
 
-                result.Save(); //Nothing happens if allready saved
+                result.Save(); //Nothing happens if already saved
 
                 log.Target = result.ToLazy();
                 log.End = DateTime.Now;

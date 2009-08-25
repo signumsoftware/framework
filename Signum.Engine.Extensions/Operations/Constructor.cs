@@ -45,7 +45,7 @@ namespace Signum.Engine.Operations
 
             //    IdentifiableEntity entity = 
 
-            //    entity.Save(); //Nothing happens if allready saved
+            //    entity.Save(); //Nothing happens if already saved
 
             //    log.Entity = ((IdentifiableEntity)entity).ToLazy();
             //    log.End = DateTime.Now;
