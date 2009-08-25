@@ -219,7 +219,7 @@ namespace Signum.Web.Operations
             if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
                 return pair.OperationSettings.Constructor(pair.OperationInfo, controller.HttpContext);
             else
-                return Constructor.Construct(type, controller);
+                return OperationLogic.ServiceConstruct(type, selected);
         }   
     }
 }
