@@ -50,7 +50,9 @@ namespace Signum.Web
                     if (settings.ValueHtmlProps.ContainsKey("class"))
                         settings.ValueHtmlProps["class"] = "valueLine inlineVal " + settings.ValueHtmlProps["class"];
                     else
+                    {
                         settings.ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
+                    }
                     sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings.ValueHtmlProps, settings.DatePickerOptions, typeof(T), settings.EnumComboItems)));
                     sb.Append("\n");
                     sb.Append("&nbsp;");
