@@ -52,7 +52,7 @@ namespace Signum.Engine.Authorization
                                        {
                                            Entity = r.ToLazy(),
                                            r.Id,
-                                           r.Name,
+                                           r.Name,                                          
                                        }).ToDynamic();
 
                 dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
@@ -62,7 +62,7 @@ namespace Signum.Engine.Authorization
                                            e.Id,
                                            e.UserName,
                                            Rol = e.Role.ToLazy(),
-                                           Empleado = e.Related.ToString(),
+                                           //Empleado = e.Related.ToString(),
                                        }).ToDynamic();
             }
         }
