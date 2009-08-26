@@ -31,9 +31,10 @@ namespace Signum.Engine.Maps
 
             SqlPreCommand cols = (from ef in Fields.Values
                                   where ef.Field is FieldMList
-                                  select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), forbidden)).Combine(Spacing.Simple);
+                                  select ((FieldMList)ef.Field).RelationalTable.RelationalInserts((Modifiable)ef.Getter(ident), ident.IsNew, forbidden)).Combine(Spacing.Simple);
 
-            ident.Modified = forbidden.Count > 0;
+            if (forbidden.Count == 0)
+                ident.Modified = false;
 
             return SqlPreCommand.Combine(Spacing.Double, entity, cols);
         }
@@ -110,18 +111,18 @@ namespace Signum.Engine.Maps
 
     public partial class RelationalTable
     { 
-        internal SqlPreCommand RelationalInserts(Modifiable collection, Forbidden forbidden)
+        internal SqlPreCommand RelationalInserts(Modifiable collection, bool newEntity, Forbidden forbidden)
         {
             if (collection == null)
-                return SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
+                return newEntity? null: SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
 
             if (!collection.Modified) // no es modificado ??
                 return null;
 
-            collection.Modified = forbidden.Count > 0;
+            if (forbidden.Count == 0)
+                collection.Modified = false;
 
-
-            var clean = SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
+            var clean = newEntity ? null : SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
 
             var inserts =  ((IEnumerable)collection).Cast<object>()
                 .Where(o => (o as IdentifiableEntity).TryCS(e => !forbidden.Contains(e)) ?? true)
@@ -203,7 +204,8 @@ namespace Signum.Engine.Maps
             if (value != null)
             {
                 EmbeddedEntity ec = (EmbeddedEntity)value;
-                ec.Modified = false; 
+                if (forbidden.Count == 0)
+                    ec.Modified = false;
                 EmbeddedFields.ForEach(c => c.Value.Field.CreateParameter(parameters, c.Value.Getter(value), forbidden));
             }
         }      

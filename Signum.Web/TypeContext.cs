@@ -24,7 +24,7 @@ namespace Signum.Web
             if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
                 return helper.BeginContext<T>((T)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()], helper.ViewData[ViewDataKeys.TypeContextKey].ToString(), true);
 
-            return helper.BeginContext<T>((T)helper.ViewData.Model, null, false);
+            return helper.BeginContext<T>((T)helper.ViewData.Model, null, null);
         }
 
         public static TypeContext<T> TypeContext<T>(this HtmlHelper helper, bool writeIdAndRuntime)
@@ -54,11 +54,11 @@ namespace Signum.Web
             return helper.BeginContext<T>((T)helper.ViewData[viewDataKeyAndPrefix], viewDataKeyAndPrefix, writeIdAndRuntime);
         }
 
-        static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool writeIdAndRuntime)
+        static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool? writeIdAndRuntime)
         {
             TypeContext<T> tc = new TypeContext<T>(value, prefix);
 
-            if (writeIdAndRuntime)
+            if (!writeIdAndRuntime.HasValue || writeIdAndRuntime.Value)
             {
                 if (prefix == null)
                     prefix = "";
@@ -88,6 +88,11 @@ namespace Signum.Web
                     helper.ViewData.Remove(ViewDataKeys.EmbeddedControl);
             }
 
+            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)) && value != null && 
+                typeof(IIdentifiable).IsAssignableFrom(typeof(T)) && !((IIdentifiable)value).IsNew)
+            {
+                StyleContext sc = new StyleContext() { ReadOnly = true };
+            }
             return tc;
         }
 
@@ -185,6 +190,12 @@ namespace Signum.Web
         {
             get { return typeof(T); }
         }
+        
+        public override void Dispose()
+        {
+            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)))
+                StyleContext.Current.Dispose();
+        }
     }
     #endregion
 
@@ -224,6 +235,12 @@ namespace Signum.Web
         public override string FriendlyName
         {
             get { return LastProperty.NiceName(); }
+        }
+
+        public override void Dispose()
+        {
+            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)))
+                StyleContext.Current.Dispose();
         }
     }
     #endregion
