@@ -269,6 +269,13 @@ namespace Signum.Web
         public event Func<Type, bool> GlobalIsReadOnly;
         public event Func<object, bool> GlobalIsFindable;
 
+
+        //public void AddEntitySettings(Type type, string ViewPrefix)
+        //{
+        //    if (!type.Name.EndsWith("DN")) throw new ApplicationException("This method is only valid for xxxDN entities");
+        //    EntitySettings.Add(type, new EntitySettings(false) { PartialViewName = ViewPrefix + type.Name.RemoveRight(2) + "IU.ascx" });
+        //}
+
         public void Start()
         {
             URLNamesToTypes = EntitySettings.ToDictionary(
