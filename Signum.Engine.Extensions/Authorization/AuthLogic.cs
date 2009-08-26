@@ -123,7 +123,7 @@ namespace Signum.Engine.Authorization
             {
                 DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
 
-                using (new EntityCache())
+                using (new EntityCache(true))
                     foreach (var role in Database.RetrieveAll<RoleDN>())
                     {
                         newRoles.Expand(role, r => r.Roles);
