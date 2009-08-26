@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
-
+<%@ Import Namespace="Signum.Utilities" %>
 <%
     string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
     string prefix = (string)ViewData[ViewDataKeys.PopupPrefix];
@@ -15,7 +15,7 @@
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup" + sufix)%>');" class="dragHandle">
-        <span id="windowTitle"><%= (Model != null) ? Model.ToString() : "" %></span>
+        <span id="windowTitle"><%= (Model != null) ? (Model.ToString().HasText() ? Model.ToString() : Navigator.TypesToURLNames[Model.GetType()] ) : "Sin título"%></span>
     </div>
     <div class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
