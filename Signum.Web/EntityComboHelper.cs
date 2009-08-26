@@ -126,8 +126,8 @@ namespace Signum.Web
                             idValueField + TypeContext.Separator + "_btnView",
                             "->",
                             viewingUrl,
-                            "",
-                            new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+                            "lineButton go",
+                            new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "inline") } }));
             }
 
             if (settings.Create)
