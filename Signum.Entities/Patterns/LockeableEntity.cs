@@ -7,13 +7,26 @@ using Signum.Entities.Properties;
 namespace Signum.Entities.Patterns
 {
     [Serializable]
-    public class LockeableEntity : Entity
+    public abstract class LockeableEntity : Entity
     {
         bool locked;
         public bool Locked
         {
             get { return locked; }
-            set { base.Set(ref locked, value, "Locked"); }
+            set
+            {
+                if (UnsafeSet(ref locked, value, "Locked"))
+                    ItemLockedChanged(Locked);
+            }
+        }
+
+        protected bool UnsafeSet<T>(ref T variable, T value, string propertyName)
+        { 
+            return base.Set<T>(ref variable, value, propertyName);
+        }
+
+        protected virtual void ItemLockedChanged(bool locked)
+        {
         }
 
         protected override bool Set<T>(ref T variable, T value, string propertyName)
