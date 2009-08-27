@@ -425,7 +425,7 @@ function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, remo
                         var container = $("#" + prefix + sfEntitiesContainer);
                         container.append("\n" +
                         "<div id=\"" + prefix + newIndex + sfRepeaterElement +"\" name=\"" + prefix + newIndex + sfRepeaterElement +"\" class=\"repeaterElement\">\n" +
-                        "<a id=\"" + prefix + newIndex + "_btnRemove\" title=\"" + removeLinkText + "\" href=\"javascript:RemoveRepeaterEntity('" + prefix + newIndex + sfRepeaterElement + "');\" class=\"lineButton\">" + removeLinkText + "</a>\n" +
+                        "<a id=\"" + prefix + newIndex + "_btnRemove\" title=\"" + removeLinkText + "\" href=\"javascript:RemoveRepeaterEntity('" + prefix + newIndex + sfRepeaterElement + "');\" class=\"lineButton remove\">" + removeLinkText + "</a>\n" +
                         "<input type=\"hidden\" id=\"" + prefix + newIndex + sfRuntimeType + "\" name=\"" + prefix + newIndex + sfRuntimeType + "\" value=\"" + runtimeType + "\" />\n" +
                         ((isEmbedded == "False") ? ("<input type=\"hidden\" id=\"" + prefix + newIndex + sfId + "\" name=\"" + prefix + newIndex + sfId + "\" value=\"\" />\n") : "") +
                         //"<input type=\"hidden\" id=\"" + prefix + newIndex + sfIndex + "\" name=\"" + prefix + newIndex + sfIndex + "\" value=\"" + (parseInt(lastIndex)+1) + "\" />\n" +

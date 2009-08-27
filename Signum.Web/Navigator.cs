@@ -566,10 +566,7 @@ namespace Signum.Web
 
         protected internal virtual Type ResolveType(string typeName)
         {
-            Type type = null;
-            if (Navigator.NameToType.ContainsKey(typeName))
-                type = Navigator.NameToType[typeName];
-            
+            Type type = Navigator.NameToType.TryGetC(typeName);
             if (type == null)
                 throw new ArgumentException(Resource.Type0NotFoundInTheSchema.Formato(typeName));
             return type;
