@@ -3,7 +3,6 @@
 <%@ Import Namespace="System.Configuration" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <title><%=ViewData[ViewDataKeys.PageTitle] ?? ""%></title>
     <link href="<%= System.Web.VirtualPathUtility.ToAbsolute("~/Content/Site.css")%>" rel="stylesheet" type="text/css" />
     <link href="<%= System.Web.VirtualPathUtility.ToAbsolute("~/Content/LineStyles.css")%>" rel="stylesheet" type="text/css" />
     

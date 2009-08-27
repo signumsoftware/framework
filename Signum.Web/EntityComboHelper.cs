@@ -168,10 +168,9 @@ namespace Signum.Web
             }
 
             EntityCombo ec = new EntityCombo();
-            Common.FireCommonTasks(ec, typeof(T), context);
+            Navigator.ConfigureEntityBase(ec, runtimeType, false);
 
-            //if (ec.Implementations == null)
-            //    Navigator.ConfigureEntityBase(el, runtimeType , false);
+            Common.FireCommonTasks(ec, typeof(T), context);
 
             helper.ViewContext.HttpContext.Response.Write(
                 SetEntityComboOptions(helper, context, ec));
@@ -196,10 +195,9 @@ namespace Signum.Web
             }
 
             EntityCombo ec = new EntityCombo();
+            Navigator.ConfigureEntityBase(ec, runtimeType, false);
+            
             Common.FireCommonTasks(ec, typeof(T), context);
-
-            //if (el.Implementations == null)
-            //    Navigator.ConfigureEntityBase(el, runtimeType, false);
 
             settingsModifier(ec);
 
