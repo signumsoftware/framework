@@ -33,7 +33,7 @@ namespace Signum.Engine
             }
         }
 
-        public static void Save<T>(this T obj)
+        public static T Save<T>(this T obj)
             where T : IdentifiableEntity
         {
             using (new EntityCache())
@@ -41,7 +41,7 @@ namespace Signum.Engine
             {
                 Saver.Save(obj);
 
-                tr.Commit();
+                return tr.Commit(obj);
             }
         }
         #endregion

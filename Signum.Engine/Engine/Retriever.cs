@@ -144,15 +144,18 @@ namespace Signum.Engine
                 SqlPreCommandSimple preComand = relationalTable.BatchSelect(ids).ToSimple();
 
                 DataTable dt = Executor.ExecuteDataTable(preComand);
-                Dictionary<int, List<DataRow>> rows = dt.Rows.Cast<DataRow>().GroupToDictionary(r => (int)r[relationalTable.BackReference.Name]);
-                foreach (var gr in rows)
+                Dictionary<int, List<DataRow>> rowGroups = dt.Rows.Cast<DataRow>().GroupToDictionary(r => (int)r[relationalTable.BackReference.Name]);
+                foreach (var id in ids)
                 {
-                    int id = gr.Key;
                     IList list = dic[id];
-                    foreach (DataRow row in gr.Value)
+                    List<DataRow> rows = rowGroups.TryGetC(id);
+                    if (rows != null)
                     {
-                        object item = relationalTable.FillItem(row, this);
-                        list.Add(item);
+                        foreach (DataRow row in rows)
+                        {
+                            object item = relationalTable.FillItem(row, this);
+                            list.Add(item);
+                        }
                     }
                     ((Modifiable)list).Modified = false;
                 }

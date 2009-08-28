@@ -219,12 +219,12 @@ namespace Signum.Engine.Maps
                 value is Lazy ? ((Lazy)value).RuntimeType :
                 value.GetType();
 
+            if (valType != null && !ImplementationColumns.ContainsKey(valType))
+                throw new InvalidOperationException(Resources.Type0IsNotAMappedType1.Formato(valType, ImplementationColumns.Keys.ToString(k => k.Name, ", ")));
+
             var param = ImplementationColumns.Select(p =>
                 SqlParameterBuilder.CreateReferenceParameter(p.Value.Name, true,
                        p.Key != valType ? null : this.GetIdForLazy(value, forbidden))).ToList();
-
-            if (value != null && !param.Any(p => p.Value != null))
-                throw new InvalidOperationException(Resources.Type0IsNotAMappedType1.Formato(value.GetType(), ImplementationColumns.Keys.ToString(k => k.Name, ", ")));
 
             parameters.AddRange(param);          
         }     
