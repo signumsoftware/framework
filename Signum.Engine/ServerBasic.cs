@@ -92,6 +92,12 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => DateTime.Now);
         }
+
+        public List<Lazy<TypeDN>> TypesAssignableFrom(Type type)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => TypeLogic.TypesAssignableFrom(type));
+        }
         #endregion
 
         #region IQueryServer

@@ -40,6 +40,9 @@ namespace Signum.Services
         Dictionary<Type, TypeDN> ServerTypes();
 
         [OperationContract, NetDataContract]
-        DateTime ServerNow(); 
+        DateTime ServerNow();
+
+        [OperationContract, NetDataContract]
+        List<Lazy<TypeDN>> TypesAssignableFrom(Type type);
     }
 }

@@ -108,5 +108,10 @@ namespace Signum.Engine
                          }).ToList();
             return lista;
         }
+
+        public static List<Lazy<TypeDN>> TypesAssignableFrom(Type type)
+        {
+            return TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLazy()).ToList();
+        }
     }
 }
