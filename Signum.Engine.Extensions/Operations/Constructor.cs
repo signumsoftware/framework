@@ -7,6 +7,7 @@ using Signum.Entities;
 using Signum.Entities.Authorization;
 using System.Threading;
 using Signum.Utilities;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Operations
 {
@@ -32,27 +33,26 @@ namespace Signum.Engine.Operations
 
         IdentifiableEntity IConstructorOperation.Construct(params object[] args)
         {
-            return (IdentifiableEntity)(IIdentifiable)OnConstruct(args);
+            using (Transaction tr = new Transaction())
+            {
+                LogOperationDN log = new LogOperationDN
+                {
+                    Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                    Start = DateTime.Now,
+                    User = UserDN.Current
+                };
 
-            //using (Transaction tr = new Transaction())
-            //{
-            //    LogOperationDN log = new LogOperationDN
-            //    {
-            //        Operation = OperationLogic.ToOperation[Key],
-            //        Start = DateTime.Now,
-            //        User = UserDN.Current
-            //    };
+                IdentifiableEntity entity = (IdentifiableEntity)(IIdentifiable)OnConstruct(args);
 
-            //    IdentifiableEntity entity = 
+                if (!log.IsNew)
+                {
+                    log.Target = ((IdentifiableEntity)entity).ToLazy();
+                    log.End = DateTime.Now;
+                    log.Save();
+                }
 
-            //    entity.Save(); //Nothing happens if already saved
-
-            //    log.Entity = ((IdentifiableEntity)entity).ToLazy();
-            //    log.End = DateTime.Now;
-            //    log.Save();
-
-            //    return tr.Commit(entity);
-            //}
+                return tr.Commit(entity);
+            }
         }
 
         protected virtual T OnConstruct(object[] args)

@@ -52,12 +52,9 @@ namespace Signum.Engine.Processes
                 sb.Include<PackageDN>();
                 sb.Include<PackageLineDN>();
 
-                if (!sb.Settings.IsTypeAttributesOverriden<IProcessDataDN>())
-                    sb.Settings.OverrideTypeAttributes<IProcessDataDN>(new ImplementedByAttribute(typeof(PackageDN)));
-
                 OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
                 {
-                    Execute = (pc, _) => ProcessLogic.Create(pc).ExecuteLazy(ProcessOperation.Execute)
+                    Execute = (pc, _) => ProcessLogic.Create(pc).Execute(ProcessOperation.Execute)
                 });
 
                 dqm[typeof(PackageDN)] =
@@ -357,7 +354,7 @@ namespace Signum.Engine.Processes
                              {
                                  State = ProcessState.Created,
                                  ProcessData = data
-                             };
+                             }.Save();
                          }
                     },
                     new Goto(ProcessOperation.Plan, ProcessState.Planned)
@@ -400,24 +397,24 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static Lazy<ProcessExecutionDN> Create(Enum processKey, params object[] args)
+        public static ProcessExecutionDN Create(Enum processKey, params object[] args)
         {
             return Create(EnumLogic<ProcessDN>.ToEntity(processKey), args);
         }
 
-        public static Lazy<ProcessExecutionDN> Create(Enum processKey, IProcessDataDN processData)
+        public static ProcessExecutionDN Create(Enum processKey, IProcessDataDN processData)
         {
             return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processData);
         }
 
-        public static Lazy<ProcessExecutionDN> Create(ProcessDN process, params object[] args)
+        public static ProcessExecutionDN Create(ProcessDN process, params object[] args)
         {
-            return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, args).ToLazy(); 
+            return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, args); 
         }
 
-        public static Lazy<ProcessExecutionDN> Create(ProcessDN process, IProcessDataDN processData)
+        public static ProcessExecutionDN Create(ProcessDN process, IProcessDataDN processData)
         {
-            return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, processData).ToLazy();
+            return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, processData);
         }
     }
 

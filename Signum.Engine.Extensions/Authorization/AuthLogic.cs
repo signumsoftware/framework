@@ -83,25 +83,28 @@ namespace Signum.Engine.Authorization
         static void Schema_Saving(Schema sender, IdentifiableEntity ident)
         {
             RoleDN role = ident as RoleDN;
-            if (role != null && !role.IsNew && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
+            if (role != null)
             {
-                using (new EntityCache())
+                if (!role.IsNew && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
                 {
-                    EntityCache.AddFullGraph(ident);
-
-                    DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
-
-                    newRoles.Expand(role, r1 => r1.Roles);
-                    foreach (var r in Database.RetrieveAll<RoleDN>())
+                    using (new EntityCache())
                     {
-                        newRoles.Expand(r, r1 => r1.Roles);
+                        EntityCache.AddFullGraph(ident);
+
+                        DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
+
+                        newRoles.Expand(role, r1 => r1.Roles);
+                        foreach (var r in Database.RetrieveAll<RoleDN>())
+                        {
+                            newRoles.Expand(r, r1 => r1.Roles);
+                        }
+
+                        var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
+
+                        if (problems.Count > 0)
+                            throw new ApplicationException("Some cycles have been found in the graph of Roles due to the relationships:\r\n{1}"
+                                .Formato(problems.Count, problems.ToString("\r\n")));
                     }
-
-                    var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
-
-                    if (problems.Count > 0)
-                        throw new ApplicationException("Some cycles have been found in the graph of Roles due to the relationships:\r\n{1}"
-                            .Formato(problems.Count, problems.ToString("\r\n")));
                 }
             }
         }

@@ -72,18 +72,12 @@ namespace Signum.Engine.Operations
 
                 IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnFromEntity((F)entity, args);
 
-                // TODO: olmo porque hay que guardar aqui????
-
-                //result.Save(); //Nothing happens if already saved
-
                 if (!result.IsNew)
                 {
                     log.Target = result.ToLazy();
                     log.End = DateTime.Now;
                     log.Save();
                 }
-
-
 
                 return tr.Commit(result);
             }
