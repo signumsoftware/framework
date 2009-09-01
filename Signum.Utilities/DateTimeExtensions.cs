@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities.Properties;
+using System.Globalization;
 
 namespace Signum.Utilities
 {
@@ -106,6 +107,16 @@ namespace Signum.Utilities
         public static DateTime Max(DateTime a, DateTime b)
         {
             return a > b ? a : b;
+        }
+
+        public static string ShortDateTimePattern(this DateTimeFormatInfo dtfi)
+        {
+             return dtfi.ShortDatePattern + " " + dtfi.ShortTimePattern; 
+        }
+
+        public static string ToShortDateTimeString(this DateTime dt)
+        {
+            return dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDateTimePattern());
         }
     }
 

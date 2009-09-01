@@ -269,7 +269,7 @@ namespace Signum.Entities.Reflection
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.DateTime:
-                    return CultureInfo.CurrentCulture.DateTimeFormat.Map(dt => dt.ShortDatePattern + " " + dt.ShortTimePattern);
+                    return CultureInfo.CurrentCulture.DateTimeFormat.ShortDateTimePattern();
                 case TypeCode.Byte:
                 case TypeCode.Int16:
                 case TypeCode.Int32:
