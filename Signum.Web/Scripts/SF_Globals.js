@@ -66,20 +66,33 @@ function singleQuote(myfunction) {
     return myfunction.toString().replace(/"/g, "'");
 }
 
-function numbersOnly(event) {
-    return (
-        (event.keyCode >= 48 && event.keyCode <= 57) || //0-9
-        (event.keyCode >= 96 && event.keyCode <= 105) ||  //NumPad 0-9
-        (event.keyCode == 8) || //BackSpace
-        (event.keyCode == 9) || //Tab
-        (event.keyCode == 12) || //Clear
-        (event.keyCode == 27) || //Escape
-        (event.keyCode == 37) || //Left
-        (event.keyCode == 39) || //Right
-        (event.keyCode == 46) || //Delete
-        (event.keyCode == 36) || //Home
-        (event.keyCode == 35) ||//End
-        (event.keyCode == 109) || //NumPad -
-        (event.keyCode == 189)
-    );
+//Performs input validation
+var validator = new function() {
+    this.number = function (e) {
+        var c = e.keyCode;
+        return (
+			(c >= 48 && c <= 57) || //0-9
+			(c >= 96 && c <= 105) ||  //NumPad 0-9
+			(c == 8) || //BackSpace
+			(c == 9) || //Tab
+			(c == 12) || //Clear
+			(c == 27) || //Escape
+			(c == 37) || //Left
+			(c == 39) || //Right
+			(c == 46) || //Delete
+			(c == 36) || //Home
+			(c == 35) || //End
+			(c == 109) || //NumPad -
+			(c == 189)
+		);
+    };
+	this.decimalNumber = function (e) {
+        var c = e.keyCode;
+        return (
+			this.number(e) || 
+			(c == 110) ||  //NumPad Decimal
+            (c == 190) || //.
+			(c == 188) //,
+		);
+    };
 }

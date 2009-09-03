@@ -63,6 +63,31 @@ namespace Signum.Web
     }
 
     /// <summary>
+    /// Obtenido de RequireSslAttribute ChangeSet 23011 ASP.NET  15/07/2009
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+    public sealed class RedirectToUrl : FilterAttribute, IAuthorizationFilter
+    {
+        public string Url
+        {
+            get;
+            set;
+        }
+
+        public RedirectToUrl(string url) {
+            this.Url = url;
+        }
+        public void OnAuthorization(AuthorizationContext filterContext)
+        {
+            if (filterContext == null)
+            {
+                throw new ArgumentNullException("filterContext");
+            }
+               filterContext.Result = new RedirectResult(Url);
+        }
+    }
+
+    /// <summary>
     /// Muestra u oculta los botones de navegación inferiores
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]

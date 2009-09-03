@@ -46,8 +46,8 @@
                 <% Lazy entityField = null;
                    if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
                        entityField = (Lazy)queryResult.Data[row][EntityColumnIndex.Value];
-                   if (entityField != null)
-                   {
+                   //if (entityField != null)
+                   //{
                        if (allowMultiple.HasValue)
                        {
                 %>
@@ -68,10 +68,12 @@
                  </td>
                  <%} %>
                 <td id="<%=Html.GlobalName("tdResults")%>" name="<%=Html.GlobalName("tdResults")%>">
+                <% if (entityField != null) { %>
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Navigate">Ver</a>
+                <% } %>
                 </td>
                 <%
-                    }
+                  //  }
                     
                     for (int col = 0; col < queryResult.Data[row].Length; col++)
                 {

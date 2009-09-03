@@ -251,13 +251,13 @@ namespace Signum.Web
             {ValueLineType.Date, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy", valueLineData.HtmlProperties, valueLineData.DatePickerOptions)},
             {ValueLineType.Number, (helper, valueLineData) => 
                 {
-                    valueLineData.HtmlProperties.Add("onkeydown", onKeyDownNumber);
+                    valueLineData.HtmlProperties.Add("onkeydown", "return validator.number(event)");
                     return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.HtmlProperties);
                 }
             },
             {ValueLineType.DecimalNumber, (helper, valueLineData) => 
                 {
-                    valueLineData.HtmlProperties.Add("onkeydown", onKeyDownDecimalNumber);
+                    valueLineData.HtmlProperties.Add("onkeydown", "return validator.decimalNumber(event)");
                     return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.HtmlProperties);
                 }
             }
