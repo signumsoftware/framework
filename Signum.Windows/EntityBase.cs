@@ -140,7 +140,10 @@ namespace Signum.Windows
         public override void OnLoad(object sender, RoutedEventArgs e)
         {
             base.OnLoad(sender, e);
-   
+
+            if (DesignerProperties.GetIsInDesignMode(this))
+                return;
+
             if (this.NotSet(EntityBase.EntityTemplateProperty))
             {
                 var type = Type;

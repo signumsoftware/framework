@@ -117,7 +117,14 @@ namespace Signum.Windows
             get { return (Type)GetValue(EntityTypeProperty); }
         }
 
- 
+        public static readonly DependencyProperty CollapseOnNoResultsProperty =
+            DependencyProperty.Register("CollapseOnNoResults", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+        public bool CollapseOnNoResults
+        {
+            get { return (bool)GetValue(CollapseOnNoResultsProperty); }
+            set { SetValue(CollapseOnNoResultsProperty, value); }
+        }
+
         private void UpdateVisibility()
         {
             btCreate.Visibility = Create ? Visibility.Visible : Visibility.Collapsed;
@@ -249,7 +256,7 @@ namespace Signum.Windows
 
             queryResult = null;
 
-            RaiseEvent(new RoutedEventArgs(QueryResultChangedEvent));
+            OnQueryResultChanged(true);
 
             object vn = QueryName;
             var lf = CurrentFilters(); 
@@ -271,9 +278,17 @@ namespace Signum.Windows
                     lvResult.Focus();
                     tbResultados.Visibility = Visibility.Visible;
                     tbResultados.Foreground = queryResult.Data.Length == limit ? Brushes.Red : Brushes.Black;
-                    RaiseEvent(new RoutedEventArgs(QueryResultChangedEvent));
+                    OnQueryResultChanged(false);
                 },
                 () => { btFind.IsEnabled = true; });
+        }
+
+        private void OnQueryResultChanged(bool cleaning)
+        {
+            if (!cleaning && CollapseOnNoResults)
+                Visibility = queryResult.Data.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+
+            RaiseEvent(new RoutedEventArgs(QueryResultChangedEvent));
         }
 
         private void btView_Click(object sender, RoutedEventArgs e)
