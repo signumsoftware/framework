@@ -28,35 +28,50 @@ namespace Signum.Engine.Linq
         Projection,
         Join,
         Aggregate,
+        AggregateSubquery,
         SqlFunction,
+        SqlConstant,
         SqlEnum,
         Case, 
         RowNumber,
-        SetOperation,
         Like,
         In,
-        FieldInit,
+        Exists,
+        Scalar,
+        IsNull,
+        IsNotNull,
+        FieldInit = 2000,
+        EmbeddedFieldInit,
         ImplementedBy,
         ImplementedByAll,
-        NullEntity,
         LazyReference,
-        LazyLiteral, 
         MList,
     }
 
-    internal static class DbExpressionExtensions
+    internal abstract class DbExpression : Expression
     {
-        internal static bool IsDbExpression(this ExpressionType et)
+        protected DbExpression(DbExpressionType nodeType, Type type)
+            : base((ExpressionType)nodeType, type)
+        {}
+
+        public abstract override string ToString();
+    }
+
+    internal abstract class SourceExpression : DbExpression
+    {
+        public abstract string[] KnownAliases { get; }
+
+        public SourceExpression(DbExpressionType nodeType, Type type)
+            : base(nodeType, type)
         {
-            return ((int)et) >= 1000;
         }
     }
 
-    internal abstract class SourceExpression: Expression
+    internal abstract class SourceWithAliasExpression: SourceExpression
     {
         public readonly string Alias;
 
-        public SourceExpression(ExpressionType nodeType, Type type, string alias)
+        public SourceWithAliasExpression(DbExpressionType nodeType, Type type, string alias)
             : base(nodeType, type)
         {
             this.Alias = alias;
@@ -67,12 +82,17 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// A custom expression node that represents a table reference in a SQL query
     /// </summary>
-    internal class TableExpression : SourceExpression
+    internal class TableExpression : SourceWithAliasExpression
     {
         public readonly string Name;
 
+        public override string[] KnownAliases
+        {
+            get { return new[] { Alias }; }
+        }
+
         internal TableExpression(Type type, string alias, string name)
-            : base((ExpressionType)DbExpressionType.Table, type, alias)
+            : base(DbExpressionType.Table, type, alias)
         {
             this.Name = name;
         }
@@ -81,20 +101,25 @@ namespace Signum.Engine.Linq
         {
             return "{0} as {1}".Formato(Name, Alias);
         }
-
     }
 
     /// <summary>
     /// A custom expression node that represents a reference to a column in a SQL query
     /// </summary>
-    internal class ColumnExpression : Expression
+    internal class ColumnExpression : DbExpression, IEquatable<ColumnExpression>
     {
         public readonly string Alias;
         public readonly string Name;
 
-        internal ColumnExpression(Type type, string alias, string name/*, int ordinal*/)
-            : base((ExpressionType)DbExpressionType.Column, type)
+        internal ColumnExpression(Type type, string alias, string name)
+            : base(DbExpressionType.Column, type)
         {
+            if (alias == null)
+                throw new ArgumentNullException("alias");
+
+            if (name == null)
+                throw new ArgumentNullException("name"); 
+
             this.Alias = alias;
             this.Name = name;
         }
@@ -102,6 +127,21 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "[{0}].[{1}]".Formato(Alias, Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ColumnExpression);
+        }
+
+        public bool Equals(ColumnExpression other)
+        {
+            return other != null && other.Alias == Alias && other.Name == Name; 
+        }
+
+        public override int GetHashCode()
+        {
+            return Alias.GetHashCode() ^ Name.GetHashCode();
         }
     }
 
@@ -115,6 +155,7 @@ namespace Signum.Engine.Linq
         internal ColumnDeclaration(string name, Expression expression)
         {
             if (expression == null) throw new ArgumentNullException("expression");
+            if (name == null) throw new ArgumentNullException("name");
 
             this.Name = name;
             this.Expression = expression;
@@ -122,7 +163,8 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0} AS {1}".Formato(Expression, Name); 
+            return Name.HasText()? "{0} AS {1}".Formato(Expression.NiceToString(), Name):
+                                   Expression.NiceToString();
         }
     }
 
@@ -135,13 +177,12 @@ namespace Signum.Engine.Linq
         Sum,
     }
 
-
-    internal class AggregateExpression : Expression
+    internal class AggregateExpression : DbExpression
     {
         public readonly Expression Source;
         public readonly AggregateFunction AggregateFunction;
         public AggregateExpression(Type type, Expression source, AggregateFunction aggregateFunction)
-            : base((ExpressionType)DbExpressionType.Aggregate, type)
+            : base(DbExpressionType.Aggregate, type)
         {
             if (source == null && aggregateFunction != AggregateFunction.Count) throw new ArgumentNullException("source");
 
@@ -151,7 +192,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0}({1})".Formato(AggregateFunction, Source.TryCC(s => s.ToString()) ?? "*");
+            return "{0}({1})".Formato(AggregateFunction, Source.NiceToString() ?? "*");
         }
     }
 
@@ -182,7 +223,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "OrderType: {0} Expression: {1}".Formato(OrderType, Expression);
+            return "OrderType: {0} Expression: {1}".Formato(OrderType, Expression.NiceToString());
         }
     }
 
@@ -200,24 +241,25 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// A custom expression node used to represent a SQL SELECT expression
     /// </summary>
-    internal class SelectExpression : SourceExpression
+    internal class SelectExpression : SourceWithAliasExpression
     {
         public readonly ReadOnlyCollection<ColumnDeclaration> Columns;
-        public readonly Expression From;
+        public readonly SourceExpression From;
         public readonly Expression Where;
         public readonly ReadOnlyCollection<OrderExpression> OrderBy;
         public readonly ReadOnlyCollection<Expression> GroupBy;
-        public readonly string GroupOf;
         public readonly Expression Top;
-        public readonly bool Distinct; 
+        public readonly bool Distinct;
 
-        internal SelectExpression(
-            Type type, string alias, bool distinct, Expression top, IEnumerable<ColumnDeclaration> columns,
-            Expression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy, string groupOf)
-            : base((ExpressionType)DbExpressionType.Select, type, alias)
+        readonly string[] knownAliases; 
+        public override string[] KnownAliases
         {
-            if (from == null) throw new ArgumentNullException("from");
+            get { return knownAliases; }
+        }
 
+        internal SelectExpression(string alias, bool distinct, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
+            : base(DbExpressionType.Select, typeof(void), alias)
+        {
             this.Distinct = distinct;
             this.Top = top; 
             this.Columns = columns.ToReadOnly();
@@ -225,7 +267,7 @@ namespace Signum.Engine.Linq
             this.Where = where;
             this.OrderBy = orderBy.ToReadOnly();
             this.GroupBy = groupBy.ToReadOnly();
-            this.GroupOf = groupOf; 
+            this.knownAliases = from == null ? new[] { alias } : from.KnownAliases.And(alias).ToArray(); 
         }
 
         internal SelectRoles SelectRoles
@@ -253,13 +295,13 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}AS {7}".Formato(
-                Distinct ? "DISTINCT " : "", 
-                Top.TryCC(t => "TOP {0} ".Formato(t)), 
+                Distinct ? "DISTINCT " : "",
+                Top.TryCC(t => "TOP {0} ".Formato(t.NiceToString())),
                 Columns.TryCC(c => c.ToString(", ")),
-                From.ToString().Map(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a),
-                Where.TryCC(a => "WHERE " + a.ToString() + "\r\n"),
-                OrderBy.TryCC(c => "ORDER BY " + c.ToString(" ,") + "\r\n"),
-                GroupBy.TryCC(g => "GROUP BY " + g.ToString(" ,") + "\r\n"),
+                From.TryCC(f=>f.ToString().Map(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
+                Where.TryCC(a => "WHERE " + a.NiceToString() + "\r\n"),
+                OrderBy.TryCC(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
+                GroupBy.TryCC(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
                 Alias);
         }
     }
@@ -274,6 +316,7 @@ namespace Signum.Engine.Linq
         CrossApply,
         OuterApply,
         LeftOuterJoin,
+        SingleRowLeftOuterJoin,
         RightOuterJoin,
         FullOuterJoin, 
     }
@@ -281,33 +324,42 @@ namespace Signum.Engine.Linq
     /// <summary>
     /// A custom expression node representing a SQL join clause
     /// </summary>
-    internal class JoinExpression : Expression
+    internal class JoinExpression : SourceExpression
     {
         public readonly JoinType JoinType;
-        public readonly Expression Left;
-        public readonly Expression Right;
-        public readonly bool IsSingleRow; 
+        public readonly SourceExpression Left;
+        public readonly SourceExpression Right;
         public new readonly Expression Condition;
-        internal JoinExpression(Type type, JoinType joinType, Expression left, Expression right, Expression condition, bool isSingleRow)
-            : base((ExpressionType)DbExpressionType.Join, type)
-        {
-            if (left == null) throw new ArgumentNullException("left");
-            if (right == null) throw new ArgumentNullException("right");
-            if (condition == null && JoinType != JoinType.CrossApply && JoinType != JoinType.CrossJoin) throw new ArgumentNullException("condition");
 
-            if (isSingleRow && joinType != JoinType.LeftOuterJoin)
-                throw new ArgumentException("{0} not allowed if isSingleRow is true".Formato(joinType));
+        public override string[] KnownAliases
+        {
+            get { return Left.KnownAliases.Concat(Right.KnownAliases).ToArray(); }
+        }
+
+        internal JoinExpression(Type type, JoinType joinType, SourceExpression left, SourceExpression right, Expression condition)
+            : base(DbExpressionType.Join, type)
+        {
+            if (left == null) 
+                throw new ArgumentNullException("left");
+
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            if (condition == null && joinType != JoinType.CrossApply && joinType != JoinType.CrossJoin)
+                throw new ArgumentNullException("condition");
+
+            if (joinType == JoinType.SingleRowLeftOuterJoin && !(right is TableExpression))
+                throw new ArgumentException("right"); 
 
             this.JoinType = joinType;
             this.Left = left;
             this.Right = right;
             this.Condition = condition;
-            this.IsSingleRow = isSingleRow; 
         }
    
         public override string ToString()
         {
-            return "{0}\r\n{1}\r\n{2}\r\nON {3}".Formato(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition);
+            return "{0}\r\n{1}\r\n{2}\r\nON {3}".Formato(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.NiceToString());
         }
     }
 
@@ -354,7 +406,9 @@ namespace Signum.Engine.Linq
         GETDATE,
         DATEPART, 
         DATEDIFF,
-        DATEADD, 
+        DATEADD,
+
+        COALESCE,
     }
 
     internal enum SqlEnums
@@ -372,11 +426,11 @@ namespace Signum.Engine.Linq
 
 
 
-    internal class SqlEnumExpression: Expression
+    internal class SqlEnumExpression : DbExpression
     {
         public readonly SqlEnums Value; 
         public SqlEnumExpression(SqlEnums value)
-            :base((ExpressionType)DbExpressionType.SqlEnum, typeof(object))
+            :base(DbExpressionType.SqlEnum, typeof(object))
         {
             this.Value = value; 
         }
@@ -387,13 +441,13 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class SqlFunctionExpression : Expression
+    internal class SqlFunctionExpression : DbExpression
     {
         public readonly string SqlFunction;
         public readonly ReadOnlyCollection<Expression> Arguments;
 
         public SqlFunctionExpression(Type type, string sqlFunction, IEnumerable<Expression> arguments)
-            :base((ExpressionType)DbExpressionType.SqlFunction, type )
+            :base(DbExpressionType.SqlFunction, type )
         {
             this.SqlFunction = sqlFunction;
             this.Arguments = arguments.ToReadOnly(); 
@@ -401,7 +455,28 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0}({1})".Formato(SqlFunction, Arguments.ToString(","));
+            return "{0}({1})".Formato(SqlFunction, Arguments.ToString(a => a.NiceToString(), ","));
+        }
+    }
+
+    internal class SqlConstantExpression : DbExpression
+    {
+        public readonly object Value;
+
+        public SqlConstantExpression(object value)
+            : this(value, value.GetType())
+        {
+        }
+
+        public SqlConstantExpression(object value, Type type)
+            : base(DbExpressionType.SqlConstant, type)
+        {
+            this.Value = value;
+        }
+
+        public override string ToString()
+        {
+            return Value.TryToString("NULL");
         }
     }
 
@@ -427,17 +502,17 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "  WHEN {0} THEN {1}".Formato(Condition, Value);
+            return "  WHEN {0} THEN {1}".Formato(Condition.NiceToString(), Value.NiceToString());
         }
     }
 
-    internal class CaseExpression : Expression
+    internal class CaseExpression : DbExpression
     {
         public readonly ReadOnlyCollection<When> Whens;
         public readonly Expression DefaultValue;
 
         public CaseExpression(IEnumerable<When> whens, Expression defaultValue)
-            :base((ExpressionType)DbExpressionType.Case, defaultValue.Type)
+            :base(DbExpressionType.Case, defaultValue.Type)
         {
             if (whens.Any(w => w.Value.Type != defaultValue.Type))
                 throw new ArgumentException("whens");
@@ -448,17 +523,17 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "CASE\r\n{0}\r\n  ELSE {1}\r\nEND".Formato(Whens.ToString("\r\n"), DefaultValue);
+            return "CASE\r\n{0}\r\n  ELSE {1}\r\nEND".Formato(Whens.ToString("\r\n"), DefaultValue.NiceToString());
         }
     }
 
-    internal class LikeExpression : Expression
+    internal class LikeExpression : DbExpression
     {
         public readonly Expression Expression;
         public readonly Expression Pattern;
 
         public LikeExpression(Expression expression, Expression pattern)
-            :base((ExpressionType)DbExpressionType.Like, typeof(bool))
+            :base(DbExpressionType.Like, typeof(bool))
         {
             if (expression == null || expression.Type != typeof(string))
                 throw new ArgumentException("expression");
@@ -471,38 +546,134 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0} LIKE {1}".Formato(Expression, Pattern);
+            return "{0} LIKE {1}".Formato(Expression.NiceToString(), Pattern.NiceToString());
         }
     }
 
-    internal class InExpression : Expression
+    internal abstract class SubqueryExpression : DbExpression
+    {
+        public readonly SelectExpression Select;
+        protected SubqueryExpression(DbExpressionType nodeType, Type type, SelectExpression select)
+            : base(nodeType, type)
+        {
+            System.Diagnostics.Debug.Assert(nodeType == DbExpressionType.Scalar || nodeType == DbExpressionType.Exists || nodeType == DbExpressionType.In);
+            this.Select = select;
+        }
+    }
+
+    internal class ScalarExpression : SubqueryExpression
+    {
+        public ScalarExpression(Type type, SelectExpression select)
+            : base(DbExpressionType.Scalar, type, select)
+        {
+        }
+
+        public override string ToString()
+        {
+            return "SCALAR({0})".Formato(Select.NiceToString());
+        }
+    }
+
+    internal class IsNullExpression : DbExpression
+    {
+        public readonly Expression Expression;
+
+        public IsNullExpression(Expression expression)
+            : base(DbExpressionType.IsNull, typeof(bool))
+        {
+            this.Expression = expression;
+        }
+
+        public override string ToString()
+        {
+            return "{0} IS NULL".Formato(Expression.NiceToString());
+        }
+    }
+
+    internal class IsNotNullExpression : DbExpression
+    {
+        public readonly Expression Expression;
+
+        public IsNotNullExpression(Expression expression)
+            : base(DbExpressionType.IsNotNull, typeof(bool))
+        {
+            this.Expression = expression;
+        }
+
+        public override string ToString()
+        {
+            return "{0} IS NOT NULL".Formato(Expression.NiceToString());
+        }
+    }
+
+    internal class ExistsExpression : SubqueryExpression
+    {
+        public ExistsExpression(SelectExpression select)
+            : base(DbExpressionType.Exists, typeof(bool), select)
+        {
+        }
+
+        public override string ToString()
+        {
+            return "EXIST({0})".Formato(Select.NiceToString());
+        }
+    }
+
+    internal class InExpression : SubqueryExpression
     {
         public readonly Expression Expression;
         public readonly object[] Values;
 
-        public InExpression(Expression expression, object[] values)
-            : base((ExpressionType)DbExpressionType.In, typeof(bool))
+        public InExpression(Expression expression, SelectExpression select)
+            : base(DbExpressionType.In, typeof(bool), select)
         {
             if (expression == null)throw new ArgumentNullException("expression");
-            if (values == null) throw new ArgumentNullException("values"); 
+            if (select == null) throw new ArgumentNullException("select"); 
        
+            this.Expression = expression;
+        }
+
+        public InExpression(Expression expression, object[] values)
+            : base(DbExpressionType.In, typeof(bool), null)
+        {
+            if (expression == null) throw new ArgumentNullException("expression");
+            if (values == null) throw new ArgumentNullException("values");
+
             this.Expression = expression;
             this.Values = values;
         }
 
         public override string ToString()
         {
-            return "{0} IN ({1})".Formato(Expression, Values.ToString(", "));
+            return "{0} IN ({1})".Formato(Expression.NiceToString(), Values.ToString(", "));
         }
     }
 
+    internal class AggregateSubqueryExpression : DbExpression
+    {
+        public readonly string GroupByAlias;
+        public readonly Expression AggregateInGroupSelect;
+        public readonly ScalarExpression AggregateAsSubquery;
+        public AggregateSubqueryExpression(string groupByAlias, Expression aggregateInGroupSelect, ScalarExpression aggregateAsSubquery)
+            : base(DbExpressionType.AggregateSubquery, aggregateAsSubquery.Type)
+        {
+            this.AggregateInGroupSelect = aggregateInGroupSelect;
+            this.GroupByAlias = groupByAlias;
+            this.AggregateAsSubquery = aggregateAsSubquery;
+        }
 
-    internal class RowNumberExpression : Expression
+        public override string ToString()
+        {
+            return "AGGREGATE OF {0}({1}) OR\r\n {2}".Formato(GroupByAlias, AggregateInGroupSelect, AggregateAsSubquery);
+        }
+    }
+
+    internal class RowNumberExpression : DbExpression
     {
         public readonly ReadOnlyCollection<OrderExpression> OrderBy;
 
         public RowNumberExpression(IEnumerable<OrderExpression> orderBy)
-            :base((ExpressionType)DbExpressionType.RowNumber, typeof(int))
+            :base(DbExpressionType.RowNumber, typeof(int))
         {
             this.OrderBy = orderBy.ToReadOnly(); 
         }
@@ -513,36 +684,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal enum SetOperation
-    {
-        Union,
-        Except,
-        Intersect,
-        Concat,
-    }
-
-    internal class SetOperationExpression : SourceExpression
-    {
-        public readonly SelectExpression Left; // not necessary a select, could be a table or a set operation, but it is de facto
-        public readonly SelectExpression Right;
-        public readonly SetOperation SetOperation;
-
-        public SetOperationExpression(Type type, string alias, SetOperation setOperation, SelectExpression left, SelectExpression right)
-            :base((ExpressionType)DbExpressionType.SetOperation, type, alias)
-        {
-            if (left == null) throw new ArgumentNullException("left");
-            if (right == null) throw new ArgumentNullException("right");
-
-            this.SetOperation = setOperation; 
-            this.Left = left;
-            this.Right = right;
-        }
-
-        public override string ToString()
-        {
-            return "{0}\r\n{1}\r\n{2}".Formato(Left.ToString().Indent(4), SetOperation, Right.ToString().Indent(4));
-        }
-    }
 
     internal enum UniqueFunction
     {
@@ -550,39 +691,23 @@ namespace Signum.Engine.Linq
         FirstOrDefault,
         Single,
         SingleOrDefault,
-        SingleGreaterThanZero,
-        SingleIsZero,
     }
 
     /// <summary>
     /// A custom expression representing the construction of one or more result objects from a 
     /// SQL select expression
     /// </summary>
-    internal class ProjectionExpression : Expression
+    internal class ProjectionExpression : DbExpression
     {   
         public readonly SelectExpression Source;
         public readonly Expression Projector;
         public readonly UniqueFunction?  UniqueFunction;
 
         internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction)
-            : this(source.Type, source, projector, uniqueFunction)
-        {  }
-
-        internal ProjectionExpression(Type type, SelectExpression source, Expression projector, UniqueFunction? uniqueFunction)
-            : base((ExpressionType)DbExpressionType.Projection, type)
+            : base(DbExpressionType.Projection,
+            uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) :
+            projector.Type)
         {
-            Type elemType = ReflectionTools.CollectionType(type);
-
-            if ((uniqueFunction == null) == (elemType == null))
-                throw new ApplicationException("uniqueFunction is {0} but type is {1}".Formato(uniqueFunction.TryToString("[null]"), type.TypeName()));
-
-            if ( uniqueFunction != Signum.Engine.Linq.UniqueFunction.SingleIsZero &&
-                 uniqueFunction != Signum.Engine.Linq.UniqueFunction.SingleGreaterThanZero &&
-                 !(elemType ?? type).IsAssignableFrom(projector.Type))
-                throw new ApplicationException("ProjectionExpression Type is {0} but projector type is {1}".Formato(type.TypeName(), projector.Type.TypeName()));
-
-            //not very strict about source type
-
             this.Source = source;
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
@@ -595,7 +720,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "SOURCE\r\n{0}\r\nPROJECTION\r\n{1}".Formato(Source.ToString().Indent(4), Projector.ToString().Indent(4)); 
+            return "SOURCE\r\n{0}\r\nPROJECTION\r\n{1}".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
         }
     }
 }

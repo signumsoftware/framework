@@ -126,6 +126,14 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void AnyCollection()
+        {
+            var years = new[] { 1992, 1993, 1995 };
+
+            var list = Database.Query<AlbumDN>().Where(a => years.Any(y => a.Year == y)).Select(a => a.Name).ToList();
+        }
+
+        [TestMethod]
         public void AnySql()
         {
             BandDN smashing = Database.Query<BandDN>().Single(b => b.Members.Any(a => a.Sex == Sex.Female));

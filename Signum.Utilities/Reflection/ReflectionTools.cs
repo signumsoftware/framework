@@ -91,6 +91,15 @@ namespace Signum.Utilities.Reflection
             return BaseMemberInfo(lambda);
         }
 
+        public static Type GetReceiverType<T1>(Expression<Func<T1, object>> lambda)
+        {
+            Expression body = lambda.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            return ((MemberExpression)body).Expression.Type;
+        }
+
         static MemberInfo BaseMemberInfo(LambdaExpression lambdaExpression)
         {
             Expression body = lambdaExpression.Body;

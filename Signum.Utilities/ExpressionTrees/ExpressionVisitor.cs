@@ -87,7 +87,7 @@ namespace Signum.Utilities.ExpressionTrees
             }
         }
 
-        protected virtual MemberBinding VisitBinding(MemberBinding binding)
+        protected MemberBinding VisitBinding(MemberBinding binding)
         {
             switch (binding.BindingType)
             {
@@ -196,7 +196,7 @@ namespace Signum.Utilities.ExpressionTrees
             return m;
         }
 
-        protected virtual ReadOnlyCollection<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
+        protected ReadOnlyCollection<Expression> VisitExpressionList(ReadOnlyCollection<Expression> original)
         {
             return original.NewIfChange(e => Visit(e));
         }
@@ -231,12 +231,12 @@ namespace Signum.Utilities.ExpressionTrees
             return binding;
         }
 
-        protected virtual IEnumerable<MemberBinding> VisitBindingList(ReadOnlyCollection<MemberBinding> original)
+        protected IEnumerable<MemberBinding> VisitBindingList(ReadOnlyCollection<MemberBinding> original)
         {
             return original.NewIfChange(b => VisitBinding(b)); 
         }
 
-        protected virtual IEnumerable<ElementInit> VisitElementInitializerList(ReadOnlyCollection<ElementInit> original)
+        protected IEnumerable<ElementInit> VisitElementInitializerList(ReadOnlyCollection<ElementInit> original)
         {
             return original.NewIfChange(e => VisitElementInitializer(e));
         }

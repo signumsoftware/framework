@@ -57,5 +57,13 @@ namespace Signum.Utilities
         {
             return new ExpandableQueryProvider<T>(q);
         }
+
+        public static string NiceToString(this Expression expression)
+        {
+            if (expression == null)
+                return null;
+
+            return ExpressionToString.NiceToString(expression); 
+        }
     }
 }

@@ -149,13 +149,6 @@ namespace Signum.Engine.Linq
                         return BindTake(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                     case "Skip":
                         return BindSkip(m.Type, m.GetArgument("source"), m.GetArgument("count"));
-                    case "Union":
-                    case "Concat":
-                    case "Except":
-                    case "Intersect":
-                        return BindSetOperation(m.Type, m.Method.Name.ToEnum<SetOperation>(),
-                            m.TryGetArgument("first") ?? m.GetArgument("source1"),
-                            m.TryGetArgument("second") ?? m.GetArgument("source2"));
                 }
             }
 
@@ -219,11 +212,6 @@ namespace Signum.Engine.Linq
             }
 
             throw new InvalidOperationException(); 
-        }
-
-        private Expression BindSetOperation(Type resultType, SetOperation setOperation, Expression left, Expression right)
-        {
-            return AsProjection(Visit(left));
         }
 
         private Expression BindTake(Type resultType, Expression source, Expression count)

@@ -45,7 +45,7 @@ namespace Signum.Engine.Linq
                     var groupBy = (selectRole & SelectRoles.GroupBy) != 0 ? newSelect.GroupBy : fromSelect.GroupBy;
                     var orderBy = (selectRole & SelectRoles.OrderBy) != 0 ? newSelect.OrderBy : fromSelect.OrderBy;
 
-                    return new SelectExpression(newSelect.Type, newSelect.Alias, distinct, top, newSelect.Columns, newSelect.From, where, orderBy, groupBy, null); 
+                    return new SelectExpression(newSelect.Alias, distinct, top, newSelect.Columns, newSelect.From, where, orderBy, groupBy); 
                 }
             }
 

@@ -24,7 +24,6 @@ namespace Signum.Engine.Linq
                 return newProj.Source;
             else
                 return newProj; 
-            
         }
     }
 }

@@ -41,32 +41,21 @@ namespace Signum.Engine.Linq
 
             IEnumerable<T> reader = new ProjectionRowEnumerable<T>(enumerator);
 
-            if (Unique == UniqueFunction.SingleIsZero || Unique == UniqueFunction.SingleGreaterThanZero)
-            {
-                int count = (int)(object)reader.Single();
-                if (Unique == UniqueFunction.SingleGreaterThanZero)
-                    return count > 0;
-                else
-                    return count == 0;
-            }
+            if (Unique.HasValue)
+                switch (Unique.Value)
+                {
+                    case UniqueFunction.First: return reader.First();
+                    case UniqueFunction.FirstOrDefault: return reader.FirstOrDefault();
+                    case UniqueFunction.Single: return reader.Single();
+                    case UniqueFunction.SingleOrDefault: return reader.SingleOrDefault();
+                    default:
+                        throw new InvalidOperationException();
+                }
             else
-            {
-                if (Unique.HasValue)
-                    switch (Unique.Value)
-                    {
-                        case UniqueFunction.First: return reader.First();
-                        case UniqueFunction.FirstOrDefault: return reader.FirstOrDefault();
-                        case UniqueFunction.Single: return reader.Single();
-                        case UniqueFunction.SingleOrDefault: return reader.SingleOrDefault();
-                        default:
-                            throw new InvalidOperationException();
-                    }
+                if (HasFullObjects || pr != null)
+                    return reader.ToList();
                 else
-                    if (HasFullObjects || pr != null)
-                        return reader.ToList();
-                    else
-                        return reader;
-            }
+                    return reader;
         }
     }
 }

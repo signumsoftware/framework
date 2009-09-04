@@ -43,6 +43,9 @@ namespace Signum.Test.LinqProvider
     [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
     public interface IAuthorDN : IIdentifiable
     {
+        string Name { get; }
+
+        AwardDN LastAward { get; }
     }
 
     [Serializable]
@@ -71,6 +74,14 @@ namespace Signum.Test.LinqProvider
             set { Set(ref sex, value, "Sex"); }
         }
 
+        [ImplementedByAll]
+        AwardDN lastAward;
+        public AwardDN LastAward
+        {
+            get { return lastAward; }
+            set { Set(ref lastAward, value, "LastAward"); }
+        }
+
         public override string ToString()
         {
             return name;
@@ -82,8 +93,6 @@ namespace Signum.Test.LinqProvider
         Male,
         Female
     }
-
-
 
     [Serializable]
     public class BandDN : Entity, IAuthorDN
@@ -102,6 +111,80 @@ namespace Signum.Test.LinqProvider
         {
             get { return members; }
             set { Set(ref members, value, "Members"); }
+        }
+
+        AwardDN lastAward;
+        public AwardDN LastAward
+        {
+            get { return lastAward; }
+            set { Set(ref lastAward, value, "LastAward"); }
+        }
+
+        public override string ToString()
+        {
+            return name;
+        }
+    }
+
+    [Serializable, ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
+    public abstract class AwardDN : Entity
+    {
+        int year;
+        public int Year
+        {
+            get { return year; }
+            set { Set(ref year, value, "Year"); }
+        }
+
+        [NotNullable, SqlDbType( Size = 100)]
+        string category;
+        [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
+        public string Category
+        {
+            get { return category; }
+            set { Set(ref category, value, "Category"); }
+        }
+
+        AwardResult result;
+        public AwardResult Result
+        {
+            get { return result; }
+            set { Set(ref result, value, "Result"); }
+        }
+    }
+
+    public enum AwardResult 
+    {
+        Won,
+        Nominated
+    }
+
+    [Serializable]
+    public class GrammyAwardDN : AwardDN
+    {
+    }
+
+    [Serializable]
+    public class AmericanMusicAwardDN : AwardDN
+    {
+    }
+
+    [Serializable]
+    public class PersonalAwardDN : AwardDN
+    {
+    }
+
+
+    [Serializable]
+    public class LabelDN : Entity
+    {
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        string name;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Name
+        {
+            get { return name; }
+            set { SetToStr(ref name, value, "Name"); }
         }
 
         public override string ToString()
@@ -138,11 +221,18 @@ namespace Signum.Test.LinqProvider
             set { Set(ref author, value, "Author"); }
         }
 
-        MList<SongDN> song;
-        public MList<SongDN> Song
+        MList<SongDN> songs;
+        public MList<SongDN> Songs
         {
-            get { return song; }
-            set { Set(ref song, value, "Song"); }
+            get { return songs; }
+            set { Set(ref songs, value, "Song"); }
+        }
+
+        LabelDN label;
+        public LabelDN Label
+        {
+            get { return label; }
+            set { Set(ref label, value, "Label"); }
         }
 
         public override string ToString()

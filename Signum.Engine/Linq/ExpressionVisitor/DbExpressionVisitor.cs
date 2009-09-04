@@ -37,32 +37,38 @@ namespace Signum.Engine.Linq
                     return this.VisitProjection((ProjectionExpression)exp);
                 case DbExpressionType.Aggregate:
                     return this.VisitAggregate((AggregateExpression)exp);
+                case DbExpressionType.AggregateSubquery:
+                    return this.VisitAggregateSubquery((AggregateSubqueryExpression)exp);
                 case DbExpressionType.SqlEnum:
                     return this.VisitSqlEnum((SqlEnumExpression)exp);
                 case DbExpressionType.SqlFunction:
                     return this.VisitSqlFunction((SqlFunctionExpression)exp);
+                case DbExpressionType.SqlConstant:
+                    return this.VisitSqlConstant((SqlConstantExpression)exp); 
                 case DbExpressionType.Case:
                     return this.VisitCase((CaseExpression)exp); 
                 case DbExpressionType.RowNumber:
                     return this.VisitRowNumber((RowNumberExpression)exp);
-                case DbExpressionType.SetOperation:
-                    return this.VisitSetOperation((SetOperationExpression)exp);
                 case DbExpressionType.Like:
                     return this.VisitLike((LikeExpression)exp);
                 case DbExpressionType.In:
-                    return this.VisitIn((InExpression)exp); 
+                case DbExpressionType.Scalar:
+                case DbExpressionType.Exists:
+                    return this.VisitSubquery((SubqueryExpression)exp);
+                case DbExpressionType.IsNull:
+                    return this.VisitIsNull((IsNullExpression)exp);
+                case DbExpressionType.IsNotNull:
+                    return this.VisitIsNotNull((IsNotNullExpression)exp);
                 case DbExpressionType.FieldInit:
                     return this.VisitFieldInit((FieldInitExpression)exp);
+                case DbExpressionType.EmbeddedFieldInit:
+                    return this.VisitEmbeddedFieldInit((EmbeddedFieldInitExpression)exp); 
                 case DbExpressionType.ImplementedBy:
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
                 case DbExpressionType.ImplementedByAll:
                     return this.VisitImplementedByAll((ImplementedByAllExpression)exp);     
-                case DbExpressionType.NullEntity:
-                    return this.VisitNullEntity((NullEntityExpression)exp); 
                 case  DbExpressionType.LazyReference:
                     return this.VisitLazyReference((LazyReferenceExpression)exp);
-                case DbExpressionType.LazyLiteral:
-                    return this.VisitLazyLiteral((LazyLiteralExpression)exp);
                 case DbExpressionType.MList:
                     return this.VisitMList((MListExpression)exp);
 
@@ -70,7 +76,6 @@ namespace Signum.Engine.Linq
                     return base.Visit(exp);
             }
         }
-
      
         protected virtual Expression VisitMList(MListExpression ml)
         {
@@ -80,29 +85,16 @@ namespace Signum.Engine.Linq
             return ml;
         }
 
-        protected virtual Expression VisitNullEntity(NullEntityExpression ne)
-        {
-            return ne;
-        }
-
         protected virtual Expression VisitLazyReference(LazyReferenceExpression lazy)
         {
             var newRef = Visit(lazy.Reference);
-            if (newRef != lazy.Reference)
-                return new LazyReferenceExpression(lazy.Type, newRef);
+            var newToStr = Visit(lazy.ToStr);
+            var newId = Visit(lazy.Id);
+            var newTypeId = Visit(lazy.TypeId);
+            if (newRef != lazy.Reference || newToStr != lazy.ToStr || newId != lazy.Id || newTypeId != lazy.TypeId)
+                return new LazyReferenceExpression(lazy.Type, newRef, newId, newToStr, newTypeId);
             return lazy;
         }
-
-
-        protected virtual Expression VisitLazyLiteral(LazyLiteralExpression lazy)
-        {
-            var id = (ColumnExpression)Visit(lazy.ID);
-            var toStr = (ColumnExpression)Visit(lazy.ToStr);
-            if (id != lazy.ID || toStr != lazy.ToStr)
-                return new LazyLiteralExpression(lazy.Type, lazy.RuntimeType, id, toStr);
-            return lazy;
-        }
-
 
         protected virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
@@ -121,52 +113,52 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
-            var id = (ColumnExpression)Visit(reference.ID);
-            var typeId = (ColumnExpression)Visit(reference.TypeID);
-            var newImple = reference.Implementations
+            var id = Visit(reference.Id);
+            var typeId = Visit(reference.TypeId);
+            var implementations = reference.Implementations
                .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
 
-            if (id != reference.ID || typeId != reference.TypeID || newImple != reference.Implementations)
-                return new ImplementedByAllExpression(reference.Type, id, typeId) {  Implementations = newImple};
+            if (id != reference.Id || typeId != reference.TypeId || implementations != reference.Implementations)
+                return new ImplementedByAllExpression(reference.Type, id, typeId) {  Implementations = implementations};
             return reference;
         }
 
         protected virtual Expression VisitImplementedBy(ImplementedByExpression reference)
         {
-            var newImple = reference.Implementations
+            var implementations = reference.Implementations
                 .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
 
-            if (newImple != reference.Implementations)
-                return new ImplementedByExpression(reference.Type, newImple);
+            var propertyBindings = reference.PropertyBindings.NewIfChange(pb => Visit(pb.Binding).Map(r => r == pb.Binding ? pb : new PropertyBinding(pb.PropertyInfo, r)));
+
+            if (implementations != reference.Implementations || propertyBindings != reference.PropertyBindings)
+                return new ImplementedByExpression(reference.Type, implementations) { PropertyBindings = propertyBindings };
             return reference;
         }
 
-        protected virtual Expression VisitFieldInit(FieldInitExpression fieldInit)
+        protected virtual Expression VisitFieldInit(FieldInitExpression fie)
         {
-            var newFields = fieldInit.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
-            var id = Visit(fieldInit.ExternalId);
-            var alias = VisitFieldInitAlias(fieldInit.Alias);
-            var other = Visit(fieldInit.OtherCondition);
-            if (fieldInit.Bindings != newFields || fieldInit.ExternalId != id || fieldInit.Alias != alias || fieldInit.OtherCondition != other)
+            var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
+            var propertyBindings = fie.PropertyBindings.NewIfChange(pb => Visit(pb.Binding).Map(r => r == pb.Binding ? pb : new PropertyBinding(pb.PropertyInfo, r)));
+            
+            var id = Visit(fie.ExternalId);
+            var other = Visit(fie.OtherCondition);
+
+            if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.PropertyBindings != propertyBindings)
             {
-                return new FieldInitExpression(fieldInit.Type, alias, id, other) { Bindings = newFields };
+                return new FieldInitExpression(fie.Type, fie.TableAlias, id, other) { Bindings = bindings, PropertyBindings = propertyBindings };
             }
-            return fieldInit;
+            return fie;
         }
 
-        protected virtual string VisitFieldInitAlias(string alias)
+        protected virtual Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
         {
-            return alias; 
-        }
-
-        protected virtual Expression VisitSetOperation(SetOperationExpression setOperationExp)
-        {
-            SelectExpression left = (SelectExpression)Visit(setOperationExp.Left);
-            SelectExpression right = (SelectExpression)Visit(setOperationExp.Right);
-            if (setOperationExp.Left != left || setOperationExp.Right != right)
-                return new SetOperationExpression(setOperationExp.Type, setOperationExp.Alias, setOperationExp.SetOperation, left, right); 
-
-            return setOperationExp;
+            var bindings = efie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
+            var propertyBindings = efie.PropertyBindings.NewIfChange(pb => Visit(pb.Binding).Map(r => r == pb.Binding ? pb : new PropertyBinding(pb.PropertyInfo, r)));
+            if (efie.Bindings != bindings || efie.PropertyBindings != propertyBindings)
+            {
+                return new EmbeddedFieldInitExpression(efie.Type, bindings) { PropertyBindings = propertyBindings };
+            }
+            return efie;
         }
 
         protected virtual Expression VisitLike(LikeExpression like)
@@ -178,13 +170,64 @@ namespace Signum.Engine.Linq
             return like;
         }
 
-
-        protected virtual Expression VisitIn(InExpression inExpression)
+        protected virtual Expression VisitSubquery(SubqueryExpression subquery)
         {
-            Expression exp = Visit(inExpression.Expression);
-            if (exp != inExpression.Expression)
-                return new InExpression(exp, inExpression.Values);
-            return inExpression;
+            switch ((DbExpressionType)subquery.NodeType)
+            {
+                case DbExpressionType.Scalar:
+                    return this.VisitScalar((ScalarExpression)subquery);
+                case DbExpressionType.Exists:
+                    return this.VisitExists((ExistsExpression)subquery);
+                case DbExpressionType.In:
+                    return this.VisitIn((InExpression)subquery);
+            }
+            return subquery;
+        }
+
+        protected virtual Expression VisitScalar(ScalarExpression scalar)
+        {
+            var select = (SelectExpression)this.Visit(scalar.Select);
+            if (select != scalar.Select)
+                return new ScalarExpression(scalar.Type, select);
+            return scalar;
+        }
+
+        protected virtual Expression VisitExists(ExistsExpression exists)
+        {
+            var select = (SelectExpression)this.Visit(exists.Select);
+            if (select != exists.Select)
+                return new ExistsExpression(select);
+            return exists;
+        }
+
+        protected virtual Expression VisitIn(InExpression @in)
+        {
+            var expression = this.Visit(@in.Expression);
+            var select = (SelectExpression)this.Visit(@in.Select);
+            if (expression != @in.Expression || select != @in.Select)
+            {
+                if (select != null)
+                    return new InExpression(expression, select);
+                else
+                    return new InExpression(expression, @in.Values);
+            }
+            return @in;
+        }
+
+        protected virtual Expression VisitIsNull(IsNullExpression isNull)
+        {
+            var newExpr = Visit(isNull.Expression);
+            if (newExpr != isNull.Expression)
+                return new IsNullExpression(newExpr);
+            return isNull;
+        }
+
+        protected virtual Expression VisitIsNotNull(IsNotNullExpression isNotNull)
+        {
+            var newExpr = Visit(isNotNull.Expression);
+            if (newExpr != isNotNull.Expression)
+                return new IsNotNullExpression(newExpr);
+            return isNotNull;
         }
 
         protected virtual Expression VisitRowNumber(RowNumberExpression rowNumber)
@@ -203,36 +246,44 @@ namespace Signum.Engine.Linq
             return aggregate;
         }
 
+        protected virtual Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+        {
+            var subquery = (ScalarExpression)this.Visit(aggregate.AggregateAsSubquery);
+            if (subquery != aggregate.AggregateAsSubquery)
+                return new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.AggregateInGroupSelect, subquery);
+            return aggregate;
+        }
+
         protected virtual Expression VisitSelect(SelectExpression select)
         {
             Expression top = this.Visit(select.Top);
-            Expression from = this.VisitSource(select.From);
+            SourceExpression from = this.VisitSource(select.From);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
             ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Type, select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy, select.GroupOf);
+                return new SelectExpression(select.Alias, select.Distinct, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }
 
         protected virtual Expression VisitJoin(JoinExpression join)
         {
-            Expression left = this.VisitSource(join.Left);
-            Expression right = this.VisitSource(join.Right);
+            SourceExpression left = this.VisitSource(join.Left);
+            SourceExpression right = this.VisitSource(join.Right);
             Expression condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
-                return new JoinExpression(join.Type, join.JoinType, left, right, condition, join.IsSingleRow);
+                return new JoinExpression(join.Type, join.JoinType, left, right, condition);
             }
             return join;
         }
 
-        protected virtual Expression VisitSource(Expression source)
+        protected virtual SourceExpression VisitSource(SourceExpression source)
         {
-            return this.Visit(source);
+            return (SourceExpression)this.Visit(source);
         }
 
         protected virtual Expression VisitProjection(ProjectionExpression proj)
@@ -241,7 +292,7 @@ namespace Signum.Engine.Linq
             Expression projector = this.Visit(proj.Projector);
             if (source != proj.Source || projector != proj.Projector)
             {
-                return new ProjectionExpression(proj.Type, source, projector, proj.UniqueFunction);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction);
             }
             return proj;
         }
@@ -252,6 +303,11 @@ namespace Signum.Engine.Linq
             if(args != sqlFunction.Arguments)
                 return new SqlFunctionExpression(sqlFunction.Type, sqlFunction.SqlFunction, args); 
             return sqlFunction;
+        }
+
+        protected virtual Expression VisitSqlConstant(SqlConstantExpression sce)
+        {
+            return sce;
         }
 
         protected virtual Expression VisitCase(CaseExpression cex)

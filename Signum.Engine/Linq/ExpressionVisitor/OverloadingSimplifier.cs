@@ -49,16 +49,6 @@ namespace Signum.Engine.Linq
         static MethodInfo miDefaultIfEmptyQ = ReflectionTools.GetMethodInfo(() => Queryable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
         static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Enumerable.DefaultIfEmpty<int>(null)).GetGenericMethodDefinition();
 
-        static MethodInfo miAnyQ = ReflectionTools.GetMethodInfo(() => Queryable.Any((IQueryable<string>)null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyE = ReflectionTools.GetMethodInfo(() => Enumerable.Any((IEnumerable<string>)null)).GetGenericMethodDefinition();
-
-        static MethodInfo miAny2Q = ReflectionTools.GetMethodInfo(() => Queryable.Any((IQueryable<string>)null, null)).GetGenericMethodDefinition();
-        static MethodInfo miAny2E = ReflectionTools.GetMethodInfo(() => Enumerable.Any((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
-
-        static MethodInfo miAllQ = ReflectionTools.GetMethodInfo(() => Queryable.All((IQueryable<string>)null, null)).GetGenericMethodDefinition();
-        static MethodInfo miAllE = ReflectionTools.GetMethodInfo(() => Enumerable.All((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
-
-
         static MethodInfo miCountQ = ReflectionTools.GetMethodInfo(() => Queryable.Count((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miCountE = ReflectionTools.GetMethodInfo(() => Enumerable.Count((IEnumerable<string>)null)).GetGenericMethodDefinition();
 
@@ -167,7 +157,7 @@ namespace Signum.Engine.Linq
                 }
 
                 //IE<R> GroupBy<S, K, R>(this IE<S> source, Func<S, K> keySelector, Func<K, IE<S>, R> resultSelector);
-                //    GroupBy(col, a=>f1(a), a=>f2(a), (a,B)=>f(a,B)) -> GroupBy(col, a=>f1(a), a=>f2(a)).Select(g=>=>f3(g.Key,g))  
+                //    GroupBy(col, a=>f1(a), a=>f2(a), (a,B)=>f3(a,B)) -> GroupBy(col, a=>f1(a), a=>f2(a)).Select(g=>=>f3(g.Key,g))  
                       
                 if (ReflectionTools.MethodEqual(mi, miGroupBySRE) || ReflectionTools.MethodEqual(mi, miGroupBySRQ))
                 {
@@ -298,20 +288,7 @@ namespace Signum.Engine.Linq
                     MethodInfo mCount = (decType == typeof(Queryable) ? miCountQ : miCountE).MakeGenericMethod(paramTypes[0]);
                     
                     return Expression.Call(mCount, Expression.Call(mWhere, source, predicate)); 
-                }
-
-                if (ReflectionTools.MethodEqual(mi, miAny2E) || ReflectionTools.MethodEqual(mi, miAny2Q))
-                {
-                    var source = Visit(m.GetArgument("source"));
-                    var predicate = (LambdaExpression)Visit(m.GetArgument("predicate").StripQuotes());
-
-                    MethodInfo mWhere = (decType == typeof(Queryable) ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]);
-                    MethodInfo mAny = (decType == typeof(Queryable) ? miAnyQ : miAnyE).MakeGenericMethod(paramTypes[0]);
-
-                    return Expression.Call(mAny, Expression.Call(mWhere, source, predicate));
-                }
-
-                
+                }                
 
                 //IE<O> Back<O,I>(this I element, Func<O, I> link)
                 //   house.Back((Persona p)=>p.House)

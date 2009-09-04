@@ -15,7 +15,7 @@ namespace Signum.Test.LinqProvider
     /// Summary description for LinqProvider
     /// </summary>
     [TestClass]
-    public class JoinTest
+    public class JoinGroupTest
     {
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
@@ -33,8 +33,8 @@ namespace Signum.Test.LinqProvider
         public void Join()
         {
             var songsAlbum = (from a in Database.Query<AlbumDN>()
-                              join b in Database.Query<AlbumDN>().SelectMany(a => a.Song) on a.Name equals b.Name
-                              select a.Name).ToList();
+                              join b in Database.Query<AlbumDN>().SelectMany(a => a.Songs) on a.Name equals b.Name
+                              select new { a.Name, Label = a.Label.Name }).ToList();
         }
 
         [TestMethod]

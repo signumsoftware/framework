@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Properties; 
+using Signum.Entities.Properties;
+using System.Reflection; 
 
 namespace Signum.Entities
 {
@@ -31,7 +32,7 @@ namespace Signum.Entities
                 throw new ApplicationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(T)));
         }
 
-        public Lazy(T entidad)
+        internal Lazy(T entidad)
             : base((IdentifiableEntity)(IIdentifiable)entidad)
         {   
         }
@@ -61,8 +62,6 @@ namespace Signum.Entities
             else
                 return object.ReferenceEquals(this.EntityOrNull, entity);
         }
-
-
     }
 
     [Serializable]
@@ -76,7 +75,7 @@ namespace Signum.Entities
         {
         }
 
-        public Lazy(Type runtimeType, int id)
+        protected Lazy(Type runtimeType, int id)
         {
             if (runtimeType == null || !typeof(IdentifiableEntity).IsAssignableFrom(runtimeType))
                 throw new ApplicationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(IIdentifiable)));
@@ -85,13 +84,12 @@ namespace Signum.Entities
             this.id = id;
         }
 
-        public Lazy(IdentifiableEntity entidad)
+        protected Lazy(IdentifiableEntity entidad)
         {
             if (entidad == null)
                 throw new ArgumentNullException("entidad");
 
             this.runtimeType = entidad.GetType();
-            this.ToStr = entidad.ToString();
             this.UntypedEntityOrNull = entidad;
             this.id = entidad.IdOrNull;
         }
@@ -197,7 +195,16 @@ namespace Signum.Entities
 
         public static Lazy Create(Type type, IdentifiableEntity entidad)
         {
-            return (Lazy)Activator.CreateInstance(Reflector.GenerateLazy(type), entidad);
+            if (entidad == null)
+                throw new ArgumentNullException("entidad");
+
+            BindingFlags bf = BindingFlags.Default | BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic;
+
+            ConstructorInfo ci = Reflector.GenerateLazy(type).GetConstructor(bf, null, new[] { type }, null);
+
+            Lazy result = (Lazy)ci.Invoke(new[] { entidad }); 
+            result.ToStr = entidad.TryToString();
+            return result;
         }
 
         public string ToStr
@@ -241,38 +248,91 @@ namespace Signum.Entities
 
     public static class LazyUtils
     {
-        public static Lazy<T> ToLazy<T>(this Lazy lazy) where T : class, IIdentifiable
+        public static Lazy<T> ToLazy<T>(this Lazy lazy)
+            where T : class, IIdentifiable
         {
+            if (lazy == null)
+                return null;
+
             if (lazy is Lazy<T>)
-                return (Lazy<T>)lazy; 
+                return (Lazy<T>)lazy;
 
             if (lazy.UntypedEntityOrNull != null)
-                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull);
+                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = lazy.ToStr };
             else
-                return new Lazy<T>(lazy.RuntimeType, lazy.Id);
+                return new Lazy<T>(lazy.RuntimeType, lazy.Id) { ToStr = lazy.ToStr };
         }
 
-        public static Lazy<T> ToLazy<T>(this T entity) where T : class, IIdentifiable
+        public static Lazy<T> ToLazy<T>(this Lazy lazy, string toStr) 
+            where T : class, IIdentifiable
         {
+            if (lazy == null)
+                return null;
+
+            if (lazy is Lazy<T>)
+                return (Lazy<T>)lazy;
+
+            if (lazy.UntypedEntityOrNull != null)
+                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = toStr };
+            else
+                return new Lazy<T>(lazy.RuntimeType, lazy.Id) { ToStr = toStr };
+        }
+
+        public static Lazy<T> ToLazy<T>(this T entity)
+          where T : class, IIdentifiable
+        {
+            if (entity == null)
+                return null;
+
+
             if (entity.IsNew)
                 throw new ApplicationException(Resources.ToLazyLightNotAllowedForNewEntities);
 
-            var milazy = new Lazy<T>(entity);
-            milazy.EntityOrNull = null;
-            return milazy;
+            return new Lazy<T>(entity.GetType(), entity.Id) { ToStr = entity.ToString() };
         }
 
-        public static Lazy<T> ToLazy<T>(this T entidad, bool fat) where T : class, IIdentifiable
+        public static Lazy<T> ToLazy<T>(this T entity, string toStr) 
+            where T : class, IIdentifiable
+        {
+            if (entity == null)
+                return null;
+
+            if (entity.IsNew)
+                throw new ApplicationException(Resources.ToLazyLightNotAllowedForNewEntities);
+
+            return new Lazy<T>(entity.GetType(), entity.Id){ ToStr = toStr};
+        }
+
+        public static Lazy<T> ToLazy<T>(this T entity, bool fat) where T : class, IIdentifiable
         {
             if (fat)
-                return entidad.ToLazyFat();
+                return entity.ToLazyFat();
             else
-                return entidad.ToLazy(); 
+                return entity.ToLazy(); 
         }
 
-        public static Lazy<T> ToLazyFat<T>(this T entidad) where T : class, IIdentifiable
+        public static Lazy<T> ToLazy<T>(this T entity, bool fat, string toStr) where T : class, IIdentifiable
         {
-            return new Lazy<T>(entidad);
-        }      
+            if (fat)
+                return entity.ToLazyFat(toStr);
+            else
+                return entity.ToLazy(toStr);
+        }
+
+        public static Lazy<T> ToLazyFat<T>(this T entity) where T : class, IIdentifiable
+        {
+            if (entity == null)
+                return null;
+
+            return new Lazy<T>(entity) { ToStr = entity.ToString() };
+        }
+
+        public static Lazy<T> ToLazyFat<T>(this T entity, string toStr) where T : class, IIdentifiable
+        {
+            if (entity == null)
+                return null;
+
+            return new Lazy<T>(entity) { ToStr = toStr };
+        } 
     }
 }

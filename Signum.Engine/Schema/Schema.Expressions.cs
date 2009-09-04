@@ -14,36 +14,36 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
+using Signum.Engine.Properties;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
 {
+
     public partial class Table
     {
-        internal ReadOnlyCollection<FieldBinding> CreateBindings(string alias)
+        internal Expression CreateBinding(string tableAlias, FieldInfo fi, QueryBinder binder)
         {
-            var bindings = Fields.Values.Select(c => new FieldBinding(c.FieldInfo, c.Field.GetExpression(alias))).ToReadOnly();
+            EntityField field = Fields.TryGetC(fi.Name);
+            if (field == null)
+                throw new ApplicationException(Resources.TheField0IsNotIncluded.Formato(fi.Name));
 
-            if (!IsView)
-            {
-                ColumnExpression ce = bindings.IDColumn();
+            Expression result = field.Field.GetExpression(tableAlias, binder);
 
-                bindings.Select(fb => fb.Binding).OfType<MListExpression>().ForEach(ml => ml.BackID = ce);
-            }
-
-            return bindings; 
+            return result;
         }
     }
 
     public partial class RelationalTable
     {
-        internal ColumnExpression BackColumnExpression(string alias)
+        internal ColumnExpression BackColumnExpression(string tableAlias)
         {
-            return new ColumnExpression(BackReference.ReferenceType(), alias, BackReference.Name);
+            return new ColumnExpression(BackReference.ReferenceType(), tableAlias, BackReference.Name);
         }
 
-        internal Expression CampoExpression(string alias)
+        internal Expression FieldExpression(string tableAlias, QueryBinder binder)
         {
-            return Field.GetExpression(alias); 
+            return Field.GetExpression(tableAlias, binder);
         }
     }
 
@@ -59,56 +59,55 @@ namespace Signum.Engine.Maps
 
     public abstract partial class Field
     {
-        internal abstract Expression GetExpression(string alias);
+        internal abstract Expression GetExpression(string tableAlias, QueryBinder binder);
     }
 
     public partial class FieldPrimaryKey
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            return new ColumnExpression(typeof(int), alias, this.Name);
-        } 
+            return new ColumnExpression(typeof(int), tableAlias, this.Name);
+        }
     }
 
     public partial class FieldValue
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            return new ColumnExpression(this.FieldType, alias, this.Name);
-        } 
+            return new ColumnExpression(this.FieldType, tableAlias, this.Name);
+        }
     }
 
     public static partial class ReferenceFieldExtensions
-    {
-        internal static Expression MaybeLazy(this IFieldReference campo, Expression reference)
-        {
-            if (!campo.IsLazy)
-                return reference;
-            else
-                return new LazyReferenceExpression(Reflector.GenerateLazy(reference.Type), reference);
-        }
+    {  
     }
 
 
     public partial class FieldReference
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            return this.MaybeLazy(new FieldInitExpression(Reflector.ExtractLazy(FieldType) ?? FieldType, alias, new ColumnExpression(this.ReferenceType(), alias, Name), null)); 
-        } 
+            var result = new FieldInitExpression(IsLazy ? Reflector.ExtractLazy(FieldType) : FieldType, null,
+                new ColumnExpression(this.ReferenceType(), tableAlias, Name), null);
+
+            if(this.IsLazy)
+                return binder.MakeLazy(this.FieldType, result);
+            else 
+                return result; 
+        }
     }
 
     public partial class FieldEnum
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            return Expression.Convert(new ColumnExpression(this.ReferenceType(), alias, Name), FieldType);
+            return Expression.Convert(new ColumnExpression(this.ReferenceType(), tableAlias, Name), FieldType);
         }
     }
 
     public partial class FieldMList
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
             return new MListExpression(FieldType, null, RelationalTable); // keep back id empty for some seconds 
         }
@@ -116,40 +115,46 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            List<FieldBinding> fb = new List<FieldBinding>();
-            foreach (var kvp in EmbeddedFields)
-	        {
-                FieldInfo fi = FieldType.GetField(kvp.Key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic); 
-                fb.Add(new FieldBinding(fi, kvp.Value.Field.GetExpression(alias))); 
-            }
-            return new FieldInitExpression(this.FieldType, alias, null, null) { Bindings = fb.NotNull().ToReadOnly() }; 
+            var bindings = (from kvp in EmbeddedFields
+                            let fi = FieldType.GetField(kvp.Key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder))).ToReadOnly(); 
+                                          
+            return new EmbeddedFieldInitExpression(this.FieldType, bindings); 
         }
     }
 
     public partial class FieldImplementedBy
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            List<ImplementationColumnExpression> ri = new List<ImplementationColumnExpression>();
-            foreach (var kvp in ImplementationColumns)
-	        {
-                ri.Add(new ImplementationColumnExpression(kvp.Key,
-                    new FieldInitExpression(kvp.Key, alias, new ColumnExpression(kvp.Value.ReferenceType(), alias, kvp.Value.Name), null)));
-            }
+            var implementations = (from kvp in ImplementationColumns
+                                   select new ImplementationColumnExpression(kvp.Key,
+                                            new FieldInitExpression(kvp.Key, null,
+                                                new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), null))).ToReadOnly();
 
-            return this.MaybeLazy(new ImplementedByExpression(Reflector.ExtractLazy(FieldType)??FieldType, ri.NotNull().ToReadOnly())); 
+            var result = new ImplementedByExpression(IsLazy ? Reflector.ExtractLazy(FieldType) : FieldType, implementations);
+
+            if (this.IsLazy)
+                return binder.MakeLazy(this.FieldType, result);
+            else
+                return result; 
         }
     }
 
     public partial class FieldImplementedByAll
     {
-        internal override Expression GetExpression(string alias)
+        internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            return this.MaybeLazy(new ImplementedByAllExpression(Reflector.ExtractLazy(FieldType) ?? FieldType,
-                new ColumnExpression( Column.ReferenceType(), alias, Column.Name),
-                new ColumnExpression( Column.ReferenceType(), alias, ColumnTypes.Name)));
+            Expression result = new ImplementedByAllExpression(IsLazy ? Reflector.ExtractLazy(FieldType) : FieldType,
+                new ColumnExpression(Column.ReferenceType(), tableAlias, Column.Name),
+                new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name));
+
+            if (this.IsLazy)
+                return binder.MakeLazy(this.FieldType, result);
+            else
+                return result; 
         }
     }
 }

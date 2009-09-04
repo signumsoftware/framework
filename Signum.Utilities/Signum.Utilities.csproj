@@ -67,6 +67,7 @@
     <Compile Include="DataStructures\ReferenceEqualityComparer.cs" />
     <Compile Include="DataStructures\Sequence.cs" />
     <Compile Include="DateTimeExtensions.cs" />
+    <Compile Include="DebugTextWriter.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="EnumExtensions.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="ExpressionTrees\ExpressionEvaluator.cs" />
     <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
     <Compile Include="ExpressionTrees\ExpressionNominator.cs" />
+    <Compile Include="ExpressionTrees\ExpressionToString.cs" />
     <Compile Include="ExpressionTrees\ExpressionVisitor.cs">
       <SubType>Code</SubType>
     </Compile>

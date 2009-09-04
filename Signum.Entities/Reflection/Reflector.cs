@@ -144,9 +144,9 @@ namespace Signum.Entities.Reflection
         {
             switch (e.NodeType)
             {
-                case ExpressionType.MemberAccess: return ((MemberExpression)e).Map(me=> me.Member.MemberType == MemberTypes.Field ? me.Member :
-                                                                                        me.Member.Name == "EntityOrNull" ? null : 
-                                                                                        FindFieldInfo((PropertyInfo)me.Member, throws));
+                case ExpressionType.MemberAccess: return ((MemberExpression)e).Map(me => me.Member.MemberType == MemberTypes.Field ? me.Member :
+                                                                                        me.Member.Name == "EntityOrNull" ? null :
+                                                                                        FindFieldInfo(me.Expression.Type, (PropertyInfo)me.Member, throws));
                 case ExpressionType.Call: return ((MethodCallExpression)e).Method;
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
@@ -154,19 +154,21 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        internal static FieldInfo FindFieldInfo(MemberInfo value, bool throws)
+        internal static FieldInfo FindFieldInfo(Type type, MemberInfo value, bool throws)
         {
-            return value as FieldInfo ?? Reflector.FindFieldInfo((PropertyInfo)value, throws);
+            return value as FieldInfo ?? Reflector.FindFieldInfo(type, (PropertyInfo)value, throws);
         }
 
-        public static FieldInfo FindFieldInfo(PropertyInfo pi, bool throws)
+        public static FieldInfo FindFieldInfo(Type type, PropertyInfo pi, bool throws)
         {
-            Type type = pi.DeclaringType;
             FieldInfo fi = (type.GetField(pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
                 type.GetField("m" + pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
                 type.GetField("_" + pi, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic));
 
-            return throws ? fi.ThrowIfNullC(Resources.FieldForPropertyNotFound.Formato(pi.Name)): fi;
+            if (throws && fi == null)
+                throw new NullReferenceException(Resources.FieldForPropertyNotFound.Formato(pi.Name));
+
+            return fi;
         }
 
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)

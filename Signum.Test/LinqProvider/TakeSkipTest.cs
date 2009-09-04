@@ -36,7 +36,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void TakeSql()
         {
-            var takeAlbum = Database.Query<AlbumDN>().Select(a => new { a.Name, TwoSongs = a.Song.Take(2) }).ToList();
+            var takeAlbum = Database.Query<AlbumDN>().Select(a => new { a.Name, TwoSongs = a.Songs.Take(2) }).ToList();
             Assert.IsTrue(takeAlbum.All(a => a.TwoSongs.Count() <= 2));
         }
 
@@ -49,7 +49,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SkipSql()
         {
-            var takeAlbum = Database.Query<AlbumDN>().Select(a => new { a.Name, TwoSongs = a.Song.Skip(2) }).ToList();
+            var takeAlbum = Database.Query<AlbumDN>().Select(a => new { a.Name, TwoSongs = a.Songs.Skip(2) }).ToList();
         }
     }
 }

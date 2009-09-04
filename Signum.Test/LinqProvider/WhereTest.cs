@@ -48,6 +48,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void WhereNotNull()
+        {
+            var list = Database.Query<ArtistDN>().Where(a => a.LastAward != null).ToList();
+        }
+
+        [TestMethod]
         public void SingleFirstLast()
         {
             var artists = Database.Query<ArtistDN>();
@@ -87,10 +93,10 @@ namespace Signum.Test.LinqProvider
         {
             ArtistDN wretzky = Database.Query<ArtistDN>().Single(a => a.Sex == Sex.Female);
 
-            var list = (from b in Database.Query<BandDN>()
-                        from a in b.Members
-                        where a.ToLazy() == wretzky.ToLazy()
-                        select b).Single();
+            BandDN smashing = (from b in Database.Query<BandDN>()
+                               from a in b.Members
+                               where a.ToLazy() == wretzky.ToLazy()
+                               select b).Single();
         }
 
 

@@ -8,8 +8,6 @@ using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq
 {
-   
-
     internal class AliasReplacer : DbExpressionVisitor
     {
         Dictionary<string, string> aliasMap;
@@ -43,7 +41,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitSelect(SelectExpression select)
         {
             Expression top = this.Visit(select.Top);
-            Expression from = this.VisitSource(select.From);
+            SourceExpression from = this.VisitSource(select.From);
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
             ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
@@ -51,7 +49,7 @@ namespace Signum.Engine.Linq
             string newAlias = aliasMap.TryGetC(select.Alias) ?? select.Alias;
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy || newAlias != select.Alias)
-                return new SelectExpression(select.Type, newAlias, false, top, columns, from, where, orderBy, groupBy, null);
+                return new SelectExpression(newAlias, false, top, columns, from, where, orderBy, groupBy);
 
             return select;
         }

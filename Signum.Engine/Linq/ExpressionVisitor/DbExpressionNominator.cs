@@ -20,8 +20,6 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class DbExpressionNominator : DbExpressionVisitor
     {
-        public static ConditionsRewriter ConditionsRewriter = new ConditionsRewriter();
-
         string[] existingAliases;
 
         // existingAliases is null when used in QueryBinder, not ColumnProjector
@@ -88,45 +86,27 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            if (IsFullNominate)
+            if (IsFullNominate || c.Value == null)
                 candidates.Add(c);
             return c;
         }
-
-        protected override Expression VisitProjection(ProjectionExpression proj)
-        {
-            if (proj.IsOneCell)
-            {
-                if (proj.UniqueFunction == UniqueFunction.SingleIsZero)
-                {
-                    var newProj = new ProjectionExpression(typeof(int), proj.Source, proj.Projector, UniqueFunction.Single);
-                    candidates.Add(newProj); 
-                    Expression result = Expression.Equal(newProj, Expression.Constant(0));
-                    candidates.Add(result);
-                    return result;
-                }
-                else if (proj.UniqueFunction == UniqueFunction.SingleGreaterThanZero)
-                {
-                    var newProj = new ProjectionExpression(typeof(int), proj.Source, proj.Projector, UniqueFunction.Single);
-                    candidates.Add(newProj); 
-                    Expression result = Expression.GreaterThan(newProj, Expression.Constant(0));
-                    candidates.Add(result);
-                    return result;
-                }
-                else
-                {
-                    candidates.Add(proj);
-                    return proj;
-                }
-            }
-            else
-                return base.VisitProjection(proj);
-        }
-
+ 
         protected override Expression VisitSqlFunction(SqlFunctionExpression sqlFunction)
         {
             candidates.Add(sqlFunction);
             return sqlFunction;
+        }
+
+        protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstant)
+        {
+            candidates.Add(sqlConstant);
+            return sqlConstant;
+        }
+
+        protected override Expression VisitCase(CaseExpression cex)
+        {
+            candidates.Add(cex);
+            return cex;
         }
 
         protected Expression TrySqlFunction(SqlFunction sqlFunction, Type type, params Expression[] expression)
@@ -139,17 +119,12 @@ namespace Signum.Engine.Linq
             expression = expression.NotNull().ToArray();
             Expression[] newExpressions = new Expression[expression.Length];
 
-            bool oldTemp = tempFullNominate;
-            tempFullNominate = true;
-            
             for (int i = 0; i < expression.Length; i++)
             {
                 newExpressions[i] = Visit(expression[i]);
                 if (!candidates.Contains(newExpressions[i]))
                     return null;
             }
-
-            tempFullNominate = oldTemp;
 
             var result = new SqlFunctionExpression(type, sqlFunction.ToString(), newExpressions);
             candidates.Add(result);
@@ -232,16 +207,34 @@ namespace Signum.Engine.Linq
         {
             if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
             {
-                var newb = SmartEqualizer.PolymorphicEqual(b.Left, b.Right);
+                var newExp = SmartEqualizer.PolymorphicEqual(b.Left, b.Right);
 
-                if (newb.NodeType == b.NodeType && ((BinaryExpression)newb).Map(nb => nb.Left == b.Left && nb.Right == b.Right))
+                BinaryExpression newBin = newExp as BinaryExpression;
+                if (newBin != null && newBin.Left == b.Left && newBin.Right == b.Right)
+                    return null;
+
+                if (b.NodeType == ExpressionType.NotEqual)
                 {
-                    return null; 
+                    if (newExp.NodeType == ExpressionType.Equal)
+                    {
+                        BinaryExpression be = (BinaryExpression)newExp;
+                        return be.NodeType == ExpressionType.Equal ?
+                            Expression.NotEqual(be.Left, be.Right) :
+                            Expression.Equal(be.Left, be.Right);
+                    }
+                    else if (newExp.NodeType == (ExpressionType)DbExpressionType.IsNull)
+                    {
+                        return new IsNotNullExpression(((IsNullExpression)newExp).Expression);
+                    }
+                    else
+                    {
+                        return Expression.Not(newExp);
+                    }
                 }
-                else if (b.NodeType == ExpressionType.NotEqual)
-                    return Expression.Not(newb);
                 else
-                    return newb;
+                {
+                    return newExp;
+                }
             }
             return null;
         }
@@ -282,7 +275,7 @@ namespace Signum.Engine.Linq
             if (operand != u.Operand)
                 u = Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
 
-            if (candidates.Contains(operand))
+            if (candidates.Contains(operand) && (u.NodeType != ExpressionType.Convert || u.Operand.Type.UnNullify() == u.Type.UnNullify() || IsFullNominate))
                 candidates.Add(u);
 
             return u;
@@ -291,13 +284,66 @@ namespace Signum.Engine.Linq
         protected override Expression VisitIn(InExpression inExp)
         {
             Expression exp = this.Visit(inExp.Expression);
+            SelectExpression select = (SelectExpression)this.Visit(inExp.Select);
             if (exp != inExp.Expression)
-                inExp = new InExpression(exp, inExp.Values);
+                inExp = select == null ? new InExpression(exp, inExp.Values) :
+                                         new InExpression(exp, select); 
 
             if (candidates.Contains(exp))
                 candidates.Add(inExp);
 
             return inExp;
+        }
+
+        protected override Expression VisitExists(ExistsExpression exists)
+        {
+            SelectExpression select = (SelectExpression)this.Visit(exists.Select);
+            if (select != exists.Select)
+                exists = new ExistsExpression(select);
+
+            candidates.Add(exists);
+
+            return exists;
+        }
+
+        protected override Expression VisitScalar(ScalarExpression scalar)
+        {
+            SelectExpression select = (SelectExpression)this.Visit(scalar.Select);
+            if (select != scalar.Select)
+                scalar = new ScalarExpression(scalar.Type, select);
+
+            candidates.Add(scalar);
+
+            return scalar;
+        }
+
+        protected override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
+        {
+            Expression exp= this.Visit(isNotNull.Expression);
+            if (exp != isNotNull.Expression)
+                isNotNull = new IsNotNullExpression(exp);
+
+            if (candidates.Contains(exp))
+                candidates.Add(isNotNull);
+
+            return isNotNull;
+        }
+
+        protected override Expression VisitIsNull(IsNullExpression isNull)
+        {
+            Expression exp = this.Visit(isNull.Expression);
+            if (exp != isNull.Expression)
+                isNull = new IsNullExpression(exp);
+
+            if (candidates.Contains(exp))
+                candidates.Add(isNull);
+
+            return isNull;
+        }
+
+        protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+        {
+            return aggregate;
         }
 
         protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
@@ -327,11 +373,11 @@ namespace Signum.Engine.Linq
             if (m.Expression.Type.IsNullable() && (m.Member.Name == "Value" || m.Member.Name == "HasValue"))
             {
                 Expression expression = this.Visit(m.Expression);
-                Expression nullable; 
+                Expression nullable;
                 if (m.Member.Name == "Value")
                     nullable = Expression.Convert(expression, m.Expression.Type.UnNullify());
                 else
-                    nullable = Expression.NotEqual(expression, Expression.Constant(null));
+                    nullable = new IsNotNullExpression(expression);
 
                 if (candidates.Contains(expression))
                     candidates.Add(nullable);
@@ -459,56 +505,55 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected override Expression VisitImplementedBy(ImplementedByExpression reference)
-        {
-            if (!IsFullNominate)
-                return base.VisitImplementedBy(reference); 
+        //protected override Expression VisitImplementedBy(ImplementedByExpression reference)
+        //{
+        //    if (!IsFullNominate)
+        //        return base.VisitImplementedBy(reference); 
 
-            var newImple = reference.Implementations
-              .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
+        //    var newImple = reference.Implementations
+        //      .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
 
-            if (newImple != reference.Implementations)
-                reference = new ImplementedByExpression(reference.Type, newImple);
+        //    if (newImple != reference.Implementations)
+        //        reference = new ImplementedByExpression(reference.Type, newImple);
 
-            if (newImple.All(i => candidates.Contains(i.Field)))
-                candidates.Add(reference);
+        //    if (newImple.All(i => candidates.Contains(i.Field)))
+        //        candidates.Add(reference);
 
-            return reference;
-        }
+        //    return reference;
+        //}
 
-        protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
-        {
-            if (!IsFullNominate|| reference.Implementations != null && reference.Implementations.Count > 0)
-                return base.VisitImplementedByAll(reference); 
+        //protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
+        //{
+        //    if (!IsFullNominate|| reference.Implementations != null && reference.Implementations.Count > 0)
+        //        return base.VisitImplementedByAll(reference); 
 
-            var id = (ColumnExpression)Visit(reference.ID);
-            var typeId = (ColumnExpression)Visit(reference.TypeID);
+        //    var id = (ColumnExpression)Visit(reference.Id);
+        //    var typeId = (ColumnExpression)Visit(reference.TypeId);
 
-            if (id != reference.ID || typeId != reference.TypeID)
-                reference = new ImplementedByAllExpression(reference.Type, id, typeId);
+        //    if (id != reference.Id || typeId != reference.TypeId)
+        //        reference = new ImplementedByAllExpression(reference.Type, id, typeId);
 
-            if (candidates.Contains(id) && candidates.Contains(typeId))
-                candidates.Add(reference);
+        //    if (candidates.Contains(id) && candidates.Contains(typeId))
+        //        candidates.Add(reference);
 
-            return reference;
-        }
+        //    return reference;
+        //}
 
-        protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
-        {
-            if (!IsFullNominate || fieldInit.Bindings != null && fieldInit.Bindings.Count > 0)
-                return base.VisitFieldInit(fieldInit);
+        //protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
+        //{
+        //    if (!IsFullNominate || fieldInit.Bindings != null && fieldInit.Bindings.Count > 0)
+        //        return base.VisitFieldInit(fieldInit);
 
-            var id = Visit(fieldInit.ExternalId);
-            var alias = VisitFieldInitAlias(fieldInit.Alias);
-            var other = Visit(fieldInit.OtherCondition);
-            if (fieldInit.ExternalId != id || fieldInit.OtherCondition != other || fieldInit.Alias != alias)
-                fieldInit = new FieldInitExpression(fieldInit.Type, alias, id, other);
+        //    var id = Visit(fieldInit.ExternalId);
+        //    var other = Visit(fieldInit.OtherCondition);
+        //    if (fieldInit.ExternalId != id || fieldInit.OtherCondition != other)
+        //        fieldInit = new FieldInitExpression(fieldInit.Type, fieldInit.TableAlias, id, other);
 
-            if (candidates.Contains(id))
-                candidates.Add(fieldInit);
+        //    if (candidates.Contains(id))
+        //        candidates.Add(fieldInit);
             
-            return fieldInit;
-        }
+        //    return fieldInit;
+        //}
     }
 
 

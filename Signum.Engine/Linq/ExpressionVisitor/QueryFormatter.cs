@@ -141,29 +141,6 @@ namespace Signum.Engine.Linq
             return u;
         }
 
-        protected override Expression VisitSetOperation(SetOperationExpression setOperationExp)
-        {
-            sb.Append("(");
-
-            AppendNewLine(Indentation.Inner);
-            Visit(setOperationExp.Left);
-            AppendNewLine(Indentation.Outer);
-
-            sb.Append(
-                setOperationExp.SetOperation == SetOperation.Union ? "UNION":
-                setOperationExp.SetOperation == SetOperation.Concat ? "UNION ALL":
-                setOperationExp.SetOperation == SetOperation.Intersect ? "INTERSECT":
-                setOperationExp.SetOperation == SetOperation.Except ? "EXCEPT": "");
-
-            AppendNewLine(Indentation.Inner);
-            Visit(setOperationExp.Right);
-            AppendNewLine(Indentation.Outer);
-
-            sb.Append(")");
-
-            return setOperationExp;
-        }
-
         bool IsNull(Expression exp)
         {
             return exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null; 
@@ -181,25 +158,12 @@ namespace Signum.Engine.Linq
             }
             else if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
             {
-                bool isEqual = b.NodeType == ExpressionType.Equal;
-
                 sb.Append("(");
-                if(IsNull(b.Left))
-                {
-                    Visit(b.Right);
-                    sb.Append(isEqual?" IS NULL " : " IS NOT NULL");
-                }
-                else if(IsNull(b.Right))
-                {
-                    Visit(b.Left);
-                    sb.Append(isEqual?" IS NULL " : " IS NOT NULL");
-                }
-                else
-                {
-                    Visit(b.Left);
-                    sb.Append(isEqual?" = " : " <> ");
-                    Visit(b.Right);
-                }
+
+                Visit(b.Left);
+                sb.Append(b.NodeType == ExpressionType.Equal ? " = " : " <> ");
+                Visit(b.Right);
+
                 sb.Append(")");
             }
             else
@@ -307,19 +271,58 @@ namespace Signum.Engine.Linq
             return like;
         }
 
+        protected override Expression VisitExists(ExistsExpression exists)
+        {
+            sb.Append("EXISTS(");
+            this.Visit(exists.Select);
+            sb.Append(")");
+            return exists;
+        }
+
+        protected override Expression VisitScalar(ScalarExpression exists)
+        {
+            sb.Append("(");
+            this.Visit(exists.Select);
+            sb.Append(")");
+            return exists;
+        }
+
+        protected override Expression VisitIsNull(IsNullExpression isNull)
+        {
+            sb.Append("(");
+            this.Visit(isNull.Expression);
+            sb.Append(") IS NULL");
+            return isNull;
+        }
+
+        protected override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
+        {
+            sb.Append("(");
+            this.Visit(isNotNull.Expression);
+            sb.Append(") IS NOT NULL");
+            return isNotNull;
+        }
+
         protected override Expression VisitIn(InExpression inExpression)
         {
             Visit(inExpression.Expression);
             sb.Append(" IN (");
-            bool any = false;
-            foreach (var obj in inExpression.Values)
+            if (inExpression.Select == null)
             {
-                VisitConstant(Expression.Constant(obj));
-                sb.Append(",");
-                any = true;
+                bool any = false;
+                foreach (var obj in inExpression.Values)
+                {
+                    VisitConstant(Expression.Constant(obj));
+                    sb.Append(",");
+                    any = true;
+                }
+                if (any)
+                    sb.Remove(sb.Length - 1, 1);
             }
-            if (any)
-                sb.Remove(sb.Length - 1, 1);
+            else
+            {
+                Visit(inExpression.Select);
+            }
             sb.Append(" )");
             return inExpression;
         }
@@ -338,9 +341,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitConstant(ConstantExpression c)
         {
             if (c.Value == null)
-            {
                 sb.Append("NULL");
-            }
             else
             {
                 if (!IsSupported(c.Value.GetType()))
@@ -350,8 +351,18 @@ namespace Signum.Engine.Linq
 
                 parameterExpressions.Add(this.CreateParameter(paramName, c));
 
-                sb.Append(paramName); 
+                sb.Append(paramName);
             }
+            return c;
+        }
+
+        protected override Expression VisitSqlConstant(SqlConstantExpression c)
+        {
+            if (!IsSupported(c.Value.GetType()))
+                throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
+
+            sb.Append(c.TryToString("NULL"));
+
             return c;
         }
 
@@ -408,9 +419,7 @@ namespace Signum.Engine.Linq
                 {
                     ColumnDeclaration column = select.Columns[i];
                     if (i > 0)
-                    {
                         sb.Append(", ");
-                    }
 
                     AppendColumn(column);
                 }
@@ -511,7 +520,7 @@ namespace Signum.Engine.Linq
         {
             ColumnExpression c = this.Visit(column.Expression) as ColumnExpression;
 
-            if (c == null || c.Name != column.Name)
+            if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {
                 sb.Append(" AS ");
                 sb.Append(column.Name.SqlScape());
@@ -525,9 +534,9 @@ namespace Signum.Engine.Linq
             return table;
         }
 
-        protected override Expression VisitSource(Expression source)
+        protected override SourceExpression VisitSource(SourceExpression source)
         {
-            if (source is SourceExpression)
+            if (source is SourceWithAliasExpression)
             {
                 if (source is TableExpression)
                     Visit(source);
@@ -539,7 +548,7 @@ namespace Signum.Engine.Linq
                 }
 
                 sb.Append(" AS ");
-                sb.Append(((SourceExpression)source).Alias);
+                sb.Append(((SourceWithAliasExpression)source).Alias);
             }
             else
                 this.VisitJoin((JoinExpression)source);
@@ -560,6 +569,7 @@ namespace Signum.Engine.Linq
                     sb.Append("INNER JOIN ");
                     break;
                 case JoinType.LeftOuterJoin:
+                case JoinType.SingleRowLeftOuterJoin:
                     sb.Append("LEFT OUTER JOIN ");
                     break;
                 case JoinType.RightOuterJoin:

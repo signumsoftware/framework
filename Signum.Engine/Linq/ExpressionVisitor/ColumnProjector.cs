@@ -41,7 +41,7 @@ namespace Signum.Engine.Linq
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
         List<ColumnDeclaration> columns = new List<ColumnDeclaration>();
         HashSet<Expression> candidates;
-        string[] existingAliases;
+        string[] knownAliases;
         string newAlias;
         int iColumn;
 
@@ -52,27 +52,19 @@ namespace Signum.Engine.Linq
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, params string[] existingAliases)
+        static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, params string[] knownAliases)
         {
             Expression newProj;
             ColumnProjector cp = new ColumnProjector
             {
                 newAlias = newAlias,
-                existingAliases = existingAliases,
-                candidates = DbExpressionNominator.Nominate(projector, existingAliases, out newProj)
+                knownAliases = knownAliases,
+                candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj)
             };
 
             Expression e = cp.Visit(newProj);
 
             return new ProjectedColumns(e, cp.columns.AsReadOnly());
-        }
-
-        protected override string VisitFieldInitAlias(string alias)
-        {
-            if (existingAliases.Contains(alias))
-                return newAlias;
-            else
-                return alias;
         }
 
         protected override Expression Visit(Expression expression)
@@ -87,7 +79,7 @@ namespace Signum.Engine.Linq
                     {
                         return mapped;
                     }
-                    if (this.existingAliases.Contains(column.Alias))
+                    if (this.knownAliases.Contains(column.Alias))
                     {
                         int ordinal = this.columns.Count;
                         string columnName = this.GetUniqueColumnName(column.Name);
@@ -104,7 +96,7 @@ namespace Signum.Engine.Linq
                     string columnName = this.GetNextColumnName();
                     int ordinal = this.columns.Count;
                     if (ConditionsRewriter.IsBooleanExpression(expression))
-                        expression = DbExpressionNominator.ConditionsRewriter.MakeSqlValue(expression);
+                        expression = ConditionsRewriter.MakeSqlValue(expression);
                     this.columns.Add(new ColumnDeclaration(columnName, expression));
                     return new ColumnExpression(expression.Type, this.newAlias, columnName);
                 }

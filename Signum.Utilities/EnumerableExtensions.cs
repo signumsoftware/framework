@@ -434,9 +434,9 @@ namespace Signum.Utilities
             }
         }
 
-        public static List<Grouping<T,T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
+        public static List<IGrouping<T,T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
         {
-            List<Grouping<T, T>> result = new List<Grouping<T, T>>();
+            List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
             Grouping<T, T> group = null;
             foreach (var item in collection)
             {

@@ -12,6 +12,8 @@ using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using System.Globalization;
 using System.Threading;
+using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test
 {
@@ -36,13 +38,32 @@ namespace Signum.Test
     public class NiceToStringTest
     {
         [TestMethod]
-        public void Pruebas()
+        public void EnumToStr()
         {
             Assert.AreEqual(EnumPruebas.Prueba_1.NiceToString(), "Prueba 1");
             Assert.AreEqual(EnumPruebas.MyPrueba2.NiceToString(), "My Prueba2");
             Assert.AreEqual(EnumPruebas.Prueba3.NiceToString(), "Prueba!");
             Assert.AreEqual(EnumPruebas.Prueba4.NiceToString(), "Test 4");
             Assert.AreEqual(EnumPruebas.Prueba5.NiceToString(), "Custom Test 5");
+        }
+
+        [TestMethod]
+        public void ExpressionToStr()
+        {
+            string str = Expression.Add(Expression.Constant(2), new MyExpression()).NiceToString();
+            Assert.IsTrue(str.Contains("$$"));
+        }
+
+        class MyExpression: Expression
+        {
+            public MyExpression() : 
+                base((ExpressionType)101, typeof(int)) 
+            { }
+
+            public override string ToString()
+            {
+                return "$$";
+            }
         }
     }
 }

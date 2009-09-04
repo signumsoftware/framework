@@ -18,7 +18,7 @@ namespace Signum.Utilities
 
         public static Type Nullify(this Type type)
         {
-            return type.IsNullable() ? type : typeof(Nullable<>).MakeGenericType(type);
+            return type.IsClass || type.IsNullable() ? type : typeof(Nullable<>).MakeGenericType(type);
         }
 
         public static bool IsNullable(this Type type)

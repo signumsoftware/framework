@@ -58,7 +58,7 @@ namespace Signum.Engine.Linq
                 }
                 if (orderings != select.OrderBy || columns != select.Columns)
                 {
-                    select = new SelectExpression(select.Type, select.Alias, false, select.Top, columns, select.From, select.Where, orderings, select.GroupBy, null);
+                    select = new SelectExpression(select.Alias, false, select.Top, columns, select.From, select.Where, orderings, select.GroupBy);
                 }
                 return select;
             }
@@ -72,15 +72,15 @@ namespace Signum.Engine.Linq
         {
             // make sure order by expressions lifted up from the left side are not lost
             // when visiting the right side
-            Expression left = this.VisitSource(join.Left);
+            SourceExpression left = this.VisitSource(join.Left);
             IEnumerable<OrderExpression> leftOrders = this.gatheredOrderings;
             this.gatheredOrderings = null; // start on the right with a clean slate
-            Expression right = this.VisitSource(join.Right);
+            SourceExpression right = this.VisitSource(join.Right);
             this.PrependOrderings(leftOrders);
             Expression condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
-                return new JoinExpression(join.Type, join.JoinType, left, right, condition, join.IsSingleRow);
+                return new JoinExpression(join.Type, join.JoinType, left, right, condition);
             }
             return join;
         }

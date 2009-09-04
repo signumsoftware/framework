@@ -291,7 +291,7 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo value, bool throws)
         {
-            FieldInfo fi = Reflector.FindFieldInfo(value, throws);
+            FieldInfo fi = Reflector.FindFieldInfo(Type, value, throws);
 
             if (fi == null && !throws)
                 return null;
@@ -426,7 +426,7 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo value, bool throws)
         {
-            FieldInfo fi = Reflector.FindFieldInfo(value, throws);
+            FieldInfo fi = Reflector.FindFieldInfo(FieldType, value, throws);
 
             if (fi == null && !throws)
                 return null;

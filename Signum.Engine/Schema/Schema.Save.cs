@@ -160,20 +160,40 @@ namespace Signum.Engine.Maps
     {
         public static int? GetIdForLazy(this IFieldReference cr, object value, Forbidden forbidden)
         {
-            return value == null ? null :
-                      cr.IsLazy ? ((Lazy)value).Map(l => l.UntypedEntityOrNull == null ? l.Id :
-                                             forbidden.Contains(l.UntypedEntityOrNull) ? (int?)null :
-                                             l.RefreshId()) :
-                     ((IdentifiableEntity)value).Map(ei => forbidden.Contains(ei) ? (int?)null : ei.Id);
+            if (value == null)
+                return null;
+
+            if (cr.IsLazy)
+            {
+                Lazy l = (Lazy)value;
+                return l.UntypedEntityOrNull == null ? l.Id :
+                       forbidden.Contains(l.UntypedEntityOrNull) ? (int?)null :
+                       l.RefreshId();
+            }
+            else
+            {
+                IdentifiableEntity ie = (IdentifiableEntity)value;
+                return forbidden.Contains(ie) ? (int?)null : ie.Id;
+            }
         }
 
         public static Type GetTypeForLazy(this IFieldReference cr, object value, Forbidden forbidden)
         {
-            return value == null ? null :
-                      cr.IsLazy ? ((Lazy)value).Map(l => l.UntypedEntityOrNull == null ? l.RuntimeType :
-                                             forbidden.Contains(l.UntypedEntityOrNull) ? null :
-                                             l.RuntimeType) :
-                     ((IdentifiableEntity)value).Map(ei => forbidden.Contains(ei) ? null : ei.GetType());
+            if (value == null)
+                return null;
+
+            if (cr.IsLazy)
+            {
+                Lazy l = (Lazy)value;
+                return l.UntypedEntityOrNull == null ? l.RuntimeType :
+                     forbidden.Contains(l.UntypedEntityOrNull) ? null :
+                     l.RuntimeType;
+            }
+            else
+            {
+                IdentifiableEntity ie = (IdentifiableEntity)value;
+                return forbidden.Contains(ie) ? null : ie.GetType();
+            }
         }
     }
 

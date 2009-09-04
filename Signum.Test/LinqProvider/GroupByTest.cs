@@ -32,27 +32,27 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void GroupStringByEnum()
         {
-            var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex, a => a.Name).ToList(); 
+            var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex, a => a.Name).ToList(); 
         }
 
         [TestMethod]
         public void GroupEntityByEnum()
         {
-            var songsAlbum = Database.Query<ArtistDN>().GroupBy(a => a.Sex).ToList();
+            var list = Database.Query<ArtistDN>().GroupBy(a => a.Sex).ToList();
+        }
+
+        [TestMethod]
+        public void WhereGroup()
+        {
+            var list = Database.Query<ArtistDN>().Where(a=>a.Dead).GroupBy(a => a.Sex).ToList();
         }
 
         [TestMethod]
         public void GroupWhere()
         {
-            var songsAlbum = Database.Query<ArtistDN>().Where(a=>a.Dead).GroupBy(a => a.Sex).ToList();
-        }
-
-        [TestMethod]
-        public void GroupWhere2()
-        {
-            var songsAlbum = (from a in Database.Query<ArtistDN>()
-                              group a by a.Sex into g
-                              select new { Sex = g.Key, DeadArtists = g.Where(a => a.Dead).ToList() }).ToList();        
+            var list = (from a in Database.Query<ArtistDN>()
+                        group a by a.Sex into g
+                        select new { Sex = g.Key, DeadArtists = g.Where(a => a.Dead).ToList() }).ToList();        
         }
 
         [TestMethod]
@@ -64,11 +64,19 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void GroupWhereCount()
+        {
+            var songsAlbum = (from a in Database.Query<ArtistDN>()
+                              group a by a.Sex into g
+                              select new { Sex = g.Key, DeadArtists = (int?)g.Count(a => a.Dead) }).ToList();
+        }
+
+        [TestMethod]
         public void GroupMax()
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>()
                               group a by a.Sex into g
-                              select new { Sex = g.Key, Count = g.Max(a => a.Name.Length) }).ToList();
+                              select new { Sex = g.Key, Max = g.Max(a => a.Name.Length) }).ToList();
         }
 
         [TestMethod]
@@ -76,7 +84,7 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>()
                               group a by a.Sex into g
-                              select new { Sex = g.Key, Count = g.Min(a => a.Name.Length) }).ToList();
+                              select new { Sex = g.Key, Min = g.Min(a => a.Name.Length) }).ToList();
         }
 
         [TestMethod]
@@ -84,7 +92,38 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>()
                               group a by a.Sex into g
-                              select new { Sex = g.Key, Count = g.Average(a=>a.Name.Length) }).ToList();
+                              select new { Sex = g.Key, Avg = g.Average(a=>a.Name.Length) }).ToList();
+        }
+
+
+        [TestMethod]
+        public void RootCount()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Count();
+        }
+
+        [TestMethod]
+        public void RootCountWhere()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Count(a => a.Name.StartsWith("M"));
+        }
+
+        [TestMethod]
+        public void RootMax()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Max(a => a.Name.Length);
+        }
+
+        [TestMethod]
+        public void RootMin()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Min(a => a.Name.Length);
+        }
+
+        [TestMethod]
+        public void RootAverage()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Average(a => a.Name.Length);
         }
     }
 }

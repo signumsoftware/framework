@@ -9,9 +9,77 @@ namespace Signum.Engine.Linq
 {
     internal class ConditionsRewriter: DbExpressionVisitor
     {
+        public static Expression MakeSqlCondition(Expression expression)
+        {
+            ConditionsRewriter cr = new ConditionsRewriter();
+            var exp = cr.Visit(expression);
+            if (!IsBooleanExpression(exp) || IsSqlCondition(exp))
+                return exp;
+            return Expression.Equal(exp, Expression.Constant(true));
+        }
+
+        public static Expression MakeSqlValue(Expression expression)
+        {
+            ConditionsRewriter cr = new ConditionsRewriter();
+            var exp = cr.Visit(expression);
+            if (!IsBooleanExpression(exp) || !IsSqlCondition(exp))
+                return exp;
+            return new CaseExpression(new[] { new When(exp, Expression.Constant(true)) }, Expression.Constant(false));
+        }
+
         public static bool IsBooleanExpression(Expression expr)
         {
-            return expr.Type == typeof(bool); 
+            return expr.Type == typeof(bool);
+        }
+
+        public static bool IsSqlCondition(Expression expression)
+        {
+            if (!IsBooleanExpression(expression))
+                throw new InvalidOperationException("Testing sql conditioness for non boolean expression : " + expression.ToString());
+
+            switch (expression.NodeType)
+            {
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                case ExpressionType.ExclusiveOr:
+                case ExpressionType.Not:
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                case ExpressionType.NotEqual:
+                case ExpressionType.Equal:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                    return true;
+
+                case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
+                    Expression o = ((UnaryExpression)expression).Operand;
+                    return IsBooleanExpression(o) && IsSqlCondition(o);
+
+                case ExpressionType.Constant:
+                case ExpressionType.Coalesce:
+                    return false;
+            }
+
+            switch ((DbExpressionType)expression.NodeType)
+            {
+                case DbExpressionType.Exists:
+                case DbExpressionType.Like:
+                case DbExpressionType.In:
+                case DbExpressionType.IsNull:
+                case DbExpressionType.IsNotNull:
+                    return true;
+
+                case DbExpressionType.SqlFunction:
+                case DbExpressionType.Column:
+                case DbExpressionType.Projection:
+                case DbExpressionType.Case:
+                    return false;
+            }
+
+            throw new InvalidOperationException("Testing sql conditioness for non boolean expression : " + expression.ToString());
         }
 
         protected override Expression VisitUnary(UnaryExpression u)
@@ -72,67 +140,6 @@ namespace Signum.Engine.Linq
             }
 
             return base.VisitBinary(b);
-        }
-
-        public Expression MakeSqlCondition(Expression expression)
-        {
-            var exp = Visit(expression);
-            if (!IsBooleanExpression(exp) || IsSqlCondition(exp))
-                return exp;
-            return Expression.Equal(exp, Expression.Constant(true));
-        }
-
-        public Expression MakeSqlValue(Expression expression)
-        {
-            var exp = Visit(expression);
-            if (!IsBooleanExpression(exp) || !IsSqlCondition(exp))
-                return exp;
-            return new CaseExpression(new[] { new When(exp, Expression.Constant(true)) }, Expression.Constant(false));
-        }
-
-        public bool IsSqlCondition(Expression expression)
-        {
-            if (!IsBooleanExpression(expression))
-                throw new InvalidOperationException("Testing sql conditioness for non boolean expression : " +  expression.ToString());
-
-            switch (expression.NodeType)
-            {
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                case ExpressionType.ExclusiveOr:
-                case ExpressionType.Not:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                case ExpressionType.NotEqual:
-                case ExpressionType.Equal:
-                case ExpressionType.GreaterThan:
-                case ExpressionType.GreaterThanOrEqual:
-                case ExpressionType.LessThan:
-                case ExpressionType.LessThanOrEqual:
-                    return true;
-
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                    return ((UnaryExpression)expression).Operand.Map(o=>IsBooleanExpression(o) && IsSqlCondition(o));
-
-                case ExpressionType.Constant:
-                case ExpressionType.Coalesce:
-                    return false;
-            }
-
-            switch ((DbExpressionType)expression.NodeType)
-            {
-                case DbExpressionType.SqlFunction:
-                case DbExpressionType.Column:
-                case DbExpressionType.Projection:
-                case DbExpressionType.Case:
-                    return false; 
-                case DbExpressionType.Like:
-                case DbExpressionType.In:
-                    return true; 
-            }
-
-            throw new InvalidOperationException("Testing sql conditioness for non boolean expression : " + expression.ToString());
         }
     }
 }

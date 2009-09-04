@@ -51,10 +51,10 @@
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
     <Compile Include="LinqProvider\SqlFunctionsTest.cs" />
     <Compile Include="LinqProvider\TakeSkipTest.cs" />
-    <Compile Include="LinqProvider\SetOperationTest.cs" />
+    <Compile Include="LinqProvider\NestedQueriesTest.cs" />
     <Compile Include="LinqProvider\GroupByTest.cs" />
     <Compile Include="LinqProvider\OrderByTest.cs" />
-    <Compile Include="LinqProvider\JoinTest.cs" />
+    <Compile Include="LinqProvider\JoinGroupTest.cs" />
     <Compile Include="LinqProvider\WhereTest.cs" />
     <Compile Include="LinqProvider\Entities.cs" />
     <Compile Include="LinqProvider\SelectTest.cs" />

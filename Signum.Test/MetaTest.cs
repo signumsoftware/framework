@@ -57,8 +57,6 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
         }
 
-
-
         [TestMethod]
         public void ComplexJoin()
         {

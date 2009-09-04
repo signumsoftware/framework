@@ -49,16 +49,15 @@ namespace Signum.Engine.Linq
             Expression partialEval = ExpressionEvaluator.PartialEval(expand);
             Expression simplified = OverloadingSimplifier.Simplify(partialEval);
             ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(simplified);
-            ProjectionExpression projCleaned = (ProjectionExpression)ProjectionCleaner.Clean(binded);
+            ProjectionExpression rewrited = (ProjectionExpression)AggregateRewriter.Rewrite(binded);
+            ProjectionExpression rebinded = (ProjectionExpression)QueryRebinder.Rebind(rewrited);
+            ProjectionExpression projCleaned = (ProjectionExpression)ProjectionCleaner.Clean(rebinded);
             ProjectionExpression ordered = OrderByRewriter.Rewrite(projCleaned);
-            ProjectionExpression aggregate = AggregateOptimizer.Optimize(ordered);
-            ProjectionExpression replaced = AliasProjectionReplacer.Replace(aggregate);
+            ProjectionExpression replaced = AliasProjectionReplacer.Replace(ordered);
             ProjectionExpression columnCleaned = (ProjectionExpression)UnusedColumnRemover.Remove(replaced);
-            ProjectionExpression optimized = SingleCellOptimizer.Optimize(columnCleaned);
-            ProjectionExpression subqueryCleaned = (ProjectionExpression)RedundantSubqueryRemover.Remove(optimized);
+            ProjectionExpression subqueryCleaned = (ProjectionExpression)RedundantSubqueryRemover.Remove(columnCleaned);
 
             ITranslateResult result = TranslatorBuilder.Build((ProjectionExpression)subqueryCleaned, ImmutableStack<string>.Empty);
-
             return result; 
         }
     }

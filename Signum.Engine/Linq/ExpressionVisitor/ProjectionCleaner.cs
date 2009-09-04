@@ -8,19 +8,12 @@ using Signum.Utilities;
 using System.Diagnostics;
 using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
     internal class ProjectionCleaner : DbExpressionVisitor
     {
-        internal class TableCondition
-        {
-            public TableExpression Table;
-            public ColumnExpression Id;
-            public ColumnExpression NewId;
-        }
-
-        HashSet<TableCondition> requests = new HashSet<TableCondition>();
 
         public static Expression Clean(Expression source)
         {
@@ -30,103 +23,62 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitLazyReference(LazyReferenceExpression lazy)
         {
-            FieldInitExpression fie = lazy.Reference as FieldInitExpression;
-            if (fie != null)
-            {
-                if (fie.Bindings == null)
-                {
-                    Table table = ConnectionScope.Current.Schema.Table(fie.Type);
-
-                    string tableAlias = this.GetNextAlias();
-                    var bindings = table.CreateBindings(tableAlias);
-
-                    ColumnExpression newId = bindings.IDColumn();
-                    ColumnExpression toStr = bindings.ToStrColumn();
-
-                    TableExpression tableExpression = new TableExpression(fie.Type, tableAlias, table.Name);
-                    requests.Add(new TableCondition
-                    {
-                        Id = (ColumnExpression)fie.ExternalId,
-                        NewId = newId,
-                        Table = tableExpression
-                    });
-
-                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId, toStr);
-                }
-                else
-                    return new LazyLiteralExpression(lazy.Type, fie.Type, (ColumnExpression)fie.ExternalId, fie.Bindings.ToStrColumn());
-            }
-            
-            return base.VisitLazyReference(lazy);
+            var newToStr = Visit(lazy.ToStr);
+            var newId = Visit(lazy.Id);
+            var newTypeId = Visit(lazy.TypeId);
+            return new LazyReferenceExpression(lazy.Type, null, newId, newToStr, newTypeId);
         }
 
         protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
         {
-            if (typeof(IdentifiableEntity).IsAssignableFrom(fieldInit.Type))
+            Expression newID = Visit(fieldInit.ExternalId);
+            if (newID != fieldInit.ExternalId)
             {
-                Expression newID = Visit(fieldInit.ExternalId);
-                if (newID != fieldInit.ExternalId)
-                {
-                    Debug.Assert(false, "FieldInit has identity"); 
-                    return new FieldInitExpression(fieldInit.Type, fieldInit.Alias, newID, null); // eliminamos los bindings
-                }
-                else
-                {
-                    fieldInit.Bindings = null;
-                    return fieldInit;
-                }
+                return new FieldInitExpression(fieldInit.Type, fieldInit.TableAlias, newID, null); // eliminamos los bindings
             }
-            else
-                return base.VisitFieldInit(fieldInit); 
+
+            fieldInit.Bindings = null;
+            fieldInit.PropertyBindings = null;
+            return fieldInit;
+        }
+
+        protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
+        {
+            var bindings = efie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
+
+            if (efie.Bindings != bindings)
+            {
+                return new EmbeddedFieldInitExpression(efie.Type, bindings);
+            }
+
+            efie.PropertyBindings = null;
+            return efie;
+        }
+
+        protected override Expression VisitImplementedBy(ImplementedByExpression reference)
+        {
+            var implementations = reference.Implementations
+                .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
+
+            if (implementations != reference.Implementations)
+                return new ImplementedByExpression(reference.Type, implementations);
+
+            reference.PropertyBindings = null;
+            return reference;
         }
 
         protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
         {
-            var id = (ColumnExpression)Visit(reference.ID);
-            var typeId = (ColumnExpression)Visit(reference.TypeID);
+            var id = (ColumnExpression)Visit(reference.Id);
+            var typeId = (ColumnExpression)Visit(reference.TypeId);
 
-            if (id != reference.ID || typeId != reference.TypeID)
+            if (id != reference.Id || typeId != reference.TypeId)
             {
-                Debug.Assert(false, "No se deberian estar tocando estas cosas");
                 return new ImplementedByAllExpression(reference.Type, id, typeId);
             }
-            else
-            {
-                reference.Implementations = null;
-                return reference;
-            }
-        }
-
-        protected override Expression VisitProjection(ProjectionExpression proj)
-        {
-            ProjectionExpression projection = (ProjectionExpression)base.VisitProjection(proj);
-
-            if (requests.Count == 0)
-                return projection;
-
-            Type type = projection.Type;
-            string newAlias = GetNextAlias();
-
-            string[] oldAliases = requests.Select(p => p.Table.Alias).And(projection.Source.Alias).ToArray();
-
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, oldAliases);
-
-            JoinExpression source = (JoinExpression)requests.Aggregate((Expression)projection.Source, (e, p) =>
-                new JoinExpression(type, JoinType.LeftOuterJoin, e, p.Table,
-                  SmartEqualizer.EqualNullable(p.Id, p.NewId),
-                true));
-
-            ProjectionExpression newProjection = new ProjectionExpression(
-                 new SelectExpression(projection.Source.Type, newAlias, false, null, pc.Columns, source, null, null, null, null),
-                 pc.Projector, null);
-
-            return newProjection; 
-        }
-
-        int aliasCount = 0; 
-        private string GetNextAlias()
-        {
-            return "r" + (aliasCount++);
+            
+            reference.Implementations = null;
+            return reference;
         }
     }
 }

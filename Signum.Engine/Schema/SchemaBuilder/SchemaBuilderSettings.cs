@@ -87,7 +87,8 @@ namespace Signum.Engine.Maps
         public bool IsFieldAttributesOverriden<T>(Expression<Func<T, object>> lambda)
         {
             MemberInfo mi = ReflectionTools.GetMemberInfo<T>(lambda);
-            FieldInfo fi = Reflector.FindFieldInfo(mi, true);
+            Type type = ReflectionTools.GetReceiverType<T>(lambda);
+            FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
             return IsFieldAttributesOverriden(typeof(T), fi.Name);
         }
 
@@ -100,7 +101,8 @@ namespace Signum.Engine.Maps
         public void OverrideFieldAttributes<T>(Expression<Func<T, object>> lambda, params Attribute[] attributes)
         {
             MemberInfo mi = ReflectionTools.GetMemberInfo<T>(lambda);
-            FieldInfo fi = Reflector.FindFieldInfo(mi, true); 
+            Type type = ReflectionTools.GetReceiverType<T>(lambda);
+            FieldInfo fi = Reflector.FindFieldInfo(type, mi, true); 
             OverrideFieldAttributes(typeof(T), fi.Name, attributes); 
         }
 

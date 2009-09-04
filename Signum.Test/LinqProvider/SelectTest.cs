@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Engine.Linq;
+using Signum.Utilities;
 
 namespace Signum.Test.LinqProvider
 {
@@ -36,6 +37,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectExpansion()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.Label.Name).ToList();
+        }
+
+        [TestMethod]
         public void SelectAnonymous()
         {
             var list = Database.Query<AlbumDN>().Select(a => new { a.Name, a.Year }).ToList();
@@ -50,7 +57,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectCount()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.Song.Count).ToList();
+            var list = Database.Query<AlbumDN>().Select(a => (int?)a.Songs.Count).ToList();
         }
 
         [TestMethod]
@@ -62,7 +69,9 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectLazyIB()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.Author.ToLazy()).ToList();
+            var list = Database.Query<AlbumDN>()
+                .Select(a => a.Author.ToLazy())
+                .Where(a => a.ToStr.StartsWith("Michael")).ToList();
         }
 
         [TestMethod]
@@ -110,6 +119,20 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectCastIBPolymorphic()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        select a.Author.Name).ToList();
+        }
+
+        [TestMethod]
+        public void SelectCastIBPolymorphicIB()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        select a.Author.LastAward.ToLazy()).ToList();
+        }
+
+        [TestMethod]
         public void SelectCastIBA()
         {
             var list = (from n in Database.Query<NoteDN>()
@@ -123,18 +146,17 @@ namespace Signum.Test.LinqProvider
         public void SelectCastIsIB()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        select (a.Author is ArtistDN ?
-                        ((ArtistDN)a.Author).Name :
-                        ((BandDN)a.Author).Name).InSql()).ToList(); //Just to full-nominate
+                        select (a.Author is ArtistDN ? ((ArtistDN)a.Author).Name :
+                                                        ((BandDN)a.Author).Name)).ToList(); //Just to full-nominate
         }
 
         [TestMethod]
         public void SelectCastIsIBA()
         {
             var list = (from n in Database.Query<NoteDN>()
-                        select (n.Target is ArtistDN ?
+                        select n.Target is ArtistDN ?
                         ((ArtistDN)n.Target).Name :
-                        ((BandDN)n.Target).Name).InSql()).ToList(); //Just to full-nominate
+                        ((BandDN)n.Target).Name).ToList(); //Just to full-nominate
         }
 
         [TestMethod]
@@ -143,6 +165,14 @@ namespace Signum.Test.LinqProvider
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
             var list = Database.Query<AlbumDN>().Select(a => a.Author == michael).ToList(); 
-        }   
+        }
+
+        [TestMethod]
+        public void SelectMList()
+        {
+            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+
+            var list = Database.Query<AlbumDN>().Select(a => a.Author == michael).ToList();
+        } 
     }
 }

@@ -71,14 +71,16 @@
     <Compile Include="DynamicQuery\AutoCompleteUtils.cs" />
     <Compile Include="Engine\SchemaInfoTables.cs" />
     <Compile Include="Engine\Synchronizer.cs" />
-    <Compile Include="Linq\DbExpressions.cs" />
+    <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateOptimizer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
     <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\QueryRebinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\OverloadingSimplifier.cs" />
     <Compile Include="Linq\ExpressionVisitor\ProjectionCleaner.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionVisitor.cs" />
@@ -94,7 +96,7 @@
     <Compile Include="Linq\ExpressionVisitor\SubqueryRemover.cs" />
     <Compile Include="Linq\ExpressionVisitor\TranslatorBuilder.cs" />
     <Compile Include="Linq\ExpressionVisitor\UnusedColumnRemover.cs" />
-    <Compile Include="Linq\DbExpressions.Projection.cs" />
+    <Compile Include="Linq\DbExpressions.Signum.cs" />
     <Compile Include="Linq\Meta\MetaEvaluator.cs" />
     <Compile Include="Linq\Meta\MetaExpression.cs" />
     <Compile Include="Linq\ProjectionReader.cs" />

@@ -130,9 +130,9 @@ namespace Signum.Utilities.ExpressionTrees
             return type.Name;
         }
 
-        public static string CleanIdentifiers(this string typeName)
+        public static string CleanIdentifiers(this string str)
         {
-            return typeName
+            return str
                 .Replace("<>f__AnonymousType", "α")
                 .Replace("<>h__TransparentIdentifier", "τ");
         }

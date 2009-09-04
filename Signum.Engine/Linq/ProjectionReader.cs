@@ -20,13 +20,12 @@ namespace Signum.Engine.Linq
 
         MList<S> GetList<S>(RelationalTable tr, int id);
 
-        S GetIdentificable<S>(int? id) where S : IdentifiableEntity;
+        S GetIdentifiable<S>(int? id) where S : IdentifiableEntity;
         S GetImplementedBy<S>(Type[] types, params int?[] ids) where S :  IIdentifiable;
-        S GetImplementedByAll<S>(int? id, int? idType) where S :  IIdentifiable;
+        S GetImplementedByAll<S>(int? id, int? typeId) where S :  IIdentifiable;
 
-        Lazy<S> GetLazyIdentificable<S>(Type runtimeType, int? id, string str) where S : class, IIdentifiable;
-        Lazy<S> GetLazyImplementedBy<S>(Type[] types, params int?[] ids) where S :class,  IIdentifiable;
-        Lazy<S> GetLazyImplementedByAll<S>(int? id, int? idType) where S :class,  IIdentifiable;
+        Lazy<S> GetLazyIdentifiable<S>(int? id, int? typeId, string str) where S : class, IIdentifiable;
+        Lazy<S> GetLazyImplementedByAll<S>(int? id, int? typeId) where S :class,  IIdentifiable;
     }
 
     internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
@@ -122,7 +121,7 @@ namespace Signum.Engine.Linq
             return (MList<S>)Retriever.GetList(tr, id);
         }
 
-        public S GetIdentificable<S>(int? id) where S : IdentifiableEntity
+        public S GetIdentifiable<S>(int? id) where S : IdentifiableEntity
         {
             if (id == null) return null; 
             return (S)Retriever.GetIdentifiable(ConnectionScope.Current.Schema.Table(typeof(S)), id.Value);
@@ -144,19 +143,12 @@ namespace Signum.Engine.Linq
             return (S)(object)Retriever.GetIdentifiable(table, id.Value);
         }
 
-        public Lazy<S> GetLazyIdentificable<S>(Type runtimeType, int? id, string str) where S : class, IIdentifiable
+        public Lazy<S> GetLazyIdentifiable<S>( int? id, int? idType, string str) where S : class, IIdentifiable
         {
             if (id == null) return null;
-            return new Lazy<S>(runtimeType, id.Value) { ToStr = str }; 
-            //return (Lazy<S>)Retriever.GetLazy(ConnectionScope.Current.Schema.Tables[runtimeType], typeof(S), id.Value);
-        }
 
-        public Lazy<S> GetLazyImplementedBy<S>(Type[] types, params int?[] ids) where S : class, IIdentifiable
-        {
-            int pos = ids.IndexOf(id => id.HasValue);
-            if (pos == -1) return null;
-            Table table = Schema.Current.Table(types[pos]);
-            return (Lazy<S>)Retriever.GetLazy(table, typeof(S), ids[pos].Value);
+            Type runtimeType = Schema.Current.TablesForID[idType.Value].Type;
+            return new Lazy<S>(runtimeType, id.Value) { ToStr = str }; 
         }
 
         public Lazy<S> GetLazyImplementedByAll<S>(int? id, int? idType) where S : class, IIdentifiable
