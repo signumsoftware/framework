@@ -33,8 +33,6 @@ namespace Signum.Engine
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
 
-     
-
         static void Save(DirectedGraph<Modifiable> modifiables)
         {
             string error = GraphExplorer.Integrity(modifiables);
