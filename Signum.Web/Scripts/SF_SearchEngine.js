@@ -83,6 +83,29 @@ function OnSearchOk(prefix, divASustituir, reloadOnChangeFunction) {
         reloadOnChangeFunction();
 }
 
+function OnDetailSearchOk(urlController, prefix, divASustituir, detailDiv, partialView) {
+    var entitySelected = $("input:radio[name=" + prefix + "rowSelection]:checked").val();
+    if (entitySelected == undefined)
+        return;
+
+    var __index = entitySelected.indexOf("__");
+    var __index2 = entitySelected.indexOf("__", __index + 2);
+
+    $('#' + prefix + sfId).val(entitySelected.substring(0, __index));
+    $('#' + prefix + sfRuntimeType).val(entitySelected.substring(__index + 2, __index2));
+    //$('#' + prefix + sfToStr).val(entitySelected.substring(__index2 + 2, entitySelected.length));
+    //$('#' + prefix + sfLink).html(entitySelected.substring(__index2 + 2, entitySelected.length));
+
+    OpenPopup(urlController, divASustituir, prefix, "", "", detailDiv, partialView)
+    
+    toggleButtonsDisplay(prefix, true);
+    //$('#' + prefix + sfEntity).hide().html("");
+    $('#' + divASustituir).hide().html("");
+
+//    if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "")
+//        reloadOnChangeFunction();
+}
+
 function OnListSearchOk(prefix, divASustituir) {
     $("#"+prefix+"tdRowSelection input:checked").each(
         function() {

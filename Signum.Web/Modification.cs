@@ -236,7 +236,7 @@ namespace Signum.Web
             {
                 foreach (var ppm in Properties.Values)
                 {
-                    object oldValue = ppm.PropertyPack.GetValue(entity);
+                    object oldValue = (entity != null) ? ppm.PropertyPack.GetValue(entity) : null;
                     object newValue = ppm.Modification.ApplyChanges(controller, oldValue);
                     try
                     {
@@ -306,13 +306,17 @@ namespace Signum.Web
         }
     }
 
-    class LazyModification : Modification
+    public class LazyModification : Modification
     {
-        Type RuntimeType; 
-        int? EntityId; //optional
-        Type CleanType; 
-        EntityModification EntityModification;
-        bool IsNew;
+        public Type RuntimeType;
+        public int? EntityId; //optional
+        public Type CleanType;
+        public EntityModification EntityModification;
+        public bool IsNew;
+
+        public LazyModification(Type staticType, string controlID)
+            : base(staticType, controlID) 
+        { }
 
         public LazyModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
             : base(staticType, controlID)

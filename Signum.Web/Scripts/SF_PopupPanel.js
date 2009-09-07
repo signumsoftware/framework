@@ -1,14 +1,34 @@
-﻿function OpenPopup(urlController, divASustituir, prefix, onOk, onCancel) {
+﻿function OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, partialView) {
     var typeName = $('#' + prefix + sfStaticType).val();
-    var hasImplementations = $('#' + prefix + sfImplementations).length > 0; 
-    TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, typeName, hasImplementations, "");
+    var hasImplementations = $('#' + prefix + sfImplementations).length > 0;
+    TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, typeName, hasImplementations, detailDiv, partialView);
 }
 
-function NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded) {
+function NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, detailDiv, partialView) {
     $('#' + prefix + sfEntity).after("<input type=\"hidden\" id=\"" + prefix + sfIsNew + "\" name=\"" + prefix + sfIsNew + "\" value=\"\" />\n");
     if ($('#' + prefix + sfImplementations).length == 0)
         $('#' + prefix + sfRuntimeType).val($('#' + prefix + sfStaticType).val());
-    OpenPopup(urlController, divASustituir, prefix, onOk, onCancel);
+    OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, partialView);
+}
+
+function NewDetail(urlController, divASustituir, prefix, detailDiv, isEmbeded, partialView) {
+    NewPopup(urlController, divASustituir, prefix, "", "", isEmbeded, detailDiv, partialView);
+
+    var runtimeType = $('#' + prefix + sfRuntimeType);
+    if (runtimeType.val() == "")
+        runtimeType.val($('#' + prefix + sfStaticType).val());
+
+    toggleButtonsDisplay(prefix, true);
+}
+
+function OpenDetail(urlController, divASustituir, prefix, onOk, onCancel, detailDiv) {
+    OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv);
+
+    var runtimeType = $('#' + prefix + sfRuntimeType);
+    if (runtimeType.val() == "")
+        runtimeType.val($('#' + prefix + sfStaticType).val());
+
+    toggleButtonsDisplay(prefix, true);
 }
 
 function OpenPopupList(urlController, divASustituir, select, onOk, onCancel, detailDiv) {
@@ -44,7 +64,7 @@ function NewPopupList(urlController, divASustituir, select, onOk, onCancel, runt
     TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefixSelected, runtimeType, hasImplementations, detailDiv);
 }
 
-function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, typeName, hasImplementations, detailDiv) {
+function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, typeName, hasImplementations, detailDiv, partialView) {
     var containedEntity = $('#' + prefix + sfEntity).html();
     if (containedEntity != null && containedEntity != "") { //Already have the containedEntity loaded => show it
         window[prefix + sfEntityTemp] = containedEntity;
@@ -70,16 +90,22 @@ function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, ty
     if (idField.length != 0) {
         idQueryParam = "&sfId=" + idField.val();
     }
+    var viewQueryParam = "";
+    if (partialView != undefined && partialView != null && partialView != "")
+        viewQueryParam = "&sfUrl=" + partialView;
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "sfStaticType=" + typeName + "&sfOnOk=" + onOk + "&sfOnCancel=" + onCancel + "&prefix=" + prefix + idQueryParam,
+        data: "sfStaticType=" + typeName + "&sfOnOk=" + onOk + "&sfOnCancel=" + onCancel + "&prefix=" + prefix + idQueryParam + viewQueryParam,
         async: false,
         dataType: "html",
         success:
                    function(msg) {
                        window[prefix + sfEntityTemp] = containedEntity;
-                       $('#' + prefix + sfEntity).html(msg);
+                       if (detailDiv != null && detailDiv != "") 
+                            $('#' + detailDiv).html(msg);
+                       else
+                            $('#' + prefix + sfEntity).html(msg);
                        ShowPopup(prefix, prefix + sfEntity, "modalBackground", "panelPopup", detailDiv);
                        $('#' + prefix + sfBtnOk).click(onOk);
                        $('#' + prefix + sfBtnCancel).click(onCancel);
@@ -99,7 +125,8 @@ function ChooseImplementation(divASustituir, prefix, onOk, onCancel) {
 
 function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailDiv) {
     if (detailDiv != null && detailDiv != "") {
-        $("#" + prefix + "_sfEntity").show();
+        //$("#" + prefix + "_sfEntity").show();
+        $("#" + detailDiv).show();
     }
     else {
         //$("#" + prefix + "_sfEntity").show();
@@ -325,6 +352,21 @@ function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
 
     if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "")
         reloadOnChangeFunction();
+}
+
+function RemoveDetailContainedEntity(prefix, detailDiv) {
+    $('#' + prefix + sfToStr).val("");
+    $('#' + prefix + sfToStr).html("");
+    $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
+    $('#' + prefix + sfRuntimeType).val("");
+    $('#' + prefix + sfIsNew).remove();
+    window[prefix + sfEntityTemp] = "";
+
+    var idField = $('#' + prefix + sfId);
+    $('#' + prefix + sfId).val("");
+    $('#' + detailDiv).html("");
+    
+    toggleButtonsDisplay(prefix, false);
 }
 
 var autocompleteOnSelected = function(extendedControlName, newIdAndType, newValue, hasEntity) {

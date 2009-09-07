@@ -48,7 +48,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix, bool? sfEmbedControl)
+        public PartialViewResult PartialView(string sfStaticType, int? sfId, string prefix, bool? sfEmbedControl, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfStaticType);
             
@@ -69,7 +69,7 @@ namespace Signum.Web.Controllers
             if (sfEmbedControl != null && sfEmbedControl.Value)
                 this.ViewData[ViewDataKeys.EmbeddedControl] = true;
 
-            return Navigator.PartialView(this, entity, prefix);
+            return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

@@ -92,12 +92,22 @@ namespace Signum.Web
 
         public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix)
         {
-            return Manager.PopupView(controller, entity, prefix);
+            return Manager.PopupView(controller, entity, prefix, null);
+        }
+
+        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix, string partialViewName)
+        {
+            return Manager.PopupView(controller, entity, prefix, partialViewName);
         }
 
         public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix)
         {
-            return Manager.PartialView(controller, entity, prefix);
+            return Manager.PartialView(controller, entity, prefix, null);
+        }
+
+        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, string partialViewName)
+        {
+            return Manager.PartialView(controller, entity, prefix, partialViewName);
         }
 
         public static ViewResult Find(Controller controller, object queryName)
@@ -338,11 +348,12 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix)
+        protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix, string partialViewName)
         {
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
+            string url = partialViewName ??
+                Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType()).PartialViewName;
 
-            controller.ViewData[ViewDataKeys.MainControlUrl] = es.PartialViewName;
+            controller.ViewData[ViewDataKeys.MainControlUrl] = url;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
 
             controller.ViewData.Model = entity;
@@ -355,9 +366,10 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix)
+        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix, string partialViewName)
         {
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType());
+            string url = partialViewName ??
+                Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType()).PartialViewName;
 
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;
@@ -367,7 +379,7 @@ namespace Signum.Web
 
             return new PartialViewResult
             {
-                ViewName = es.PartialViewName,
+                ViewName = url,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
