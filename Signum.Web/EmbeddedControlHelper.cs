@@ -103,7 +103,7 @@ namespace Signum.Web
             if (context.Value != null && typeof(IIdentifiable).IsAssignableFrom(context.Value.GetType()) && ((IIdentifiable)context.Value).IsNew)
                 helper.Write(helper.Hidden(prefixedName + TypeContext.Separator + EntityBaseKeys.IsNew, ""));
 
-            helper.RenderPartial(Navigator.Manager.EntitySettings[runtimeType].PartialViewName, vdd);
+            helper.RenderPartial(ViewName, vdd);
         }
     }
 }
