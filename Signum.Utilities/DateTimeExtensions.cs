@@ -122,6 +122,8 @@ namespace Signum.Utilities
 
     public struct DateSpan
     {
+        public static readonly DateSpan Zero = new DateSpan(0, 0, 0);
+
         public readonly int Years;
         public readonly int Months;
         public readonly int Days;
