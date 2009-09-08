@@ -168,9 +168,8 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
 }
 
 function OnPopupOK(urlController, prefix, reloadOnChangeFunction) {
-    var correcto = TrySavePartial(urlController, prefix, "", true, "*");
+    var correcto = ValidatePartial(urlController, prefix, "", true, "*");
 
-    //Clean panelPopup
     window[prefix + sfEntityTemp] = "";
     $('#' + prefix + sfEntity).hide();
 

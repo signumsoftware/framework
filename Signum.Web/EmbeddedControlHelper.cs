@@ -68,10 +68,10 @@ namespace Signum.Web
             }
 
             string prefixedName = context.Name;
-            if (!helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey) ||
-                !((string)helper.ViewData[ViewDataKeys.TypeContextKey]).HasText() ||
-                !prefixedName.StartsWith((string)helper.ViewData[ViewDataKeys.TypeContextKey]))
-            prefixedName = helper.GlobalPrefixedName(context.Name);
+            //if (!helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey) ||
+            //    !((string)helper.ViewData[ViewDataKeys.TypeContextKey]).HasText() ||
+            //    !prefixedName.StartsWith((string)helper.ViewData[ViewDataKeys.TypeContextKey]))
+            //prefixedName = helper.GlobalPrefixedName(context.Name);
 
             ViewDataDictionary vdd = new ViewDataDictionary()
             {
@@ -79,6 +79,8 @@ namespace Signum.Web
                 { prefixedName, context.Value },
                 { ViewDataKeys.EmbeddedControl, "" },
             };
+            if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
+                vdd[ViewDataKeys.PopupPrefix] = helper.ViewData[ViewDataKeys.PopupPrefix];
 
             if (context.Value != null && typeof(IIdentifiable).IsAssignableFrom(context.Value.GetType()) && ((IIdentifiable)context.Value).IsNew)
                 helper.Write(helper.Hidden(prefixedName + TypeContext.Separator + EntityBaseKeys.IsNew, ""));

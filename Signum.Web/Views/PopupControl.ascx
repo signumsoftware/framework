@@ -28,6 +28,7 @@
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), prefix) %>
     </div>
+    <div class="clearall"></div>
     <div id="<%=Html.GlobalName("divMainControl" + sufix)%>" class="divMainControl">
         <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
     </div>

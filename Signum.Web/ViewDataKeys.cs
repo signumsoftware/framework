@@ -52,13 +52,15 @@ namespace Signum.Web
 
         public static string GlobalPrefixedName(this HtmlHelper helper, string localName)
         {
+            string globalName = "";
+
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
-                return helper.ViewData[ViewDataKeys.PopupPrefix].ToString() + localName;
+                globalName = helper.ViewData[ViewDataKeys.PopupPrefix].ToString();
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
-                return helper.ViewData[ViewDataKeys.TypeContextKey].ToString() + localName;
+                globalName += helper.ViewData[ViewDataKeys.TypeContextKey].ToString();
 
-            return localName;
+            return globalName + localName;
         }
 
         public static string ParentPrefix(this HtmlHelper helper)

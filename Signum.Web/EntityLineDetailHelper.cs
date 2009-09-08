@@ -97,7 +97,7 @@ namespace Signum.Web
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("")
                        : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()) + "\n");
 
-                sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                sb.Append(helper.Div(idValueField + TypeContext.Separator + EntityBaseKeys.Entity, "", "", new Dictionary<string, object>()));
               
                 if (settings.Implementations != null) //Interface with several possible implementations
                 {
@@ -122,7 +122,7 @@ namespace Signum.Web
             else
             {
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
-                sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
+                sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" >\n");
 
                 string url = settings.Url ?? 
                     Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type).PartialViewName;

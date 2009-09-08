@@ -70,19 +70,19 @@ namespace Signum.Web
 
                         if (tc.Value != null)
                             helper.ViewContext.HttpContext.Response.Write(
-                                helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
+                                helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
                         else
                             helper.ViewContext.HttpContext.Response.Write(
-                                helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.StaticType), typeof(T).Name) + "\n");
+                                helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.StaticType), typeof(T).Name) + "\n");
                         
                         helper.ViewContext.HttpContext.Response.Write(
-                            helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
+                            helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
                         
                     }
                     else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
                     {
                         helper.ViewContext.HttpContext.Response.Write(
-                                helper.Hidden(prefix + helper.GlobalName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
+                                helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
                     }
                 }
                 //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them

@@ -140,6 +140,52 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
         return returnValue;
     }
 
+    //fixedInlineErrorText = "" for it to be populated from ModelState error messages
+    function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
+        if (panelPopupKey == "" || panelPopupKey == undefined)
+            panelPopupKey = "panelPopup"
+        var formChildren = $('#' + prefix + panelPopupKey + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
+        var idField = document.getElementById(prefix + sfId);
+        var idQueryParam = "";
+        if (idField != null && idField != undefined) {
+            idQueryParam = "&sfId=" + idField.value;
+        }
+
+        var returnValue = false;
+        $.ajax({
+            type: "POST",
+            url: urlController,
+            async: false,
+            data: formChildren.serialize() + "&prefix=" + prefix + "&" + sfPrefixToIgnore + "=" + prefixToIgnore + "&sfStaticType=" + staticType + idQueryParam,
+            success:
+            function(result) {
+                eval('var result=' + result);
+                var toStr = result[sfToStr];
+                var link = $("#" + prefix + sfLink);
+                if (link.length > 0)
+                    link.html(toStr); //EntityLine
+                else {
+                    var tost = $("#" + prefix + sfToStr);
+                    if (tost.length > 0)
+                        tost.html(toStr); //EntityList
+                    else {
+                        var combo = $("#" + prefix + sfCombo);
+                        if (combo.length > 0)
+                            $('#' + prefix + sfCombo + " option:selected").html(toStr);
+                    }
+                }
+                var modelState = result["ModelState"];
+                returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
+                return;
+            },
+            error:
+            function(XMLHttpRequest, textStatus, errorThrown) {
+                ShowError(XMLHttpRequest, textStatus, errorThrown);
+            }
+        });
+        return returnValue;
+    }
+
     function ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText) {
         //Remove previous errors
         $('.' + sfFieldErrorClass).replaceWith("");

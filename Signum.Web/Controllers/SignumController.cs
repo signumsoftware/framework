@@ -135,6 +135,26 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult ValidatePartial(string prefix, string prefixToIgnore, string sfStaticType, int? sfId)
+        {
+            Type type = Navigator.ResolveType(sfStaticType);
+
+            Modifiable entity = null;
+            if (sfId.HasValue)
+                entity = Database.Retrieve(type, sfId.Value);
+            else
+                entity = (ModifiableEntity)Navigator.CreateInstance(this, type);
+
+            var sortedList = Navigator.ToSortedList(Request.Form, prefix, prefixToIgnore);
+
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, sortedList, ref entity, prefix);
+
+            this.ModelState.FromDictionary(errors, Request.Form);
+
+            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult TrySavePartialStrict(string prefix, string prefixToIgnore, string sfStaticType, int? sfId, bool? save)
         {
             Type type = Navigator.ResolveType(sfStaticType);
