@@ -960,6 +960,8 @@ namespace Signum.Engine.Linq
 
         private Expression GetId(Expression expression)
         {
+            expression = RemoveConvert(expression); 
+
             if (expression is FieldInitExpression)
                 return ((FieldInitExpression)expression).ExternalId;
 
@@ -974,6 +976,8 @@ namespace Signum.Engine.Linq
 
         private Expression GetTypeId(Expression expression)
         {
+            expression = RemoveConvert(expression); 
+
             if (expression is FieldInitExpression)
                 return TypeConstant(expression.Type);
 

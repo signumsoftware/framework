@@ -192,8 +192,12 @@ function CloseChooser(urlController, onOk, onCancel, prefix) {
 
 function OperationExecute(urlController, typeName, id, operationKey, isLazy, prefix, onOk, onCancel) {
         var formChildren = "";
-        if (isLazy == false || isLazy == "false" || isLazy == "False")
-            formChildren = $('#' + prefix + "panelPopup *").serialize();
+        if (isLazy == false || isLazy == "false" || isLazy == "False") {
+            if (prefix != "") //PopupWindow
+                formChildren = $('#' + prefix + "panelPopup *").serialize();
+            else //NormalWindow
+                formChildren = $("form").serialize();
+        }
         $.ajax({
             type: "POST",
             url: urlController,

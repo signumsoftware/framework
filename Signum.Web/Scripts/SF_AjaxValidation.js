@@ -141,7 +141,17 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
     }
 
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-    function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
+    function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
+        var typeName = $('#' + prefix + sfStaticType).val();
+        var runtimeType = $('#' + prefix + sfRuntimeType).val(); //typeName is an interface
+        if (runtimeType != null && runtimeType != "") {
+            typeName = runtimeType;
+        }
+        return TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "");
+    }
+
+    //fixedInlineErrorText = "" for it to be populated from ModelState error messages
+    function TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
         if (panelPopupKey == "" || panelPopupKey == undefined)
             panelPopupKey = "panelPopup"
         var formChildren = $('#' + prefix + panelPopupKey + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
