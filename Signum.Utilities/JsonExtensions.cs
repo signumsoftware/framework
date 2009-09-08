@@ -12,6 +12,14 @@ namespace Signum.Utilities
             return "\"" + obj + "\"";
         }
 
+        public static string Unquote(this string obj)
+        {
+            if (obj.Length > 1 && obj[0] == '\"' && obj[obj.Length - 1] == '\"')
+                return obj.Substring(1, obj.Length - 2);
+            else
+                return obj;
+        }
+
         public static string ToJSonArray<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
             return "[" + collection.ToString(toString, ", ") + "]";
