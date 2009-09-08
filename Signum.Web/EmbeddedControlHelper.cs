@@ -53,6 +53,24 @@ namespace Signum.Web
         public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
+            Type runtimeType = typeof(S);
+            if (context.Value != null)
+            {
+                if (typeof(Lazy).IsAssignableFrom(context.Value.GetType()))
+                    runtimeType = (context.Value as Lazy).RuntimeType;
+                else
+                    runtimeType = context.Value.GetType();
+            }
+            else
+            {
+                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
+            }
+            EmbeddedControl(helper, tc, property, Navigator.Manager.EntitySettings[runtimeType].PartialViewName);
+        }
+
+        public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, string ViewName)
+        {
+            TypeContext<S> context = Common.WalkExpression(tc, property);
 
             Type runtimeType = typeof(S);
             if (context.Value != null)
