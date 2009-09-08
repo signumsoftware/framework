@@ -228,6 +228,10 @@ namespace Signum.Web
             return sb.ToString();
         }
 
+        public static void RegisterScript(this HtmlHelper html, Type type, string fullName) {
+            string url = new ScriptManager().Page.ClientScript.GetWebResourceUrl(type, fullName);
+            html.ViewContext.HttpContext.Response.Write(HtmlHelperExtenders.GetScriptRegistrationCode(url));
+        }
    }
 }
 
