@@ -136,7 +136,7 @@ namespace Signum.Entities
         protected override string OverrideError(object value)
         {
             string str = (string)value;
-            if (str == null)
+            if (string.IsNullOrEmpty(str))
                 return null;
 
             if (regex.IsMatch(str))
@@ -421,17 +421,18 @@ namespace Signum.Entities
 
         protected override string OverrideError(object value)
         {
-            if (value != null)
-            {
-                string str = (string)value;
-                
-                if ((this.textCase == Case.Uppercase) && (str != str.ToUpper()))
-                    return ErrorMessage ?? Resources._0HasToBeUppercase;
-                
-                if ((this.textCase == Case.Lowercase) && (str != str.ToLower()))
-                    return ErrorMessage ?? Resources._0HasToBeLowercase;
-            }
-            return null;            
+
+            if (string.IsNullOrEmpty((string)value)) return null;
+
+            string str = (string)value;
+
+            if ((this.textCase == Case.Uppercase) && (str != str.ToUpper()))
+                return ErrorMessage ?? Resources._0HasToBeUppercase;
+
+            if ((this.textCase == Case.Lowercase) && (str != str.ToLower()))
+                return ErrorMessage ?? Resources._0HasToBeLowercase;
+
+            return null;
         }
       
     }

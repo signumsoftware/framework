@@ -120,9 +120,20 @@ namespace Signum.Web
                 htmlProperties["class"] = " maskedEdit";
             
             }
-            return helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "",  htmlProperties)+
+
+            if (datepickerOptions != null && datepickerOptions.ShowAge)
+            {
+                htmlProperties["onchange"] = "calcAge('" + idValueField +"');"; 
+            }
+            string returnString = helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "",  htmlProperties)+
                    "\n" + 
                    helper.Calendar(idValueField, datepickerOptions);
+
+            if (datepickerOptions != null && datepickerOptions.ShowAge)
+            {
+                returnString += helper.Span(idValueField + "Age", String.Empty, "age");
+            }
+            return returnString;
         }
 
         public static string TextboxInLine(this HtmlHelper helper, string idValueField, string valueStr, Dictionary<string, object> htmlProperties)
