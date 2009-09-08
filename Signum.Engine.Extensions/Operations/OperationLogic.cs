@@ -75,25 +75,25 @@ namespace Signum.Engine.Operations
         public static event ErrorOperationHandler ErrorOperation;
         public static event AllowOperationHandler AllowOperation; 
 
-        private static void OnBeginOperation(IOperation operation, IdentifiableEntity entity)
+        internal static void OnBeginOperation(IOperation operation, IdentifiableEntity entity)
         {
             if (BeginOperation != null)
                 BeginOperation(operation, entity);
         }
 
-        private static void OnEndOperation(IOperation operation, IdentifiableEntity entity)
+        internal static void OnEndOperation(IOperation operation, IdentifiableEntity entity)
         {
             if (EndOperation != null)
                 EndOperation(operation, entity);
         }
 
-        private static void OnErrorOperation(IOperation operation, IdentifiableEntity entity, Exception ex)
+        internal static void OnErrorOperation(IOperation operation, IdentifiableEntity entity, Exception ex)
         {
             if (ErrorOperation != null)
                 ErrorOperation(operation, entity, ex);
         }
 
-        private static bool OnAllowOperation(Enum operationKey)
+        internal static bool OnAllowOperation(Enum operationKey)
         {
             if (AllowOperation != null)
                 return AllowOperation(operationKey);
@@ -147,211 +147,112 @@ namespace Signum.Engine.Operations
         }
 
         #region Execute
-        public static IdentifiableEntity ServiceExecuteLazy(Lazy lazy, Enum operationKey, params object[] args)
-        {
-            return ExecutePrivate(Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true), Database.RetrieveAndForget(lazy), args);
-        }
-
         public static IdentifiableEntity ServiceExecute(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return ExecutePrivate(Find<IExecuteOperation>(entity.GetType(), operationKey, false), entity, args);
+            Find<IExecuteOperation>(entity.GetType(), operationKey, false).Execute(entity, args);
+            return (IdentifiableEntity)entity;
         }
 
-
-        public static T ExecuteLazy<T>(this Lazy<T> lazy, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
+        public static IdentifiableEntity ServiceExecuteLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
-            return (T)(IIdentifiable)ExecutePrivate(Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true), lazy.RetrieveAndForget(), args);
+            IdentifiableEntity entity = Database.RetrieveAndForget(lazy);
+            Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true).Execute(entity, args);
+            return entity;
         }
-
-        public static T ExecuteLazyBase<T>(this Lazy<T> lazy, Type baseType, Enum operationKey, params object[] args)
-            where T:class, IIdentifiable
-        {
-            return (T)(IIdentifiable)ExecutePrivate(Find<IExecuteOperation>(baseType, operationKey, true), Database.RetrieveAndForget(lazy), args);
-        }
-
 
         public static T Execute<T>(this T entity, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ExecutePrivate(Find<IExecuteOperation>(entity.GetType(), operationKey, false), entity, args);
+            Find<IExecuteOperation>(entity.GetType(), operationKey, false).Execute(entity, args);
+            return (T)(IIdentifiable)entity;
+        }
+
+        public static T ExecuteLazy<T>(this Lazy<T> lazy, Enum operationKey, params object[] args)
+            where T : class, IIdentifiable
+        {
+            T  entity = lazy.RetrieveAndForget(); 
+            Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true).Execute(entity, args);
+            return entity;
         }
 
         public static T ExecuteBase<T>(this T entity, Type baseType, Enum operationKey, params object[] args)
              where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ExecutePrivate(Find<IExecuteOperation>(baseType, operationKey, false), entity, args);
+             Find<IExecuteOperation>(baseType, operationKey, false).Execute(entity, args);
+             return entity;
         }
-      
-        static IdentifiableEntity ExecutePrivate(IExecuteOperation operation, IIdentifiable ident, params object[] args)
+
+        public static T ExecuteLazyBase<T>(this Lazy<T> lazy, Type baseType, Enum operationKey, params object[] args)
+            where T:class, IIdentifiable
         {
-            IdentifiableEntity entity = (IdentifiableEntity)ident;
-
-            try
-            {
-                if (BeginOperation != null)
-                    BeginOperation(operation, entity);
-
-                operation.Execute(entity, args);
-
-                if (EndOperation != null)
-                    EndOperation(operation, entity);
-
-                return entity;
-            }
-            catch (Exception ex)
-            {
-                if (ErrorOperation != null)
-                    ErrorOperation(operation, entity, ex);
-
-                throw ex;
-            }
-        } 
+            T entity = lazy.RetrieveAndForget(); 
+            Find<IExecuteOperation>(baseType, operationKey, true).Execute(entity, args);
+            return entity;
+        }
         #endregion
 
         #region Construct
         public static IdentifiableEntity ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
-            return ConstructPrivate(Find<IConstructorOperation>(type, operationKey, false), args);
+            return Find<IConstructorOperation>(type, operationKey, false).Construct(args);
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ConstructPrivate(Find<IConstructorOperation>(typeof(T), operationKey, false), args);
-        }
-
-        static IdentifiableEntity ConstructPrivate(IConstructorOperation operation, params object[] parameters)
-        {
-            try
-            {
-                if (BeginOperation != null)
-                    BeginOperation(operation, null);
-
-                IdentifiableEntity result = operation.Construct(parameters);
-
-                if (EndOperation != null)
-                    EndOperation(operation, null);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                if (ErrorOperation != null)
-                    ErrorOperation(operation, null, ex);
-
-                throw ex;
-            }
+            return (T)(IIdentifiable)Find<IConstructorOperation>(typeof(T), operationKey, false).Construct(args);
         }
         #endregion
 
         #region ConstructFrom
         public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return ConstructFromPrivate(Find<IConstructorFromOperation>(entity.GetType(), operationKey, false), (IdentifiableEntity)entity, args);
-        }
-
-        public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
-              where T : class, IIdentifiable
-        {
-            return (T)(IIdentifiable)ConstructFromPrivate(Find<IConstructorFromOperation>(entity.GetType(), operationKey, false), (IdentifiableEntity)entity, args);
-        }
-
-        public static T ConstructFromBase<T>(this IIdentifiable entity, Type baseType, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
-        {
-            return (T)(IIdentifiable)ConstructFromPrivate(Find<IConstructorFromOperation>(baseType, operationKey, false), (IdentifiableEntity)entity, args);
-        }
-
-        static IdentifiableEntity ConstructFromPrivate(IConstructorFromOperation operation, IdentifiableEntity entity, params object[] parameters)
-        {
-            try
-            {
-                OnBeginOperation(operation, entity);
-
-                IdentifiableEntity result = (IdentifiableEntity)operation.Construct(entity, parameters);
-
-                OnEndOperation(operation, entity);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                OnErrorOperation(operation, entity, ex);
-
-                throw ex;
-            }
+            return (IdentifiableEntity)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
         }
 
         public static IdentifiableEntity ServiceConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
-            return ConstructFromLazyPrivate(Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true), lazy, args);
+            return (IdentifiableEntity)Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
+        }
+
+
+        public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
+              where T : class, IIdentifiable
+        {
+            return (T)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
         }
 
         public static T ConstructFromLazy<T>(this Lazy lazy, Enum operationKey, params object[] args)
+           where T : class, IIdentifiable
+        {
+            return (T)Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
+        }
+
+
+        public static T ConstructFromBase<T>(this IIdentifiable entity, Type baseType, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ConstructFromLazyPrivate(Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true), lazy, args);
+            return (T)Find<IConstructorFromOperation>(baseType, operationKey, false).Construct(entity, args);
         }
 
         public static T ConstructFromLazyBase<T>(this Lazy lazy, Type baseType, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
+               where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ConstructFromLazyPrivate(Find<IConstructorFromOperation>(baseType, operationKey, true), lazy, args);
-        }
-
-        static IdentifiableEntity ConstructFromLazyPrivate(IConstructorFromOperation operation, Lazy lazy, params object[] parameters)
-        {
-            try
-            {
-                OnBeginOperation(operation, null);
-
-                IdentifiableEntity result = (IdentifiableEntity)operation.Construct(lazy, parameters);
-
-                OnEndOperation(operation, result);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                OnErrorOperation(operation, null, ex);
-
-                throw ex;
-            }
+            return (T)Find<IConstructorFromOperation>(baseType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
         }
         #endregion
 
         #region ConstructFromMany
         public static IdentifiableEntity ServiceConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args)
         {
-            return ConstructFromManyPrivate(Find<IConstructorFromManyOperation>(type, operationKey, true), lazies, args);
+            return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationKey, true).Construct(lazies, args);
         }
 
         public static T ConstructFromMany<F, T>(List<Lazy<F>> lazies, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (T)(IIdentifiable)ConstructFromManyPrivate(Find<IConstructorFromManyOperation>(typeof(F), operationKey, true), lazies.Cast<Lazy>().ToList(), args);
-        }
-
-        static IdentifiableEntity ConstructFromManyPrivate(IConstructorFromManyOperation operation, List<Lazy> lazies, params object[] parameters)
-        {
-            try
-            {
-                OnBeginOperation(operation, null);
-
-                IdentifiableEntity result = (IdentifiableEntity)operation.Construct(lazies, parameters);
-
-                OnEndOperation(operation, result);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                OnErrorOperation(operation, null, ex);
-
-                throw ex;
-            }
+            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), operationKey, true).Construct(lazies.Cast<Lazy>().ToList(), args);
         }
         #endregion
 

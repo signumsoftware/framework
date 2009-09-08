@@ -92,18 +92,9 @@ namespace Signum.Engine.Operations
                 this.TargetState = targetState;
             }
 
-            protected override E OnFromEntity(F entity, object[] args)
+            protected override E OnConstruct(F entity, object[] args)
             {
-                E result = base.OnFromEntity(entity, args);
-
-                Graph.AssertEnterState(result, this);
-
-                return result;
-            }
-
-            protected override E OnFromLazy(Lazy<F> lazy, object[] args)
-            {
-                E result = base.OnFromLazy(lazy, args);
+                E result = base.OnConstruct(entity, args);
 
                 Graph.AssertEnterState(result, this);
 

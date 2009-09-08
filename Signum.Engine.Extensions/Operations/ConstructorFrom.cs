@@ -13,7 +13,6 @@ namespace Signum.Engine.Operations
     public interface IConstructorFromOperation : IEntityOperation
     {
         IIdentifiable Construct(IIdentifiable entity, params object[] parameters);
-        IIdentifiable Construct(Lazy lazy, params object[] parameters);
     }
 
     public class BasicConstructorFrom<F, T> : IConstructorFromOperation
@@ -24,13 +23,12 @@ namespace Signum.Engine.Operations
         public Type Type { get { return typeof(F); } }
         public OperationType OperationType { get { return OperationType.ConstructorFrom; } }
 
-        public bool Lazy { get { return FromLazy != null; } }
+        public bool Lazy { get; set; }
         public bool Returns { get; set; }
 
         public bool AllowsNew { get; set; }
 
-        public Func<F, object[], T> FromEntity { get; set; }
-        public Func<Lazy<F>, object[], T> FromLazy { get; set; }
+        public Func<F, object[], T> Construct { get; set; }
         public Func<F, string> CanConstruct { get; set; }
 
         public BasicConstructorFrom(Enum key)
@@ -61,68 +59,53 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
-            using (Transaction tr = new Transaction())
+            if (!OperationLogic.OnAllowOperation(Key))
+                throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key)); 
+
+            try
             {
-                LogOperationDN log = new LogOperationDN
+                using (Transaction tr = new Transaction())
                 {
-                    Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                    Start = DateTime.Now,
-                    User = UserDN.Current
-                };
+                    LogOperationDN log = new LogOperationDN
+                    {
+                        Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                        Start = DateTime.Now,
+                        User = UserDN.Current
+                    };
 
-                IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnFromEntity((F)entity, args);
+                    OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
 
-                if (!result.IsNew)
-                {
-                    log.Target = result.ToLazy();
-                    log.End = DateTime.Now;
-                    log.Save();
+                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstruct((F)entity, args);
+
+                    OperationLogic.OnEndOperation(this, result);
+
+                    if (!result.IsNew)
+                    {
+                        log.Target = result.ToLazy();
+                        log.End = DateTime.Now;
+                        log.Save();
+                    }
+
+                    return tr.Commit(result);
                 }
-
-                return tr.Commit(result);
             }
-        }
-
-        protected virtual T OnFromEntity(F entity, object[] args)
-        {
-            return FromEntity(entity, args);
-        }
-
-        IIdentifiable IConstructorFromOperation.Construct(Lazy lazy, params object[] args)
-        {
-            using (Transaction tr = new Transaction())
+            catch (Exception e)
             {
-                LogOperationDN log = new LogOperationDN
-                {
-                    Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                    Start = DateTime.Now,
-                    User = UserDN.Current
-                };
-
-                IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnFromLazy((Lazy<F>)lazy, args);
-
-                result.Save(); //Nothing happens if already saved
-
-                log.Target = result.ToLazy();
-                log.End = DateTime.Now;
-                log.Save();
-
-                return tr.Commit(result);
+                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, e);
+                throw e;
             }
         }
 
-        protected virtual T OnFromLazy(Lazy<F> lazy, object[] args)
+        protected virtual T OnConstruct(F entity, object[] args)
         {
-            return FromLazy(lazy, args);
+            return Construct(entity, args);
         }
+
 
         public void AssertIsValid()
         {
-            if (FromLazy == null && FromEntity == null)
-                throw new ApplicationException("Operation {0} has neither FromLazy or FromEntity initialized".Formato(Key));
-
-            if (FromLazy != null && FromEntity != null)
-                throw new ApplicationException("Operation {0} has both FromLazy and FromEntity initialized".Formato(Key));
+            if (Construct == null)
+                throw new ApplicationException("Operation {0} has no Construct".Formato(Key));
         }
     }
 }

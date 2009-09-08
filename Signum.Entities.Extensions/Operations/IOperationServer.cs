@@ -38,7 +38,6 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         IdentifiableEntity ConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args);
 
-
         [OperationContract, NetDataContract]
         IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args);
     }

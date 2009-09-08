@@ -38,25 +38,40 @@ namespace Signum.Engine.Operations
             if (Constructor == null)
                 throw new ArgumentException("FromLazy");
 
-            using (Transaction tr = new Transaction())
+            if (!OperationLogic.OnAllowOperation(Key))
+                throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key)); 
+
+            try
             {
-                LogOperationDN log = new LogOperationDN
+                using (Transaction tr = new Transaction())
                 {
-                    Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                    Start = DateTime.Now,
-                    User = UserDN.Current
-                };
+                    LogOperationDN log = new LogOperationDN
+                    {
+                        Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                        Start = DateTime.Now,
+                        User = UserDN.Current
+                    };
 
-                IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lazies.Select(l=>l.ToLazy<F>()).ToList(), args);
+                    OperationLogic.OnBeginOperation(this, null);
 
-                if (!result.IsNew)
-                {
-                    log.Target = result.ToLazy();
-                    log.End = DateTime.Now;
-                    log.Save();
+                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lazies.Select(l => l.ToLazy<F>()).ToList(), args);
+
+                    OperationLogic.OnEndOperation(this, result);
+
+                    if (!result.IsNew)
+                    {
+                        log.Target = result.ToLazy();
+                        log.End = DateTime.Now;
+                        log.Save();
+                    }
+
+                    return tr.Commit(result);
                 }
-
-                return tr.Commit(result);
+            }
+            catch (Exception e)
+            {
+                OperationLogic.OnErrorOperation(this, null, e);
+                throw e;
             }
         }
 

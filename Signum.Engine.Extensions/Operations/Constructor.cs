@@ -33,26 +33,42 @@ namespace Signum.Engine.Operations
 
         IdentifiableEntity IConstructorOperation.Construct(params object[] args)
         {
-            using (Transaction tr = new Transaction())
-            {
-                LogOperationDN log = new LogOperationDN
-                {
-                    Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                    Start = DateTime.Now,
-                    User = UserDN.Current
-                };
+             if (!OperationLogic.OnAllowOperation(Key))
+                throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key));
 
-                IdentifiableEntity entity = (IdentifiableEntity)(IIdentifiable)OnConstruct(args);
+             try
+             {
 
-                if (!log.IsNew)
-                {
-                    log.Target = ((IdentifiableEntity)entity).ToLazy();
-                    log.End = DateTime.Now;
-                    log.Save();
-                }
+                 using (Transaction tr = new Transaction())
+                 {
+                     LogOperationDN log = new LogOperationDN
+                     {
+                         Operation = EnumLogic<OperationDN>.ToEntity(Key),
+                         Start = DateTime.Now,
+                         User = UserDN.Current
+                     };
 
-                return tr.Commit(entity);
-            }
+                     OperationLogic.OnBeginOperation(this, null);
+
+                     IdentifiableEntity entity = (IdentifiableEntity)(IIdentifiable)OnConstruct(args);
+
+                     OperationLogic.OnEndOperation(this, entity);
+
+                     if (!entity.IsNew)
+                     {
+                         log.Target = ((IdentifiableEntity)entity).ToLazy();
+                         log.End = DateTime.Now;
+                         log.Save();
+                     }
+
+                     return tr.Commit(entity);
+                 }
+             }
+             catch (Exception ex)
+             {
+                 OperationLogic.OnErrorOperation(this, null, ex);
+                 throw ex;
+             }
         }
 
         protected virtual T OnConstruct(object[] args)

@@ -59,6 +59,9 @@ namespace Signum.Engine.Operations
             if (error != null)
                 throw new ApplicationException(error);
 
+            if (!OperationLogic.OnAllowOperation(Key))
+                throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key)); 
+
             try
             {
                 using (Transaction tr = new Transaction())
@@ -70,7 +73,11 @@ namespace Signum.Engine.Operations
                         User = UserDN.Current
                     };
 
+                    OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
+
                     OnExecute((T)entity, parameters);
+
+                    OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
 
                     ((IdentifiableEntity)entity).Save(); //Nothing happens if already saved
 
@@ -82,7 +89,9 @@ namespace Signum.Engine.Operations
                 }
             }
             catch (Exception ex)
-            {
+            {  
+                OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, ex);    
+
                 try
                 {
                     using (Transaction tr2 = new Transaction(true))
@@ -93,13 +102,15 @@ namespace Signum.Engine.Operations
                             Start = DateTime.Now,
                             Target = ((IdentifiableEntity)entity).ToLazy(),
                             Exception = ex.Message,
-                            User = (UserDN)Thread.CurrentPrincipal
+                            User = UserDN.Current
                         }.Save();
 
                         tr2.Commit();
                     }
                 }
-                catch (Exception) { }
+                catch (Exception)
+                { 
+                }
 
                 throw ex;
             }
