@@ -121,10 +121,14 @@ namespace Signum.Web
             
             }
 
+
             if (datepickerOptions != null && datepickerOptions.ShowAge)
             {
-                htmlProperties["onchange"] = "calcAge('" + idValueField +"');"; 
+                //htmlProperties["onchange"] = "calcAge('" + idValueField +"');"; 
+                htmlProperties["class"] += " hasAge";
             }
+
+            htmlProperties["size"] = dateFormat.Length;
             string returnString = helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "",  htmlProperties)+
                    "\n" + 
                    helper.Calendar(idValueField, datepickerOptions);
