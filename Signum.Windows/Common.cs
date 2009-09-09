@@ -277,7 +277,7 @@ namespace Signum.Windows
         {
             bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
 
-            if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty)  && (fe is ValueLine || fe is EntityLine || fe is EntityCombo))
+            if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty)  && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is TextArea))
             {
                 Common.SetIsReadOnly(fe, isReadOnly);
             }

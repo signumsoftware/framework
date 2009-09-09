@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{76278145-7CCD-4411-9B8A-078708128571}</ProjectGuid>
     <OutputType>library</OutputType>
@@ -96,6 +96,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="AdminWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TextArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -219,6 +223,9 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
+    <Compile Include="TextArea.xaml.cs">
+      <DependentUpon>TextArea.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LineBase.cs" />
     <Compile Include="ValueLineBox.xaml.cs">
       <DependentUpon>ValueLineBox.xaml</DependentUpon>
