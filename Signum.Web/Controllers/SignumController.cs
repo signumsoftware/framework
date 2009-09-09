@@ -85,18 +85,22 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult TrySave(string prefixToIgnore)
+        public ActionResult TrySave(string prefixToIgnore)
         {   
             Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
 
             Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefixToIgnore, ref entity);
 
-            this.ModelState.FromDictionary(errors, Request.Form);
+            if (errors != null && errors.Count > 0)
+            {
+                this.ModelState.FromDictionary(errors, Request.Form);
+                return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+            }
 
             if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
                 Database.Save((IdentifiableEntity)entity);
 
-            return Content(this.ModelState.ToJsonData());
+            return Navigator.View(this, entity);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -112,7 +116,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult TrySavePartial(string prefix, string prefixToIgnore, string sfStaticType, int? sfId, bool? save)
+        public ContentResult TrySavePartial(string prefix, string prefixToIgnore, string sfStaticType, int? sfId)
         {
             Type type = Navigator.ResolveType(sfStaticType);
 
@@ -128,7 +132,7 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
-            if (entity is IdentifiableEntity && (errors == null || errors.Count == 0) && save.HasValue && save.Value)
+            if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
                 Database.Save((IdentifiableEntity)entity);
 
             return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
@@ -152,6 +156,33 @@ namespace Signum.Web.Controllers
             this.ModelState.FromDictionary(errors, Request.Form);
 
             return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult SavePartial(string prefix, string prefixToIgnore, string sfStaticType, int? sfId)
+        {
+            Type type = Navigator.ResolveType(sfStaticType);
+
+            Modifiable entity = null;
+            if (sfId.HasValue)
+                entity = Database.Retrieve(type, sfId.Value);
+            else
+                entity = (ModifiableEntity)Navigator.CreateInstance(this, type);
+
+            var sortedList = Navigator.ToSortedList(Request.Form, prefix, prefixToIgnore);
+
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, sortedList, ref entity, prefix);
+
+            if (errors != null && errors.Count > 0)
+                throw new ApplicationException(Resource.ItsNotPossibleToSaveAnEntityOfType0WithErrors);
+
+            if (entity is IdentifiableEntity && (errors == null || errors.Count == 0))
+                Database.Save((IdentifiableEntity)entity);
+
+            if (prefix.HasText())
+                return Navigator.PopupView(this, entity, prefix);
+            else //NormalWindow
+                return Navigator.View(this, entity);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

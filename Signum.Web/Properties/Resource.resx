@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ItsNotPossibleToSaveAnEntityOfType0WithErrors" xml:space="preserve">
+    <value>It's not possible to save an entity of type {{0}} with errors</value>
+  </data>
   <data name="NoPropertyWithName0FoundInType0" xml:space="preserve">
     <value>No property with name {{0}} found in type {0}</value>
   </data>

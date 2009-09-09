@@ -210,7 +210,7 @@ function ReloadEntity(urlController, prefix) {
 
 function OnListPopupOK(urlController, prefix, btnOkId) {
     var itemPrefix = btnOkId.substr(0, btnOkId.indexOf(sfBtnOk));
-    TrySavePartialList(urlController, prefix, itemPrefix, "", true, "*");
+    ValidatePartialList(urlController, prefix, itemPrefix, "", true, "*");
 
     //Clean panelPopup
     window[itemPrefix + sfEntityTemp] = "";
@@ -395,7 +395,7 @@ function EntityComboOnChange(prefix) {
 }
 
 function OnPopupComboOk(urlController, prefix) {
-    TrySavePartial(urlController, prefix, "", true, "");
+    ValidatePartial(urlController, prefix, "", true, "");
 
     //Clean panelPopup
     window[prefix + sfEntityTemp] = "";

@@ -121,7 +121,7 @@ namespace Signum.Web
 
             if (settings.View)
             {
-                string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/TrySavePartial");
+                string viewingUrl = "javascript:OpenPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/ValidatePartial");
                 sb.Append(helper.Button(
                             idValueField + TypeContext.Separator + "_btnView",
                             "->",
@@ -132,7 +132,7 @@ namespace Signum.Web
 
             if (settings.Create)
             {
-                string creatingUrl = "javascript:NewPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/TrySavePartial", (typeof(EmbeddedEntity).IsAssignableFrom(type)));
+                string creatingUrl = "javascript:NewPopup('{0}','{1}','{2}',function(){{OnPopupComboOk('{3}','{2}');}},function(){{OnPopupComboCancel('{2}');}});".Formato("Signum.aspx/PopupView", divASustituir, idValueField, "Signum.aspx/ValidatePartial", (typeof(EmbeddedEntity).IsAssignableFrom(type)));
                 sb.Append(
                     helper.Button(idValueField + "_btnCreate",
                               "+",

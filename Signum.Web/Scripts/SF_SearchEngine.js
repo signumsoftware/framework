@@ -50,7 +50,7 @@ function SearchCreate(urlController, prefix, onOk, onCancel) {
 function OnSearchCreateOK(urlController, prefix) {
     var typeName = $('#' + prefix + sfEntityTypeName).val();
     var newPrefix = prefix + "New";
-    if (TypedTrySavePartial(urlController, newPrefix, "", true, "", typeName, "panelPopup", true)) {
+    if (TypedTrySavePartial(urlController, newPrefix, "", true, "", typeName, "panelPopup")) {
         OnSearchCreateCancel(prefix);
     }
 }
@@ -198,6 +198,8 @@ function OperationExecute(urlController, typeName, id, operationKey, isLazy, pre
             else //NormalWindow
                 formChildren = $("form").serialize();
         }
+        if (formChildren.length > 0)
+            formChildren = "&" + formChildren;
         $.ajax({
             type: "POST",
             url: urlController,
@@ -225,7 +227,8 @@ function OperationExecute(urlController, typeName, id, operationKey, isLazy, pre
                                else {
                                    //var newForm = new RegExp("<form[\w\W]*</form>");
                                    //$('form').html(newForm.exec(msg));
-                                   $('form').html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                                   $("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                                   return;
                                }
                            }
                        },

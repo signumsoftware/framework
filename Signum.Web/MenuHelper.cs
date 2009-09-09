@@ -13,9 +13,19 @@ namespace Signum.Web
 {
     public class Item
     {
+        public FindOptions FindOptions { get; set; }
         public string ManualA {get; set;} //Specify all the tag string <a href='http://www.signumframework.com'>Signum</a>
         public string ManualHref {get; set;} //Specify the href element to be inserted in an A tag with the specified Title and Text
-        public object QueryName {get; set;}
+        /// <summary>
+        /// Shortcut for "FindOptions = new FindOptions {QueryName = value}"
+        /// </summary>
+        public object QueryName 
+        { 
+            set 
+            { 
+                FindOptions = new FindOptions { QueryName = value }; 
+            } 
+        }
         
         string text;
         public string Text
@@ -23,8 +33,8 @@ namespace Signum.Web
             get
             { 
                 return text ??
-                       ((QueryName != null) ?
-                            (Navigator.Manager.QuerySettings[QueryName].TryCC(qs => qs.UrlName) ?? "") :
+                       ((FindOptions != null && FindOptions.QueryName != null) ?
+                            (Navigator.Manager.QuerySettings[FindOptions.QueryName].TryCC(qs => qs.UrlName) ?? "") :
                             ""); 
             }
             set { text = value; }
@@ -44,8 +54,8 @@ namespace Signum.Web
             if (SubItems != null && SubItems.Count > 0)
                 return SubItems.Exists(mi => mi.IsVisible());
 
-            if (QueryName != null)
-                return Navigator.IsFindable(QueryName);
+            if (FindOptions != null)
+                return Navigator.IsFindable(FindOptions.QueryName);
 
             return ManualHref.HasText() || ManualA.HasText();
         }
@@ -62,7 +72,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
 
-            if (children.Exists(mi => (mi.QueryName == null && mi.ManualHref.HasText()) || Navigator.IsFindable(mi.QueryName)))
+            if (children.Exists(mi => (mi.FindOptions == null && mi.ManualHref.HasText()) || Navigator.IsFindable(mi.FindOptions.QueryName)))
             {
                 sb.AppendLine("<li>");
                 sb.AppendLine("<span title='{0}'>{0}</span>".Formato(text));
@@ -100,7 +110,7 @@ namespace Signum.Web
                     else if (menuItem.ManualA.HasText())
                         sb.AppendLine(menuItem.ManualA);
                     else
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.QueryName), menuItem.Title, menuItem.Text));
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.FindOptions.QueryName), menuItem.Title, menuItem.Text));
                     sb.AppendLine("</li>");
                 }
             }
