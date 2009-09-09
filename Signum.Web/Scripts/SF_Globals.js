@@ -97,4 +97,4 @@ var validator = new function() {
 			(c == 188) //,
 		);
     };
-}
+};

@@ -18,7 +18,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
                 if (msg.indexOf("ModelState") > 0) {
                     eval('var result=' + msg);
                     var modelState = result["ModelState"];
-                    returnValue = ShowErrorMessages("", modelState, true, "*");
+                    returnValue = ShowErrorMessages("", modelState, showInlineError, fixedInlineErrorText);
                 }
                 else {
                     $("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
@@ -47,7 +47,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
                 if (msg.indexOf("ModelState") > 0) {
                     eval('var result=' + msg);
                     var modelState = result["ModelState"];
-                    returnValue = ShowErrorMessages("", modelState, true, "*");
+                    returnValue = ShowErrorMessages("", modelState, showInlineError, fixedInlineErrorText);
                 }
                 else {
                     returnValue = true;
@@ -74,7 +74,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages
     function TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
         if (panelPopupKey == "" || panelPopupKey == undefined)
-            panelPopupKey = "panelPopup"
+            panelPopupKey = "panelPopup";
         var formChildren = $('#' + prefix + panelPopupKey + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
         var idField = document.getElementById(prefix + sfId);
         var idQueryParam = "";
@@ -140,7 +140,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages
     function TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
         if (panelPopupKey == "" || panelPopupKey == undefined)
-            panelPopupKey = "panelPopup"
+            panelPopupKey = "panelPopup";
         var formChildren = $('#' + prefix + panelPopupKey + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
         var idField = document.getElementById(prefix + sfId);
         var idQueryParam = "";
@@ -191,7 +191,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 
         var allErrors = "";
         var inlineErrorStart = "&nbsp;<span class=\"" + sfFieldErrorClass + "\">";
-        var inlineErrorEnd = "</span>"
+        var inlineErrorEnd = "</span>";
 
         for (var controlID in modelState) {
             var errorsArray = modelState[controlID];
