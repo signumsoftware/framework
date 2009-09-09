@@ -4,19 +4,21 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities.Properties;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace Signum.Utilities
 {
     public static class DateTimeExtensions
     {
+        public static Expression<Func<DateTime, DateTime, DateTime, bool>> IsInIntervalExpression =
+            (date, firstDate, lastDate) => firstDate <= date && date < lastDate;
+        
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
         public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
         {
-            if (firstDate <= date && date < lastDate)
-                return true;
-            return false;
+            return firstDate <= date && date < lastDate;
         }
 
         /// <summary>
