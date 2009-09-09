@@ -133,7 +133,7 @@ namespace Signum.Windows
 
         public event Func<object> Creating;
         public event Action<object> Viewing;
-        public event Action DoubleClick; 
+        public event Action DoubleClick;
 
         public SearchControl()
         {
@@ -155,14 +155,14 @@ namespace Signum.Windows
             remove { RemoveHandler(QueryResultChangedEvent, value); }
         }
 
-        QuerySettings settings; 
+        QuerySettings settings;
 
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            settings = Navigator.GetQuerySettings(QueryName); 
+            settings = Navigator.GetQuerySettings(QueryName);
 
             QueryDescription view = Server.Service<IQueryServer>().GetQueryDescription(QueryName);
 
@@ -198,7 +198,7 @@ namespace Signum.Windows
             if (GetCustomMenuItems != null)
             {
                 MenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(QueryName, EntityType)).NotNull().ToArray();
-                menu.Items.Clear(); 
+                menu.Items.Clear();
                 foreach (MenuItem mi in menus)
                 {
                     menu.Items.Add(mi);
@@ -259,26 +259,30 @@ namespace Signum.Windows
             OnQueryResultChanged(true);
 
             object vn = QueryName;
-            var lf = CurrentFilters(); 
+            var lf = CurrentFilters();
             tbResultados.Visibility = Visibility.Hidden;
 
-            int? limit = tbLimite.Text.ToInt(); 
+            int? limit = tbLimite.Text.ToInt();
 
             Async.Do(this.FindCurrentWindow(),
                 () => queryResult = Server.Service<IQueryServer>().GetQueryResult(vn, lf, limit),
-                () => 
-                { 
-                    lvResult.ItemsSource = queryResult.Data;
-                    if (queryResult.Data.Length > 0)
+                () =>
+                {
+                    if (queryResult != null)
                     {
-                        lvResult.SelectedIndex = 0;
-                        lvResult.ScrollIntoView(queryResult.Data.First());
+                        lvResult.ItemsSource = queryResult.Data;
+                        if (queryResult.Data.Length > 0)
+                        {
+                            lvResult.SelectedIndex = 0;
+                            lvResult.ScrollIntoView(queryResult.Data.First());
+                        }
+                        lvResult.Background = Brushes.White;
+                        lvResult.Focus();
+                        tbResultados.Visibility = Visibility.Visible;
+                        tbResultados.Foreground = queryResult.Data.Length == limit ? Brushes.Red : Brushes.Black;
+                        OnQueryResultChanged(false);
                     }
-                    lvResult.Background = Brushes.White;
-                    lvResult.Focus();
-                    tbResultados.Visibility = Visibility.Visible;
-                    tbResultados.Foreground = queryResult.Data.Length == limit ? Brushes.Red : Brushes.Black;
-                    OnQueryResultChanged(false);
+
                 },
                 () => { btFind.IsEnabled = true; });
         }
@@ -346,7 +350,7 @@ namespace Signum.Windows
             UpdateViewSelection();
         }
 
-      
+
         private void expander_Expanded(object sender, RoutedEventArgs e)
         {
             if (!ignoreExpanded)
@@ -436,11 +440,11 @@ namespace Signum.Windows
         public static event MenuItemForQueryName GetCustomMenuItems;
     }
 
-    public delegate MenuItem MenuItemForQueryName(object queryName, Type entityType); 
+    public delegate MenuItem MenuItemForQueryName(object queryName, Type entityType);
 
     public class SearchControlMenuItem : MenuItem
     {
-        protected SearchControl SearchControl; 
+        protected SearchControl SearchControl;
 
         protected override void OnInitialized(EventArgs e)
         {
@@ -462,7 +466,7 @@ namespace Signum.Windows
 
         void searchControl_QueryResultChanged(object sender, RoutedEventArgs e)
         {
-            QueryResultChanged(); 
+            QueryResultChanged();
         }
 
         protected virtual void Initialize()
@@ -472,7 +476,7 @@ namespace Signum.Windows
 
         protected virtual void QueryResultChanged()
         {
-            
+
         }
     }
 }
