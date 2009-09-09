@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.DynamicQuery;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
@@ -41,6 +42,31 @@ namespace Signum.Web
         }
 
         public bool? Create { get; set; }
+
+        public string ToStringNoName()
+        {
+            StringBuilder sb = new StringBuilder();
+            //sb.Append("&queryUrlName=" + Navigator.Manager.QuerySettings[QueryName].UrlName);
+            if (SearchOnLoad)
+                sb.Append("&searchOnLoad=true");
+            if (AllowMultiple==null || !AllowMultiple.Value)
+                sb.Append("&allowMultiple=false");
+            if (filterOptions != null && filterOptions.Count > 0)
+            {
+                for (int i = 0; i < filterOptions.Count; i++)
+                {
+                    FilterOptions fo = filterOptions[i];
+                    sb.Append("&name{0}={1}&sel{0}={2}&val{0}={3}".Formato(i, fo.ColumnName, fo.Operation.ToString(), fo.Value.ToString()));
+                    if (filterOptions[i].Frozen)
+                        sb.Append("&frozen{0}=true".Formato(i));
+                }
+            }
+            string result = sb.ToString();
+            if (result.HasText())
+                return "?" + result.RemoveLeft(1);
+            else
+                return result;
+        }
     }
 
     public class FilterOptions

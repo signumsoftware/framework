@@ -3,7 +3,7 @@
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "queryFriendlyName=" + queryUrlName + "&allowMultiple=" + allowMultiple + "&prefix=" + prefix + "&prefixEnd=S",
+        data: "queryUrlName=" + queryUrlName + "&allowMultiple=" + allowMultiple + "&prefix=" + prefix + "&prefixEnd=S",
         async: false,
         dataType: "html",
         success:

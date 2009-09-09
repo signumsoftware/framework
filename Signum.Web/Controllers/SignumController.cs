@@ -232,22 +232,22 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult Find(string queryFriendlyName, bool? allowMultiple)
+        public ActionResult Find([ModelBinder(typeof(FindOptionsModelBinder))]FindOptions findOptions)
         {
-            object queryName = Navigator.ResolveQueryFromUrlName(queryFriendlyName);
+            //object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
 
-            FindOptions findOptions = new FindOptions(queryName);
+            //FindOptions findOptions = new FindOptions(queryName);
             
-            if (allowMultiple.HasValue)
-                findOptions.AllowMultiple = allowMultiple.Value;
+            //if (allowMultiple.HasValue)
+            //   findOptions.AllowMultiple = allowMultiple.Value;
 
             return Navigator.Find(this, findOptions);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialFind(string queryFriendlyName, bool? allowMultiple, string prefix, string prefixEnd)
+        public PartialViewResult PartialFind(string queryUrlName, bool? allowMultiple, string prefix, string prefixEnd)
         {
-            object queryName = Navigator.ResolveQueryFromUrlName(queryFriendlyName);
+            object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
 
             FindOptions findOptions = new FindOptions(queryName);
 
@@ -261,7 +261,7 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
 
-            List<Filter> filters = Navigator.ExtractFilters(Request.Form, queryName, sfPrefix);
+            List<Filter> filters = Navigator.ExtractFilters(this.HttpContext, queryName);
 
             return Navigator.Search(this, queryName, filters, sfTop, sfAllowMultiple, sfPrefix);
         }

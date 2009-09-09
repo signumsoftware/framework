@@ -130,9 +130,14 @@ namespace Signum.Web
             return Manager.Search(controller, queryName, filters, resultsLimit, allowMultiple, prefix);
         }
 
-        internal static List<Filter> ExtractFilters(NameValueCollection form, object queryName, string prefix)
+        internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
         {
-            return Manager.ExtractFilters(form, queryName); //, prefix);
+            return Manager.ExtractFilters(httpContext, queryName);
+        }
+
+        internal static List<FilterOptions> ExtractFilterOptions(HttpContextBase httpContext, object queryName)
+        {
+            return Manager.ExtractFilterOptions(httpContext, queryName);
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixFilter, string prefixToIgnore)
@@ -494,7 +499,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual List<Filter> ExtractFilters(NameValueCollection form, object queryName)
+        protected internal virtual List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
         {
             List<Filter> result = new List<Filter>();
 
@@ -505,15 +510,16 @@ namespace Signum.Web
             object value;
             string operation;
             Type type;
-            var names = form.AllKeys.Where(k => k.StartsWith("name"));
+            NameValueCollection parameters = httpContext.Request.Params;
+            var names = parameters.AllKeys.Where(k => k.StartsWith("name"));
             foreach(string nameKey in names)
             {
                 if (!int.TryParse(nameKey.RemoveLeft(4), out index))
                     continue;
 
-                name = form[nameKey];
-                value = form["val" + index.ToString()];
-                operation = form["sel" + index.ToString()];
+                name = parameters[nameKey];
+                value = parameters["val" + index.ToString()];
+                operation = parameters["sel" + index.ToString()];
                 type = queryDescription.Columns
                            .SingleOrDefault(c => c.Name == name)
                            .ThrowIfNullC("Invalid filter, column \"{0}\" not found".Formato(name))
@@ -540,6 +546,61 @@ namespace Signum.Web
                     Name = name, 
                     Type = type,
                     Operation = filterOperation,
+                    Value = value,
+                });
+            }
+            return result;
+        }
+
+        protected internal virtual List<FilterOptions> ExtractFilterOptions(HttpContextBase httpContext, object queryName)
+        {
+            List<FilterOptions> result = new List<FilterOptions>();
+
+            QueryDescription queryDescription = Queries.QueryDescription(queryName);
+
+            int index = 0;
+            string name;
+            object value;
+            string operation;
+            bool frozen;
+            Type type;
+            NameValueCollection parameters = httpContext.Request.Params;
+            var names = parameters.AllKeys.Where(k => k.StartsWith("name"));
+            foreach (string nameKey in names)
+            {
+                if (!int.TryParse(nameKey.RemoveLeft(4), out index))
+                    continue;
+
+                name = parameters[nameKey];
+                value = parameters["val" + index.ToString()];
+                operation = parameters["sel" + index.ToString()];
+                type = queryDescription.Columns
+                           .SingleOrDefault(c => c.Name == name)
+                           .ThrowIfNullC("Invalid filter, column \"{0}\" not found".Formato(name))
+                           .Type;
+                
+                if (type == typeof(bool))
+                {
+                    string[] vals = ((string)value).Split(',');
+                    value = (vals[0] == "true") ? true : false;
+                }
+                if (typeof(Lazy).IsAssignableFrom(type))
+                {
+                    int intValue;
+                    if (value != null && int.TryParse(value.ToString(), out intValue))
+                        value = Lazy.Create(Reflector.ExtractLazy(type), intValue);
+                    else
+                        value = null;
+                }
+                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
+
+                frozen = parameters.AllKeys.Any(k => k == "frozen" + index.ToString());
+
+                result.Add(new FilterOptions
+                {
+                    ColumnName = name,
+                    Operation = filterOperation,
+                    Frozen = frozen,
                     Value = value,
                 });
             }

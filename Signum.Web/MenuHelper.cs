@@ -110,7 +110,7 @@ namespace Signum.Web
                     else if (menuItem.ManualA.HasText())
                         sb.AppendLine(menuItem.ManualA);
                     else
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.FindOptions.QueryName), menuItem.Title, menuItem.Text));
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.FindOptions.QueryName) + menuItem.FindOptions.ToStringNoName(), menuItem.Title, menuItem.Text));
                     sb.AppendLine("</li>");
                 }
             }

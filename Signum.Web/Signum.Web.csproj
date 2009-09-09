@@ -86,6 +86,7 @@
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="EntityLineDetailHelper.cs" />
     <Compile Include="EmbeddedControlHelper.cs" />
+    <Compile Include="FindOptionsModelBinder.cs" />
     <Compile Include="WwwRedirectAttributes.cs" />
     <Compile Include="MenuHelper.cs" />
     <Compile Include="LightEntityLineHelper.cs" />
