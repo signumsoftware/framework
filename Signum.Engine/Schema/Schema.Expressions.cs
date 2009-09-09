@@ -32,6 +32,15 @@ namespace Signum.Engine.Maps
 
             return result;
         }
+
+        internal Expression GetViewExpression(string tableAlias, QueryBinder binder)
+        {
+            var bindings = (from kvp in this.Fields
+                            let fi = kvp.Value.FieldInfo
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder))).ToReadOnly();
+
+            return new EmbeddedFieldInitExpression(this.Type, bindings);
+        }
     }
 
     public partial class RelationalTable
@@ -118,7 +127,7 @@ namespace Signum.Engine.Maps
         internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
             var bindings = (from kvp in EmbeddedFields
-                            let fi = FieldType.GetField(kvp.Key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                            let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder))).ToReadOnly(); 
                                           
             return new EmbeddedFieldInitExpression(this.FieldType, bindings); 

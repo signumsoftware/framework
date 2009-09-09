@@ -715,30 +715,36 @@ namespace Signum.Engine.Linq
 
         private ProjectionExpression GetTableProjection(Type type)
         {
+            string tableAlias = this.GetNextTableAlias();
+            Type resultType = typeof(IEnumerable<>).MakeGenericType(type);
+
+            Expression exp; 
             Table table;
+            TableExpression tableExpression; 
             if (typeof(IdentifiableEntity).IsAssignableFrom(type))
             {
                 table = ConnectionScope.Current.Schema.Table(type);
+
+                tableExpression = new TableExpression(resultType, tableAlias, table.Name);
+
+                Expression id = table.CreateBinding(tableAlias, FieldInitExpression.IdField, this);
+                exp = new FieldInitExpression(type, tableAlias, id, null)
+                {
+                    Bindings = { new FieldBinding(FieldInitExpression.IdField, id) }
+                };
             }
             else
             {
                 ViewBuilder vb = new ViewBuilder(Schema.Current);
                 table = vb.NewView(type);
+
+                tableExpression = new TableExpression(resultType, tableAlias, table.Name);
+
+                exp = table.GetViewExpression(tableAlias, this); 
             }
-
-            string tableAlias = this.GetNextTableAlias();
-            Type resultType = typeof(IEnumerable<>).MakeGenericType(type);
-            TableExpression tableExpression = new TableExpression(resultType, tableAlias, table.Name);
-
-            Expression id = table.IsView ? null : table.CreateBinding(tableAlias, FieldInitExpression.IdField, this);
-            FieldInitExpression fie = new FieldInitExpression(type, tableAlias, id, null)
-            {
-                Bindings = { new FieldBinding(FieldInitExpression.IdField, id) }
-            };
-
             string selectAlias = this.GetNextSelectAlias();
 
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(fie, selectAlias, tableAlias);
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, tableAlias);
             var projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null),
             pc.Projector, null);

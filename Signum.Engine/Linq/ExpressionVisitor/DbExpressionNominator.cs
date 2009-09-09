@@ -119,12 +119,13 @@ namespace Signum.Engine.Linq
             expression = expression.NotNull().ToArray();
             Expression[] newExpressions = new Expression[expression.Length];
 
-            for (int i = 0; i < expression.Length; i++)
-            {
-                newExpressions[i] = Visit(expression[i]);
-                if (!candidates.Contains(newExpressions[i]))
-                    return null;
-            }
+            using(ForceFullNominate())
+                for (int i = 0; i < expression.Length; i++)
+                {
+                    newExpressions[i] = Visit(expression[i]);
+                    if (!candidates.Contains(newExpressions[i]))
+                        return null;
+                }
 
             var result = new SqlFunctionExpression(type, sqlFunction.ToString(), newExpressions);
             candidates.Add(result);
@@ -492,17 +493,25 @@ namespace Signum.Engine.Linq
                     m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? Expression.Constant(0).InSqlExpression());
 
                 case "LinqProviderExtensions.InSql":
-                    bool oldTemp = tempFullNominate;
-                    tempFullNominate = true;
-                    Expression expression = Visit(m.GetArgument("value"));
-                    tempFullNominate = oldTemp;
 
-                    if (!candidates.Contains(expression))
-                        throw new ApplicationException("Impossible to translate to SQL: " + expression.ToString());
+                    using (ForceFullNominate())
+                    {
+                        Expression expression = Visit(m.GetArgument("value"));
 
-                    return expression; 
+                        if (!candidates.Contains(expression))
+                            throw new ApplicationException("Impossible to translate to SQL: " + expression.ToString());
+
+                        return expression;
+                    }
                 default: return null; 
             }
+        }
+
+        IDisposable ForceFullNominate()
+        {
+            bool oldTemp = tempFullNominate;
+            tempFullNominate = true;
+            return new Disposable(() => tempFullNominate = oldTemp); 
         }
 
         //protected override Expression VisitImplementedBy(ImplementedByExpression reference)

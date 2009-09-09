@@ -40,11 +40,15 @@ namespace Signum.Engine.Linq
         public FieldInitExpression(Type type, string tableAlias, Expression externalId, Expression otherCondition)
             : base(DbExpressionType.FieldInit, type)
         {
-            if (type == null) throw new ArgumentNullException("type");
-            if (!typeof(IIdentifiable).IsAssignableFrom(type)) throw new ArgumentException("type");
+            if (type == null) 
+                throw new ArgumentNullException("type");
 
-            if (externalId == null) throw new ArgumentNullException("externalId");
-
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                throw new ArgumentException("type");
+            
+            if (externalId == null) 
+                throw new ArgumentNullException("externalId");
+            
             this.Table = Schema.Current.Table(type);
             this.TableAlias = tableAlias;
             this.ExternalId = externalId;
