@@ -799,11 +799,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            Expression result = p;
-            while (result is ParameterExpression)
-                result = map.TryGetC((ParameterExpression)result);
-
-            return result;
+            return map[p];
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
@@ -954,6 +950,8 @@ namespace Signum.Engine.Linq
                 return null;
 
             Expression[] args = mce.Object == null ? mce.Arguments.ToArray() : mce.Arguments.PreAnd(mce.Object).ToArray();
+
+            args = args.Select(e => Visit(e)).ToArray(); 
 
             Expression result = Visit(Expression.Invoke(lambda, args));
             return result;
