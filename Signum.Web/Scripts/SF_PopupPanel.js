@@ -150,10 +150,10 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
         else {*/
             popupWidth = popup.offsetWidth;
             var bodyWidth = document.body.clientWidth;
-            left = ((bodyWidth - popupWidth) / 2) + "px";
+            left = Math.max((bodyWidth - popupWidth) / 2, 10) + "px";
             var popupHeight = popup.offsetHeight;
             var bodyHeight = document.documentElement.clientHeight;
-            top = ((bodyHeight - popupHeight) / 2) + "px";
+            top = Math.max((bodyHeight - popupHeight) / 2, 10) + "px";
        // }
         //$('#' + prefix + globalKey).hide();
         $('#' + globalKey).hide();
