@@ -172,7 +172,7 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        internal TypeContext(T value)
+        public TypeContext(T value)
         {
             Value = value;
         }
@@ -215,7 +215,7 @@ namespace Signum.Web
     #endregion
 
     #region TypeSubContext<T>
-    internal class TypeSubContext<T> : TypeContext<T>, IDisposable
+    public class TypeSubContext<T> : TypeContext<T>, IDisposable
     {
         PropertyInfo[] properties; 
         internal TypeContext Parent { get; private set; }
