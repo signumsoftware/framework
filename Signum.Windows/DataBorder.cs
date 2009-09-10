@@ -28,6 +28,7 @@ namespace Signum.Windows
 
         void DataBorder_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Loaded -= DataBorder_Loaded;
             RecalculateVisibility(null, DataContext);
         }
 

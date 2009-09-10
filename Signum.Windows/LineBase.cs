@@ -49,6 +49,8 @@ namespace Signum.Windows
 
         public virtual void OnLoad(object sender, RoutedEventArgs e)
         {
+            this.Loaded -= OnLoad;
+
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 

@@ -86,6 +86,7 @@ namespace Signum.Windows
 
         void DateTimePicker_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Loaded -= DateTimePicker_Loaded;
             DateTimeConverter dtc = DateTimeConverter; 
             Binding b = new Binding
             {

@@ -159,6 +159,8 @@ namespace Signum.Windows
 
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Loaded -= SearchControl_Loaded;
+
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
@@ -454,6 +456,7 @@ namespace Signum.Windows
 
         void SearchControlMenuItem_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Loaded -= SearchControlMenuItem_Loaded;
             if (this.Parent != null)
             {
                 SearchControl = this.Parents().OfType<SearchControl>().First();
