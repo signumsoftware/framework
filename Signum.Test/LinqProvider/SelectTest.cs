@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Engine.Linq;
 using Signum.Utilities;
+using System.Linq.Expressions;
 
 namespace Signum.Test.LinqProvider
 {
@@ -173,6 +174,27 @@ namespace Signum.Test.LinqProvider
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
             var list = Database.Query<AlbumDN>().Select(a => a.Author == michael).ToList();
-        } 
+        }
+
+        [TestMethod]
+        public void SelectExpressionProperty()
+        {
+            var list = Database.Query<ArtistDN>().Where(a => a.IsMale).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectExpressionMethod()
+        {
+            var list = Database.Query<ArtistDN>().Select(a => new { a.Name, Count = a.AlbumCount() }).ToArray();
+        }
+    }
+
+    public static class AuthorExtensions
+    {
+        static Expression<Func<IAuthorDN, int>> AlbumCountExpression = auth => Database.Query<AlbumDN>().Count(a => a.Author == auth);
+        public static int AlbumCount(this IAuthorDN author)
+        {
+            return Database.Query<AlbumDN>().Count(a => a.Author == author);
+        }
     }
 }

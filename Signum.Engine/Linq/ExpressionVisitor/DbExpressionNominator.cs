@@ -439,7 +439,7 @@ namespace Signum.Engine.Linq
             {
                 case "string.IndexOf":
                     {
-                        Expression startIndex = m.TryGetArgument("startIndex").TryCC(e => Expression.Add(e, Expression.Constant(1).InSqlExpression()));
+                        Expression startIndex = m.TryGetArgument("startIndex").TryCC(e => Expression.Add(e, new SqlConstantExpression(1)));
 
                         Expression charIndex = TrySqlFunction(SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex);
                         if (charIndex == null)
@@ -454,7 +454,7 @@ namespace Signum.Engine.Linq
                 case "string.TrimStart": return TrySqlFunction(SqlFunction.LTRIM, m.Type, m.Object);
                 case "string.TrimEnd": return TrySqlFunction(SqlFunction.RTRIM, m.Type, m.Object);
                 case "string.Replace": return TrySqlFunction(SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
-                case "string.Substring": return TrySqlFunction(SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), Expression.Constant(1).InSqlExpression()), m.TryGetArgument("length") ?? Expression.Constant(int.MaxValue).InSqlExpression());
+                case "string.Substring": return TrySqlFunction(SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
                 case "string.Contains": return TryLike(m.Object, Expression.Add(Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c), Expression.Constant("%"), c));
                 case "string.StartsWith": return TryLike(m.Object, Expression.Add(m.GetArgument("value"), Expression.Constant("%"), c));
                 case "string.EndsWith": return TryLike(m.Object, Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c));
@@ -490,7 +490,7 @@ namespace Signum.Engine.Linq
                 case "Math.Ceiling": return TrySqlFunction(SqlFunction.CEILING, m.Type, m.TryGetArgument("d") ?? m.GetArgument("a"));
                 case "Math.Round": return TrySqlFunction(SqlFunction.ROUND, m.Type,
                     m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
-                    m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? Expression.Constant(0).InSqlExpression());
+                    m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
 
                 case "LinqProviderExtensions.InSql":
 

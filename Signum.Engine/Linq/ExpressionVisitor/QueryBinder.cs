@@ -149,12 +149,16 @@ namespace Signum.Engine.Linq
             }
             else if (m.Object != null && typeof(IList).IsAssignableFrom(m.Object.Type) && m.Method.Name == "Contains")
             {
-                return this.BindContains(m.Type, m.Object, m.Arguments[0], m == root);   
+                return this.BindContains(m.Type, m.Object, m.Arguments[0], m == root);
+            }
+            else
+            {
+                Expression exp = BindStaticLambdaMethod(m);
+                if (exp != null)
+                    return exp;
             }
             return base.VisitMethodCall(m);
         }
-
-
 
         internal static SqlConstantExpression TypeConstant(Type type)
         {
@@ -795,7 +799,11 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            return map.TryGetC(p) ?? p;
+            Expression result = p;
+            while (result is ParameterExpression)
+                result = map.TryGetC((ParameterExpression)result);
+
+            return result;
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
@@ -826,84 +834,146 @@ namespace Signum.Engine.Linq
                         .OfType<MemberAssignment>()
                         .Single(a => ReflectionTools.MemeberEquals(a.Member, m.Member)).Expression;
                 case ExpressionType.New:
-                    {
-                        NewExpression nex = (NewExpression)source;
-                        if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && m.Member.Name == "Key")
-                            return nex.Arguments[0];
-                        MethodInfo mi = ((PropertyInfo)m.Member).GetGetMethod();
-                        return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second;
-                    }
+                {
+                    NewExpression nex = (NewExpression)source;
+                    if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && m.Member.Name == "Key")
+                        return nex.Arguments[0];
+                    MethodInfo mi = ((PropertyInfo)m.Member).GetGetMethod();
+                    return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second;
+                }
                 case (ExpressionType)DbExpressionType.FieldInit:
+                {
+                    FieldInitExpression fie = (FieldInitExpression)source;
+                    FieldInfo fi = Reflector.FindFieldInfo(fie.Type, m.Member, false);
+
+                    if (fi != null && fi.FieldEquals<IdentifiableEntity>(ei => ei.id))
+                        return fie.ExternalId;
+
+                    if (fie.TableAlias == null)
                     {
-                        FieldInitExpression fie = (FieldInitExpression)source;
-                        FieldInfo fi = Reflector.FindFieldInfo(fie.Type, m.Member, false);
-
-                        if (fi != null && fi.FieldEquals<IdentifiableEntity>(ei => ei.id))
-                            return fie.ExternalId;
-
-                        if (fie.TableAlias == null)
+                        fie.TableAlias = GetNextTableAlias();
+                        if (!fie.Table.IsView)
+                            fie.GetOrCreateFieldBinding(FieldInitExpression.IdField, this);
+                        requests.GetOrCreate(CurrentAlias).Add(new TableCondition
                         {
-                            fie.TableAlias = GetNextTableAlias();
-                            if (!fie.Table.IsView)
-                                fie.GetOrCreateFieldBinding(FieldInitExpression.IdField, this);
-                            requests.GetOrCreate(CurrentAlias).Add(new TableCondition
-                            {
-                                FieldInit = fie,
-                                Table = new TableExpression(fie.Type, fie.TableAlias, fie.Table.Name)
-                            });
-                        }
-
-                        Expression binding = fie.GetOrCreateFieldBinding(fi, this);
-
-                        return binding;
+                            FieldInit = fie,
+                            Table = new TableExpression(fie.Type, fie.TableAlias, fie.Table.Name)
+                        });
                     }
+
+                    if (fi != null)
+                    {
+                        Expression result = fie.GetOrCreateFieldBinding(fi, this);
+                        return result;
+                    }
+                    else
+                    {
+                        Expression result = BindStaticLambdaProperty((PropertyInfo)m.Member, fie);
+                        return result;
+                    }
+                }
                 case (ExpressionType)DbExpressionType.EmbeddedFieldInit:
-                    {
-                        EmbeddedFieldInitExpression efie = (EmbeddedFieldInitExpression)source;
-                        FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
+                {
+                    EmbeddedFieldInitExpression efie = (EmbeddedFieldInitExpression)source;
+                    FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
 
-                        Expression binding =  efie.GetBinding(fi);
-                        return binding;
+                    if (fi != null)
+                    {
+                        Expression result = efie.GetBinding(fi);
+                        return result;
                     }
+                    else
+                    {
+                        Expression result = BindStaticLambdaProperty((PropertyInfo)m.Member, efie);
+                        return result;
+                    }
+                }
                 case (ExpressionType)DbExpressionType.LazyReference:
+                {
+                    LazyReferenceExpression lazyRef = (LazyReferenceExpression)source;
+                    PropertyInfo pi = m.Member as PropertyInfo;
+                    if (pi != null)
                     {
-                        LazyReferenceExpression lazyRef = (LazyReferenceExpression)source;
-                        PropertyInfo pi = m.Member as PropertyInfo;
-                        if (pi != null)
-                        {
-                            if (pi.Name == "Id")
-                                return lazyRef.Id;
-                            if (pi.Name == "EntityOrNull")
-                                return lazyRef.Reference;
-                            if (pi.Name == "ToStr")
-                                return lazyRef.ToStr.ThrowIfNullC("ToStr is no accesible on queries in ImplementedByAll");
-                        }
-
-                        throw new ApplicationException("The member {0} of Lazy is no accesible on queries, use EntityOrNull instead".Formato(m.Member));
+                        if (pi.Name == "Id")
+                            return lazyRef.Id;
+                        if (pi.Name == "EntityOrNull")
+                            return lazyRef.Reference;
+                        if (pi.Name == "ToStr")
+                            return lazyRef.ToStr.ThrowIfNullC("ToStr is no accesible on queries in ImplementedByAll");
                     }
+
+                    throw new ApplicationException("The member {0} of Lazy is no accesible on queries, use EntityOrNull instead".Formato(m.Member));
+                }
                 case (ExpressionType)DbExpressionType.ImplementedBy:
+                {
+                    ImplementedByExpression ib = (ImplementedByExpression)source;
+
+                    PropertyInfo pi = (PropertyInfo)m.Member;
+
+                    Expression result = ib.TryGetPropertyBinding(pi); 
+
+                    if(result == null)
                     {
-                        ImplementedByExpression ib = (ImplementedByExpression)source;
+                        List<Expression> list = ib.Implementations
+                            .Select(imp => BindMemberAccess(Expression.MakeMemberAccess(imp.Field, m.Member))).ToList();
 
-                        PropertyInfo pi = (PropertyInfo)m.Member;
+                        result = Collapse(list, m.Member.ReturningType());
 
-                        Expression result = ib.TryGetPropertyBinding(pi); 
-
-                        if(result == null)
-                        {
-                            List<Expression> list = ib.Implementations
-                                .Select(imp => BindMemberAccess(Expression.MakeMemberAccess(imp.Field, m.Member))).ToList();
-
-                            result = Collapse(list, m.Member.ReturningType());
-
-                            ib.AddPropertyBinding(pi, result); 
-                        }
-
-                        return result; 
+                        ib.AddPropertyBinding(pi, result); 
                     }
+
+                    return result; 
+                }
             }
       
             return Expression.MakeMemberAccess(source, m.Member);
+        }
+
+        private Expression BindStaticLambdaProperty(PropertyInfo pi, IPropertyInitExpression pie)
+        {
+            Expression result = pie.TryGetPropertyBinding(pi);
+            if (result != null)
+                return result;
+
+            LambdaExpression lambda = ExtractAndClean(pie.Type, pi);
+
+            if (lambda == null)
+                throw new ApplicationException("{0}.{1} has no implementing Field or static Expression".Formato(pie.Type, pi.Name));
+
+            result = Visit(Expression.Invoke(lambda, (Expression)pie));
+
+            pie.AddPropertyBinding(pi, result);
+            return result;
+        }
+
+        private Expression BindStaticLambdaMethod(MethodCallExpression mce)
+        {
+            LambdaExpression lambda = ExtractAndClean(mce.Object.TryCC(o => o.Type) ?? mce.Method.DeclaringType, mce.Method);
+
+            if (lambda == null)
+                return null;
+
+            Expression[] args = mce.Object == null ? mce.Arguments.ToArray() : mce.Arguments.PreAnd(mce.Object).ToArray();
+
+            Expression result = Visit(Expression.Invoke(lambda, args));
+            return result;
+        }
+
+        static LambdaExpression ExtractAndClean(Type type, MemberInfo mi)
+        {
+            FieldInfo fi = type.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            if (fi == null)
+                return null;
+
+            LambdaExpression lambda = fi.GetValue(null) as LambdaExpression;
+            if (lambda == null)
+                return null;
+
+            LambdaExpression expand = (LambdaExpression)ExpressionExpander.ExpandUntyped(lambda);
+            LambdaExpression partialEval = (LambdaExpression)ExpressionEvaluator.PartialEval(expand);
+            LambdaExpression simplified = (LambdaExpression)OverloadingSimplifier.Simplify(partialEval);
+
+            return simplified;
         }
 
         private Expression Collapse(List<Expression> list, Type returnType)

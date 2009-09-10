@@ -15,7 +15,7 @@ namespace Signum.Engine.Linq
             var exp = cr.Visit(expression);
             if (!IsBooleanExpression(exp) || IsSqlCondition(exp))
                 return exp;
-            return Expression.Equal(exp, Expression.Constant(true));
+            return Expression.Equal(exp, new SqlConstantExpression(true));
         }
 
         public static Expression MakeSqlValue(Expression expression)
@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
             var exp = cr.Visit(expression);
             if (!IsBooleanExpression(exp) || !IsSqlCondition(exp))
                 return exp;
-            return new CaseExpression(new[] { new When(exp, Expression.Constant(true)) }, Expression.Constant(false));
+            return new CaseExpression(new[] { new When(exp, new SqlConstantExpression(true)) }, new SqlConstantExpression(false));
         }
 
         public static bool IsBooleanExpression(Expression expr)
@@ -76,6 +76,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.Column:
                 case DbExpressionType.Projection:
                 case DbExpressionType.Case:
+                case DbExpressionType.SqlConstant:
                     return false;
             }
 

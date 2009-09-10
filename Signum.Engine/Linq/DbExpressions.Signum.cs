@@ -22,6 +22,7 @@ namespace Signum.Engine.Linq
     {
         Expression TryGetPropertyBinding(PropertyInfo pi);
         void AddPropertyBinding(PropertyInfo pi, Expression binding);
+        Type Type { get; } 
     }
 
     internal class FieldInitExpression : DbExpression, IPropertyInitExpression
@@ -80,7 +81,7 @@ namespace Signum.Engine.Linq
 
         public Expression TryGetPropertyBinding(PropertyInfo pi)
         {
-            PropertyBinding binding = PropertyBindings.Single(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
+            PropertyBinding binding = PropertyBindings.SingleOrDefault(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
 
             if (binding == null)
                 return null;
@@ -124,7 +125,7 @@ namespace Signum.Engine.Linq
 
         public Expression TryGetPropertyBinding(PropertyInfo pi)
         {
-            PropertyBinding binding = PropertyBindings.Single(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
+            PropertyBinding binding = PropertyBindings.SingleOrDefault(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
 
             if (binding == null)
                 return null;

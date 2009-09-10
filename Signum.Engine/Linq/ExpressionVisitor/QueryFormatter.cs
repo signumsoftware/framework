@@ -361,7 +361,12 @@ namespace Signum.Engine.Linq
             if (!IsSupported(c.Value.GetType()))
                 throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
 
-            sb.Append(c.TryToString("NULL"));
+            if (c.Value.Equals(true))
+                sb.Append("1");
+            else if (c.Value.Equals(false))
+                sb.Append("0");
+            else
+                sb.Append(c.ToString());
 
             return c;
         }
