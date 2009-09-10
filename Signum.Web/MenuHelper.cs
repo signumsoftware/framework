@@ -61,6 +61,70 @@ namespace Signum.Web
         }
     }
 
+
+    public class OrderedMenu {
+        public OrderedMenu() {
+        }
+        public string ToString(string currentUrl) {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<ul>{0}</ul>".Formato(this.ToString(0)));
+            return sb.ToString();
+        }
+
+        private string ToString(int i) {
+            StringBuilder sb = new StringBuilder();
+            if (node != null)
+                sb.Append(NodeToString(i, children == null ? 0 : children.Count)); // + NodeToString(i, children.Count)
+           /* else {
+                sb.Append("<li>Unknown</li>");
+            }*/
+            if (children != null && children.Count > 0)
+            {
+                sb.AppendLine("<ul{0}>".Formato((i > 1) ? " class='submenu'" : ""));
+                foreach (OrderedMenu menu in children)
+                {
+                    sb.Append(menu.ToString(i+1));
+                }
+                sb.Append("</ul>");
+            }
+            sb.Append("</li>");
+            return sb.ToString();
+        }
+
+        private string NodeToString(int i, int children)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (node.IsVisible() && children>0) {
+                sb.AppendLine("<li class='{0}'>".Formato(i));
+                sb.AppendLine("<span title='{0}'>{1}</span>".Formato(node.Title, node.Text));
+              //  sb.AppendLine("</li>");
+            }
+            else
+            {
+                if (node.IsVisible())
+                {
+                    sb.AppendLine("<li class='{0}'>".Formato(i));
+                    if (node.ManualHref.HasText())
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(node.ManualHref, node.Title, node.Text));
+                    else if (node.ManualA.HasText())
+                        sb.AppendLine(node.ManualA);
+                    else
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToStringNoName(), node.Title, node.Text));
+                 //   sb.AppendLine("</li>");
+                }
+                else {
+                    if (node.FindOptions == null && node.ManualA == null && node.ManualHref == null)
+                        sb.AppendLine("<li class='{0}'>{1}".Formato(i, node.Text));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public List<OrderedMenu> children;
+        public Item node;
+    }
+
     public static class MenuHelper
     {
         public static void MenuLI(this HtmlHelper helper, Item menuItem)
