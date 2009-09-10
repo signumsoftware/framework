@@ -128,8 +128,6 @@ namespace Signum.Windows
                     ValidatesOnDataErrors = true,
                     NotifyOnValidationError = true,
                 };
-
-                PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
             }
             else //otherwise bind to value property
             {
