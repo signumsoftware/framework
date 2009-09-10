@@ -13,46 +13,12 @@ using System.Configuration;
 
 namespace Signum.Web
 {
-    //public static class EntityLineKeys
-    //{
-    //    public const string DDL = "sfDDL";
-    //}
-
-    //public class EntityLine : EntityBase
-    //{
-    //    private bool autocomplete = true;
-    //    public bool Autocomplete
-    //    {
-    //        get { return autocomplete; }
-    //        set { autocomplete = value; }
-    //    }
-
-    //    public EntityLine()
-    //    {
-    //    }
-
-    //    public override void SetReadOnly()
-    //    {
-    //        Find = false;
-    //        Create = false;
-    //        Remove = false;
-    //        Autocomplete = false;
-    //        Implementations = null;
-    //    }
-
-    //    bool reloadOnChange = false;
-    //    public bool ReloadOnChange
-    //    {
-    //        get { return reloadOnChange; }
-    //        set { reloadOnChange = value; }
-    //    }
-    //}
-
     public static class EmbeddedControlHelper
     {
         public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
+
             Type runtimeType = typeof(S);
             if (context.Value != null)
             {
@@ -60,12 +26,20 @@ namespace Signum.Web
                     runtimeType = (context.Value as Lazy).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
+                if (runtimeType != typeof(S))
+                {
+                    var s = Expression.Parameter(typeof(S), "s");
+                    var lambda = Expression.Lambda(Expression.Convert(s, runtimeType), s);
+                    TypeContext c = Common.UntypedTypeContext(context, lambda, runtimeType);
+                    EmbeddedControl(helper, c, Navigator.Manager.EntitySettings[runtimeType].PartialViewName);
+                    return; 
+                }
             }
             else
             {
                 runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
             }
-            EmbeddedControl(helper, tc, property, Navigator.Manager.EntitySettings[runtimeType].PartialViewName);
+            EmbeddedControl(helper, context, Navigator.Manager.EntitySettings[runtimeType].PartialViewName);
         }
 
         public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, string ViewName)
@@ -85,22 +59,22 @@ namespace Signum.Web
                 runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
             }
 
-            string prefixedName = context.Name;
-            //if (!helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey) ||
-            //    !((string)helper.ViewData[ViewDataKeys.TypeContextKey]).HasText() ||
-            //    !prefixedName.StartsWith((string)helper.ViewData[ViewDataKeys.TypeContextKey]))
-            //prefixedName = helper.GlobalPrefixedName(context.Name);
+            EmbeddedControl(helper, context, ViewName);
+        }
 
+        private static void EmbeddedControl(this HtmlHelper helper, TypeContext tc, string ViewName)
+        { 
+            string prefixedName = tc.Name;
             ViewDataDictionary vdd = new ViewDataDictionary()
             {
                 { ViewDataKeys.TypeContextKey, prefixedName },
-                { prefixedName, context }, //Directly the context instead of the context.Value so we don't lose its context path
+                { prefixedName, tc }, //Directly the context instead of the context.Value so we don't lose its context path
                 { ViewDataKeys.EmbeddedControl, "" },
             };
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
                 vdd[ViewDataKeys.PopupPrefix] = helper.ViewData[ViewDataKeys.PopupPrefix];
 
-            if (context.Value != null && typeof(IIdentifiable).IsAssignableFrom(context.Value.GetType()) && ((IIdentifiable)context.Value).IsNew)
+            if (tc.UntypedValue != null && typeof(IIdentifiable).IsAssignableFrom(tc.UntypedValue.GetType()) && ((IIdentifiable)tc.UntypedValue).IsNew)
                 helper.Write(helper.Hidden(prefixedName + TypeContext.Separator + EntityBaseKeys.IsNew, ""));
 
             helper.RenderPartial(ViewName, vdd);

@@ -24,7 +24,10 @@ namespace Signum.Web
             if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
             {
                 if (helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()] is TypeContext<T>)
+                {
+                    WriteRuntimeAndId<T>(helper, (TypeContext<T>)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()]);
                     return (TypeContext<T>)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()];
+                }
                 return helper.BeginContext<T>((T)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()], helper.ViewData[ViewDataKeys.TypeContextKey].ToString(), true);
             }
 
@@ -244,7 +247,12 @@ namespace Signum.Web
 
         public override string Name
         {
-            get { return ((Parent.Name == TypeContext.Separator) ? "" : Parent.Name) + TypeContext.Separator + properties.ToString(p => p.Name, TypeContext.Separator); }
+            get 
+            {
+                string propertiesName = properties.ToString(p => p.Name, TypeContext.Separator);
+                return ((Parent.Name == TypeContext.Separator) ? "" : Parent.Name) +
+                    (propertiesName.HasText() ? TypeContext.Separator + propertiesName : "");
+            }
         }
 
         public override string FriendlyName

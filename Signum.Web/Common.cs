@@ -120,6 +120,13 @@ namespace Signum.Web
         }
 #endregion
 
+        static MethodInfo mi = typeof(Common).GetMethod("WalkExpression", BindingFlags.Static| BindingFlags.NonPublic); 
+
+        internal static TypeContext UntypedTypeContext(TypeContext tc, LambdaExpression lambda, Type returnType)
+        {
+            return (TypeContext)mi.MakeGenericMethod(tc.ContextType, returnType).Invoke(null, new object[] { tc, lambda });
+        }
+
         internal static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             PropertyInfo[] pi = MemberAccessGatherer.GetMemberList(lambda).Cast<PropertyInfo>().ToArray();

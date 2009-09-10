@@ -112,7 +112,7 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromDictionary(errors, Request.Form);
 
-            return Content(this.ModelState.ToJsonData());
+            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

@@ -1,6 +1,6 @@
-﻿function TrySaveAndPostServer(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
-    if (TrySave('Signum/Validate', prefixToIgnore, showInlineError, fixedInlineErrorText)) {
-        document.forms[0].action = urlController;
+﻿function ValidateAndPostServer(urlValidateController, urlPostController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
+    if (Validate(urlValidateController, prefixToIgnore, showInlineError, fixedInlineErrorText)) {
+        document.forms[0].action = urlPostController;
         document.forms[0].submit();
     }
 }

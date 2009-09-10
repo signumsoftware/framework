@@ -177,6 +177,13 @@ namespace Signum.Web
             return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
         }
 
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, string prefixToIgnore, ref T obj, out List<string> fullIntegrityErrors)
+        {
+            SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefixToIgnore);
+
+            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null, out fullIntegrityErrors);
+        }
+
         public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, string prefix, string prefixToIgnore, ref T obj)
         {
             SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
@@ -193,6 +200,12 @@ namespace Signum.Web
             where T:Modifiable
         {
             return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
+        }
+
+        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix, out List<string> fullIntegrityErrors)
+            where T:Modifiable
+        {
+            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix, out fullIntegrityErrors);
         }
 
         public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
@@ -654,6 +667,15 @@ namespace Signum.Web
             return GenerateErrors((Modifiable)(object)obj, modification);
         }
 
+        protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix, out List<string> fullIntegrityErrors)
+        {
+            Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
+
+            obj = (T)modification.ApplyChanges(controller, obj);
+
+            return GenerateErrors((Modifiable)(object)obj, modification, out fullIntegrityErrors);
+        }
+
         protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable obj, Modification modification)
         {
             Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
@@ -668,6 +690,25 @@ namespace Signum.Web
             //meter el resto en el diccionario
             if (globalErrors.Count > 0)
                 errors.Add(ViewDataKeys.GlobalErrors, globalErrors.ToList());
+
+            return errors;
+        }
+
+        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable obj, Modification modification, out List<string> fullIntegrityErrors)
+        {
+            fullIntegrityErrors = null;
+
+            Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
+            modification.Validate(obj, errors);
+
+            Dictionary<Modifiable, string> dicGlobalErrors = obj.FullIntegrityCheckDictionary();
+            //Split each error in one entry in the HashTable:
+            var globalErrors = dicGlobalErrors.SelectMany(a => a.Value.Lines()).ToList();
+            //eliminar de globalErrors los que ya hemos metido en el diccionario
+            errors.SelectMany(a => a.Value)
+                  .ForEach(e => globalErrors.Remove(e));
+            //meter el resto en el diccionario
+            fullIntegrityErrors = globalErrors.ToList();
 
             return errors;
         }
