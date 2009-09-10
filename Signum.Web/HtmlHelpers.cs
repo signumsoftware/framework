@@ -215,22 +215,24 @@ namespace Signum.Web
             return sb.ToString();
         }
 
-        public static string GetScriptRegistrationCode(string url){
+        public static string GetScriptRegistrationCode(string url, bool includeScriptTags){
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("<script type='text/javascript'>");
-            sb.AppendLine("var script=document.createElement('script')");
+            if (includeScriptTags)
+                sb.AppendLine("<script type='text/javascript'>");
+            sb.AppendLine("var script=document.createElement('script');");
             sb.AppendLine("script.setAttribute('type', 'text/javascript');");
             sb.AppendFormat("script.setAttribute('src', '{0}');", url);
             sb.AppendLine();
             sb.AppendLine("var head = document.getElementsByTagName('head')[0];");
             sb.AppendLine("head.appendChild(script);");
-            sb.AppendLine("</script>");
+            if (includeScriptTags)
+                sb.AppendLine("</script>");
             return sb.ToString();
         }
 
         public static void RegisterScript(this HtmlHelper html, Type type, string fullName) {
             string url = new ScriptManager().Page.ClientScript.GetWebResourceUrl(type, fullName);
-            html.ViewContext.HttpContext.Response.Write(HtmlHelperExtenders.GetScriptRegistrationCode(url));
+            html.ViewContext.HttpContext.Response.Write(HtmlHelperExtenders.GetScriptRegistrationCode(url, true));
         }
    }
 }

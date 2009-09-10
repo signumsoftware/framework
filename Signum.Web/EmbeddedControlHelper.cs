@@ -94,7 +94,7 @@ namespace Signum.Web
             ViewDataDictionary vdd = new ViewDataDictionary()
             {
                 { ViewDataKeys.TypeContextKey, prefixedName },
-                { prefixedName, context.Value },
+                { prefixedName, context }, //Directly the context instead of the context.Value so we don't lose its context path
                 { ViewDataKeys.EmbeddedControl, "" },
             };
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
