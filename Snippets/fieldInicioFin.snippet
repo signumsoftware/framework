@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>fieldInicioFin</Title>
+			<Shortcut>fieldInicioFin</Shortcut>
+			<Description>Campos Inicio y Fin para entidades temporales</Description>
+			<Author>Signum Software</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Code Language="csharp">
+				<![CDATA[DateTime? fechaInicio;
+        public DateTime? FechaInicio
+        {
+            get { return fechaInicio; }
+            set { if (Set(ref fechaInicio, value, "FechaInicio"))Notify("FechaFin"); }
+        }
+
+        DateTime? fechafin;
+        public DateTime? FechaFin
+        {
+            get { return fechafin; }
+            set { if (Set(ref fechafin, value, "FechaFin"))Notify("FechaInicio"); }
+        }
+
+        public override string this[string columnName]
+        {
+            get
+            {
+                string result = base[columnName];
+
+                if (columnName == "FechaInicio" || columnName == "FechaFin")
+                {
+                    if(this.FechaFin < this.FechaInicio)
+                      result = result.AddLine("Fecha Inicio es mayor que Fecha Fin");
+                    
+                    if(this.FechaInicio == null && this.FechaFin != null)
+                       result = result.AddLine("Fecha Inicio es nulo pero Fecha Fin no lo es");
+                }
+                
+                return result;
+            }
+        }$end$]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
