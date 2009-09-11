@@ -106,6 +106,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The provided User Name is already registered, please choose another one.
+        /// </summary>
+        internal static string UserNameAlreadyExists {
+            get {
+                return ResourceManager.GetString("UserNameAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You must repeat the new Password.
         /// </summary>
         internal static string YouMustRepeatTheNewPassword {

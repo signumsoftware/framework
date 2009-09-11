@@ -14,6 +14,11 @@ using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
 using Signum.Entities;
+using System.Collections.Specialized;
+using Signum.Web.Extensions.Properties;
+using Signum.Engine.Operations;
+using Signum.Engine.Basics;
+using Signum.Entities.Operations;
 
 namespace Signum.Web.Authorization
 {
@@ -186,6 +191,114 @@ namespace Signum.Web.Authorization
                 return false;
 
             }
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult RegisterUserValidate(string prefixToIgnore)
+        {
+            UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
+
+            Dictionary<string, List<string>> errors = RegisterUserApplyChanges(Request.Form, ref u);
+
+            this.ModelState.FromDictionary(errors, Request.Form);
+            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+        }
+
+        public ActionResult RegisterUserPost()
+        {
+            UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
+
+            Dictionary<string, List<string>> errors = RegisterUserApplyChanges(Request.Form, ref u);
+            if (errors != null && errors.Count > 0)
+            {
+                this.ModelState.FromDictionary(errors, Request.Form);
+                return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+            }
+
+            u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.Alta);
+
+            return Navigator.View(this, u);
+        }
+
+        public ActionResult RegisterUserPostNoOperation()
+        {
+            UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
+
+            Dictionary<string, List<string>> errors = RegisterUserApplyChanges(Request.Form, ref u);
+            if (errors != null && errors.Count > 0)
+            {
+                this.ModelState.FromDictionary(errors, Request.Form);
+                return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+            }
+
+            u = Database.Save(u);
+
+            return Navigator.View(this, u);
+        }
+
+        Dictionary<string, List<string>> RegisterUserApplyChanges(NameValueCollection form, ref UserDN u)
+        {
+            List<string> fullIntegrityErrors;
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "my", ref u, out fullIntegrityErrors);
+            if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
+                errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
+
+            if (u != null && u.UserName.HasText())
+            {
+                string username = u.UserName;
+                if (Database.Query<UserDN>().Any(us => us.UserName == username))
+                    errors.Add(ViewDataKeys.GlobalErrors, new List<string> { Resources.UserNameAlreadyExists });
+            }
+            return errors;
+        }
+
+        Dictionary<string, List<string>> UserOperationApplyChanges(NameValueCollection form, ref UserDN u)
+        {
+            List<string> fullIntegrityErrors;
+            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "my", ref u, out fullIntegrityErrors);
+            if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
+                errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
+
+            return errors;
+        }
+
+        public ActionResult UserExecOperation(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLazy, string prefix, string sfOnOk, string sfOnCancel)
+        {
+            Type type = Navigator.ResolveType(sfTypeName);
+
+            UserDN entity = null;
+            if (isLazy)
+            {
+                if (sfId.HasValue)
+                {
+                    Lazy lazy = Lazy.Create(type, sfId.Value);
+                    entity = (UserDN)OperationLogic.ServiceExecuteLazy((Lazy)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                }
+                else
+                    throw new ArgumentException("Could not create Lazy without an id to call Operation {{{0}}}".Formato(sfOperationFullKey));
+            }
+            else
+            {
+                if (sfId.HasValue)
+                    entity = Database.Retrieve<UserDN>(sfId.Value);
+                else
+                    entity = (UserDN)Navigator.CreateInstance(type);
+
+                Dictionary<string, List<string>> errors = UserOperationApplyChanges(Request.Form, ref entity);
+
+                if (errors != null && errors.Count > 0)
+                {
+                    this.ModelState.FromDictionary(errors, Request.Form);
+                    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+                }
+
+                entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+            }
+
+            if (prefix.HasText())
+                return Navigator.PopupView(this, entity, prefix);
+            else //NormalWindow
+                return Navigator.View(this, entity);
         }
 
         private void AddUserSession(string username, bool? rememberMe, UserDN usuario)

@@ -132,6 +132,9 @@
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>Las contraseñas especificadas no coinciden</value>
   </data>
+  <data name="UserNameAlreadyExists" xml:space="preserve">
+    <value>El nombre de usuario elegido ya está registrado, debe elegir otro distinto</value>
+  </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Debes repetir la nueva contraseña</value>
   </data>

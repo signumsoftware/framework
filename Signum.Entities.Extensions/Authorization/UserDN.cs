@@ -111,6 +111,20 @@ namespace Signum.Entities.Authorization
         Anulado,
     }
 
+    public enum UserOperation
+    {
+        [Description("Alta")]
+        Alta,
+        [Description("Crear")]
+        Crear,
+        [Description("Modificar")]
+        Modificar,
+        [Description("Anular")]
+        Anular,
+        [Description("Reactivar")]
+        Reactivar,
+    }
+
     public interface IEmployee:IIdentifiable
     {
 
