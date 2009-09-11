@@ -17,7 +17,9 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined<QueryDN>())
             {
-                QueryNames = queryManagers.SelectMany(a => a.GetQueryNames()).ToHashSet();  
+                sb.Schema.Initializing += s =>
+                    { QueryNames = queryManagers.SelectMany(a => a.GetQueryNames()).ToHashSet(); };
+                  
 
                 sb.Include<QueryDN>();
 

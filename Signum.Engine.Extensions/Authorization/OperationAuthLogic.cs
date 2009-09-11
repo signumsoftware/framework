@@ -24,7 +24,7 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined<RuleOperationDN>())
             {
@@ -37,6 +37,25 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
+
+                var operaciones = (from o in Database.Query<LogOperationDN>()
+                                   select new
+                                   {
+                                       Entity = o.ToLazy(),
+                                       o.Id,
+                                       o.Target,
+                                       o.Operation,
+                                       o.User,
+                                       o.Start,
+                                       o.End,
+                                       o.Exception,                                                                           
+                                   });
+                dqm[typeof(LogOperationDN)] = operaciones.ToDynamic();
+                dqm[LogOperationQueries.All] = operaciones.ToDynamic();
+                dqm[LogOperationQueries.InProces] = operaciones.Where(o => o.Start != null).ToDynamic();
+                dqm[LogOperationQueries.Completed ] = operaciones.Where(o => o.End  != null).ToDynamic();
+
+
             }
         }
 

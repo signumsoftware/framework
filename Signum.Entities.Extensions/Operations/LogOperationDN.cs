@@ -58,5 +58,13 @@ namespace Signum.Entities.Operations
             get { return exception; }
             set { Set(ref exception, value, "Exception"); }
         }
-    }  
+    }
+
+    public enum LogOperationQueries
+    {
+        All,
+        InProces,
+        Completed,
+    }
+
 }
