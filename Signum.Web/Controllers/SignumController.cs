@@ -12,6 +12,7 @@ using Signum.Web.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
+using System.Reflection;
 
 namespace Signum.Web.Controllers
 {
@@ -284,6 +285,7 @@ namespace Signum.Web.Controllers
             return Navigator.View(this, entity);
         }
 
+   
 
         public static HtmlHelper CreateHtmlHelper(Controller c)
         {
