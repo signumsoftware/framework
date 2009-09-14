@@ -6,13 +6,13 @@
 }
 
 //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText) {
+function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText, parentDiv) {
     var returnValue = false;
     $.ajax({
         type: "POST",
         url: urlController,
         async: false,
-        data: $("form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
+        data: $( (parentDiv!==undefined) ? ("." +parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
         success:
             function(msg) {
                 if (msg.indexOf("ModelState") > 0) {
@@ -35,13 +35,13 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
     }
 
     //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-    function Validate(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText) {
+    function Validate(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText, parentDiv) {
         var returnValue = false;
         $.ajax({
             type: "POST",
             url: urlController,
             async: false,
-            data: $("form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
+            data: $( (parentDiv!==undefined) ? ("." +parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
             success:
             function(msg) {
                 if (msg.indexOf("ModelState") > 0) {

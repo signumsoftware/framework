@@ -180,19 +180,29 @@ namespace Signum.Web
                 sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
-            if (settings.Implementations != null || settings.View)
-            {
-                string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters + ");";
-                sb.Append(
-                        helper.Href(idValueField + TypeContext.Separator + EntityBaseKeys.ToStrLink,
-                            (value != null) ? value.ToString() : "&nbsp;",
-                            viewingUrl,
-                            "View",
-                            "valueLine",
-                            new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
-
+            //if (settings.Implementations != null || settings.View)
+            //{
+                if (settings.View)
+                {
+                    string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters + ");";
+                    sb.Append(
+                            helper.Href(idValueField + TypeContext.Separator + EntityBaseKeys.ToStrLink,
+                                (value != null) ? value.ToString() : "&nbsp;",
+                                viewingUrl,
+                                "View",
+                                "valueLine",
+                                new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+                }
+                else
+                {
+                    sb.Append(
+                            helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStrLink,
+                                (value != null) ? value.ToString() : "&nbsp;",
+                                "valueLine",
+                                new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+                }
                 sb.Append("<script type=\"text/javascript\">var " + idValueField + "_sfEntityTemp = \"\"</script>\n");
-            }
+            //}
 
             if (settings.Implementations != null || settings.Create)
                 {
