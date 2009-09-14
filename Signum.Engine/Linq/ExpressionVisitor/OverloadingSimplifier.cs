@@ -61,11 +61,6 @@ namespace Signum.Engine.Linq
         static MethodInfo miContainsQ = ReflectionTools.GetMethodInfo(() => Queryable.Contains((IQueryable<string>)null, null)).GetGenericMethodDefinition();
         static MethodInfo miContainsE = ReflectionTools.GetMethodInfo(() => Enumerable.Contains((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
 
-
-        static MethodInfo miBack = ReflectionTools.GetMethodInfo(() => Database.Back<TypeDN, TypeDN>(null, a => a)).GetGenericMethodDefinition();
-        static MethodInfo miBackMany = ReflectionTools.GetMethodInfo(() => Database.Back<TypeDN, TypeDN>(null, a => new[] { a, a })).GetGenericMethodDefinition();
-
-
         static MethodInfo miElementAtQ = ReflectionTools.GetMethodInfo(() => Queryable.ElementAt((IQueryable<string>)null, 0)).GetGenericMethodDefinition();
         static MethodInfo miElementAtE = ReflectionTools.GetMethodInfo(() => Enumerable.ElementAt((IEnumerable<string>)null, 0)).GetGenericMethodDefinition();
 
@@ -289,26 +284,6 @@ namespace Signum.Engine.Linq
                     
                     return Expression.Call(mCount, Expression.Call(mWhere, source, predicate)); 
                 }                
-
-                //IE<O> Back<O,I>(this I element, Func<O, I> link)
-                //   house.Back((Persona p)=>p.House)
-                //   Database.Query<O>().Where(linq == element)
-
-                if (ReflectionTools.MethodEqual(mi, miBack))
-                {
-                    var sourceElement = Visit(m.GetArgument("sourceElement"));
-                    var route = (LambdaExpression)Visit(m.GetArgument("route").StripQuotes());
-
-                    return BackExpression(sourceElement, route);
-                }
-
-                if (ReflectionTools.MethodEqual(mi, miBackMany))
-                {
-                    var sourceElement = Visit(m.GetArgument("sourceElement"));
-                    var route = (LambdaExpression)Visit(m.GetArgument("route").StripQuotes());
-
-                    return BackManyExpression(sourceElement, route);
-                }
 
 
                 if (ReflectionTools.MethodEqual(mi, miElementAtE) || ReflectionTools.MethodEqual(mi, miElementAtOrDefaultE) ||

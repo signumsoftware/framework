@@ -98,7 +98,7 @@ namespace Signum.Engine.Linq
             SourceExpression left = this.VisitSource(join.Left);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
-                return new JoinExpression(join.Type, join.JoinType, left, right, condition);
+                return new JoinExpression(join.JoinType, left, right, condition);
             }
             return join;
 

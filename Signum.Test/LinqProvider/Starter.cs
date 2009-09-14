@@ -31,6 +31,11 @@ namespace Signum.Test.LinqProvider
             }
         }
 
+        internal static void Dirty()
+        {
+            started = false;
+        }
+
         public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();

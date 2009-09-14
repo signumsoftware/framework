@@ -60,10 +60,14 @@ namespace Signum.Engine.Linq
 
         private QueryFormatter() { }
 
-        static internal string Format(Expression expression)
+
+        static internal string Format(Expression expression, out Expression<Func<SqlParameter[]>> getParameters)
         {
             QueryFormatter qf = new QueryFormatter() { prevAliases = ImmutableStack<string>.Empty };
             qf.Visit(expression);
+
+            getParameters = Expression.Lambda<Func<SqlParameter[]>>(
+                Expression.NewArrayInit(typeof(SqlParameter), qf.parameterExpressions.ToArray()));
 
             return qf.sb.ToString();
         }
@@ -599,6 +603,44 @@ namespace Signum.Engine.Linq
                 this.Indent(Indentation.Outer);
             }
             return join;
+        }
+
+        protected override Expression VisitDelete(DeleteExpression delete)
+        {
+            sb.Append("DELETE ");
+            sb.Append(delete.Table.Name);
+            this.AppendNewLine(Indentation.Same);
+            sb.Append("FROM ");
+            VisitSource(delete.Source);
+            this.AppendNewLine(Indentation.Same);
+            sb.Append("WHERE ");
+            Visit(delete.Where);
+            return delete;
+        }
+
+        protected override Expression VisitUpdate(UpdateExpression update)
+        {
+            sb.Append("UPDATE ");
+            sb.Append(update.Table.Name);
+            sb.Append(" SET");
+            this.AppendNewLine(Indentation.Inner);
+           
+            for (int i = 0, n = update.Assigments.Count; i < n; i++)
+            {
+                ColumnAssignment assignment= update.Assigments[i];
+                if (i > 0)
+                    this.AppendNewLine(Indentation.Same);
+                sb.Append(assignment.Column.Name);
+                sb.Append(" = ");
+                this.Visit(assignment.Expression);
+            }         
+
+            sb.Append("FROM ");
+            VisitSource(update.Source);
+            this.AppendNewLine(Indentation.Same);
+            sb.Append("WHERE ");
+            Visit(update.Where);
+            return update; 
         }
     }
 }

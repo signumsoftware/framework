@@ -38,11 +38,9 @@ namespace Signum.Engine.Linq
             if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
                 throw new InvalidOperationException("expression Type is not IQueryable");
 
-            Expression expand = ExpressionExpander.ExpandUntyped(expression);
-            Expression partialEval = MetaEvaluator.PartialEval(expand);
-            Expression simplified = OverloadingSimplifier.Simplify(partialEval);
+            Expression cleaned = QueryUtils.Clean(expression);
 
-            MetaProjectorExpression meta = new MetadataVisitor().Visit(simplified) as MetaProjectorExpression;
+            MetaProjectorExpression meta = new MetadataVisitor().Visit(cleaned) as MetaProjectorExpression;
 
             if (meta == null)
                 return null;

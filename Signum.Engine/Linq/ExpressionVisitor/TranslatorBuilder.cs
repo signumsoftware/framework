@@ -33,9 +33,9 @@ namespace Signum.Engine.Linq
             }
         }
 
-        static MethodInfo miBuildPrivate = typeof(TranslatorBuilder).GetMethod("BuildPrivate", BindingFlags.NonPublic | BindingFlags.Static);
+        static MethodInfo miBuildPrivate = typeof(TranslatorBuilder).GetMethod("BuildTranslateResult", BindingFlags.NonPublic | BindingFlags.Static);
 
-        static internal TranslateResult<T> BuildPrivate<T>(ProjectionExpression proj, ImmutableStack<string> prevAliases)
+        static internal TranslateResult<T> BuildTranslateResult<T>(ProjectionExpression proj, ImmutableStack<string> prevAliases)
         {
             string alias = proj.Source.Alias;
 
@@ -64,6 +64,19 @@ namespace Signum.Engine.Linq
             };
 
             return result;
+        }
+
+        public static CommandResult DeleteUpdate<T>(Expression updateOrDelete)
+        {
+            Expression<Func<SqlParameter[]>> createParams;
+            string sql = QueryFormatter.Format(updateOrDelete, out createParams);
+
+            return new CommandResult
+            {
+                GetParameters = createParams.Compile(),
+                GetParametersExpression = createParams,
+                CommandText = sql,
+            }; 
         }
 
         /// <summary>

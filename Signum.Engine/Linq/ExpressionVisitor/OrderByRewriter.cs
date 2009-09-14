@@ -20,9 +20,9 @@ namespace Signum.Engine.Linq
 
         private OrderByRewriter() { }
 
-        static internal ProjectionExpression Rewrite(ProjectionExpression expression)
+        static internal Expression Rewrite(Expression expression)
         {
-            return (ProjectionExpression)new OrderByRewriter().Visit(expression);
+            return new OrderByRewriter().Visit(expression);
         }
 
         protected override Expression VisitSelect(SelectExpression select)
@@ -80,7 +80,7 @@ namespace Signum.Engine.Linq
             Expression condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
-                return new JoinExpression(join.Type, join.JoinType, left, right, condition);
+                return new JoinExpression(join.JoinType, left, right, condition);
             }
             return join;
         }

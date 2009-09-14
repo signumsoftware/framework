@@ -21,12 +21,12 @@ namespace Signum.Engine.Linq
 
         private QueryRebinder() { }
 
-        internal static ProjectionExpression Rebind(ProjectionExpression binded)
+        internal static Expression Rebind(Expression binded)
         {
             QueryRebinder qr = new QueryRebinder();
             using (qr.NewScope(null))
             {
-                return (ProjectionExpression)qr.Visit(binded); 
+                return qr.Visit(binded); 
             }
         }
 
@@ -65,7 +65,7 @@ namespace Signum.Engine.Linq
             Expression condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
-                return new JoinExpression(join.Type, join.JoinType, left, right, condition);
+                return new JoinExpression(join.JoinType, left, right, condition);
             }
             return join;
         }

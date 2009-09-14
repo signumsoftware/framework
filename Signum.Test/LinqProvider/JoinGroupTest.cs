@@ -45,6 +45,15 @@ namespace Signum.Test.LinqProvider
                               select new { Artist = a.Name, Album = b.Name }).ToList();
         }
 
+        [TestMethod]
+        public void JoinerExpansions()
+        {
+            var labels = Database.Query<AlbumDN>().Join(
+                Database.Query<AlbumDN>(), 
+                a => a.Year, a => a.Year, 
+                (a1, a2) => a1.Label.Name + " " + a2.Label.Name).ToList();
+        }
+
 
         [TestMethod]
         public void LeftOuterJoinEntity()

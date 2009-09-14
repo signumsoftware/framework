@@ -59,6 +59,10 @@ namespace Signum.Engine.Linq
                     return this.VisitIsNull((IsNullExpression)exp);
                 case DbExpressionType.IsNotNull:
                     return this.VisitIsNotNull((IsNotNullExpression)exp);
+                case DbExpressionType.Delete:
+                    return this.VisitDelete((DeleteExpression)exp);
+                case DbExpressionType.Update:
+                    return this.VisitUpdate((UpdateExpression)exp);
                 case DbExpressionType.FieldInit:
                     return this.VisitFieldInit((FieldInitExpression)exp);
                 case DbExpressionType.EmbeddedFieldInit:
@@ -76,7 +80,38 @@ namespace Signum.Engine.Linq
                     return base.Visit(exp);
             }
         }
-     
+
+        protected virtual Expression VisitDelete(DeleteExpression delete)
+        {
+            var source = Visit(delete.Source);
+            var where = Visit(delete.Where);
+            if (source != delete.Source || where != delete.Where)
+                return new DeleteExpression(delete.Table, delete.Source, delete.Where);
+            return delete;
+        }
+
+        protected virtual Expression VisitUpdate(UpdateExpression update)
+        {
+            var source = Visit(update.Source); 
+            var where = Visit(update.Where);
+            var assigments = VisitColumnAssigments(update.Assigments);
+            if(source != update.Source || where != update.Where || assigments != update.Assigments)
+                return new UpdateExpression(update.Table, update.Source, update.Where, update.Assigments);
+            return update;
+        }
+
+        private IEnumerable<ColumnAssignment> VisitColumnAssigments(ReadOnlyCollection<ColumnAssignment> columns)
+        {
+            return columns.NewIfChange(c =>
+                {
+                    var col = (ColumnExpression)Visit(c.Column);
+                    var exp = Visit(c.Expression);
+                    if (col != c.Column || exp != c.Expression)
+                        return new ColumnAssignment(col, exp);
+                    return c;
+                });
+        }
+
         protected virtual Expression VisitMList(MListExpression ml)
         {
             var newBackID = Visit(ml.BackID);
@@ -276,7 +311,7 @@ namespace Signum.Engine.Linq
             Expression condition = this.Visit(join.Condition);
             if (left != join.Left || right != join.Right || condition != join.Condition)
             {
-                return new JoinExpression(join.Type, join.JoinType, left, right, condition);
+                return new JoinExpression(join.JoinType, left, right, condition);
             }
             return join;
         }

@@ -10,10 +10,10 @@ namespace Signum.Engine.Linq
     {
         ProjectionExpression root;
 
-        public static ProjectionExpression Replace(ProjectionExpression proj)
+        public static Expression Replace(Expression proj)
         {
-            AliasProjectionReplacer apr = new AliasProjectionReplacer() { root = proj };
-            return (ProjectionExpression)apr.Visit(proj);
+            AliasProjectionReplacer apr = new AliasProjectionReplacer() { root = proj as ProjectionExpression };
+            return apr.Visit(proj);
         }
         int aliasCount = 0;
         private string GetNextAlias()

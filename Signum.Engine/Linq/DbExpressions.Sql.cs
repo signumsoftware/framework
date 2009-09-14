@@ -12,6 +12,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Maps;
 
 
 namespace Signum.Engine.Linq
@@ -40,6 +41,8 @@ namespace Signum.Engine.Linq
         Scalar,
         IsNull,
         IsNotNull,
+        Update,
+        Delete, 
         FieldInit = 2000,
         EmbeddedFieldInit,
         ImplementedBy,
@@ -61,8 +64,8 @@ namespace Signum.Engine.Linq
     {
         public abstract string[] KnownAliases { get; }
 
-        public SourceExpression(DbExpressionType nodeType, Type type)
-            : base(nodeType, type)
+        public SourceExpression(DbExpressionType nodeType)
+            : base(nodeType, typeof(void))
         {
         }
     }
@@ -71,8 +74,8 @@ namespace Signum.Engine.Linq
     {
         public readonly string Alias;
 
-        public SourceWithAliasExpression(DbExpressionType nodeType, Type type, string alias)
-            : base(nodeType, type)
+        public SourceWithAliasExpression(DbExpressionType nodeType, string alias)
+            : base(nodeType)
         {
             this.Alias = alias;
         }
@@ -91,8 +94,8 @@ namespace Signum.Engine.Linq
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Type type, string alias, string name)
-            : base(DbExpressionType.Table, type, alias)
+        internal TableExpression(string alias, string name)
+            : base(DbExpressionType.Table, alias)
         {
             this.Name = name;
         }
@@ -258,7 +261,7 @@ namespace Signum.Engine.Linq
         }
 
         internal SelectExpression(string alias, bool distinct, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
-            : base(DbExpressionType.Select, typeof(void), alias)
+            : base(DbExpressionType.Select, alias)
         {
             this.Distinct = distinct;
             this.Top = top; 
@@ -336,8 +339,8 @@ namespace Signum.Engine.Linq
             get { return Left.KnownAliases.Concat(Right.KnownAliases).ToArray(); }
         }
 
-        internal JoinExpression(Type type, JoinType joinType, SourceExpression left, SourceExpression right, Expression condition)
-            : base(DbExpressionType.Join, type)
+        internal JoinExpression(JoinType joinType, SourceExpression left, SourceExpression right, Expression condition)
+            : base(DbExpressionType.Join)
         {
             if (left == null) 
                 throw new ArgumentNullException("left");
@@ -684,7 +687,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-
     internal enum UniqueFunction
     {
         First, 
@@ -721,6 +723,69 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "SOURCE\r\n{0}\r\nPROJECTION\r\n{1}".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
+        }
+    }
+
+    internal class DeleteExpression : DbExpression
+    {
+        public readonly Table Table;
+        public readonly SourceExpression Source;
+        public readonly Expression Where;
+
+        public DeleteExpression(Table table, SourceExpression source, Expression where)
+            :base(DbExpressionType.Delete, typeof(void))
+        {
+            this.Table = table;
+            this.Source = source;
+            this.Where = where; 
+        }
+
+        public override string ToString()
+        {
+            return "DELETE {0}\r\nFROM {1}\r\nWHERE {2}".Formato(Table.Name, Source.NiceToString(), Where.NiceToString()); 
+        }
+    }
+
+    internal class UpdateExpression : DbExpression
+    {
+        public readonly Table Table;
+        public readonly ReadOnlyCollection<ColumnAssignment> Assigments; 
+        public readonly SourceExpression Source;
+        public readonly Expression Where;
+
+        public UpdateExpression(Table table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+            :base(DbExpressionType.Update, typeof(void))
+        {
+            this.Table = table;
+            this.Assigments = assigments.ToReadOnly();
+            this.Source = source;
+            this.Where = where;
+        }
+
+        public override string ToString()
+        {
+            return "UPDATE {0}\r\nSET {1}\r\nFROM {2}\r\nWHERE {3}".Formato(
+                Table.Name,
+                Assigments.ToString("\r\n"),
+                Source.NiceToString(),
+                Where.NiceToString());
+        }
+    }
+
+    internal class ColumnAssignment
+    {
+        public readonly ColumnExpression Column;
+        public readonly Expression Expression;
+
+        public ColumnAssignment(ColumnExpression column, Expression expression)
+        {
+            this.Column = column;
+            this.Expression = expression;
+        }
+
+        public override string ToString()
+        {
+            return "{0} = {1}".Formato(Column, Expression); 
         }
     }
 }

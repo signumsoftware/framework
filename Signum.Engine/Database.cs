@@ -272,24 +272,20 @@ namespace Signum.Engine
         {
             return new Query<T>(DbQueryProvider.Single);
         }
-
-        public static IQueryable<T> Back<T, S>(this S sourceElement, Expression<Func<T, S>> route)
-            where T : IdentifiableEntity
-            where S : IdentifiableEntity
-        {
-            return new Query<T>(DbQueryProvider.Single,
-                OverloadingSimplifier.BackExpression(Expression.Constant(sourceElement, typeof(S)), route));
-        }
-
-        public static IQueryable<T> Back<T, S>(this S sourceElement, Expression<Func<T, IEnumerable<S>>> route)
-            where T : IdentifiableEntity
-            where S : IdentifiableEntity
-        {
-            return new Query<T>(DbQueryProvider.Single,
-                OverloadingSimplifier.BackManyExpression(Expression.Constant(sourceElement, typeof(S)), route));
-        }
         #endregion
 
         public static int MaxParameters { get { return SqlBuilder.MaxParametersInSQL; } }
+
+        //public static int UnsafeDelete<T>(Expression<Func<T, bool>> predicate)
+        //      where T : IdentifiableEntity
+        //{
+        //    return QueryUtils.Delete<T>(predicate); 
+        //}
+
+        //public static int UnsafeUpdate<T>(Expression<Func<T, T>> update, Expression<Func<T, bool>> predicate)
+        //    where T : IdentifiableEntity
+        //{
+        //    return QueryUtils.Update<T>(update, predicate);
+        //}
     }
 }

@@ -96,14 +96,18 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
+            string constructor = "new {0}({1})".Formato(Type.TypeName(), ExternalId.NiceToString());
             string bindings =
                 (Bindings.TryCC(b => b.ToString(",\r\n ")).Add(
                 PropertyBindings.TryCC(b => b.ToString(",\r\n ")), "\r\n")) ?? "";
 
-            return "new {0}({1}){{\r\n{2}\r\n}}".Formato(Type.TypeName(), ExternalId.NiceToString(), bindings);
+            return bindings.HasText() ?
+                constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
+                constructor;
         }
     }
 
+  
     internal class EmbeddedFieldInitExpression : DbExpression, IPropertyInitExpression
     {
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
@@ -140,11 +144,15 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
+            string constructor = "new {0}".Formato(Type.TypeName());
+
             string bindings =
                 (Bindings.TryCC(b => b.ToString(",\r\n ")).Add(
                 PropertyBindings.TryCC(b => b.ToString(",\r\n ")), "\r\n")) ?? "";
 
-            return "new {0}{{\r\n{1}\r\n}}".Formato(Type.TypeName(), bindings.Indent(4));
+            return bindings.HasText() ? 
+                constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" : 
+                constructor;
         }
     }
 
@@ -203,9 +211,6 @@ namespace Signum.Engine.Linq
             this.Implementations = implementations.ToReadOnly();
         }
 
-
-
-
         public Expression TryGetPropertyBinding(PropertyInfo pi)
         {
             PropertyBinding binding = PropertyBindings.SingleOrDefault(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
@@ -223,9 +228,13 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "ImplementedBy{{\r\n{0}\r\n    Bindings = {{\r\n{1}\r\n}}}}".Formato(
-                Implementations.ToString(",\r\n").Indent(4),
-                PropertyBindings.TryCC(b => b.ToString(",\r\n ")).Indent(8));
+            string bindings = PropertyBindings.TryCC(b => b.ToString(",\r\n "));
+
+            string bindings2 = bindings.HasText() ? "Bindings = {{\r\n{0}\r\n}}}".Formato(bindings.Indent(4)) : null;
+ 
+            return "ImplementedBy{{\r\n{0}\r\n}".Formato(
+                Implementations.ToString(",\r\n").Add(bindings2, ",\r\n").Indent(4)
+                );
         }
     }
 

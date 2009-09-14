@@ -14,7 +14,6 @@ namespace Signum.Engine.Linq
 {
     internal class ProjectionCleaner : DbExpressionVisitor
     {
-
         public static Expression Clean(Expression source)
         {
             ProjectionCleaner pc = new ProjectionCleaner();

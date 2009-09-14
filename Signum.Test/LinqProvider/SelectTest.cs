@@ -44,6 +44,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectWhereExpansion()
+        {
+            var list = Database.Query<AlbumDN>().Where(a=>a.Label != null).Select(a => a.Label.Name).ToList();
+        }
+
+        [TestMethod]
         public void SelectAnonymous()
         {
             var list = Database.Query<AlbumDN>().Select(a => new { a.Name, a.Year }).ToList();

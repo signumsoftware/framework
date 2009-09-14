@@ -58,4 +58,18 @@ namespace Signum.Engine.Linq
                     return reader;
         }
     }
+
+    class CommandResult
+    {
+        public string CommandText { get; set; }
+        internal Expression<Func<SqlParameter[]>> GetParametersExpression;
+        internal Func<SqlParameter[]> GetParameters;
+
+        public int Execute()
+        {
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+
+            return (int)Executor.ExecuteScalar(command);
+        }
+    }
 }
