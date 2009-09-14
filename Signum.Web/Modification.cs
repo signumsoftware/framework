@@ -102,9 +102,9 @@ namespace Signum.Web
         public ValueModification(Type staticType, SortedList<string, object> formValues, string controlID)
             : base(staticType, controlID)
         {
+            string valueStr = (string)formValues[controlID];
             try
             {
-                string valueStr = (string)formValues[controlID];
                 if (staticType.UnNullify() == typeof(bool))
                 {
                     string[] vals = valueStr.Split(',');
@@ -115,6 +115,7 @@ namespace Signum.Web
             }
             catch (Exception ex)
             {
+                //BindingError = BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(valueStr,  ppm.PropertyPack.PropertyInfo.NiceName()));
                 BindingError = BindingError.AddLine(ex.Message);
             }
         }
@@ -242,9 +243,14 @@ namespace Signum.Web
                     {
                         ppm.PropertyPack.SetValue(entity, newValue);
                     }
+                    catch (NullReferenceException nullEx)
+                    { 
+                        if (entity != null && newValue == null && ppm.PropertyPack.PropertyInfo.PropertyType.IsValueType && !ppm.Modification.BindingError.HasText())
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.ValueMustBeSpecifiedFor0.Formato(ppm.PropertyPack.PropertyInfo.NiceName()));
+                    }
                     catch (Exception ex)
                     {
-                        ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(ex.Message);
+                        ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
                     }
                 }
             }

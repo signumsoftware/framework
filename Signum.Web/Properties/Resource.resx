@@ -123,7 +123,13 @@
   <data name="NoPropertyWithName0FoundInType0" xml:space="preserve">
     <value>No property with name {{0}} found in type {0}</value>
   </data>
+  <data name="NotPossibleToAssign0To1" xml:space="preserve">
+    <value>It's not possible to set {0} as {1}</value>
+  </data>
   <data name="Type0NotFoundInTheSchema" xml:space="preserve">
     <value>Type {0} not found in the schema</value>
+  </data>
+  <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
+    <value>A value must be specified for {0}</value>
   </data>
 </root>

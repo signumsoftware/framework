@@ -231,4 +231,7 @@
   <data name="FileName" xml:space="preserve">
     <value>file name</value>
   </data>
+  <data name="Telephone" xml:space="preserve">
+    <value>Telephone</value>
+  </data>
 </root>

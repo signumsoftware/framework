@@ -79,11 +79,29 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to It&apos;s not possible to set {0} as {1}.
+        /// </summary>
+        internal static string NotPossibleToAssign0To1 {
+            get {
+                return ResourceManager.GetString("NotPossibleToAssign0To1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type {0} not found in the schema.
         /// </summary>
         internal static string Type0NotFoundInTheSchema {
             get {
                 return ResourceManager.GetString("Type0NotFoundInTheSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A value must be specified for {0}.
+        /// </summary>
+        internal static string ValueMustBeSpecifiedFor0 {
+            get {
+                return ResourceManager.GetString("ValueMustBeSpecifiedFor0", resourceCulture);
             }
         }
     }
