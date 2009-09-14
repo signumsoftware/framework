@@ -136,7 +136,7 @@ namespace Signum.Web.Operations
 
         protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, OperationInfo oi, WebMenuItem os, IdentifiableEntity ident)
         {
-            if (os.OnClick.HasText() || os.OnServerClickPost.HasText())
+            if (os != null && (os.OnClick.HasText() || os.OnServerClickPost.HasText()))
                 return null;
 
             string controllerUrl = "Operation.aspx/OperationExecute";
@@ -157,7 +157,7 @@ namespace Signum.Web.Operations
 
         protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, WebMenuItem os, object queryName, Type entityType)
         {
-            if (os.OnClick.HasText() || os.OnServerClickPost.HasText())
+            if (os != null && (os.OnClick.HasText() || os.OnServerClickPost.HasText()))
                 return null;
 
             string controllerUrl = "Operation.aspx/ConstructFromManyExecute";
