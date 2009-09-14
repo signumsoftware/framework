@@ -368,8 +368,9 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix, string partialViewName)
         {
+            Type cleanType = entity != null ? entity.GetType() : typeof(T);
             string url = partialViewName ??
-                Navigator.Manager.EntitySettings.TryGetC(entity.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + entity.GetType()).PartialViewName;
+                Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC("No hay una vista asociada al tipo: " + cleanType).PartialViewName;
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = url;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
