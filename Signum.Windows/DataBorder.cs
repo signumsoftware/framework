@@ -60,8 +60,8 @@ namespace Signum.Windows
                             Foreground = Brushes.Red,
                             FontWeight = FontWeights.Bold
                         }; 
-
-                    Child = setting.View(); 
+                    else
+                        Child = setting.View(); 
                 }
             }
             if (Child != null)
