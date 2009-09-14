@@ -124,7 +124,7 @@
     <value>No se ha encontrado la propiedad {{0}} en el tipo {0}</value>
   </data>
   <data name="NotPossibleToAssign0To1" xml:space="preserve">
-    <value>No es posible utilizar el valor {0} como {1}</value>
+    <value>No es posible utilizar el valor indicado como {1}</value>
   </data>
   <data name="Type0NotFoundInTheSchema" xml:space="preserve">
     <value>Tipo {0} no encontrado en el Schema</value>

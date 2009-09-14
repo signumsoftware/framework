@@ -113,10 +113,10 @@ namespace Signum.Web
                 else
                     Value = ReflectionTools.Parse(valueStr, staticType);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                //BindingError = BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(valueStr,  ppm.PropertyPack.PropertyInfo.NiceName()));
-                BindingError = BindingError.AddLine(ex.Message);
+                BindingError = BindingError.AddLine("Binding Error");
+                //BindingError = BindingError.AddLine(ex.Message);
             }
         }
 
@@ -244,12 +244,25 @@ namespace Signum.Web
                         ppm.PropertyPack.SetValue(entity, newValue);
                     }
                     catch (NullReferenceException nullEx)
-                    { 
-                        if (entity != null && newValue == null && ppm.PropertyPack.PropertyInfo.PropertyType.IsValueType && !ppm.Modification.BindingError.HasText())
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.ValueMustBeSpecifiedFor0.Formato(ppm.PropertyPack.PropertyInfo.NiceName()));
-                    }
-                    catch (Exception ex)
                     {
+                        if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("Binding Error"))
+                        {
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("Binding Error", "");
+                            if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("\r\n\r\n"))
+                                ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
+                        }
+                        else if (entity != null && newValue == null && ppm.PropertyPack.PropertyInfo.PropertyType.IsValueType && !ppm.Modification.BindingError.HasText())
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.ValueMustBeSpecifiedFor0.Formato(ppm.PropertyPack.PropertyInfo.NiceName()));
+                        else
+                            ppm.Modification.BindingError = nullEx.Message;
+                    }
+                    catch (Exception)
+                    {
+                        if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("Binding Error"))
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("Binding Error", "");
+                        if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("\r\n\r\n"))
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
                         ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
                     }
                 }
