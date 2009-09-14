@@ -142,7 +142,7 @@ namespace Signum.Engine.Operations
         {
             return (from k in EnumLogic<OperationDN>.Keys
                     let eo = TryFind(entity.GetType(), k) as IEntityOperation
-                    where eo != null && OnAllowOperation(k)
+                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OnAllowOperation(k)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
         }
 
