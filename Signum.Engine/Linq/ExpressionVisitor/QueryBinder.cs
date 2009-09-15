@@ -429,6 +429,9 @@ namespace Signum.Engine.Linq
         {
             Expression newItem = Visit(item);
 
+            if (source is ParameterExpression)
+                source = VisitParameter((ParameterExpression)source); 
+
             if (source.NodeType == ExpressionType.Constant && !typeof(IQueryable).IsAssignableFrom(source.Type)) //!isRoot
             {
                 ConstantExpression ce = (ConstantExpression)source;
@@ -1080,10 +1083,14 @@ namespace Signum.Engine.Linq
             if (lambda != null)
             {
                 for (int i = 0, n = lambda.Parameters.Count; i < n; i++)
-                {
                     this.map[lambda.Parameters[i]] = iv.Arguments[i];
-                }
-                return this.Visit(lambda.Body);
+
+                Expression result = this.Visit(lambda.Body);
+
+                for (int i = 0, n = lambda.Parameters.Count; i < n; i++)
+                    this.map.Remove(lambda.Parameters[i]);
+
+                return result; 
             }
             return base.VisitInvocation(iv);
         }
