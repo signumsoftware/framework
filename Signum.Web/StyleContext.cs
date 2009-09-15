@@ -62,7 +62,6 @@ namespace Signum.Web
             set { valueFirst = value; }
         }
 
-
         public StyleContext(): this(true)
         {
         }

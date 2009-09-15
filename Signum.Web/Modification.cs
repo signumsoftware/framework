@@ -401,7 +401,12 @@ namespace Signum.Web
                         return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lazy)));
                 }
                 else
-                    return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(RuntimeType, EntityId.Value)));
+                {
+                    if (EntityModification == null)
+                        return Lazy.Create(CleanType, EntityId.Value, RuntimeType);
+                    else
+                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(RuntimeType, EntityId.Value)));
+                }
             }
         }
 

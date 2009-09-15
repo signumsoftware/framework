@@ -20,7 +20,8 @@ namespace Signum.Web
                 return null;
 
             StringBuilder sb = new StringBuilder();
-            sb.Append("<div class='field'>");
+            if (settings.ShowFieldDiv)
+                sb.Append("<div class='field'>");
             idValueField = helper.GlobalName(idValueField);
 
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("<div class='valueFirst'>");
@@ -79,7 +80,8 @@ namespace Signum.Web
 
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("</div>");
 
-            sb.Append("</div>");
+            if (settings.ShowFieldDiv)
+                sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class='clearall'></div>\n");
 
@@ -113,20 +115,12 @@ namespace Signum.Web
         public static string DateTimePickerTextbox(this HtmlHelper helper, string idValueField, object value, string dateFormat, Dictionary<string, object> htmlProperties, DatePickerOptions datepickerOptions)
         {
             if (htmlProperties.ContainsKey("class"))
-            {
                 htmlProperties["class"] += " maskedEdit";
-            }
-            else {
+            else
                 htmlProperties["class"] = " maskedEdit";
-            
-            }
-
 
             if (datepickerOptions != null && datepickerOptions.ShowAge)
-            {
-                //htmlProperties["onchange"] = "calcAge('" + idValueField +"');"; 
                 htmlProperties["class"] += " hasAge";
-            }
 
             htmlProperties["size"] = dateFormat.Length;
             string returnString = helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "",  htmlProperties)+
@@ -134,9 +128,8 @@ namespace Signum.Web
                    helper.Calendar(idValueField, datepickerOptions);
 
             if (datepickerOptions != null && datepickerOptions.ShowAge)
-            {
                 returnString += helper.Span(idValueField + "Age", String.Empty, "age");
-            }
+
             return returnString;
         }
 
@@ -212,6 +205,8 @@ namespace Signum.Web
         public ValueLineType? ValueLineType;
         public List<SelectListItem> EnumComboItems;
         public DatePickerOptions DatePickerOptions;
+        public bool ShowFieldDiv = false;
+
         public override void SetReadOnly()
         {
         }
