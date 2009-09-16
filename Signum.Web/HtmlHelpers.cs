@@ -69,7 +69,7 @@ namespace Signum.Web
         { 
             return "<span " + 
                 ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
-                "class=\"" + cssClass + "\" >" + value.Replace('_',' ') + 
+                "class=\"" + cssClass + "\" >" + value + 
                 "</span>\n";
         }
 
@@ -89,6 +89,7 @@ namespace Signum.Web
 
             if (type == typeof(Nullable<Int32>) || type == typeof(Int32)) strValue=(value !=null) ? ((int)value).ToString("N0") : String.Empty;
             if (type == typeof(Nullable<Double>) || type == typeof(Double)) strValue=String.Format("{0:N}",value);
+            if (type == typeof(Enum)) strValue = strValue.Replace('_', ' ');
             if (strValue == String.Empty)
             {
                 strValue = (value != null) ? value.ToString() : "";
