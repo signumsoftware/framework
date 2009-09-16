@@ -362,15 +362,20 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSqlConstant(SqlConstantExpression c)
         {
-            if (!IsSupported(c.Value.GetType()))
-                throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
-
-            if (c.Value.Equals(true))
-                sb.Append("1");
-            else if (c.Value.Equals(false))
-                sb.Append("0");
+            if (c.Value == null)
+                sb.Append("NULL");
             else
-                sb.Append(c.ToString());
+            {
+                if (!IsSupported(c.Value.GetType()))
+                    throw new NotSupportedException(string.Format(Resources.TheConstantFor0IsNotSupported, c.Value));
+
+                if (c.Value.Equals(true))
+                    sb.Append("1");
+                else if (c.Value.Equals(false))
+                    sb.Append("0");
+                else
+                    sb.Append(c.ToString());
+            }
 
             return c;
         }
@@ -612,9 +617,12 @@ namespace Signum.Engine.Linq
             this.AppendNewLine(Indentation.Same);
             sb.Append("FROM ");
             VisitSource(delete.Source);
-            this.AppendNewLine(Indentation.Same);
-            sb.Append("WHERE ");
-            Visit(delete.Where);
+            if (delete.Where != null)
+            {
+                this.AppendNewLine(Indentation.Same);
+                sb.Append("WHERE ");
+                Visit(delete.Where);
+            }
             return delete;
         }
 
@@ -629,18 +637,51 @@ namespace Signum.Engine.Linq
             {
                 ColumnAssignment assignment= update.Assigments[i];
                 if (i > 0)
+                {
+                    sb.Append(",");
                     this.AppendNewLine(Indentation.Same);
+                }
                 sb.Append(assignment.Column.Name);
                 sb.Append(" = ");
                 this.Visit(assignment.Expression);
-            }         
-
+            }
+            this.AppendNewLine(Indentation.Outer);
             sb.Append("FROM ");
             VisitSource(update.Source);
-            this.AppendNewLine(Indentation.Same);
-            sb.Append("WHERE ");
-            Visit(update.Where);
+            if (update.Where != null)
+            {
+                this.AppendNewLine(Indentation.Same);
+                sb.Append("WHERE ");
+                Visit(update.Where);
+            }
             return update; 
+
         }
+
+        protected override Expression VisitSelectRowCount(SelectRowCountExpression src)
+        {
+            sb.Append("SELECT @@rowcount");
+            return src; 
+        }
+
+        
+
+        protected override Expression VisitCommandAggregate(CommandAggregateExpression cea)
+        {
+            for (int i = 0, n = cea.Commands.Count; i < n; i++)
+            {
+                CommandExpression command = cea.Commands[i];
+                if (i > 0)
+                {
+                    sb.Append(";"); 
+                    this.AppendNewLine(Indentation.Same);
+                    this.AppendNewLine(Indentation.Same);
+                }
+                this.Visit(command);
+            }
+            return cea;
+        }
+
+        
     }
 }

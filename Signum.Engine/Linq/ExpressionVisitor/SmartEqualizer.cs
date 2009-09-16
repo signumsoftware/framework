@@ -15,16 +15,16 @@ namespace Signum.Engine.Linq
     {
         public static Expression EqualNullable(Expression e1, Expression e2)
         {
-            if (IsNull(e1))
+            if (e1.IsNull())
             {
-                if (IsNull(e2))
+                if (e2.IsNull())
                     return True;
                 else
                     return new IsNullExpression(e2);
             }
             else
             {
-                if (IsNull(e2))
+                if (e2.IsNull())
                     return new IsNullExpression(e1);
             }
 
@@ -32,12 +32,6 @@ namespace Signum.Engine.Linq
                 return Expression.Equal(e1, e2);
 
             return Expression.Equal(e1.Nullify(), e2.Nullify());
-        }
-
-        private static bool IsNull(Expression e)
-        {
-            ConstantExpression ce = e as ConstantExpression;
-            return ce != null && ce.Value == null;
         }
 
         public static Expression PolymorphicEqual(Expression exp1, Expression exp2)
@@ -86,8 +80,8 @@ namespace Signum.Engine.Linq
         {   
             if (e1 is LazyReferenceExpression || e2 is LazyReferenceExpression )
             {
-                e1 = IsNull(e1)? e1: ((LazyReferenceExpression)e1).Reference;
-                e2 = IsNull(e2)? e2: ((LazyReferenceExpression)e2).Reference;
+                e1 = e1.IsNull() ? e1 : ((LazyReferenceExpression)e1).Reference;
+                e2 = e2.IsNull() ? e2 : ((LazyReferenceExpression)e2).Reference;
             }
 
             var tE1 = (DbExpressionType)e1.NodeType;
@@ -97,25 +91,25 @@ namespace Signum.Engine.Linq
                 if (tE2 == DbExpressionType.FieldInit) return FieFieEquals((FieldInitExpression)e1, (FieldInitExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedBy) return FieIbEquals((FieldInitExpression)e1, (ImplementedByExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedByAll) return FieIbaEquals((FieldInitExpression)e1, (ImplementedByAllExpression)e2);
-                else if (IsNull(e2)) return EqualsToNull(((FieldInitExpression)e1).ExternalId);
+                else if (e2.IsNull()) return EqualsToNull(((FieldInitExpression)e1).ExternalId);
                 else return null;
             else if (tE1 == DbExpressionType.ImplementedBy)
                 if (tE2 == DbExpressionType.FieldInit) return FieIbEquals((FieldInitExpression)e2, (ImplementedByExpression)e1);
                 else if (tE2 == DbExpressionType.ImplementedBy) return IbIbEquals((ImplementedByExpression)e1, (ImplementedByExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedByAll) return IbIbaEquals((ImplementedByExpression)e1, (ImplementedByAllExpression)e2);
-                else if (IsNull(e2)) return ((ImplementedByExpression)e1).Implementations.Select(a => EqualsToNull(a.Field)).Aggregate((a, b) => Expression.And(a, b));
+                else if (e2.IsNull()) return ((ImplementedByExpression)e1).Implementations.Select(a => EqualsToNull(a.Field)).Aggregate((a, b) => Expression.And(a, b));
                 else return null;
             else if (tE1 == DbExpressionType.ImplementedByAll)
                 if (tE2 == DbExpressionType.FieldInit) return FieIbaEquals((FieldInitExpression)e2, (ImplementedByAllExpression)e1);
                 else if (tE2 == DbExpressionType.ImplementedBy) return IbIbaEquals((ImplementedByExpression)e2, (ImplementedByAllExpression)e1);
                 else if (tE2 == DbExpressionType.ImplementedByAll) return IbaIbaEquals((ImplementedByAllExpression)e1, (ImplementedByAllExpression)e2);
-                else if (IsNull(e2)) return EqualsToNull(((ImplementedByAllExpression)e1).Id);
+                else if (e2.IsNull()) return EqualsToNull(((ImplementedByAllExpression)e1).Id);
                 else return null;
-            else if (IsNull(e1))
+            else if (e1.IsNull())
                 if (tE2 == DbExpressionType.FieldInit) return EqualsToNull(((FieldInitExpression)e2).ExternalId);
                 else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Field)).Aggregate((a, b) => Expression.And(a, b));
                 else if (tE2 == DbExpressionType.ImplementedByAll) return EqualsToNull(((ImplementedByAllExpression)e2).Id);
-                else if (IsNull(e2)) return True;
+                else if (e2.IsNull()) return True;
                 else return null;
             else return null;
         }

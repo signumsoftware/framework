@@ -66,10 +66,10 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        public static CommandResult DeleteUpdate<T>(Expression updateOrDelete)
+        public static CommandResult BuildCommandResult<T>(CommandExpression command)
         {
             Expression<Func<SqlParameter[]>> createParams;
-            string sql = QueryFormatter.Format(updateOrDelete, out createParams);
+            string sql = QueryFormatter.Format(command, out createParams);
 
             return new CommandResult
             {

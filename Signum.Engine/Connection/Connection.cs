@@ -205,6 +205,7 @@ namespace Signum.Engine
             switch (ex.Number)
             {
                 case 2601: return new UniqueKeyException(ex);
+                case 547: return new ForeignKeyException(ex);
                 default: return ex; 
             }
         }

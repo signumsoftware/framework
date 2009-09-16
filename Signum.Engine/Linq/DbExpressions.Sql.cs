@@ -27,6 +27,7 @@ namespace Signum.Engine.Linq
         Column,
         Select,
         Projection,
+        CommandProjection,
         Join,
         Aggregate,
         AggregateSubquery,
@@ -43,6 +44,8 @@ namespace Signum.Engine.Linq
         IsNotNull,
         Update,
         Delete, 
+        CommandAggregate,
+        SelectRowCount,
         FieldInit = 2000,
         EmbeddedFieldInit,
         ImplementedBy,
@@ -695,12 +698,15 @@ namespace Signum.Engine.Linq
         SingleOrDefault,
     }
 
+    public class ProjectionToken { }
+
     /// <summary>
     /// A custom expression representing the construction of one or more result objects from a 
     /// SQL select expression
-    /// </summary>
+    /// </summary> 
     internal class ProjectionExpression : DbExpression
-    {   
+    {
+        public readonly ProjectionToken Token; 
         public readonly SelectExpression Source;
         public readonly Expression Projector;
         public readonly UniqueFunction?  UniqueFunction;
@@ -710,6 +716,18 @@ namespace Signum.Engine.Linq
             uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) :
             projector.Type)
         {
+            this.Token = new ProjectionToken();
+            this.Source = source;
+            this.Projector = projector;
+            this.UniqueFunction = uniqueFunction;
+        }
+
+        internal ProjectionExpression(ProjectionToken token, SelectExpression source, Expression projector, UniqueFunction? uniqueFunction)
+            : base(DbExpressionType.Projection,
+            uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) :
+            projector.Type)
+        {
+            this.Token = token;
             this.Source = source;
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
@@ -726,14 +744,43 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class DeleteExpression : DbExpression
+    internal class CommandProjectionExpression : DbExpression
     {
-        public readonly Table Table;
+        public readonly ProjectionToken Token; 
+        public readonly SourceExpression Source;
+        public readonly FieldInitExpression Projector;
+
+        internal CommandProjectionExpression(SourceExpression source, FieldInitExpression projector)
+            : base(DbExpressionType.CommandProjection,
+            typeof(IEnumerable<>).MakeGenericType(projector.Type))
+        {
+            this.Token = new ProjectionToken();
+            this.Source = source;
+            this.Projector = projector;
+        }
+
+        public override string ToString()
+        {
+            return "SOURCE\r\n{0}\r\nPROJECTION\r\n{1}".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4));
+        }
+    }
+
+    internal abstract class CommandExpression : DbExpression
+    {
+        public CommandExpression(DbExpressionType nodeType)
+            : base(nodeType, typeof(void))
+        {
+        }
+    }
+
+    internal class DeleteExpression : CommandExpression
+    {
+        public readonly ITable Table;
         public readonly SourceExpression Source;
         public readonly Expression Where;
 
-        public DeleteExpression(Table table, SourceExpression source, Expression where)
-            :base(DbExpressionType.Delete, typeof(void))
+        public DeleteExpression(ITable table, SourceExpression source, Expression where)
+            :base(DbExpressionType.Delete)
         {
             this.Table = table;
             this.Source = source;
@@ -742,11 +789,14 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "DELETE {0}\r\nFROM {1}\r\nWHERE {2}".Formato(Table.Name, Source.NiceToString(), Where.NiceToString()); 
+            return "DELETE {0}\r\nFROM {1}\r\n{2}".Formato(
+                Table.Name, 
+                Source.NiceToString(), 
+                Where.TryCC(w => "WHERE " + w.NiceToString())); 
         }
     }
 
-    internal class UpdateExpression : DbExpression
+    internal class UpdateExpression : CommandExpression
     {
         public readonly Table Table;
         public readonly ReadOnlyCollection<ColumnAssignment> Assigments; 
@@ -754,7 +804,7 @@ namespace Signum.Engine.Linq
         public readonly Expression Where;
 
         public UpdateExpression(Table table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
-            :base(DbExpressionType.Update, typeof(void))
+            :base(DbExpressionType.Update)
         {
             this.Table = table;
             this.Assigments = assigments.ToReadOnly();
@@ -764,11 +814,11 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "UPDATE {0}\r\nSET {1}\r\nFROM {2}\r\nWHERE {3}".Formato(
+            return "UPDATE {0}\r\nSET {1}\r\nFROM {2}\r\n{3}".Formato(
                 Table.Name,
                 Assigments.ToString("\r\n"),
                 Source.NiceToString(),
-                Where.NiceToString());
+                Where.TryCC(w => "WHERE " + w.NiceToString()));
         }
     }
 
@@ -785,7 +835,36 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0} = {1}".Formato(Column, Expression); 
+            return "{0} = {1}".Formato(Column, Expression);
+        }
+    }
+
+    internal class CommandAggregateExpression : CommandExpression
+    {
+        public readonly ReadOnlyCollection<CommandExpression> Commands;
+
+        public CommandAggregateExpression(IEnumerable<CommandExpression> commands)
+            : base(DbExpressionType.CommandAggregate)
+        {
+            Commands = commands.ToReadOnly(); 
+        }
+
+        public override string ToString()
+        {
+            return Commands.ToString(a => a.NiceToString(), "\r\n\r\n");
+        }
+    }
+
+    internal class SelectRowCountExpression : CommandExpression
+    {
+        public SelectRowCountExpression()
+            : base(DbExpressionType.SelectRowCount)
+        {
+        }
+
+        public override string ToString()
+        {
+            return "SELECT @@rowcount";
         }
     }
 }

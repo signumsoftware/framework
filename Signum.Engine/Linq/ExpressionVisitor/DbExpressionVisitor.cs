@@ -35,6 +35,8 @@ namespace Signum.Engine.Linq
                     return this.VisitJoin((JoinExpression)exp);
                 case DbExpressionType.Projection:
                     return this.VisitProjection((ProjectionExpression)exp);
+                case DbExpressionType.CommandProjection:
+                    return this.VisitCommandProjection((CommandProjectionExpression)exp);
                 case DbExpressionType.Aggregate:
                     return this.VisitAggregate((AggregateExpression)exp);
                 case DbExpressionType.AggregateSubquery:
@@ -63,6 +65,10 @@ namespace Signum.Engine.Linq
                     return this.VisitDelete((DeleteExpression)exp);
                 case DbExpressionType.Update:
                     return this.VisitUpdate((UpdateExpression)exp);
+                case DbExpressionType.CommandAggregate:
+                    return this.VisitCommandAggregate((CommandAggregateExpression)exp);
+                case DbExpressionType.SelectRowCount:
+                    return this.VisitSelectRowCount((SelectRowCountExpression)exp);
                 case DbExpressionType.FieldInit:
                     return this.VisitFieldInit((FieldInitExpression)exp);
                 case DbExpressionType.EmbeddedFieldInit:
@@ -79,6 +85,28 @@ namespace Signum.Engine.Linq
                 default:
                     return base.Visit(exp);
             }
+        }
+
+        protected virtual Expression VisitCommandProjection(CommandProjectionExpression cpe)
+        {
+            var source = (SourceExpression)Visit(cpe.Source);
+            var projector = (FieldInitExpression)Visit(cpe.Projector);
+            if (projector != cpe.Projector || source != cpe.Source)
+                return new CommandProjectionExpression(source, projector);
+            return cpe; 
+        }
+
+        protected virtual Expression VisitCommandAggregate(CommandAggregateExpression cea)
+        {
+            var commands = VisitCommands(cea.Commands);
+            if (cea.Commands != commands)
+                return new CommandAggregateExpression(commands);
+            return cea; 
+        }
+
+        protected IEnumerable<CommandExpression> VisitCommands(ReadOnlyCollection<CommandExpression> commands)
+        {
+            return commands.NewIfChange(c => (CommandExpression)Visit(c));
         }
 
         protected virtual Expression VisitDelete(DeleteExpression delete)
@@ -100,7 +128,7 @@ namespace Signum.Engine.Linq
             return update;
         }
 
-        private IEnumerable<ColumnAssignment> VisitColumnAssigments(ReadOnlyCollection<ColumnAssignment> columns)
+        protected IEnumerable<ColumnAssignment> VisitColumnAssigments(ReadOnlyCollection<ColumnAssignment> columns)
         {
             return columns.NewIfChange(c =>
                 {
@@ -110,6 +138,11 @@ namespace Signum.Engine.Linq
                         return new ColumnAssignment(col, exp);
                     return c;
                 });
+        }
+
+        protected virtual Expression VisitSelectRowCount(SelectRowCountExpression src)
+        {
+            return src;
         }
 
         protected virtual Expression VisitMList(MListExpression ml)

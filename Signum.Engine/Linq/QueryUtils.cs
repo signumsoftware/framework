@@ -34,13 +34,10 @@ namespace Signum.Engine.Linq
         internal static int Delete<T>(Expression<Func<T, bool>> predicate)
             where T:IdentifiableEntity
         {
-            LambdaExpression cleanPredicate = (LambdaExpression)Clean(predicate);
-
-            DeleteExpression delete = new QueryBinder().BindDelete<T>(cleanPredicate);
-
-            DeleteExpression deleteOptimized = (DeleteExpression)Optimize(delete);
-
-            CommandResult cr = TranslatorBuilder.DeleteUpdate<T>(deleteOptimized);
+            LambdaExpression cleanPredicate = predicate == null ? null : (LambdaExpression)Clean(predicate);
+            CommandExpression delete = new QueryBinder().BindDelete<T>(cleanPredicate);
+            CommandExpression deleteOptimized = (CommandExpression)Optimize(delete);
+            CommandResult cr = TranslatorBuilder.BuildCommandResult<T>(deleteOptimized);
 
             return cr.Execute(); 
         }
@@ -48,18 +45,18 @@ namespace Signum.Engine.Linq
         internal static int Update<T>(Expression<Func<T, T>> set, Expression<Func<T, bool>> predicate)
          where T : IdentifiableEntity
         {
-            LambdaExpression cleanPredicate = (LambdaExpression)Clean(predicate);
-            LambdaExpression cleanSet = (LambdaExpression)Clean(set);
-
-            UpdateExpression update = new QueryBinder().BindUpdate<T>(cleanPredicate, cleanSet);
-
-            UpdateExpression updateOptimized = (UpdateExpression)Optimize(update);
-
-            CommandResult cr = TranslatorBuilder.DeleteUpdate<T>(updateOptimized);
+            LambdaExpression cleanPredicate = predicate == null ? null : (LambdaExpression)Clean(predicate);
+            CommandExpression update = new QueryBinder().BindUpdate<T>(set, cleanPredicate);
+            CommandExpression updateOptimized = (CommandExpression)Optimize(update);
+            CommandResult cr = TranslatorBuilder.BuildCommandResult<T>(updateOptimized);
 
             return cr.Execute();
         }
 
-      
+        internal static bool IsNull(this Expression e)
+        {
+            ConstantExpression ce = e as ConstantExpression;
+            return ce != null && ce.Value == null;
+        }
     }
 }

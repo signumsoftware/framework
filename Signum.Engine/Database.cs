@@ -276,16 +276,16 @@ namespace Signum.Engine
 
         public static int MaxParameters { get { return SqlBuilder.MaxParametersInSQL; } }
 
-        //public static int UnsafeDelete<T>(Expression<Func<T, bool>> predicate)
-        //      where T : IdentifiableEntity
-        //{
-        //    return QueryUtils.Delete<T>(predicate); 
-        //}
+        public static int UnsafeDelete<T>(Expression<Func<T, bool>> predicate)
+              where T : IdentifiableEntity
+        {
+            return QueryUtils.Delete<T>(predicate);
+        }
 
-        //public static int UnsafeUpdate<T>(Expression<Func<T, T>> update, Expression<Func<T, bool>> predicate)
-        //    where T : IdentifiableEntity
-        //{
-        //    return QueryUtils.Update<T>(update, predicate);
-        //}
+        public static int UnsafeUpdate<T>(Expression<Func<T, T>> update, Expression<Func<T, bool>> predicate)
+            where T : IdentifiableEntity
+        {
+            return QueryUtils.Update<T>(update, predicate);
+        }
     }
 }
