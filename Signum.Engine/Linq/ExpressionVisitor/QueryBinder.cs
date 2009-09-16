@@ -393,6 +393,10 @@ namespace Signum.Engine.Linq
         private Expression BindAnyAll(Type resultType, Expression source, LambdaExpression predicate, MethodInfo method, bool isRoot)
         {
             bool isAll = method.Name == "All";
+
+            if (source is ParameterExpression)
+                source = VisitParameter((ParameterExpression)source); 
+
             ConstantExpression constSource = source as ConstantExpression;
             if (constSource != null && !typeof(IQueryable).IsAssignableFrom(constSource.Type))
             {

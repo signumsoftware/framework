@@ -102,6 +102,14 @@ namespace Signum.Utilities
             return dictionary.ToDictionary(p => mapKey(p.Key), p => mapValue(p.Key, p.Value));
         }
 
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
+        {
+             var result = new Dictionary<K,V>();
+             foreach (var kvp in collection)
+                 result.Add(kvp.Key, kvp.Value);
+            return result;
+        }
+
         public static Dictionary<K, V> JumpDictionary<K, Z, V>(this IDictionary<K, Z> dictionary, IDictionary<Z, V> other)
         {
             return dictionary.ToDictionary(p => p.Key, p => other[p.Value]);

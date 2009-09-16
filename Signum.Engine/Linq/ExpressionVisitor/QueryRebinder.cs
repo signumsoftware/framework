@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
         internal static Expression Rebind(Expression binded)
         {
             QueryRebinder qr = new QueryRebinder();
-            using (qr.NewScope(null))
+            using (qr.NewScope())
             {
                 return qr.Visit(binded); 
             }
@@ -72,9 +72,13 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSelect(SelectExpression select)
         {
-            Dictionary<ColumnExpression, ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(a => a, a => (ColumnExpression)null);
+            Dictionary<ColumnExpression, ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (ColumnExpression)null);
+            Dictionary<ColumnExpression, ColumnExpression> externalAnswers = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value != null).ToDictionary();
 
-            var scope = NewScope(askedColumns.Keys.Where(a => a.Alias != select.Alias));
+            var scope = NewScope();
+
+            CurrentScope.AddRange(askedColumns.Where(kvp => kvp.Key.Alias != select.Alias).ToDictionary());
+            CurrentScope.AddRange(externalAnswers);
 
             this.Visit(select.Top);
             this.Visit(select.Where);
@@ -90,9 +94,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
             ReadOnlyCollection<ColumnDeclaration> columns = VisitAndExpandColumns(select, askedColumns);
 
-            var externals = CurrentScope.Extract(c => !select.KnownAliases.Contains(c.Alias));
-
-            Debug.Assert(externals.All(kvp => kvp.Value == null));
+            var externals = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value == null).ToDictionary();
 
             scope.Dispose();
 
@@ -144,12 +146,9 @@ namespace Signum.Engine.Linq
             return name;
         }
 
-        public IDisposable NewScope(IEnumerable<ColumnExpression> requestedColumns)
+        public IDisposable NewScope()
         {
-            var newDic = requestedColumns == null ?
-                new Dictionary<ColumnExpression, ColumnExpression>() :
-                requestedColumns.ToDictionary(r => r, r => (ColumnExpression)null);
-            scopes = scopes.Push(newDic);
+            scopes = scopes.Push(new Dictionary<ColumnExpression, ColumnExpression>());
             return new Disposable(() => scopes = scopes.Pop());
         }
 
