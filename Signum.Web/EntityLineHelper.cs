@@ -100,16 +100,18 @@ namespace Signum.Web
 
                     EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(isIdentifiable ? type : Reflector.ExtractLazy(type)).ThrowIfNullC("No hay una vista asociada al tipo: " + type);
 
-                    sb.Append(
-                        helper.RenderPartialToString(
-                            "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx",
-                            new ViewDataDictionary(value) 
-                        { 
-                            { ViewDataKeys.MainControlUrl, es.PartialViewName},
-                            { ViewDataKeys.PopupPrefix, idValueField}
-                        }
-                        )
-                    );
+                    using (var sc = StyleContext.RegisterCleanStyleContext(true))
+                        sb.Append(
+                            helper.RenderPartialToString(
+                                "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx",
+                                new ViewDataDictionary(value) 
+                            { 
+                                { ViewDataKeys.MainControlUrl, es.PartialViewName},
+                                { ViewDataKeys.PopupPrefix, idValueField}
+                            }
+                            )
+                        );
+
                     sb.Append("</div>\n");
                 }
                 else
@@ -164,17 +166,18 @@ namespace Signum.Web
                 sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
 
                 EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type);
-            
-                sb.Append(
-                    helper.RenderPartialToString(
-                        "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx", 
-                        new ViewDataDictionary(value) 
-                        { 
-                            { ViewDataKeys.MainControlUrl, es.PartialViewName},
-                            { ViewDataKeys.PopupPrefix, idValueField}
-                        }
-                    )
-                );
+
+                using (var sc = StyleContext.RegisterCleanStyleContext(true))
+                    sb.Append(
+                        helper.RenderPartialToString(
+                            "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx", 
+                            new ViewDataDictionary(value) 
+                            { 
+                                { ViewDataKeys.MainControlUrl, es.PartialViewName},
+                                { ViewDataKeys.PopupPrefix, idValueField}
+                            }
+                        )
+                    );
                 sb.Append("</div>\n");
 
                 sb.Append(helper.Span(idValueField + TypeContext.Separator + EntityBaseKeys.ToStr, value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));

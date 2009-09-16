@@ -212,7 +212,6 @@ namespace Signum.Web
         public ValueLineType? ValueLineType;
         public List<SelectListItem> EnumComboItems;
         public DatePickerOptions DatePickerOptions;
-        public bool ShowFieldDiv = false;
 
         public override void SetReadOnly()
         {

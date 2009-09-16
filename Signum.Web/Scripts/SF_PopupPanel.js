@@ -219,6 +219,8 @@ function OnListPopupOK(urlController, prefix, btnOkId) {
     var runtimeType = $('#' + itemPrefix + sfRuntimeType);
     if (runtimeType.val() == "")
         runtimeType.val($('#' + itemPrefix + sfStaticType).val());
+
+    toggleButtonsDisplayList(itemPrefix.substr(0, itemPrefix.lastIndexOf("_")), true);
 }
 
 function OnImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, selectedType) {
@@ -274,7 +276,7 @@ function OnImplementationsCancel(prefix) {
 function OnPopupCancel(prefix) {
     var oldValue = window[prefix + sfEntityTemp];
     $('#' + prefix + sfEntity).html(oldValue);
-
+    
     var id = $('#' + prefix + sfId);
     if (id.length > 0 && id.val() != null && id.val() > 0)
         toggleButtonsDisplay(prefix, true);
@@ -294,28 +296,31 @@ function OnPopupCancel(prefix) {
 }
 
 function OnListPopupCancel(btnCancelId) {
-    var prefix = btnCancelId.substr(0, btnCancelId.indexOf(sfBtnCancel));
-    var oldValue = window[prefix + sfEntityTemp];
-    $('#' + prefix + sfEntity).html(oldValue);
+    var itemPrefix = btnCancelId.substr(0, btnCancelId.indexOf(sfBtnCancel));
+    var prefix = itemPrefix.substr(0, itemPrefix.lastIndexOf("_"));
+    var oldValue = window[itemPrefix + sfEntityTemp];
+    $('#' + itemPrefix + sfEntity).html(oldValue);
 
-    var id = $('#' + prefix + sfId);
-    if (id.length > 0 && id.val() != null && id.val() > 0)
-    { }
+    var id = $('#' + itemPrefix + sfId);
+    if (id.length > 0 && id.val() != null && id.val() > 0) {
+        toggleButtonsDisplayList(prefix, true);
+    }
     else {
         if (oldValue != undefined && oldValue != null && oldValue != "") {
-            { }
+            toggleButtonsDisplayList(prefix, true);
         }
         else {
-            $('#' + prefix + sfId).remove();
-            $('#' + prefix + sfRuntimeType).remove();
-            $('#' + prefix + sfToStr).remove();
-            $('#' + prefix + sfEntity).remove();
-            $('#' + prefix + sfIsNew).remove();
+            toggleButtonsDisplayList(prefix, false);
+            $('#' + itemPrefix + sfId).remove();
+            $('#' + itemPrefix + sfRuntimeType).remove();
+            $('#' + itemPrefix + sfToStr).remove();
+            $('#' + itemPrefix + sfEntity).remove();
+            $('#' + itemPrefix + sfIsNew).remove();
         }
     }
 
-    window[prefix + sfEntityTemp] = "";
-    $('#' + prefix + sfEntity).hide();
+    window[itemPrefix + sfEntityTemp] = "";
+    $('#' + itemPrefix + sfEntity).hide();
 }
 
 function RemoveListContainedEntity(select) {
@@ -324,9 +329,7 @@ function RemoveListContainedEntity(select) {
         return;
     var nameSelected = selected[0].id;
     var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
-    var idField = $('#' + prefixSelected + sfId);
-    var typeName = $('#' + select + sfStaticType).val();
-    
+     
     $('#' + prefixSelected + sfId).remove();
     $('#' + prefixSelected + sfRuntimeType).remove();
     $('#' + prefixSelected + sfToStr).remove();
@@ -334,6 +337,8 @@ function RemoveListContainedEntity(select) {
     $('#' + prefixSelected + sfIndex).remove();
     $('#' + prefixSelected + sfIsNew).remove();
     window[prefixSelected + sfEntityTemp] = "";
+
+    toggleButtonsDisplayList(select, $('#' + select + " > option").length > 0);
 }
 
 function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
@@ -439,6 +444,14 @@ function toggleButtonsDisplay(prefix, hasEntity) {
         btnRemove.hide();
         btnView.hide();
     }
+}
+
+function toggleButtonsDisplayList(prefix, hasEntity) {
+    var btnRemove = $('#' + prefix + "_btnRemove");
+    if (hasEntity == true)
+        btnRemove.show();
+    else
+        btnRemove.hide();
 }
 
 function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, removeLinkText, maxElements) {

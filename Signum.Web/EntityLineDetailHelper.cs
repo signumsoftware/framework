@@ -126,17 +126,18 @@ namespace Signum.Web
 
                 string url = settings.Url ?? 
                     Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type).PartialViewName;
-            
-                sb.Append(
-                    helper.RenderPartialToString(
-                        "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx", 
-                        new ViewDataDictionary(value) 
-                        { 
-                            { ViewDataKeys.MainControlUrl, url},
-                            { ViewDataKeys.PopupPrefix, idValueField}
-                        }
-                    )
-                );
+
+                using (var sc = StyleContext.RegisterCleanStyleContext(true))
+                    sb.Append(
+                        helper.RenderPartialToString(
+                            "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx", 
+                            new ViewDataDictionary(value) 
+                            { 
+                                { ViewDataKeys.MainControlUrl, url},
+                                { ViewDataKeys.PopupPrefix, idValueField}
+                            }
+                        )
+                    );
                 sb.Append("</div>\n");
             }
 

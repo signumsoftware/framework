@@ -48,13 +48,16 @@ namespace Signum.Web
             string divASustituir = helper.GlobalName("divASustituir");
 
             StringBuilder sb = new StringBuilder();
-
+            
             Type elementsCleanType = Reflector.ExtractLazy(typeof(T)) ?? typeof(T);
             
             sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, elementsCleanType.Name) + "\n");
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
+
+            if (settings.ShowFieldDiv)
+                sb.Append("<div class='fieldList'>");
 
             string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id);}},function(){{OnListPopupCancel(this.id);}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial");
 
@@ -95,27 +98,23 @@ namespace Signum.Web
 
             sb.Append(sbSelect);
 
+            StringBuilder sbBtns = new StringBuilder();
+
             if (settings.Create)
             {
                 string creatingUrl = (settings.Implementations == null) ?
                     "NewPopupList({0},'{1}','{2}','{3}');".Formato(popupOpeningParameters, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv) :
                     "ChooseImplementation('{0}','{1}',function(){{OnListImplementationsOk({2},'{3}','{4}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv);
-                
-                sb.Append(
+
+                sbBtns.AppendLine("<tr><td>");
+                sbBtns.Append(
                         helper.Button(idValueField + "_btnCreate",
                                   "+",
                                   creatingUrl,
                                   "lineButton create",
                                   new Dictionary<string, object>()));
+                sbBtns.AppendLine("</td></tr>");
             }
-
-            if (settings.Remove)
-                sb.Append(
-                    helper.Button(idValueField + "_btnRemove",
-                              "x",
-                              "RemoveListContainedEntity('{0}');".Formato(idValueField),
-                              "lineButton remove",
-                              (value == null || value.Count == 0) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Find && !typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))
             {
@@ -123,14 +122,35 @@ namespace Signum.Web
                     string findingUrl = (settings.Implementations == null) ?
                         "Find({0});".Formato(popupFindingParameters) :
                         "ChooseImplementation('{0}','{1}',function(){{OnSearchImplementationsOk({2});}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupFindingParameters);
-                    sb.Append(
+
+                    sbBtns.AppendLine("<tr><td>");
+                    sbBtns.Append(
                             helper.Button(idValueField + "_btnFind",
                                         "O",
                                         findingUrl,
                                         "lineButton find",
                                         new Dictionary<string, object>()));
+                    sbBtns.AppendLine("</td></tr>");
             }
+            
+            if (settings.Remove)
+            {
+                sbBtns.AppendLine("<tr><td>");
+                sbBtns.Append(
+                        helper.Button(idValueField + "_btnRemove",
+                                  "x",
+                                  "RemoveListContainedEntity('{0}');".Formato(idValueField),
+                                  "lineButton remove",
+                                  (value == null || value.Count == 0) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
+                sbBtns.AppendLine("</td></tr>");
+            }
+            
+            string sBtns = sbBtns.ToString();
+            if (sBtns.HasText())
+                sb.AppendLine("<table>\n" + sBtns + "</table>\n");
 
+            if (settings.ShowFieldDiv)
+                sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
                 sb.Append("<div class=\"clearall\"></div>\n");
 
@@ -186,16 +206,18 @@ namespace Signum.Web
 
                 EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
 
-                sb.Append(
-                    helper.RenderPartialToString(
-                        "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx",
-                        new ViewDataDictionary(value) 
-                        { 
-                            { ViewDataKeys.MainControlUrl, es.PartialViewName},
-                            { ViewDataKeys.PopupPrefix, idValueField + TypeContext.Separator + index.ToString()}
-                        }
-                    )
-                );
+                using (var sc = StyleContext.RegisterCleanStyleContext(true))
+                    sb.Append(
+                        helper.RenderPartialToString(
+                            "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx",
+                            new ViewDataDictionary(value) 
+                            { 
+                                { ViewDataKeys.MainControlUrl, es.PartialViewName},
+                                { ViewDataKeys.PopupPrefix, idValueField + TypeContext.Separator + index.ToString()}
+                            }
+                        )
+                    );
+
                 sb.Append("</div>\n");
 
                 //Note this is added to the sbOptions, not to the result sb

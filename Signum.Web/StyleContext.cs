@@ -17,7 +17,8 @@ namespace Signum.Web
                 LabelVisible = true,
                 ShowValidationMessage = true,
                 ReadOnly = false,
-                ValueFirst = false
+                ValueFirst = false,
+                ShowFieldDiv = true,
             }; 
         }
 
@@ -62,6 +63,13 @@ namespace Signum.Web
             set { valueFirst = value; }
         }
 
+        bool? showFieldDiv = null;
+        public bool ShowFieldDiv
+        {
+            get { return showFieldDiv ?? parent.ShowFieldDiv; }
+            set { showFieldDiv = value; }
+        }
+
         public StyleContext(): this(true)
         {
         }
@@ -79,6 +87,19 @@ namespace Signum.Web
             parent = Current;
             current = this;
             return this;
+        }
+
+        public static StyleContext RegisterCleanStyleContext(bool register)
+        {
+            return new StyleContext(register)
+            {
+                BreakLine = true,
+                LabelVisible = true,
+                ShowValidationMessage = true,
+                ReadOnly = false,
+                ValueFirst = false,
+                ShowFieldDiv = true,
+            };
         }
 
         public void Dispose()

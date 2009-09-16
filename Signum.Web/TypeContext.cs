@@ -149,6 +149,7 @@ namespace Signum.Web
 
         public abstract string FriendlyName { get; }
         public abstract Type ContextType { get; }
+        public abstract Type LastIdentifiableProperty { get; }
         public abstract List<PropertyInfo> GetPath();
         public abstract PropertyInfo LastProperty { get; }
 
@@ -164,6 +165,11 @@ namespace Signum.Web
     {
         public T Value { get; set; }
         string prefix;
+
+        public override Type LastIdentifiableProperty
+        {
+            get { return typeof(T); }
+        }
 
         public override List<PropertyInfo> GetPath() 
         {
@@ -240,9 +246,27 @@ namespace Signum.Web
             get { return properties.Last(); }
         }
 
+        public override Type LastIdentifiableProperty
+        {
+            get
+            {
+                return properties.LastOrDefault(pi => typeof(IdentifiableEntity).IsAssignableFrom(pi.PropertyType))
+                                 .TryCC(prop => prop.PropertyType) ??
+                                 Parent.LastIdentifiableProperty;
+            }
+        }
+
         public override List<PropertyInfo> GetPath()
         {
-            return Parent.GetPath().Do(l => l.AddRange(properties));
+            List<PropertyInfo> pis = Parent.GetPath().Do(l => l.AddRange(properties));
+            int lastPI = 0;
+            for(lastPI = 0; lastPI < pis.Count && pis[lastPI].PropertyType != LastIdentifiableProperty; lastPI++)
+            {
+            }
+            if (lastPI == pis.Count)
+                return pis;
+            else
+                return pis.GetRange(lastPI + 1, pis.Count - lastPI - 1);
         }
 
         public override string Name

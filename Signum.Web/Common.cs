@@ -53,7 +53,7 @@ namespace Signum.Web
                     if (eb is EntityList)
                         path.Add(path.Last().PropertyType.GetProperty("Item"));
 
-                    ((EntityBase)eb).Implementations = Schema.Current.FindImplementations(parent, path.Cast<MemberInfo>().ToArray());
+                    ((EntityBase)eb).Implementations = Schema.Current.FindImplementations(context.LastIdentifiableProperty, path.Cast<MemberInfo>().ToArray());
                 }
             }
         }
