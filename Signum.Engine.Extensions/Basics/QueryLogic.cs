@@ -13,13 +13,15 @@ namespace Signum.Engine.Basics
     {
         public static HashSet<object> QueryNames { get; private set; }
 
+        static DynamicQueryManager[] QueryManagers;
+
         public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
         {
             if (sb.NotDefined<QueryDN>())
             {
-                sb.Schema.Initializing += s =>
-                    { QueryNames = queryManagers.SelectMany(a => a.GetQueryNames()).ToHashSet(); };
-                  
+
+                QueryManagers = queryManagers;
+                sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
 
                 sb.Include<QueryDN>();
 
@@ -27,25 +29,26 @@ namespace Signum.Engine.Basics
             }
         }
 
+        static void Schema_Initializing(Schema sender)
+        {
+            QueryNames = QueryManagers.SelectMany(a => a.GetQueryNames()).ToHashSet();
+        }
+
         public static List<QueryDN> RetrieveOrGenerateQueries()
         {
             var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Name);
-            var total = GenerateQueries().ToDictionary(a => a.Name);
+            var total = QueryNames.Select(o => new QueryDN { Name = o.ToString() }).ToDictionary(a => a.Name);
 
             total.SetRange(current);
             return total.Values.ToList();
-        }
-
-        static List<QueryDN> GenerateQueries()
-        {
-            return QueryNames.Select(o => new QueryDN { Name = o.ToString() }).ToList();
         }
 
         const string QueriesKey = "Queries";
 
         static SqlPreCommand SynchronizeQueries(Replacements replacements)
         {
-            var should = GenerateQueries();
+            var should = QueryManagers.SelectMany(a => a.GetQueryNames()).Distinct()
+                .Select(o => new QueryDN { Name = o.ToString() }).ToList();
 
             var current = Administrator.TryRetrieveAll<QueryDN>(replacements);
 
