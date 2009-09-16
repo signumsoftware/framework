@@ -11,8 +11,8 @@
             %>
             <div id="<%=user.Name + "DivOld"%>">
                 <%
-                    Html.ValueLine(user, u => u.UserName, vl => vl.StyleContext = new StyleContext { ReadOnly = true});
-                    Html.ValueLine("", user.Name + "OldPassword", new ValueLine(){LabelText="Contraseña actual"});
+                    Html.ValueLine(user, u => u.UserName, vl => vl.ReadOnly = true);
+                    Html.ValueLine("", user.Name + "OldPassword", new ValueLine() { LabelText = "Contraseña actual" });
                 %>
             </div>
             <%
