@@ -83,10 +83,9 @@ namespace Signum.Web
 
         public void Dispose()
         {
-            if (this != current)
-                throw new InvalidOperationException("StyleContext not registred");
-
-            current = parent;
+            if (this == current)
+                current = parent;
+            //throw new InvalidOperationException("StyleContext not registered");
         }
     }
 }

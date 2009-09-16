@@ -154,13 +154,15 @@ namespace Signum.Web
             if (options == null || options.LabelText == null)
                 throw new ArgumentException("LabelText property of ValueLineOptions must be specified for Manual Value Lines");
 
-            if (options.StyleContext != null)
-            {
-                using (options.StyleContext)
+            //if (options.StyleContext != null)
+            //{
+            //    using (options.StyleContext)
+            //        return helper.ManualValueLine(idValueField, value, options);
+            //}
+            //else
+            //    return helper.ManualValueLine(idValueField, value, options);
+            using (options)
                     return helper.ManualValueLine(idValueField, value, options);
-            }
-            else
-                return helper.ManualValueLine(idValueField, value, options);
         }
 
         public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
@@ -189,11 +191,16 @@ namespace Signum.Web
 
         private static string SetManualValueLineOptions<S>(HtmlHelper helper, TypeContext<S> context, ValueLine vl)
         {
-            if (vl != null && vl.StyleContext != null)
-            {
-                using (vl.StyleContext)
+            //if (vl != null && vl.StyleContext != null)
+            //{
+            //    using (vl.StyleContext)
+            //        return helper.ManualValueLine(context.Name, context.Value, vl);
+            //}
+            //else
+            //    return helper.ManualValueLine(context.Name, context.Value, vl);
+            if (vl != null)
+                using (vl)
                     return helper.ManualValueLine(context.Name, context.Value, vl);
-            }
             else
                 return helper.ManualValueLine(context.Name, context.Value, vl);
         }

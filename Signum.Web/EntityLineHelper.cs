@@ -325,11 +325,16 @@ namespace Signum.Web
 
         private static string SetEntityLineOptions<S>(HtmlHelper helper, TypeContext<S> context, EntityLine el)
         {
-            if (el != null && el.StyleContext != null)
-            {
-                using (el.StyleContext)
+            //if (el != null && el.StyleContext != null)
+            //{
+            //    using (el.StyleContext)
+            //        return helper.InternalEntityLine(context.Name, typeof(S), context.Value, el);
+            //}
+            //else
+            //    return helper.InternalEntityLine(context.Name, typeof(S), context.Value, el);
+            if (el != null)
+                using (el)
                     return helper.InternalEntityLine(context.Name, typeof(S), context.Value, el);
-            }
             else
                 return helper.InternalEntityLine(context.Name, typeof(S), context.Value, el);
         }

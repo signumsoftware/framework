@@ -279,11 +279,16 @@ namespace Signum.Web
 
         private static string SetEntityLineDetailOptions<S>(HtmlHelper helper, TypeContext<S> context, EntityLineDetail el)
         {
-            if (el != null && el.StyleContext != null)
-            {
-                using (el.StyleContext)
+            //if (el != null && el.StyleContext != null)
+            //{
+            //    using (el.StyleContext)
+            //        return helper.InternalEntityLineDetail(context.Name, typeof(S), context.Value, el);
+            //}
+            //else
+            //    return helper.InternalEntityLineDetail(context.Name, typeof(S), context.Value, el);
+            if (el != null)
+                using (el)
                     return helper.InternalEntityLineDetail(context.Name, typeof(S), context.Value, el);
-            }
             else
                 return helper.InternalEntityLineDetail(context.Name, typeof(S), context.Value, el);
         }

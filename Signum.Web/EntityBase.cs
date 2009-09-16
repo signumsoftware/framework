@@ -15,11 +15,11 @@ namespace Signum.Web
         public const string IsNew = "sfIsNew";
     }
 
-    public abstract class BaseLine
+    public abstract class BaseLine : StyleContext
     {
         public abstract void SetReadOnly();
 
-        public StyleContext StyleContext;
+        //public StyleContext StyleContext;
         public string LabelText;
         public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string, object>(0);
 

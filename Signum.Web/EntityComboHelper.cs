@@ -207,11 +207,16 @@ namespace Signum.Web
 
         private static string SetEntityComboOptions<S>(HtmlHelper helper, TypeContext<S> context, EntityCombo ec)
         {
-            if (ec != null && ec.StyleContext != null)
-            {
-                using (ec.StyleContext)
+            //if (ec != null && ec.StyleContext != null)
+            //{
+            //    using (ec.StyleContext)
+            //        return helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec);
+            //}
+            //else
+            //    return helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec);
+            if (ec != null)
+                using (ec)
                     return helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec);
-            }
             else
                 return helper.InternalEntityCombo(context.Name, typeof(S), context.Value, ec);
         }

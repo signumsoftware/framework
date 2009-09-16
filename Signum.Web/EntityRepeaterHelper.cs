@@ -209,15 +209,17 @@ namespace Signum.Web
 
             settingsModifier(el);
 
-            if (el.StyleContext != null)
-            {
-                using (el.StyleContext)
+            //if (el.StyleContext != null)
+            //{
+            //    using (el.StyleContext)
+            //        helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
+            //    return;
+            //}
+            if (el != null)
+                using(el)
                     helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
-                return;
-            }
-
-
-            helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
+            else
+                helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
         }
     }
 }

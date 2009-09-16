@@ -245,17 +245,19 @@ namespace Signum.Web
             Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
 
             settingsModifier(el);
+                        
+            //if (el.StyleContext != null)
+            //{
+            //    using (el.StyleContext)
+            //        helper.InternalEntityList<S>(context.Name, context.Value, el);
+            //    return;
+            //}
 
-            
-            if (el.StyleContext != null)
-            {
-                using (el.StyleContext)
+            if (el != null)
+                using (el)
                     helper.InternalEntityList<S>(context.Name, context.Value, el);
-                return;
-            }
-
-            
-            helper.InternalEntityList<S>(context.Name, context.Value, el);
+            else
+                helper.InternalEntityList<S>(context.Name, context.Value, el);
         }
     }
 }
