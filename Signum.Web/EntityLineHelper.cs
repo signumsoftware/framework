@@ -68,9 +68,10 @@ namespace Signum.Web
                 sb.Append(helper.Label(idValueField + "lbl", settings.LabelText ?? "", idValueField + "_sfToStr", TypeContext.CssLineLabel));
 
             string runtimeType = "";
+            Type cleanRuntimeType = null;
             if (value != null)
             {
-                Type cleanRuntimeType = value.GetType();
+                cleanRuntimeType = value.GetType();
                 if (typeof(Lazy).IsAssignableFrom(value.GetType()))
                     cleanRuntimeType = (value as Lazy).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
@@ -98,7 +99,7 @@ namespace Signum.Web
                     //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
                     sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
 
-                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(isIdentifiable ? type : Reflector.ExtractLazy(type)).ThrowIfNullC("No hay una vista asociada al tipo: " + type);
+                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(Reflector.ExtractLazy(cleanRuntimeType ?? type) ?? cleanRuntimeType ?? type).ThrowIfNullC("No hay una vista asociada al tipo: " + (cleanRuntimeType ?? type));
 
                     using (var sc = StyleContext.RegisterCleanStyleContext(true))
                         sb.Append(
@@ -216,7 +217,9 @@ namespace Signum.Web
                                 "OnImplementationsOk({0},'{1}',this.id);".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type)) +
                             "});" +
                         "});" +
-                        "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField);
+                        ((settings.Implementations.Count() == 1) ? 
+                            "$('#{0} :button').click();".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) :
+                            "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
 
                     sb.Append(
                         helper.Button(idValueField + "_btnCreate",
@@ -250,7 +253,9 @@ namespace Signum.Web
                                 "OnSearchImplementationsOk({0},this.id);".Formato(popupFindingParameters) +
                             "});" +
                         "});" +
-                        "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField);
+                        ((settings.Implementations.Count() == 1) ? 
+                            "$('#{0} :button').click();".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) :
+                            "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
                         
                     sb.Append(
                         helper.Button(idValueField + "_btnFind",

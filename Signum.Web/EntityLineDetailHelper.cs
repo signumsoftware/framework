@@ -156,7 +156,9 @@ namespace Signum.Web
                                 "OnImplementationsOk({0},'{1}',this.id);".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type)) +
                             "});" +
                         "});" +
-                        "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField);
+                        ((settings.Implementations.Count() == 1) ? 
+                            "$('#{0} :button').click();".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) :
+                            "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
 
                     sb.Append(
                         helper.Button(idValueField + "_btnCreate",
@@ -184,7 +186,9 @@ namespace Signum.Web
                             "OnSearchImplementationsOk({0},this.id);".Formato(popupFindingParameters) +
                         "});" +
                     "});" +
-                    "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField);
+                    ((settings.Implementations.Count() == 1) ? 
+                            "$('#{0} :button').click();".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) :
+                            "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
                     
                 sb.Append(
                     helper.Button(idValueField + "_btnFind",

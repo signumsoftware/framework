@@ -49,7 +49,7 @@ namespace Signum.Web
             this.ControlID = controlID;
         }
 
-        public abstract object ApplyChanges(Controller controller, object obj);
+        public abstract object ApplyChanges(Controller controller, object obj, out bool needsReload);
 
         public abstract void Validate(object entity, Dictionary<string, List<string>> errors);
         
@@ -120,8 +120,9 @@ namespace Signum.Web
             }
         }
 
-        public override object ApplyChanges(Controller controller, object obj)
+        public override object ApplyChanges(Controller controller, object obj, out bool needsReload)
         {
+            needsReload = false;
             return Value;
         }
 
@@ -218,7 +219,7 @@ namespace Signum.Web
             return subInterval.Max - 1;
         }
 
-        public override object ApplyChanges(Controller controller, object obj)
+        public override object ApplyChanges(Controller controller, object obj, out bool needsReload)
         {
             ModifiableEntity entity;
             if (AvoidChange)
@@ -226,19 +227,20 @@ namespace Signum.Web
             else
                 entity = Change(controller, (ModifiableEntity)obj);
 
-            ApplyChangesOfProperties(controller, entity);
+            needsReload = ApplyChangesOfProperties(controller, entity);
 
             return entity;
         }
 
-        protected virtual void ApplyChangesOfProperties(Controller controller, ModifiableEntity entity)
+        protected virtual bool ApplyChangesOfProperties(Controller controller, ModifiableEntity entity)
         {
             if (Properties != null)
             {
                 foreach (var ppm in Properties.Values)
                 {
                     object oldValue = (entity != null) ? ppm.PropertyPack.GetValue(entity) : null;
-                    object newValue = ppm.Modification.ApplyChanges(controller, oldValue);
+                    bool needsReload;
+                    object newValue = ppm.Modification.ApplyChanges(controller, oldValue, out needsReload);
                     try
                     {
                         ppm.PropertyPack.SetValue(entity, newValue);
@@ -265,8 +267,11 @@ namespace Signum.Web
                             ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
                         ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
                     }
+                    //if (needsReload || ppm.PropertyPack.PropertyInfo.HasAttribute<ReloadEntityOnChange>() && oldValue != newValue)
+                        //return true;
                 }
             }
+            return false;
         }
 
         protected virtual ModifiableEntity Change(Controller controller, ModifiableEntity entity)
@@ -365,13 +370,14 @@ namespace Signum.Web
                 EntityModification = null;
         }
 
-        public override object ApplyChanges(Controller controller, object obj)
+        public override object ApplyChanges(Controller controller, object obj, out bool needsReload)
         {
+            needsReload = false;
             if (RuntimeType == null)
                 return null;
 
             if (IsNew)
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null));
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null, out needsReload));
 
             Lazy lazy = (Lazy)obj;
 
@@ -382,14 +388,14 @@ namespace Signum.Web
                 else
                     return Lazy.Create(CleanType,
                         (IdentifiableEntity)EntityModification.ApplyChanges(
-                           controller, 
-                           Database.Retrieve(RuntimeType, EntityId.Value)));
+                           controller, Database.Retrieve(RuntimeType, EntityId.Value), out needsReload));
             }
 
             if (EntityId == null)
             {
                 Debug.Assert(lazy.IdOrNull == null && RuntimeType == lazy.GetType() && EntityModification != null);
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull));
+                return Lazy.Create(CleanType, 
+                    (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull, out needsReload));
             }
             else
             {
@@ -398,14 +404,16 @@ namespace Signum.Web
                     if (EntityModification == null)
                         return lazy;
                     else
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lazy)));
+                        return Lazy.Create(CleanType, 
+                            (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lazy), out needsReload));
                 }
                 else
                 {
                     if (EntityModification == null)
                         return Lazy.Create(CleanType, EntityId.Value, RuntimeType);
                     else
-                        return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(RuntimeType, EntityId.Value)));
+                        return Lazy.Create(CleanType, 
+                            (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(RuntimeType, EntityId.Value), out needsReload));
                 }
             }
         }
@@ -477,17 +485,18 @@ namespace Signum.Web
         }
 
 
-        public override object ApplyChanges(Controller controller, object obj)
+        public override object ApplyChanges(Controller controller, object obj, out bool needsReload)
         {
             IList old = (IList)obj;
+            needsReload = false;
 
             IList list = (IList)Activator.CreateInstance(StaticType, modifications.Count);
             foreach (var item in modifications)
             {
                 if (item.Second.HasValue)
-                    list.Add(item.First.ApplyChanges(controller, old[item.Second.Value]));
+                    list.Add(item.First.ApplyChanges(controller, old[item.Second.Value], out needsReload));
                 else
-                    list.Add(item.First.ApplyChanges(controller, null));
+                    list.Add(item.First.ApplyChanges(controller, null, out needsReload));
             }
             return list;
         }
@@ -497,5 +506,10 @@ namespace Signum.Web
             IList list = (IList)entity;
             list.Cast<object>().ZipForeachStrict(modifications, (obj, mod) => mod.First.Validate(obj, errors));
         }
+    }
+
+    public class ReloadModificationException : Exception
+    { 
+        
     }
 }

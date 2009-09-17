@@ -168,7 +168,12 @@ namespace Signum.Web
 
         public override Type LastIdentifiableProperty
         {
-            get { return typeof(T); }
+            get 
+            {
+                if (!Reflector.IsIdentifiableEntity(typeof(T)))
+                    throw new ApplicationException("There's not an IdentifiableEntity property in the TypeContext path");
+                return typeof(T); 
+            }
         }
 
         public override List<PropertyInfo> GetPath() 
@@ -250,7 +255,7 @@ namespace Signum.Web
         {
             get
             {
-                return properties.LastOrDefault(pi => typeof(IdentifiableEntity).IsAssignableFrom(pi.PropertyType))
+                return properties.LastOrDefault(pi => Reflector.IsIdentifiableEntity(pi.PropertyType))
                                  .TryCC(prop => prop.PropertyType) ??
                                  Parent.LastIdentifiableProperty;
             }
@@ -258,12 +263,13 @@ namespace Signum.Web
 
         public override List<PropertyInfo> GetPath()
         {
-            List<PropertyInfo> pis = Parent.GetPath().Do(l => l.AddRange(properties));
-            int lastPI = 0;
-            for(lastPI = 0; lastPI < pis.Count && pis[lastPI].PropertyType != LastIdentifiableProperty; lastPI++)
-            {
-            }
-            if (lastPI == pis.Count)
+            List<PropertyInfo> pis = Parent.GetPath();
+            pis.AddRange(properties);
+            
+            Type lastIP = LastIdentifiableProperty;
+            int lastPI = pis.FindLastIndex(pi => pi.PropertyType == lastIP); 
+
+            if (lastPI == -1)
                 return pis;
             else
                 return pis.GetRange(lastPI + 1, pis.Count - lastPI - 1);
@@ -282,6 +288,70 @@ namespace Signum.Web
         public override string FriendlyName
         {
             get { return LastProperty.NiceName(); }
+        }
+
+        public override void Dispose()
+        {
+            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)))
+                StyleContext.Current.Dispose();
+        }
+    }
+    #endregion
+
+    #region TypeElementContext<T>
+    public class TypeElementContext<T> : TypeContext<T>, IDisposable
+    {
+        int Index;
+
+        internal TypeContext Parent { get; private set; }
+
+        public TypeElementContext(T value, TypeContext parent, int index)
+            : base(value)
+        {
+            this.Index = index;
+            Parent = parent;
+        }
+
+        public override PropertyInfo LastProperty
+        {
+            get { throw new NotImplementedException("TypeElementContext has no LastProperty"); }
+        }
+
+        public override Type LastIdentifiableProperty
+        {
+            get
+            {
+                if (Reflector.IsIdentifiableEntity(typeof(T)))
+                    return typeof(T); 
+
+                return Parent.LastIdentifiableProperty;
+            }
+        }
+
+        public override List<PropertyInfo> GetPath()
+        {
+            List<PropertyInfo> pis = Parent.GetPath();
+
+            Type lastIP = LastIdentifiableProperty;
+            int lastPI = pis.FindLastIndex(pi => pi.PropertyType == lastIP);
+
+            if (lastPI == -1)
+                return pis;
+            else
+                return pis.GetRange(lastPI + 1, pis.Count - lastPI - 1);
+        }
+
+        public override string Name
+        {
+            get
+            {
+                return ""; // Parent.Name == TypeContext.Separator ? "" : Parent.Name;
+            }
+        }
+
+        public override string FriendlyName
+        {
+            get { throw new NotImplementedException("TypeElementContext has no FriendlyName"); }
         }
 
         public override void Dispose()

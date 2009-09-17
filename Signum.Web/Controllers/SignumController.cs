@@ -79,7 +79,12 @@ namespace Signum.Web.Controllers
             ModifiableEntity entity = Navigator.ExtractEntity(this, Request.Form, prefix)
                 .ThrowIfNullC("PartialView: Type was not possible to extract");
 
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefix, "", ref entity);
+            SortedList<string, object> formValues = Navigator.ToSortedList(this.Request.Form, prefix, "");
+            Modification modification = Navigator.Manager.GenerateModification(formValues, (Modifiable)(object)entity, prefix ?? "");
+            bool needsReload;
+            entity = (ModifiableEntity)modification.ApplyChanges(this, entity, out needsReload);
+
+            //Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefix, "", ref entity);
 
             this.ViewData[ViewDataKeys.LoadAll] = true; //Prevents losing unsaved changes of the UI when reloading control
             return Navigator.PartialView(this, entity, prefix);

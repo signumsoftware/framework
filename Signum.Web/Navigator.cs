@@ -662,19 +662,26 @@ namespace Signum.Web
 
         protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix)
         {
-            Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
-
-            obj = (T)modification.ApplyChanges(controller, obj);
-
+            Modification modification = null;
+            bool needsReload = true;
+            while (needsReload)
+            {
+                modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
+                obj = (T)modification.ApplyChanges(controller, obj, out needsReload);
+            }
             return GenerateErrors((Modifiable)(object)obj, modification);
         }
 
         protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix, out List<string> fullIntegrityErrors)
         {
-            Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
-
-            obj = (T)modification.ApplyChanges(controller, obj);
-
+            
+            Modification modification = null;
+            bool needsReload = true;
+            while (needsReload)
+            {
+                modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
+                obj = (T)modification.ApplyChanges(controller, obj, out needsReload);
+            }
             return GenerateErrors((Modifiable)(object)obj, modification, out fullIntegrityErrors);
         }
 
