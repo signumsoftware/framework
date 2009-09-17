@@ -48,7 +48,7 @@ namespace Signum.Windows.Reports
                 try
                 {
                     // 1º nos taremos la plantilla y la guardamos
-                    ExcelReportDN er = erl.RetrieveLazyThin();
+                    ExcelReportDN er = erl.RetrieveAndForget();
                     filename = di.FullName + "\\" + cr.Name + " - " + er.QueryName + ".xlsx";
                     File.WriteAllBytes(filename, er.File.BinaryFile);
 
