@@ -190,7 +190,6 @@ namespace Signum.Web
                 runtimeType = cleanRuntimeType.Name;
             }
             sb.Append(helper.Hidden(indexedPrefix + TypeContext.RuntimeType, runtimeType) + "\n");
-
             sb.Append(helper.Hidden(indexedPrefix + EntityListKeys.Index, index.ToString()) + "\n");
 
             if (isIdentifiable || isLazy)
@@ -199,18 +198,21 @@ namespace Signum.Web
                     indexedPrefix + TypeContext.Id,
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
-                       : ((Lazy)(object)value).TryCS(i => i.Id)) + "\n");
+                       : ((Lazy)(object)value).TryCS(i => i.IdOrNull)) + "\n");
 
                 sb.Append(helper.Div(indexedPrefix + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 
+                if (isIdentifiable &&((IIdentifiable)(object)value).TryCS(i => i.IdOrNull) == null)
+                    sb.Append(helper.Hidden(indexedPrefix + EntityBaseKeys.IsNew, index.ToString()) + "\n");
+            
                 //Note this is added to the sbOptions, not to the result sb
                 sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
                                 "name=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " + 
                                 "value=\"\" " +
-                                "class = valueLine entityListOption\" " +
+                                "class = \"valueLine entityListOption\" " +
                                 ">" + 
                                 ((isIdentifiable)
-                                    ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToStr)
+                                    ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToString())
                                     : ((Lazy)(object)value).TryCC(i => i.ToStr)) + 
                                 "</option>\n");
             }
