@@ -40,13 +40,6 @@ namespace Signum.Web
             Autocomplete = false;
             Implementations = null;
         }
-
-        bool reloadOnChange = false;
-        public bool ReloadOnChange
-        {
-            get { return reloadOnChange; }
-            set { reloadOnChange = value; }
-        }
     }
 
     public static class EntityLineHelper

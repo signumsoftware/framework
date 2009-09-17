@@ -19,7 +19,6 @@ namespace Signum.Web
     {
         public abstract void SetReadOnly();
 
-        //public StyleContext StyleContext;
         public string LabelText;
         public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string, object>(0);
 
@@ -28,6 +27,20 @@ namespace Signum.Web
         {
             get { return visible; }
             set { visible = value; }
+        }
+
+        bool reloadOnChange = false;
+        public bool ReloadOnChange
+        {
+            get { return reloadOnChange; }
+            set { reloadOnChange = value; }
+        }
+
+        string reloadOnChangeFunction = null;
+        public string ReloadOnChangeFunction
+        {
+            get { return reloadOnChangeFunction; }
+            set { reloadOnChangeFunction = value; }
         }
     }
 
@@ -101,13 +114,6 @@ namespace Signum.Web
         {
             get { return removing; }
             set { removing = value; }
-        }
-
-        string reloadOnChangeFunction = null;
-        public string ReloadOnChangeFunction
-        {
-            get { return reloadOnChangeFunction; }
-            set {reloadOnChangeFunction = value; }
         }
     }
 }

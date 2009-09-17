@@ -109,14 +109,11 @@ namespace Signum.Web
 
         public static void TaskSetReloadOnChange(BaseLine eb, Type parent, TypeContext context)
         {
-            if (eb is EntityLine)
+            if (eb != null)
             {
-                if (eb != null)
-                {
-                    var atribute = context.LastProperty.SingleAttribute<ReloadEntityOnChange>();
-                    if (atribute != null)
-                        ((EntityLine)eb).ReloadOnChange = true;
-                }
+                var atribute = context.LastProperty.SingleAttribute<ReloadEntityOnChange>();
+                if (atribute != null)
+                    eb.ReloadOnChange = true;
             }
         }
 #endregion

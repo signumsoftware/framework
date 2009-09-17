@@ -242,10 +242,8 @@ namespace Signum.Web
                         new ValueLineData(
                             id,
                             value,
-                            new Dictionary<string, object>(),
-                            null,
-                            columnType, 
-                            null)));
+                            new ValueLine(),
+                            columnType)));
             }
             return sb.ToString();
         }
