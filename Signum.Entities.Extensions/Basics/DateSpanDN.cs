@@ -29,6 +29,11 @@ namespace Signum.Entities.Extensions.Basics
             set { Set(ref days, value, "Days"); }
         }
 
+        public bool  EsNulo()
+        {
+            return years == 0 && months == 0 && days == 0;        
+        }
+
         public DateTime Add(DateTime date)
         {
             return date.AddYears(years).AddMonths(months).AddDays(days);
