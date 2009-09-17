@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
     internal class QueryBinder : ExpressionVisitor
     {
         Dictionary<ParameterExpression, Expression> map = new Dictionary<ParameterExpression, Expression>();
-        Dictionary<Expression, GroupByInfo> groupByMap = new Dictionary<Expression, GroupByInfo>();
+        Dictionary<ProjectionToken, GroupByInfo> groupByMap = new Dictionary<ProjectionToken, GroupByInfo>();
         Dictionary<ProjectionToken, HashSet<TableCondition>> requests = new Dictionary<ProjectionToken, HashSet<TableCondition>>();
         Expression root;
 
@@ -399,7 +399,7 @@ namespace Signum.Engine.Linq
 
             ScalarExpression subquery = new ScalarExpression(resultType, select);
 
-            GroupByInfo info = groupByMap.TryGetC(projection);
+            GroupByInfo info = groupByMap.TryGetC(projection.Token);
             if (info != null)
             {
                 Expression exp2 =
@@ -662,7 +662,8 @@ namespace Signum.Engine.Linq
             // make it possible to tie aggregates back to this group-by
             NewExpression newResult = (NewExpression)RemoveConvert(pc.Projector);
             GroupByInfo info = new GroupByInfo { Alias = alias, Projection = new ProjectionExpression(projection.Source, elemExpr, null) };
-            this.groupByMap.Add(newResult.Arguments[1], info);
+            
+            this.groupByMap.Add(((ProjectionExpression)newResult.Arguments[1]).Token, info);
 
             return new ProjectionExpression(
                 new SelectExpression(alias, false, null, pc.Columns, projection.Source, null, null, groupExprs),
@@ -1273,7 +1274,7 @@ namespace Signum.Engine.Linq
         private ColumnAssignment[] Assign(Expression colExpression, Expression expression)
         {
             if (expression is FieldInitExpression && IsNewId(((FieldInitExpression)expression).ExternalId))
-                throw new ApplicationException("The entity is New");
+                throw new InvalidOperationException("The entity is New");
 
             if (colExpression is ColumnExpression)
             {

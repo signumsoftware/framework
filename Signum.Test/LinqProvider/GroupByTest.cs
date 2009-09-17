@@ -125,5 +125,17 @@ namespace Signum.Test.LinqProvider
         {
             var songsAlbum = Database.Query<ArtistDN>().Average(a => a.Name.Length);
         }
+
+        [TestMethod]
+        public void GroupBySelectSelect()
+        {
+            var artistsBySex =
+                Database.Query<ArtistDN>()
+                .GroupBy(a=>a.Sex)
+                .Select(g=>g)
+                .Select(g=>new { Sex = g.Key, Count = g.Count() }).ToList();
+
+
+        }
     }
 }

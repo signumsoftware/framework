@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
+using Signum.Engine.Linq;
 
 namespace Signum.Test.LinqProvider
 {
@@ -15,7 +16,7 @@ namespace Signum.Test.LinqProvider
     /// Summary description for LinqProvider
     /// </summary>
     [TestClass]
-    public class OrderByTest
+    public class DistinctTest
     {
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
@@ -30,28 +31,33 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void OrderByString()
+        public void DistinctString()
         {
-            var songsAlbum = Database.Query<AlbumDN>().Select(a => a.Name).OrderBy(n => n).ToList();
+            var authors = Database.Query<AlbumDN>().Select(a => a.Label.Name).Distinct().ToList();
         }
 
         [TestMethod]
-        public void OrderByIntDescending()
+        public void DistinctPair()
         {
-            var songsAlbum = Database.Query<AlbumDN>().OrderByDescending(a => a.Year).ToList();
+            var authors = Database.Query<ArtistDN>().Select(a =>new {a.Sex, a.Dead}).Distinct().ToList();
         }
 
         [TestMethod]
-        public void OrderByThenBy()
+        public void DistinctFie()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).ThenBy(a => a.Sex).ToList();
+            var authors = Database.Query<AlbumDN>().Select(a => a.Label).Distinct().ToList();
         }
 
-        [TestMethod, ExpectedException(typeof(InvalidOperationException))]
-        public void OrderByNotLast()
+        [TestMethod]
+        public void DistinctFieExpanded()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Select(a => a.Name).ToList();
+            var authors = Database.Query<AlbumDN>().Where(a => a.Year != 0).Select(a => a.Label).Distinct().ToList();
         }
 
+        [TestMethod]
+        public void DistinctIb()
+        {
+            var authors = Database.Query<AlbumDN>().Select(a => a.Author).Distinct().ToList();
+        }
     }
 }

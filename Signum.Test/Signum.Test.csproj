@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Assert2.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
+    <Compile Include="LinqProvider\DistinctTest.cs" />
     <Compile Include="LinqProvider\UpdateDeleteTest.cs" />
     <Compile Include="LinqProvider\SqlFunctionsTest.cs" />
     <Compile Include="LinqProvider\TakeSkipTest.cs" />

@@ -80,7 +80,7 @@ namespace Signum.Test.LinqProvider
             int count = Database.UnsafeUpdate<AlbumDN>(a => new AlbumDN { Label = label }, null);
         }
 
-        [TestMethod]
+        [TestMethod, ExpectedException(typeof(InvalidOperationException), "The entity is New")]
         public void UpdateNewFie()
         {
             Starter.Dirty();

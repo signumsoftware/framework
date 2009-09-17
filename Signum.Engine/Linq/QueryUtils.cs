@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             Expression rebinded = QueryRebinder.Rebind(rewrited);
             Expression projCleaned = ProjectionCleaner.Clean(rebinded);
-            Expression ordered = OrderByRewriter.Rewrite(projCleaned);
+            Expression ordered = OrderByAsserter.Assert(projCleaned);
             Expression replaced = AliasProjectionReplacer.Replace(ordered);
             Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);

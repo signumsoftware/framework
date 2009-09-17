@@ -147,5 +147,14 @@ namespace Signum.Test.LinqProvider
                           where a.Author is ArtistDN
                           select a.ToLazy()).ToList();
         }
+
+
+        [TestMethod]
+        public void WhereCase()
+        {
+            var list = (from a in Database.Query<ArtistDN>()
+                        where a.Dead ? a.Name.Contains("Michael") : a.Name.Contains("Billy")
+                        select a).ToArray();
+        }
     }
 }

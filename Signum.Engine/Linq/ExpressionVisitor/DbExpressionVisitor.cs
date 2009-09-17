@@ -360,7 +360,7 @@ namespace Signum.Engine.Linq
             Expression projector = this.Visit(proj.Projector);
             if (source != proj.Source || projector != proj.Projector)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction);
+                return new ProjectionExpression(proj.Token, source, projector, proj.UniqueFunction);
             }
             return proj;
         }

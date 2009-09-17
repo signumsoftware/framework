@@ -255,15 +255,16 @@ namespace Signum.Engine.Linq
             if (candidates.Contains(test) && candidates.Contains(ifTrue) && candidates.Contains(ifFalse))
             {
                 Expression newTest = ConditionsRewriter.MakeSqlCondition(test); 
+                Expression newTrue = ConditionsRewriter.MakeSqlValue(ifTrue);
 
                 if (ifFalse.NodeType == (ExpressionType)DbExpressionType.Case)
                 {
                     var oldC  = (CaseExpression)ifFalse;
                     candidates.Remove(ifFalse); // just to save some memory
-                    result = new CaseExpression(oldC.Whens.PreAnd(new When(newTest, ifTrue)), oldC.DefaultValue);
+                    result = new CaseExpression(oldC.Whens.PreAnd(new When(newTest, newTrue)), oldC.DefaultValue);
                 }
                 else
-                    result = new CaseExpression(new[] { new When(newTest, ifTrue) }, ifFalse);
+                    result = new CaseExpression(new[] { new When(newTest, newTrue) }, ConditionsRewriter.MakeSqlValue(ifFalse));
 
                 candidates.Add(result);
             }
