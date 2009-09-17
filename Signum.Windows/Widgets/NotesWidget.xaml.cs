@@ -47,7 +47,7 @@ namespace Signum.Windows
             {
                 Button b = (Button)e.OriginalSource;
                 Lazy<INoteDN> nota = (Lazy<INoteDN>)b.Tag;
-                ViewNote(Server.RetrieveLazyThin(nota));
+                ViewNote(Server.RetrieveAndForget(nota));
             }
         }
 

@@ -305,8 +305,8 @@ namespace Signum.Windows
             {
                 lazyType = Reflector.ExtractLazy(entity.GetType());
 
-                entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveLazyThin((Lazy)entity) :
-                                                                   Server.RetrieveLazyFat((Lazy)entity);
+                entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveAndForget((Lazy)entity) :
+                                                                   Server.Retrieve((Lazy)entity);
             }
 
             if (!IsViewable(entity.GetType(), true))

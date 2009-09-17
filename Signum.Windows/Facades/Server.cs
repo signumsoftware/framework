@@ -54,7 +54,7 @@ namespace Signum.Windows
             return Service<IBaseServer>().Retrieve(type, id);
         }
 
-        public static IdentifiableEntity RetrieveLazyFat(Lazy lazy)
+        public static IdentifiableEntity Retrieve(Lazy lazy)
         {
             if (lazy.UntypedEntityOrNull == null)
             {
@@ -63,7 +63,7 @@ namespace Signum.Windows
             return lazy.UntypedEntityOrNull;
         }
 
-        public static T RetrieveLazyFat<T>(this Lazy<T> lazy) where T : class, IIdentifiable
+        public static T Retrieve<T>(this Lazy<T> lazy) where T : class, IIdentifiable
         {
             if (lazy.EntityOrNull == null)
             {
@@ -72,12 +72,12 @@ namespace Signum.Windows
             return lazy.EntityOrNull;
         }
 
-        public static IdentifiableEntity RetrieveLazyThin(Lazy lazy)
+        public static IdentifiableEntity RetrieveAndForget(Lazy lazy)
         {
             return Service<IBaseServer>().Retrieve(lazy.RuntimeType, lazy.Id);
         }
 
-        public static T RetrieveLazyThin<T>(this Lazy<T> lazy) where T : class, IIdentifiable
+        public static T RetrieveAndForget<T>(this Lazy<T> lazy) where T : class, IIdentifiable
         {
             return (T)(IIdentifiable)Service<IBaseServer>().Retrieve(lazy.RuntimeType, lazy.Id);
         }
@@ -125,7 +125,7 @@ namespace Signum.Windows
 
             if (typeof(Lazy).IsAssignableFrom(sourceType) && type.IsAssignableFrom(((Lazy)obj).RuntimeType))
             {
-                return RetrieveLazyThin((Lazy)obj);
+                return RetrieveAndForget((Lazy)obj);
             }
 
             
