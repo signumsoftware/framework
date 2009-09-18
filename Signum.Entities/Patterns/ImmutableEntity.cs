@@ -8,16 +8,16 @@ namespace Signum.Entities
     [Serializable]
     public class ImmutableEntity: IdentifiableEntity
     {
-        bool allowChange;
+        bool allowTemporaly = false;
         public bool AllowChange
         {
-            get { return allowChange; }
-            set { allowChange = value; }
+            get { return allowTemporaly || IsNew; }
+            set { allowTemporaly = value; }
         }
 
         protected override bool Set<T>(ref T variable, T value, string propertyName)
         {
-            if (allowChange)
+            if (AllowChange)
                 return base.Set(ref variable, value, propertyName);
             else
                 return base.SetIfNew(ref variable, value, propertyName);
@@ -25,11 +25,11 @@ namespace Signum.Entities
 
         protected internal override void PreSaving()
         {
-            if (!IsNew && !AllowChange && SelfModified)
-                throw new ApplicationException("Attempt to save a not new modified ImmutableEntity");
-
-            if (IsNew)
-                base.PreSaving(); //Do not re-update
+            if (AllowChange)
+                base.PreSaving();
+            else
+                if (SelfModified)
+                    throw new ApplicationException("Attempt to save a not new modified ImmutableEntity");
         }
     }
 
