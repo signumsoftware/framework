@@ -15,7 +15,7 @@ namespace Signum.Entities.Authorization
     {
         [NotNullable, UniqueIndex, SqlDbType(Size = 100)]
         string userName;
-        [StringLengthValidator(AllowNulls = false, Min = 4, Max = 100), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100), LocDescription]
         public string UserName
         {
             get { return userName; }
