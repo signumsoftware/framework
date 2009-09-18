@@ -382,7 +382,7 @@ WRITETEXT</value>
   <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
     <value>No se han eliminado todas las entidades de tipo {0} e ids: {1}</value>
   </data>
-  <data name="NoSeHanEncontrado0ConId1" xml:space="preserve">
+  <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
     <value>No se han encontrado {0} con Id {1}</value>
   </data>
   <data name="TableForType0NotInSchema" xml:space="preserve">

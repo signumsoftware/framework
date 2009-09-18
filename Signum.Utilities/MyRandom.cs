@@ -95,5 +95,10 @@ namespace Signum.Utilities
         {
             return elements[r.Next(elements.Length)];
         }
+
+        public static T NextElement<T>(this Random r, List<T> elements)
+        {
+            return elements[r.Next(elements.Count)];
+        }
     }
 }

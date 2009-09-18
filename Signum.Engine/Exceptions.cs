@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
+using Signum.Engine.Properties;
 
 namespace Signum.Engine.Exceptions
 {
@@ -74,6 +75,23 @@ namespace Signum.Engine.Exceptions
 
                 return "There are records in '{0}' pointing to this table by column '{1}'".Formato(TableName, Field);
             }
+        }
+    }
+
+
+    [Serializable]
+    public class EntityNotFoundException : Exception
+    {
+        public Type Type { get; private set; }
+        public int[] Ids { get; private set; }
+
+        protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+        public EntityNotFoundException(Type type, int[] ids)
+            : base(Resources.EntityWithType0AndId1NotFound.Formato(type.Name, ids.ToString(", ")))
+        {
+            this.Type = type;
+            this.Ids = ids;
         }
     }
 }

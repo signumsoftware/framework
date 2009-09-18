@@ -183,6 +183,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Entity with type {0} and Id {1} not found.
+        /// </summary>
+        internal static string EntityWithType0AndId1NotFound {
+            get {
+                return ResourceManager.GetString("EntityWithType0AndId1NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Field {0} contains both a {1} as a {2}.
         /// </summary>
         internal static string Field0ContainsBoth1And2 {
@@ -305,15 +314,6 @@ namespace Signum.Engine.Properties {
         internal static string NoNameForType0Defined {
             get {
                 return ResourceManager.GetString("NoNameForType0Defined", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Entity with type {0} and Id {1} not found.
-        /// </summary>
-        internal static string NoSeHanEncontrado0ConId1 {
-            get {
-                return ResourceManager.GetString("NoSeHanEncontrado0ConId1", resourceCulture);
             }
         }
         

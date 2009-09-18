@@ -172,7 +172,7 @@
   <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
     <value>Not all entities of type {0} and ids {1} are removed</value>
   </data>
-  <data name="NoSeHanEncontrado0ConId1" xml:space="preserve">
+  <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
     <value>Entity with type {0} and Id {1} not found</value>
   </data>
   <data name="TableForType0NotInSchema" xml:space="preserve">

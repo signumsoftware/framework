@@ -51,7 +51,7 @@ namespace Signum.Entities
         public bool IsNew 
         {
             get { return isNew; }
-            set { isNew = value; }
+            internal set { isNew = value; }
         }
 
         protected bool SetIfNew<T>(ref T variable, T value, string propertyName)

@@ -10,6 +10,8 @@ using System.Reflection;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Reflection;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine
 {
@@ -286,6 +288,30 @@ namespace Signum.Engine
             where T : IdentifiableEntity
         {
             return QueryUtils.Update<T>(update, predicate);
+        }
+
+        public static T Random<T>()
+        where T : IdentifiableEntity
+        {
+            int count = Database.Query<T>().Count();
+            if (count == null)
+                throw new InvalidOperationException("There are no {0} in the database".Formato(typeof(T).NiceName())); 
+            
+            int retries = 4; 
+
+            for (int i = 0; i < retries; i++)
+			{
+                int id = MyRandom.Current.Next(1,  count+ 1);
+                
+                try
+                {
+                    return Database.Retrieve<T>(id); 
+                }
+                catch(EntityNotFoundException)
+                {}
+			}
+
+            throw new InvalidOperationException("Impossible to get a Random {0} after {1} retries".Formato(typeof(T).NiceName(), retries));
         }
     }
 }

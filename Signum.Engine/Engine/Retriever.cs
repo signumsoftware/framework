@@ -11,6 +11,7 @@ using System.Data;
 using System.Collections;
 using Signum.Engine.Maps;
 using Signum.Engine.Properties;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Engine
 {
@@ -82,8 +83,11 @@ namespace Signum.Engine
                 DataTable dt = Executor.ExecuteDataTable(preComand);
 
                 if (array.Length != dt.Rows.Count)
-                    throw new ApplicationException(Resources.NoSeHanEncontrado0ConId1.Formato(table.Type.Name, 
-                        array.Except(dt.Rows.Cast<DataRow>().Select(row => (int)row[SqlBuilder.PrimaryKeyName])).ToString(",")));
+                {
+                    int[] ids = array.Except(dt.Rows.Cast<DataRow>().Select(row => (int)row[SqlBuilder.PrimaryKeyName])).ToArray();
+
+                    throw new EntityNotFoundException(table.Type, ids);
+                }
 
                 foreach (DataRow row in dt.Rows)
                 {
