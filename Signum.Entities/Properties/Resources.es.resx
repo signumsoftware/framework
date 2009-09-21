@@ -223,7 +223,7 @@
     <value>Modificación no permitida: el objeto está bloqueado</value>
   </data>
   <data name="FileName" xml:space="preserve">
-    <value>nombre de archivo</value>
+    <value>Nombre de archivo</value>
   </data>
   <data name="Telephone" xml:space="preserve">
     <value>Teléfono</value>
