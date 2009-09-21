@@ -24,6 +24,9 @@ namespace Signum.Web
                 sb.Append("<div class='field'>");
             idValueField = helper.GlobalName(idValueField);
 
+            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                sb.Append("<input type='hidden' id='{0}' name='{0}' value='0' />".Formato(idValueField + TypeContext.Separator + TypeContext.Ticks));
+
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("<div class='valueFirst'>");
             if (StyleContext.Current.LabelVisible && !StyleContext.Current.ValueFirst)
             {
@@ -158,12 +161,13 @@ namespace Signum.Web
 
         public static string TextboxInLine(this HtmlHelper helper, string idValueField, string valueStr, ValueLine settings)
         {
-            string reloadOnChangeFunction = "''";
+            string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
-            if (reloadOnChangeFunction == "''")
-                reloadOnChangeFunction = "";
-
+            {
+                reloadOnChangeFunction = "$('#{0}').val(new Date().getTime()); ".Formato(idValueField + TypeContext.Separator + TypeContext.Ticks) +
+                                         (settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix()));
+            }
+            
             settings.ValueHtmlProps.Add("autocomplete", "off");
             if (settings.ValueHtmlProps.ContainsKey("onblur"))
                 settings.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];

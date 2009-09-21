@@ -35,14 +35,6 @@ namespace Signum.Entities
                 return base.IdentifiableIntegrityCheck();
             }
         }
-
-        public override Dictionary<Modifiable, string> IdentifiableIntegrityCheckDictionary()
-        {
-            using (Corrupt ? Corruption.Allow() : null)
-            {
-                return base.IdentifiableIntegrityCheckDictionary();
-            }
-        } 
     }
 
     public static class Corruption

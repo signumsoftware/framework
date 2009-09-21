@@ -81,8 +81,9 @@ namespace Signum.Web.Controllers
 
             SortedList<string, object> formValues = Navigator.ToSortedList(this.Request.Form, prefix, "");
             Modification modification = Navigator.Manager.GenerateModification(formValues, (Modifiable)(object)entity, prefix ?? "");
-            bool needsReload;
-            entity = (ModifiableEntity)modification.ApplyChanges(this, entity, out needsReload);
+            ModificationFinish onFinish = new ModificationFinish();
+            entity = (ModifiableEntity)modification.ApplyChanges(this, entity, onFinish);
+            onFinish.Finish();
 
             //Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, prefix, "", ref entity);
 

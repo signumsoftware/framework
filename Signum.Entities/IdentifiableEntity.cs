@@ -91,12 +91,7 @@ namespace Signum.Entities
 
         public virtual string IdentifiableIntegrityCheck()
         {
-            return GraphExplorer.GraphIntegrityCheck(this, ModifyInspector.IdentifiableExplore);
-        }
-
-        public virtual Dictionary<Modifiable,string> IdentifiableIntegrityCheckDictionary()
-        {
-            return GraphExplorer.GraphIntegrityCheckDictionary(this, ModifyInspector.IdentifiableExplore);
+            return GraphExplorer.IdentifiableIntegrityCheck(GraphExplorer.FromRootIdentifiable(this));
         }
 
         public override int GetHashCode()

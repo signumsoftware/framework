@@ -41,12 +41,12 @@ namespace Signum.Entities
 
         public string FullIntegrityCheck()
         {
-            return GraphExplorer.GraphIntegrityCheck(this, ModifyInspector.FullExplore);
+            return GraphExplorer.Integrity(GraphExplorer.FromRoot(this));
         }
 
         public Dictionary<Modifiable, string> FullIntegrityCheckDictionary()
         {
-            return GraphExplorer.GraphIntegrityCheckDictionary(this, ModifyInspector.FullExplore);
+            return GraphExplorer.IntegrityDictionary(GraphExplorer.FromRoot(this));
         }
 
         protected internal virtual void PreSaving()
