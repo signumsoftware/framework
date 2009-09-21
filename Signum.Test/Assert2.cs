@@ -23,5 +23,23 @@ namespace Signum.Test
 
             throw new AssertFailedException("No {0} has been thrown".Formato(typeof(T).Name));
         }
+
+        public static void Throws<T>(Action action, string messageToContain)
+           where T : Exception
+        {
+            try
+            {
+                action();
+            }
+            catch (T ex)
+            {
+                if(!ex.Message.Contains(messageToContain))
+                    throw new AssertFailedException("Exception thrown does not contain message '{0}'".Formato(ex.Message));
+
+                return;
+            }
+
+            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(T).Name));
+        }
     }
 }
