@@ -185,9 +185,11 @@ function OnPopupOK(urlController, prefix, reloadOnChangeFunction) {
     }
 }
 
-function ReloadEntity(urlController, prefix) {
+function ReloadEntity(urlController, prefix, parentDiv) {
     var formChildren;
-    if ($('#' + prefix + "panelPopup").length != 0)
+    if (parentDiv != undefined)
+        formChildren = $("#" + parentDiv + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
+    else if ($('#' + prefix + "panelPopup").length != 0)
         formChildren = $('#' + prefix + "panelPopup *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
     else
         formChildren = $("form");
@@ -199,6 +201,9 @@ function ReloadEntity(urlController, prefix) {
         dataType: "html",
         success:
                    function(msg) {
+                       if (parentDiv != undefined)
+                        $('#' + parentDiv).html(msg);
+                       else
                        $('#' + prefix + "divMainControl").html(msg);
                    },
         error:

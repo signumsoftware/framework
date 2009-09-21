@@ -12,7 +12,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 		type: "POST",
 		url: urlController,
 		async: false,
-		data: $((parentDiv !== undefined) ? ("." + parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
+		data: $((parentDiv !== undefined) ? ("#" + parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
 		success: function (msg) {
 			if (msg.indexOf("ModelState") > 0) {
 				eval('var result=' + msg);
@@ -20,7 +20,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 				returnValue = ShowErrorMessages("", modelState, showInlineError, fixedInlineErrorText);
 			}
 			else {
-				$("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+				$("#" + (parentDiv != undefined ? parentDiv : "content")).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
 				returnValue = true;
 				return;
 			}
@@ -39,7 +39,7 @@ function Validate(urlController, prefixToIgnore, showInlineError, fixedInlineErr
 		type: "POST",
 		url: urlController,
 		async: false,
-		data: $((parentDiv !== undefined) ? ("." + parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
+		data: $((parentDiv !== undefined) ? ("#" + parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
 		success: function (msg) {
 			if (msg.indexOf("ModelState") > 0) {
 				eval('var result=' + msg);
