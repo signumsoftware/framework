@@ -69,7 +69,7 @@ namespace Signum.Entities.Reflection
 
         public static string IdentifiableIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
-            return graph.Select(m => m.IntegrityCheck()).NotNull().ToString("\r\n");
+            return graph.Select(m => m.IntegrityCheck()).Where(e => e.HasText()).ToString("\r\n");
         }
 
         public static string Integrity(DirectedGraph<Modifiable> graph)
