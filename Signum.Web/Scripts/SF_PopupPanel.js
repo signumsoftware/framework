@@ -180,8 +180,10 @@ function OnPopupOK(urlController, prefix, reloadOnChangeFunction) {
     toggleButtonsDisplay(prefix, true);
 
     if (correcto) {
-        if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "")
+        if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "") {
+            $('#' + prefix + sfChanged).val("true");
             reloadOnChangeFunction();
+        }
     }
 }
 
@@ -360,8 +362,10 @@ function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
     $('#' + prefix + sfId).val("");
     toggleButtonsDisplay(prefix, false);
 
-    if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "")
+    if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "") {
+        $('#' + prefix + sfChanged).val("true");
         reloadOnChangeFunction();
+    }
 }
 
 function RemoveDetailContainedEntity(prefix, detailDiv) {

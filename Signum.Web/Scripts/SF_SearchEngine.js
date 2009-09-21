@@ -71,7 +71,10 @@ function OnSearchOk(prefix, divASustituir, reloadOnChangeFunction) {
 	//$('#' + prefix + sfEntity).hide().html("");
 	$('#' + divASustituir).hide().html("");
 
-	if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "") reloadOnChangeFunction();
+	if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "") {
+	    $('#' + prefix + sfChanged).val("true");
+	    reloadOnChangeFunction();
+	}
 }
 
 function OnDetailSearchOk(urlController, prefix, divASustituir, detailDiv, partialView) {

@@ -141,7 +141,7 @@ namespace Signum.Web
         public const string Id = "sfId";
         public const string StaticType = "sfStaticType"; //READONLY
         public const string RuntimeType = "sfRuntimeType";
-        public const string Ticks = "sfTicks";
+        public const string Changed = "sfChanged";
         public const string CssLineLabel = "labelLine";
 
         public abstract object UntypedValue { get; }

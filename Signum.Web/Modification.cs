@@ -37,7 +37,7 @@ namespace Signum.Web
             TypeContext.RuntimeType, 
             TypeContext.Id, 
             TypeContext.StaticType, 
-            TypeContext.Ticks,
+            TypeContext.Changed,
             EntityBaseKeys.ToStr, 
             EntityBaseKeys.ImplementationsDDL,
             EntityBaseKeys.IsNew,
@@ -219,10 +219,10 @@ namespace Signum.Web
 
             MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
             bool propertyIsLastChange = false;
-            string ticks = (string)formValues.TryGetC(subControlID + TypeContext.Separator + TypeContext.Ticks);
-            if (ticks.HasText())
+            if (formValues.ContainsKey(subControlID + TypeContext.Separator + TypeContext.Changed))
             {
-                if (ticks == "0")
+                string changed = (string)formValues.TryGetC(subControlID + TypeContext.Separator + TypeContext.Changed);
+                if (!changed.HasText())
                     return subInterval.Max-1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
                 else
                     propertyIsLastChange = true; 
@@ -282,8 +282,6 @@ namespace Signum.Web
                             ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
                         ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
                     }
-                    //if (needsReload || ppm.PropertyPack.PropertyInfo.HasAttribute<ReloadEntityOnChange>() && oldValue != newValue)
-                        //return true;
                 }
             }
             return false;

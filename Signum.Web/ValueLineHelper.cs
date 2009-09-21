@@ -25,7 +25,7 @@ namespace Signum.Web
             idValueField = helper.GlobalName(idValueField);
 
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                sb.Append("<input type='hidden' id='{0}' name='{0}' value='0' />".Formato(idValueField + TypeContext.Separator + TypeContext.Ticks));
+                sb.Append("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(idValueField + TypeContext.Separator + TypeContext.Changed));
 
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("<div class='valueFirst'>");
             if (StyleContext.Current.LabelVisible && !StyleContext.Current.ValueFirst)
@@ -113,11 +113,12 @@ namespace Signum.Web
                     );
             }
 
-            string reloadOnChangeFunction = "''";
+            string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
-            if (reloadOnChangeFunction != "''")
             {
+                reloadOnChangeFunction = "$('#{0}').val('1'); ".Formato(idValueField + TypeContext.Separator + TypeContext.Changed) +
+                                         (settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix()));
+
                 if (settings.ValueHtmlProps.ContainsKey("onblur"))
                     settings.ValueHtmlProps["onblur"] = reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
                 else
@@ -137,15 +138,16 @@ namespace Signum.Web
             if (settings.DatePickerOptions != null && settings.DatePickerOptions.ShowAge)
                 settings.ValueHtmlProps["class"] += " hasAge";
 
-            string reloadOnChangeFunction = "''";
+            string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
-            if (reloadOnChangeFunction != "''")
             {
-                if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                    settings.ValueHtmlProps["onblur"] = reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
-                else
-                    settings.ValueHtmlProps.Add("onblur", reloadOnChangeFunction);
+                reloadOnChangeFunction = "$('#{0}').val('1'); ".Formato(idValueField + TypeContext.Separator + TypeContext.Changed) +
+                                         (settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix()));
+           
+            if (settings.ValueHtmlProps.ContainsKey("onblur"))
+                settings.ValueHtmlProps["onblur"] = reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+            else
+                settings.ValueHtmlProps.Add("onblur", reloadOnChangeFunction);
             }
 
             settings.ValueHtmlProps["size"] = dateFormat.Length;
@@ -164,7 +166,7 @@ namespace Signum.Web
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
             {
-                reloadOnChangeFunction = "$('#{0}').val(new Date().getTime()); ".Formato(idValueField + TypeContext.Separator + TypeContext.Ticks) +
+                reloadOnChangeFunction = "$('#{0}').val('1'); ".Formato(idValueField + TypeContext.Separator + TypeContext.Changed) +
                                          (settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix()));
             }
             

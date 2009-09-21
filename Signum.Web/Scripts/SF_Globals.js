@@ -18,6 +18,7 @@ var sfLink = "_sfLink";
 var sfIsNew = "_sfIsNew";
 var sfIndex = "_sfIndex";
 var sfCombo = "_sfCombo";
+var sfChanged = "_sfChanged";
 
 var sfEntitiesContainer = "_sfEntitiesContainer";
 var sfRepeaterElement = "_sfRepeaterElement";
