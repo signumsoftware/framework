@@ -141,7 +141,7 @@ namespace Signum.Utilities
         {
             if (min > max) return FromToDates(max, min).Invert();
 
-            int yeas = max.Year - min.Year;
+            int years = max.Year - min.Year;
             int months = max.Month - min.Month;
 
 
@@ -150,13 +150,13 @@ namespace Signum.Utilities
 
             if (months < 0)
             {
-                yeas -= 1;
+                years -= 1;
                 months += 12;
             }
 
-            int days = max.Subtract(min.AddYears(yeas).AddMonths(months)).Days;
+            int days = max.Subtract(min.AddYears(years).AddMonths(months)).Days;
 
-            return new DateSpan(yeas, months, days);
+            return new DateSpan(years, months, days);
 
         }
 
