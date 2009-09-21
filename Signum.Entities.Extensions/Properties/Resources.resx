@@ -486,4 +486,13 @@
   <data name="UserOperation_SaveNew" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="LogOperationQueries_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="LogOperationQueries_Completed" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="LogOperationQueries_InProcess" xml:space="preserve">
+    <value>In Process</value>
+  </data>
 </root>

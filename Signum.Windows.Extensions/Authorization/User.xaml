@@ -11,6 +11,6 @@
     	<auth:DoublePassword PasswordHash="{Binding Path=PasswordHash}"/>
         <m:EntityLine m:Common.Route="Role"  />
         <m:ValueLine m:Common.Route="EMail"  />
-        <m:EntityLine m:Common.Route="Related"/>
+        <m:EntityLine m:Common.Route="Employee"/>
     </StackPanel>
 </UserControl>

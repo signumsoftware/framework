@@ -430,6 +430,33 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        internal static string LogOperationQueries_All {
+            get {
+                return ResourceManager.GetString("LogOperationQueries_All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Completed.
+        /// </summary>
+        internal static string LogOperationQueries_Completed {
+            get {
+                return ResourceManager.GetString("LogOperationQueries_Completed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In Process.
+        /// </summary>
+        internal static string LogOperationQueries_InProcess {
+            get {
+                return ResourceManager.GetString("LogOperationQueries_InProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package.
         /// </summary>
         internal static string PackageDN {
