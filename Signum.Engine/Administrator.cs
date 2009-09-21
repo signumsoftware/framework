@@ -238,10 +238,11 @@ deallocate cur");
             return ident; 
         }
 
-        public static T SetNew<T>(bool isNew, T ident)
+        public static T SetNew<T>(T ident)
             where T : IdentifiableEntity
         {
-            ident.IsNew = isNew;
+            ident.IsNew = true;
+            ident.Modified = true;
             return ident;
         }
 
