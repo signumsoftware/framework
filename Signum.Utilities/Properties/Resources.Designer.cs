@@ -61,6 +61,24 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} Day.
+        /// </summary>
+        internal static string _0Day {
+            get {
+                return ResourceManager.GetString("_0Day", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Days.
+        /// </summary>
+        internal static string _0Days {
+            get {
+                return ResourceManager.GetString("_0Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:X} has no free bits.
         /// </summary>
         internal static string _0HasNoFreeBits {
@@ -70,11 +88,47 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} Month.
+        /// </summary>
+        internal static string _0Month {
+            get {
+                return ResourceManager.GetString("_0Month", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Months.
+        /// </summary>
+        internal static string _0Months {
+            get {
+                return ResourceManager.GetString("_0Months", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Year.
+        /// </summary>
+        internal static string _0Year {
+            get {
+                return ResourceManager.GetString("_0Year", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} Year(s), {1} Month(s), {2} Day(s).
         /// </summary>
         internal static string _0Year1Month2Day {
             get {
                 return ResourceManager.GetString("_0Year1Month2Day", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Years.
+        /// </summary>
+        internal static string _0Years {
+            get {
+                return ResourceManager.GetString("_0Years", resourceCulture);
             }
         }
         

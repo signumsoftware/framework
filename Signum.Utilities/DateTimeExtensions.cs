@@ -12,7 +12,7 @@ namespace Signum.Utilities
     {
         public static Expression<Func<DateTime, DateTime, DateTime, bool>> IsInIntervalExpression =
             (date, firstDate, lastDate) => firstDate <= date && date < lastDate;
-        
+
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
@@ -113,7 +113,7 @@ namespace Signum.Utilities
 
         public static string ShortDateTimePattern(this DateTimeFormatInfo dtfi)
         {
-             return dtfi.ShortDatePattern + " " + dtfi.ShortTimePattern; 
+            return dtfi.ShortDatePattern + " " + dtfi.ShortTimePattern;
         }
 
         public static string ToShortDateTimeString(this DateTime dt)
@@ -172,13 +172,27 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            /*string s;
+            string s = string.Empty;
+            string separator = ", ";
             if (Years > 0)
             {
-                if (Years == 1) s+= Years + " " + Properties.Resources._0Year;
+                if (Years == 1) s=s.Add(Properties.Resources._0Year.Formato(Years), separator);
+                else s.Add(Properties.Resources._0Years.Formato(Years), separator);
             }
-                s += Years + " " + Properties.Resources.*/
-            return Properties.Resources._0Year1Month2Day.Formato(Years, Months, Days);
+
+            if (Months > 0)
+            {
+                if (Months == 1) s = s.Add(Properties.Resources._0Month.Formato(Months), separator);
+                else s.Add(Properties.Resources._0Months.Formato(Months), separator);
+            }
+
+            if (Days > 0)
+            {
+                if (Days == 1) s = s.Add(Properties.Resources._0Day.Formato(Days), separator);
+                else s.Add(Properties.Resources._0Days.Formato(Days), separator);
+            }
+
+            return s;
         }
     }
 }

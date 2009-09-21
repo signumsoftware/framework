@@ -233,4 +233,22 @@
   <data name="UnhandledExpressionType0" xml:space="preserve">
     <value>Tipo de expresion no tratado '{0}'</value>
   </data>
+  <data name="_0Day" xml:space="preserve">
+    <value>{0} día</value>
+  </data>
+  <data name="_0Days" xml:space="preserve">
+    <value>{0} días</value>
+  </data>
+  <data name="_0Month" xml:space="preserve">
+    <value>{0} mes</value>
+  </data>
+  <data name="_0Months" xml:space="preserve">
+    <value>{0} meses</value>
+  </data>
+  <data name="_0Year" xml:space="preserve">
+    <value>{0} año</value>
+  </data>
+  <data name="_0Years" xml:space="preserve">
+    <value>{0} años</value>
+  </data>
 </root>
