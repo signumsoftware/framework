@@ -172,6 +172,12 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
+            /*string s;
+            if (Years > 0)
+            {
+                if (Years == 1) s+= Years + " " + Properties.Resources._0Year;
+            }
+                s += Years + " " + Properties.Resources.*/
             return Properties.Resources._0Year1Month2Day.Formato(Years, Months, Days);
         }
     }
