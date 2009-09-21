@@ -29,7 +29,6 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertIsStarted(sb);
                 QueryLogic.Start(sb, queryManagers);
-
                
                 sb.Include<RuleQueryDN>();
                 sb.Schema.Initializing += Schema_Initializing;

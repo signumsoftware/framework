@@ -19,44 +19,44 @@ namespace Signum.Engine.Authorization
             this.GetState = u => u.State;
             this.Operations = new List<IGraphOperation>
             {
-                new Construct(UserOperation.Crear, UserState.Creado)
+                new Construct(UserOperation.Create, UserState.Createad)
                 {
-                    Constructor = args =>new UserDN {State=UserState.Creado}
+                    Constructor = args =>new UserDN {State = UserState.Createad}
                 },                
-                new Goto(UserOperation.Alta, UserState.Creado)
+                new Goto(UserOperation.SaveNew, UserState.Createad)
                 {
-                   FromStates = new []{UserState.Creado},
+                   FromStates = new []{UserState.Createad},
                    Execute = (u,_)=>{},
                    AllowsNew = true,
                    Lazy =false 
                 },
-                new Goto(UserOperation.Modificar, UserState.Creado)
+                new Goto(UserOperation.Save, UserState.Createad)
                 {
-                   FromStates = new []{UserState.Creado},
+                   FromStates = new []{UserState.Createad},
                    Execute = (u,_)=>{},
                    AllowsNew = false,
                    Lazy =false 
                 },
                   
-                new Goto(UserOperation.Anular, UserState.Anulado )
+                new Goto(UserOperation.Disable, UserState.Disabled)
                 {
-                   FromStates = new []{UserState.Creado},
+                   FromStates = new []{UserState.Createad},
                    Execute = (u,_)=>
                    {
                        u.AnulationDate=DateTime.Now;
-                       u.State=UserState.Anulado; 
+                       u.State=UserState.Disabled; 
                    },
                    AllowsNew = false ,
                    Lazy =false 
                 },
          
-                new Goto(UserOperation.Reactivar, UserState.Creado)
+                new Goto(UserOperation.Enable, UserState.Createad)
                 {
-                   FromStates = new []{UserState.Anulado },
+                   FromStates = new []{UserState.Disabled },
                    Execute = (u,_)=>
                    {
-                       u.AnulationDate=null ;
-                       u.State=UserState.Creado ; 
+                       u.AnulationDate = null;
+                       u.State = UserState.Createad; 
                    },
                    AllowsNew = false ,
                    Lazy =true  

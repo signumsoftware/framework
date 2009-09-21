@@ -471,4 +471,19 @@
   <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
     <value>Prefijo Web</value>
   </data>
+  <data name="UserOperation_Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="UserOperation_Disable" xml:space="preserve">
+    <value>Desactivar</value>
+  </data>
+  <data name="UserOperation_Enable" xml:space="preserve">
+    <value>Activar</value>
+  </data>
+  <data name="UserOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="UserOperation_SaveNew" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
 </root>

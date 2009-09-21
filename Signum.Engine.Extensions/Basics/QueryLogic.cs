@@ -37,7 +37,7 @@ namespace Signum.Engine.Basics
         public static List<QueryDN> RetrieveOrGenerateQueries()
         {
             var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Name);
-            var total = QueryNames.Select(o => new QueryDN { Name = o.ToString() }).ToDictionary(a => a.Name);
+            var total = QueryNames.Select(o => new QueryDN { Name = QueryDN.GetQueryName(o) }).ToDictionary(a => a.Name);
 
             total.SetRange(current);
             return total.Values.ToList();

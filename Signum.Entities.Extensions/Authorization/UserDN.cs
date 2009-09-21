@@ -31,13 +31,12 @@ namespace Signum.Entities.Authorization
             set { Set(ref passwordHash, value, "PasswordHash"); }
         }
 
-        //ImplementedBy this
-        Lazy<IEmployee> related;
+        Lazy<IEmployeeDN> employee;
         [LocDescription]
-        public Lazy<IEmployee> Related
+        public Lazy<IEmployeeDN> Employee
         {
-            get { return related; }
-            set { Set(ref related, value, "Related;"); }
+            get { return employee; }
+            set { Set(ref employee, value, "Related;"); }
         }
 
         RoleDN role;
@@ -81,11 +80,10 @@ namespace Signum.Entities.Authorization
             set { Set(ref state, value, "State"); }
         }
 
-
         protected override void PreSaving()
         {
 
-            if (anulationDate != null && state != UserState.Anulado)
+            if (anulationDate != null && state != UserState.Disabled)
                 throw new ApplicationException("The user state must be Anulated {0}".Formato(this.ToString()));
             
             base.PreSaving();
@@ -106,26 +104,26 @@ namespace Signum.Entities.Authorization
     public enum UserState
     {
         [Description("Creado")]
-        Creado,
+        Createad,
         [Description("Anulado")]
-        Anulado,
+        Disabled,
     }
 
     public enum UserOperation
     {
-        [Description("Alta")]
-        Alta,
-        [Description("Crear")]
-        Crear,
-        [Description("Modificar")]
-        Modificar,
-        [Description("Anular")]
-        Anular,
-        [Description("Reactivar")]
-        Reactivar,
+        [LocDescription]
+        Create,
+        [LocDescription]
+        SaveNew,
+        [LocDescription]
+        Save,
+        [LocDescription]
+        Enable,
+        [LocDescription]
+        Disable,
     }
 
-    public interface IEmployee:IIdentifiable
+    public interface IEmployeeDN:IIdentifiable
     {
 
     }

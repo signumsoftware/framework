@@ -49,18 +49,18 @@ namespace Signum.Web.Authorization
                     var settings = OperationClient.Manager.Settings;
 
                     Func<IdentifiableEntity, bool> creada = (IdentifiableEntity entity) => !entity.IsNew;
-                    settings.Add(UserOperation.Alta, new EntityOperationSettings
+                    settings.Add(UserOperation.SaveNew, new EntityOperationSettings
                     {
                         OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth.aspx/RegisterUserValidate", "Auth.aspx/RegisterUserPost"),
                         IsVisible = (IdentifiableEntity entity) => entity.IsNew,
                     });
-                    settings.Add(UserOperation.Modificar, new EntityOperationSettings 
+                    settings.Add(UserOperation.Save, new EntityOperationSettings 
                     {
                         OnServerClickAjax = "Auth.aspx/UserExecOperation",
                         IsVisible = creada 
                     });
-                    settings.Add(UserOperation.Anular, new EntityOperationSettings { IsVisible = creada });
-                    settings.Add(UserOperation.Reactivar, new EntityOperationSettings { IsVisible = creada });
+                    settings.Add(UserOperation.Disable, new EntityOperationSettings { IsVisible = creada });
+                    settings.Add(UserOperation.Enable, new EntityOperationSettings { IsVisible = creada });
                 }
             }
         }
