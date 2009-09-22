@@ -121,7 +121,7 @@
     <value>La propiedad Route no puede ser applicada con un TypeContext nulo</value>
   </data>
   <data name="FinderOf0" xml:space="preserve">
-    <value>Buscador de  {0}</value>
+    <value>Buscador de {0}</value>
   </data>
   <data name="ContextItsOnlyPossibleWithIdentifiableEntities" xml:space="preserve">
     <value>Context is solo posible con IdentifiableEntities</value>
@@ -211,7 +211,7 @@
     <value>Arrastra horizontal o verticalmente</value>
   </data>
   <data name="ThereAreChangesContinue" xml:space="preserve">
-    <value>Existen cambios no guardado y se perderán.
+    <value>Existen cambios no guardados y se perderán.
 
 	¿Continuamos?</value>
   </data>
@@ -268,7 +268,7 @@
     <value>Nueva Nota</value>
   </data>
   <data name="Type0IsNotAColection" xml:space="preserve">
-    <value>El tipo {0} no es una coleccion</value>
+    <value>El tipo {0} no es una colección</value>
   </data>
   <data name="Property0DoNotExistOnType1" xml:space="preserve">
     <value>La propiedad {0} no existe en el tipo {1}</value>
@@ -307,6 +307,6 @@
     <value>Campo</value>
   </data>
   <data name="TypePropertyItsNotDeterminedForControl0" xml:space="preserve">
-    <value>La propiedd Type no está establecida para el control con Label {0}</value>
+    <value>La propiedad Type no está establecida para el control con Label {0}</value>
   </data>
 </root>

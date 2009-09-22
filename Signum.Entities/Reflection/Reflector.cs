@@ -161,9 +161,13 @@ namespace Signum.Entities.Reflection
 
         public static FieldInfo FindFieldInfo(Type type, PropertyInfo pi, bool throws)
         {
-            FieldInfo fi = (type.GetField(pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
-                type.GetField("m" + pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
-                type.GetField("_" + pi, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic));
+            FieldInfo fi=null;
+            for (Type tempType = type; tempType != typeof(object) && fi == null; tempType = tempType.BaseType)
+            {
+                fi = (tempType.GetField(pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
+                tempType.GetField("m" + pi.Name, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic) ??
+                tempType.GetField("_" + pi, BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic));
+            }
 
             if (throws && fi == null)
                 throw new NullReferenceException(Resources.FieldForPropertyNotFound.Formato(pi.Name));

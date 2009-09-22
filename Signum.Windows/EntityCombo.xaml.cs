@@ -121,10 +121,21 @@ namespace Signum.Windows
         {
             if (isLoaded || DesignerProperties.GetIsInDesignMode(this)) return;
 
+            LoadNow();
+
+            isLoaded = true;
+        }
+
+        public void ClearItems() {
+            combo.Items.Clear();
+        }
+
+        public void LoadNow()
+        {
             IEnumerable data;
             if (LoadData != null)
                 data = LoadData();
-            else 
+            else
                 data = Server.RetriveAllLazy(CleanType, safeImplementations);
 
             try
@@ -141,14 +152,12 @@ namespace Signum.Windows
                 if (selectedItem != null && !combo.Items.Contains(selectedItem))
                     combo.Items.Add(selectedItem);
 
-                combo.SelectedItem = selectedItem; 
+                combo.SelectedItem = selectedItem;
             }
             finally
             {
                 changing = false;
             }
-
-            isLoaded = true;
         }
 
         private void btCreate_Click(object sender, RoutedEventArgs e)

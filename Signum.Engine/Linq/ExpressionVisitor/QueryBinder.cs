@@ -966,7 +966,9 @@ namespace Signum.Engine.Linq
 
         private Expression BindStaticLambdaMethod(MethodCallExpression mce)
         {
-            LambdaExpression lambda = ExtractAndClean(mce.Object.TryCC(o => o.Type) ?? mce.Method.DeclaringType, mce.Method);
+            LambdaExpression lambda = 
+                mce.Object.TryCC(o => ExtractAndClean(o.Type, mce.Method)) ?? 
+                ExtractAndClean(mce.Method.DeclaringType, mce.Method);
 
             if (lambda == null)
                 return null;
