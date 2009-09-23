@@ -168,7 +168,10 @@ namespace Signum.Engine.Operations
             {
                 switch (item.OperationType)
                 {
-                    case OperationType.Execute: ((Goto)item).FromStates.ForEach(s => result.Add(s.ToString(), item.TargetState.ToString(), item.Key)); break;
+                    case OperationType.Execute:
+                        foreach (var s in ((Goto)item).FromStates)
+                            result.Add(s.ToString(), item.TargetState.ToString(), item.Key);
+                        break;
                     case OperationType.Constructor: result.Add("[New]", item.TargetState.ToString(), item.Key); break;
                     case OperationType.ConstructorFrom: result.Add("[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()), item.TargetState.ToString(), item.Key); break;
                     case OperationType.ConstructorFromMany: result.Add("[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()), item.TargetState.ToString(), item.Key); break;

@@ -54,21 +54,25 @@ namespace Signum.Windows.Reports
                 string columnasVista = DameColumnaExcel(colsVisibles.Count - 1); //((char)('A' + (char)vista.Columns.Count)).ToString();
                 Range rangeTotal = wsDatos.get_Range("A2", columnasVista + wsDatos.Rows.Count.ToString());
                 rangeTotal.Clear();
-                
-                var visibles = vista.Columns.Select((c,i)=> new {Column = c , Index = i}).Where(p=>p.Column.Visible).ToList(); 
-                //Copiar nuevos datos origen
-                vista.Data.ForEach((fila, numFila) =>
-                {
-                    int numFilaBase1 = numFila + 2;
 
-                    visibles.ForEach((par,i) =>
+                var visibles = vista.Columns.Select((c, i) => new { Column = c, Index = i }).Where(p => p.Column.Visible).ToList(); 
+                //Copiar nuevos datos origen
+                for (int j = 0; j < vista.Data.Length; j++)
+                {
+                    int numFilaBase1 = j + 2;
+
+                    var fila = vista.Data[j];
+
+                    for (int i = 0; i < visibles.Count; i++)
                     {
+                        var par = visibles[i];
+
                         string columna = DameColumnaExcel(i); //((char)('A' + (char)numCol)).ToString();
                         Range range = wsDatos.get_Range(columna + numFilaBase1, columna + numFilaBase1);
                         if (range != null)
                             range.Value2 = fila[par.Index].TryCC(a => a.ToString());
-                    });
-                });
+                    }
+                }
 
                 //Recorrer todas las hojas de cálculo, y para cada una de ellas buscar todas sus Tablas y Gráficos Dinámicos (ambos son PivotTables) y
                 //  actualizar su SourceData al área de los nuevos datos origen

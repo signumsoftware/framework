@@ -20,7 +20,8 @@ namespace Signum.Test.Extensions
 
             Thread[] producers = 0.To(10).Select(i => new Thread(() => 
             {
-                0.To(100).ForEach(j => queue.Enqueue(j + i * 1000)); 
+                foreach (var j in 0.To(100))
+                    queue.Enqueue(j + i * 1000);
                 queue.Enqueue(-1);
             })).ToArray();
 
@@ -38,11 +39,11 @@ namespace Signum.Test.Extensions
                 }
             })).ToArray();
 
-            consumers.ForEach(p => p.Start());
-            producers.ForEach(p => p.Start());
-            
-            producers.ForEach(p => p.Join());
-            consumers.ForEach(p => p.Join());
+            foreach (var p in consumers) p.Start();
+            foreach (var p in producers) p.Start();
+
+            foreach (var p in producers) p.Join();
+            foreach (var p in consumers) p.Join();
 
             Assert.AreEqual(tree.Keys.Count(), 1000); 
         }
