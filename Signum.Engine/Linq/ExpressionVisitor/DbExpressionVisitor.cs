@@ -277,7 +277,7 @@ namespace Signum.Engine.Linq
                 if (select != null)
                     return new InExpression(expression, select);
                 else
-                    return new InExpression(expression, @in.Values);
+                    return InExpression.FromValues(expression, @in.Values);
             }
             return @in;
         }

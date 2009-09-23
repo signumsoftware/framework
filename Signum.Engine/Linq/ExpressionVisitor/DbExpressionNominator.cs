@@ -285,14 +285,16 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitIn(InExpression inExp)
         {
+
             Expression exp = this.Visit(inExp.Expression);
             SelectExpression select = (SelectExpression)this.Visit(inExp.Select);
+            Expression result = inExp;
             if (exp != inExp.Expression)
-                inExp = select == null ? new InExpression(exp, inExp.Values) :
-                                         new InExpression(exp, select); 
+                result = select == null ? InExpression.FromValues(exp, inExp.Values) :
+                                         new InExpression(exp, select);
 
             if (candidates.Contains(exp))
-                candidates.Add(inExp);
+                candidates.Add(result);
 
             return inExp;
         }

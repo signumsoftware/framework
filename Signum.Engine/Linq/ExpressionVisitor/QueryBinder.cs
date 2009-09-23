@@ -471,7 +471,7 @@ namespace Signum.Engine.Linq
                 else if (typeof(Lazy).IsAssignableFrom(colType))
                     return SmartEqualizer.EntityIn(newItem, col.Cast<Lazy>().Select(lazy => ToLazyReferenceExpression(colType, lazy)).ToArray());
                 else
-                    return new InExpression(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
+                    return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
             }
             else
             {
@@ -481,7 +481,7 @@ namespace Signum.Engine.Linq
                 var pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Source.KnownAliases);
 
                 SubqueryExpression se = null;
-                if (pc.Columns.Count == 1)
+                if (pc.Columns.Count == 1 && !typeof(IIdentifiable).IsAssignableFrom(newItem.Type))
                     se = new InExpression(newItem, projection.Source);
                 else
                 {

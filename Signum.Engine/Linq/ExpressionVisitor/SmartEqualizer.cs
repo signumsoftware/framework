@@ -18,7 +18,7 @@ namespace Signum.Engine.Linq
             if (e1.IsNull())
             {
                 if (e2.IsNull())
-                    return True;
+                    return SqlConstantExpression.True;
                 else
                     return new IsNullExpression(e2);
             }
@@ -59,19 +59,19 @@ namespace Signum.Engine.Linq
 
             FieldInitExpression fie = newItem as FieldInitExpression;
             if (fie != null)
-                return new InExpression(fie.ExternalId, entityIDs.TryGetC(fie.Type) ?? new object[0]);
+                return InExpression.FromValues(fie.ExternalId, entityIDs.TryGetC(fie.Type) ?? new object[0]);
 
             ImplementedByExpression ib = newItem as ImplementedByExpression;
             if (ib != null)
                 return ib.Implementations.ToDictionary(a => a.Type, a => a.Field).JoinDictionary(entityIDs, (t, f, values) => Expression.And(
                     new IsNotNullExpression(f.ExternalId),
-                    new InExpression(f.ExternalId, values))).Values.Aggregate((a, b) => Expression.Or(a, b));
+                    InExpression.FromValues(f.ExternalId, values))).Values.Aggregate((a, b) => Expression.Or(a, b));
 
             ImplementedByAllExpression iba = newItem as ImplementedByAllExpression;
             if (iba != null)
                 return entityIDs.Select(kvp => Expression.And(
                     EqualNullable(Expression.Constant(Schema.Current.IDsForType[kvp.Key]), iba.TypeId),
-                    new InExpression(iba.Id, kvp.Value))).Aggregate((a, b) => Expression.Or(a, b));
+                    InExpression.FromValues(iba.Id, kvp.Value))).Aggregate((a, b) => Expression.Or(a, b));
 
             throw new InvalidOperationException("EntityIn not defined for newItem of type  {0}".Formato(newItem.Type.Name));
         }
@@ -109,27 +109,24 @@ namespace Signum.Engine.Linq
                 if (tE2 == DbExpressionType.FieldInit) return EqualsToNull(((FieldInitExpression)e2).ExternalId);
                 else if (tE2 == DbExpressionType.ImplementedBy) return ((ImplementedByExpression)e2).Implementations.Select(a => EqualsToNull(a.Field.ExternalId)).Aggregate((a, b) => Expression.And(a, b));
                 else if (tE2 == DbExpressionType.ImplementedByAll) return EqualsToNull(((ImplementedByAllExpression)e2).Id);
-                else if (e2.IsNull()) return True;
+                else if (e2.IsNull()) return SqlConstantExpression.True;
                 else return null;
             else return null;
         }
-
-        static readonly Expression False = Expression.Equal(Expression.Constant(1), Expression.Constant(0));
-        static readonly Expression True = Expression.Equal(Expression.Constant(1), Expression.Constant(1));
 
         static Expression FieFieEquals(FieldInitExpression fie1, FieldInitExpression fie2)
         {
             if (fie1.Type == fie2.Type)
                 return EqualNullable(fie1.ExternalId, fie2.ExternalId);
-            else 
-                return False;
+            else
+                return SqlConstantExpression.False;
         }
 
         static Expression FieIbEquals(FieldInitExpression fie, ImplementedByExpression ib)
         {
             var imp = ib.Implementations.SingleOrDefault(i => i.Type == fie.Type);
             if (imp == null)
-                return False;
+                return SqlConstantExpression.False;
 
             return EqualNullable(imp.Field.ExternalId, fie.ExternalId); 
         }
@@ -145,7 +142,7 @@ namespace Signum.Engine.Linq
         {
             var list = ib.Implementations.Join(ib2.Implementations, i => i.Type, j => j.Type, (i, j) => EqualNullable(i.Field.ExternalId, j.Field.ExternalId)).ToList();
             if(list.Count == 0)
-                return False;
+                return SqlConstantExpression.False;
             return list.Aggregate((e1, e2) => Expression.Or(e1, e2));
         }
 
@@ -156,7 +153,7 @@ namespace Signum.Engine.Linq
                 EqualNullable(iba.TypeId, Expression.Constant(Schema.Current.IDsForType[i.Type])))).ToList();
 
             if (list.Count == 0)
-                return False;
+                return SqlConstantExpression.False;
 
             return list.Aggregate((e1, e2) => Expression.Or(e1, e2));
         }
