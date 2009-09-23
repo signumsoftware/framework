@@ -10,20 +10,34 @@ using System.ServiceModel;
 using Signum.Engine;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
+using Signum.Utilities;
 
 namespace Signum.Services
 {
     public abstract class ServerBasic : IBaseServer, IQueryServer, INotesServer
     {
+        protected T Return<T>(MethodBase mi, string description, Func<T> function)
+        {
+            T t = default(T);
+            Action a = () => t = function();
+            Execute(mi, description, a);
+            return t;
+        }
+
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
             T t = default(T);
             Action a = () => t = function();
-            Execute(mi, a);
+            Execute(mi, mi.Name, a);
             return t;
         }
 
-        protected virtual void Execute(MethodBase mi, Action action)
+        protected void Execute(MethodBase mi, Action action)
+        {
+            Execute(mi, mi.Name, action);
+        }
+
+        protected virtual void Execute(MethodBase mi, string description, Action action)
         {
             try
             {
@@ -40,25 +54,25 @@ namespace Signum.Services
         #region IBaseServer
         public IdentifiableEntity Retrieve(Type type, int id)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "Retrieve {0}".Formato(type.Name),
              () => Database.Retrieve(type, id));
         }
 
         public IdentifiableEntity Save(IdentifiableEntity entidad)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "Save {0}".Formato(entidad.GetType()),
              () => { Database.Save(entidad); return entidad; });
         }
 
         public List<Lazy> RetrieveAllLazy(Type lazyType, Type[] types)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLazy {0}".Formato(lazyType),
              () => AutoCompleteUtils.RetriveAllLazy(lazyType, types));
         }
 
         public List<Lazy> FindLazyLike(Type lazyType, Type[] types, string subString, int count)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "FindLazyLike {0}".Formato(lazyType),
              () => AutoCompleteUtils.FindLazyLike(lazyType, types, subString, count));
         }
 
@@ -70,7 +84,7 @@ namespace Signum.Services
 
         public List<IdentifiableEntity> RetrieveAll(Type type)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAll {0}".Formato(type),
             () => Database.RetrieveAll(type));
         }
 
@@ -109,7 +123,7 @@ namespace Signum.Services
 
         public QueryResult GetQueryResult(object queryName, List<Filter> filters, int? limit)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(queryName),
              () => GetQueryManager().ExecuteQuery(queryName, filters, limit));
         }
 

@@ -251,4 +251,22 @@
   <data name="_0Years" xml:space="preserve">
     <value>{0} Years</value>
   </data>
+  <data name="_0Hour" xml:space="preserve">
+    <value>{0} Hour</value>
+  </data>
+  <data name="_0Hours" xml:space="preserve">
+    <value>{0} Hours</value>
+  </data>
+  <data name="_0Minute" xml:space="preserve">
+    <value>{0} Minute</value>
+  </data>
+  <data name="_0Minutes" xml:space="preserve">
+    <value>{0} Minutes</value>
+  </data>
+  <data name="_0Second" xml:space="preserve">
+    <value>{0} Second</value>
+  </data>
+  <data name="_0Seconds" xml:space="preserve">
+    <value>{0} Seconds</value>
+  </data>
 </root>

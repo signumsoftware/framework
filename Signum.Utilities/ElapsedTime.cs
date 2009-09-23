@@ -6,13 +6,13 @@ using System.Diagnostics;
 
 namespace Signum.Utilities
 {
-    public class ElapsedTime
+    public static class ElapsedTime
     {
         public static bool ShowDebug = true;
         public static Dictionary<string, ElapsedTimeEnty> IdentifiedElapseds =
             new Dictionary<string, ElapsedTimeEnty>();
 
-        public IDisposable Start(string identifier)
+        public static IDisposable Start(string identifier)
         {
             Stopwatch sp = new Stopwatch();
             sp.Start();
@@ -20,7 +20,7 @@ namespace Signum.Utilities
             return new Disposable(() => { sp.Stop(); InsertEnty(sp.ElapsedMilliseconds, identifier); });
         }
 
-        private void InsertEnty(long milliseconds, string identifier)
+        static void InsertEnty(long milliseconds, string identifier)
         {
             lock (IdentifiedElapseds)
             {
@@ -32,11 +32,12 @@ namespace Signum.Utilities
                 }
 
                 entry.LastTime = milliseconds;
+                entry.LastDate = DateTime.Now;
                 entry.TotalTime += milliseconds;
                 entry.Times++;
 
-                if (milliseconds < entry.MinTime) entry.MinTime = milliseconds;
-                if (milliseconds > entry.MaxTime) entry.MaxTime = milliseconds;
+                if (milliseconds < entry.MinTime) { entry.MinTime = milliseconds; entry.MinDate = DateTime.Now; }
+                if (milliseconds > entry.MaxTime) {entry.MaxTime = milliseconds; entry.MaxDate = DateTime.Now; }
                 if (ShowDebug) Debug.WriteLine(identifier + " - " + entry);
             }
         }
@@ -53,6 +54,10 @@ namespace Signum.Utilities
         {
             get { return (TotalTime / Times); }
         }
+
+        public DateTime MinDate;
+        public DateTime MaxDate;
+        public DateTime LastDate;
 
         public override string ToString()
         { 

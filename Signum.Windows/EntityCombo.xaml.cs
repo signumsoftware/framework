@@ -126,10 +126,6 @@ namespace Signum.Windows
             isLoaded = true;
         }
 
-        public void ClearItems() {
-            combo.Items.Clear();
-        }
-
         public void LoadNow()
         {
             IEnumerable data;

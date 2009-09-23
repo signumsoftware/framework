@@ -88,6 +88,42 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} Hour.
+        /// </summary>
+        internal static string _0Hour {
+            get {
+                return ResourceManager.GetString("_0Hour", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Hours.
+        /// </summary>
+        internal static string _0Hours {
+            get {
+                return ResourceManager.GetString("_0Hours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Minute.
+        /// </summary>
+        internal static string _0Minute {
+            get {
+                return ResourceManager.GetString("_0Minute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Minutes.
+        /// </summary>
+        internal static string _0Minutes {
+            get {
+                return ResourceManager.GetString("_0Minutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} Month.
         /// </summary>
         internal static string _0Month {
@@ -102,6 +138,24 @@ namespace Signum.Utilities.Properties {
         internal static string _0Months {
             get {
                 return ResourceManager.GetString("_0Months", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Second.
+        /// </summary>
+        internal static string _0Second {
+            get {
+                return ResourceManager.GetString("_0Second", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Seconds.
+        /// </summary>
+        internal static string _0Seconds {
+            get {
+                return ResourceManager.GetString("_0Seconds", resourceCulture);
             }
         }
         

@@ -51,6 +51,7 @@
     <Compile Include="AboutUtils.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
+    <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="CSV.cs" />
     <Compile Include="DataStructures\Grouping.cs" />
     <Compile Include="DataStructures\ImmutableAVLTree.cs">
