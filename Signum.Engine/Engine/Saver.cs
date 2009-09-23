@@ -54,7 +54,8 @@ namespace Signum.Engine
 
             Schema schema = ConnectionScope.Current.Schema;
 
-            identifiables.ForEach(node => schema.OnSaving(node)); 
+            foreach (var node in identifiables)
+                schema.OnSaving(node);
 
             ////calculate saving dependencies (edges to new identifiables)
             //DirectedGraph<IdentifiableEntity> dependencies = identifiables.WhereEdges(e => e.To.IsNew);
@@ -75,7 +76,8 @@ namespace Signum.Engine
 
             SaveGroup(postSavings, schema, null);
 
-            identifiables.ForEach(node => schema.OnSaved(node)); 
+            foreach (var node in identifiables)
+                schema.OnSaved(node);
 
             EntityCache.Add(identifiables);
         }

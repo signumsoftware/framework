@@ -52,21 +52,22 @@ namespace Signum.Excel
             ns2.Types.Add(type);
 
             if (_styles != null)
-            {  
-                _styles.ForEach((st,i) => 
-                {   
+            {
+                for (int i = 0; i < _styles.Count; i++)
+                {
+                    Style st = _styles[i];
+
                     var constant = new CodeMemberField(typeof(string), st.ID)
                     {
                         Attributes = MemberAttributes.Const | MemberAttributes.Private,
                         InitExpression = new CodePrimitiveExpression(st.ID),
-                    }; 
+                    };
 
-                    if(i== 0) constant.StartDirectives.Add(new CodeRegionDirective(CodeRegionMode.Start, "Styles"));
-                    if(i == _styles.Count-1)      constant.EndDirectives.Add(new CodeRegionDirective(CodeRegionMode.End, null));
+                    if (i == 0) constant.StartDirectives.Add(new CodeRegionDirective(CodeRegionMode.Start, "Styles"));
+                    if (i == _styles.Count - 1) constant.EndDirectives.Add(new CodeRegionDirective(CodeRegionMode.End, null));
 
                     type.Members.Add(constant);
-                });
-           
+                }
             }
 
             CodeMemberMethod method = new CodeMemberMethod()

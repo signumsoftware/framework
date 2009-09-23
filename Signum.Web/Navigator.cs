@@ -687,8 +687,8 @@ namespace Signum.Web
             //Split each error in one entry in the HashTable:
             var globalErrors = dicGlobalErrors.SelectMany(a => a.Value.Lines()).ToList();
             //eliminar de globalErrors los que ya hemos metido en el diccionario
-            errors.SelectMany(a => a.Value)
-                  .ForEach(e => globalErrors.Remove(e));
+            foreach (var e in errors.SelectMany(a => a.Value))
+                globalErrors.Remove(e);
             //meter el resto en el diccionario
             if (globalErrors.Count > 0)
                 errors.Add(ViewDataKeys.GlobalErrors, globalErrors.ToList());
@@ -707,8 +707,8 @@ namespace Signum.Web
             //Split each error in one entry in the HashTable:
             var globalErrors = dicGlobalErrors.SelectMany(a => a.Value.Lines()).ToList();
             //eliminar de globalErrors los que ya hemos metido en el diccionario
-            errors.SelectMany(a => a.Value)
-                  .ForEach(e => globalErrors.Remove(e));
+            foreach (var e in errors.SelectMany(a => a.Value))
+                globalErrors.Remove(e);
             //meter el resto en el diccionario
             fullIntegrityErrors = globalErrors.ToList();
 
@@ -794,7 +794,9 @@ namespace Signum.Web
         public static void FromDictionary(this ModelStateDictionary modelState, Dictionary<string, List<string>> errors, NameValueCollection form)
         {
             if (errors != null)
-                errors.ForEach(p => p.Value.ForEach(v => modelState.AddModelError(p.Key, v, form[p.Key])));
+                foreach (var p in errors)
+                    foreach (var v in p.Value)
+                        modelState.AddModelError(p.Key, v, form[p.Key]);
         }
 
         public static string ToJsonData(this ModelStateDictionary modelState)

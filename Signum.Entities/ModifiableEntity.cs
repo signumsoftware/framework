@@ -155,9 +155,9 @@ namespace Signum.Entities
             if (NotifyPropertyChangedAttribute.FieldsToNotify(GetType()).Any(f => f(this) == sender))
             {
                 if (args.NewItems != null)
-                    args.NewItems.Cast<INotifyPropertyChanged>().ForEach(p => p.PropertyChanged += ChildItemPropertyChanged);
+                    foreach (var p in args.NewItems.Cast<INotifyPropertyChanged>())p.PropertyChanged += ChildItemPropertyChanged;
                 if (args.OldItems != null)
-                    args.OldItems.Cast<INotifyPropertyChanged>().ForEach(p => p.PropertyChanged -= ChildItemPropertyChanged);
+                    foreach (var p in args.OldItems.Cast<INotifyPropertyChanged>())p.PropertyChanged -= ChildItemPropertyChanged;
             }
         }
 

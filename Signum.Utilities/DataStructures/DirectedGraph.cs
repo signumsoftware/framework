@@ -417,14 +417,16 @@ public class DirectedGraph<T>:IEnumerable<T>
             if (fanInOut(mm.Max) > -fanInOut(mm.Min))
             {
                 T node = mm.Max;
-                inv.RelatedTo(node).ForEach(n=>result.Add(n,node));
+                foreach (var n in inv.RelatedTo(node))
+                    result.Add(node, n);
                 DirectedGraph<T>.RemoveFullNodeSymetric(clone, inv, node);
                 head.Add(node); 
             }
             else
             {
                 T node = mm.Min;
-                clone.RelatedTo(node).ForEach(n=>result.Add(node, n));
+                foreach (var n in clone.RelatedTo(node))
+                    result.Add(node, n);
                 DirectedGraph<T>.RemoveFullNodeSymetric(clone, inv, node);
                 head.Add(node); 
             }

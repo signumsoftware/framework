@@ -24,14 +24,15 @@ namespace Signum.Entities.DynamicQuery
             {
                 return Columns.Where(c => c.Visible).ToList();
             }
-        } 
+        }
 
         public DataTable ToDataTable()
         {
             DataTable dt = new DataTable("Tabla");
             dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Name, c.Type)).ToArray());
-            Data.ForEach(arr => dt.Rows.Add(arr));
-            return dt; 
+            foreach (var arr in Data)
+                dt.Rows.Add(arr);
+            return dt;
         }
     }
 

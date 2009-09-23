@@ -93,7 +93,10 @@ namespace Signum.Entities.Reflection
 
         public static void PreSaving(DirectedGraph<Modifiable> modifiable)
         {
-            modifiable.ForEach(m => m.PreSaving());
+            foreach (var m in modifiable)
+            {
+                m.PreSaving();
+            }
         }
 
 

@@ -129,23 +129,25 @@ namespace Signum.Utilities
             }
         }
 
-        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T> action)
-        {
-            foreach (var item in collection)
-                action(item);
-            return collection;
-        }
+        //public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T> action)
+        //{
+        //    foreach (var item in collection)
+        //    {
+        //        action(item);
+        //        yield return item; 
+        //    }
+        //}
 
-        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T, int> action)
-        {
-            int i = 0;
-            foreach (var item in collection)
-            {
-                action(item, i);
-                i++;
-            }
-            return collection;
-        }
+        //public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T, int> action)
+        //{
+        //    int i = 0;
+        //    foreach (var item in collection)
+        //    {
+        //        action(item, i);
+        //        yield return item;
+        //        i++;
+        //    }
+        //}
 
         public static string ToString<T>(this IEnumerable<T> collection, string separator)
         {
@@ -201,8 +203,8 @@ namespace Signum.Utilities
 
             List<MemberEntry<T>> members = MemberEntryFactory.GenerateList<T>();
             table.Columns.AddRange(members.Select(m => new DataColumn(m.Name, m.MemberInfo.ReturningType())).ToArray());
-            collection.ForEach(
-                e => table.Rows.Add(members.Select(m => m.Getter(e)).ToArray()));
+            foreach (var e in collection)
+                table.Rows.Add(members.Select(m => m.Getter(e)).ToArray());
             return table;
         }
 

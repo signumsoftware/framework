@@ -422,14 +422,17 @@ namespace Signum.Utilities.DataStructures
                 if (fanInOut(mm.Max) > -fanInOut(mm.Min))
                 {
                     T node = mm.Max;
-                    inv.RelatedTo(node).ForEach(n => result.Add(n.Key, node, n.Value));
+                    foreach (var n in inv.RelatedTo(node))
+                        result.Add(n.Key, node, n.Value);
+                    
                     DirectedEdgedGraph<T, E>.RemoveFullNodeSymetric(clone, inv, node);
                     head.Add(node);
                 }
                 else
                 {
                     T node = mm.Min;
-                    clone.RelatedTo(node).ForEach(n => result.Add(node, n.Key, n.Value));
+                    foreach (var n in clone.RelatedTo(node))
+                        result.Add(node, n.Key, n.Value);
                     DirectedEdgedGraph<T, E>.RemoveFullNodeSymetric(clone, inv, node);
                     head.Add(node);
                 }

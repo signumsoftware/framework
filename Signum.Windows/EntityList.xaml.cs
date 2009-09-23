@@ -169,7 +169,14 @@ namespace Signum.Windows
             {
                 int index = InsertIndex();
                 if (value is object[])
-                    ((object[])value).ForEach((a, i) => list.Insert(index + i, a));
+                {
+                    object[] array = ((object[])value);
+
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        list.Insert(index + i, array[i]);
+                    }
+                }
                 else
                     list.Insert(index, value);
 
@@ -178,7 +185,8 @@ namespace Signum.Windows
             else
             {
                 if (value is object[])
-                    ((object[])value).ForEach(a => list.Add(a));
+                    foreach (var a in ((object[])value))
+		                 list.Add(a);
                 else
                     list.Add(value);
 

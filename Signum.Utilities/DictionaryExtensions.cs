@@ -130,7 +130,8 @@ namespace Signum.Utilities
             set.UnionWith(dic1.Keys);
             set.IntersectWith(dic2.Keys);
 
-            set.ForEach(k => action(k, dic1[k], dic2[k]));
+            foreach (var k in set)
+                action(k, dic1[k], dic2[k]);
         }
 
         public static Dictionary<K, V3> OuterJoinDictionaryCC<K, V1, V2, V3>(this IDictionary<K, V1> dic1, IDictionary<K, V2> dic2, Func<K, V1, V2, V3> mixer)

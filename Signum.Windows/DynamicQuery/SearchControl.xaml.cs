@@ -227,8 +227,10 @@ namespace Signum.Windows
         {
             gvResults.Columns.Clear();
 
-            view.Columns.ForEach((c, i) =>
+            for (int i = 0; i < view.Columns.Count; i++)
             {
+                Column c = view.Columns[i];
+
                 if (!c.Visible) return;
 
                 Binding b = new Binding("[{0}]".Formato(i)) { Mode = BindingMode.OneTime };
@@ -239,7 +241,7 @@ namespace Signum.Windows
                     Header = c.DisplayName,
                     CellTemplate = dt,
                 });
-            });
+            }
         }
 
         private void FilterBuilder_SearchClicked(object sender, RoutedEventArgs e)
