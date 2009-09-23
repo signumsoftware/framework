@@ -15,6 +15,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Entities.Operations;
 using Signum.Engine.Operations;
+using Signum.Utilities;
 
 namespace Signum.Services
 {
@@ -23,7 +24,7 @@ namespace Signum.Services
     {
         protected UserDN currentUser;
 
-        protected override void Execute(MethodBase mi, Action action)
+        protected override void Execute(MethodBase mi, string description, Action action)
         {
             try
             {
@@ -71,7 +72,7 @@ namespace Signum.Services
         #region IOperationServer Members
         public List<OperationInfo> GetEntityOperationInfos(IdentifiableEntity entity)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "GetEntityOperationInfos {0}".Formato(entity.GetType()),
                 () => OperationLogic.ServiceGetEntityOperationInfos(entity));
         }
 
@@ -89,37 +90,37 @@ namespace Signum.Services
 
         public IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperation {0}".Formato(operationKey),
                () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum type, params object[] args)
+        public IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationLogic.ServiceExecuteLazy(lazy, type, args));
+            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperationLazy {0}".Formato(operationKey),
+              () => OperationLogic.ServiceExecuteLazy(lazy, operationKey, args));
         }
 
         public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "Construct {0}".Formato(operationKey),
               () => OperationLogic.ServiceConstruct(type, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "ConstructFrom {0}".Formato(operationKey),
               () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromLazy {0}".Formato(operationKey),
               () => OperationLogic.ServiceConstructFromLazy(lazy, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
+            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromMany {0}".Formato(operationKey),
               () => OperationLogic.ServiceConstructFromMany(lazies, type, operationKey, args));
         }
         #endregion
