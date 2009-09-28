@@ -231,7 +231,8 @@ namespace Signum.Windows
             {
                 Column c = view.Columns[i];
 
-                if (!c.Visible) return;
+                if (!c.Visible)
+                    continue;
 
                 Binding b = new Binding("[{0}]".Formato(i)) { Mode = BindingMode.OneTime };
                 DataTemplate dt = settings.GetFormatter(c)(b);

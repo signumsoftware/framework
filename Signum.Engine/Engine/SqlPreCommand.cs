@@ -108,7 +108,7 @@ namespace Signum.Engine
 
         public static void OpenSqlFile(this SqlPreCommand command)
         {
-            OpenSqlFile(command, "Sync {0:dd-MM-YYYY}.sql".Formato(DateTime.Now));
+            OpenSqlFile(command, "Sync {0:dd-MM-yyyy}.sql".Formato(DateTime.Now));
         }
 
         public static void OpenSqlFile(this SqlPreCommand command, string fileName)

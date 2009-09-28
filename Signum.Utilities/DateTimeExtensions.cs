@@ -129,29 +129,13 @@ namespace Signum.Utilities
         public readonly int Years;
         public readonly int Months;
         public readonly int Days;
-      /*  public readonly int Hours;
-        public readonly int Minutes;
-        public readonly int Seconds;*/
 
         public DateSpan(int years, int months, int days)
         {
             this.Years = years;
             this.Months = months;
             this.Days = days;
-      /*      this.Hours = 0;
-            this.Minutes = 0;
-            this.Seconds = 0;*/
         }
-
-     /*   public DateSpan(int years, int months, int days, int hours, int minutes, int seconds)
-        {
-            this.Years = years;
-            this.Months = months;
-            this.Days = days;
-            this.Hours = hours;
-            this.Minutes = minutes;
-            this.Seconds = seconds;
-        }*/
 
         public static DateSpan FromToDates(DateTime min, DateTime max)
         {
@@ -172,13 +156,6 @@ namespace Signum.Utilities
 
             int days = max.Subtract(min.AddYears(years).AddMonths(months)).Days;
 
-            /*
-            int hours = max.Subtract(min.AddYears(years).AddMonths(months)).Hours;
-            int minutes = max.Subtract(min.AddYears(years).AddMonths(months)).Minutes;
-            int seconds = max.Subtract(min.AddYears(years).AddMonths(months)).Seconds;
-
-            return new DateSpan(years, months, days, hours, minutes, seconds);
-            */
             return new DateSpan(years, months, days);
         }
 
@@ -216,53 +193,5 @@ namespace Signum.Utilities
 
             return s;
         }
-
-       /* public string ToShortString()
-        {
-            string s = string.Empty;
-            string separator = ", ";
-            if (Years > 0)
-            {
-                if (Years == 1) s = s.Add(Properties.Resources._0Year.Formato(Years), separator);
-                else s = s.Add(Properties.Resources._0Years.Formato(Years), separator);
-                return s;
-            }
-
-            if (Months > 0)
-            {
-                if (Months == 1) s = s.Add(Properties.Resources._0Month.Formato(Months), separator);
-                else s = s.Add(Properties.Resources._0Months.Formato(Months), separator);
-                return s;
-            }
-
-            if (Days > 0)
-            {
-                if (Days == 1) s = s.Add(Properties.Resources._0Day.Formato(Days), separator);
-                else s = s.Add(Properties.Resources._0Days.Formato(Days), separator);
-                return s;
-            }
-
-            if (Hours > 0)
-            {
-                if (Hours == 1) s = s.Add(Properties.Resources._0Hour.Formato(Hours), separator);
-                else s = s.Add(Properties.Resources._0Hours.Formato(Hours), separator);
-                return s;
-            }
-
-            if (Minutes > 0)
-            {
-                if (Minutes == 1) s = s.Add(Properties.Resources._0Minute.Formato(Minutes), separator);
-                else s = s.Add(Properties.Resources._0Minutes.Formato(Minutes), separator);
-                return s;
-            }
-
-            if (Seconds > 0)
-            {
-                if (Seconds == 1) s = s.Add(Properties.Resources._0Second.Formato(Seconds), separator);
-                else s = s.Add(Properties.Resources._0Seconds.Formato(Seconds), separator);
-                return s;
-            }
-            return s;
-        }*/
     }
 }
