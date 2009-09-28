@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities;
 
 namespace Signum.Entities.Extensions.Basics
 {
@@ -29,7 +30,7 @@ namespace Signum.Entities.Extensions.Basics
             set { Set(ref days, value, "Days"); }
         }
 
-        public bool  EsNulo()
+        public bool EsNulo()
         {
             return years == 0 && months == 0 && days == 0;        
         }
@@ -39,5 +40,9 @@ namespace Signum.Entities.Extensions.Basics
             return date.AddYears(years).AddMonths(months).AddDays(days);
         }
 
+        public DateSpan ToDateSpan()
+        {
+            return new DateSpan(years, months, days); 
+        }
     }
 }
