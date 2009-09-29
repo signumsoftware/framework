@@ -23,8 +23,10 @@ namespace Signum.Engine
 
             int result = Executor.ExecuteNonQuery(comando.ToSimple());
 
-            if (!ConnectionScope.Current.IsMock && result != 1)
-                throw new ApplicationException(Resources.EntityOfType0AndId1NotFound.Formato(type.Name, id));
+
+            //TODO: olmo desactivado provisional mente
+            //if (!ConnectionScope.Current.IsMock && result != 1)
+            //    throw new ApplicationException(Resources.EntityOfType0AndId1NotFound.Formato(type.Name, id));
 
             Schema.Current.OnDeleted(type, id); 
         }
@@ -35,7 +37,8 @@ namespace Signum.Engine
 
             SqlPreCommand comando = SqlPreCommand.Combine(Spacing.Double,
                 SqlBuilder.DeclareLastEntityID(),
-                table.DeleteSql(id));
+                table.DeleteSql(id),
+                new SqlPreCommandSimple("SELECT @@rowcount"));
             return comando;
         }
 
@@ -57,7 +60,13 @@ namespace Signum.Engine
 
             SqlPreCommand comando = SqlPreCommand.Combine(Spacing.Double,
                 SqlBuilder.DeclareLastEntityID(),
-                ids.Select(id => table.DeleteSql(id)).Combine(Spacing.Simple));
+                new SqlPreCommandSimple("DECLARE @Acumulator int"),
+                new SqlPreCommandSimple("SET @Acumulator = 0"),
+                ids.SelectMany(id => new []{
+                    table.DeleteSql(id),
+                    new SqlPreCommandSimple("SET @Acumulator = @@rowcount + @Acumulator")}
+                    ).Combine(Spacing.Simple),
+                new SqlPreCommandSimple("select @Acumulator"));
             return comando;
         }
     }
