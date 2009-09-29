@@ -18,6 +18,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using System.Configuration;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Web
 {
@@ -330,14 +331,11 @@ namespace Signum.Web
 
         HashSet<string> loadedModules = new HashSet<string>();
 
-        public bool NotDefined<T>()
+        public bool NotDefined(MethodBase currentMethod)
         {
-            return NotDefined(typeof(T).FullName);
-        }
+            string methodName = currentMethod.DeclaringType.TypeName() + "." + currentMethod.Name;
 
-        public bool NotDefined(string moduleName)
-        {
-            return loadedModules.Add(moduleName);
+            return loadedModules.Add(methodName);
         }
 
         protected internal virtual string GetQueryName(object queryName)

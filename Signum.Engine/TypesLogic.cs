@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using Signum.Utilities;
+using System.Reflection;
 
 namespace Signum.Engine
 {
@@ -28,7 +29,7 @@ namespace Signum.Engine
 
         public static void Start(SchemaBuilder sb, bool fillStaticCache)
         {
-            if (sb.NotDefined<TypeDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<TypeDN>();
 
