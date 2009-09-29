@@ -17,19 +17,24 @@ namespace Signum.Engine.Authorization
 
     public static class PermissionAuthLogic
     {
-        static List<Type> permissionTypes;
+        static List<Type> permissionTypes = new List<Type>();
         static Dictionary<RoleDN, Dictionary<string, bool>> _runtimeRules;
         static Dictionary<RoleDN, Dictionary<string, bool>> RuntimeRules
         {
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, params Type[] types)
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            if (!sb.ContainsDefinition<RulePermissionDN>())
+                throw new ApplicationException("Call PermissionAuthLogic.Start First"); 
+        }
+
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined<RulePermissionDN>())
             {
                 AuthLogic.AssertIsStarted(sb);
-                permissionTypes = new List<Type>(types);
 
                 sb.Include<RulePermissionDN>();
                 sb.Include<PermissionDN>();
@@ -39,10 +44,11 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
-            else
-            {
-                permissionTypes.AddRange(types);
-            }
+        }
+
+        public static void RegisterTypes(params Type[] types)
+        {
+            permissionTypes.AddRange(types);
         }
 
         static void Schema_Initializing(Schema sender)

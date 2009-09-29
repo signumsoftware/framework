@@ -66,7 +66,6 @@ namespace Signum.Engine.Files
 
                 Transaction.RealCommit += () => File.Delete(fullPath);
             }
-            throw new NotImplementedException();
         }
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h

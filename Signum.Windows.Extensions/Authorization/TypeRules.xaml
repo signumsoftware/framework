@@ -5,7 +5,7 @@
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     SizeToContent="WidthAndHeight"
-    Title="Service Operation Rules" x:Name="me" MinWidth="300" MinHeight="300">
+    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
