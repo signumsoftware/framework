@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System.Threading;
 using Signum.Entities;
+using System.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -25,7 +26,7 @@ namespace Signum.Engine.Authorization
 
         public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
         {
-            if (sb.NotDefined<RuleQueryDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
                 QueryLogic.Start(sb, queryManagers);

@@ -6,6 +6,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Utilities;
+using System.Reflection;
 
 namespace Signum.Engine.Basics
 {
@@ -17,7 +18,7 @@ namespace Signum.Engine.Basics
 
         public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
         {
-            if (sb.NotDefined<QueryDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
 
                 QueryManagers = queryManagers;

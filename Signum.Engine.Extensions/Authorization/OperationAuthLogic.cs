@@ -13,6 +13,7 @@ using System.Threading;
 using Signum.Entities;
 using Signum.Entities.Operations;
 using Signum.Engine.Operations;
+using System.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -26,7 +27,7 @@ namespace Signum.Engine.Authorization
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined<RuleOperationDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
                 OperationLogic.AssertIsStarted(sb);

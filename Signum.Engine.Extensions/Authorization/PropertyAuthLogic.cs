@@ -10,7 +10,8 @@ using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
-using Signum.Entities.DynamicQuery; 
+using Signum.Entities.DynamicQuery;
+using System.Reflection; 
 
 namespace Signum.Engine.Authorization
 {
@@ -24,7 +25,7 @@ namespace Signum.Engine.Authorization
 
         public static void Start(SchemaBuilder sb, bool queries)
         {
-            if (sb.NotDefined<RulePropertyDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
                 PropertyLogic.Start(sb); 

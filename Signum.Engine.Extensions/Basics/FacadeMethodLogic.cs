@@ -18,7 +18,7 @@ namespace Signum.Engine.Basics
         static Type serviceInterface;
         public static void Start(SchemaBuilder sb, Type serviceInterface)
         {
-            if (sb.NotDefined<FacadeMethodDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 FacadeMethodLogic.serviceInterface = serviceInterface;
                 sb.Include<FacadeMethodDN>();

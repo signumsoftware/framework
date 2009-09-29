@@ -24,7 +24,7 @@ namespace Signum.Web.Authorization
 
         public static void Start(NavigationManager manager, bool types, bool property, bool queries, bool registerUserGraph)
         {
-            if (manager.NotDefined<UserDN>())
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(true)); //{ PartialViewName= ViewPrefix + "UserIU.ascx" }); 
                 manager.EntitySettings.Add(typeof(RoleDN), new EntitySettings(false)); //{ View = () => new Role() });

@@ -6,6 +6,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Engine.Authorization;
+using System.Reflection;
 
 namespace Signum.Engine.Basics
 {
@@ -19,7 +20,7 @@ namespace Signum.Engine.Basics
 
         public static void Start(SchemaBuilder sb, Func<HashSet<Enum>> getKeys)
         {
-            if (sb.NotDefined("Enum<{0}>".Formato(typeof(T).FullName)))
+            if (sb.NotDefined(typeof(EnumLogic<T>).GetMethod("Start")))
             {
                 sb.Include<T>(); 
 

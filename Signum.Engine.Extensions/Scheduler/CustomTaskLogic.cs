@@ -12,6 +12,7 @@ using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
+using System.Reflection;
 
 namespace Signum.Engine.Scheduler
 {
@@ -21,7 +22,7 @@ namespace Signum.Engine.Scheduler
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined<CustomTaskDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 EnumLogic<CustomTaskDN>.Start(sb, () => tasks.Keys.ToHashSet());
 

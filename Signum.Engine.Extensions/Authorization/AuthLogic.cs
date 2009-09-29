@@ -13,6 +13,8 @@ using Signum.Utilities.DataStructures;
 using System.Security.Principal;
 using System.Threading;
 using Signum.Services;
+using Signum.Utilities.Reflection;
+using System.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -31,13 +33,12 @@ namespace Signum.Engine.Authorization
 
         public static void AssertIsStarted(SchemaBuilder sb)
         {
-            if (!sb.ContainsDefinition<UserDN>())
-                throw new ApplicationException("Call AuthLogic.Start first"); 
+            sb.AssertDefined(typeof(AuthLogic).GetMethod("Start"));
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName)
         {
-            if (sb.NotDefined<UserDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 SystemUserName = systemUserName; 
 

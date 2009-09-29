@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System.Threading;
 using Signum.Entities;
+using System.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -26,13 +27,12 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            if (!sb.ContainsDefinition<RulePermissionDN>())
-                throw new ApplicationException("Call PermissionAuthLogic.Start First"); 
+            sb.AssertDefined(typeof(PermissionAuthLogic).GetMethod("Start")); 
         }
 
         public static void Start(SchemaBuilder sb)
         {
-            if (sb.NotDefined<RulePermissionDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
 

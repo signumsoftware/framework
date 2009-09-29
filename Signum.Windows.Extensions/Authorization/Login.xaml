@@ -1,6 +1,7 @@
 ﻿<Window
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
 	x:Class="Signum.Windows.Authorization.Login"
 	x:Name="Window"
 	Title="TeleCita"
@@ -8,7 +9,7 @@
 	ResizeMode="NoResize" 
 	SizeToContent="Height" 
 	WindowStartupLocation="CenterScreen"
-	Icon="..\Images\keysicon.png"
+	Icon="..\Images\keysicon.png"    
 	>
 	<Window.Background>
 		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -42,8 +43,8 @@
 		</Image>
 		<TextBlock Margin="4,0,4,0" Grid.Column="1" Grid.ColumnSpan="2" Foreground="#FFFFFFFF" VerticalAlignment="Center" Text="Introduzca su nombre de usuario y contraseña:"/>
 		<Label FontWeight="Bold" VerticalAlignment="Center" Content="_UserName:" Grid.Column="1" Grid.Row="1" Target="{Binding ElementName=tbUserName, Mode=OneWay}" Foreground="#FFFFFFFF"/>
-		<TextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="1" Margin="2,2,8,2"/>
-		<Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Password" Grid.Column="1" Grid.Row="2" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="#FFFFFFFF"/>
+		<m:WatermarkTextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="1" Margin="2,2,8,2" HelpText="usuario" />
+		<Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Password:" Grid.Column="1" Grid.Row="2" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="#FFFFFFFF"/>
 		<PasswordBox x:Name="tbPassword" Grid.Column="2" Grid.Row="2" Margin="2,2,8,2"/>
 		<TextBlock x:Name="txtError" TextWrapping="WrapWithOverflow" Margin="0,6,-101,5.987" Grid.ColumnSpan="2" Grid.Row="3" Foreground="Orange" />
 		<Button x:Name="btLogin" Margin="81,3,0,0" Content="Login" Grid.Column="2" Grid.Row="3" IsDefault="True" Click="btLogin_Click" Width="80" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" />

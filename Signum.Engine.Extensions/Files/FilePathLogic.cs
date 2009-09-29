@@ -10,6 +10,7 @@ using Signum.Utilities;
 using System.IO;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
+using System.Reflection;
 
 namespace Signum.Engine.Files
 {
@@ -20,7 +21,7 @@ namespace Signum.Engine.Files
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined<FilePathDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<FilePathDN>();
 

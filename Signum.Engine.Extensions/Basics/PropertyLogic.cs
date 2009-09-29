@@ -16,7 +16,7 @@ namespace Signum.Engine.Basics
     {
         public static void Start(SchemaBuilder sb)
         {
-            if (sb.NotDefined<PropertyDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 TypeLogic.Start(sb, true);
                 sb.Include<PropertyDN>();

@@ -41,13 +41,12 @@ namespace Signum.Engine.Operations
 
         public static void AssertIsStarted(SchemaBuilder sb)
         {
-            if (!sb.ContainsDefinition<OperationDN>())
-                throw new ApplicationException("Call OperationLogic.Start first"); 
+            sb.AssertDefined(typeof(OperationLogic).GetMethod("Start")); 
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined<OperationDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<OperationDN>();
                 sb.Include<LogOperationDN>();

@@ -10,6 +10,7 @@ using Signum.Engine.Basics;
 using System.Threading;
 using Signum.Entities;
 using Signum.Utilities;
+using System.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -23,7 +24,7 @@ namespace Signum.Engine.Authorization
 
         public static void Start(SchemaBuilder sb)
         {
-            if (sb.NotDefined<RuleTypeDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
                 TypeLogic.Start(sb, true);

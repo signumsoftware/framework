@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
 
         public static void Start(SchemaBuilder sb, Type serviceInterface)
         {
-            if (sb.NotDefined<RuleFacadeMethodDN>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
                 FacadeMethodLogic.Start(sb, serviceInterface);

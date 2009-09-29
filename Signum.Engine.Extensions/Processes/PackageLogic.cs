@@ -9,9 +9,60 @@ using Signum.Entities;
 using Signum.Engine.Operations;
 using Signum.Entities.Operations;
 using Signum.Engine.Basics;
+using System.Reflection;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Engine.Processes
 {
+    public static class PackageLogic
+    {
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(typeof(ProcessLogic).GetMethod("StartPackages"));
+        }
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                ProcessLogic.AssertStarted(sb);
+
+                sb.Include<PackageDN>();
+                sb.Include<PackageLineDN>();
+
+                OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
+                {
+                    Execute = (pc, _) => ProcessLogic.Create(pc).Execute(ProcessOperation.Execute)
+                });
+
+                dqm[typeof(PackageDN)] =
+                     (from p in Database.Query<PackageDN>()
+                      select new
+                      {
+                          Entity = p.ToLazy(),
+                          p.Id,
+                          Operation = p.Operation.ToLazy(),
+                          Lines = (int?)Database.Query<PackageLineDN>().Count(pl => pl.Package == p.ToLazy())
+                      }).ToDynamic();
+
+                dqm[typeof(PackageLineDN)] =
+                    (from pl in Database.Query<PackageLineDN>()
+                     select new
+                     {
+                         Entity = pl.ToLazy(),
+                         Package = pl.Package,
+                         pl.Id,
+                         pl.Target,
+                         pl.FinishTime,
+                         pl.Exception
+                     }).ToDynamic()
+                     .ChangeColumn(a => a.Package, c => c.Visible = false)
+                     .ChangeColumn(a => a.Target, c => c.Filterable = false);
+            }
+        }
+
+    }
+
     public class PackageAlgorithm: IProcessAlgorithm
     {
         Enum operationKey;

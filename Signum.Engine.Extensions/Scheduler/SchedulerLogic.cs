@@ -14,6 +14,7 @@ using Signum.Engine.Processes;
 using Signum.Entities.Processes;
 using Signum.Engine.Authorization;
 using Signum.Engine.DynamicQuery;
+using System.Reflection;
 
 namespace Signum.Engine.Scheduler
 {
@@ -40,7 +41,7 @@ namespace Signum.Engine.Scheduler
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            if (sb.NotDefined<Schema>())
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
                 OperationLogic.AssertIsStarted(sb); 
