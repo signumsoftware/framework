@@ -12,7 +12,7 @@ namespace Signum.Entities
         public bool AllowChange
         {
             get { return allowTemporaly || IsNew; }
-            set { allowTemporaly = value; }
+            set { allowTemporaly = value; Notify("AllowChange"); }
         }
 
         protected override bool Set<T>(ref T variable, T value, string propertyName)

@@ -124,16 +124,18 @@ namespace Signum.Engine.Linq
             }
             else if (m.Method.DeclaringType == typeof(LazyUtils) && m.Method.Name == "ToLazy")
             {
+                Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
+
                 if (m.Method.GetParameters().First().ParameterType == typeof(Lazy))
                 {
                     LazyReferenceExpression lazyRef = (LazyReferenceExpression)Visit(m.GetArgument("lazy"));
 
-                    return new LazyReferenceExpression(m.Type, lazyRef.Reference, lazyRef.Id, lazyRef.ToStr, lazyRef.TypeId);
+                    return new LazyReferenceExpression(m.Type, lazyRef.Reference, lazyRef.Id, toStr ?? lazyRef.ToStr, lazyRef.TypeId);
                 }
                 else
                 {
                     var entity = Visit(m.GetArgument("entity"));
-                    return MakeLazy(m.Type, entity);
+                    return MakeLazy(m.Type, entity, toStr);
                 }
             }
             else if (m.Method.DeclaringType == typeof(object) && m.Method.Name == "ToString" && typeof(IdentifiableEntity).IsAssignableFrom(m.Object.Type))
@@ -1002,7 +1004,7 @@ namespace Signum.Engine.Linq
             {
                 Expression entity = Collapse(list.Select(exp => ((LazyReferenceExpression)exp).Reference).ToList(), Reflector.ExtractLazy(returnType));
 
-                return MakeLazy(returnType, entity); 
+                return MakeLazy(returnType, entity, null); 
             }
 
             if(list.Any(e=>e is ImplementedByAllExpression))
@@ -1099,10 +1101,10 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
-        internal Expression MakeLazy(Type type, Expression entity)
+        internal Expression MakeLazy(Type type, Expression entity, Expression toStr)
         {
-            var toStr = (entity is ImplementedByAllExpression) ? null :
-                BindMemberAccess(Expression.MakeMemberAccess(entity, ToStrProperty));
+            if (toStr == null && !(entity is ImplementedByAllExpression))
+                toStr = BindMemberAccess(Expression.MakeMemberAccess(entity, ToStrProperty));
 
             Expression id = GetId(entity);
             Expression typeId = GetTypeId(entity);

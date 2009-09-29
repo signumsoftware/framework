@@ -74,6 +74,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectLazyToStr()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.ToLazy(a.Label.Name)).ToList();
+        }
+
+        [TestMethod]
         public void SelectLazyIB()
         {
             var list = Database.Query<AlbumDN>()

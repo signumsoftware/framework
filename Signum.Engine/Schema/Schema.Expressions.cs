@@ -100,7 +100,7 @@ namespace Signum.Engine.Maps
                 new ColumnExpression(this.ReferenceType(), tableAlias, Name), null);
 
             if(this.IsLazy)
-                return binder.MakeLazy(this.FieldType, result);
+                return binder.MakeLazy(this.FieldType, result, null);
             else 
                 return result; 
         }
@@ -146,7 +146,7 @@ namespace Signum.Engine.Maps
             var result = new ImplementedByExpression(IsLazy ? Reflector.ExtractLazy(FieldType) : FieldType, implementations);
 
             if (this.IsLazy)
-                return binder.MakeLazy(this.FieldType, result);
+                return binder.MakeLazy(this.FieldType, result, null);
             else
                 return result; 
         }
@@ -161,7 +161,7 @@ namespace Signum.Engine.Maps
                 new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name));
 
             if (this.IsLazy)
-                return binder.MakeLazy(this.FieldType, result);
+                return binder.MakeLazy(this.FieldType, result, null);
             else
                 return result; 
         }
