@@ -53,6 +53,48 @@ namespace Signum.Windows.Authorization
             tbPassword.Focus();
         }
 
+        private BitmapImage _minimizarFocus = null;
+        public BitmapImage MinimizarFocus {
+            get
+            {
+                if (_minimizarFocus == null)
+                    _minimizarFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar-on.png"));
+                return _minimizarFocus;
+            }
+        }
+
+        private BitmapImage _minimizarNoFocus = null;
+        public BitmapImage MinimizarNoFocus
+        {
+            get
+            {
+                if (_minimizarNoFocus == null)
+                    _minimizarNoFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar.png"));
+                return _minimizarNoFocus;
+            }
+        }
+
+        private BitmapImage _cerrarFocus = null;
+        public BitmapImage CerrarFocus
+        {
+            get
+            {
+                if (_cerrarFocus == null)
+                    _cerrarFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar-on.png"));
+                return _cerrarFocus;
+            }
+        }
+
+        private BitmapImage _cerrarNoFocus = null;
+        public BitmapImage CerrarNoFocus
+        {
+            get
+            {
+                if (_cerrarNoFocus == null)
+                    _cerrarNoFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar.png"));
+                return _cerrarNoFocus;
+            }
+        }
         public event EventHandler LoginClicked; 
 
         private void btLogin_Click(object sender, RoutedEventArgs e)
@@ -86,20 +128,20 @@ namespace Signum.Windows.Authorization
 
         private void EntraMinimizar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iMinimizar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar-on.png"));
+            iMinimizar.Source = MinimizarFocus;
         }
         private void SaleMinimizar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iMinimizar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar.png"));
+            iMinimizar.Source = MinimizarNoFocus;
         }
 
         private void EntraCerrar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iCerrar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar-on.png"));
+            iCerrar.Source = CerrarFocus;
         }
         private void SaleCerrar(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            iCerrar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar.png"));
+            iCerrar.Source = CerrarNoFocus;
         }
 	}
 }
