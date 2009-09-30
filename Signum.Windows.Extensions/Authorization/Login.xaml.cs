@@ -66,5 +66,21 @@ namespace Signum.Windows.Authorization
         {
             DialogResult = false;
         }
+
+        private void window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+                this.DragMove();
+
+        }
+
+        private void Cerrar(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Minimizar(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
 	}
 }
