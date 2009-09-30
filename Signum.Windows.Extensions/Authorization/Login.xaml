@@ -4,21 +4,29 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
 	x:Class="Signum.Windows.Authorization.Login"
 	x:Name="Window"
-	Title="TeleCita"
+	Title="Xena"
 	Width="500"
 	ResizeMode="NoResize" 
 	SizeToContent="Height" 
 	WindowStartupLocation="CenterScreen"
-	Icon="..\Images\keysicon.png"    
-	>
-	<Window.Background>
-		<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-			<GradientStop Color="#FF6BA5F3" Offset="0"/>
-			<GradientStop Color="#FF0050B8" Offset="1"/>
-		</LinearGradientBrush>
-	</Window.Background>
+	Icon="..\Images\keysicon.png"
 
-	<Grid x:Name="LayoutRoot" Margin="4">
+      Background="#000000FF" AllowsTransparency="True" WindowStyle="None" BorderThickness="10"
+	>
+	<Window.Effect>
+		<DropShadowEffect ShadowDepth="0" BlurRadius="8" Opacity="0.405"/>
+	</Window.Effect>
+    <Border Margin="0,0,0,0" CornerRadius="5,5,5,5">
+    	<Border.Effect>
+    		<DropShadowEffect RenderingBias="Quality" Opacity="0.1"/>
+    	</Border.Effect>
+       
+        <Border.Background>
+            <SolidColorBrush Color="White">                
+            </SolidColorBrush>
+        </Border.Background>
+        <Grid x:Name="LayoutRoot" Margin="4">
+
 		<Grid.RowDefinitions>
 			<RowDefinition Height="22.05"/>
 			<RowDefinition Height="30"/>
@@ -32,7 +40,7 @@
 		</Grid.ColumnDefinitions>
 		<Image Grid.RowSpan="4" Source="..\Images\keys.png" Stretch="None" Margin="0,6,0,0" Height="102" VerticalAlignment="Top">
 			<Image.Effect>
-				<DropShadowEffect Color="#FFFFFFFF" BlurRadius="10" ShadowDepth="0"/>
+				<DropShadowEffect Color="#FFFFFFFF" BlurRadius="20" ShadowDepth="0"/>
 			</Image.Effect>
 			<Image.OpacityMask>
 				<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -42,12 +50,13 @@
 			</Image.OpacityMask>
 		</Image>
 		<TextBlock Margin="4,0,4,0" Grid.Column="1" Grid.ColumnSpan="2" Foreground="#FFFFFFFF" VerticalAlignment="Center" Text="Introduzca su nombre de usuario y contraseña:"/>
-		<Label FontWeight="Bold" VerticalAlignment="Center" Content="_UserName:" Grid.Column="1" Grid.Row="1" Target="{Binding ElementName=tbUserName, Mode=OneWay}" Foreground="#FFFFFFFF"/>
+		<Label FontWeight="Bold" VerticalAlignment="Center" Content="_Usuario:" Grid.Column="1" Grid.Row="1" Target="{Binding ElementName=tbUserName, Mode=OneWay}" Foreground="Black" Background="#00000000"/>
 		<m:WatermarkTextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="1" Margin="2,2,8,2" HelpText="usuario" />
-		<Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Password:" Grid.Column="1" Grid.Row="2" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="#FFFFFFFF"/>
+		<Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Contraseña:" Grid.Column="1" Grid.Row="2" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="Black"/>
 		<PasswordBox x:Name="tbPassword" Grid.Column="2" Grid.Row="2" Margin="2,2,8,2"/>
 		<TextBlock x:Name="txtError" TextWrapping="WrapWithOverflow" Margin="0,6,-101,5.987" Grid.ColumnSpan="2" Grid.Row="3" Foreground="Orange" />
 		<Button x:Name="btLogin" Margin="81,3,0,0" Content="Login" Grid.Column="2" Grid.Row="3" IsDefault="True" Click="btLogin_Click" Width="80" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" />
 		<Button x:Name="btSalir" Content="Salir" Grid.Column="2" Grid.Row="3" HorizontalAlignment="Right" Width="80" IsCancel="True" Height="25" VerticalAlignment="Top" Margin="0,3,8,0" Click="btSalir_Click" />
-	</Grid>
+    </Grid>
+    </Border>
 </Window>
