@@ -4,14 +4,13 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
 	x:Class="Signum.Windows.Authorization.Login"
 	x:Name="Window"
-	Title="Xena"
+	Title="Título"
 	Width="500"
 	ResizeMode="NoResize" 
 	SizeToContent="Height" 
 	WindowStartupLocation="CenterScreen"
 	Icon="..\Images\keysicon.png"
-
-      Background="#000000FF" AllowsTransparency="True" WindowStyle="None" BorderThickness="10"
+    Background="#000000FF" AllowsTransparency="True" WindowStyle="None" BorderThickness="10"
     MouseLeftButtonDown="window_MouseLeftButtonDown"
 	>
 	<Window.Effect>
@@ -27,13 +26,14 @@
             <ImageBrush ImageSource="/Signum.Windows.Extensions;Component/Images/fondoLogin.jpg" />
         </Border.Background>
 
-     
         <Grid x:Name="LayoutRoot" Margin="4">
 
-		<Grid.RowDefinitions>
-            <RowDefinition Height="16" />
-            <RowDefinition Height="22.05"/>
+		<Grid.RowDefinitions>			
 			<RowDefinition Height="30"/>
+			<RowDefinition Height="36"/>
+        	<RowDefinition Height="40"/>
+		    <RowDefinition Height="30" />
+            <RowDefinition Height="30"/>
 			<RowDefinition Height="30"/>
 			<RowDefinition Height="60"/>
 		</Grid.RowDefinitions>
@@ -42,11 +42,11 @@
 			<ColumnDefinition Width="84"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
-            <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="3" MinHeight="14" >
-                <Image Source="/Signum.Windows.Extensions;Component/Images/bminimizar.png" Margin="0" MouseLeftButtonDown="Minimizar" />
-                <Image Source="/Signum.Windows.Extensions;Component/Images/bcerrar.png" Margin="0" MouseLeftButtonDown="btSalir_Click"/>              
+            <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Margin="3" Height="22" >
+                <Image Height="16" Width="16" Name="iMinimizar" Source="/Signum.Windows.Extensions;Component/Images/bminimizar.png" Margin="3,0" MouseLeftButtonDown="Minimizar" MouseEnter="EntraMinimizar" MouseLeave="SaleMinimizar" />
+                <Image Height="16" Width="16" Name="iCerrar" Source="/Signum.Windows.Extensions;Component/Images/bcerrar.png" Margin="3,0" MouseLeftButtonDown="btSalir_Click" MouseEnter="EntraCerrar" MouseLeave="SaleCerrar"/>              
             </StackPanel>
-            <Image Grid.RowSpan="4" Source="..\Images\keys.png" Stretch="None" Margin="0,6,0,0" Height="102" VerticalAlignment="Top">
+            <Image Grid.RowSpan="4" Grid.Row="2" Source="..\Images\keys.png" Stretch="None" Margin="0,22,0,0" Height="102" VerticalAlignment="Top">
 			<Image.Effect>
 				<DropShadowEffect Color="#FFFFFFFF" BlurRadius="20" ShadowDepth="0"/>
 			</Image.Effect>
@@ -57,14 +57,16 @@
 				</LinearGradientBrush>
 			</Image.OpacityMask>
 		</Image>
-		<TextBlock Margin="4,0,4,0" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Foreground="#FF000000" VerticalAlignment="Center" Text="Introduzca su nombre de usuario y contraseña:"/>
-		<Label FontWeight="Bold" VerticalAlignment="Center" Content="_Usuario:" Grid.Column="1" Grid.Row="2" Target="{Binding ElementName=tbUserName, Mode=OneWay}" Foreground="Black" Background="#00000000"/>
-		<m:WatermarkTextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="2" Margin="2,2,8,2" HelpText="usuario" />
-		<Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Contraseña:" Grid.Column="1" Grid.Row="3" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="Black"/>
-		<PasswordBox x:Name="tbPassword" Grid.Column="2" Grid.Row="3" Margin="2,2,8,2"/>
-		<TextBlock x:Name="txtError" TextWrapping="WrapWithOverflow" Margin="0,6,-101,5.987" Grid.ColumnSpan="2" Grid.Row="3" Foreground="Orange" />
-		<Button x:Name="btLogin" Margin="0,22,8,0" Content="Login" Grid.Column="2" Grid.Row="4" IsDefault="True" Click="btLogin_Click" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="80" />
+		<TextBlock Margin="4,0,4,0" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Foreground="#FF000000" VerticalAlignment="Center" Text="{Binding Title}"/>
+		<Label FontWeight="Bold" VerticalAlignment="Center" Content="_Usuario:" Grid.Column="1" Grid.Row="4" Target="{Binding ElementName=tbUserName, Mode=OneWay}" Foreground="Black" Background="#00000000"/>
+		<m:WatermarkTextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="4" Margin="2,2,8,2" HelpText="usuario" />
+		<Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Contraseña:" Grid.Column="1" Grid.Row="5" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="Black"/>
+		<PasswordBox x:Name="tbPassword" Grid.Column="2" Grid.Row="5" Margin="2,2,8,2"/>
+		<TextBlock x:Name="txtError" TextWrapping="WrapWithOverflow" Margin="0,6,-101,5.987" Grid.ColumnSpan="2" Grid.Row="5" Foreground="Orange" />
+		<Button x:Name="btLogin" Margin="0,22,8,0" Content="Login" Grid.Column="2" Grid.Row="6" IsDefault="True" Click="btLogin_Click" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="80" />
 		<!--<Button x:Name="btSalir" Content="Salir" Grid.Column="2" Grid.Row="4" HorizontalAlignment="Right" Width="80" IsCancel="True" Height="25" VerticalAlignment="Top" Margin="0,22,8,0" Click="btSalir_Click" />-->
-    </Grid>
+    	<TextBlock Text="Signum Software" FontSize="25" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="1"/>
+		<TextBlock Text="Seguros Application" FontSize="35" FontFamily="Calibri" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="1"/>
+	</Grid>
     </Border>
 </Window>

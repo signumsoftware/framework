@@ -12,6 +12,7 @@ using Signum.Utilities;
 using System.Threading;
 using Signum.Windows;
 using System.Windows.Threading;
+using System.Windows.Media.Imaging;
 
 namespace Signum.Windows.Authorization
 {
@@ -81,6 +82,24 @@ namespace Signum.Windows.Authorization
         private void Minimizar(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
+        }
+
+        private void EntraMinimizar(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            iMinimizar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar-on.png"));
+        }
+        private void SaleMinimizar(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            iMinimizar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar.png"));
+        }
+
+        private void EntraCerrar(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            iCerrar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar-on.png"));
+        }
+        private void SaleCerrar(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            iCerrar.Source = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar.png"));
         }
 	}
 }
