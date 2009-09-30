@@ -20,6 +20,7 @@
     <SccProvider>SAK</SccProvider>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>SignumFramework.pfx</AssemblyOriginatorKeyFile>
+    <ExpressionBlendVersion>3.0.1927.0</ExpressionBlendVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -96,6 +97,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="AdminWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EntityDetail.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -228,6 +233,9 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
+    <Compile Include="EntityDetail.xaml.cs">
+      <DependentUpon>EntityDetail.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TextArea.xaml.cs">
       <DependentUpon>TextArea.xaml</DependentUpon>
     </Compile>
@@ -343,7 +351,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\cancel.png" />
