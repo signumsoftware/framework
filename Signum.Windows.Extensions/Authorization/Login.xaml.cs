@@ -35,6 +35,18 @@ namespace Signum.Windows.Authorization
             set { tbPassword.Password = value; }
         }
 
+        public string CompanyName
+        {
+            get { return tbCompanyName.Text; }
+            set { tbCompanyName.Text = value; }
+        }
+
+        public string ProductName
+        {
+            get { return tbProductName.Text; }
+            set { tbProductName.Text = value; }
+        }
+
         public string Error
         {
             get { return txtError.Text; }
@@ -112,8 +124,7 @@ namespace Signum.Windows.Authorization
 
         private void window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-                this.DragMove();
-
+            this.DragMove();
         }
 
         private void Cerrar(object sender, System.Windows.Input.MouseButtonEventArgs e)

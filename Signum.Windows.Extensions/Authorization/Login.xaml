@@ -30,8 +30,8 @@
 
 		<Grid.RowDefinitions>			
 			<RowDefinition Height="30"/>
-			<RowDefinition Height="36"/>
-        	<RowDefinition Height="40"/>
+			<RowDefinition Height="30"/>
+        	<RowDefinition Height="36"/>
 		    <RowDefinition Height="30" />
             <RowDefinition Height="30"/>
 			<RowDefinition Height="30"/>
@@ -60,13 +60,14 @@
 		<TextBlock Margin="4,0,4,0" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Foreground="#FF000000" VerticalAlignment="Center" Text="{Binding Title}"/>
 		<Label FontWeight="Bold" VerticalAlignment="Center" Content="_Usuario:" Grid.Column="1" Grid.Row="4" Target="{Binding ElementName=tbUserName, Mode=OneWay}" Foreground="Black" Background="#00000000"/>
 		<m:WatermarkTextBox x:Name="tbUserName" Grid.Column="2" Grid.Row="4" Margin="2,2,8,2" HelpText="usuario" />
-		<Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Contraseña:" Grid.Column="1" Grid.Row="5" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="Black"/>
+
+        <Label FontWeight="Bold" VerticalAlignment="Stretch" Content="_Contraseña:" Grid.Column="1" Grid.Row="5" Target="{Binding ElementName=tbPassword, Mode=OneWay}" Foreground="Black"/>
 		<PasswordBox x:Name="tbPassword" Grid.Column="2" Grid.Row="5" Margin="2,2,8,2"/>
-		<TextBlock x:Name="txtError" TextWrapping="WrapWithOverflow" Margin="0,6,-101,5.987" Grid.ColumnSpan="2" Grid.Row="5" Foreground="Orange" />
+		<TextBlock x:Name="txtError" TextWrapping="WrapWithOverflow" Margin="0,25,-101,16.987" Grid.ColumnSpan="2" Grid.Row="6" Foreground="Orange" />
 		<Button x:Name="btLogin" Margin="0,22,8,0" Content="Login" Grid.Column="2" Grid.Row="6" IsDefault="True" Click="btLogin_Click" VerticalAlignment="Top" Height="25" HorizontalAlignment="Right" Width="80" />
 		<!--<Button x:Name="btSalir" Content="Salir" Grid.Column="2" Grid.Row="4" HorizontalAlignment="Right" Width="80" IsCancel="True" Height="25" VerticalAlignment="Top" Margin="0,22,8,0" Click="btSalir_Click" />-->
-    	<TextBlock Text="Signum Software" FontSize="25" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="1"/>
-		<TextBlock Text="Seguros Application" FontSize="35" FontFamily="Calibri" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="1"/>
-	</Grid>
+    	<TextBlock Name="tbCompanyName" Text="{Binding CompanyName}" FontSize="21.333" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="1"/>
+		<TextBlock Name="tbProductName" Text="{Binding ProductName}" FontSize="32" FontFamily="Calibri" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="1" Margin="0,-3,0,0"/>
+        </Grid>
     </Border>
 </Window>
