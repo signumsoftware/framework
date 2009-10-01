@@ -8,13 +8,6 @@
         <GradientStop Color="#E3E9EF" Offset="1"/>
     </LinearGradientBrush>
     <Style TargetType="{x:Type m:WatermarkTextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
-        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="1"/>
-        <Setter Property="AllowDrop" Value="true"/>
-        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter 
         Property="Template">
             <Setter.Value>
@@ -29,22 +22,11 @@
                         </Grid>    
                     </li:ListBoxChrome>
                     <ControlTemplate.Triggers>
-
-                        <Trigger 
-                        Property="Text" 
-                        Value="">
-                            <Setter 
-                            TargetName="PART_HelpTextElement" 
-                            Property="Visibility" 
-                            Value="Visible"/>
+                        <Trigger Property="Text" Value="">
+                            <Setter TargetName="PART_HelpTextElement" Property="Visibility" Value="Visible"/>
                         </Trigger>
-                        <Trigger 
-                        Property="Text" 
-                        Value="{x:Null}">
-                            <Setter 
-                            TargetName="PART_HelpTextElement" 
-                            Property="Visibility" 
-                            Value="Visible"/>
+                        <Trigger Property="Text" Value="{x:Null}">
+                            <Setter TargetName="PART_HelpTextElement" Property="Visibility" Value="Visible"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
