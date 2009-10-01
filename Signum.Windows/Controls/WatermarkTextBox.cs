@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Signum.Windows
 {
-    public class WatermarkTextBox: TextBox
+    public class WatermarkTextBox : TextBox
     {
         public string HelpText
         {
@@ -24,5 +24,10 @@ namespace Signum.Windows
                  typeof(string),
                  typeof(WatermarkTextBox),
                  new PropertyMetadata(String.Empty));
+
+        static WatermarkTextBox()
+        {
+            FrameworkElement.DefaultStyleKeyProperty.OverrideMetadata(typeof(WatermarkTextBox), new FrameworkPropertyMetadata(typeof(WatermarkTextBox)));
+        }
     }
 }

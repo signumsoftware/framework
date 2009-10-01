@@ -2,25 +2,34 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
     xmlns:li="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
-    <Style TargetType="{x:Type m:WatermarkTextBox}">
+    <LinearGradientBrush x:Key="TextBoxBorder" MappingMode="Absolute" EndPoint="0,20" StartPoint="0,0">
+        <GradientStop Color="#ABADB3" Offset="0.05"/>
+        <GradientStop Color="#E2E3EA" Offset="0.07"/>
+        <GradientStop Color="#E3E9EF" Offset="1"/>
+    </LinearGradientBrush>
+    <Style TargetType="{x:Type m:WatermarkTextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="AllowDrop" Value="true"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter 
         Property="Template">
             <Setter.Value>
-                <ControlTemplate 
-                TargetType="{x:Type m:WatermarkTextBox}">
-                    <li:ListBoxChrome  
-                    x:Name="Bd" 
-                    SnapsToDevicePixels="true" >
+                <ControlTemplate TargetType="{x:Type m:WatermarkTextBox}">
+                    <li:ListBoxChrome x:Name="Bd" SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" RenderFocused="{TemplateBinding IsKeyboardFocusWithin}" RenderMouseOver="{TemplateBinding IsMouseOver}">
                         <Grid>
-                            <ScrollViewer 
-                            x:Name="PART_ContentHost" />
-                            <TextBlock 
+                        <ScrollViewer x:Name="PART_ContentHost" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        <TextBlock 
                             x:Name="PART_HelpTextElement" 
-                            Text="{TemplateBinding HelpText}" 
+                            Text="{TemplateBinding HelpText}" Foreground="Silver" Margin="3,1,0,0" 
                             Visibility="Collapsed"/>
-                    </Grid>
+                        </Grid>    
                     </li:ListBoxChrome>
                     <ControlTemplate.Triggers>
+
                         <Trigger 
                         Property="Text" 
                         Value="">
