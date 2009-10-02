@@ -100,13 +100,13 @@ namespace Signum.Web.Authorization
             return base.GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, index, propertyValidators);
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors)
+        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             if (Properties != null)
             {
                 foreach (var ppm in Properties.Values)
                 {
-                    ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors);
+                    ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors, prefix);
 
                     if (ppm.PropertyPack.PropertyInfo.Name == "PasswordHash")
                         continue;

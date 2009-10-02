@@ -25,6 +25,7 @@ namespace Signum.Web.Operations
             Type type = Navigator.ResolveType(sfTypeName);
 
             IdentifiableEntity entity = null;
+            ChangesLog changesLog = null;
             if (isLazy)
             {
                 if (sfId.HasValue)
@@ -37,16 +38,14 @@ namespace Signum.Web.Operations
             }
             else
             {
-                if (sfId.HasValue)
-                    entity = Database.Retrieve(type, sfId.Value);
-                else
-                    entity = (IdentifiableEntity)Navigator.CreateInstance(type);
+                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form);
 
-                Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "", ref entity);
+                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, "");
+                //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", "");
 
-                if (errors != null && errors.Count > 0)
+                if (changesLog.Errors != null && changesLog.Errors.Count > 0)
                 {
-                    this.ModelState.FromDictionary(errors, Request.Form);
+                    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
                     return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
                 }
 

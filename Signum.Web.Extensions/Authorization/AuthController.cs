@@ -198,9 +198,9 @@ namespace Signum.Web.Authorization
         {
             UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
 
-            Dictionary<string, List<string>> errors = RegisterUserApplyChanges(Request.Form, ref u);
+            ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
 
-            this.ModelState.FromDictionary(errors, Request.Form);
+            this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
             return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
         }
 
@@ -208,10 +208,10 @@ namespace Signum.Web.Authorization
         {
             UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
 
-            Dictionary<string, List<string>> errors = RegisterUserApplyChanges(Request.Form, ref u);
-            if (errors != null && errors.Count > 0)
+            ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
+            if (changesLog.Errors != null && changesLog.Errors.Count > 0)
             {
-                this.ModelState.FromDictionary(errors, Request.Form);
+                this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
                 return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
             }
 
@@ -224,10 +224,10 @@ namespace Signum.Web.Authorization
         {
             UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
 
-            Dictionary<string, List<string>> errors = RegisterUserApplyChanges(Request.Form, ref u);
-            if (errors != null && errors.Count > 0)
+            ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
+            if (changesLog.Errors != null && changesLog.Errors.Count > 0)
             {
-                this.ModelState.FromDictionary(errors, Request.Form);
+                this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
                 return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
             }
 
@@ -236,30 +236,30 @@ namespace Signum.Web.Authorization
             return Navigator.View(this, u);
         }
 
-        Dictionary<string, List<string>> RegisterUserApplyChanges(NameValueCollection form, ref UserDN u)
+        ChangesLog RegisterUserApplyChanges(NameValueCollection form, ref UserDN u)
         {
             List<string> fullIntegrityErrors;
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "my", ref u, out fullIntegrityErrors);
+            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
             if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-                errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
+                changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
 
             if (u != null && u.UserName.HasText())
             {
                 string username = u.UserName;
                 if (Database.Query<UserDN>().Any(us => us.UserName == username))
-                    errors.Add(ViewDataKeys.GlobalErrors, new List<string> { Resources.UserNameAlreadyExists });
+                    changesLog.Errors.Add(ViewDataKeys.GlobalErrors, new List<string> { Resources.UserNameAlreadyExists });
             }
-            return errors;
+            return changesLog;
         }
 
         Dictionary<string, List<string>> UserOperationApplyChanges(NameValueCollection form, ref UserDN u)
         {
             List<string> fullIntegrityErrors;
-            Dictionary<string, List<string>> errors = Navigator.ApplyChangesAndValidate(this, "my", ref u, out fullIntegrityErrors);
+            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
             if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-                errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
+                changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
 
-            return errors;
+            return changesLog.Errors;
         }
 
         public ActionResult UserExecOperation(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLazy, string prefix, string sfOnOk, string sfOnCancel)
