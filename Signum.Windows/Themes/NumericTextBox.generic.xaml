@@ -1,30 +1,26 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
-    xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic">
+    xmlns:li="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
 	<Style   TargetType="{x:Type m:NumericTextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type m:NumericTextBox}">
-				<Microsoft_Windows_Themes:ClassicBorderDecorator x:Name="Bd" 
-							Background="{TemplateBinding Background}" 
-							BorderBrush="{TemplateBinding BorderBrush}"
-							 BorderStyle="Sunken" 
-							 BorderThickness="{TemplateBinding BorderThickness}">
-						<Grid>
-							<ScrollViewer SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" x:Name="PART_ContentHost"/>
-							<Ellipse HorizontalAlignment="Left" Stroke="#FF828282" x:Name="PART_Anchor" 
+                    <li:ListBoxChrome x:Name="Bd" SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" RenderFocused="{TemplateBinding IsKeyboardFocusWithin}" RenderMouseOver="{TemplateBinding IsMouseOver}">
+                        <Grid>
+                            <ScrollViewer SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" x:Name="PART_ContentHost"/>
+                            <Ellipse HorizontalAlignment="Left" Stroke="#FF828282" x:Name="PART_Anchor" 
 							Width="{Binding Path=ActualHeight, ElementName=PART_Anchor, Mode=Default}" Cursor="SizeAll" 
-							Margin="3,3,0,3" Opacity="0.5" ToolTip="{m:Loc DragHorizontallyAndVertically}">
-								<Ellipse.Fill>
-									<RadialGradientBrush GradientOrigin="0.348,0.326">
-										<GradientStop Color="#FFAFAFAF" Offset="1"/>
-										<GradientStop Color="#FFFFFFFF" Offset="0"/>
-									</RadialGradientBrush>
-								</Ellipse.Fill>
-							</Ellipse>
-						</Grid>
-						</Microsoft_Windows_Themes:ClassicBorderDecorator>
+							Margin="3,3,0,3" Opacity="0.5"><!--ToolTip="{m:Loc DragHorizontallyAndVertically}"-->
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush GradientOrigin="0.348,0.326">
+                                        <GradientStop Color="#FFAFAFAF" Offset="1"/>
+                                        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </Grid>
+                    </li:ListBoxChrome>
 							<ControlTemplate.Triggers>
 								<Trigger Property="IsEnabled" Value="false">
 									<Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
