@@ -31,13 +31,13 @@ namespace Signum.Web
         public string ControlID { get; private set; }
         public Type StaticType { get; private set; }
         public string BindingError { get; set; }
-        public bool IsLastChange { get; set; }
+        public long? TicksLastChange { get; set; }
 
         protected static readonly string[] specialProperties = new[] { 
             TypeContext.RuntimeType, 
             TypeContext.Id, 
             TypeContext.StaticType, 
-            TypeContext.Changed,
+            TypeContext.Ticks,
             EntityBaseKeys.ToStr, 
             EntityBaseKeys.ImplementationsDDL,
             EntityBaseKeys.IsNew,
@@ -51,9 +51,9 @@ namespace Signum.Web
             this.ControlID = controlID;
         }
 
-        public abstract object ApplyChanges(Controller controller, object obj, ModificationFinish onFinish);
+        public abstract object ApplyChanges(Controller controller, object obj, ModificationState onFinish);
 
-        public abstract void Validate(object entity, Dictionary<string, List<string>> errors);
+        public abstract void Validate(object entity, Dictionary<string, List<string>> errors, string prefix);
         
         public static MinMax<int> FindSubInterval(SortedList<string, object> formValues, string prefix)
         {
@@ -122,20 +122,23 @@ namespace Signum.Web
             }
         }
 
-        public override object ApplyChanges(Controller controller, object obj, ModificationFinish onFinish)
+        public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
         {
             return Value;
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors)
+        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
         {
-            if (BindingError != null)
+            if ((!prefix.HasText() || ControlID.StartsWith(prefix)) && BindingError != null)
                 errors.GetOrCreate(ControlID).AddRange(BindingError.Lines());
         }
 
         public override string ToString()
         {
-            return "Value({0}): {1}".Formato(Value.TryCC(a => CSharpRenderer.Value(a, a.GetType(), null)) ?? "[null]", ControlID);
+            return "Value({0}-Ticks:{1}): {2}".Formato(
+                Value.TryCC(a => CSharpRenderer.Value(a, a.GetType(), null)) ?? "[null]", 
+                TicksLastChange,
+                ControlID);
         }
     }
 
@@ -193,47 +196,69 @@ namespace Signum.Web
 
             Properties = new Dictionary<string, PropertyPackModification>();
 
-            for (int i = interval.Min; i < interval.Max; i++)
+            if (formValues.ContainsKey(ControlID + TypeContext.Separator + TypeContext.Ticks))
             {
-                string subControlID = formValues.Keys[i];
-
-                if (!subControlID.ContinuesWith(TypeContext.Separator, ControlID.Length))
-                    throw new FormatException("The control ID {0} has an invalid format".Formato(subControlID));
-
-                int propertyEnd = subControlID.IndexOf(TypeContext.Separator, propertyStart).Map(pe => pe == -1 ? subControlID.Length : pe);
-
-                string propertyName = subControlID.Substring(propertyStart, propertyEnd - propertyStart);
-
-                if (specialProperties.Contains(propertyName))
-                    continue;
-
-                string commonSubControlID = subControlID.Substring(0, propertyEnd);
-
-                i = GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, i, propertyValidators);
+                string changed = (string)formValues.TryGetC(ControlID + TypeContext.Separator + TypeContext.Ticks);
+                if (changed == "0")
+                    return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+                else
+                    TicksLastChange = long.Parse(changed);
             }
+            
+                for (int i = interval.Min; i < interval.Max; i++)
+                {
+                    string subControlID = formValues.Keys[i];
+
+                    if (!subControlID.ContinuesWith(TypeContext.Separator, ControlID.Length))
+                        throw new FormatException("The control ID {0} has an invalid format".Formato(subControlID));
+
+                    int propertyEnd = subControlID.IndexOf(TypeContext.Separator, propertyStart).Map(pe => pe == -1 ? subControlID.Length : pe);
+
+                    string propertyName = subControlID.Substring(propertyStart, propertyEnd - propertyStart);
+
+                    if (specialProperties.Contains(propertyName))
+                        continue;
+
+                    string commonSubControlID = subControlID.Substring(0, propertyEnd);
+
+                    i = GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, i, propertyValidators);
+                }
+            
         }
 
         protected virtual int GeneratePropertyModification(SortedList<string, object> formValues, MinMax<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
-        { 
+        {
             PropertyPack pp = propertyValidators.GetOrThrow(propertyName, Resource.NoPropertyWithName0FoundInType0.Formato(propertyName, RuntimeType));
 
             MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
-            bool propertyIsLastChange = false;
-            if (formValues.ContainsKey(subControlID + TypeContext.Separator + TypeContext.Changed))
+            
+            long? propertyIsLastChange = null;
+            if (formValues.ContainsKey(commonSubControlID + TypeContext.Separator + TypeContext.Ticks))
             {
-                string changed = (string)formValues.TryGetC(subControlID + TypeContext.Separator + TypeContext.Changed);
-                if (!changed.HasText())
-                    return subInterval.Max-1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+                string changed = (string)formValues.TryGetC(commonSubControlID + TypeContext.Separator + TypeContext.Ticks);
+                if (changed == "0")
+                    return subInterval.Max - 1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
                 else
-                    propertyIsLastChange = true; 
+                    propertyIsLastChange = long.Parse(changed);
             }
+
+            //long? propertyIsLastChange = null;
+            //if (formValues.ContainsKey(subControlID + TypeContext.Separator + TypeContext.Ticks))
+            //{
+            //    string changed = (string)formValues.TryGetC(subControlID + TypeContext.Separator + TypeContext.Ticks);
+            //    if (changed == "0")
+            //        return subInterval.Max-1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+            //    else
+            //        propertyIsLastChange = long.Parse(changed); 
+            //}
             Modification mod = Modification.Create(pp.PropertyInfo.PropertyType, formValues, subInterval, commonSubControlID);
-            mod.IsLastChange = propertyIsLastChange;
+            if (mod.TicksLastChange == null)
+                mod.TicksLastChange = propertyIsLastChange;
             Properties.Add(propertyName, new PropertyPackModification { Modification = mod, PropertyPack = pp });
             return subInterval.Max - 1;
         }
 
-        public override object ApplyChanges(Controller controller, object obj, ModificationFinish onFinish)
+        public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
         {
             ModifiableEntity entity;
             if (AvoidChange)
@@ -246,7 +271,7 @@ namespace Signum.Web
             return entity;
         }
 
-        protected virtual bool ApplyChangesOfProperties(Controller controller, ModifiableEntity entity, ModificationFinish onFinish)
+        protected virtual bool ApplyChangesOfProperties(Controller controller, ModifiableEntity entity, ModificationState onFinish)
         {
             if (Properties != null)
             {
@@ -256,9 +281,14 @@ namespace Signum.Web
                     object newValue = ppm.Modification.ApplyChanges(controller, oldValue, onFinish);
                     try
                     {
-                        if (ppm.Modification.IsLastChange)
-                            onFinish.OnFinish += ()=>ppm.PropertyPack.SetValue(entity, newValue);
-                        ppm.PropertyPack.SetValue(entity, newValue);
+                        if (ppm.Modification.TicksLastChange != null)
+                        {
+                            PropertyPack pp = ppm.PropertyPack;
+                            onFinish.Actions.Add(ppm.Modification.TicksLastChange.Value,
+                                new Tuple<string, Action>(ppm.Modification.ControlID, () => pp.SetValue(entity, newValue)));
+                        }
+                        else
+                            ppm.PropertyPack.SetValue(entity, newValue);
                     }
                     catch (NullReferenceException nullEx)
                     {
@@ -293,7 +323,15 @@ namespace Signum.Web
                 return null;
 
             if (IsNew)
+            {
+                if (entity != null)
+                {
+                    if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()) ||
+                        (typeof(IIdentifiable).IsAssignableFrom(entity.GetType()) && ((IIdentifiable)entity).IsNew))
+                        return entity;
+                }
                 return (ModifiableEntity)Constructor.Construct(RuntimeType, controller);
+            }
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(RuntimeType))
                 return entity;
@@ -309,21 +347,24 @@ namespace Signum.Web
                 return Database.Retrieve(RuntimeType, EntityId.Value);
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors)
+        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             if (entity!=null && Properties != null)
             {
                 foreach (var ppm in Properties.Values)
                 {
-                    ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors);
+                    ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors, prefix);
 
-                    string error = ((ModifiableEntity)entity)[ppm.PropertyPack.PropertyInfo.Name];
-                    if (error != null)
-                        errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
+                    if (!prefix.HasText() || ControlID.StartsWith(prefix))
+                    {
+                        string error = ((ModifiableEntity)entity)[ppm.PropertyPack.PropertyInfo.Name];
+                        if (error != null)
+                            errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
+                    }
                 }
             }
 
-            if (!string.IsNullOrEmpty(BindingError))
+            if ((!prefix.HasText() || ControlID.StartsWith(prefix)) && BindingError.HasText())
                 errors.GetOrCreate(ControlID).Add(BindingError);
         }
 
@@ -334,8 +375,9 @@ namespace Signum.Web
                 EntityId == null ? RuntimeType.TypeName() :
                 "{0}({1})".Formato(RuntimeType.TypeName(), EntityId);
 
-            return "Entity({0}): {1}\r\n{{\r\n{2}\r\n}}".Formato(
+            return "Entity({0}-Ticks:{1}): {2}\r\n{{\r\n{3}\r\n}}".Formato(
                 identity,
+                TicksLastChange,
                 ControlID,
                 Properties.ToString(kvp => "{0} = {1}".Formato(
                     kvp.Key,
@@ -383,15 +425,20 @@ namespace Signum.Web
                 EntityModification = null;
         }
 
-        public override object ApplyChanges(Controller controller, object obj, ModificationFinish onFinish)
+        public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
         {
             if (RuntimeType == null)
                 return null;
 
-            if (IsNew)
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null, onFinish));
-
             Lazy lazy = (Lazy)obj;
+
+            if (IsNew)
+            {
+                if (lazy != null && lazy.UntypedEntityOrNull != null && lazy.UntypedEntityOrNull.IsNew)
+                    return Lazy.Create(CleanType,
+                            (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull, onFinish));
+                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null, onFinish));
+            }
 
             if (lazy == null)
             {
@@ -430,10 +477,24 @@ namespace Signum.Web
             }
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors)
+        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             if (EntityModification != null)
-                EntityModification.Validate(((Lazy)entity).TryCC(l => l.UntypedEntityOrNull), errors); 
+                EntityModification.Validate(((Lazy)entity).TryCC(l => l.UntypedEntityOrNull), errors, prefix); 
+        }
+
+        public override string ToString()
+        {
+            string identity =
+                RuntimeType == null ? "[null]" :
+                EntityId == null ? RuntimeType.TypeName() :
+                "{0}({1})".Formato(RuntimeType.TypeName(), EntityId);
+
+            return "Lazy({0}-Ticks:{1}): {2}\r\n{{\r\n{3}\r\n}}".Formato(
+                identity,
+                TicksLastChange,
+                ControlID,
+                EntityModification.ToString());
         }
     }
 
@@ -458,6 +519,15 @@ namespace Signum.Web
             SortedList<int, Tuple<Modification, int?>> list = new SortedList<int, Tuple<Modification, int?>>();
 
             int propertyStart = ControlID.Length + TypeContext.Separator.Length;
+
+            if (formValues.ContainsKey(ControlID + TypeContext.Separator + TypeContext.Ticks))
+            {
+                string changed = (string)formValues.TryGetC(ControlID + TypeContext.Separator + TypeContext.Ticks);
+                if (changed == "0")
+                    return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+                else
+                    TicksLastChange = long.Parse(changed);
+            }
 
             for (int i = interval.Min; i < interval.Max; i++)
             {
@@ -496,14 +566,13 @@ namespace Signum.Web
             modifications = list.Values.ToList();
         }
 
-
-        public override object ApplyChanges(Controller controller, object obj, ModificationFinish onFinish)
+        public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
         {
             IList old = (IList)obj;
             IList list = (IList)Activator.CreateInstance(StaticType, modifications.Count);
             foreach (var item in modifications)
             {
-                if (item.Second.HasValue)
+                if (item.Second.HasValue && old.Count > item.Second.Value)
                     list.Add(item.First.ApplyChanges(controller, old[item.Second.Value], onFinish));
                 else
                     list.Add(item.First.ApplyChanges(controller, null, onFinish));
@@ -511,26 +580,82 @@ namespace Signum.Web
             return list;
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors)
+        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             IList list = (IList)entity;
-            list.Cast<object>().ZipForeachStrict(modifications, (obj, mod) => mod.First.Validate(obj, errors));
+            for (int i = 0; i < modifications.Count; i++)
+            {
+                Tuple<Modification, int?> item = modifications[i];
+                if (item.Second.HasValue && list.Count > item.Second.Value)
+                    item.First.Validate(list[i], errors, prefix);
+                else
+                    item.First.Validate(null, errors, prefix);
+            }
+        }
+
+        //public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
+        //{
+        //    IList list = (IList)entity;
+        //    list.Cast<object>().ZipForeachStrict(modifications, (obj, mod) => mod.First.Validate(obj, errors, prefix));
+        //}
+        //public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
+        //{
+        //    IList old = (IList)obj;
+        //    IList list = (IList)Activator.CreateInstance(StaticType, modifications.Count);
+        //    foreach (var item in modifications)
+        //    {
+        //        if (item.Second.HasValue)
+        //        {
+        //            if (old.Count > item.Second.Value) //If not, it will be an item created by the setter of another property
+        //                list.Add(item.First.ApplyChanges(controller, old[item.Second.Value], onFinish));
+        //            else
+        //            {
+        //                list.Add(item.First.ApplyChanges(controller, null, onFinish));
+        //            }
+        //        }
+        //        else
+        //            list.Add(item.First.ApplyChanges(controller, null, onFinish));
+        //    }
+        //    return list;
+        //}
+
+        public override string ToString()
+        {
+            return "List<{0}>(Count:{1}-Ticks:{2}): {3}\r\n{{\r\n{4}\r\n}}".Formato(
+                staticElementType.Name,
+                modifications.Count,
+                TicksLastChange,
+                ControlID,
+                modifications.ToString("\r\n").Indent(4));
         }
     }
 
-    public class ReloadModificationException : Exception
-    { 
-        
-    }
-
-    public class ModificationFinish
+    public class ModificationState
     {
-        public event Action OnFinish;
+        /// <summary>
+        /// Ticks => ControlID, Action
+        /// </summary>
+        public SortedList<long, Tuple<string, Action>> Actions = new SortedList<long, Tuple<string, Action>>();
+
+        public static Dictionary<string, long> ToDictionary(SortedList<long, Tuple<string, Action>> actions)
+        {
+            return actions.ToDictionary(kvp => kvp.Value.First, kvp => kvp.Key);
+        }
 
         public void Finish()
         {
-            if (OnFinish != null)
-                OnFinish();
+            if (Actions.Count > 0)
+                foreach (var key in Actions.Keys)
+                    Actions[key].Second();
         }
+    }
+
+    public class ChangesLog
+    {
+        public Dictionary<string, List<string>> Errors { get; set; }
+        /// <summary>
+        /// ControlID => Ticks
+        /// </summary>
+        public Dictionary<string, long> ChangeTicks;
     }
 }

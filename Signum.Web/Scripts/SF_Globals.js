@@ -1,4 +1,6 @@
-﻿var sfPrefixToIgnore = "prefixToIgnore";
+﻿var sfPrefix = "prefix";
+var sfPrefixToIgnore = "prefixToIgnore";
+var sfReactive = "sfReactive";
 var sfFieldErrorClass = "field-validation-error";
 var sfInputErrorClass = "input-validation-error";
 var sfSummaryErrorClass = "validation-summary-errors";
@@ -18,7 +20,7 @@ var sfLink = "_sfLink";
 var sfIsNew = "_sfIsNew";
 var sfIndex = "_sfIndex";
 var sfCombo = "_sfCombo";
-var sfChanged = "_sfChanged";
+var sfTicks = "_sfTicks";
 
 var sfEntitiesContainer = "_sfEntitiesContainer";
 var sfRepeaterElement = "_sfRepeaterElement";
@@ -31,7 +33,17 @@ var sfBtnOkS = "sfBtnOkS";
 var sfTop = "sfTop";
 var sfAllowMultiple = "sfAllowMultiple";
 var sfEntityTypeName = "sfEntityTypeName";
-var sfEmbedControl = "sfEmbedControl";
+var sfEmbeddedControl = "sfEmbeddedControl";
+var sfTabId = "sfTabId";
+
+function qp(name, value) {
+    return "&" + name + "=" + value;
+}
+
+function empty(myString) {
+    if (myString == undefined || myString == "") return true;
+    return false;
+}
 
 function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     var error;

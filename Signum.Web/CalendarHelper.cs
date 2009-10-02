@@ -96,7 +96,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
             //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
-            sb.Append(helper.ScriptInclude("Scripts/jqueryui/ui.core.js",
+            sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/ui.core.js",
                 "Scripts/jqueryui/ui.datepicker.js",
                 "Scripts/jqueryui/i18n/ui.datepicker-es.js"));
             
@@ -108,12 +108,12 @@ namespace Signum.Web
                 "Scripts/jqueryui/ui.datepicker.css",
                 "Scripts/jqueryui/ui.theme.css"));
 
-            sb.Append(
+            sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 
                 "$(document).ready(function(){\n" +
                 "$(\"#" + elementId + "\").datepicker({ " + OptionsToString(settings) +" });\n" + 
                 "});\n" + 
-                "</script>\n");
+                "</script>");
 
             return sb.ToString();
         }

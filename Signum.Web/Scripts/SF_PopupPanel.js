@@ -1,11 +1,10 @@
 ﻿function OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, partialView) {
-    var typeName = $('#' + prefix + sfStaticType).val();
-    var hasImplementations = $('#' + prefix + sfImplementations).length > 0;
-    TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, typeName, hasImplementations, detailDiv, partialView);
+    $('#' + prefix + sfTicks).val(new Date().getTime());
+    OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView);
 }
 
 function NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, detailDiv, partialView) {
-    $('#' + prefix + sfEntity).after("<input type=\"hidden\" id=\"" + prefix + sfIsNew + "\" name=\"" + prefix + sfIsNew + "\" value=\"\" />\n");
+    $('#' + prefix + sfEntity).after("<input type='hidden' id='" + prefix + sfIsNew + "' name='" + prefix + sfIsNew + "' value='' />\n");
     if ($('#' + prefix + sfImplementations).length == 0)
         $('#' + prefix + sfRuntimeType).val($('#' + prefix + sfStaticType).val());
     OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, partialView);
@@ -13,60 +12,50 @@ function NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbede
 
 function NewDetail(urlController, divASustituir, prefix, detailDiv, isEmbeded, partialView) {
     NewPopup(urlController, divASustituir, prefix, "", "", isEmbeded, detailDiv, partialView);
-
-    var runtimeType = $('#' + prefix + sfRuntimeType);
-    if (runtimeType.val() == "")
-        runtimeType.val($('#' + prefix + sfStaticType).val());
-
     toggleButtonsDisplay(prefix, true);
 }
 
 function OpenDetail(urlController, divASustituir, prefix, onOk, onCancel, detailDiv) {
     OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv);
-
-    var runtimeType = $('#' + prefix + sfRuntimeType);
-    if (runtimeType.val() == "")
-        runtimeType.val($('#' + prefix + sfStaticType).val());
-
     toggleButtonsDisplay(prefix, true);
 }
 
 function OpenPopupList(urlController, divASustituir, select, onOk, onCancel, detailDiv) {
-    if (detailDiv != null && detailDiv != "") {
-        $("#" + detailDiv + " > div").hide();
-    }
-    var selected = $('#' + select + " > option:selected");
+    $('#' + select + sfTicks).val(new Date().getTime());
     
-    var typeName = $('#' + select + sfStaticType).val();
-    if (selected.length == 0) { //Create New
+    if (!empty(detailDiv))
+        $("#" + detailDiv).hide();
+    
+    var selected = $('#' + select + " > option:selected");
+    if (selected.length == 0)
         return;
-//        NewListOption(select, typeName);
-//        selected = $('#' + select + " > option:selected"); //Needs refresh
-    }
-        
+    
     var nameSelected = selected[0].id;
     var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
-    var hasImplementations = $('#' + select + sfImplementations).length > 0;
-    TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefixSelected, typeName, hasImplementations, detailDiv);
+    OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefixSelected, detailDiv);
 }
 
 function NewPopupList(urlController, divASustituir, select, onOk, onCancel, runtimeType, isEmbeded, detailDiv) {
-    if (detailDiv != null && detailDiv != "") {
-        $("#" + detailDiv + " > div").hide();
-    }
-    NewListOption(select, runtimeType, isEmbeded, detailDiv);
+    $('#' + select + sfTicks).val(new Date().getTime());
     
+    if (!empty(detailDiv))
+        $("#" + detailDiv).hide();
+    
+    NewListOption(select, runtimeType, isEmbeded, detailDiv);
+
     var selected = $('#' + select + " > option:selected");
+    if (selected.length == 0)
+        return;
+        
     var nameSelected = selected[0].id;
     var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
-    var hasImplementations = $('#' + select + sfImplementations).length > 0;
-    $('#' + prefixSelected + sfEntity).after("<input type=\"hidden\" id=\"" + prefixSelected + sfIsNew + "\" name=\"" + prefixSelected + sfIsNew + "\" value=\"\" />\n");
-    TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefixSelected, runtimeType, hasImplementations, detailDiv);
+    $('#' + prefixSelected + sfEntity).after("<input type='hidden' id='" + prefixSelected + sfIsNew + "' name='" + prefixSelected + sfIsNew + "' value='' />\n");
+    OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefixSelected, detailDiv);
 }
 
-function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, typeName, hasImplementations, detailDiv, partialView) {
+function OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView) {
     var containedEntity = $('#' + prefix + sfEntity).html();
-    if (containedEntity != null && containedEntity != "") { //Already have the containedEntity loaded => show it
+    if (!empty(containedEntity)) { //Already have the containedEntity loaded => show it
         window[prefix + sfEntityTemp] = containedEntity;
         ShowPopup(prefix, prefix + sfEntity, "modalBackground", "panelPopup", detailDiv);
         $('#' + prefix + sfBtnOk).unbind('click').click(onOk);
@@ -74,35 +63,34 @@ function TypedOpenPopup(urlController, onOk, onCancel, divASustituir, prefix, ty
         return;
     }
 
-    //Don't have the containedEntity loaded => ask the server for it
-    if (hasImplementations) {//It's an interface => The runtime type is the one to open
-        var runtimeType = $('#' + prefix + sfRuntimeType).val();
-        if (runtimeType != null && runtimeType != "") {
-            typeName = runtimeType;
-        }
-        else {
-            window.alert("Error: The different possible implementations of the interface are not loaded");
-            return;
-        }
+    var runtimeType = $('#' + prefix + sfRuntimeType).val();
+    if (empty(runtimeType)) {
+        window.alert("Error: RuntimeType could not be solved");
+        return;
     }
+    
     var idQueryParam = "";
     var idField = $('#' + prefix + sfId);
-    if (idField.length != 0) {
-        idQueryParam = "&sfId=" + idField.val();
-    }
+    if (idField.length > 0)
+        idQueryParam = qp("sfId", idField.val());
+
+    var reactiveParam = "";
+    if ($('#' + sfReactive).length > 0)
+        reactiveParam = qp(sfReactive, true);
+    
     var viewQueryParam = "";
-    if (partialView != undefined && partialView != null && partialView != "")
-        viewQueryParam = "&sfUrl=" + partialView;
+    if (!empty(partialView))
+        viewQueryParam = qp("sfUrl", partialView);
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "sfStaticType=" + typeName + "&sfOnOk=" + onOk + "&sfOnCancel=" + onCancel + "&prefix=" + prefix + idQueryParam + viewQueryParam,
+        data: "sfRuntimeType=" + runtimeType + qp("sfOnOk",onOk) + qp("sfOnCancel",onCancel) + qp(sfPrefix, prefix) + idQueryParam + reactiveParam + viewQueryParam,
         async: false,
         dataType: "html",
         success:
                    function(msg) {
                        window[prefix + sfEntityTemp] = containedEntity;
-                       if (detailDiv != null && detailDiv != "") 
+                       if (!empty(detailDiv)) 
                             $('#' + detailDiv).html(msg);
                        else
                             $('#' + prefix + sfEntity).html(msg);
@@ -124,43 +112,27 @@ function ChooseImplementation(divASustituir, prefix, onOk, onCancel) {
 }
 
 function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailDiv) {
-    if (detailDiv != null && detailDiv != "") {
-        //$("#" + prefix + "_sfEntity").show();
+    if (!empty(detailDiv))
         $("#" + detailDiv).show();
-    }
     else {
-        //$("#" + prefix + "_sfEntity").show();
+        //$("#" + prefix + sfEntity).show();
         $("#" + globalKey).show();
-        
-        $('#' + prefix + modalBackgroundKey).width(document.documentElement.clientWidth);
-        $('#' + prefix + modalBackgroundKey).height(document.documentElement.clientHeight);
-        $('#' + prefix + modalBackgroundKey).hide();
+        $('#' + prefix + modalBackgroundKey).width(document.documentElement.clientWidth).height(document.documentElement.clientHeight).hide();
 
         //Read offsetWidth and offsetHeight after display=block or otherwise it's 0
         var popup = $('#' + prefix + panelPopupKey)[0];
-        var parentDiv = $("#" + prefix + "_sfEntity").parent();
-        var left;
-        var top;
-        var popupWidth = 500;
-        /*if (parentDiv.length > 0 && parentDiv[0].id.indexOf(panelPopupKey) > -1) {
-            left = "25px";
-            top = "25px";
-            
-        }
-        else {*/
-            popupWidth = popup.offsetWidth;
-            var bodyWidth = document.body.clientWidth;
-            left = Math.max((bodyWidth - popupWidth) / 2, 10) + "px";
-            var popupHeight = popup.offsetHeight;
-            var bodyHeight = document.documentElement.clientHeight;
-            top = Math.max((bodyHeight - popupHeight) / 2, 10) + "px";
-       // }
-        //$('#' + prefix + globalKey).hide();
+        var parentDiv = $("#" + prefix + sfEntity).parent();
+        var popupWidth = popup.offsetWidth;
+        var bodyWidth = document.body.clientWidth;
+        var left = Math.max((bodyWidth - popupWidth) / 2, 10) + "px";
+        var popupHeight = popup.offsetHeight;
+        var bodyHeight = document.documentElement.clientHeight;
+        var top = Math.max((bodyHeight - popupHeight) / 2, 10) + "px";
+       
         $('#' + globalKey).hide();
         popup.style.left = left;
         popup.style.top = top;
         popup.style.width = popupWidth + "px";
-        //$('#' + prefix + globalKey).show('fast');
         $('#' + globalKey).show('fast');
         $('#' + prefix + modalBackgroundKey)[0].style.left=0;
         $('#' + prefix + modalBackgroundKey).css('filter','alpha(opacity=40)').fadeIn('slow');
@@ -168,45 +140,48 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
 }
 
 function OnPopupOK(urlController, prefix, reloadOnChangeFunction) {
-    var correcto = ValidatePartial(urlController, prefix, "", true, "*");
+    var correct = ValidatePartial(urlController, prefix, "", true, "*");
 
     window[prefix + sfEntityTemp] = "";
     $('#' + prefix + sfEntity).hide();
 
-    var runtimeType = $('#' + prefix + sfRuntimeType);
-    if (runtimeType.val() == "")
-        runtimeType.val($('#' + prefix + sfStaticType).val());
-
     toggleButtonsDisplay(prefix, true);
 
-    if (correcto) {
-        if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "") {
-            $('#' + prefix + sfChanged).val("true");
-            reloadOnChangeFunction();
-        }
+    if (!empty(reloadOnChangeFunction)) {
+        $('#' + prefix + sfTicks).val(new Date().getTime());
+        reloadOnChangeFunction();
+    }
+}
+
+function OnListPopupOK(urlController, prefix, btnOkId, reloadOnChangeFunction) {
+    var itemPrefix = btnOkId.substr(0, btnOkId.indexOf(sfBtnOk));
+    var correct = ValidatePartial(urlController, itemPrefix, "", true, "*");
+
+    window[itemPrefix + sfEntityTemp] = "";
+    $('#' + itemPrefix + sfEntity).hide();
+
+    toggleButtonsDisplayList(prefix, true);//prefix=itemPrefix.substr(0, itemPrefix.lastIndexOf("_"))
+    
+    if (!empty(reloadOnChangeFunction)) {
+        $('#' + prefix + sfTicks).val(new Date().getTime());
+        reloadOnChangeFunction();
     }
 }
 
 function ReloadEntity(urlController, prefix, parentDiv) {
-    var formChildren;
-    if (parentDiv != undefined)
-        formChildren = $("#" + parentDiv + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
-    else if ($('#' + prefix + "panelPopup").length != 0)
-        formChildren = $('#' + prefix + "panelPopup *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
-    else
-        formChildren = $("form");
+    var formChildren = $("form");
     $.ajax({
         type: "POST",
         url: urlController,
-        data: formChildren.serialize() + "&prefix=" + prefix,
+        data: formChildren.serialize() + qp(sfPrefix,prefix),
         async: false,
         dataType: "html",
         success:
                    function(msg) {
-                       if (parentDiv != undefined)
-                        $('#' + parentDiv).html(msg);
+                       if (!empty(parentDiv))
+                            $('#' + parentDiv).html(msg);
                        else
-                       $('#' + prefix + "divMainControl").html(msg);
+                            $('#' + prefix + "divMainControl").html(msg);
                    },
         error:
                    function(XMLHttpRequest, textStatus, errorThrown) {
@@ -215,25 +190,8 @@ function ReloadEntity(urlController, prefix, parentDiv) {
     });
 }
 
-function OnListPopupOK(urlController, prefix, btnOkId) {
-    var itemPrefix = btnOkId.substr(0, btnOkId.indexOf(sfBtnOk));
-    ValidatePartialList(urlController, prefix, itemPrefix, "", true, "*");
-
-    //Clean panelPopup
-    window[itemPrefix + sfEntityTemp] = "";
-    $('#' + itemPrefix + sfEntity).hide();
-
-    var runtimeType = $('#' + itemPrefix + sfRuntimeType);
-    if (runtimeType.val() == "")
-        runtimeType.val($('#' + itemPrefix + sfStaticType).val());
-
-    toggleButtonsDisplayList(itemPrefix.substr(0, itemPrefix.lastIndexOf("_")), true);
-}
-
 function OnImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, selectedType) {
-    //var selectedType = $('#' + prefix + sfImplementationsDDL + " > option:selected");
-    //if (selectedType.length == 0 || selectedType.val() == "")
-    if (selectedType == null || selectedType == undefined || selectedType == "")
+    if (empty(selectedType))
         return;
     $('#' + prefix + sfRuntimeType).val(selectedType);
     $('#' + prefix + sfImplementations).hide();
@@ -250,30 +208,26 @@ function NewListOption(prefix, selectedType, isEmbeded, detailDiv) {
     var newIndex = "_" + (parseInt(lastIndex) + 1);
     var staticType = $("#" + prefix + sfStaticType);
     staticType.after(
-        "<input type=\"hidden\" id=\"" + prefix + newIndex + sfRuntimeType + "\" name=\"" + prefix + newIndex + sfRuntimeType + "\" value=\"" + selectedType + "\" />\n" +
-        "<script type=\"text/javascript\">var " + prefix + newIndex + sfEntityTemp + " = \"\";</script>\n");
-    var sfEntityDiv = "<div id=\"" + prefix + newIndex + sfEntity + "\" name=\"" + prefix + newIndex + sfEntity + "\" style=\"display:none\"></div>\n";
-    if (detailDiv == null || detailDiv == "")
+        "<input type='hidden' id='" + prefix + newIndex + sfRuntimeType + "' name='" + prefix + newIndex + sfRuntimeType + "' value='" + selectedType + "' />\n" +
+        "<script type=\"text/javascript\">var " + prefix + newIndex + sfEntityTemp + " = '';</script>\n");
+    var sfEntityDiv = "<div id='" + prefix + newIndex + sfEntity + "' name='" + prefix + newIndex + sfEntity + "' style='display:none'></div>\n";
+    if (empty(detailDiv))
         staticType.after(sfEntityDiv);
     else
-        $("#" + detailDiv).html($("#" + detailDiv).html() + sfEntityDiv);
+        $("#" + detailDiv).append(sfEntityDiv);
     if (isEmbeded == "False")
-        staticType.after("<input type=\"hidden\" id=\"" + prefix + newIndex + sfId + "\" name=\"" + prefix + newIndex + sfId + "\" value=\"\" />\n");
+        staticType.after("<input type='hidden' id='" + prefix + newIndex + sfId + "' name='" + prefix + newIndex + sfId + "' value='' />\n");
 
     var select = $('#' + prefix);
-    select.html(select.html() + "\n<option id='" + prefix + newIndex + sfToStr + "' name='" + prefix + newIndex + sfToStr + "' value='' class='valueLine'>&nbsp;</option>");
+    select.append("\n<option id='" + prefix + newIndex + sfToStr + "' name='" + prefix + newIndex + sfToStr + "' value='' class='valueLine'>&nbsp;</option>");
     $('#' + prefix + " > option").attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
     $('#' + prefix + " > option:last").attr('selected', true);
 }
 
 function OnListImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, detailDiv, selectedType) {
-    //var selectedType = $('#' + prefix + sfImplementationsDDL + " > option:selected");
-    //if (selectedType.length == 0 || selectedType.val() == "")
-    if (selectedType == null || selectedType == undefined || selectedType == "")
+    if (empty(selectedType))
         return;
-
     $('#' + prefix + sfImplementations).hide();
-
     NewPopupList(urlController, divASustituir, prefix, onOk, onCancel, selectedType, isEmbeded, detailDiv);
 }
 
@@ -289,7 +243,7 @@ function OnPopupCancel(prefix) {
     if (id.length > 0 && id.val() != null && id.val() > 0)
         toggleButtonsDisplay(prefix, true);
     else {
-        if (oldValue != undefined && oldValue != null && oldValue != "") {
+        if (!empty(oldValue)) {
             toggleButtonsDisplay(prefix, true);
         }
         else {
@@ -314,7 +268,7 @@ function OnListPopupCancel(btnCancelId) {
         toggleButtonsDisplayList(prefix, true);
     }
     else {
-        if (oldValue != undefined && oldValue != null && oldValue != "") {
+        if (!empty(oldValue)) {
             toggleButtonsDisplayList(prefix, true);
         }
         else {
@@ -346,6 +300,8 @@ function RemoveListContainedEntity(select) {
     $('#' + prefixSelected + sfIsNew).remove();
     window[prefixSelected + sfEntityTemp] = "";
 
+    $('#' + select + sfTicks).val(new Date().getTime());
+            
     toggleButtonsDisplayList(select, $('#' + select + " > option").length > 0);
 }
 
@@ -362,8 +318,8 @@ function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
     $('#' + prefix + sfId).val("");
     toggleButtonsDisplay(prefix, false);
 
-    if (reloadOnChangeFunction != null && reloadOnChangeFunction != undefined && reloadOnChangeFunction != "") {
-        $('#' + prefix + sfChanged).val("true");
+    if (!empty(reloadOnChangeFunction)) {
+        $('#' + prefix + sfTicks).val(new Date().getTime());
         reloadOnChangeFunction();
     }
 }
@@ -465,7 +421,7 @@ function toggleButtonsDisplayList(prefix, hasEntity) {
 }
 
 function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, removeLinkText, maxElements) {
-    if (maxElements != null && maxElements != "") {
+    if (!empty(maxElements)) {
         var elements = $("#" + prefix + sfEntitiesContainer + " > div[name$=" + sfRepeaterElement + "]").length;
         if (elements >= parseInt(maxElements))
             return;
@@ -481,21 +437,21 @@ function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, remo
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "sfStaticType=" + runtimeType + "&prefix=" + prefix + newIndex,
+        data: "sfRuntimeType=" + runtimeType + qp(sfPrefix, prefix + newIndex),
         async: false,
         dataType: "html",
         success:
                    function(msg) {
-                        var container = $("#" + prefix + sfEntitiesContainer);
-                        container.append("\n" +
-                        "<div id=\"" + prefix + newIndex + sfRepeaterElement +"\" name=\"" + prefix + newIndex + sfRepeaterElement +"\" class=\"repeaterElement\">\n" +
-                        "<a id=\"" + prefix + newIndex + "_btnRemove\" title=\"" + removeLinkText + "\" href=\"javascript:RemoveRepeaterEntity('" + prefix + newIndex + sfRepeaterElement + "');\" class=\"lineButton remove\">" + removeLinkText + "</a>\n" +
-                        "<input type=\"hidden\" id=\"" + prefix + newIndex + sfRuntimeType + "\" name=\"" + prefix + newIndex + sfRuntimeType + "\" value=\"" + runtimeType + "\" />\n" +
-                        ((isEmbedded == "False") ? ("<input type=\"hidden\" id=\"" + prefix + newIndex + sfId + "\" name=\"" + prefix + newIndex + sfId + "\" value=\"\" />\n") : "") +
-                        //"<input type=\"hidden\" id=\"" + prefix + newIndex + sfIndex + "\" name=\"" + prefix + newIndex + sfIndex + "\" value=\"" + (parseInt(lastIndex)+1) + "\" />\n" +
-                        "<input type=\"hidden\" id=\"" + prefix + newIndex + sfIsNew + "\" name=\"" + prefix + newIndex + sfIsNew + "\" value=\"\" />\n" +
-                        "<script type=\"text/javascript\">var " + prefix + newIndex + sfEntityTemp + " = \"\";</script>\n" +
-                        "<div id=\"" + prefix + newIndex + sfEntity + "\" name=\"" + prefix + newIndex + sfEntity + "\">\n" +
+                       var newPrefix = prefix + newIndex;
+                       $("#" + prefix + sfEntitiesContainer).append("\n" +
+                        "<div id='" + newPrefix + sfRepeaterElement + "' name='" + newPrefix + sfRepeaterElement + "' class='repeaterElement'>\n" +
+                        "<a id='" + newPrefix + "_btnRemove' title='" + removeLinkText + "' href=\"javascript:RemoveRepeaterEntity('" + newPrefix + sfRepeaterElement + "');\" class='lineButton remove'>" + removeLinkText + "</a>\n" +
+                        "<input type='hidden' id='" + newPrefix + sfRuntimeType + "' name='" + newPrefix + sfRuntimeType + "' value='" + runtimeType + "' />\n" +
+                        ((isEmbedded == "False") ? ("<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n") : "") +
+                       //"<input type=\"hidden\" id=\"" + newPrefix + sfIndex + "\" name=\"" + newPrefix + sfIndex + "\" value=\"" + (parseInt(lastIndex)+1) + "\" />\n" +
+                        "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n" +
+                        "<script type=\"text/javascript\">var " + newPrefix + sfEntityTemp + " = '';</script>\n" +
+                        "<div id='" + newPrefix + sfEntity + "' name='" + newPrefix + sfEntity + "'>\n" +
                         msg + "\n" +
                         "</div>\n" + //sfEntity
                         "</div>\n" //sfRepeaterElement                        

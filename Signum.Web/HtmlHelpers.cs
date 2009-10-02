@@ -24,15 +24,15 @@ namespace Signum.Web
         public static string ValidationSummaryAjax(this HtmlHelper html)
         {
             return "<div id='sfGlobalValidationSummary'>" + 
-                   html.ValidationSummary()
-                   + "&nbsp;</div>";
+                   html.ValidationSummary() +
+                   "</div>";
         }
 
         public static string ValidationSummaryAjax(this HtmlHelper html, string prefix)
         {
             return "<div id='{0}sfGlobalValidationSummary'>".Formato(prefix) +
-                   html.ValidationSummary()
-                   + "&nbsp;</div>";
+                   html.ValidationSummary() +
+                   "</div>";
         }
 
         /// <summary>
@@ -65,21 +65,22 @@ namespace Signum.Web
             return html.Label(id, value, idField, cssClass, null);
         }
 
-        public static string Span(this HtmlHelper html, string name, string value, string cssClass)
-        { 
-            return "<span " + 
-                ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
-                "class=\"" + cssClass + "\" >" + value + 
-                "</span>\n";
-        }
-
         public static string Span(this HtmlHelper html, string name, string value, string cssClass, Dictionary<string, object> htmlAttributes)
         {
-            return "<span " +
-                ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
-                "class=\"" + cssClass + "\" " +
-                htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") + ">" + value +
-                "</span>\n";
+            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            return "<span{0}{1}{2}>{3}</span>".Formato(idname, attributes, css, value);
+        }
+
+        public static string Span(this HtmlHelper html, string name, string value, string cssClass)
+        {
+            return Span(html, name, value, cssClass, null);
+        }
+
+        public static string Span(this HtmlHelper html, string name, string value)
+        {
+            return Span(html, name, value, null, null);
         }
 
         public static string Span(this HtmlHelper html, string name, object value, string cssClass, Type type)
@@ -98,42 +99,34 @@ namespace Signum.Web
         }
 
         public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, Dictionary<string, object> htmlAttributes)
-        { 
-            return "<a " +
-                ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
-                "href=\"" + href + "\" " +
-                "class=\"" + cssClass + "\" " +
-                (htmlAttributes != null ? (htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "") + 
-                ">" + text +
-                "</a>\n";
+        {
+            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            string tooltip = " " + (title.HasText() ? title : text);
+            return "<a{0}{1}{2}{3} href=\"{4}\">{5}</a>".Formato(idname,css,tooltip,attributes,href,text);
         }
 
         public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass, Dictionary<string, object> htmlAttributes)
         {
-            return "<div " +
-                ((!string.IsNullOrEmpty(name)) ? "id=\"" + name + "\" name=\"" + name + "\" " : "") +
-                "class=\"" + cssClass + "\" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") + ">" + innerHTML +
-                "</div>\n";
+            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            return "<div{0}{1}{2}>{3}</div>".Formato(idname, css, attributes, innerHTML);
         }
 
         public static string Button(this HtmlHelper html, string name, string value, string onclick, string cssClass, Dictionary<string, object> htmlAttributes)
         {
-            return "<input type=\"button\" " +
-                   "id=\"" + name + "\" " +
-                   "value=\"" + value + "\" " +
-                   "class=\"" + cssClass + "\" " +
-                   ((htmlAttributes != null) ? htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") : "") +
-                   "onclick=\"" + onclick + "\" " +
-                   "/>\n";
+            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+            string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
+            return "<input type='button'{0}{1} value='{2}'{3} onclick=\"{4}\" />".Formato(idname, css, value, attributes, onclick);
         }
 
         public static string ImageButton(this HtmlHelper html, string name, string imgSrc, string altText, string onclick, Dictionary<string, object> htmlAttributes)
         {
-            return "<img id='{0}' src='{1}' alt='{2}' title='{2}' onclick=\"{3}\" {4} />".Formato
-                (
-                    name, imgSrc, altText, onclick,
-                    (htmlAttributes != null) ? htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ") : ""
-                );
+            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+            return "<img id='{0}' src='{1}' alt='{2}' title='{2}' onclick=\"{3}\"{4} />".Formato(name, imgSrc, altText, onclick, attributes);
         }
 
         public static void Write(this HtmlHelper html, string text)
@@ -160,8 +153,6 @@ namespace Signum.Web
         }
         #endregion
 
-     
-
         private static string ToAttributeList(object values) {
             StringBuilder sb = new StringBuilder(); 
             foreach (System.ComponentModel.PropertyDescriptor descriptor in System.ComponentModel.TypeDescriptor.GetProperties(values))
@@ -177,7 +168,7 @@ namespace Signum.Web
                                                   string AutoKeyDowned)
         {                   
             StringBuilder sb = new StringBuilder();
-            sb.Append(html.Div(
+            sb.AppendLine(html.Div(
                         ddlName,
                         "",
                         "AutoCompleteMainDiv",
@@ -188,7 +179,7 @@ namespace Signum.Web
                                                               entityIdFieldName + 
                                                               "', event); {0}".Formato(Utils.Specify(AutoKeyDowned)) }, 
                         }));
-            sb.Append("<script type=\"text/javascript\">CreateAutocomplete('" + ddlName + 
+            sb.AppendLine("<script type=\"text/javascript\">CreateAutocomplete('" + ddlName + 
                                                               "','" + extendedControlName + 
                                                               "','" + entityTypeName + 
                                                               "','" + implementations +
@@ -198,14 +189,14 @@ namespace Signum.Web
                                                               "," + numResults +
                                                               "," + delayMiliseconds +
                                                               "," + AutoKeyDowned +
-                                                              ");</script>\n");
+                                                              ");</script>");
             return sb.ToString();
         }
 
         public static string CssDynamic(this HtmlHelper html, string url) {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("<script type='text/javascript'>");
-            sb.AppendLine("var link=document.createElement('link')");
+            sb.AppendLine("var link=document.createElement('link');");
             sb.AppendLine("link.setAttribute('rel', 'stylesheet');");
             sb.AppendLine("link.setAttribute('type', 'text/css');");
             sb.AppendFormat("link.setAttribute('href', '{0}');", url);

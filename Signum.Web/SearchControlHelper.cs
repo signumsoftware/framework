@@ -214,6 +214,8 @@ namespace Signum.Web
                             c.TempData),
                         new ViewPage()); 
         }
+        
+        static MethodInfo mi = typeof(EntityLineHelper).GetMethod("InternalEntityLine", BindingFlags.Static | BindingFlags.NonPublic);
 
         private static string PrintValueField(HtmlHelper helper, FilterType filterType, Type columnType, string id, object value, string propertyName)
         {
@@ -230,7 +232,13 @@ namespace Signum.Web
                     if (id.StartsWith(prefix))
                         id = id.RemoveLeft(prefix.Length); //We call GlobalName with it in EntityLine
                 }
-                string result = (string)EntityLineHelper.InternalEntityLine(helper, id, columnType, value, el);
+
+                Type t = typeof(TypeContext<>);
+                var tcreator = t.MakeGenericType(new Type[] {columnType});
+                TypeContext tc = (TypeContext)Activator.CreateInstance(tcreator, new object[]{value, id});
+                
+                string result = (string)mi.MakeGenericMethod(tc.ContextType).Invoke(null, new object[] { helper, tc, el });
+                //string result = (string)EntityLineHelper.InternalEntityLine(helper, id, columnType, value, el);
                 sb.Append(result);
             }
             else

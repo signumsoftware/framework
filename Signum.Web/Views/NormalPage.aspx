@@ -16,6 +16,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
+     <input type="hidden" id="<%=ViewDataKeys.TabId%>" name="<%=ViewDataKeys.TabId%>" value="<%=(string)ViewData[ViewDataKeys.TabId]%>" />
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
             <input type="button" id="btnSave" class="OperationDiv" onclick="<%="TrySave('Signum/TrySave');" %>" value="Guardar" />   
@@ -24,7 +25,9 @@
         <br />
         <%= Html.ValidationSummaryAjax() %>
         <br />
-        <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
+        <div id="divMainControl" class="divMainControl">
+            <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
+        </div>
         <div id="divASustituir"></div>
  <%}%>
 </asp:Content>

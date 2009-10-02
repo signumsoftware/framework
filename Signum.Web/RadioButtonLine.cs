@@ -32,9 +32,9 @@ namespace Signum.Web
             if (StyleContext.Current.LabelVisible)
             {
                 if (labelHtmlOptions != null && labelHtmlOptions.Count > 0)
-                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, labelHtmlOptions));
+                    sb.AppendLine(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel, labelHtmlOptions));
                 else
-                    sb.Append(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
+                    sb.AppendLine(helper.Label(idValueField + "lbl", labelText, idValueField, TypeContext.CssLineLabel));
             }
             if (rbHtmlOptions == null)
                 rbHtmlOptions = new Dictionary<string, object>();
@@ -46,13 +46,12 @@ namespace Signum.Web
                 rbHtmlOptions.Add("disabled", "disabled");
                 string rb = helper.RadioButton(idValueField, true, value.HasValue && value.Value, rbHtmlOptions);
                 rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_True\"");
-                sb.Append(rb);
-                sb.Append("&nbsp;" + trueLabel + "\n");
+                sb.AppendLine(rb);
+                sb.AppendLine("<span class='lblRadioTrue'>" + trueLabel + "</span>");
                 rb = helper.RadioButton(idValueField, false, value.HasValue && !value.Value, rbHtmlOptions);
                 rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_False\"");
-                sb.Append(rb);
-                sb.Append("&nbsp;" + falseLabel);
-                sb.Append("\r\n");
+                sb.AppendLine(rb);
+                sb.AppendLine("<span class='lblRadioFalse'>" + falseLabel + "</span>");
             }
             else
             {
@@ -60,19 +59,17 @@ namespace Signum.Web
                 {
                     rbHtmlOptions.Add("name", idValueField);
                     rbHtmlOptions.Add("class", "rbValueLine inlineVal");//inlineVal class tells Javascript code to show Inline Error
-                    sb.Append("<div id='" + idValueField + "' class='valueLine'>");
+                    sb.AppendLine("<div id='{0}' class='valueLine'>".Formato(idValueField));
                     string rb = helper.RadioButton(idValueField, true, value.HasValue && value.Value, rbHtmlOptions); 
                     rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_True\"");
-                    sb.Append(rb);
-                    sb.Append("<span class='lblRadioTrue'>" + trueLabel + "</span>\n");
+                    sb.AppendLine(rb);
+                    sb.AppendLine("<span class='lblRadioTrue'>" + trueLabel + "</span>");
                     rb = helper.RadioButton(idValueField, false, value.HasValue && !value.Value, rbHtmlOptions);
                     rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_False\"");
-                    sb.Append(rb);
-                    sb.Append("<span class='lblRadioFalse'>" + falseLabel + "</span>\n");
-                    sb.Append("&nbsp;");
-                    sb.Append("</div>");
-                    sb.Append(helper.ValidationMessage(idValueField));
-                    sb.Append("\n");
+                    sb.AppendLine(rb);
+                    sb.AppendLine("<span class='lblRadioFalse'>" + falseLabel + "</span>");
+                    sb.AppendLine("</div>");
+                    sb.AppendLine(helper.ValidationMessage(idValueField));
                 }
                 else
                 {
@@ -80,51 +77,21 @@ namespace Signum.Web
                     rbHtmlOptions.Add("class", "rbValueLine");
                     string rb = helper.RadioButton(idValueField, true, value.HasValue && value.Value, rbHtmlOptions);
                     rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_True\"");
-                    sb.Append(rb);
-                    sb.Append("&nbsp;" + trueLabel + "\n");
+                    sb.AppendLine(rb);
+                    sb.AppendLine("<span class='lblRadioTrue'>" + trueLabel + "</span>");
                     rb = helper.RadioButton(idValueField, false, value.HasValue && !value.Value, rbHtmlOptions);
                     rb = rb.Replace("id=\"" + idValueField + "\"", "id=\"" + idValueField + "_False\"");
-                    sb.Append(rb);
-                    sb.Append("&nbsp;" + falseLabel);
-                    sb.Append("\r\n");
+                    sb.AppendLine(rb);
+                    sb.AppendLine("<span class='lblRadioFalse'>" + falseLabel + "</span>");
                 }
             }
             if (StyleContext.Current.BreakLine)
-                sb.Append("<div class=\"clearall\">&nbsp;</div>\n");
+                sb.AppendLine("<div class='clearall'></div>");
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
 
             return idValueField;
         }
-
-        //public static string RadioButtonLine<T>(this HtmlHelper helper, TypeContext<T> tc, string propertyName, string trueLabel, string falseLabel, string labelText)
-        //{
-        //    T entity = tc.Value;
-        //    PropertyInfo pi = typeof(T).GetProperty(propertyName);
-        //    bool? value = (bool?)pi.GetValue(entity, null);
-
-        //    string globalName = tc.Name.EndsWith("_") ? tc.Name + pi.Name : tc.Name + "_" + pi.Name;
-        //    return helper.InternalRadioButtonLine<T>(globalName, value, trueLabel, falseLabel, labelText, string.Empty);
-        //}
-
-        //public static string RadioButtonLine<T>(this HtmlHelper helper, TypeContext<T> tc, string propertyName, string trueLabel, string falseLabel)
-        //{
-        //    T entity = tc.Value;
-        //    PropertyInfo pi = typeof(T).GetProperty(propertyName);
-        //    bool? value = (bool?)pi.GetValue(entity, null);
-
-        //    string globalName = tc.Name.EndsWith("_") ? tc.Name + pi.Name : tc.Name + "_" + pi.Name;
-        //    return helper.InternalRadioButtonLine<T>(globalName, value, trueLabel, falseLabel, pi.Name, string.Empty);
-        //}
-
-        //public static string RadioButtonLine<T>(this HtmlHelper helper, TypeContext<T> tc, string propertyName, string trueLabel, string falseLabel, string labelText, string onchange)
-        //{
-        //    T entity = tc.Value;
-        //    PropertyInfo pi = typeof(T).GetProperty(propertyName);
-        //    bool? value = (bool?)pi.GetValue(entity, null);
-        //    string globalName = tc.Name.EndsWith("_") ? tc.Name + pi.Name : tc.Name + "_" + pi.Name;
-        //    return helper.InternalRadioButtonLine<T>(globalName, value, trueLabel, falseLabel, labelText, onchange);
-        //}
 
         public static string RadioButtonLine<T>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, bool?>> property, RadioButtonLine options)
         {

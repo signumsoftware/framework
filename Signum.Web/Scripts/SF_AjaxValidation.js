@@ -7,12 +7,13 @@
 
 //fixedInlineErrorText = "" for it to be populated from ModelState error messages
 function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText, parentDiv) {
-	var returnValue = false;
+    var returnValue = false;
+	var formChildren = empty(parentDiv) ? $("form") : $("#" + parentDiv + " *, #" + sfTabId);
 	$.ajax({
 		type: "POST",
 		url: urlController,
 		async: false,
-		data: $((parentDiv !== undefined) ? ("#" + parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
+		data: formChildren.serialize() + qp(sfPrefixToIgnore, prefixToIgnore),
 		success: function (msg) {
 			if (msg.indexOf("ModelState") > 0) {
 				eval('var result=' + msg);
@@ -22,7 +23,6 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 			else {
 				$("#" + (parentDiv != undefined ? parentDiv : "content")).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
 				returnValue = true;
-				return;
 			}
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -34,12 +34,13 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 
 //fixedInlineErrorText = "" for it to be populated from ModelState error messages
 function Validate(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText, parentDiv) {
-	var returnValue = false;
+    var returnValue = false;
+    var formChildren = empty(parentDiv) ? $("form") : $("#" + parentDiv + " *, #" + sfTabId);
 	$.ajax({
 		type: "POST",
 		url: urlController,
 		async: false,
-		data: $((parentDiv !== undefined) ? ("#" + parentDiv + " *") : "form").serialize() + "&" + sfPrefixToIgnore + "=" + prefixToIgnore,
+		data: formChildren.serialize() + qp(sfPrefixToIgnore,prefixToIgnore),
 		success: function (msg) {
 			if (msg.indexOf("ModelState") > 0) {
 				eval('var result=' + msg);
@@ -57,31 +58,19 @@ function Validate(urlController, prefixToIgnore, showInlineError, fixedInlineErr
 	return returnValue;
 }
 
-////    //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-////    function TrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
-////        var typeName = $('#' + prefix + sfStaticType).val();
-////        var runtimeType = $('#' + prefix + sfRuntimeType).val(); //typeName is an interface
-////        if (runtimeType != null && runtimeType != "") {
-////            typeName = runtimeType;
-////        }
-////        return TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "", FalseParameterNotExistsAnyMore);
-////    }
 //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-function TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
-	if (panelPopupKey == "" || panelPopupKey == undefined) panelPopupKey = "panelPopup";
-	var formChildren = $('#' + prefix + panelPopupKey + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
-	var idField = document.getElementById(prefix + sfId);
-	var idQueryParam = "";
-	if (idField != null && idField != undefined) {
-		idQueryParam = "&sfId=" + idField.value;
-	}
-
-	var returnValue = false;
+function TrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, panelPopupKey) {
+    var returnValue = false;
+    if (empty(panelPopupKey)) panelPopupKey = "panelPopup";
+    var formChildren = $('#' + prefix + panelPopupKey + " *, #" + sfTabId).add(SFparams(prefix));
+    var typeNameParam = "";
+    if ($('#' + prefix + sfRuntimeType).length == 0) //From SearchCreate I don't have sfRuntimeType of the subentity => use typeName param
+        typeNameParam = qp(prefix + sfRuntimeType, typeName);
 	$.ajax({
 		type: "POST",
 		url: urlController,
 		async: false,
-		data: formChildren.serialize() + "&prefix=" + prefix + "&" + sfPrefixToIgnore + "=" + prefixToIgnore + "&sfStaticType=" + staticType + idQueryParam,
+		data: formChildren.serialize() + qp(sfPrefix,prefix) + qp(sfPrefixToIgnore,prefixToIgnore) + typeNameParam,
 		success: function (result) {
 			eval('var result=' + result);
 			var toStr = result[sfToStr];
@@ -97,8 +86,7 @@ function TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineEr
 			}
 			var modelState = result["ModelState"];
 			returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
-			return;
-		},
+			},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
@@ -107,41 +95,67 @@ function TypedTrySavePartial(urlController, prefix, prefixToIgnore, showInlineEr
 }
 
 //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
-	var typeName = $('#' + prefix + sfStaticType).val();
-	var runtimeType = $('#' + prefix + sfRuntimeType).val(); //typeName is an interface
-	if (runtimeType != null && runtimeType != "") {
-		typeName = runtimeType;
-	}
-	return TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "");
+//function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
+//	return TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "");
+//}
+
+////fixedInlineErrorText = "" for it to be populated from ModelState error messages
+//function ValidatePartialList(urlController, prefix, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
+//	var typeName = $('#' + prefix + sfStaticType).val();
+//	var runtimeType = $('#' + itemPrefix + sfRuntimeType).val(); //typeName is an interface
+//	if (runtimeType != null && runtimeType != "") {
+//		typeName = runtimeType;
+//	}
+//	return TypedValidatePartial(urlController, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "");
+//}
+
+//function GetPath(prefix) {
+//    var path = prefix.split("_");
+//    var formChildren = $("#" + sfId + ", #" + sfRuntimeType);
+//    for (var i = 0; i < path.length; i++) { 
+//        var currPrefix = concat(path, i);
+//        formChildren = formChildren.add("#" + currPrefix + sfId + ", #" + currPrefix + sfRuntimeType + ", #" + currPrefix + sfStaticType + ", #" + currPrefix + sfIsNew + ", #" + currPrefix + sfIndex);
+//    }
+//    return formChildren;
+//}
+
+//function concat(array, toIndex)
+//{
+//    var path = "";
+//    for (var i = 0; i <= toIndex; i++) {
+//        if (array[i] != "")
+//            path += "_" + array[i];
+//    }
+//    return path;
+//}
+
+function SFparams(prefix) {
+    return $("#" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew + ", #" + prefix + sfIndex + ", #" + prefix + sfTicks);
 }
 
 //fixedInlineErrorText = "" for it to be populated from ModelState error messages
-function ValidatePartialList(urlController, prefix, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText) {
-	var typeName = $('#' + prefix + sfStaticType).val();
-	var runtimeType = $('#' + itemPrefix + sfRuntimeType).val(); //typeName is an interface
-	if (runtimeType != null && runtimeType != "") {
-		typeName = runtimeType;
-	}
-	return TypedValidatePartial(urlController, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "");
-}
-
-//fixedInlineErrorText = "" for it to be populated from ModelState error messages
-function TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, staticType, panelPopupKey) {
-	if (panelPopupKey == "" || panelPopupKey == undefined) panelPopupKey = "panelPopup";
-	var formChildren = $('#' + prefix + panelPopupKey + " *, #" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew);
-	var idField = document.getElementById(prefix + sfId);
-	var idQueryParam = "";
-	if (idField != null && idField != undefined) {
-		idQueryParam = "&sfId=" + idField.value;
-	}
-
-	var returnValue = false;
+function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, panelPopupKey) {
+    var returnValue = false;
+    if (empty(panelPopupKey)) panelPopupKey = "panelPopup";
+    var formChildren;
+    var idQueryParam = ""; var typeNameParam = ""; //var reactiveEntity = "";
+    if ($('#' + sfReactive).length > 0) {
+        formChildren = $("form");
+//        if ($('#' + sfReactive).length > 0)
+//            reactiveEntity = qp(sfReactive, true);
+    }
+    else {
+        formChildren = $('#' + prefix + panelPopupKey + " *, #" + sfTabId);
+        if (formChildren.filter('#' + prefix + sfId).length == 0)
+            idQueryParam = qp(prefix + sfId, $('#' + prefix + sfId));
+        if (formChildren.filter('#' + prefix + sfRuntimeType).length == 0)
+            typeNameParam = qp(prefix + sfRuntimeType, $('#' + prefix + sfRuntimeType));    
+    }    
 	$.ajax({
 		type: "POST",
 		url: urlController,
 		async: false,
-		data: formChildren.serialize() + "&prefix=" + prefix + "&" + sfPrefixToIgnore + "=" + prefixToIgnore + "&sfStaticType=" + staticType + idQueryParam,
+		data: formChildren.serialize() + qp(sfPrefix,prefix) + qp(sfPrefixToIgnore,prefixToIgnore) + idQueryParam + typeNameParam + reactiveEntity,
 		success: function (result) {
 			eval('var result=' + result);
 			var toStr = result[sfToStr];
@@ -157,7 +171,6 @@ function TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineE
 			}
 			var modelState = result["ModelState"];
 			returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
-			return;
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 			ShowError(XMLHttpRequest, textStatus, errorThrown);
@@ -173,7 +186,7 @@ function ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineError
 	$('.' + sfSummaryErrorClass).replaceWith("");
 
 	var allErrors = "";
-	var inlineErrorStart = "&nbsp;<span class=\"" + sfFieldErrorClass + "\">";
+	var inlineErrorStart = '&nbsp;<span class="' + sfFieldErrorClass + '">';
 	var inlineErrorEnd = "</span>";
 
 	for (var controlID in modelState) {
@@ -201,8 +214,8 @@ function ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineError
 	if (allErrors != "") {
 		$('#' + prefix + sfToStr).addClass(sfInputErrorClass);
 		$('#' + prefix + sfLink).addClass(sfInputErrorClass);
-		if (document.getElementById(prefix + sfGlobalValidationSummary) != null) {
-			document.getElementById(prefix + sfGlobalValidationSummary).innerHTML = "<br /><ul class=\"" + sfSummaryErrorClass + "\">\n" + allErrors + "</ul><br />\n";
+		if ($('#' + prefix + sfGlobalValidationSummary).length > 0) {
+			$('#' + prefix + sfGlobalValidationSummary).html('<br /><ul class="' + sfSummaryErrorClass + '">\n' + allErrors + '</ul><br />\n');
 		}
 		return false;
 	}

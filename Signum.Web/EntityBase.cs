@@ -10,6 +10,7 @@ namespace Signum.Web
         public const string Implementations = "sfImplementations"; 
         public const string ImplementationsDDL = "sfImplementationsDDL";
         public const string Entity = "sfEntity";
+        public const string EntityTemp = "sfEntityTemp";
         public const string ToStr = "sfToStr";
         public const string ToStrLink = "sfLink";
         public const string IsNew = "sfIsNew";

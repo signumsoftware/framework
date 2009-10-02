@@ -52,8 +52,8 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
 
             Type elementsCleanType = Reflector.ExtractLazy(typeof(T)) ?? typeof(T);
-            
-            sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, elementsCleanType.Name) + "\n");
+
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), elementsCleanType.Name));
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
@@ -69,8 +69,8 @@ namespace Signum.Web
                     "javascript:NewRepeaterElement('{0}','{1}','{2}','{3}','{4}','{5}');".Formato("Signum.aspx/PartialView", idValueField, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.RemoveElementLinkText, (settings.maxElements.HasValue ? settings.maxElements.Value.ToString() : "")) :
                     ""; //"ChooseImplementation('{0}','{1}',function(){{OnListImplementationsOk({2},'{3}','{4}');}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField, popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv);
 
-                sb.Append(
-                    helper.Href(idValueField + "_btnCreate",
+                sb.AppendLine(
+                    helper.Href(TypeContext.Compose(idValueField, "btnCreate"),
                               settings.AddElementLinkText,
                               creatingUrl,
                               "Nuevo",
@@ -78,7 +78,7 @@ namespace Signum.Web
                               new Dictionary<string, object>()));
             }
 
-            sb.Append("<div id=\"{0}\" name=\"{0}\">".Formato(idValueField + TypeContext.Separator + EntityRepeaterKeys.EntitiesContainer));
+            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(idValueField, EntityRepeaterKeys.EntitiesContainer)));
             using (StyleContext sc = new StyleContext() { BreakLine=true, LabelVisible=true, ReadOnly=false, ShowValidationMessage=true})
             {
                 if (value != null)
@@ -89,7 +89,7 @@ namespace Signum.Web
                     }
                 }
             }
-            sb.Append("</div>");
+            sb.AppendLine("</div>");
 
             //SEARCH is not supported for EntityRepeater yet
             //if (!typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))
@@ -108,7 +108,7 @@ namespace Signum.Web
             //}
 
             if (StyleContext.Current.BreakLine)
-                sb.Append("<div class=\"clearall\"></div>\n");
+                sb.AppendLine("<div class='clearall'></div>");
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
         }
@@ -120,15 +120,15 @@ namespace Signum.Web
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
             bool isLazy = typeof(Lazy).IsAssignableFrom(typeof(T));
 
-            string indexedPrefix = idValueField + TypeContext.Separator + index.ToString() + TypeContext.Separator;
+            string indexedPrefix = TypeContext.Compose(idValueField, index.ToString());
 
-            sb.Append("<div id=\"{0}\" name=\"{0}\" class=\"repeaterElement\">".Formato(indexedPrefix + EntityRepeaterKeys.RepeaterElement));
+            sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(TypeContext.Compose(indexedPrefix, EntityRepeaterKeys.RepeaterElement)));
             
             if (settings.Remove)
-                sb.Append(
-                    helper.Href(indexedPrefix + "btnRemove",
+                sb.AppendLine(
+                    helper.Href(TypeContext.Compose(indexedPrefix, "btnRemove"),
                               settings.RemoveElementLinkText,
-                              "javascript:RemoveRepeaterEntity('{0}');".Formato(indexedPrefix + EntityRepeaterKeys.RepeaterElement),
+                              "javascript:RemoveRepeaterEntity('{0}');".Formato(TypeContext.Compose(indexedPrefix, EntityRepeaterKeys.RepeaterElement)),
                               settings.RemoveElementLinkText,
                               "lineButton remove",
                               new Dictionary<string, object>()));
@@ -141,37 +141,37 @@ namespace Signum.Web
                     cleanRuntimeType = (value as Lazy).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
-            sb.Append(helper.Hidden(indexedPrefix + TypeContext.RuntimeType, runtimeType) + "\n");
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, TypeContext.RuntimeType), runtimeType));
 
-            sb.Append(helper.Hidden(indexedPrefix + EntityListKeys.Index, index.ToString()) + "\n");
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityListKeys.Index), index.ToString()));
 
             if (isIdentifiable || isLazy)
             {
-                sb.Append(helper.Hidden(
-                    indexedPrefix + TypeContext.Id,
+                sb.AppendLine(helper.Hidden(
+                    TypeContext.Compose(indexedPrefix, TypeContext.Id),
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
-                       : ((Lazy)(object)value).TryCS(i => i.Id)) + "\n");
+                       : ((Lazy)(object)value).TryCS(i => i.Id)));
             }
 
-            sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" >\n");
+            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
 
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
 
-            sb.Append(
+            sb.AppendLine(
                 helper.RenderPartialToString(
                     es.PartialViewName,
                     new ViewDataDictionary(value) 
                     { 
-                        { ViewDataKeys.PopupPrefix, idValueField + TypeContext.Separator + index.ToString()}
+                        { ViewDataKeys.PopupPrefix, indexedPrefix}
                     }
                 )
             );
-            sb.Append("</div>\n");
+            sb.AppendLine("</div>");
 
-            sb.Append("<script type=\"text/javascript\">var " + indexedPrefix + "sfEntityTemp = \"\"</script>\n");
+            sb.AppendLine("<script type=\"text/javascript\">var " + TypeContext.Compose(indexedPrefix, EntityBaseKeys.EntityTemp) + " = '';</script>");
 
-            sb.Append("</div>");
+            sb.AppendLine("</div>");
 
             return sb.ToString();
         }
@@ -209,12 +209,6 @@ namespace Signum.Web
 
             settingsModifier(el);
 
-            //if (el.StyleContext != null)
-            //{
-            //    using (el.StyleContext)
-            //        helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
-            //    return;
-            //}
             if (el != null)
                 using(el)
                     helper.InternalEntityRepeater<S>(context.Name, context.Value, el);

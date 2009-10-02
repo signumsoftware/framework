@@ -41,11 +41,14 @@ namespace Signum.Web
         public const string AllowMultiple = "sfAllowMultiple";
         public const string Create = "sfCreate";
         public const string Formatters = "sfFormatters";
+        public const string ChangeTicks = "sfChangeTicks";
+        public const string Reactive = "sfReactive";
+        public const string TabId = "sfTabId";
 
         public static string GlobalName(this HtmlHelper helper, string localName)
         {
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
-                return helper.ViewData[ViewDataKeys.PopupPrefix].ToString() + localName;
+                return ((string)helper.ViewData[ViewDataKeys.PopupPrefix] ?? "") + localName;
 
             return localName;
         }
@@ -59,6 +62,9 @@ namespace Signum.Web
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
                 globalName += helper.ViewData[ViewDataKeys.TypeContextKey].ToString();
+
+            if (helper.ViewData.Model is TypeContext)
+                globalName += ((TypeContext)helper.ViewData.Model).Name;
 
             return globalName + localName;
         }
@@ -75,7 +81,16 @@ namespace Signum.Web
             if (helper.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
                 return true;
 
-            return !helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix);
+            return !helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix) ||
+                !((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText();
+        }
+
+        public static long? GetChangeTicks(this HtmlHelper helper, string controlID)
+        {
+            if (!helper.ViewData.ContainsKey(ViewDataKeys.ChangeTicks))
+                return null;
+            return ((Dictionary<string, long>)helper.ViewData[ViewDataKeys.ChangeTicks])
+                .TryGetS(controlID);
         }
     }
 }

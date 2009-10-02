@@ -18,15 +18,17 @@ namespace Signum.Web
     {
         public static TypeContext<T> TypeContext<T>(this HtmlHelper helper)
         {
-            if (helper.ViewData.Model is TypeContext<T>)
-                return (TypeContext<T>)helper.ViewData.Model;
+            TypeContext<T> tc = CastTypeContext<T>(helper.ViewData.Model as TypeContext);
+            if (tc != null)
+                return tc;
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
             {
-                if (helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()] is TypeContext<T>)
+                tc = CastTypeContext<T>(helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()] as TypeContext);
+                if (tc != null)
                 {
-                    WriteRuntimeAndId<T>(helper, (TypeContext<T>)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()]);
-                    return (TypeContext<T>)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()];
+                    WriteRuntimeAndId<T>(helper, tc);
+                    return tc;
                 }
                 return helper.BeginContext<T>((T)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()], helper.ViewData[ViewDataKeys.TypeContextKey].ToString(), true);
             }
@@ -36,16 +38,18 @@ namespace Signum.Web
 
         public static TypeContext<T> TypeContext<T>(this HtmlHelper helper, bool writeIdAndRuntime)
         {
-            if (helper.ViewData.Model is TypeContext<T>)
-                return (TypeContext<T>)helper.ViewData.Model;
+            TypeContext<T> tc = CastTypeContext<T>(helper.ViewData.Model as TypeContext);
+            if (tc != null)
+                return tc;
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.TypeContextKey))
             {
-                if (helper.ViewData[(string)helper.ViewData[ViewDataKeys.TypeContextKey]] is TypeContext<T>)
+                tc = CastTypeContext<T>(helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()] as TypeContext);
+                if (tc != null)
                 {
                     if (writeIdAndRuntime)
-                        WriteRuntimeAndId<T>(helper, (TypeContext<T>)helper.ViewData[ViewDataKeys.TypeContextKey]);
-                    return (TypeContext<T>)helper.ViewData[(string)helper.ViewData[ViewDataKeys.TypeContextKey]];
+                        WriteRuntimeAndId<T>(helper, tc);
+                    return tc;
                 }
                 return helper.BeginContext<T>((T)helper.ViewData[helper.ViewData[ViewDataKeys.TypeContextKey].ToString()], helper.ViewData[ViewDataKeys.TypeContextKey].ToString(), writeIdAndRuntime);
             }
@@ -58,10 +62,11 @@ namespace Signum.Web
             if (!viewDataKeyAndPrefix.HasText())
                 return TypeContext<T>(helper);
 
-            if (helper.ViewData[viewDataKeyAndPrefix] is TypeContext<T>)
+            TypeContext<T> tc = CastTypeContext<T>(helper.ViewData[viewDataKeyAndPrefix] as TypeContext);
+            if (tc != null)
             {
-                WriteRuntimeAndId<T>(helper, (TypeContext<T>)helper.ViewData[viewDataKeyAndPrefix]);
-                return (TypeContext<T>)helper.ViewData[viewDataKeyAndPrefix];
+                WriteRuntimeAndId<T>(helper, tc);
+                return tc;
             }
 
             return helper.BeginContext<T>((T)helper.ViewData[viewDataKeyAndPrefix], viewDataKeyAndPrefix, true);
@@ -72,19 +77,41 @@ namespace Signum.Web
             if (!viewDataKeyAndPrefix.HasText())
                 return TypeContext<T>(helper, writeIdAndRuntime);
 
-            if (helper.ViewData[viewDataKeyAndPrefix] is TypeContext<T>)
+            TypeContext<T> tc = CastTypeContext<T>(helper.ViewData[viewDataKeyAndPrefix] as TypeContext);
+            if (tc != null)
             {
                 if (writeIdAndRuntime)
-                    WriteRuntimeAndId<T>(helper, (TypeContext<T>)helper.ViewData[viewDataKeyAndPrefix]);
-                return (TypeContext<T>)helper.ViewData[viewDataKeyAndPrefix];
+                    WriteRuntimeAndId<T>(helper, tc);
+                return tc;
             }
 
             return helper.BeginContext<T>((T)helper.ViewData[viewDataKeyAndPrefix], viewDataKeyAndPrefix, writeIdAndRuntime);
         }
 
+        static TypeContext<T> CastTypeContext<T>(TypeContext typeContext)
+        {
+            if (typeContext == null)
+                return null;
+
+            if (typeContext is TypeContext<T>)
+                return (TypeContext<T>)typeContext;
+
+            if (typeContext.ContextType.IsAssignableFrom(typeof(T)))
+            {
+                ParameterExpression pe = Expression.Parameter(typeContext.ContextType, "p");
+                LambdaExpression lambda = Expression.Lambda(Expression.Convert(pe, typeof(T)), pe);
+                return (TypeContext<T>)Common.UntypedTypeContext(typeContext, lambda, typeof(T));
+            }
+
+            return null;
+        }
+
         static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool? writeIdAndRuntime)
         {
             TypeContext<T> tc = new TypeContext<T>(value, prefix);
+
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
+                helper.Write("<input type='hidden' id='{0}' name='{0}' value='' />\n".Formato(ViewDataKeys.Reactive));
 
             if (!writeIdAndRuntime.HasValue || writeIdAndRuntime.Value)
                 WriteRuntimeAndId<T>(helper, tc);
@@ -141,8 +168,16 @@ namespace Signum.Web
         public const string Id = "sfId";
         public const string StaticType = "sfStaticType"; //READONLY
         public const string RuntimeType = "sfRuntimeType";
-        public const string Changed = "sfChanged";
+        public const string Ticks = "sfTicks";
         public const string CssLineLabel = "labelLine";
+
+        public static string Compose(string prefix, params string[] namesToAppend)
+        {
+            string result = prefix;
+            foreach (string s in namesToAppend)
+                result += Separator + s;
+            return result;
+        }
 
         public abstract object UntypedValue { get; }
         public abstract string Name { get; }
@@ -191,7 +226,7 @@ namespace Signum.Web
             Value = value;
         }
 
-        internal TypeContext(T value, string prefix)
+        public TypeContext(T value, string prefix)
         {
             Value = value;
             this.prefix = prefix; 

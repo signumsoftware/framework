@@ -22,6 +22,12 @@ namespace Signum.Entities
     
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class Reactive : Attribute
+    {
+
+    }
+
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class NoIndexAttribute : Attribute
     {

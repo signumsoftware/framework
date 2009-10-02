@@ -21,27 +21,31 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
             if (settings.ShowFieldDiv)
-                sb.Append("<div class='field'>");
+                sb.AppendLine("<div class='field'>");
             idValueField = helper.GlobalName(idValueField);
 
-            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                sb.Append("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(idValueField + TypeContext.Separator + TypeContext.Changed));
+            if (!StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
+                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
 
-            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("<div class='valueFirst'>");
-            if (StyleContext.Current.LabelVisible && !StyleContext.Current.ValueFirst)
+            if (StyleContext.Current.LabelVisible)
             {
-                if (settings.LabelHtmlProps != null && settings.LabelHtmlProps.Count > 0)
-                    sb.Append(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
+                if (StyleContext.Current.ValueFirst)
+                    sb.AppendLine("<div class='valueFirst'>");
                 else
-                    sb.Append(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel));
+                {
+                    if (settings.LabelHtmlProps != null && settings.LabelHtmlProps.Count > 0)
+                        sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
+                    else
+                        sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel));
+                }
             }
             string valueStr = (value != null) ? value.ToString() : "";
             if (StyleContext.Current.ReadOnly)
             {
                 if (value != null && typeof(T).UnNullify() == typeof(DateTime) && settings.ValueLineType != null && settings.ValueLineType == ValueLineType.Date)
-                    sb.Append(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
+                    sb.AppendLine(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
                 else
-                    sb.Append(helper.Span(idValueField, value, "valueLine", typeof(T)));
+                    sb.AppendLine(helper.Span(idValueField, value, "valueLine", typeof(T)));
             }
             else
             {
@@ -57,11 +61,9 @@ namespace Signum.Web
                     {
                         settings.ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
                     }
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings, typeof(T))));
-                    sb.Append("\n");
+                    sb.AppendLine(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings, typeof(T))));
                     sb.Append("&nbsp;");
-                    sb.Append(helper.ValidationMessage(idValueField));
-                    sb.Append("\n");
+                    sb.AppendLine(helper.ValidationMessage(idValueField));
                 }
                 else
                 {
@@ -69,24 +71,23 @@ namespace Signum.Web
                         settings.ValueHtmlProps["class"] = "valueLine inlineVal " + settings.ValueHtmlProps["class"];
                     else
                         settings.ValueHtmlProps.Add("class", "valueLine");
-                    sb.Append(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings, typeof(T))));
-                    sb.Append("\r\n");
+                    sb.AppendLine(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings, typeof(T))));
                 }
             }
             if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst)
             {
                 if (settings.LabelHtmlProps != null && settings.LabelHtmlProps.Count > 0)
-                    sb.Append(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
+                    sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
                 else
-                    sb.Append(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel));
+                    sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel));
             }
 
-            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) sb.Append("</div>");
-
+            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) 
+                sb.AppendLine("</div>");
             if (settings.ShowFieldDiv)
-                sb.Append("</div>");
+                sb.AppendLine("</div>");
             if (StyleContext.Current.BreakLine)
-                sb.Append("<div class='clearall'></div>\n");
+                sb.AppendLine("<div class='clearall'></div>");
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
 
@@ -113,16 +114,20 @@ namespace Signum.Web
                     );
             }
 
+            string setTicks = "";
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
+
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-            {
-                reloadOnChangeFunction = "$('#{0}').val('1'); ".Formato(idValueField + TypeContext.Separator + TypeContext.Changed) +
-                                         (settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix()));
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
 
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            {
                 if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                    settings.ValueHtmlProps["onblur"] = reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                    settings.ValueHtmlProps["onblur"] = setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
                 else
-                    settings.ValueHtmlProps.Add("onblur", reloadOnChangeFunction);
+                    settings.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
             return helper.DropDownList(idValueField, items, settings.ValueHtmlProps);
@@ -138,16 +143,20 @@ namespace Signum.Web
             if (settings.DatePickerOptions != null && settings.DatePickerOptions.ShowAge)
                 settings.ValueHtmlProps["class"] += " hasAge";
 
+            string setTicks = "";
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
+
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-            {
-                reloadOnChangeFunction = "$('#{0}').val('1'); ".Formato(idValueField + TypeContext.Separator + TypeContext.Changed) +
-                                         (settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix()));
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
            
-            if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                settings.ValueHtmlProps["onblur"] = reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
-            else
-                settings.ValueHtmlProps.Add("onblur", reloadOnChangeFunction);
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            {
+                if (settings.ValueHtmlProps.ContainsKey("onblur"))
+                    settings.ValueHtmlProps["onblur"] = setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                else
+                    settings.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
             settings.ValueHtmlProps["size"] = dateFormat.Length;
@@ -163,36 +172,42 @@ namespace Signum.Web
 
         public static string TextboxInLine(this HtmlHelper helper, string idValueField, string valueStr, ValueLine settings)
         {
+            string setTicks = "";
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Separator + TypeContext.Ticks));
+
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-            {
-                reloadOnChangeFunction = "$('#{0}').val('1'); ".Formato(idValueField + TypeContext.Separator + TypeContext.Changed) +
-                                         (settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix()));
-            }
-            
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+
             settings.ValueHtmlProps.Add("autocomplete", "off");
             if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                settings.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                settings.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
             else
-                settings.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + reloadOnChangeFunction);
+                settings.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
 
             return helper.TextBox(idValueField, valueStr, settings.ValueHtmlProps);
         }
 
         public static string CheckBox(this HtmlHelper helper, string idValueField, bool? value, ValueLine settings)
         {
-            string reloadOnChangeFunction = "''";
+            string setTicks = "";
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
+
+            string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
                 reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
-            if (reloadOnChangeFunction != "''")
+
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
             {
                 if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                    settings.ValueHtmlProps["onblur"] = reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                    settings.ValueHtmlProps["onblur"] = setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
                 else
-                    settings.ValueHtmlProps.Add("onblur", reloadOnChangeFunction);
+                    settings.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
-            return System.Web.Mvc.Html.InputExtensions.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, settings.ValueHtmlProps) + "\n";
+            return System.Web.Mvc.Html.InputExtensions.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, settings.ValueHtmlProps);
         }
 
         public static string ValueLine<T>(this HtmlHelper helper, T value, string idValueField, ValueLine options)
@@ -299,44 +314,44 @@ namespace Signum.Web
             {ValueLineType.Date, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy", valueLineData.ValueLineSettings)},
             {ValueLineType.Number, (helper, valueLineData) => 
                 {
-                    valueLineData.ValueLineSettings.ValueHtmlProps.Add("onkeydown", "return validator.number(event)");
+                    valueLineData.ValueLineSettings.ValueHtmlProps.Add("onkeydown", "return validator.number(event);");
                     return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.ValueLineSettings);
                 }
             },
             {ValueLineType.DecimalNumber, (helper, valueLineData) => 
                 {
-                    valueLineData.ValueLineSettings.ValueHtmlProps.Add("onkeydown", "return validator.decimalNumber(event)");
+                    valueLineData.ValueLineSettings.ValueHtmlProps.Add("onkeydown", "return validator.decimalNumber(event);");
                     return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.ValueLineSettings);
                 }
             }
         };
 
-        private static string numberKeyCode =
-            "(event.keyCode >= 48 && event.keyCode <= 57) || " +  //0-9
-            "(event.keyCode >= 96 && event.keyCode <= 105) ";  //NumPad 0-9
+        //private static string numberKeyCode =
+        //    "(event.keyCode >= 48 && event.keyCode <= 57) || " +  //0-9
+        //    "(event.keyCode >= 96 && event.keyCode <= 105) ";  //NumPad 0-9
 
-        private static string standardKeyCode = 
-            "(event.keyCode == 8) || " +   //BackSpace
-            "(event.keyCode == 9) || " +   //Tab
-            "(event.keyCode == 12) || " +  //Clear
-            "(event.keyCode == 27) || " +  //Escape
-            "(event.keyCode == 37) || " +  //Left
-            "(event.keyCode == 39) || " +  //Right
-            "(event.keyCode == 46) || " +  //Delete
-            "(event.keyCode == 36) || " +  //Home
-            "(event.keyCode == 35) ";     //End
+        //private static string standardKeyCode = 
+        //    "(event.keyCode == 8) || " +   //BackSpace
+        //    "(event.keyCode == 9) || " +   //Tab
+        //    "(event.keyCode == 12) || " +  //Clear
+        //    "(event.keyCode == 27) || " +  //Escape
+        //    "(event.keyCode == 37) || " +  //Left
+        //    "(event.keyCode == 39) || " +  //Right
+        //    "(event.keyCode == 46) || " +  //Delete
+        //    "(event.keyCode == 36) || " +  //Home
+        //    "(event.keyCode == 35) ";     //End
 
-        private static string decimalKeyCode = 
-            "(event.keyCode == 110) || " + //NumPad Decimal
-            "(event.keyCode == 190) || " + //.
-            "(event.keyCode == 188) ";     //, 
+        //private static string decimalKeyCode = 
+        //    "(event.keyCode == 110) || " + //NumPad Decimal
+        //    "(event.keyCode == 190) || " + //.
+        //    "(event.keyCode == 188) ";     //, 
         
-        private static string negativeKeyCode = 
-            "(event.keyCode == 109) || " + //NumPad -
-            "(event.keyCode == 189) ";     //-
+        //private static string negativeKeyCode = 
+        //    "(event.keyCode == 109) || " + //NumPad -
+        //    "(event.keyCode == 189) ";     //-
 
-        private static string onKeyDownNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " );";
-        private static string onKeyDownDecimalNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " || " + decimalKeyCode + " );";
+        //private static string onKeyDownNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " );";
+        //private static string onKeyDownDecimalNumber = "return (" + numberKeyCode + " || " + standardKeyCode + " || " + negativeKeyCode + " || " + decimalKeyCode + " );";
     }
 
     public class ValueLineData

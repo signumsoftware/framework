@@ -83,32 +83,72 @@ namespace Signum.Web
 
         public static ViewResult View(this Controller controller, object obj)
         {
-            return Manager.View(controller, obj, null); 
+            return Manager.View(controller, obj, null, null); 
         }
 
         public static ViewResult View(this Controller controller, object obj, string partialViewName)
         {
-            return Manager.View(controller, obj, partialViewName);
+            return Manager.View(controller, obj, partialViewName, null);
+        }
+
+        public static ViewResult View(this Controller controller, object obj, Dictionary<string, long> changeTicks)
+        {
+            return Manager.View(controller, obj, null, changeTicks);
+        }
+
+        public static ViewResult View(this Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
+        {
+            return Manager.View(controller, obj, partialViewName, changeTicks);
+        }
+
+        public static string GetOrCreateTabID(Controller c)
+        {
+            return Manager.GetOrCreateTabID(c);
+        }
+
+        public static string ExtractTabID(NameValueCollection form)
+        {
+            return Manager.ExtractTabID(form);
         }
 
         public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix)
         {
-            return Manager.PopupView(controller, entity, prefix, null);
+            return Manager.PopupView(controller, entity, prefix, null, null);
         }
 
         public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix, string partialViewName)
         {
-            return Manager.PopupView(controller, entity, prefix, partialViewName);
+            return Manager.PopupView(controller, entity, prefix, partialViewName, null);
+        }
+
+        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix, Dictionary<string, long> changeTicks)
+        {
+            return Manager.PopupView(controller, entity, prefix, null, changeTicks);
+        }
+
+        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
+        {
+            return Manager.PopupView(controller, entity, prefix, partialViewName, changeTicks);
         }
 
         public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix)
         {
-            return Manager.PartialView(controller, entity, prefix, null);
+            return Manager.PartialView(controller, entity, prefix, null, null);
         }
 
         public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, string partialViewName)
         {
-            return Manager.PartialView(controller, entity, prefix, partialViewName);
+            return Manager.PartialView(controller, entity, prefix, partialViewName, null);
+        }
+
+        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, Dictionary<string, long> changeTicks)
+        {
+            return Manager.PartialView(controller, entity, prefix, null, changeTicks);
+        }
+
+        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
+        {
+            return Manager.PartialView(controller, entity, prefix, partialViewName, changeTicks);
         }
 
         public static ViewResult Find(Controller controller, object queryName)
@@ -171,42 +211,54 @@ namespace Signum.Web
             return formValues;
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, string prefixToIgnore, ref T obj)
+        public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity) where T : Modifiable
         {
-            SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefixToIgnore);
-
-            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
+            return Manager.ApplyChangesAndValidate(controller, ref entity, null, null);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, string prefixToIgnore, ref T obj, out List<string> fullIntegrityErrors)
+        public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix) where T : Modifiable
         {
-            SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefixToIgnore);
-
-            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null, out fullIntegrityErrors);
+            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, null);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, string prefix, string prefixToIgnore, ref T obj)
+        public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore) where T : Modifiable
         {
-            SortedList<string, object> formValues = ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
-
-            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
+            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, prefixToIgnore);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj)
+        public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, null);
+            return Manager.ApplyChangesAndValidate(controller, ref entity, null, null, out fullIntegrityErrors);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix)
-            where T:Modifiable
+        public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix);
+            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, null, out fullIntegrityErrors);
         }
 
-        public static Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix, out List<string> fullIntegrityErrors)
-            where T:Modifiable
+        public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, formValues, ref obj, prefix, out fullIntegrityErrors);
+            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, prefixToIgnore, out fullIntegrityErrors);
+        }
+
+        public static Modification GenerateModification<T>(Controller controller, T entity) where T : Modifiable
+        {
+            return Manager.GenerateModification(controller, entity, null, null);
+        }
+
+        public static Modification GenerateModification<T>(Controller controller, T entity, string prefix) where T : Modifiable
+        {
+            return Manager.GenerateModification(controller, entity, prefix, null);
+        }
+
+        public static Modification GenerateModification<T>(Controller controller, T entity, string prefix, string prefixToIgnore) where T : Modifiable
+        {
+            return Manager.GenerateModification(controller, entity, prefix, prefixToIgnore);
+        }
+
+        public static ModificationState ApplyChanges<T>(Controller controller, Modification modification, ref T entity) where T : Modifiable
+        {
+            return Manager.ApplyChanges(controller, modification, ref entity);
         }
 
         public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
@@ -345,7 +397,7 @@ namespace Signum.Web
                    queryName.ToString();
         }
 
-        protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName)
+        protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
         {
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
 
@@ -354,6 +406,16 @@ namespace Signum.Web
             controller.ViewData.Model = entity;
             if (controller.ViewData.Keys.Count(s => s==ViewDataKeys.PageTitle)==0)
                 controller.ViewData[ViewDataKeys.PageTitle] = entity.ToStr;
+            if (changeTicks != null)
+                controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
+            string tabID = GetOrCreateTabID(controller);
+            controller.ViewData[ViewDataKeys.TabId] = tabID;
+
+            if (GraphExplorer.FromRoot(entity).Any(m => m.GetType().HasAttribute<Reactive>()))
+            {
+                controller.ViewData[ViewDataKeys.Reactive] = true;
+                controller.Session[tabID] = entity;
+            }
 
             return new ViewResult()
             {
@@ -364,7 +426,28 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix, string partialViewName)
+        protected internal string GetOrCreateTabID(Controller c)
+        {
+            if (c.Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
+            {
+                string tabID = c.Request.Form[ViewDataKeys.TabId];
+                if (tabID.HasText())
+                    return tabID;
+            }
+            return Guid.NewGuid().ToString();
+        }
+
+        protected internal string ExtractTabID(NameValueCollection form)
+        {
+            if (!form.AllKeys.Contains(ViewDataKeys.TabId))
+                throw new ApplicationException("The Request doesn't have the necessary tab identifier");
+            string tabID = (string)form[ViewDataKeys.TabId];
+            if (!tabID.HasText())
+                throw new ApplicationException("The Request doesn't have the necessary tab identifier");
+            return tabID;
+        }
+
+        protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
         {
             Type cleanType = entity != null ? entity.GetType() : typeof(T);
             string url = partialViewName ??
@@ -372,6 +455,8 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = url;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+            if (changeTicks != null)
+                controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
 
             controller.ViewData.Model = entity;
             
@@ -383,7 +468,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix, string partialViewName)
+        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
         {
             Type cleanType = entity != null ? entity.GetType() : typeof(T);
             string url = partialViewName ??
@@ -391,6 +476,8 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;
+            if (changeTicks != null)
+                controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
 
             if (controller.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
                 controller.Response.Write("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(prefix + TypeContext.Separator + EntityBaseKeys.IsNew)); 
@@ -658,30 +745,61 @@ namespace Signum.Web
             return type;
         }
 
-        protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix)
+        protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore) where T : Modifiable
         {
-            Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
-            ModificationFinish onFinish = new ModificationFinish();
-            obj = (T)modification.ApplyChanges(controller, obj, onFinish);
-            onFinish.Finish();
-            return GenerateErrors((Modifiable)(object)obj, modification);
+            Modification modification = GenerateModification(controller, entity, prefix, prefixToIgnore);
+            ModificationState modState = ApplyChanges(controller, modification, ref entity);
+            return new ChangesLog
+            {
+                Errors = GenerateErrors((Modifiable)(object)entity, modification, prefix),
+                ChangeTicks = ModificationState.ToDictionary(modState.Actions),
+            };
         }
 
-        protected internal virtual Dictionary<string, List<string>> ApplyChangesAndValidate<T>(Controller controller, SortedList<string, object> formValues, ref T obj, string prefix, out List<string> fullIntegrityErrors)
+        protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            Modification modification = GenerateModification(formValues, (Modifiable)(object)obj, prefix ?? "");
-            ModificationFinish onFinish = new ModificationFinish();
-            obj = (T)modification.ApplyChanges(controller, obj, onFinish);
-            onFinish.Finish();
-            return GenerateErrors((Modifiable)(object)obj, modification, out fullIntegrityErrors);
+            Modification modification = GenerateModification(controller, entity, prefix, prefixToIgnore);
+            ModificationState modState = ApplyChanges(controller, modification, ref entity);
+            return new ChangesLog
+            {
+                Errors = GenerateErrors((Modifiable)(object)entity, modification, prefix, out fullIntegrityErrors),
+                ChangeTicks = ModificationState.ToDictionary(modState.Actions),
+            };
         }
 
-        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable obj, Modification modification)
+        protected internal virtual Modification GenerateModification<T>(Controller controller, T entity, string prefix, string prefixToIgnore) where T: Modifiable
+        {
+            SortedList<string, object> formValues;
+            Modification modification;
+            if (controller.Request.Form.AllKeys.Contains(ViewDataKeys.Reactive))
+            {
+                formValues = Navigator.ToSortedList(controller.Request.Form, "", prefixToIgnore); //Apply modifications to the entity and all the path
+                MinMax<int> interval = Modification.FindSubInterval(formValues, "");
+                modification = Modification.Create(entity.GetType(), formValues, interval, "");
+            }
+            else
+            {
+                formValues = Navigator.ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
+                MinMax<int> interval = Modification.FindSubInterval(formValues, prefix);
+                modification = Modification.Create(entity.GetType(), formValues, interval, prefix);
+            }
+            return modification;
+        }
+
+        protected internal virtual ModificationState ApplyChanges<T>(Controller controller, Modification modification, ref T entity)
+        {
+            ModificationState modState = new ModificationState();
+            entity = (T)modification.ApplyChanges(controller, entity, modState);
+            modState.Finish();
+            return modState;
+        }
+
+        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable entity, Modification modification, string prefix)
         {
             Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
-            modification.Validate(obj, errors);
+            modification.Validate(entity, errors, prefix);
 
-            Dictionary<Modifiable, string> dicGlobalErrors = obj.FullIntegrityCheckDictionary();
+            Dictionary<Modifiable, string> dicGlobalErrors = entity.FullIntegrityCheckDictionary();
             //Split each error in one entry in the HashTable:
             var globalErrors = dicGlobalErrors.SelectMany(a => a.Value.Lines()).ToList();
             //eliminar de globalErrors los que ya hemos metido en el diccionario
@@ -694,14 +812,14 @@ namespace Signum.Web
             return errors;
         }
 
-        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable obj, Modification modification, out List<string> fullIntegrityErrors)
+        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable entity, Modification modification, string prefix, out List<string> fullIntegrityErrors)
         {
             fullIntegrityErrors = null;
 
             Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
-            modification.Validate(obj, errors);
+            modification.Validate(entity, errors, prefix);
 
-            Dictionary<Modifiable, string> dicGlobalErrors = obj.FullIntegrityCheckDictionary();
+            Dictionary<Modifiable, string> dicGlobalErrors = entity.FullIntegrityCheckDictionary();
             //Split each error in one entry in the HashTable:
             var globalErrors = dicGlobalErrors.SelectMany(a => a.Value.Lines()).ToList();
             //eliminar de globalErrors los que ya hemos metido en el diccionario
@@ -712,13 +830,20 @@ namespace Signum.Web
 
             return errors;
         }
+ 
+        //public virtual Modification GenerateModification(Controller controller, Modifiable obj, string prefix)
+        //{
+        //    return GenerateModification(controller, obj, prefix, "");
+        //}
 
-        public virtual Modification GenerateModification(SortedList<string, object> formValues, Modifiable obj, string prefix)
-        {
-            MinMax<int> interval = Modification.FindSubInterval(formValues, prefix);
+        //public virtual Modification GenerateModification(Controller controller, Modifiable obj, string prefix, string prefixToIgnore)
+        //{
+        //    var formValues = Navigator.ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
 
-            return Modification.Create(obj.GetType(), formValues, interval, prefix);
-        }
+        //    MinMax<int> interval = Modification.FindSubInterval(formValues, prefix);
+
+        //    return Modification.Create(obj.GetType(), formValues, interval, prefix);
+        //}
 
         protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
@@ -726,6 +851,23 @@ namespace Signum.Web
             string id = form[(prefix ?? "") + TypeContext.Separator + TypeContext.Id];
 
             Type type = Navigator.NameToType.GetOrThrow(typeName, Resource.Type0NotFoundInTheSchema);
+
+            if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive))
+            {
+                string tabID = ExtractTabID(controller.Request.Form);
+                controller.ViewData[ViewDataKeys.Reactive] = true;
+                ModifiableEntity mod = (ModifiableEntity)controller.Session[tabID];
+                if (mod == null)
+                    throw new ApplicationException("Your Session has timed out, click F5 to reload the entity from the Database");
+                string parentTypeName = form[TypeContext.Separator + TypeContext.RuntimeType];
+                string parentId = form[TypeContext.Separator + TypeContext.Id];
+                Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resource.Type0NotFoundInTheSchema);
+                if (mod.GetType() == parentType &&
+                    (typeof(EmbeddedEntity).IsAssignableFrom(parentType) || ((IIdentifiable)mod).IdOrNull.TryToString("") == parentId))
+                    return mod;
+                else
+                    throw new ApplicationException("Incorrect entity in Session");
+            }
 
             if (!string.IsNullOrEmpty(id))
                 return Database.Retrieve(type, int.Parse(id));

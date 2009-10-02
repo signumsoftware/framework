@@ -38,20 +38,20 @@ namespace Signum.Web
 
     public static class EntityListHelper
     {
-        private static void InternalEntityList<T>(this HtmlHelper helper, string idValueField, MList<T> value, EntityList settings, TypeContext<MList<T>> typeContext)
-        //    where T : Modifiable
+        private static void InternalEntityList<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityList settings)
         {
             if (!settings.Visible)
                 return;
-
-            idValueField = helper.GlobalName(idValueField);
+            
+            string idValueField = helper.GlobalName(typeContext.Name);
+            MList<T> value = typeContext.Value;         
             string divASustituir = helper.GlobalName("divASustituir");
 
             StringBuilder sb = new StringBuilder();
             
             Type elementsCleanType = Reflector.ExtractLazy(typeof(T)) ?? typeof(T);
             
-            sb.Append(helper.Hidden(idValueField + TypeContext.Separator + TypeContext.StaticType, elementsCleanType.Name) + "\n");
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), elementsCleanType.Name));
 
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
@@ -59,21 +59,26 @@ namespace Signum.Web
             if (settings.ShowFieldDiv)
                 sb.Append("<div class='fieldList'>");
 
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id);}},function(){{OnListPopupCancel(this.id);}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial");
+            if (!StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
+                sb.Append("<input type='hidden' id='{0}' name='{0}' value='{1}' />".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
+            
+            string reloadOnChangeFunction = "''";
+            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+            
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id,{4});}},function(){{OnListPopupCancel(this.id);}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial", reloadOnChangeFunction);
 
             if (settings.Implementations != null) //Interface with several possible implementations
             {
-                sb.Append("<div id=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" name=\"" + idValueField + TypeContext.Separator + EntityBaseKeys.Implementations + "\" style=\"display:none\" >\n");
+                sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)));
 
-                //List<SelectListItem> types = new List<SelectListItem> { new SelectListItem { Text = "Select type", Value = "", Selected = true } };
                 string strButtons = "";
                 foreach (Type t in settings.Implementations)
                 {
                     strButtons += "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(t.Name, Navigator.TypesToURLNames.TryGetC(t) ?? t.Name);
                 }
-                //string ddlStr = helper.DropDownList(idValueField + TypeContext.Separator + EntityBaseKeys.ImplementationsDDL, types);
                 sb.Append(helper.RenderPartialToString(
-                    "~/Plugin/Signum.Web.dll/Signum.Web.Views.OKCancelPopup.ascx",
+                    Navigator.Manager.OKCancelPopulUrl,
                     new ViewDataDictionary(value) 
                         { 
                             { ViewDataKeys.CustomHtml, strButtons},
@@ -85,7 +90,7 @@ namespace Signum.Web
 
             string viewingUrl = "OpenPopupList(" + popupOpeningParameters + ",'{0}');".Formato(settings.DetailDiv);
             StringBuilder sbSelect = new StringBuilder();
-            sbSelect.Append("<select id=\"{0}\" name=\"{0}\" multiple=\"multiple\" ondblclick=\"{1}\" class=\"entityList\">\n".Formato(idValueField, viewingUrl));
+            sbSelect.AppendLine("<select id='{0}' name='{0}' multiple='multiple' ondblclick=\"{1}\" class='entityList'>".Formato(idValueField, viewingUrl));
 
             if (value != null)
             {
@@ -95,7 +100,7 @@ namespace Signum.Web
                 }
             }
 
-            sbSelect.Append("</select>\n");
+            sbSelect.AppendLine("</select>");
 
             sb.Append(sbSelect);
 
@@ -105,18 +110,18 @@ namespace Signum.Web
             {
                 string creatingUrl = (settings.Implementations == null) ?
                     "NewPopupList({0},'{1}','{2}','{3}');".Formato(popupOpeningParameters, elementsCleanType.Name, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv) :
-                    "$('#{0} :button').each(function(){{".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) +
+                    "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
                             "$('#' + this.id).unbind('click').click(function(){" +
                                 "OnListImplementationsOk({0},'{1}','{2}',this.id);".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType), settings.DetailDiv) +
                             "});" +
                         "});" +
                         ((settings.Implementations.Count() == 1) ? 
-                            "$('#{0} :button').click();".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) :
+                            "$('#{0} :button').click();".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) :
                             "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
 
                 sbBtns.AppendLine("<tr><td>");
-                sbBtns.Append(
-                        helper.Button(idValueField + "_btnCreate",
+                sbBtns.AppendLine(
+                        helper.Button(TypeContext.Compose(idValueField, "btnCreate"),
                                   "+",
                                   creatingUrl,
                                   "lineButton create",
@@ -129,18 +134,18 @@ namespace Signum.Web
                     string popupFindingParameters = "'{0}','{1}','true',function(){{OnListSearchOk('{2}','{3}');}},function(){{OnListSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLazy(typeof(T)) ?? typeof(T)), idValueField, divASustituir);
                     string findingUrl = (settings.Implementations == null) ?
                         "Find({0});".Formato(popupFindingParameters) :
-                        "$('#{0} :button').each(function(){{".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) +
+                        "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
                             "$('#' + this.id).unbind('click').click(function(){" +
                                 "OnSearchImplementationsOk({0},this.id);".Formato(popupFindingParameters) +
                             "});" +
                         "});" +
                         ((settings.Implementations.Count() == 1) ? 
-                            "$('#{0} :button').click();".Formato(idValueField + TypeContext.Separator + EntityBaseKeys.Implementations) :
+                            "$('#{0} :button').click();".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) :
                             "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
 
                     sbBtns.AppendLine("<tr><td>");
-                    sbBtns.Append(
-                            helper.Button(idValueField + "_btnFind",
+                    sbBtns.AppendLine(
+                            helper.Button(TypeContext.Compose(idValueField, "btnFind"),
                                         "O",
                                         findingUrl,
                                         "lineButton find",
@@ -151,8 +156,8 @@ namespace Signum.Web
             if (settings.Remove)
             {
                 sbBtns.AppendLine("<tr><td>");
-                sbBtns.Append(
-                        helper.Button(idValueField + "_btnRemove",
+                sbBtns.AppendLine(
+                        helper.Button(TypeContext.Compose(idValueField, "btnRemove"),
                                   "x",
                                   "RemoveListContainedEntity('{0}');".Formato(idValueField),
                                   "lineButton remove",
@@ -162,12 +167,12 @@ namespace Signum.Web
             
             string sBtns = sbBtns.ToString();
             if (sBtns.HasText())
-                sb.AppendLine("<table>\n" + sBtns + "</table>\n");
+                sb.AppendLine("<table>\n" + sBtns + "</table>");
 
             if (settings.ShowFieldDiv)
                 sb.Append("</div>");
             if (StyleContext.Current.BreakLine)
-                sb.Append("<div class=\"clearall\"></div>\n");
+                sb.AppendLine("<div class='clearall'></div>");
 
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
         }
@@ -179,7 +184,7 @@ namespace Signum.Web
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
             bool isLazy = typeof(Lazy).IsAssignableFrom(typeof(T));
 
-            string indexedPrefix = idValueField + TypeContext.Separator + index.ToString() + TypeContext.Separator;
+            string indexedPrefix = TypeContext.Compose(idValueField, index.ToString());
 
             string runtimeType = "";
             if (value != null)
@@ -189,73 +194,83 @@ namespace Signum.Web
                     cleanRuntimeType = (value as Lazy).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
-            sb.Append(helper.Hidden(indexedPrefix + TypeContext.RuntimeType, runtimeType) + "\n");
-            sb.Append(helper.Hidden(indexedPrefix + EntityListKeys.Index, index.ToString()) + "\n");
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, TypeContext.RuntimeType), runtimeType));
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityListKeys.Index), index.ToString()));
 
             if (isIdentifiable || isLazy)
             {
                 sb.Append(helper.Hidden(
-                    indexedPrefix + TypeContext.Id,
+                    TypeContext.Compose(indexedPrefix, TypeContext.Id),
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
                        : ((Lazy)(object)value).TryCS(i => i.IdOrNull)) + "\n");
 
-                sb.Append(helper.Div(indexedPrefix + EntityBaseKeys.Entity, "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 
-                if (isIdentifiable &&((IIdentifiable)(object)value).TryCS(i => i.IdOrNull) == null)
-                    sb.Append(helper.Hidden(indexedPrefix + EntityBaseKeys.IsNew, index.ToString()) + "\n");
-            
-                //Note this is added to the sbOptions, not to the result sb
-                sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
-                                "name=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " + 
-                                "value=\"\" " +
-                                "class = \"valueLine entityListOption\" " +
-                                ">" + 
-                                ((isIdentifiable)
-                                    ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToString())
-                                    : ((Lazy)(object)value).TryCC(i => i.ToStr)) + 
-                                "</option>\n");
+                if (isIdentifiable && ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull) == null)
+                {
+                    sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityBaseKeys.IsNew), index.ToString()));
+
+                    //It's a new object, I preload it because it won't be possible to retrieve it from the server
+                    sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
+                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+                    TypeElementContext<T> tsc = new TypeElementContext<T>(value, typeContext, index);
+                    ViewDataDictionary vdd = new ViewDataDictionary(tsc)
+                    { 
+                        { ViewDataKeys.MainControlUrl, es.PartialViewName},
+                        { ViewDataKeys.PopupPrefix, indexedPrefix}
+                    };
+                    if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                        vdd.Add(ViewDataKeys.Reactive, true);
+
+                    using (var sc = StyleContext.RegisterCleanStyleContext(true))
+                        sb.Append(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
+                    sb.AppendLine("</div>");
+                }
+                else
+                {
+                    sb.Append(helper.Div(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                }
+
+                    //Note this is added to the sbOptions, not to the result sb
+                    sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.ToStr)) +
+                                    ((isIdentifiable)
+                                        ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToString())
+                                        : ((Lazy)(object)value).TryCC(i => i.ToStr)) +
+                                    "</option>");
             }
             else
             {
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
-                sb.Append("<div id=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" name=\"" + indexedPrefix + EntityBaseKeys.Entity + "\" style=\"display:none\" >\n");
+                sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
 
                 EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
 
                 TypeElementContext<T> tsc = new TypeElementContext<T>(value, typeContext, index);
+                ViewDataDictionary vdd = new ViewDataDictionary(tsc)  //value instead of tsc
+                { 
+                    { ViewDataKeys.MainControlUrl, es.PartialViewName},
+                    { ViewDataKeys.PopupPrefix, indexedPrefix}
+                };
+                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                        vdd.Add(ViewDataKeys.Reactive, true);
 
                 using (var sc = StyleContext.RegisterCleanStyleContext(true))
-                    sb.Append(
-                        helper.RenderPartialToString(
-                            "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx",
-                            new ViewDataDictionary(tsc)  //value instead of tsc
-                            { 
-                                { ViewDataKeys.MainControlUrl, es.PartialViewName},
-                                { ViewDataKeys.PopupPrefix, idValueField + TypeContext.Separator + index.ToString()}
-                            }
-                        )
-                    );
+                    sb.Append(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
 
-                sb.Append("</div>\n");
+                sb.AppendLine("</div>");
 
                 //Note this is added to the sbOptions, not to the result sb
-                sbOptions.Append("<option id=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
-                                "name=\"" + indexedPrefix + EntityBaseKeys.ToStr + "\" " +
-                                "value=\"\" " +
-                                "class = valueLine\" " +
-                                ">" +
+                sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.ToStr)) +
                                 ((EmbeddedEntity)(object)value).TryCC(i => i.ToString()) + 
-                                "</option>\n");
+                                "</option>");
             }
 
-            sb.Append("<script type=\"text/javascript\">var " + indexedPrefix + "sfEntityTemp = \"\"</script>\n");
+            sb.AppendLine("<script type=\"text/javascript\">var " + TypeContext.Compose(indexedPrefix, EntityBaseKeys.EntityTemp) + " = '';</script>");
 
             return sb.ToString();
         }
 
         public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
-        //    where S : Modifiable 
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
@@ -268,11 +283,10 @@ namespace Signum.Web
 
             Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
 
-            helper.InternalEntityList<S>(context.Name, context.Value, el, context);
+            helper.InternalEntityList<S>(context, el);
         }
 
         public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityList> settingsModifier)
-        //    where S : Modifiable
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
@@ -287,18 +301,11 @@ namespace Signum.Web
 
             settingsModifier(el);
                         
-            //if (el.StyleContext != null)
-            //{
-            //    using (el.StyleContext)
-            //        helper.InternalEntityList<S>(context.Name, context.Value, el);
-            //    return;
-            //}
-
             if (el != null)
                 using (el)
-                    helper.InternalEntityList<S>(context.Name, context.Value, el, context);
+                    helper.InternalEntityList<S>(context, el);
             else
-                helper.InternalEntityList<S>(context.Name, context.Value, el, context);
+                helper.InternalEntityList<S>(context, el);
         }
     }
 }

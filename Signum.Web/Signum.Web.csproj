@@ -87,6 +87,7 @@
     <Compile Include="EntityLineDetailHelper.cs" />
     <Compile Include="EmbeddedControlHelper.cs" />
     <Compile Include="FindOptionsModelBinder.cs" />
+    <Compile Include="ModificationSession.cs" />
     <Compile Include="WwwRedirectAttributes.cs" />
     <Compile Include="MenuHelper.cs" />
     <Compile Include="LightEntityLineHelper.cs" />
@@ -131,6 +132,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\SearchControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\SearchWindow.aspx">
       <SubType>ASPXCodeBehind</SubType>
@@ -139,6 +141,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\PopupControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NormalPage.aspx">
       <SubType>ASPXCodeBehind</SubType>
