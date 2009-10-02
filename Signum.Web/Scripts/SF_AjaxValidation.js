@@ -155,7 +155,7 @@ function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError,
 		type: "POST",
 		url: urlController,
 		async: false,
-		data: formChildren.serialize() + qp(sfPrefix,prefix) + qp(sfPrefixToIgnore,prefixToIgnore) + idQueryParam + typeNameParam + reactiveEntity,
+		data: formChildren.serialize() + qp(sfPrefix,prefix) + qp(sfPrefixToIgnore,prefixToIgnore) + idQueryParam + typeNameParam, //+ reactiveEntity,
 		success: function (result) {
 			eval('var result=' + result);
 			var toStr = result[sfToStr];
