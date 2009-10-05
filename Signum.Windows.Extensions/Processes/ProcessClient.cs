@@ -8,30 +8,33 @@ using Signum.Windows.Operations;
 using System.Windows.Media.Imaging;
 using Signum.Entities;
 using Signum.Services;
+using System.Reflection;
 
 namespace Signum.Windows.Processes
 {
     public static class ProcessClient
     {
-        public static void Start(bool packages)
+        internal static void AsserIsStarted()
         {
-            if(Navigator.Manager.NotDefined<ProcessDN>())
+            Navigator.Manager.AssertDefined(typeof(ProcessClient).GetMethod("Start"));
+        }
+
+        public static void Start()
+        {
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.Add(typeof(ProcessDN), new EntitySettings(EntityType.ServerOnly) { View = () => new Process(), IsReadOnly = a => true, IsCreable = a => false, Icon = Image("process.png")  });
-                Navigator.Manager.Settings.Add(typeof(ProcessExecutionDN), new EntitySettings(EntityType.ServerOnly) { View = () => new ProcessExecution(),Icon = Image("processExecution.png") });
+                Navigator.Manager.Settings.Add(typeof(ProcessDN), new EntitySettings(EntityType.ServerOnly) { View = () => new Process(), IsReadOnly = a => true, IsCreable = a => false, Icon = Image("process.png") });
+                Navigator.Manager.Settings.Add(typeof(ProcessExecutionDN), new EntitySettings(EntityType.ServerOnly) { View = () => new ProcessExecution(), Icon = Image("processExecution.png") });
 
                 OperationClient.Manager.Settings.Add(ProcessOperation.FromProcess, new EntityOperationSettings { Icon = Image("execute.png") });
                 OperationClient.Manager.Settings.Add(ProcessOperation.Plan, new EntityOperationSettings { Icon = Image("plan.png"), Click = ProcessOperation_Plan });
                 OperationClient.Manager.Settings.Add(ProcessOperation.Cancel, new EntityOperationSettings { Icon = Image("stop.png") });
                 OperationClient.Manager.Settings.Add(ProcessOperation.Execute, new EntityOperationSettings { Icon = Image("play.png") });
                 OperationClient.Manager.Settings.Add(ProcessOperation.Suspend, new EntityOperationSettings { Icon = Image("pause.png") });
-            }
 
-            if(packages && Navigator.Manager.NotDefined<PackageDN>())
-            {
                 Navigator.Manager.Settings.Add(typeof(PackageDN), new EntitySettings(EntityType.ServerOnly) { View = () => new Package(), Icon = Image("package.png") });
                 Navigator.Manager.Settings.Add(typeof(PackageLineDN), new EntitySettings(EntityType.ServerOnly) { View = () => new PackageLine(), IsReadOnly = a => true, IsCreable = a => false, Icon = Image("packageLine.png") }); 
-            }    
+            }
         }
 
         static IdentifiableEntity ProcessOperation_Plan(EntityOperationEventArgs args)
@@ -44,11 +47,7 @@ namespace Signum.Windows.Processes
             return null; 
         }
 
-        internal static void AsserIsLoaded()
-        {
-            if (!Navigator.Manager.ContainsDefinition<ProcessDN>())
-                throw new ApplicationException("Call ProcessClient.Start first"); 
-        }
+
 
         static BitmapFrame Image(string name)
         {

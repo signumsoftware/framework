@@ -20,38 +20,37 @@ namespace Signum.Windows.Authorization
         static Dictionary<Type, TypeAccess> typeRules; 
         static Dictionary<Type, Dictionary<string, Access>> propertyRules;
 
-
         public static void Start(bool types, bool property, bool queries)
         {
-            if (Navigator.Manager.NotDefined<UserDN>())
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin) { View = () => new User() });
                 Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings { View = () => new Role() });
-            }
 
-            if (property && Navigator.Manager.NotDefined<RulePropertyDN>())
-            {
-                propertyRules = Server.Service<IPropertyAuthServer>().AuthorizedProperties();
-                Common.RouteTask += Common_RouteTask;
-                Common.PseudoRouteTask += Common_RouteTask;
-            }
+                if (property)
+                {
+                    propertyRules = Server.Service<IPropertyAuthServer>().AuthorizedProperties();
+                    Common.RouteTask += Common_RouteTask;
+                    Common.PseudoRouteTask += Common_RouteTask;
+                }
 
-            if (types && Navigator.Manager.NotDefined<RuleTypeDN>())
-            {
-                typeRules = Server.Service<ITypeAuthServer>().AuthorizedTypes();
-                Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type) == TypeAccess.Create;
-                Navigator.Manager.GlobalIsReadOnly += type => GetTypeAccess(type) < TypeAccess.Modify;
-                Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type) >= TypeAccess.Read;
+                if (types)
+                {
+                    typeRules = Server.Service<ITypeAuthServer>().AuthorizedTypes();
+                    Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type) == TypeAccess.Create;
+                    Navigator.Manager.GlobalIsReadOnly += type => GetTypeAccess(type) < TypeAccess.Modify;
+                    Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type) >= TypeAccess.Read;
 
-                MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
-            }
+                    MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
+                }
 
-            if (queries && Navigator.Manager.NotDefined<RuleQueryDN>())
-            {
-                authorizedQueries = Server.Service<IQueryAuthServer>().AuthorizedQueries();
-                Navigator.Manager.GlobalIsFindable += qn => GetQueryAceess(qn);
+                if (queries)
+                {
+                    authorizedQueries = Server.Service<IQueryAuthServer>().AuthorizedQueries();
+                    Navigator.Manager.GlobalIsFindable += qn => GetQueryAceess(qn);
 
-                MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
+                    MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
+                }
             }
         }
 

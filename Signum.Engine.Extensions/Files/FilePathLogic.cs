@@ -28,9 +28,9 @@ namespace Signum.Engine.Files
                 EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
 
-                sb.Schema.Saving += new EntityEventHandler(Schema_Saving);
-                sb.Schema.Retrieved += new EntityEventHandler(Schema_Retrieved);
-                sb.Schema.Deleting += new TypeIdEventHandler(Schema_Deleting);
+                sb.Schema.EntityEvents<FilePathDN>().Saving += FilePath_Saving;
+                sb.Schema.EntityEvents<FilePathDN>().Retrieved += FilePath_Retrieved;
+                sb.Schema.EntityEvents<FilePathDN>().Deleting += FilePath_Deleting;
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
@@ -57,50 +57,43 @@ namespace Signum.Engine.Files
             }
         }
 
-        static void Schema_Deleting(Schema sender, Type type, int id)
+        static void FilePath_Deleting(Type type, int id)
         {
-            if (type == typeof(FilePathDN))
-            {
-                string fullPath = (from f in Database.Query<FilePathDN>()
-                                   where f.Id == id
-                                   select f.FullPhysicalPath).Single();
+            string fullPath = (from f in Database.Query<FilePathDN>()
+                               where f.Id == id
+                               select f.FullPhysicalPath).Single();
 
-                Transaction.RealCommit += () => File.Delete(fullPath);
-            }
+            Transaction.RealCommit += () => File.Delete(fullPath);
         }
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
-        static void Schema_Saving(Schema sender, IdentifiableEntity ident)
+        static void FilePath_Saving(FilePathDN fp)
         {
-            FilePathDN fp = ident as FilePathDN;
-            if (fp != null)
+            if (fp.IsNew)
             {
-                if (ident.IsNew)
+                //asignar el typedn a partir del enum
+                fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
+
+                FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
+                string sufix = alg.CalculateSufix(fp);
+                if (!sufix.HasText())
+                    throw new ApplicationException(Resources.SufixNotSet);
+
+                do
                 {
-                    //asignar el typedn a partir del enum
-                    fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
-
-                    FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
-                    string sufix = alg.CalculateSufix(fp);
-                    if (!sufix.HasText())
-                        throw new ApplicationException(Resources.SufixNotSet);
-
-                    do
+                    fp.Repository = alg.GetRepository(fp);
+                    if (fp.Repository == null)
+                        throw new ApplicationException(Resources.RepositoryNotSet);
+                    int i = 2;
+                    fp.Sufix = sufix;
+                    while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
                     {
-                        fp.Repository = alg.GetRepository(fp);
-                        if (fp.Repository == null)
-                            throw new ApplicationException(Resources.RepositoryNotSet);
-                        int i = 2;
-                        fp.Sufix = sufix;
-                        while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
-                        {
-                            fp.Sufix = alg.RenameAlgorithm(sufix, i);
-                            i++;
-                        }
+                        fp.Sufix = alg.RenameAlgorithm(sufix, i);
+                        i++;
                     }
-                    while (!SaveFile(fp));
                 }
+                while (!SaveFile(fp));
             }
         }
 
@@ -126,15 +119,10 @@ namespace Signum.Engine.Files
             return true;
         }
 
-        static void Schema_Retrieved(Schema sender, IdentifiableEntity ident)
+        static void FilePath_Retrieved(FilePathDN fp)
         {
-            if (ident is FilePathDN)
-            {
-                FilePathDN file = (FilePathDN)ident;
-                file.BinaryFile = System.IO.File.ReadAllBytes(file.FullPhysicalPath);
-            }
+            fp.BinaryFile = System.IO.File.ReadAllBytes(fp.FullPhysicalPath);
         }
-
 
         public static void Register(Enum fileTypeKey, FileTypeAlgorithm algorithm)
         {

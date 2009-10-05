@@ -33,7 +33,7 @@ namespace Signum.Engine.Authorization
                
                 sb.Include<RuleQueryDN>();
                 sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Saved += Schema_Saved;
+                sb.Schema.EntityEvents<RuleQueryDN>().Saved += Rule_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
         }
@@ -43,15 +43,12 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
+        static void Rule_Saved(RuleQueryDN rule)
         {
-            if (ident is RuleQueryDN)
-            {
-                Transaction.RealCommit += () => _runtimeRules = null;
-            }
+            Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void UserAndRoleLogic_RolesModified(Schema sender)
+        static void UserAndRoleLogic_RolesModified()
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }

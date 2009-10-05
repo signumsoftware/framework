@@ -29,8 +29,8 @@ namespace Signum.Engine.Authorization
                 FacadeMethodLogic.Start(sb, serviceInterface);
                 sb.Include<RuleFacadeMethodDN>();
                 sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Saved += Schema_Saved;
-                AuthLogic.RolesModified+= UserAndRoleLogic_RolesModified;
+                sb.Schema.EntityEvents<RuleFacadeMethodDN>().Saved += Schema_Saved;
+                AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
         }
 
@@ -39,15 +39,12 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
+        static void Schema_Saved(RuleFacadeMethodDN rule)
         {
-            if (ident is RuleFacadeMethodDN)
-            {
-                Transaction.RealCommit += () => _runtimeRules = null;
-            }
+            Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void UserAndRoleLogic_RolesModified(Schema sender)
+        static void UserAndRoleLogic_RolesModified()
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }

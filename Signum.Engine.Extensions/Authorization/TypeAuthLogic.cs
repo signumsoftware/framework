@@ -30,9 +30,9 @@ namespace Signum.Engine.Authorization
                 TypeLogic.Start(sb, true);
                 sb.Include<RuleTypeDN>();
                 sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Saving += Schema_Saving;
-                sb.Schema.Saved += Schema_Saved;
-                sb.Schema.Retrieving += Schema_Retrieving;
+                sb.Schema.EntityEvents<RuleTypeDN>().Saved += RuleType_Saved;
+                sb.Schema.EntityEventsGlobal.Saving += Schema_Saving;
+                sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
         }
@@ -42,20 +42,17 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
-        {
-            if (ident is RuleTypeDN)
-            {
-                Transaction.RealCommit += () => _runtimeRules = null;
-            }
-        }
-
-        static void UserAndRoleLogic_RolesModified(Schema sender)
+        static void RuleType_Saved(RuleTypeDN rule)
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void Schema_Saving(Schema sender, IdentifiableEntity ident)
+        static void UserAndRoleLogic_RolesModified()
+        {
+            Transaction.RealCommit += () => _runtimeRules = null;
+        }
+
+        static void Schema_Saving(IdentifiableEntity ident)
         {
             if (AuthLogic.IsEnabled)
             {
@@ -68,10 +65,8 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Retrieving(Schema sender, Type type, int id)
+        static void Schema_Retrieving(Type type, int id)
         {
-           
-            
             if (AuthLogic.IsEnabled)
             {
                 if (UserDN.Current == null)

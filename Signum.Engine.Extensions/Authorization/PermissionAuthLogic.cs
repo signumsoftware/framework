@@ -41,7 +41,7 @@ namespace Signum.Engine.Authorization
 
                 EnumLogic<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet());
                 sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Saved += Schema_Saved;
+                sb.Schema.EntityEvents<RulePermissionDN>().Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
         }
@@ -56,15 +56,12 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
+        static void Schema_Saved(RulePermissionDN rule)
         {
-            if (ident is RulePermissionDN)
-            {
-                Transaction.RealCommit += () => _runtimeRules = null;
-            }
+            Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void UserAndRoleLogic_RolesModified(Schema sender)
+        static void UserAndRoleLogic_RolesModified()
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }

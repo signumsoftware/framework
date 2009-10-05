@@ -59,7 +59,7 @@ namespace Signum.Engine.Processes
                 new ExecutingProcessGraph().Register();   
 
                 sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Saved += Schema_Saved;
+                sb.Schema.EntityEvents<ProcessExecutionDN>().Saved += ProcessExecution_Saved;
 
                 dqm[typeof(ProcessDN)] =
                              (from p in Database.Query<ProcessDN>()
@@ -137,33 +137,31 @@ namespace Signum.Engine.Processes
                                   pe.SuspendDate,
                                   ErrorDate = pe.ExceptionDate,
                                   pe.Exception
-                              }).ToDynamic(); 
+                              }).ToDynamic();
+
+                PackageLogic.Start(sb, dqm); 
             }
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
+        static void ProcessExecution_Saved(ProcessExecutionDN pe)
         {
-            ProcessExecutionDN pe = ident as ProcessExecutionDN;
-            if (pe != null)
+            switch (pe.State)
             {
-                switch (pe.State)
-                {
-                    case ProcessState.Created:
-                    case ProcessState.Suspended:
-                    case ProcessState.Finished:
-                    case ProcessState.Executing:
-                        break;
-                    case ProcessState.Planned:
-                    case ProcessState.Canceled:
-                        RefreshPlan();
-                        break;
-                    case ProcessState.Suspending:
-                        Suspend(pe.Id);
-                        break;
-                    case ProcessState.Queued:
-                        Transaction.RealCommit += ()=>Execute(pe);
-                        break;
-                }
+                case ProcessState.Created:
+                case ProcessState.Suspended:
+                case ProcessState.Finished:
+                case ProcessState.Executing:
+                    break;
+                case ProcessState.Planned:
+                case ProcessState.Canceled:
+                    RefreshPlan();
+                    break;
+                case ProcessState.Suspending:
+                    Suspend(pe.Id);
+                    break;
+                case ProcessState.Queued:
+                    Transaction.RealCommit += () => Execute(pe);
+                    break;
             }
         }
 

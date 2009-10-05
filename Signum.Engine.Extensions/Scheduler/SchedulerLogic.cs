@@ -53,8 +53,8 @@ namespace Signum.Engine.Scheduler
 
                 CustomTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
-                sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
-                sb.Schema.Saved += new EntityEventHandler(Schema_Saved);
+                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.EntityEvents<ScheduledTaskDN>().Saved += Schema_Saved;
 
                 dqm[typeof(ScheduledTaskDN)] =
                     (from st in Database.Query<ScheduledTaskDN>()
@@ -66,6 +66,8 @@ namespace Signum.Engine.Scheduler
                          st.NextDate,
                          st.Suspended,
                      }).ToDynamic();
+
+                CustomTaskLogic.Start(sb, dqm); 
             }
         }
 
@@ -74,9 +76,9 @@ namespace Signum.Engine.Scheduler
             ReloadPlan();
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
+        static void Schema_Saved(ScheduledTaskDN task)
         {
-            if (ident is ScheduledTaskDN && !isSafeSave)
+            if (!isSafeSave)
             {
                 Transaction.RealCommit -= Transaction_RealCommit;
                 Transaction.RealCommit += Transaction_RealCommit;

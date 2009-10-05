@@ -20,7 +20,7 @@ namespace Signum.Engine.Scheduler
     {
         static Dictionary<Enum, Action> tasks = new Dictionary<Enum, Action>();
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {

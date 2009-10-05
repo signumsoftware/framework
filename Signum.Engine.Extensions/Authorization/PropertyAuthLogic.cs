@@ -30,9 +30,9 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertIsStarted(sb);
                 PropertyLogic.Start(sb); 
                 sb.Include<RulePropertyDN>();
-                sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
-                sb.Schema.Saved += new EntityEventHandler(Schema_Saved);
-                AuthLogic.RolesModified += new InitEventHandler(UserAndRoleLogic_RolesModified);
+                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.EntityEvents<RulePropertyDN>().Saved +=Schema_Saved;
+                AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
 
                 if(queries)
                     DynamicQuery.DynamicQuery.IsAllowed += new Func<Meta, bool>(DynamicQuery_IsAllowed);
@@ -59,15 +59,12 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
+        static void Schema_Saved(RulePropertyDN rule)
         {
-            if (ident is RulePropertyDN)
-            {
                 Transaction.RealCommit += () => _runtimeRules = null;
-            }
         }
 
-        static void UserAndRoleLogic_RolesModified(Schema sender)
+        static void UserAndRoleLogic_RolesModified()
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }

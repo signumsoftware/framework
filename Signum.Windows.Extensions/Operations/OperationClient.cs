@@ -32,6 +32,9 @@ namespace Signum.Windows.Operations
 
             SearchControl.GetCustomMenuItems += (qn, type) =>
             {
+                if (type == null)
+                    return null;
+
                 var list = Server.Service<IOperationServer>().GetQueryOperationInfos(type).Where(oi =>
                 {
                     ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);

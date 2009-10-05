@@ -29,7 +29,7 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _roles, () => Cache()); }
         }
 
-        public static event InitEventHandler RolesModified;
+        public static event Action RolesModified;
 
         public static void AssertIsStarted(SchemaBuilder sb)
         {
@@ -45,8 +45,8 @@ namespace Signum.Engine.Authorization
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
                 sb.Schema.Initializing += Schema_Initializing;
-                sb.Schema.Saving += Schema_Saving;
-                sb.Schema.Saved += Schema_Saved;
+                sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
+                sb.Schema.EntityEvents<RoleDN>().Saved += Schema_Saved;
 
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
@@ -81,44 +81,37 @@ namespace Signum.Engine.Authorization
                 }
         }
 
-        static void Schema_Saving(Schema sender, IdentifiableEntity ident)
+        static void Schema_Saving(RoleDN role)
         {
-            RoleDN role = ident as RoleDN;
-            if (role != null)
+            if (!role.IsNew && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
             {
-                if (!role.IsNew && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
+                using (new EntityCache())
                 {
-                    using (new EntityCache())
+                    EntityCache.AddFullGraph(role);
+
+                    DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
+
+                    newRoles.Expand(role, r1 => r1.Roles);
+                    foreach (var r in Database.RetrieveAll<RoleDN>())
                     {
-                        EntityCache.AddFullGraph(ident);
-
-                        DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
-
-                        newRoles.Expand(role, r1 => r1.Roles);
-                        foreach (var r in Database.RetrieveAll<RoleDN>())
-                        {
-                            newRoles.Expand(r, r1 => r1.Roles);
-                        }
-
-                        var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
-
-                        if (problems.Count > 0)
-                            throw new ApplicationException("Some cycles have been found in the graph of Roles due to the relationships:\r\n{1}"
-                                .Formato(problems.Count, problems.ToString("\r\n")));
+                        newRoles.Expand(r, r1 => r1.Roles);
                     }
+
+                    var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
+
+                    if (problems.Count > 0)
+                        throw new ApplicationException("Some cycles have been found in the graph of Roles due to the relationships:\r\n{1}"
+                            .Formato(problems.Count, problems.ToString("\r\n")));
                 }
             }
         }
 
-        static void Schema_Saved(Schema sender, IdentifiableEntity ident)
+        static void Schema_Saved(RoleDN role)
         {
-            if (ident is RoleDN)
-            {
-                Transaction.RealCommit += () => _roles = null;
+            Transaction.RealCommit += () => _roles = null;
 
-                if (RolesModified != null)
-                    RolesModified(sender);
-            }
+            if (RolesModified != null)
+                RolesModified();
         }
 
         static DirectedGraph<RoleDN> Cache()
