@@ -100,7 +100,7 @@ namespace Signum.Utilities.Reflection
             return ((MemberExpression)body).Expression.Type;
         }
 
-        static MemberInfo BaseMemberInfo(LambdaExpression lambdaExpression)
+        public static MemberInfo BaseMemberInfo(LambdaExpression lambdaExpression)
         {
             Expression body = lambdaExpression.Body;
             if (body.NodeType == ExpressionType.Convert)

@@ -13,9 +13,9 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
-    public class AdminBase:Window
+    public class AdminBase : Window
     {
-        public virtual List<IdentifiableEntity> GetEntities() 
+        public virtual List<IdentifiableEntity> GetEntities()
         {
             throw new NotImplementedException();
         }
@@ -29,7 +29,7 @@ namespace Signum.Windows
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Could be called Async
         /// </summary>
@@ -109,7 +109,7 @@ namespace Signum.Windows
                 }
                 else if (result == MessageBoxResult.No)
                 {
-                    return; 
+                    return;
                 }
             }
 
@@ -125,7 +125,7 @@ namespace Signum.Windows
         {
             if (!HasChanges())
             {
-                MessageBox.Show(Properties.Resources.NoChangeHaveBeenFound, Properties.Resources.NoChanges, MessageBoxButton.OK, MessageBoxImage.Hand );
+                MessageBox.Show(Properties.Resources.NoChangeHaveBeenFound, Properties.Resources.NoChanges, MessageBoxButton.OK, MessageBoxImage.Hand);
                 return;
             }
 

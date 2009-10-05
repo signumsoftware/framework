@@ -19,7 +19,7 @@ namespace Signum.Entities
         internal int? id = null; //primary key
         internal string toStr; //no value for new entities
 
-        [HiddenProperty]
+        [HiddenProperty, Description("Id")]
         public int Id
         {
             get

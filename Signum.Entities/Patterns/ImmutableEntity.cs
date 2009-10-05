@@ -8,6 +8,7 @@ namespace Signum.Entities
     [Serializable]
     public class ImmutableEntity: IdentifiableEntity
     {
+        [Ignore]
         bool allowTemporaly = false;
         public bool AllowChange
         {

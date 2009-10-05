@@ -1,4 +1,4 @@
-﻿<m:EntityBase
+﻿<m:EntityListBase
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
@@ -6,10 +6,10 @@
     x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
 	Style="{DynamicResource toolTip}"
 	>
-	<m:EntityBase.Resources>
+	<m:EntityListBase.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="Resources.xaml"/>
+				<ResourceDictionary Source="../Resources.xaml"/>
 			</ResourceDictionary.MergedDictionaries>
 			<Style x:Key="AllBlueListBoxItem" TargetType="{x:Type ListBoxItem}">
 				<Setter Property="Background" Value="Transparent"/>
@@ -43,7 +43,7 @@
 				</Setter>
 			</Style>
 		</ResourceDictionary>
-	</m:EntityBase.Resources>
+	</m:EntityListBase.Resources>
 
 	<Grid>
 		<Grid.ColumnDefinitions>
@@ -72,4 +72,4 @@
 			<Button x:Name="btDown" Style="{DynamicResource RoundButton}" Click="btDown_Click"  Content="{DynamicResource Down}" ToolTip="{m:Loc MoveDown}"/>
 		</StackPanel>
 	</Grid>
-</m:EntityBase>
+</m:EntityListBase>

@@ -8,7 +8,7 @@
 	<m:EntityBase.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="Resources.xaml"/>
+				<ResourceDictionary Source="../Resources.xaml"/>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</m:EntityBase.Resources>
@@ -24,8 +24,6 @@
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
         <ContentPresenter Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" x:Name="contentPresenter"
              VerticalAlignment="Top" HorizontalAlignment="Left" Content="{Binding EntityControl, ElementName=me, Mode=Default}" />
-        <!--<ComboBox Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" Background="{DynamicResource BlueBackground}"  x:Name="combo" 
-		ItemTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" SelectionChanged="combo_SelectionChanged"/>-->
 		<StackPanel Orientation="{Binding Orientation, ElementName=me, Mode=Default}" Grid.Column="2" x:Name="buttons">
 			<Button x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
 			<Button x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>

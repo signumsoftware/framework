@@ -482,25 +482,17 @@ namespace Signum.Windows
         }
 
         HashSet<string> loadedModules = new HashSet<string>();
-
-        public bool NotDefined<T>()
+        public bool NotDefined(MethodBase methodBase)
         {
-            return NotDefined(typeof(T).FullName);
+            return loadedModules.Add(methodBase.DeclaringType.TypeName() + "." + methodBase.Name);
         }
 
-        public bool NotDefined(string moduleName)
+        public void AssertDefined(MethodBase methodBase)
         {
-            return loadedModules.Add(moduleName);
-        }
+            string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
 
-        public bool ContainsDefinition(string moduleName)
-        {
-            return loadedModules.Contains(moduleName);
-        }
-
-        public bool ContainsDefinition<T>()
-        {
-            return loadedModules.Contains(typeof(T).FullName);
+            if (!loadedModules.Contains(name))
+                throw new ApplicationException("Call {0} first".Formato(name));
         }
     }
 }

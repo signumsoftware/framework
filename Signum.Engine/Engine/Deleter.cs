@@ -17,18 +17,13 @@ namespace Signum.Engine
     {
         public static void Delete(Type type, int id)
         {
-            Schema.Current.OnDeleting(type, id); 
+            Schema.Current.OnDeleting(type, new List<int> { id }); 
 
             SqlPreCommand comando = DeleteCommand(type, id);
 
             int result = Executor.ExecuteNonQuery(comando.ToSimple());
 
-
-            //TODO: olmo desactivado provisional mente
-            //if (!ConnectionScope.Current.IsMock && result != 1)
-            //    throw new ApplicationException(Resources.EntityOfType0AndId1NotFound.Formato(type.Name, id));
-
-            Schema.Current.OnDeleted(type, id); 
+            Schema.Current.OnDeleted(type, new List<int> { id }); 
         }
 
         internal static SqlPreCommand DeleteCommand(Type type, int id)

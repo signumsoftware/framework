@@ -11,9 +11,6 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
-   
-
-
     public class EntityBase : LineBase
     {
         public static readonly DependencyProperty EntityProperty =

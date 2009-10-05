@@ -657,6 +657,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <SolidColorBrush x:Key="LightBlue" Color="#FFC9E4FF"/>
 
 
 

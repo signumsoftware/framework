@@ -25,24 +25,8 @@ namespace Signum.Windows
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class EntityList : EntityBase
+    public partial class EntityList : EntityListBase
     {
-        public static readonly DependencyProperty EntitiesProperty =
-            DependencyProperty.Register("Entities", typeof(IList), typeof(EntityList), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityList)d).EntitiesChanged(e)));
-        public IList Entities
-        {
-            get { return (IList)GetValue(EntitiesProperty); }
-            set { SetValue(EntitiesProperty, value); }
-        }
-
-        public static readonly DependencyProperty EntitiesTypeProperty =
-          DependencyProperty.Register("EntitiesType", typeof(Type), typeof(EntityList), new UIPropertyMetadata((d, e) => ((EntityList)d).Type = ReflectionTools.CollectionType((Type)e.NewValue)));
-        public Type EntitiesType
-        {
-            get { return (Type)GetValue(EntitiesTypeProperty); }
-            set { SetValue(EntitiesTypeProperty, value); }
-        }
-
         public static readonly DependencyProperty SelectionModeProperty =
             DependencyProperty.Register("SelectionMode", typeof(SelectionMode), typeof(EntityList), new UIPropertyMetadata(SelectionMode.Single));
         public SelectionMode SelectionMode
@@ -94,24 +78,7 @@ namespace Signum.Windows
             return Entity != null && Entities.IndexOf(Entity) < Entities.Count - 1;
         }
      
-        protected override bool CanFind()
-        {
-            return Find && !Common.GetIsReadOnly(this);
-        }
-
-        protected override bool CanCreate()
-        {
-            return Create && !Common.GetIsReadOnly(this);
-        }
-
-        public IList EnsureEntities()
-        {
-            if (Entities == null)
-                Entities = (IList)Activator.CreateInstance(EntitiesType);
-            return Entities;
-        }
-
-        public void EntitiesChanged(DependencyPropertyChangedEventArgs e)
+        public override void EntitiesChanged(DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue != null && CleanType != null)
             {

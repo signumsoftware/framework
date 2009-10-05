@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media.Animation;
 using Signum.Utilities;
 using System.Windows.Media;
+using Signum.Entities;
 
 namespace Signum.Windows
 {

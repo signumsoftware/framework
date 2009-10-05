@@ -40,70 +40,91 @@ namespace Signum.Engine.Maps
         }
 
         #region Events
-        public event EntityEventHandler Saving;
-        public event EntityEventHandler Saved;
 
-        public event TypeIdEventHandler Retrieving;
-        public event EntityEventHandler Retrieved;
+        readonly IEntityEvents entityEventsGlobal = new EntityEvents<IdentifiableEntity>(); 
+        public EntityEvents<IdentifiableEntity> EntityEventsGlobal
+        {
+            get { return (EntityEvents<IdentifiableEntity>)entityEventsGlobal; }
+        }
 
-        public event TypeIdEventHandler Deleting;
-        public event TypeIdEventHandler Deleted;
+        Dictionary<Type, IEntityEvents> entityEvents = new Dictionary<Type,IEntityEvents>();
+        public EntityEvents<T> EntityEvents<T>()
+            where T : IdentifiableEntity
+        {
+            return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
+        }
 
         internal void OnSaving(IdentifiableEntity entity)
         {
-            if (Saving != null)
-                Saving(this, entity);
+            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+
+            if (ee != null)
+                ee.OnSaving(entity);
+
+            entityEventsGlobal.OnSaving(entity); 
         }
 
         internal void OnSaved(IdentifiableEntity entity)
         {
-            if (Saved != null)
-                Saved(this, entity);
+            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+
+            if (ee != null)
+                ee.OnSaved(entity);
+
+            entityEventsGlobal.OnSaved(entity); 
         }
 
         internal void OnRetrieving(Type type, int id)
         {
-            if (Retrieving != null)
-                Retrieving(this, type, id);
+            IEntityEvents ee = entityEvents.TryGetC(type);
+
+            if (ee != null)
+                ee.OnRetrieving(type, id);
+
+            entityEventsGlobal.OnRetrieving(type, id); 
         }
 
-        internal void OnRetrieved(IdentifiableEntity entity)
+        void OnRetrieved(IdentifiableEntity entity)
         {
-            if (Retrieved != null)
-                Retrieved(this, entity);
+            IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
+
+            if (ee != null)
+                ee.OnRetrieved(entity);
+
+            entityEventsGlobal.OnRetrieved(entity); 
         }
+
 
         internal void OnRetrieved(IEnumerable<IdentifiableEntity> collection)
         {
-            if (Retrieved != null)
-                foreach (var ei in collection)
-                    Retrieved(this, ei);
-        }
-
-        internal void OnDeleting(Type type, int id)
-        {
-            if (Deleting != null)
-                Deleting(this, type, id);
+            foreach (var ei in collection)
+                OnRetrieved(ei);
         }
 
         internal void OnDeleting(Type type, List<int> ids)
         {
-            if (Deleting != null)
-                foreach (var id in ids)
-                    Deleting(this, type, id); 
-        }
+            IEntityEvents ee = entityEvents.TryGetC(type);
 
-        internal void OnDeleted(Type type, int id)
-        {
-            if (Deleted != null)
-                Deleted(this, type, id);
+            foreach (var id in ids)
+            {
+                if (ee != null)
+                    ee.OnDeleting(type, id);
+
+                entityEventsGlobal.OnDeleting(type, id); 
+            }
         }
 
         internal void OnDeleted(Type type, List<int> ids)
         {
-            if (Deleted != null)
-                foreach (var id in ids)
-                    Deleted(this, type, id); 
+            IEntityEvents ee = entityEvents.TryGetC(type);
+
+            foreach (var id in ids)
+            {
+                if (ee != null)
+                    ee.OnDeleted(type, id);
+
+                entityEventsGlobal.OnDeleted(type, id);
+            }
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
@@ -217,7 +238,7 @@ namespace Signum.Engine.Maps
         {
             if (!Tables.ContainsKey(lazyType))
                 return null;
-
+            
             Field field = FindField(Table(lazyType), members, false); 
 
             FieldImplementedBy ibaField = field as FieldImplementedBy;
@@ -243,8 +264,68 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public delegate void EntityEventHandler(Schema sender, IdentifiableEntity ident);
-    public delegate void TypeIdEventHandler(Schema sender, Type type, int id);
+    internal interface IEntityEvents
+    {
+        void OnSaving(IdentifiableEntity entity);
+        void OnSaved(IdentifiableEntity entity);
+        void OnRetrieving(Type type, int id);
+        void OnRetrieved(IdentifiableEntity entity);
+        void OnDeleting(Type type, int id);
+        void OnDeleted(Type type, int id);
+    }
+
+    public class EntityEvents<T> : IEntityEvents
+        where T : IdentifiableEntity
+    {
+        public event EntityEventHandler<T> Saving;
+        public event EntityEventHandler<T> Saved;
+
+        public event TypeIdEventHandler Retrieving;
+        public event EntityEventHandler<T> Retrieved;
+
+        public event TypeIdEventHandler Deleting;
+        public event TypeIdEventHandler Deleted;
+
+        void IEntityEvents.OnSaving(IdentifiableEntity entity)
+        {
+            if (Saving != null)
+                Saving((T)entity);
+        }
+
+        void IEntityEvents.OnSaved(IdentifiableEntity entity)
+        {
+            if (Saved != null)
+                Saved((T)entity);
+        }
+
+        void IEntityEvents.OnRetrieving(Type type, int id)
+        {
+            if (Retrieving != null)
+                Retrieving(type, id);
+        }
+
+        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
+        {
+            if (Retrieved != null)
+                Retrieved((T)entity);
+        }
+
+        void IEntityEvents.OnDeleting(Type type, int id)
+        {
+            if (Deleting != null)
+                Deleting(type, id);
+        }
+
+        void IEntityEvents.OnDeleted(Type type, int id)
+        {
+            if (Deleted != null)
+                Deleted(type, id);
+        }
+    }
+     
+    public delegate void EntityEventHandler<T>(T ident) where T : IdentifiableEntity;
+    public delegate void TypeIdEventHandler(Type type, int id);
+
     public delegate void InitEventHandler(Schema sender); 
 
     public interface IFieldFinder

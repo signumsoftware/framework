@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{76278145-7CCD-4411-9B8A-078708128571}</ProjectGuid>
     <OutputType>library</OutputType>
@@ -76,7 +76,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="AutoCompleteTextBox.xaml">
+    <Page Include="Controls\AutoCompleteTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -100,11 +100,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="EntityDetail.xaml">
+    <Page Include="EntityControls\EntityDetail.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="TextArea.xaml">
+    <Page Include="EntityControls\EntityRepeater.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EntityControls\TextArea.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -120,7 +124,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="LightEntityLine.xaml">
+    <Page Include="EntityControls\LightEntityLine.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -132,11 +136,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="EntityButtons.xaml">
+    <Page Include="EntityControls\EntityButtons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="EntityCombo.xaml">
+    <Page Include="EntityControls\EntityCombo.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -192,15 +196,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ValueLine.xaml">
+    <Page Include="EntityControls\ValueLine.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="EntityList.xaml">
+    <Page Include="EntityControls\EntityList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="EntityLine.xaml">
+    <Page Include="EntityControls\EntityLine.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -208,7 +212,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Compile Include="EntityLine.xaml.cs">
+    <Compile Include="EntityControls\EntityLine.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>EntityLine.xaml</DependentUpon>
     </Compile>
@@ -219,7 +223,7 @@
     </Compile>
     <Compile Include="AdminBase.cs" />
     <Compile Include="Async.cs" />
-    <Compile Include="AutoCompleteTextBox.xaml.cs">
+    <Compile Include="Controls\AutoCompleteTextBox.xaml.cs">
       <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Basics\Note.xaml.cs">
@@ -233,13 +237,17 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
-    <Compile Include="EntityDetail.xaml.cs">
+    <Compile Include="EntityControls\EntityDetail.xaml.cs">
       <DependentUpon>EntityDetail.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TextArea.xaml.cs">
+    <Compile Include="EntityControls\EntityListBase.cs" />
+    <Compile Include="EntityControls\EntityRepeater.xaml.cs">
+      <DependentUpon>EntityRepeater.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EntityControls\TextArea.xaml.cs">
       <DependentUpon>TextArea.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LineBase.cs" />
+    <Compile Include="EntityControls\LineBase.cs" />
     <Compile Include="ValueLineBox.xaml.cs">
       <DependentUpon>ValueLineBox.xaml</DependentUpon>
     </Compile>
@@ -293,7 +301,7 @@
     <Compile Include="DynamicQuery\SearchControl.xaml.cs">
       <DependentUpon>SearchControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LightEntityLine.xaml.cs">
+    <Compile Include="EntityControls\LightEntityLine.xaml.cs">
       <DependentUpon>LightEntityLine.xaml</DependentUpon>
     </Compile>
     <Compile Include="DynamicQuery\FilterBuilder.xaml.cs">
@@ -302,11 +310,11 @@
     <Compile Include="DynamicQuery\SearchWindow.xaml.cs">
       <DependentUpon>SearchWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EntityBase.cs" />
-    <Compile Include="EntityButtons.xaml.cs">
+    <Compile Include="EntityControls\EntityBase.cs" />
+    <Compile Include="EntityControls\EntityButtons.xaml.cs">
       <DependentUpon>EntityButtons.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EntityCombo.xaml.cs">
+    <Compile Include="EntityControls\EntityCombo.xaml.cs">
       <DependentUpon>EntityCombo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageLoader.cs" />
@@ -342,10 +350,10 @@
     <Compile Include="TypeSelectorWindow.xaml.cs">
       <DependentUpon>TypeSelectorWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ValueLine.xaml.cs">
+    <Compile Include="EntityControls\ValueLine.xaml.cs">
       <DependentUpon>ValueLine.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EntityList.xaml.cs">
+    <Compile Include="EntityControls\EntityList.xaml.cs">
       <DependentUpon>EntityList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">

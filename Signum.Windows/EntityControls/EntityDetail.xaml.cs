@@ -34,7 +34,14 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty EntityControlProperty =
-         DependencyProperty.Register("EntityControl", typeof(object), typeof(EntityDetail), new UIPropertyMetadata(null));
+         DependencyProperty.Register("EntityControl", typeof(object), typeof(EntityDetail), new UIPropertyMetadata((d, e) => ((EntityDetail)d).OnEntityControlChanged(e)));
+
+        private void OnEntityControlChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.RemoveLogicalChild(e.OldValue);
+            base.AddLogicalChild(e.NewValue);
+        }
+
         public object EntityControl
         {
             get { return (object)GetValue(EntityControlProperty); }
@@ -58,6 +65,17 @@ namespace Signum.Windows
         public EntityDetail()
         {
             InitializeComponent();
+        }
+
+        protected override void OnEntityChanged(object oldValue, object newValue)
+        {
+            base.OnEntityChanged(oldValue, newValue);
+
+            Lazy lazy = newValue as Lazy;
+            if (lazy != null)
+                contentPresenter.DataContext = Server.Retrieve(lazy);
+            else
+                contentPresenter.DataContext = newValue;
         }
       
         private void btCreate_Click(object sender, RoutedEventArgs e)

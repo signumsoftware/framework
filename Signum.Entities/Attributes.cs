@@ -149,66 +149,75 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class NotifyCollectionChangedAttribute : Attribute
     {
-        static Dictionary<Type, Tuple<List<Func<object, object>>, HashSet<string>>> fieldAndProperties = new Dictionary<Type, Tuple<List<Func<object, object>>, HashSet<string>>>();
-        static Tuple<List<Func<object, object>>, HashSet<string>> GetFieldsAndProperties(Type type)
-        {
-            lock (fieldAndProperties)
-            {
-                return fieldAndProperties.GetOrCreate(type, () =>
-                {
-                    var list = (from fi in Reflector.InstanceFieldsInOrder(type)
-                                where fi.HasAttribute<NotifyCollectionChangedAttribute>() &&
-                                      typeof(INotifyCollectionChanged).IsAssignableFrom(fi.FieldType)
-                                select fi).ToList();
 
-                    return Tuple.New(
-                        list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToList(),
-                        list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToHashSet());
-                });
-            }
-        }
-
-        public static bool HasToNotify(Type type, string propertyName)
-        {
-            return GetFieldsAndProperties(type).Second.Contains(propertyName);
-        }
-
-        public static List<Func<object, object>> FieldsToNotify(Type type)
-        {
-            return GetFieldsAndProperties(type).First;
-        }
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class NotifyPropertyChangedAttribute : Attribute
+    public sealed class NotifyChildPropertyAttribute : Attribute
     {
-        static Dictionary<Type, Tuple<List<Func<object, object>>, HashSet<string>>> fieldAndProperties = new Dictionary<Type, Tuple<List<Func<object, object>>, HashSet<string>>>();
-        static Tuple<List<Func<object, object>>, HashSet<string>> GetFieldsAndProperties(Type type)
+        
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class ValidateChildPropertyAttribute : Attribute
+    {
+
+    }
+
+
+    //Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute, ValidateChildPropertyAttribute
+    internal static class AttributeManager<T>
+        where T : Attribute
+    {
+        //Consider using ImmutableAVLTree instead
+        readonly static Dictionary<Type, TypeAttributePack> fieldAndProperties = new Dictionary<Type, TypeAttributePack>();
+       
+        static TypeAttributePack GetFieldsAndProperties(Type type)
         {
             lock (fieldAndProperties)
             {
                 return fieldAndProperties.GetOrCreate(type, () =>
                 {
-                    var list = (from fi in Reflector.InstanceFieldsInOrder(type)
-                                where fi.HasAttribute<NotifyPropertyChangedAttribute>() &&
-                                      typeof(INotifyPropertyChanged).IsAssignableFrom(fi.FieldType)
-                                select fi).ToList();
+                    var list = Reflector.InstanceFieldsInOrder(type).Where(fi=>fi.HasAttribute<T>()).ToList();
 
-                    return Tuple.New(
-                        list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToList(),
-                        list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToHashSet());
+                    if (list.Count == 0)
+                        return null;
+
+                    return new TypeAttributePack
+                    {
+                        Fields = list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray(),
+                        PropertyNames = list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToHashSet()
+                    };
                 });
             }
         }
 
         public static bool HasToNotify(Type type, string propertyName)
         {
-            return GetFieldsAndProperties(type).Second.Contains(propertyName);
+            TypeAttributePack pack = GetFieldsAndProperties(type);
+
+            if(pack == null)
+                return false;
+
+            return pack.PropertyNames.Contains(propertyName);
         }
 
-        public static List<Func<object, object>> FieldsToNotify(Type type)
+        readonly static Func<object, object>[] EmptyArray = new Func<object, object>[0]; 
+
+        public static Func<object, object>[] FieldsToNotify(Type type)
         {
-            return GetFieldsAndProperties(type).First;
+            TypeAttributePack pack = GetFieldsAndProperties(type);
+
+            if (pack == null)
+                return EmptyArray;
+
+            return GetFieldsAndProperties(type).Fields;
         }
+    }
+
+    internal class TypeAttributePack
+    {
+        public Func<object, object>[] Fields;
+        public HashSet<string> PropertyNames; 
     }
 }
