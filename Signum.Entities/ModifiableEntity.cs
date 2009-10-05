@@ -172,6 +172,12 @@ namespace Signum.Entities
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        protected void Notify(object sender, string propertyName)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(sender, new PropertyChangedEventArgs(propertyName));
+        }
+
         static long temporalIdCounter = 0;
 
         [Ignore]

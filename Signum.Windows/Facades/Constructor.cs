@@ -44,8 +44,7 @@ namespace Signum.Windows
             if (c != null)
             {
                 object result = c(window);
-                if (result != null)
-                    return result;
+                return result;
             }
 
             if (GeneralConstructor != null)
