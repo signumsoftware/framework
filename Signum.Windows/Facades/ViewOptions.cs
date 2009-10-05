@@ -42,8 +42,6 @@ namespace Signum.Windows
 
     public enum ViewButtons
     {
-        //TODO: olmo revisar esto no quiro modal pero no quiero botones
-        None,
         Ok,
         Save,
     }

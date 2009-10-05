@@ -127,7 +127,7 @@ namespace Signum.Windows
 
         private void UpdateVisibility()
         {
-            btCreate.Visibility = Create ? Visibility.Visible : Visibility.Collapsed;
+            btCreate.Visibility = Create  && EntityType != null ? Visibility.Visible : Visibility.Collapsed;
             UpdateViewSelection();
         }
 
