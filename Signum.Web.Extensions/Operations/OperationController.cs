@@ -50,6 +50,12 @@ namespace Signum.Web.Operations
                 }
 
                 entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+
+                if (Navigator.ExtractIsReactive(Request.Form))
+                {
+                    string tabID = Navigator.ExtractTabID(Request.Form);
+                    Session[tabID] = entity;
+                }
             }
 
             if (prefix.HasText()) 
