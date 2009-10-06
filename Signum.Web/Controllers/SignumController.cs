@@ -171,16 +171,22 @@ namespace Signum.Web.Controllers
             //    entity = Database.Retrieve(type, sfId.Value);
             //else
             //    entity = (ModifiableEntity)Navigator.CreateInstance(this, type);
-            Modifiable entity = Navigator.ExtractEntity(this, Request.Form, prefix);
+            Modifiable parentEntity = Navigator.ExtractEntity(this, Request.Form, prefix);
 
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, prefixToIgnore);
+            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref parentEntity, prefix, prefixToIgnore);
 
             this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
 
-            if (entity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0))
-                Database.Save((IdentifiableEntity)entity);
+            if (parentEntity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0))
+                Database.Save((IdentifiableEntity)parentEntity);
 
-            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
+            string newToStr;
+            if (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText())
+                newToStr = Modification.GetPropertyValue(parentEntity, prefix).ToString();
+            else
+                newToStr = parentEntity.ToString();
+
+            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -198,7 +204,13 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
 
-            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + parentEntity.ToString().Quote() + "}");
+            string newToStr;
+            if (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText())
+                newToStr = Modification.GetPropertyValue(parentEntity, prefix).ToString();
+            else
+                newToStr = parentEntity.ToString();
+
+            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
