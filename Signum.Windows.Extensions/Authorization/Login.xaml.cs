@@ -70,7 +70,7 @@ namespace Signum.Windows.Authorization
             get
             {
                 if (_minimizarFocus == null)
-                    _minimizarFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar-on.png"));
+                    _minimizarFocus = new BitmapImage(PackUriHelper.Reference("Images/bminimizar-on.png","Signum.Windows.Extensions"));
                 return _minimizarFocus;
             }
         }
@@ -81,7 +81,7 @@ namespace Signum.Windows.Authorization
             get
             {
                 if (_minimizarNoFocus == null)
-                    _minimizarNoFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bminimizar.png"));
+                    _minimizarNoFocus = new BitmapImage(PackUriHelper.Reference("Images/bminimizar.png","Signum.Windows.Extensions"));
                 return _minimizarNoFocus;
             }
         }
@@ -92,7 +92,7 @@ namespace Signum.Windows.Authorization
             get
             {
                 if (_cerrarFocus == null)
-                    _cerrarFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar-on.png"));
+                    _cerrarFocus = new BitmapImage(PackUriHelper.Reference("Images/bcerrar-on.png", "Signum.Windows.Extensions"));
                 return _cerrarFocus;
             }
         }
@@ -103,7 +103,7 @@ namespace Signum.Windows.Authorization
             get
             {
                 if (_cerrarNoFocus == null)
-                    _cerrarNoFocus = new BitmapImage(new Uri(@"pack://application:,,,/Signum.Windows.Extensions;Component/Images/bcerrar.png"));
+                    _cerrarNoFocus = new BitmapImage(PackUriHelper.Reference("Images/bcerrar.png", "Signum.Windows.Extensions"));
                 return _cerrarNoFocus;
             }
         }
