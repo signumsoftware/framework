@@ -106,6 +106,11 @@ namespace Signum.Web
             return Manager.GetOrCreateTabID(c);
         }
 
+        public static bool ExtractIsReactive(NameValueCollection form)
+        {
+            return Manager.ExtractIsReactive(form);
+        }
+
         public static string ExtractTabID(NameValueCollection form)
         {
             return Manager.ExtractTabID(form);
@@ -437,6 +442,11 @@ namespace Signum.Web
             return Guid.NewGuid().ToString();
         }
 
+        protected internal bool ExtractIsReactive(NameValueCollection form)
+        {
+            return form.AllKeys.Contains(ViewDataKeys.Reactive);
+        }
+
         protected internal string ExtractTabID(NameValueCollection form)
         {
             if (!form.AllKeys.Contains(ViewDataKeys.TabId))
@@ -480,7 +490,7 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
 
             if (controller.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
-                controller.Response.Write("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(prefix + TypeContext.Separator + EntityBaseKeys.IsNew)); 
+                controller.Response.Write("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(TypeContext.Compose(prefix, EntityBaseKeys.IsNew))); 
 
             return new PartialViewResult
             {
@@ -847,14 +857,14 @@ namespace Signum.Web
 
         protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
-            string typeName = form[(prefix ?? "") + TypeContext.Separator + TypeContext.RuntimeType];
-            string id = form[(prefix ?? "") + TypeContext.Separator + TypeContext.Id];
+            string typeName = form[TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType)];
+            string id = form[TypeContext.Compose(prefix ?? "", TypeContext.Id)];
 
             Type type = Navigator.NameToType.GetOrThrow(typeName, Resource.Type0NotFoundInTheSchema);
 
             if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive))
             {
-                string tabID = ExtractTabID(controller.Request.Form);
+                string tabID = ExtractTabID(form);
                 controller.ViewData[ViewDataKeys.Reactive] = true;
                 ModifiableEntity mod = (ModifiableEntity)controller.Session[tabID];
                 if (mod == null)
@@ -864,7 +874,7 @@ namespace Signum.Web
                 Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resource.Type0NotFoundInTheSchema);
                 if (mod.GetType() == parentType &&
                     (typeof(EmbeddedEntity).IsAssignableFrom(parentType) || ((IIdentifiable)mod).IdOrNull.TryToString("") == parentId))
-                    return mod;
+                    return (ModifiableEntity)((ICloneable)mod).Clone();
                 else
                     throw new ApplicationException("Incorrect entity in Session");
             }

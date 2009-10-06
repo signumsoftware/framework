@@ -41,13 +41,14 @@ namespace Signum.Web
 
     public static class EntityRepeaterHelper
     {
-        private static void InternalEntityRepeater<T>(this HtmlHelper helper, string idValueField, MList<T> value, EntityRepeater settings)
+        private static void InternalEntityRepeater<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityRepeater settings)
             where T : Modifiable
         {
             if (!settings.Visible)
                 return;
 
-            idValueField = helper.GlobalName(idValueField);
+            string idValueField = helper.GlobalName(typeContext.Name);
+            MList<T> value = typeContext.Value;  
 
             StringBuilder sb = new StringBuilder();
 
@@ -56,7 +57,10 @@ namespace Signum.Web
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), elementsCleanType.Name));
 
             if (StyleContext.Current.LabelVisible)
-                sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
+                sb.AppendLine(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
+
+            if (!StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
+                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}' />".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
 
             if (settings.Implementations != null) //Interface with several possible implementations
             {
@@ -85,7 +89,7 @@ namespace Signum.Web
                 {
                     for (int i = 0; i < value.Count; i++)
                     {
-                        sb.Append(InternalRepeaterElement(helper, idValueField, value[i], i, settings));
+                        sb.Append(InternalRepeaterElement(helper, idValueField, value[i], i, settings, typeContext));
                     }
                 }
             }
@@ -113,7 +117,7 @@ namespace Signum.Web
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
         }
 
-        private static string InternalRepeaterElement<T>(this HtmlHelper helper, string idValueField, T value, int index, EntityRepeater settings)
+        private static string InternalRepeaterElement<T>(this HtmlHelper helper, string idValueField, T value, int index, EntityRepeater settings, TypeContext<MList<T>> typeContext)
         {
             StringBuilder sb = new StringBuilder();
             
@@ -122,13 +126,17 @@ namespace Signum.Web
 
             string indexedPrefix = TypeContext.Compose(idValueField, index.ToString());
 
+            string reloadOnChangeFunction = "''";
+            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+
             sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(TypeContext.Compose(indexedPrefix, EntityRepeaterKeys.RepeaterElement)));
             
             if (settings.Remove)
                 sb.AppendLine(
                     helper.Href(TypeContext.Compose(indexedPrefix, "btnRemove"),
                               settings.RemoveElementLinkText,
-                              "javascript:RemoveRepeaterEntity('{0}');".Formato(TypeContext.Compose(indexedPrefix, EntityRepeaterKeys.RepeaterElement)),
+                              "javascript:RemoveRepeaterEntity('{0}','{1}',{2});".Formato(TypeContext.Compose(indexedPrefix, EntityRepeaterKeys.RepeaterElement), idValueField, reloadOnChangeFunction),
                               settings.RemoveElementLinkText,
                               "lineButton remove",
                               new Dictionary<string, object>()));
@@ -157,16 +165,15 @@ namespace Signum.Web
             sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
 
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+            TypeElementContext<T> tsc = new TypeElementContext<T>(value, typeContext, index);
+            ViewDataDictionary vdd = new ViewDataDictionary(tsc) 
+            { 
+                { ViewDataKeys.PopupPrefix, indexedPrefix}
+            };
+            helper.PropagateSFKeys(vdd);
 
             sb.AppendLine(
-                helper.RenderPartialToString(
-                    es.PartialViewName,
-                    new ViewDataDictionary(value) 
-                    { 
-                        { ViewDataKeys.PopupPrefix, indexedPrefix}
-                    }
-                )
-            );
+                helper.RenderPartialToString(es.PartialViewName, vdd));
             sb.AppendLine("</div>");
 
             sb.AppendLine("<script type=\"text/javascript\">var " + TypeContext.Compose(indexedPrefix, EntityBaseKeys.EntityTemp) + " = '';</script>");
@@ -190,7 +197,7 @@ namespace Signum.Web
 
             Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
 
-            helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
+            helper.InternalEntityRepeater<S>(context, el);
         }
 
         public static void EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityRepeater> settingsModifier)
@@ -211,9 +218,9 @@ namespace Signum.Web
 
             if (el != null)
                 using(el)
-                    helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
+                    helper.InternalEntityRepeater<S>(context, el);
             else
-                helper.InternalEntityRepeater<S>(context.Name, context.Value, el);
+                helper.InternalEntityRepeater<S>(context, el);
         }
     }
 }

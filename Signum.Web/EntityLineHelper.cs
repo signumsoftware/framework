@@ -85,13 +85,14 @@ namespace Signum.Web
             bool isLazy = typeof(Lazy).IsAssignableFrom(type);
             if (isIdentifiable || isLazy)
             {
-                sb.Append(helper.Hidden(
+                sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(idValueField, TypeContext.Id), 
                     (isIdentifiable) 
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("")
-                       : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()) + "\n");
+                       : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()));
 
-                if (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null)
+                if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
+                    (isIdentifiable && value != null && ((IIdentifiable)(object)value).IdOrNull == null))
                 {
                     sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
 
@@ -101,16 +102,17 @@ namespace Signum.Web
                         { ViewDataKeys.MainControlUrl, es.PartialViewName},
                         //{ ViewDataKeys.PopupPrefix, idValueField}
                     };
-                    if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                        vdd.Add(ViewDataKeys.Reactive, true);
+                    helper.PropagateSFKeys(vdd);
+                    if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                        vdd[ViewDataKeys.Reactive] = true;
 
                     using (var sc = StyleContext.RegisterCleanStyleContext(true))
-                        sb.Append(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
+                        sb.AppendLine(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
 
-                    sb.Append("</div>\n");
+                    sb.AppendLine("</div>");
                 }
                 else
-                    sb.Append(helper.Div(TypeContext.Compose(idValueField, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                    sb.AppendLine(helper.Div(TypeContext.Compose(idValueField, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 
                 sb.AppendLine(helper.TextBox(
                     TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), 
@@ -125,7 +127,7 @@ namespace Signum.Web
                     }));
 
                 if (settings.Autocomplete && Navigator.NameToType.ContainsKey((Reflector.ExtractLazy(type) ?? type).Name))
-                    sb.Append(helper.AutoCompleteExtender(TypeContext.Compose(idValueField, EntityLineKeys.DDL),
+                    sb.AppendLine(helper.AutoCompleteExtender(TypeContext.Compose(idValueField, EntityLineKeys.DDL),
                                                       TypeContext.Compose(idValueField, EntityBaseKeys.ToStr),
                                                       (Reflector.ExtractLazy(type) ?? type).Name,
                                                       (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name, ",") : "",
@@ -163,9 +165,10 @@ namespace Signum.Web
                     { ViewDataKeys.MainControlUrl, es.PartialViewName},
                     //{ ViewDataKeys.PopupPrefix, idValueField}
                 };
-                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                    vdd.Add(ViewDataKeys.Reactive, true);
-                
+                helper.PropagateSFKeys(vdd);
+                if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                    vdd[ViewDataKeys.Reactive] = true;
+
                 using (var sc = StyleContext.RegisterCleanStyleContext(true))
                     sb.Append(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
                 

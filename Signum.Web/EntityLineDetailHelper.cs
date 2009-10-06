@@ -52,13 +52,15 @@ namespace Signum.Web
 
     public static class EntityLineDetailHelper
     {
-        internal static string InternalEntityLineDetail(this HtmlHelper helper, string idValueField, Type type, object value, EntityLineDetail settings)
+        internal static string InternalEntityLineDetail<T>(this HtmlHelper helper, TypeContext<T> typeContext, EntityLineDetail settings)
         {
             if (!settings.Visible)
                 return null;
 
-            idValueField = helper.GlobalName(idValueField);
-
+            string idValueField = helper.GlobalName(typeContext.Name);
+            Type type = typeContext.ContextType;
+            T value = typeContext.Value;
+            
             string defaultDetailDiv = idValueField + "DetailDiv";
             if (!settings.DetailDiv.HasText())
                 settings.DetailDiv = defaultDetailDiv;
@@ -75,14 +77,22 @@ namespace Signum.Web
                 sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText ?? "", TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), TypeContext.CssLineLabel));
 
             string runtimeType = "";
+            Type cleanRuntimeType = null;
             if (value != null)
             {
-                Type cleanRuntimeType = value.GetType();
+                cleanRuntimeType = value.GetType();
                 if (typeof(Lazy).IsAssignableFrom(value.GetType()))
                     cleanRuntimeType = (value as Lazy).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.RuntimeType), runtimeType));
+
+            if (!StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
+                sb.Append("<input type='hidden' id='{0}' name='{0}' value='{1}' />".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
+
+            string reloadOnChangeFunction = "''";
+            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
 
             string popupOpeningParameters = "'{0}','{1}','{2}','{3}'".Formato("Signum/PartialView", divASustituir, idValueField, settings.DetailDiv);
 
@@ -127,22 +137,21 @@ namespace Signum.Web
                     Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type).PartialViewName;
 
                 using (var sc = StyleContext.RegisterCleanStyleContext(true))
-                    sb.Append(
-                        helper.RenderPartialToString(
-                            Navigator.Manager.PopupControlUrl, 
-                            new ViewDataDictionary(value) 
-                            { 
-                                { ViewDataKeys.MainControlUrl, url},
-                                { ViewDataKeys.PopupPrefix, idValueField}
-                            }
-                        )
-                    );
+                {
+                    ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
+                    { 
+                        //{ ViewDataKeys.MainControlUrl, url},
+                        //{ ViewDataKeys.PopupPrefix, idValueField}
+                    };
+                    helper.PropagateSFKeys(vdd);
+                    sb.Append(helper.RenderPartialToString(url, vdd));
+                }
                 sb.AppendLine("</div>");
             }
 
             if (settings.Implementations != null || settings.View)
             {
-                string viewingUrl = "javascript:OpenDetail(" + popupOpeningParameters + ");";
+                //string viewingUrl = "javascript:OpenDetail(" + popupOpeningParameters + ");";
                 sb.AppendLine("<script type=\"text/javascript\">var " + TypeContext.Compose(idValueField, EntityBaseKeys.EntityTemp) + " = '';</script>");
             }
 
@@ -171,13 +180,13 @@ namespace Signum.Web
                     sb.AppendLine(
                         helper.Button(TypeContext.Compose(idValueField, "btnRemove"),
                                   "x",
-                                  "RemoveDetailContainedEntity('{0}','{1}');".Formato(idValueField, settings.DetailDiv),
+                                  "RemoveDetailContainedEntity('{0}','{1}',{2});".Formato(idValueField, settings.DetailDiv, reloadOnChangeFunction),
                                   "lineButton remove",
                                   (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLazy)))
             {
-                string popupFindingParameters = "'{0}','{1}','false',function(){{OnDetailSearchOk('{4}','{2}','{3}','{5}'{6});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}','{5}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLazy(type) ?? type), idValueField, divASustituir, "Signum.aspx/PartialView", settings.DetailDiv, (settings.Url.HasText() ? ",'" + settings.Url + "'" : ""));
+                string popupFindingParameters = "'{0}','{1}','false',function(){{OnDetailSearchOk('{4}','{2}','{3}',{5},'{6}'{7});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}','{6}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLazy(type) ?? type), idValueField, divASustituir, "Signum.aspx/PartialView", reloadOnChangeFunction, settings.DetailDiv, (settings.Url.HasText() ? ",'" + settings.Url + "'" : ""));
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
@@ -202,12 +211,16 @@ namespace Signum.Web
 
             string controlHtml = null;
             if (value != null)
+            {
+                ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
+                { 
+                    //{ ViewDataKeys.PopupPrefix, idValueField},
+                };
+                helper.PropagateSFKeys(vdd);
                 controlHtml = helper.RenderPartialToString(
                         settings.Url ?? Navigator.Manager.EntitySettings[value.GetType()].PartialViewName,
-                        new ViewDataDictionary(value) 
-                        { 
-                            { ViewDataKeys.PopupPrefix, idValueField},
-                        });
+                        vdd);
+            }
 
             if (settings.DetailDiv == defaultDetailDiv)
                 sb.AppendLine("<div id='{0}' name='{0}'>{1}</div>".Formato(settings.DetailDiv, controlHtml ?? ""));
@@ -285,9 +298,9 @@ namespace Signum.Web
         {
             if (el != null)
                 using (el)
-                    return helper.InternalEntityLineDetail(context.Name, typeof(S), context.Value, el);
+                    return helper.InternalEntityLineDetail(context, el);
             else
-                return helper.InternalEntityLineDetail(context.Name, typeof(S), context.Value, el);
+                return helper.InternalEntityLineDetail(context, el);
         }
     }
 }

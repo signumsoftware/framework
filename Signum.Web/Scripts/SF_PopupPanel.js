@@ -13,12 +13,18 @@ function NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbede
 function NewDetail(urlController, divASustituir, prefix, detailDiv, isEmbeded, partialView) {
     NewPopup(urlController, divASustituir, prefix, "", "", isEmbeded, detailDiv, partialView);
     toggleButtonsDisplay(prefix, true);
+    $('#' + prefix + sfTicks).val(new Date().getTime());
 }
 
-function OpenDetail(urlController, divASustituir, prefix, onOk, onCancel, detailDiv) {
-    OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv);
-    toggleButtonsDisplay(prefix, true);
-}
+//function OpenDetail(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, reloadOnChangeFunction) {
+//    OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv);
+//    toggleButtonsDisplay(prefix, true);
+
+//    if (!empty(reloadOnChangeFunction)) {
+//        $('#' + prefix + sfTicks).val(new Date().getTime());
+//        reloadOnChangeFunction();
+//    }
+//}
 
 function OpenPopupList(urlController, divASustituir, select, onOk, onCancel, detailDiv) {
     $('#' + select + sfTicks).val(new Date().getTime());
@@ -75,8 +81,12 @@ function OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, d
         idQueryParam = qp("sfId", idField.val());
 
     var reactiveParam = "";
-    if ($('#' + sfReactive).length > 0)
+    if ($('#' + sfReactive).length > 0) { //If reactive => send also tabId and Id & Runtime of the main entity
         reactiveParam = qp(sfReactive, true);
+        reactiveParam += qp(sfTabId, $('#' + sfTabId).val());
+        reactiveParam += qp(sfRuntimeType, $('#' + sfRuntimeType).val());
+        reactiveParam += qp(sfId, $('#' + sfId).val());
+    }
     
     var viewQueryParam = "";
     if (!empty(partialView))
@@ -324,7 +334,7 @@ function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
     }
 }
 
-function RemoveDetailContainedEntity(prefix, detailDiv) {
+function RemoveDetailContainedEntity(prefix, detailDiv, reloadOnChangeFunction) {
     $('#' + prefix + sfToStr).val("");
     $('#' + prefix + sfToStr).html("");
     $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
@@ -335,8 +345,13 @@ function RemoveDetailContainedEntity(prefix, detailDiv) {
     var idField = $('#' + prefix + sfId);
     $('#' + prefix + sfId).val("");
     $('#' + detailDiv).html("");
-    
+
     toggleButtonsDisplay(prefix, false);
+
+    if (!empty(reloadOnChangeFunction)) {
+        $('#' + prefix + sfTicks).val(new Date().getTime());
+        reloadOnChangeFunction();
+    }
 }
 
 var autocompleteOnSelected = function(extendedControlName, newIdAndType, newValue, hasEntity) {
@@ -345,6 +360,7 @@ var autocompleteOnSelected = function(extendedControlName, newIdAndType, newValu
     $('#' + prefix + sfId).val(newIdAndType.substr(0, _index));
     $('#' + prefix + sfRuntimeType).val(newIdAndType.substr(_index+1, newIdAndType.length));
     $('#' + prefix + sfLink).html($('#' + extendedControlName).val());
+    $('#' + prefix + sfTicks).val(new Date().getTime());
     toggleButtonsDisplay(prefix, hasEntity);
 }
 
@@ -421,6 +437,7 @@ function toggleButtonsDisplayList(prefix, hasEntity) {
 }
 
 function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, removeLinkText, maxElements) {
+    $('#' + prefix + sfTicks).val(new Date().getTime());
     if (!empty(maxElements)) {
         var elements = $("#" + prefix + sfEntitiesContainer + " > div[name$=" + sfRepeaterElement + "]").length;
         if (elements >= parseInt(maxElements))
@@ -464,6 +481,11 @@ function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, remo
     });
 }
 
-function RemoveRepeaterEntity(idRepeaterElement) {
+function RemoveRepeaterEntity(idRepeaterElement, prefix, reloadOnChangeFunction) {
     $("#" + idRepeaterElement).remove();
+    
+    if (!empty(reloadOnChangeFunction)) {
+        $('#' + prefix + sfTicks).val(new Date().getTime());
+        reloadOnChangeFunction();
+    }
 }

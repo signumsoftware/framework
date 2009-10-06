@@ -29,75 +29,95 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, string sfUrl, string sfReactive)
+        public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
-             
+            bool isReactive = Navigator.ExtractIsReactive(Request.Form);
+            
             ModifiableEntity entity = null;
-            if (sfId.HasValue)
-                entity = Database.Retrieve(type, sfId.Value);
-            else
+            if (isReactive)
             {
-                object result = Navigator.CreateInstance(this, type);
-                if (result.GetType() == typeof(PartialViewResult))
-                    return (PartialViewResult)result;
-                else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                    entity = (ModifiableEntity)result;
+                NameValueCollection nvc = new NameValueCollection(Request.Form);
+                entity = Navigator.ExtractEntity(this, nvc)
+                    .ThrowIfNullC("PartialView: Type was not possible to extract");
+                entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
+            }
+            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
+            {
+                if (sfId.HasValue)
+                    entity = Database.Retrieve(type, sfId.Value);
                 else
-                    throw new ApplicationException("Invalid result type for a Constructor");
+                {
+                    object result = Navigator.CreateInstance(this, type);
+                    if (result.GetType() == typeof(PartialViewResult))
+                        return (PartialViewResult)result;
+                    else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
+                        entity = (ModifiableEntity)result;
+                    else
+                        throw new ApplicationException("Invalid result type for a Constructor");
+                }
             }
 
-            if (sfReactive.HasText())
+            if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
             return Navigator.PopupView(this, entity, prefix, sfUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfEmbeddedControl, string sfUrl, string sfReactive)
+        public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfEmbeddedControl, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
-            
+            bool isReactive = Navigator.ExtractIsReactive(Request.Form);
+
             ModifiableEntity entity = null;
-            if (sfId.HasValue)
-                entity = Database.Retrieve(type, sfId.Value);
-            else
+            if (isReactive)
             {
-                object result = Navigator.CreateInstance(this, type);
-                if (result.GetType() == typeof(PartialViewResult))
-                    return (PartialViewResult)result;
-                else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                    entity = (ModifiableEntity)result;
+                entity = Navigator.ExtractEntity(this, Request.Form, "")
+                    .ThrowIfNullC("PartialView: Type was not possible to extract");
+                entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
+            }
+            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
+            {
+                if (sfId.HasValue)
+                    entity = Database.Retrieve(type, sfId.Value);
                 else
-                    throw new ApplicationException("Invalid result type for a Constructor");
+                {
+                    object result = Navigator.CreateInstance(this, type);
+                    if (result.GetType() == typeof(PartialViewResult))
+                        return (PartialViewResult)result;
+                    else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
+                        entity = (ModifiableEntity)result;
+                    else
+                        throw new ApplicationException("Invalid result type for a Constructor");
+                }
             }
 
             if (sfEmbeddedControl != null && sfEmbeddedControl.Value)
                 this.ViewData[ViewDataKeys.EmbeddedControl] = true;
 
-            if (sfReactive.HasText())
+            if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult ReloadEntity(string prefix, string tabID)
+        public PartialViewResult ReloadEntity(string prefix)
         {
             ModifiableEntity entity = Navigator.ExtractEntity(this, Request.Form, prefix)
-                .ThrowIfNullC("PartialView: Type was not possible to extract");
+                .ThrowIfNullC("Type was not possible to extract");
 
             Modification modification = Navigator.GenerateModification(this, entity, prefix);
             ModificationState modState = Navigator.ApplyChanges(this, modification, ref entity);
             
-            if (Request.Form.AllKeys.Contains(ViewDataKeys.Reactive))
+            if (Navigator.ExtractIsReactive(Request.Form))
             {
-                if (!tabID.HasText())
-                    throw new ApplicationException("Request does not have the necessary Tab Identificator");
+                string tabID = Navigator.ExtractTabID(Request.Form);
                 Session[tabID] = entity;
                 this.ViewData[ViewDataKeys.Reactive] = true;
                 if (prefix.HasText())
-                    entity = (ModifiableEntity)SessionModification.GetPropertyValue(entity, prefix);
+                    entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
             }
             
             this.ViewData[ViewDataKeys.LoadAll] = true; //Prevents losing unsaved changes of the UI when reloading control
@@ -120,7 +140,13 @@ namespace Signum.Web.Controllers
             if (entity is IdentifiableEntity)
                 Database.Save((IdentifiableEntity)entity);
 
-            return Navigator.View(this, entity, changesLog.ChangeTicks);
+            if (Navigator.ExtractIsReactive(Request.Form))
+            {
+                string tabID = Navigator.ExtractTabID(Request.Form);
+                Session[tabID] = entity;
+            }
+
+            return Navigator.View(this, entity); //changesLog.ChangeTicks);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

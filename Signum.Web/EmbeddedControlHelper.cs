@@ -73,14 +73,18 @@ namespace Signum.Web
             };
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
                 vdd[ViewDataKeys.PopupPrefix] = helper.ViewData[ViewDataKeys.PopupPrefix];
+            
+            helper.PropagateSFKeys(vdd);
+
+            prefixedName = helper.GlobalName(prefixedName);
 
             if (tc.UntypedValue != null && typeof(IIdentifiable).IsAssignableFrom(tc.UntypedValue.GetType()) && ((IIdentifiable)tc.UntypedValue).IsNew)
                 helper.Write(helper.Hidden(TypeContext.Compose(prefixedName, EntityBaseKeys.IsNew), ""));
 
-            if (!StyleContext.Current.ReadOnly && helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
             {
-                vdd[ViewDataKeys.Reactive] = true;
-                helper.Write("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(prefixedName, TypeContext.Ticks), helper.GetChangeTicks(prefixedName) ?? 0));
+                long? ticks = helper.GetChangeTicks(prefixedName);
+                helper.Write("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(prefixedName, TypeContext.Ticks), ticks!=null ? ticks.Value.ToString() : ""));
             }
 
             helper.RenderPartial(ViewName, vdd);

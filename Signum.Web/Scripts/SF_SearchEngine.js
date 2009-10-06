@@ -77,7 +77,7 @@ function OnSearchOk(prefix, divASustituir, reloadOnChangeFunction) {
 	}
 }
 
-function OnDetailSearchOk(urlController, prefix, divASustituir, detailDiv, partialView) {
+function OnDetailSearchOk(urlController, prefix, divASustituir, reloadOnChangeFunction, detailDiv, partialView) {
 	var entitySelected = $("input:radio[name=" + prefix + "rowSelection]:checked").val();
 	if (entitySelected == undefined) return;
 
@@ -90,6 +90,11 @@ function OnDetailSearchOk(urlController, prefix, divASustituir, detailDiv, parti
 
 	toggleButtonsDisplay(prefix, true);
 	$('#' + divASustituir).hide().html("");
+
+	if (!empty(reloadOnChangeFunction)) {
+	    $('#' + prefix + sfTicks).val(new Date().getTime());
+	    reloadOnChangeFunction();
+	}
 }
 
 function OnListSearchOk(prefix, divASustituir) {
@@ -167,7 +172,7 @@ function OperationExecute(urlController, typeName, id, operationKey, isLazy, pre
 	var formChildren = "";
 	if (isLazy == false || isLazy == "false" || isLazy == "False") {
 		if (prefix != "") //PopupWindow
-		    formChildren = $('#' + prefix + "panelPopup *, #" + sfTabId).serialize();
+		    formChildren = $('#' + prefix + "panelPopup *, #" + sfReactive + ", #" + sfTabId).serialize();
 		else //NormalWindow
 		    formChildren = $("form").serialize();
 	}

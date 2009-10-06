@@ -174,7 +174,7 @@ namespace Signum.Web
         {
             string setTicks = "";
             if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Separator + TypeContext.Ticks));
+                setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
 
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())

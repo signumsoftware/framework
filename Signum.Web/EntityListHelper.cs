@@ -54,13 +54,13 @@ namespace Signum.Web
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), elementsCleanType.Name));
 
             if (StyleContext.Current.LabelVisible)
-                sb.Append(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
+                sb.AppendLine(helper.Span(idValueField + "lbl", settings.LabelText ?? "", TypeContext.CssLineLabel));
 
             if (settings.ShowFieldDiv)
-                sb.Append("<div class='fieldList'>");
+                sb.AppendLine("<div class='fieldList'>");
 
             if (!StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
-                sb.Append("<input type='hidden' id='{0}' name='{0}' value='{1}' />".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
+                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}' />".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
             
             string reloadOnChangeFunction = "''";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
@@ -77,7 +77,7 @@ namespace Signum.Web
                 {
                     strButtons += "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(t.Name, Navigator.TypesToURLNames.TryGetC(t) ?? t.Name);
                 }
-                sb.Append(helper.RenderPartialToString(
+                sb.AppendLine(helper.RenderPartialToString(
                     Navigator.Manager.OKCancelPopulUrl,
                     new ViewDataDictionary(value) 
                         { 
@@ -85,7 +85,7 @@ namespace Signum.Web
                             { ViewDataKeys.PopupPrefix, idValueField},
                         }
                 ));
-                sb.Append("</div>\n");
+                sb.AppendLine("</div>");
             }
 
             string viewingUrl = "OpenPopupList(" + popupOpeningParameters + ",'{0}');".Formato(settings.DetailDiv);
@@ -96,7 +96,7 @@ namespace Signum.Web
             {
                 for (int i = 0; i < value.Count; i++)
                 {
-                    sb.Append(InternalListElement(helper, sbSelect, idValueField, value[i], i, settings, divASustituir, typeContext));
+                    sb.Append(InternalListElement(helper, sbSelect, idValueField, value[i], i, settings, typeContext));
                 }
             }
 
@@ -177,7 +177,7 @@ namespace Signum.Web
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
         }
 
-        private static string InternalListElement<T>(this HtmlHelper helper, StringBuilder sbOptions, string idValueField, T value, int index, EntityList settings, string divASustituir, TypeContext<MList<T>> typeContext)
+        private static string InternalListElement<T>(this HtmlHelper helper, StringBuilder sbOptions, string idValueField, T value, int index, EntityList settings, TypeContext<MList<T>> typeContext)
         {
             StringBuilder sb = new StringBuilder();
             
@@ -199,14 +199,15 @@ namespace Signum.Web
 
             if (isIdentifiable || isLazy)
             {
-                sb.Append(helper.Hidden(
+                sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(indexedPrefix, TypeContext.Id),
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
-                       : ((Lazy)(object)value).TryCS(i => i.IdOrNull)) + "\n");
+                       : ((Lazy)(object)value).TryCS(i => i.IdOrNull)));
 
-                
-                if (isIdentifiable && ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull) == null)
+
+                if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
+                    (isIdentifiable && value != null && ((IIdentifiable)(object)value).IdOrNull == null))
                 {
                     sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityBaseKeys.IsNew), index.ToString()));
 
@@ -219,8 +220,9 @@ namespace Signum.Web
                         { ViewDataKeys.MainControlUrl, es.PartialViewName},
                         { ViewDataKeys.PopupPrefix, indexedPrefix}
                     };
-                    if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                        vdd.Add(ViewDataKeys.Reactive, true);
+                    helper.PropagateSFKeys(vdd);
+                    if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                        vdd[ViewDataKeys.Reactive] = true;
 
                     using (var sc = StyleContext.RegisterCleanStyleContext(true))
                         sb.Append(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
@@ -251,8 +253,9 @@ namespace Signum.Web
                     { ViewDataKeys.MainControlUrl, es.PartialViewName},
                     { ViewDataKeys.PopupPrefix, indexedPrefix}
                 };
-                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                        vdd.Add(ViewDataKeys.Reactive, true);
+                helper.PropagateSFKeys(vdd);
+                if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+                    vdd[ViewDataKeys.Reactive] = true;
 
                 using (var sc = StyleContext.RegisterCleanStyleContext(true))
                     sb.Append(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));

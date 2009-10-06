@@ -92,5 +92,22 @@ namespace Signum.Web
             return ((Dictionary<string, long>)helper.ViewData[ViewDataKeys.ChangeTicks])
                 .TryGetS(controlID);
         }
+
+        /// <summary>
+        /// Propagates LoadAll, Reactive, ChangeTicks
+        /// </summary>
+        /// <param name="helper"></param>
+        /// <param name="vdd"></param>
+        public static void PropagateSFKeys(this HtmlHelper helper, ViewDataDictionary vdd)
+        {
+            if (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll))
+                vdd[ViewDataKeys.LoadAll] = true;
+            
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
+                vdd[ViewDataKeys.Reactive] = true;
+            
+            if (helper.ViewData.ContainsKey(ViewDataKeys.ChangeTicks))
+                vdd[ViewDataKeys.ChangeTicks] = helper.ViewData[ViewDataKeys.ChangeTicks];
+        }
     }
 }

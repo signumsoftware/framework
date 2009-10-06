@@ -107,7 +107,7 @@ namespace Signum.Web
                         settings.ComboHtmlProperties.Add("onchange", "EntityComboOnChange('{0}');".Formato(idValueField));
 
                     sb.AppendLine(helper.DropDownList(
-                        idValueField + TypeContext.Separator + EntityComboKeys.Combo,
+                        TypeContext.Compose(idValueField, EntityComboKeys.Combo),
                         items,
                         settings.ComboHtmlProperties));
                 }
