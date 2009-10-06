@@ -337,6 +337,10 @@ namespace Signum.Windows
 
         public static bool AssertErrors(this FrameworkElement element)
         {
+            IAsserErrorsHandler aeh = element as IAsserErrorsHandler;
+            if(aeh != null)
+                return aeh.AssertErrors();
+
             return AssertErrors((Modifiable)element.DataContext);
         }
 
@@ -440,4 +444,9 @@ namespace Signum.Windows
     }
 
     public delegate void CommonRouteTask(FrameworkElement fe, string route, TypeContext context);
+
+    public interface IAsserErrorsHandler
+    {
+        bool AssertErrors();
+    }
 }

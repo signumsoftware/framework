@@ -90,7 +90,7 @@ namespace Signum.Windows
                 return;
             }
 
-            if (!this.AssertErrors())
+            if (!MainControl.AssertErrors())
                 return;
 
             buttonBar.SaveButton.IsEnabled = false;
