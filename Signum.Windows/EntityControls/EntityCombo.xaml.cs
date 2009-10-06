@@ -25,6 +25,8 @@ namespace Signum.Windows
 {
     public partial class EntityCombo : EntityBase
     {
+        public static readonly Lazy[] EmptyList = new Lazy[0];
+
         public static readonly DependencyProperty LoadDataTriggerProperty =
             DependencyProperty.Register("LoadDataTrigger", typeof(LoadDataTrigger), typeof(EntityCombo), new UIPropertyMetadata(LoadDataTrigger.OnExpand));
         public LoadDataTrigger LoadDataTrigger
