@@ -12,6 +12,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Diagnostics;
 using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Maps
 {

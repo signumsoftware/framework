@@ -416,6 +416,29 @@ namespace Signum.Engine.Maps
         public abstract IEnumerable<IColumn> Columns();
     }
 
+    public static class FieldExtensions
+    {
+        public static bool Implements(this Field field, Type type)
+        {
+            if (field is FieldReference)
+                return ((FieldReference)field).FieldType == type;
+
+            if (field is FieldImplementedByAll)
+                return true;
+
+            if (field is FieldImplementedBy)
+                return ((FieldImplementedBy)field).ImplementationColumns.ContainsKey(type);
+
+            return false;
+        }
+
+        public static void AssertImplements(this Field field, Type type)
+        {
+            if (!Implements(field, type))
+                throw new ApplicationException("{0} does not implement {1}".Formato(field.ToString(), type.Name)); 
+        }
+    }
+
     public partial interface IColumn
     {
         string Name { get; }
