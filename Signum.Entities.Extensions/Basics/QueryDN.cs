@@ -10,12 +10,12 @@ namespace Signum.Entities.Basics
     public class QueryDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string queryName;
+        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name
         {
-            get { return queryName; }
-            set { SetToStr(ref queryName, value, "Name"); }
+            get { return name; }
+            set { SetToStr(ref name, value, "Name"); }
         }
 
         public static string GetQueryName(object queryKey)
@@ -28,7 +28,7 @@ namespace Signum.Entities.Basics
 
         public override string ToString()
         {
-            return queryName;
+            return name;
         }
     }
 }
