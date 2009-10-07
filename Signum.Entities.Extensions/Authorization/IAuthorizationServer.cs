@@ -14,7 +14,7 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void Login(string username, string passwordHash);
 
-        [OperationContract(IsTerminating = false), NetDataContract]
+        [OperationContract(IsTerminating = true), NetDataContract]
         void Logout();
 
         [OperationContract, NetDataContract]

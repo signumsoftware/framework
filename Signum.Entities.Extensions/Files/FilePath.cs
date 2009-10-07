@@ -16,9 +16,14 @@ namespace Signum.Entities.Files
     {
         private FilePathDN() { }
 
-        public FilePathDN(Enum fileType) 
+        public FilePathDN(FileTypeDN fileType)
         {
-            this.fileTypeEnum = fileType; 
+            this.FileType = fileType;
+        }
+
+        public FilePathDN(Enum fileType)
+        {
+            this.fileTypeEnum = fileType;
         }
 
         public FilePathDN(Enum fileType, string path)
@@ -61,6 +66,10 @@ namespace Signum.Entities.Files
             get { return fileTypeEnum; }
         }
 
+        public void SetFileTypeEnum(Enum ftEnum)
+        {
+            fileTypeEnum = ftEnum;
+        }
 
         FileTypeDN fileType;
         [LocDescription]
@@ -69,6 +78,8 @@ namespace Signum.Entities.Files
             get { return fileType; }
             internal set { Set(ref fileType, value, "FileType"); }
         }
+
+
 
         FileRepositoryDN repository;
         [LocDescription]

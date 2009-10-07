@@ -44,16 +44,16 @@ namespace Signum.Engine.Files
                                                  }).ToDynamic();
 
                 dqm[typeof(FilePathDN)] = (from p in Database.Query<FilePathDN>()
-                                                 select new
-                                                 {
-                                                     Entity = p.ToLazy(),
-                                                     p.Id,
-                                                     p.FileName,
-                                                     FileType = p.FileType.ToLazy(),
-                                                     p.FullPhysicalPath,
-                                                     p.FullWebPath,
-                                                     Repository = p.Repository.ToLazy()
-                                                 }).ToDynamic();                
+                                           select new
+                                           {
+                                               Entity = p.ToLazy(),
+                                               p.Id,
+                                               p.FileName,
+                                               FileType = p.FileType.ToLazy(),
+                                               p.FullPhysicalPath,
+                                               p.FullWebPath,
+                                               Repository = p.Repository.ToLazy()
+                                           }).ToDynamic();
             }
         }
 
@@ -73,7 +73,12 @@ namespace Signum.Engine.Files
             if (fp.IsNew)
             {
                 //asignar el typedn a partir del enum
-                fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
+                if (fp.FileType == null)
+                    fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
+
+                //asignar el enum a partir del typedn
+                if (fp.FileTypeEnum == null)
+                    fp.SetFileTypeEnum(EnumLogic<FileTypeDN>.ToEnum(fp.FileType));
 
                 FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
                 string sufix = alg.CalculateSufix(fp);
