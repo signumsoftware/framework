@@ -128,7 +128,6 @@ namespace Signum.Web
         {
             if (helper.WriteIdAndRuntime())
             {
-                //string prefix = (tc.Name != Signum.Web.TypeContext.Separator) ? tc.Name : ""; 
                 if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
                 {
                     IdentifiableEntity id = (IdentifiableEntity)(object)tc.Value;
@@ -138,31 +137,19 @@ namespace Signum.Web
                             helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
                     else
                     {
-                        helper.ViewContext.HttpContext.Response.Write(
-                            helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), "") + "\n");
+                        //helper.ViewContext.HttpContext.Response.Write(
+                        //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), "") + "\n");
                         helper.ViewContext.HttpContext.Response.Write(
                             helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.StaticType), typeof(T).Name) + "\n");
                     }
 
                     helper.ViewContext.HttpContext.Response.Write(
                         helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
-                    //if (tc.Value != null)
-                    //    helper.ViewContext.HttpContext.Response.Write(
-                    //        helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Compose(prefix, Signum.Web.TypeContext.RuntimeType)), typeof(T).Name) + "\n");
-                    //else
-                    //    helper.ViewContext.HttpContext.Response.Write(
-                    //        helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Compose(prefix, Signum.Web.TypeContext.StaticType)), typeof(T).Name) + "\n");
-
-                    //helper.ViewContext.HttpContext.Response.Write(
-                    //    helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Compose(prefix, Signum.Web.TypeContext.Id)), id.TryCS(i => i.IdOrNull)) + "\n");
-
                 }
                 else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
                 {
                     helper.ViewContext.HttpContext.Response.Write(
                         helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
-                    //helper.ViewContext.HttpContext.Response.Write(
-                    //    helper.Hidden(helper.GlobalName(Signum.Web.TypeContext.Compose(prefix, Signum.Web.TypeContext.RuntimeType)), typeof(T).Name) + "\n");
                 }
             }
             //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them
@@ -173,7 +160,6 @@ namespace Signum.Web
         public static TypeContext<S> TypeContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
             TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
-            //helper.WriteRuntimeAndId(typeContext);
             return typeContext;
         }
     }

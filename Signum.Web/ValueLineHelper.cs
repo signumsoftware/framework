@@ -24,7 +24,7 @@ namespace Signum.Web
                 sb.AppendLine("<div class='field'>");
             idValueField = helper.GlobalName(idValueField);
 
-            if (!StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
+            if ((StyleContext.Current.ShowTicks == null || StyleContext.Current.ShowTicks.Value) && !StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
                 sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
 
             if (StyleContext.Current.LabelVisible)
@@ -201,10 +201,10 @@ namespace Signum.Web
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
             {
-                if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                    settings.ValueHtmlProps["onblur"] = setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                if (settings.ValueHtmlProps.ContainsKey("onclick"))
+                    settings.ValueHtmlProps["onclick"] = setTicks + settings.ValueHtmlProps["onclick"] + reloadOnChangeFunction;
                 else
-                    settings.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
+                    settings.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
             }
 
             return System.Web.Mvc.Html.InputExtensions.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, settings.ValueHtmlProps);

@@ -141,7 +141,7 @@ namespace Signum.Web
                     ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
                     { 
                         //{ ViewDataKeys.MainControlUrl, url},
-                        //{ ViewDataKeys.PopupPrefix, idValueField}
+                        { ViewDataKeys.PopupPrefix, idValueField}
                     };
                     helper.PropagateSFKeys(vdd);
                     sb.Append(helper.RenderPartialToString(url, vdd));
@@ -214,7 +214,7 @@ namespace Signum.Web
             {
                 ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
                 { 
-                    //{ ViewDataKeys.PopupPrefix, idValueField},
+                    { ViewDataKeys.PopupPrefix, helper.ParentPrefix() }, // idValueField},
                 };
                 helper.PropagateSFKeys(vdd);
                 controlHtml = helper.RenderPartialToString(

@@ -19,6 +19,7 @@ namespace Signum.Web
                 ReadOnly = false,
                 ValueFirst = false,
                 ShowFieldDiv = true,
+                ShowTicks = true,
             }; 
         }
 
@@ -70,6 +71,13 @@ namespace Signum.Web
             set { showFieldDiv = value; }
         }
 
+        bool? showTicks;
+        public bool? ShowTicks
+        {
+            get { return showTicks ?? parent.showTicks; }
+            set { showTicks = value; }
+        }
+
         public StyleContext(): this(true)
         {
         }
@@ -99,6 +107,7 @@ namespace Signum.Web
                 ReadOnly = false,
                 ValueFirst = false,
                 ShowFieldDiv = true,
+                ShowTicks = true,
             };
         }
 
