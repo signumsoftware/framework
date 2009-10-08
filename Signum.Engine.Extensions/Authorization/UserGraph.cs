@@ -19,20 +19,20 @@ namespace Signum.Engine.Authorization
             this.GetState = u => u.State;
             this.Operations = new List<IGraphOperation>
             {
-                new Construct(UserOperation.Create, UserState.Createad)
+                new Construct(UserOperation.Create, UserState.Created)
                 {
-                    Constructor = args =>new UserDN {State = UserState.Createad}
+                    Constructor = args =>new UserDN {State = UserState.Created}
                 },                
-                new Goto(UserOperation.SaveNew, UserState.Createad)
+                new Goto(UserOperation.SaveNew, UserState.Created)
                 {
-                   FromStates = new []{UserState.Createad},
+                   FromStates = new []{UserState.Created},
                    Execute = (u,_)=>{},
                    AllowsNew = true,
                    Lazy =false 
                 },
-                new Goto(UserOperation.Save, UserState.Createad)
+                new Goto(UserOperation.Save, UserState.Created)
                 {
-                   FromStates = new []{UserState.Createad},
+                   FromStates = new []{UserState.Created},
                    Execute = (u,_)=>{},
                    AllowsNew = false,
                    Lazy =false 
@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
                   
                 new Goto(UserOperation.Disable, UserState.Disabled)
                 {
-                   FromStates = new []{UserState.Createad},
+                   FromStates = new []{UserState.Created},
                    Execute = (u,_)=>
                    {
                        u.AnulationDate=DateTime.Now;
@@ -50,13 +50,13 @@ namespace Signum.Engine.Authorization
                    Lazy =false 
                 },
          
-                new Goto(UserOperation.Enable, UserState.Createad)
+                new Goto(UserOperation.Enable, UserState.Created)
                 {
                    FromStates = new []{UserState.Disabled },
                    Execute = (u,_)=>
                    {
                        u.AnulationDate = null;
-                       u.State = UserState.Createad; 
+                       u.State = UserState.Created; 
                    },
                    AllowsNew = false ,
                    Lazy =true  

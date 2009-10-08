@@ -104,7 +104,7 @@ namespace Signum.Entities.Authorization
     public enum UserState
     {
         [Description("Creado")]
-        Createad,
+        Created,
         [Description("Anulado")]
         Disabled,
     }

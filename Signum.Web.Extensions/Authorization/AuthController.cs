@@ -215,7 +215,7 @@ namespace Signum.Web.Authorization
                 return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
             }
 
-            u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.Enable);
+            u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.SaveNew);
 
             return Navigator.View(this, u);
         }
