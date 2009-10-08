@@ -62,6 +62,9 @@ namespace Signum.Web
 
         protected static MinMax<int> FindSubInterval(SortedList<string, object> formValues, MinMax<int> interval, int knownPrefixLength, string newPrefix)
         {
+            if (newPrefix == null)
+                newPrefix = "";
+
             int maxLength = knownPrefixLength + newPrefix.Length;
 
             for (int i = interval.Min; i < interval.Max; i++)
@@ -78,6 +81,8 @@ namespace Signum.Web
 
         public static Modification Create(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
         {
+            if (controlID == null)
+                controlID = "";
             var binder = CustomModificationBinders.Binders.TryGetC(staticType);
             if(binder!= null)
                 return binder(formValues, interval, controlID);

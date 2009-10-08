@@ -266,6 +266,16 @@ namespace Signum.Web
             return Manager.ApplyChanges(controller, modification, ref entity);
         }
 
+        public static Dictionary<string, List<string>> GenerateErrors(Modifiable entity, Modification modification, string prefix)
+        {
+            return Manager.GenerateErrors(entity, modification, prefix);
+        }
+
+        public static Dictionary<string, List<string>> GenerateErrors(Modifiable entity, Modification modification, string prefix, out List<string> fullIntegrityErrors)
+        {
+            return Manager.GenerateErrors(entity, modification, prefix, out fullIntegrityErrors);
+        }
+
         public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
         {
             return Manager.ExtractEntity(controller, form, null);
