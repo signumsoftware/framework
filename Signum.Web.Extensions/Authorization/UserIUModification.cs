@@ -24,6 +24,21 @@ namespace Signum.Web.Authorization
 
         protected override int GeneratePropertyModification(SortedList<string, object> formValues, MinMax<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
         {
+            MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
+
+            long? propertyIsLastChange = null;
+            if (formValues.ContainsKey(TypeContext.Compose(commonSubControlID, TypeContext.Ticks)))
+            {
+                string changed = (string)formValues.TryGetC(TypeContext.Compose(commonSubControlID, TypeContext.Ticks));
+                if (changed.HasText()) //It'll be null for EmbeddedControls 
+                {
+                    if (changed == "0")
+                        return subInterval.Max - 1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+                    else
+                        propertyIsLastChange = long.Parse(changed);
+                }
+            }
+
             if (propertyName == "OldPassword")
             {
                 PropertyPack ppCP = propertyValidators.GetOrThrow("PasswordHash", Resources.Property0NotExistsInType1.Formato("PasswordHash", RuntimeType));
@@ -34,7 +49,7 @@ namespace Signum.Web.Authorization
                 {
                     pCP.BindingError = Resources.PasswordMustHaveAValue;
                     Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return index;
+                    return subInterval.Max - 1;
                 }
                 
                 string passwordHash = Signum.Services.Security.EncodePassword(formCP);
@@ -43,13 +58,13 @@ namespace Signum.Web.Authorization
                 {
                     pCP.BindingError = Resources.PasswordDoesNotMatchCurrent;
                     Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return index;
+                    return subInterval.Max - 1;
                 }
 
                 pCP.Value = passwordHash;
 
                 Properties.Add(propertyName, new PropertyPackModification{Modification = pCP, PropertyPack = ppCP});
-                return index;
+                return subInterval.Max - 1;
             }
 
             if (propertyName == "NewPassword")
@@ -62,7 +77,7 @@ namespace Signum.Web.Authorization
                 {
                     pCP.BindingError = Resources.PasswordMustHaveAValue;
                     Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return index;
+                    return subInterval.Max - 1;
                 }
 
                 string passwordHash = Signum.Services.Security.EncodePassword(formCP);
@@ -70,7 +85,7 @@ namespace Signum.Web.Authorization
                 pCP.Value = passwordHash;
 
                 Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                return index;
+                return subInterval.Max - 1;
             }
 
             if (propertyName == "NewPasswordBis")
@@ -83,7 +98,7 @@ namespace Signum.Web.Authorization
                 {
                     pCP.BindingError = Resources.YouMustRepeatTheNewPassword;
                     Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return index;
+                    return subInterval.Max - 1;
                 }
 
                 string formCPBis = (string)formValues[subControlID.RemoveRight(3)];
@@ -91,10 +106,10 @@ namespace Signum.Web.Authorization
                 {
                     pCP.BindingError = Resources.TheSpecifiedPasswordsDontMatch;
                     Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return index;
+                    return subInterval.Max - 1;
                 }
 
-                return index;
+                return subInterval.Max - 1;
             }
 
             return base.GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, index, propertyValidators);

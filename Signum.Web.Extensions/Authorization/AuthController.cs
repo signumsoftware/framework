@@ -241,8 +241,11 @@ namespace Signum.Web.Authorization
             List<string> fullIntegrityErrors;
             ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
             if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-                changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
-
+            {
+                fullIntegrityErrors = fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList();
+                if (fullIntegrityErrors.Count > 0)
+                    changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors);
+            }
             if (u != null && u.UserName.HasText())
             {
                 string username = u.UserName;
