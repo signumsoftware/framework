@@ -121,7 +121,8 @@ namespace Signum.Web
                     }
                     else
                     {
-                        PropertyInfo pi = currentEntity.GetType().GetProperty(property);
+                        Type cleanType = (currentEntity as Lazy).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
+                        PropertyInfo pi = cleanType.GetProperty(property);
                         pis.Add(pi);
                         currentEntity = pi.GetValue(currentEntity, null);
                     }

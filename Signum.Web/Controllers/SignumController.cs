@@ -37,8 +37,8 @@ namespace Signum.Web.Controllers
             ModifiableEntity entity = null;
             if (isReactive)
             {
-                NameValueCollection nvc = new NameValueCollection(Request.Form);
-                entity = Navigator.ExtractEntity(this, nvc)
+                //NameValueCollection nvc = new NameValueCollection();
+                entity = Navigator.ExtractEntity(this, Request.Form)
                     .ThrowIfNullC("PartialView: Type was not possible to extract");
                 entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
             }
