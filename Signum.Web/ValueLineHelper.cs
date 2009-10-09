@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Web.Mvc.Html;
+using Signum.Web.Properties;
 
 
 namespace Signum.Web
@@ -213,7 +214,7 @@ namespace Signum.Web
         public static string ValueLine<T>(this HtmlHelper helper, T value, string idValueField, ValueLine options)
         {
             if (options == null || options.LabelText == null)
-                throw new ArgumentException("LabelText property of ValueLineOptions must be specified for Manual Value Lines");
+                throw new ArgumentException(Resources.LabelTextPropertyOfValueLineOptionsMustBeSpecifiedForManualValueLines);
 
             using (options)
                     return helper.ManualValueLine(idValueField, value, options);

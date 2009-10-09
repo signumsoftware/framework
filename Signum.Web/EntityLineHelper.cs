@@ -11,6 +11,7 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
 using Signum.Engine;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -96,7 +97,7 @@ namespace Signum.Web
                 {
                     sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
 
-                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? Reflector.ExtractLazy(type) ?? type).ThrowIfNullC("No hay una vista asociada al tipo: " + (cleanRuntimeType ?? type));
+                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? Reflector.ExtractLazy(type) ?? type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? type));
                     ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
                     { 
                         { ViewDataKeys.MainControlUrl, es.PartialViewName},
@@ -159,7 +160,7 @@ namespace Signum.Web
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
                 sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
 
-                EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type);
+                EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(type));
                 ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
                 { 
                     { ViewDataKeys.MainControlUrl, es.PartialViewName},

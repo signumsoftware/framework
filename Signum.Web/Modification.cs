@@ -103,7 +103,7 @@ namespace Signum.Web
 
             string[] properties = prefix.Split(new string[] { TypeContext.Separator }, StringSplitOptions.RemoveEmptyEntries);
             if (properties == null || properties.Length == 0)
-                throw new ArgumentException("Invalid property prefix");
+                throw new ArgumentException(Resources.InvalidPropertyPrefix);
 
             List<PropertyInfo> pis = new List<PropertyInfo>();
             object currentEntity = entity;
@@ -133,7 +133,7 @@ namespace Signum.Web
             }
             catch (Exception)
             {
-                throw new ApplicationException("Invalid property prefix or wrong property in Session");
+                throw new ApplicationException(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
             }
 
             return (Modifiable)currentEntity;
@@ -183,8 +183,8 @@ namespace Signum.Web
         public override string ToString()
         {
             return "Value({0}-Ticks:{1}): {2}".Formato(
-                Value.TryCC(a => CSharpRenderer.Value(a, a.GetType(), null)) ?? "[null]", 
-                TicksLastChange,
+                Value.TryCC(a => CSharpRenderer.Value(a, a.GetType(), null)) ?? "[null]",
+                TicksLastChange != null ? TicksLastChange.ToString() : "",
                 ControlID);
         }
     }
@@ -260,7 +260,7 @@ namespace Signum.Web
                 string subControlID = formValues.Keys[i];
 
                 if (!subControlID.ContinuesWith(TypeContext.Separator, ControlID.Length))
-                    throw new FormatException("The control ID {0} has an invalid format".Formato(subControlID));
+                    throw new FormatException(Resources.ControlID0HasAnInvalidFormat.Formato(subControlID));
 
                 int propertyEnd = subControlID.IndexOf(TypeContext.Separator, propertyStart).Map(pe => pe == -1 ? subControlID.Length : pe);
 
@@ -350,10 +350,10 @@ namespace Signum.Web
                             ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("Binding Error", "");
                             if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("\r\n\r\n"))
                                 ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
                         }
                         else if (entity != null && newValue == null && ppm.PropertyPack.PropertyInfo.PropertyType.IsValueType && !ppm.Modification.BindingError.HasText())
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.ValueMustBeSpecifiedFor0.Formato(ppm.PropertyPack.PropertyInfo.NiceName()));
+                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resources.ValueMustBeSpecifiedFor0.Formato(ppm.PropertyPack.PropertyInfo.NiceName()));
                         else
                             ppm.Modification.BindingError = nullEx.Message;
                     }
@@ -363,7 +363,7 @@ namespace Signum.Web
                             ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("Binding Error", "");
                         if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("\r\n\r\n"))
                             ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
-                        ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resource.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
+                        ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
                     }
                 }
             }
@@ -430,7 +430,7 @@ namespace Signum.Web
 
             return "Entity({0}-Ticks:{1}): {2}\r\n{{\r\n{3}\r\n}}".Formato(
                 identity,
-                TicksLastChange,
+                TicksLastChange != null ? TicksLastChange.ToString() : "",
                 ControlID,
                 Properties.ToString(kvp => "{0} = {1}".Formato(
                     kvp.Key,
@@ -545,7 +545,7 @@ namespace Signum.Web
 
             return "Lazy({0}-Ticks:{1}): {2}\r\n{{\r\n{3}\r\n}}".Formato(
                 identity,
-                TicksLastChange,
+                TicksLastChange != null ? TicksLastChange.ToString() : "",
                 ControlID,
                 EntityModification.ToString());
         }
@@ -560,7 +560,7 @@ namespace Signum.Web
             : base(staticType, controlID)
         {
             if (!Reflector.IsMList(staticType))
-                throw new InvalidOperationException("MListModification with staticType {0}".Formato(staticType.TypeName()));
+                throw new InvalidOperationException(Resources.MListModificationWithStaticType0.Formato(staticType.TypeName()));
 
             staticElementType = ReflectionTools.CollectionType(staticType);
 
@@ -600,7 +600,7 @@ namespace Signum.Web
                     if (specialProperties.Contains(propertyName))
                         continue; 
 
-                    throw new InvalidOperationException("Malformed controlID {0}".Formato(subControlID));
+                    throw new InvalidOperationException(Resources.ControlID0HasAnInvalidFormat.Formato(subControlID));
                 }
 
                 string index = subControlID.Substring(propertyStart, propertyEnd - propertyStart);
@@ -680,7 +680,7 @@ namespace Signum.Web
             return "List<{0}>(Count:{1}-Ticks:{2}): {3}\r\n{{\r\n{4}\r\n}}".Formato(
                 staticElementType.Name,
                 modifications.Count,
-                TicksLastChange,
+                TicksLastChange != null ? TicksLastChange.ToString() : "",
                 ControlID,
                 modifications.ToString("\r\n").Indent(4));
         }

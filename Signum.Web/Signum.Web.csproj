@@ -87,6 +87,16 @@
     <Compile Include="EntityLineDetailHelper.cs" />
     <Compile Include="EmbeddedControlHelper.cs" />
     <Compile Include="FindOptionsModelBinder.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.es.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.es.resx</DependentUpon>
+    </Compile>
     <Compile Include="WwwRedirectAttributes.cs" />
     <Compile Include="MenuHelper.cs" />
     <Compile Include="LightEntityLineHelper.cs" />
@@ -102,11 +112,6 @@
     <Compile Include="Modification.cs" />
     <Compile Include="Navigator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resource.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resource.resx</DependentUpon>
-    </Compile>
     <Compile Include="QuerySettings.cs" />
     <Compile Include="RadioButtonLine.cs" />
     <Compile Include="ScriptHelper.cs" />
@@ -151,16 +156,6 @@
     <None Include="SignumFramework.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resource.es.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>
@@ -194,6 +189,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
+    <EmbeddedResource Include="Properties\Resources.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\ElapsedTime.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>

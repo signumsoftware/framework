@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Collections.Specialized;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -18,7 +19,7 @@ namespace Signum.Web
             NameValueCollection parameters = controllerContext.HttpContext.Request.Params;
 
             string queryUrlName = (string)bindingContext.ValueProvider.TryGetC("queryUrlName").TryCC(vp => vp.RawValue)
-                                  .ThrowIfNullC("{queryUrlName} to search was not provided");
+                                  .ThrowIfNullC(Resources.QueryUrlNameWasNotProvided);
             fo.QueryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
 
             fo.FilterOptions = Navigator.ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);

@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Web.Mvc;
 using System.Web;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -71,7 +72,7 @@ namespace Signum.Web
                 if (!string.IsNullOrEmpty(mi.OnClick))
                 {
                     if (!string.IsNullOrEmpty(mi.OnServerClickAjax) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                        throw new ArgumentException("The custom Menu Item {0} cannot have OnClick and another Click defined".Formato(mi.Id));
+                        throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(mi.Id));
 
                     int lastEnd = mi.OnClick.LastIndexOf(")");
                     int lastStart = mi.OnClick.LastIndexOf("(");
@@ -85,7 +86,7 @@ namespace Signum.Web
                 if (!string.IsNullOrEmpty(mi.OnServerClickAjax))
                 {
                     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                        throw new ArgumentException("The custom Menu Item {0} cannot have both OnServerClickAjax and another Click defined".Formato(mi.Id));
+                        throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(mi.Id));
                     onclick = mi.OnServerClickAjax;
                 }
 
@@ -93,7 +94,7 @@ namespace Signum.Web
                 if (!string.IsNullOrEmpty(mi.OnServerClickPost))
                 {
                     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
-                        throw new ArgumentException("The custom Menu Item {0} cannot have both OnServerClickPost and another Click defined".Formato(mi.Id));
+                        throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(mi.Id));
                     onclick = "PostServer('{0}',{1});".Formato(mi.OnServerClickPost, strPrefix);
                 }
 

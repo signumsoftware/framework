@@ -164,7 +164,7 @@ namespace Signum.Web
 
             sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
 
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(typeof(T)));
             TypeElementContext<T> tsc = new TypeElementContext<T>(value, typeContext, index);
             ViewDataDictionary vdd = new ViewDataDictionary(tsc) 
             { 

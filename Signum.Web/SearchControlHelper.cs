@@ -11,6 +11,7 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -35,7 +36,7 @@ namespace Signum.Web
                     if (!string.IsNullOrEmpty(mi.OnClick))
                     {
                         if (!string.IsNullOrEmpty(mi.OnServerClickAjax) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                            throw new ArgumentException("The custom Menu Item {0} cannot have OnClick and another Click defined".Formato(mi.Id));
+                            throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(mi.Id));
 
                         int lastEnd = mi.OnClick.LastIndexOf(")");
                         int lastStart = mi.OnClick.LastIndexOf("(");
@@ -49,7 +50,7 @@ namespace Signum.Web
                     if (!string.IsNullOrEmpty(mi.OnServerClickAjax))
                     {
                         if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                            throw new ArgumentException("The custom Menu Item {0} cannot have both OnServerClickAjax and another Click defined".Formato(mi.Id));
+                            throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(mi.Id));
                         onclick = "CallServer('{0}',{1});".Formato(mi.OnServerClickAjax, strPrefix);
                     }
 
@@ -57,7 +58,7 @@ namespace Signum.Web
                     if (!string.IsNullOrEmpty(mi.OnServerClickPost))
                     {
                         if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
-                            throw new ArgumentException("The custom Menu Item {0} cannot have both OnServerClickPost and another Click defined".Formato(mi.Id));
+                            throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(mi.Id));
                         onclick = "PostServer('{0}',{1});".Formato(mi.OnServerClickPost, strPrefix);
                     }
 
@@ -81,7 +82,7 @@ namespace Signum.Web
             foreach (FilterOptions opt in findOptions.FilterOptions)
             {
                 opt.Column = queryDescription.Columns.Where(c => c.Name == opt.ColumnName)
-                    .Single("Filter Column {0} not found or found more than once in query description".Formato(opt.ColumnName));
+                    .Single(Resources.FilterColumn0NotFoundOrFoundMoreThanOnce.Formato(opt.ColumnName));
             }
 
             Column entityColumn = queryDescription.Columns.SingleOrDefault(a => a.IsEntity);
@@ -94,7 +95,7 @@ namespace Signum.Web
 
             helper.ViewData[ViewDataKeys.FilterColumns] = columns;
             helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            helper.ViewData[ViewDataKeys.Top] = Navigator.Manager.QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
+            helper.ViewData[ViewDataKeys.Top] = Navigator.Manager.QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC(Resources.MissingQuerySettingsForQueryName0.Formato(findOptions.QueryName.ToString())).Top;
             if (helper.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 helper.ViewData[ViewDataKeys.PageTitle] = Navigator.Manager.SearchTitle(findOptions.QueryName);
             if (entitiesType != null)

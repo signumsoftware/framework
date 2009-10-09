@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -213,7 +214,7 @@ namespace Signum.Web
 
                     //It's a new object, I preload it because it won't be possible to retrieve it from the server
                     sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
-                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(typeof(T)));
                     TypeElementContext<T> tsc = new TypeElementContext<T>(value, typeContext, index);
                     ViewDataDictionary vdd = new ViewDataDictionary(tsc)
                     { 
@@ -245,7 +246,7 @@ namespace Signum.Web
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
                 sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
 
-                EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC("No hay una vista asociada al tipo: " + typeof(T));
+                EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(typeof(T)).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(typeof(T)));
 
                 TypeElementContext<T> tsc = new TypeElementContext<T>(value, typeContext, index);
                 ViewDataDictionary vdd = new ViewDataDictionary(tsc)  //value instead of tsc

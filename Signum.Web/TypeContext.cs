@@ -10,6 +10,7 @@ using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -210,7 +211,7 @@ namespace Signum.Web
             get 
             {
                 if (!Reflector.IsIdentifiableEntity(typeof(T)))
-                    throw new ApplicationException("There's not an IdentifiableEntity property in the TypeContext path");
+                    throw new ApplicationException(Resources.NoIdentifiableEntityPropertyInTypeContextPath);
                 return typeof(T); 
             }
         }

@@ -13,7 +13,6 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections.Specialized;
 using Signum.Web.Properties;
-using Signum.Entities.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
@@ -191,7 +190,7 @@ namespace Signum.Web
             SortedList<string, object> formValues = new SortedList<string, object>(form.Count);
             foreach (string key in form.Keys)
             {
-                if (!string.IsNullOrEmpty(key) && key != "prefixToIgnore" && (string.IsNullOrEmpty(prefixFilter) || key.StartsWith(prefixFilter)))
+                if (key.HasText() && key != "prefixToIgnore" && (string.IsNullOrEmpty(prefixFilter) || key.StartsWith(prefixFilter)))
                 {
                     if (string.IsNullOrEmpty(prefixToIgnore) || !key.StartsWith(prefixToIgnore))
                         formValues.Add(key, form[key]);
@@ -350,7 +349,7 @@ namespace Signum.Web
         static Dictionary<string, Type> nameToType;
         public static Dictionary<string, Type> NameToType
         {
-            get { return nameToType.ThrowIfNullC("Names to Types dictionary not initialized"); }
+            get { return nameToType.ThrowIfNullC(Resources.NamesToTypesDictionaryNotInitialized); }
             internal set { nameToType = value; }
         }
 
@@ -459,7 +458,7 @@ namespace Signum.Web
 
         protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
         {
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC("No hay una vista asociada al tipo: " + obj.GetType());
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(obj.GetType()));
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? es.PartialViewName;
             IdentifiableEntity entity = (IdentifiableEntity)obj;
@@ -505,10 +504,10 @@ namespace Signum.Web
         protected internal string ExtractTabID(NameValueCollection form)
         {
             if (!form.AllKeys.Contains(ViewDataKeys.TabId))
-                throw new ApplicationException("The Request doesn't have the necessary tab identifier");
+                throw new ApplicationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
             string tabID = (string)form[ViewDataKeys.TabId];
             if (!tabID.HasText())
-                throw new ApplicationException("The Request doesn't have the necessary tab identifier");
+                throw new ApplicationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
             return tabID;
         }
 
@@ -516,7 +515,7 @@ namespace Signum.Web
         {
             Type cleanType = entity != null ? entity.GetType() : typeof(T);
             string url = partialViewName ??
-                Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC("No hay una vista asociada al tipo: " + cleanType).PartialViewName;
+                Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType)).PartialViewName;
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = url;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
@@ -537,7 +536,7 @@ namespace Signum.Web
         {
             Type cleanType = entity != null ? entity.GetType() : typeof(T);
             string url = partialViewName ??
-                Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC("No hay una vista asociada al tipo: " + cleanType).PartialViewName;
+                Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType)).PartialViewName;
 
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;
@@ -566,14 +565,14 @@ namespace Signum.Web
             foreach (FilterOptions opt in findOptions.FilterOptions)
             {
                 opt.Column = queryDescription.Columns.Where(c => c.Name == opt.ColumnName)
-                    .Single("Filter Column {0} not found or found more than once in query description".Formato(opt.ColumnName));
+                    .Single(Resources.FilterColumn0NotFoundOrFoundMoreThanOnce.Formato(opt.ColumnName));
             }
 
             //controller.ViewData[ViewDataKeys.SearchResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.SearchResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
+            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC(Resources.MissingQuerySettingsForQueryName0.Formato(findOptions.QueryName.ToString())).Top;
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
@@ -607,7 +606,7 @@ namespace Signum.Web
 
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString())).Top;
+            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC(Resources.MissingQuerySettingsForQueryName0.Formato(findOptions.QueryName.ToString())).Top;
             //controller.ViewData[ViewDataKeys.QuerySettings] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString()));
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
@@ -687,7 +686,7 @@ namespace Signum.Web
                 operation = parameters["sel" + index.ToString()];
                 type = queryDescription.Columns
                            .SingleOrDefault(c => c.Name == name)
-                           .ThrowIfNullC("Invalid filter, column \"{0}\" not found".Formato(name))
+                           .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
                            .Type;
 
                 if (type == typeof(bool))
@@ -741,7 +740,7 @@ namespace Signum.Web
                 operation = parameters["sel" + index.ToString()];
                 type = queryDescription.Columns
                            .SingleOrDefault(c => c.Name == name)
-                           .ThrowIfNullC("Invalid filter, column \"{0}\" not found".Formato(name))
+                           .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
                            .Type;
                 
                 if (type == typeof(bool))
@@ -776,7 +775,7 @@ namespace Signum.Web
         {
             return URLNamesToTypes
                 .TryGetC(typeUrlName)
-                .ThrowIfNullC("No hay un tipo asociado al nombre: " + typeUrlName);
+                .ThrowIfNullC(Resources.NoTypeForUrlName0.Formato(typeUrlName));
         }
 
         protected internal virtual object ResolveQueryFromUrlName(string queryUrlName)
@@ -789,24 +788,24 @@ namespace Signum.Web
             { 
                 string urlName= TypesToURLNames[Navigator.NameToType[queryUrlName]];
                 if (!string.IsNullOrEmpty(urlName))
-                    return UrlQueryNames[urlName].ThrowIfNullC("No hay una query asociado al nombre: " + queryUrlName);
+                    return UrlQueryNames[urlName].ThrowIfNullC(Resources.NoQueryWithName0.Formato(queryUrlName));
             }
 
-            throw new ArgumentException("No hay una query asociado al nombre: " + queryUrlName);
+            throw new ArgumentException(Resources.NoQueryWithName0.Formato(queryUrlName));
         }
 
         protected internal virtual object ResolveQueryFromToStr(string queryNameToStr)
         {
             return Queries.GetQueryNames()
                 .SingleOrDefault(qn => qn.ToString() == queryNameToStr)
-                .ThrowIfNullC("No hay una query asociado al nombre: " + queryNameToStr);
+                .ThrowIfNullC(Resources.NoQueryWithName0.Formato(queryNameToStr));
         }
 
         protected internal virtual Type ResolveType(string typeName)
         {
             Type type = Navigator.NameToType.TryGetC(typeName);
             if (type == null)
-                throw new ArgumentException(Resource.Type0NotFoundInTheSchema.Formato(typeName));
+                throw new ArgumentException(Resources.Type0NotFoundInTheSchema.Formato(typeName));
             return type;
         }
 
@@ -915,7 +914,7 @@ namespace Signum.Web
             string typeName = form[TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType)];
             string id = form[TypeContext.Compose(prefix ?? "", TypeContext.Id)];
 
-            Type type = Navigator.NameToType.GetOrThrow(typeName, Resource.Type0NotFoundInTheSchema);
+            Type type = Navigator.NameToType.GetOrThrow(typeName, Resources.Type0NotFoundInTheSchema);
 
             if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive))
             {
@@ -923,15 +922,15 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.Reactive] = true;
                 ModifiableEntity mod = (ModifiableEntity)controller.Session[tabID];
                 if (mod == null)
-                    throw new ApplicationException("Your Session has timed out, click F5 to reload the entity from the Database");
+                    throw new ApplicationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
                 string parentTypeName = form[TypeContext.Separator + TypeContext.RuntimeType];
                 string parentId = form[TypeContext.Separator + TypeContext.Id];
-                Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resource.Type0NotFoundInTheSchema);
+                Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resources.Type0NotFoundInTheSchema);
                 if (mod.GetType() == parentType &&
                     (typeof(EmbeddedEntity).IsAssignableFrom(parentType) || ((IIdentifiable)mod).IdOrNull.TryToString("") == parentId))
                     return (ModifiableEntity)((ICloneable)mod).Clone();
                 else
-                    throw new ApplicationException("Incorrect entity in Session");
+                    throw new ApplicationException(Resources.IncorrectEntityInSession);
             }
 
             if (!string.IsNullOrEmpty(id))

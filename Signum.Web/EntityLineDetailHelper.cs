@@ -10,6 +10,7 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -134,7 +135,7 @@ namespace Signum.Web
                 sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
 
                 string url = settings.Url ?? 
-                    Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC("No hay una vista asociada al tipo: " + type).PartialViewName;
+                    Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(type)).PartialViewName;
 
                 using (var sc = StyleContext.RegisterCleanStyleContext(true))
                 {
