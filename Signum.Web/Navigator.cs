@@ -218,47 +218,52 @@ namespace Signum.Web
 
         public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, ref entity, null, null);
+            return Manager.ApplyChangesAndValidate(controller, controller.Request.Form, ref entity, null, null);
+        }
+
+        public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, NameValueCollection form, ref T entity) where T : Modifiable
+        {
+            return Manager.ApplyChangesAndValidate(controller, form, ref entity, null, null);
         }
 
         public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, null);
+            return Manager.ApplyChangesAndValidate(controller, controller.Request.Form, ref entity, prefix, null);
         }
 
         public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, prefixToIgnore);
+            return Manager.ApplyChangesAndValidate(controller, controller.Request.Form, ref entity, prefix, prefixToIgnore);
         }
 
         public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, ref entity, null, null, out fullIntegrityErrors);
+            return Manager.ApplyChangesAndValidate(controller, controller.Request.Form, ref entity, null, null, out fullIntegrityErrors);
         }
 
         public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, null, out fullIntegrityErrors);
+            return Manager.ApplyChangesAndValidate(controller, controller.Request.Form, ref entity, prefix, null, out fullIntegrityErrors);
         }
 
         public static ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            return Manager.ApplyChangesAndValidate(controller, ref entity, prefix, prefixToIgnore, out fullIntegrityErrors);
+            return Manager.ApplyChangesAndValidate(controller, controller.Request.Form, ref entity, prefix, prefixToIgnore, out fullIntegrityErrors);
         }
 
         public static Modification GenerateModification<T>(Controller controller, T entity) where T : Modifiable
         {
-            return Manager.GenerateModification(controller, entity, null, null);
+            return Manager.GenerateModification(controller, controller.Request.Form, entity, null, null);
         }
 
         public static Modification GenerateModification<T>(Controller controller, T entity, string prefix) where T : Modifiable
         {
-            return Manager.GenerateModification(controller, entity, prefix, null);
+            return Manager.GenerateModification(controller, controller.Request.Form, entity, prefix, null);
         }
 
         public static Modification GenerateModification<T>(Controller controller, T entity, string prefix, string prefixToIgnore) where T : Modifiable
         {
-            return Manager.GenerateModification(controller, entity, prefix, prefixToIgnore);
+            return Manager.GenerateModification(controller, controller.Request.Form, entity, prefix, prefixToIgnore);
         }
 
         public static ModificationState ApplyChanges<T>(Controller controller, Modification modification, ref T entity) where T : Modifiable
@@ -765,9 +770,9 @@ namespace Signum.Web
             return type;
         }
 
-        protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore) where T : Modifiable
+        protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, NameValueCollection form, ref T entity, string prefix, string prefixToIgnore) where T : Modifiable
         {
-            Modification modification = GenerateModification(controller, entity, prefix, prefixToIgnore);
+            Modification modification = GenerateModification(controller, form, entity, prefix, prefixToIgnore);
             ModificationState modState = ApplyChanges(controller, modification, ref entity);
             return new ChangesLog
             {
@@ -776,9 +781,9 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, ref T entity, string prefix, string prefixToIgnore, out List<string> fullIntegrityErrors) where T : Modifiable
+        protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, NameValueCollection form, ref T entity, string prefix, string prefixToIgnore, out List<string> fullIntegrityErrors) where T : Modifiable
         {
-            Modification modification = GenerateModification(controller, entity, prefix, prefixToIgnore);
+            Modification modification = GenerateModification(controller, form, entity, prefix, prefixToIgnore);
             ModificationState modState = ApplyChanges(controller, modification, ref entity);
             return new ChangesLog
             {
@@ -787,19 +792,19 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual Modification GenerateModification<T>(Controller controller, T entity, string prefix, string prefixToIgnore) where T: Modifiable
+        protected internal virtual Modification GenerateModification<T>(Controller controller, NameValueCollection form, T entity, string prefix, string prefixToIgnore) where T: Modifiable
         {
             SortedList<string, object> formValues;
             Modification modification;
-            if (controller.Request.Form.AllKeys.Contains(ViewDataKeys.Reactive))
+            if (form.AllKeys.Contains(ViewDataKeys.Reactive))
             {
-                formValues = Navigator.ToSortedList(controller.Request.Form, "", prefixToIgnore); //Apply modifications to the entity and all the path
+                formValues = Navigator.ToSortedList(form, "", prefixToIgnore); //Apply modifications to the entity and all the path
                 MinMax<int> interval = Modification.FindSubInterval(formValues, "");
                 modification = Modification.Create(entity.GetType(), formValues, interval, "");
             }
             else
             {
-                formValues = Navigator.ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
+                formValues = Navigator.ToSortedList(form, prefix, prefixToIgnore);
                 MinMax<int> interval = Modification.FindSubInterval(formValues, prefix);
                 modification = Modification.Create(entity.GetType(), formValues, interval, prefix);
             }
