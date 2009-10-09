@@ -14,7 +14,7 @@ using Signum.Utilities;
 
 namespace Signum.Services
 {
-    public abstract class ServerBasic : IBaseServer, IQueryServer, INotesServer
+    public abstract class ServerBasic : IBaseServer, IQueryServer, INotesServer, IAlertsServer
     {
         protected T Return<T>(MethodBase mi, string description, Func<T> function)
         {
@@ -142,6 +142,18 @@ namespace Signum.Services
                     where n.Entity == lazy
                     select n.ToLazy<INoteDN>()).ToList());
         }
+        #endregion
+
+        #region IAlertsServer Members
+
+        public virtual List<Lazy<IAlert>> RetrieveAlerts(Lazy<IdentifiableEntity> lazy)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+             () => (from n in Database.Query<Alert>()
+                    where n.Entity == lazy
+                    select n.ToLazy<IAlert>()).ToList());
+        }
+
         #endregion
     }
 }

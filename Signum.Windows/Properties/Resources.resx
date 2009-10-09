@@ -309,4 +309,13 @@
   <data name="TypePropertyItsNotDeterminedForControl0" xml:space="preserve">
     <value>Type Property is not determined for control with Label {0}</value>
   </data>
+  <data name="Alert" xml:space="preserve">
+    <value>Alert</value>
+  </data>
+  <data name="NewAlert" xml:space="preserve">
+    <value>New Alert</value>
+  </data>
+  <data name="RelatedEntity" xml:space="preserve">
+    <value>Related Entity</value>
+  </data>
 </root>

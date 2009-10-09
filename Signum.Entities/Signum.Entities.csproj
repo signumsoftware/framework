@@ -60,6 +60,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Attributes.cs" />
+    <Compile Include="Basics\Alert.cs" />
     <Compile Include="Basics\Color.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
@@ -81,6 +82,7 @@
     </Compile>
     <Compile Include="Reflection\GraphExplorer.cs" />
     <Compile Include="Reflection\Reflector.cs" />
+    <Compile Include="Services\IAlertsServer.cs" />
     <Compile Include="Services\IBaseServer.cs" />
     <Compile Include="Services\INotesServer.cs" />
     <Compile Include="Services\IQueryServer.cs" />

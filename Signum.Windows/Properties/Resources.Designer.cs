@@ -88,6 +88,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Alert.
+        /// </summary>
+        internal static string Alert {
+            get {
+                return ResourceManager.GetString("Alert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         internal static string Cancel {
@@ -288,6 +297,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New Alert.
+        /// </summary>
+        internal static string NewAlert {
+            get {
+                return ResourceManager.GetString("NewAlert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _New Filter:.
         /// </summary>
         internal static string NewFilter {
@@ -446,6 +464,15 @@ namespace Signum.Windows.Properties {
         internal static string Property0DoNotExistOnType1 {
             get {
                 return ResourceManager.GetString("Property0DoNotExistOnType1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Related Entity.
+        /// </summary>
+        internal static string RelatedEntity {
+            get {
+                return ResourceManager.GetString("RelatedEntity", resourceCulture);
             }
         }
         

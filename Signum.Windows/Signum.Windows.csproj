@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{76278145-7CCD-4411-9B8A-078708128571}</ProjectGuid>
     <OutputType>library</OutputType>
@@ -76,6 +76,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Basics\Alert.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\AutoCompleteTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -152,6 +156,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Widgets\AlertsWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Widgets\LinksWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -223,6 +231,9 @@
     </Compile>
     <Compile Include="AdminBase.cs" />
     <Compile Include="Async.cs" />
+    <Compile Include="Basics\Alert.xaml.cs">
+      <DependentUpon>Alert.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\AutoCompleteTextBox.xaml.cs">
       <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
     </Compile>
@@ -318,6 +329,9 @@
       <DependentUpon>EntityCombo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageLoader.cs" />
+    <Compile Include="Widgets\AlertsWidget.xaml.cs">
+      <DependentUpon>AlertsWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
     </Compile>
@@ -401,6 +415,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\note.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\alert.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
