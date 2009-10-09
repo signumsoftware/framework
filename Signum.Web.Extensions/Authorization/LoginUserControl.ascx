@@ -1,10 +1,10 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Entities.Authorization" %>
 <%
-    if (Session["usuario"] != null) 
+    if (Session["user"] != null) 
     {
 %>
-        Usuario: <b><%=Html.Encode(Session["usuario"])%></b>
+        Usuario: <b><%=Html.Encode(Session["user"])%></b>
         [ <%= Html.ActionLink("Logout", "Logout", "Auth") %> ]
 <%
     }

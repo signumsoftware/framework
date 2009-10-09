@@ -117,11 +117,35 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Change password</value>
+  </data>
+  <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
+    <value>Construct From Many Operation {{{0}}} needs source Ids as parameter</value>
+  </data>
+  <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
+    <value>Construct From Many Operation {{{0}}} needs source Lazies</value>
+  </data>
+  <data name="CouldNotCreateLazyWithoutAnIdToCallOperation0" xml:space="preserve">
+    <value>Could not create Lazy without an id to call Operation {{{0}}}</value>
+  </data>
+  <data name="InvalidNewPassword" xml:space="preserve">
+    <value>Invalid new password</value>
+  </data>
+  <data name="InvalidUsernameOrPassword" xml:space="preserve">
+    <value>Invalid username or password</value>
+  </data>
   <data name="PasswordDoesNotMatchCurrent" xml:space="preserve">
-    <value>The password doesn't match the current one</value>
+    <value>The given password doesn't match the current one</value>
+  </data>
+  <data name="PasswordHasBeenChangedSuccessfully" xml:space="preserve">
+    <value>The password has been changed successfully</value>
+  </data>
+  <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
+    <value>The password must have {0} or more characters</value>
   </data>
   <data name="PasswordMustHaveAValue" xml:space="preserve">
-    <value>Password must have a value</value>
+    <value>The password must have a value</value>
   </data>
   <data name="Property0HasNoValue" xml:space="preserve">
     <value>Property {0} has no value</value>
@@ -134,6 +158,12 @@
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>The provided User Name is already registered, please choose another one</value>
+  </data>
+  <data name="UserNameMustHaveAValue" xml:space="preserve">
+    <value>The Username must have a value</value>
+  </data>
+  <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
+    <value>You must enter the current password</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>You must repeat the new Password</value>

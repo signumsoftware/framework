@@ -51,7 +51,7 @@ namespace Signum.Web.Authorization
 
         public ActionResult ChangePassword()
         {
-            ViewData["Title"] = "Cambiar contraseña";
+            ViewData["Title"] = Resources.ChangePassword;
             ViewData["PasswordLength"] = Provider.MinRequiredPasswordLength;
 
             return View(AuthClient.ChangePasswordUrl);
@@ -60,21 +60,21 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult ChangePassword(string currentPassword, string newPassword, string confirmPassword)
         {
-            ViewData["Title"] = "Cambiar contraseña";
+            ViewData["Title"] = Resources.ChangePassword;
             ViewData["PasswordLength"] = Provider.MinRequiredPasswordLength;
 
             if (String.IsNullOrEmpty(currentPassword))
-                ModelState.AddModelError("currentPassword", "Debe especificar la contraseña actual.");
+                ModelState.AddModelError("currentPassword", Resources.YouMustEnterTheCurrentPassword);
             
             if (newPassword == null || newPassword.Length < Provider.MinRequiredPasswordLength)
             {
                 ModelState.AddModelError("newPassword",
                     String.Format(CultureInfo.CurrentCulture,
-                         "Debe especificar una constraseña de {0} o más caracteres.",
+                         Resources.PasswordMustHave0orMoreCharacters,
                          Provider.MinRequiredPasswordLength));
             }
             if (!String.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
-                ModelState.AddModelError("_FORM", "La nueva constraseña y la confirmación no concuerdan.");
+                ModelState.AddModelError("_FORM", Resources.TheSpecifiedPasswordsDontMatch);
             
             if (ModelState.IsValid)
             {
@@ -85,7 +85,7 @@ namespace Signum.Web.Authorization
                     {
                         usr.PasswordHash = Security.EncodePassword(newPassword);
                         Database.Save(usr);
-                        Session["usuario"] = usr;
+                        Session["user"] = usr;
                     }
                 }
                 catch (Exception ex)
@@ -94,9 +94,9 @@ namespace Signum.Web.Authorization
                 }
 
                 if (usr == null)
-                    ModelState.AddModelError("_FORM", "La nueva contraseña es incorrecta o la nueva contraseña no es válida.");
+                    ModelState.AddModelError("_FORM", Resources.InvalidNewPassword);
                 else
-                    return RedirectToAction(AuthClient.ChangePasswordSuccessUrl);
+                    return RedirectToAction("ChangePasswordSuccess");
             }
 
             return View(AuthClient.ChangePasswordUrl);
@@ -104,9 +104,8 @@ namespace Signum.Web.Authorization
 
         public ActionResult ChangePasswordSuccess()
         {
-            ViewData["Mensaje"] = "Su contraseña ha sido cambiada con éxito.";
-            ViewData["Titulo"] = "Cambiar contraseña";
-            ViewData["Title"] = "Contraseña cambiada";
+            ViewData["Message"] = Resources.PasswordHasBeenChangedSuccessfully;
+            ViewData["Title"] = Resources.ChangePassword;
 
             return View(AuthClient.ChangePasswordSuccessUrl);
         }
@@ -124,11 +123,11 @@ namespace Signum.Web.Authorization
             ViewData["Title"] = "Login";
 
             // Basic parameter validation
-            if (String.IsNullOrEmpty(username))
-                ModelState.AddModelError("username", "Debe especificar un nombre de usuario.");
+            if (!username.HasText())
+                ModelState.AddModelError("username", Resources.UserNameMustHaveAValue);
 
             if (String.IsNullOrEmpty(password))
-                ModelState.AddModelError("password", "Debe especificar una contraseña.");
+                ModelState.AddModelError("password", Resources.PasswordMustHaveAValue);
             
             if (ViewData.ModelState.IsValid)
             {
@@ -158,7 +157,7 @@ namespace Signum.Web.Authorization
                         return RedirectToAction("Index", "Home");
                 }
                 else
-                    ModelState.AddModelError("_FORM", "El nombre de usuario o la constraseña son incorrectos.");
+                    ModelState.AddModelError("_FORM", Resources.InvalidUsernameOrPassword);
             }
 
             // If we got this far, something failed, redisplay form
@@ -278,7 +277,7 @@ namespace Signum.Web.Authorization
                     entity = (UserDN)OperationLogic.ServiceExecuteLazy((Lazy)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
-                    throw new ArgumentException("Could not create Lazy without an id to call Operation {{{0}}}".Formato(sfOperationFullKey));
+                    throw new ArgumentException(Resources.CouldNotCreateLazyWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
             }
             else
             {
@@ -306,7 +305,7 @@ namespace Signum.Web.Authorization
 
         private void AddUserSession(string username, bool? rememberMe, UserDN usuario)
         {
-            System.Web.HttpContext.Current.Session.Add("usuario", usuario);
+            System.Web.HttpContext.Current.Session.Add("user", usuario);
             Thread.CurrentPrincipal = usuario;
 
             FormsAuth.SetAuthCookie(username, rememberMe ?? false);

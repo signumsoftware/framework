@@ -14,6 +14,7 @@ using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Entities.Operations;
 using Signum.Engine.Basics;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
@@ -34,7 +35,7 @@ namespace Signum.Web.Operations
                     entity = OperationLogic.ServiceExecuteLazy((Lazy)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
-                    throw new ArgumentException("Could not create Lazy without an id to call Operation {{{0}}}".Formato(sfOperationFullKey));
+                    throw new ArgumentException(Resources.CouldNotCreateLazyWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
             }
             else
             {
@@ -73,11 +74,11 @@ namespace Signum.Web.Operations
             {
                 string[] ids = sfIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 if (ids == null || ids.Length == 0)
-                    throw new ArgumentException("Construct From Many Operation needs source Ids as parameter");
+                    throw new ArgumentException(Resources.ConstructFromManyOperation0NeedsSourceIdsAsParameter.Formato(sfOperationFullKey));
                 sourceEntities = ids.Select(idstr => Lazy.Create(type, int.Parse(idstr))).ToList();
             }
             if (sourceEntities == null)
-                throw new ArgumentException("Construct From Many Operation needs source Lazies");
+                throw new ArgumentException(Resources.ConstructFromManyOperation0NeedsSourceLazies.Formato(sfOperationFullKey));
 
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
 

@@ -61,7 +61,61 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The password doesn&apos;t match the current one.
+        ///   Looks up a localized string similar to Change password.
+        /// </summary>
+        internal static string ChangePassword {
+            get {
+                return ResourceManager.GetString("ChangePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Construct From Many Operation {{{0}}} needs source Ids as parameter.
+        /// </summary>
+        internal static string ConstructFromManyOperation0NeedsSourceIdsAsParameter {
+            get {
+                return ResourceManager.GetString("ConstructFromManyOperation0NeedsSourceIdsAsParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Construct From Many Operation {{{0}}} needs source Lazies.
+        /// </summary>
+        internal static string ConstructFromManyOperation0NeedsSourceLazies {
+            get {
+                return ResourceManager.GetString("ConstructFromManyOperation0NeedsSourceLazies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not create Lazy without an id to call Operation {{{0}}}.
+        /// </summary>
+        internal static string CouldNotCreateLazyWithoutAnIdToCallOperation0 {
+            get {
+                return ResourceManager.GetString("CouldNotCreateLazyWithoutAnIdToCallOperation0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid new password.
+        /// </summary>
+        internal static string InvalidNewPassword {
+            get {
+                return ResourceManager.GetString("InvalidNewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid username or password.
+        /// </summary>
+        internal static string InvalidUsernameOrPassword {
+            get {
+                return ResourceManager.GetString("InvalidUsernameOrPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given password doesn&apos;t match the current one.
         /// </summary>
         internal static string PasswordDoesNotMatchCurrent {
             get {
@@ -70,7 +124,25 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Password must have a value.
+        ///   Looks up a localized string similar to The password has been changed successfully.
+        /// </summary>
+        internal static string PasswordHasBeenChangedSuccessfully {
+            get {
+                return ResourceManager.GetString("PasswordHasBeenChangedSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must have {0} or more characters.
+        /// </summary>
+        internal static string PasswordMustHave0orMoreCharacters {
+            get {
+                return ResourceManager.GetString("PasswordMustHave0orMoreCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must have a value.
         /// </summary>
         internal static string PasswordMustHaveAValue {
             get {
@@ -111,6 +183,24 @@ namespace Signum.Web.Extensions.Properties {
         internal static string UserNameAlreadyExists {
             get {
                 return ResourceManager.GetString("UserNameAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Username must have a value.
+        /// </summary>
+        internal static string UserNameMustHaveAValue {
+            get {
+                return ResourceManager.GetString("UserNameMustHaveAValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must enter the current password.
+        /// </summary>
+        internal static string YouMustEnterTheCurrentPassword {
+            get {
+                return ResourceManager.GetString("YouMustEnterTheCurrentPassword", resourceCulture);
             }
         }
         
