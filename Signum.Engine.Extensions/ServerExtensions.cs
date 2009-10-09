@@ -43,7 +43,7 @@ namespace Signum.Services
 
         #region ILoginServer Members
 
-        public void Login(string username, string passwordHash)
+        public virtual void Login(string username, string passwordHash)
         {
             try
             {
