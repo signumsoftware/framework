@@ -200,7 +200,7 @@ namespace Signum.Web.Captcha
 			LineNoise = LineNoise ?? LineNoiseLevel.Low;
             TextLength = TextLength ?? 5;
 			TextChars = TextChars ?? "ACDEFGHJKLNPQRTUVXYZ2346789";
-            CacheTimeOut = CacheTimeOut ?? 90D;
+            CacheTimeOut = CacheTimeOut ?? 60 * 15; //15 minutos
 		}
 
 		/// <summary>
