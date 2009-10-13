@@ -15,11 +15,11 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" MinHeight="32" />
+            <RowDefinition Name="rdFilter" Height="Auto" MinHeight="32" />
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto" MinHeight="24" />
+            <RowDefinition Name="rdFooter" Height="Auto" MinHeight="24" />
         </Grid.RowDefinitions>
-        <Expander VerticalAlignment="Top" ExpandDirection="Up" x:Name="expander" Expanded="expander_Expanded" Collapsed="expander_Expanded">
+        <Expander Visibility="{Binding ElementName=me,Path=FilterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" VerticalAlignment="Top" ExpandDirection="Up" x:Name="expander" Expanded="expander_Expanded" Collapsed="expander_Expanded">
             <Expander.Header>
                 <Label Content="{m:Loc Filters}" VerticalAlignment="Center" Height="28"/>
             </Expander.Header>
@@ -27,7 +27,7 @@
                 <m:FilterBuilder  x:Name="filterBuilder"  />
             </Grid>
         </Expander>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="80,0,0,2" Height="30" Background="Transparent">
+        <StackPanel Visibility="{Binding ElementName=me,Path=FilterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="80,0,0,2" Height="30" Background="Transparent">
             <StackPanel.Resources>
                 <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
                     <Setter Property="Width" Value="24"/>
@@ -75,7 +75,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="6,4,6,4" HorizontalAlignment="Left"  >
+        <StackPanel Visibility="{Binding ElementName=me,Path=FooterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" Orientation="Horizontal" Grid.Row="2" Margin="6,4,6,4" HorizontalAlignment="Left"  >
             <TextBlock TextWrapping="Wrap" x:Name="tbResultados" Visibility="Hidden" VerticalAlignment="Center">
                 <InlineUIContainer>
         		    <TextBlock Text="{Binding Path=Items.Count, ElementName=lvResult, Mode=Default}" TextWrapping="Wrap" FontWeight="Bold"/>

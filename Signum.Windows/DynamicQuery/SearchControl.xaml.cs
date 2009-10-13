@@ -42,6 +42,33 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+        public int ItemsCount
+        {
+            get { return (int) lvResult.Items.Count; }
+        }
+
+        public static readonly DependencyProperty FilterVisibleProperty =
+        DependencyProperty.Register("FilterVisible", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool FilterVisible
+        {
+            get { return (bool)GetValue(FilterVisibleProperty); }
+            set
+            {
+                SetValue(FilterVisibleProperty, value);
+                if (value == false) { rdFilter.MinHeight = 0; rdFilter.Height = new GridLength(0); }
+            }
+        }
+
+        public static readonly DependencyProperty FooterVisibleProperty =
+        DependencyProperty.Register("FooterVisible", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool FooterVisible
+        {
+            get { return (bool)GetValue(FooterVisibleProperty); }
+            set { SetValue(FooterVisibleProperty, value);
+            if (value == false) { rdFooter.MinHeight = 0; rdFooter.Height = new GridLength(0); }
+            }
+        }
+
         public static readonly DependencyProperty SelectedItemProperty =
           DependencyProperty.Register("SelectedItem", typeof(object), typeof(SearchControl), new UIPropertyMetadata(null));
         public object SelectedItem

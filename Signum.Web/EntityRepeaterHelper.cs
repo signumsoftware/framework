@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
