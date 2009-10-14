@@ -11,6 +11,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Signum.Entities;
+using Signum.Entities.Basics;
+using Signum.Windows.Widgets;
+using Signum.Services;
 
 namespace Signum.Windows.Basics
 {
@@ -22,6 +26,16 @@ namespace Signum.Windows.Basics
         public Alert()
         {
             InitializeComponent();
+        }
+
+        public static void Start()
+        {
+            WidgetPanel.GetWidgets += (obj, mainControl) => obj is IdentifiableEntity && !(obj is IAlert || ((IdentifiableEntity)obj).IsNew) ? new AlertsWidget() : null;
+
+            AlertsWidget.CreateAlert = ei => ei.IsNew ? null : new Signum.Entities.Basics.Alert { Entity = ei.ToLazy() };
+            AlertsWidget.RetrieveAlerts = ei => ei == null ? null : Server.Service<IAlertsServer>().RetrieveAlerts(ei.ToLazy());
+
+            Navigator.Manager.Settings.Add(typeof(Alert), new EntitySettings { View = () => new Alert(), IsCreable = admin => false, Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/alert.png", typeof(AlertsWidget))) });
         }
     }
 }
