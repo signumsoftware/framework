@@ -14,9 +14,7 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>
-    <GroupBox Header="{Binding Path=LabelText, ElementName=me}">
         <TextBox Text="{Binding Path=Text, ElementName=me}" AcceptsReturn="True" AcceptsTab="True" 
                  IsReadOnly="{Binding Path=m:Common.IsReadOnly, ElementName=me}" 
                  TextWrapping="Wrap"/>
-    </GroupBox>
 </m:LineBase>

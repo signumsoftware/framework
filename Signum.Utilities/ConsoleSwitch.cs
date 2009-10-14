@@ -102,7 +102,7 @@ namespace Signum.Utilities
 
         private V GetValue(string line)
         {
-            return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).Single("No option with key {0} found")
+            return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).Single("No option with key {0} found".Formato(line))
                 .Value.First;
         }
 

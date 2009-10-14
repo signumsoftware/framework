@@ -8,7 +8,7 @@ namespace Signum.Utilities
 {
     public static class ElapsedTime
     {
-        public static bool ShowDebug = true;
+        public static bool ShowDebug = false;
         public static Dictionary<string, ElapsedTimeEnty> IdentifiedElapseds =
             new Dictionary<string, ElapsedTimeEnty>();
 
@@ -28,7 +28,7 @@ namespace Signum.Utilities
                 if (!IdentifiedElapseds.TryGetValue(identifier, out entry))
                 {
                     entry = new ElapsedTimeEnty();
-                    IdentifiedElapseds.Add(identifier, entry); 
+                    IdentifiedElapseds.Add(identifier, entry);
                 }
 
                 entry.LastTime = milliseconds;
@@ -37,8 +37,10 @@ namespace Signum.Utilities
                 entry.Times++;
 
                 if (milliseconds < entry.MinTime) { entry.MinTime = milliseconds; entry.MinDate = DateTime.Now; }
-                if (milliseconds > entry.MaxTime) {entry.MaxTime = milliseconds; entry.MaxDate = DateTime.Now; }
-                if (ShowDebug) Debug.WriteLine(identifier + " - " + entry);
+                if (milliseconds > entry.MaxTime) { entry.MaxTime = milliseconds; entry.MaxDate = DateTime.Now; }
+
+                if (ShowDebug)
+                    Debug.WriteLine(identifier + " - " + entry);
             }
         }
     }
