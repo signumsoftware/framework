@@ -45,6 +45,16 @@ namespace Signum.Test.LinqProvider
                               select new { Artist = a.Name, Album = b.Name }).ToList();
         }
 
+
+        [TestMethod]
+        public void JoinEntityTwice()
+        {
+            var algums = (from a1 in Database.Query<AlbumDN>()
+                          join a2 in Database.Query<AlbumDN>() on a1.Label equals a2.Label
+                          join a3 in Database.Query<AlbumDN>() on a2.Label equals a3.Label
+                          select new { Name1 = a1.Name, Name2 = a2.Name, Name3 = a3.Name  }).ToList();
+        }
+
         [TestMethod]
         public void JoinerExpansions()
         {
