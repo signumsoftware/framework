@@ -278,7 +278,7 @@ namespace Signum.Web
 
         protected virtual int GeneratePropertyModification(SortedList<string, object> formValues, MinMax<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
         {
-            PropertyPack pp = propertyValidators.GetOrThrow(propertyName, Resources.NoPropertyWithName0FoundInType0.Formato(propertyName, RuntimeType));
+            PropertyPack pp = propertyValidators.GetOrThrow(propertyName, Resources.NoPropertyWithName0FoundInType1.Formato(propertyName, RuntimeType));
 
             MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
             

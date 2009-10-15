@@ -162,8 +162,8 @@
   <data name="NoIdentifiableEntityPropertyInTypeContextPath" xml:space="preserve">
     <value>No hay una propiedad IdentifiableEntity en la ruta de TypeContexts</value>
   </data>
-  <data name="NoPropertyWithName0FoundInType0" xml:space="preserve">
-    <value>No se ha encontrado la propiedad {{0}} en el tipo {0}</value>
+  <data name="NoPropertyWithName0FoundInType1" xml:space="preserve">
+    <value>No se ha encontrado la propiedad {{0}} en el tipo {{1}}</value>
   </data>
   <data name="NoQueryWithName0" xml:space="preserve">
     <value>No hay una query asociada al nombre {{{0}}}</value>

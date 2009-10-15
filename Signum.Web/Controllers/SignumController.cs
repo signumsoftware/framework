@@ -229,7 +229,7 @@ namespace Signum.Web.Controllers
             ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, prefixToIgnore);
 
             if (changesLog.Errors != null && changesLog.Errors.Count > 0)
-                throw new ApplicationException(Resources.ItsNotPossibleToSaveAnEntityOfType0WithErrors);
+                throw new ApplicationException(Resources.ItsNotPossibleToSaveAnEntityOfType0WithErrors.Formato(entity.GetType().Name));
 
             if (entity is IdentifiableEntity)
                 Database.Save((IdentifiableEntity)entity);
