@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLazy<LT>()).Take(count).AsEnumerable().Cast<Lazy>().ToList();
+            return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLazy<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToStr).Cast<Lazy>().ToList();
         }
 
         static MethodInfo miLazyContaining = typeof(AutoCompleteUtils).GetMethod("LazyContaining", BindingFlags.NonPublic | BindingFlags.Static);
@@ -57,7 +57,7 @@ namespace Signum.Engine.DynamicQuery
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLazy<LT>()).Take(count).AsEnumerable().Cast<Lazy>().ToList();
+            return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLazy<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToStr).Cast<Lazy>().ToList();
         }
 
         public static List<Lazy> RetriveAllLazy(Type lazyType, Type[] types)

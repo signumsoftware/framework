@@ -138,7 +138,7 @@ namespace Signum.Windows
                     if (!abort)
                     {
                         listBox.ItemsSource = result;
-                        popup.IsOpen = listBox.HasItems;
+                        popup.IsOpen = listBox.HasItems && textBox.IsFocused;
                     }
                 }));
 
@@ -163,11 +163,35 @@ namespace Signum.Windows
                 }
                 e.Handled = true; 
             }
+            if (e.Key == Key.Tab)
+            {
+                switch (listBox.Items.Count) {
+                    case 0: textBox.Text = string.Empty;
+                            e.Handled = true;
+                            break;
+
+                    case 1: listBox.SelectedItem = listBox.Items[0];
+                            SelectItem();
+                            break;
+
+                    default:
+                            foreach (object o in listBox.ItemsSource)
+                            {
+                                if (string.Equals(o.ToString(), textBox.Text, StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    listBox.SelectedItem = o;
+                                    SelectItem();
+                                    break;
+                                }
+                            }
+                            break;
+                }
+            }
         }
 
         private void listbox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter || e.Key == Key.Tab)
             {
                 SelectItem();
                 e.Handled = true; 
@@ -192,7 +216,6 @@ namespace Signum.Windows
             popup.IsOpen = false;
             RaiseEvent(new RoutedEventArgs(SelectedItemChangedEvent, this)); 
         }
-
 
         internal void Close()
         {

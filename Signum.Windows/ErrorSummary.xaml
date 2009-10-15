@@ -24,13 +24,14 @@
 		IsEnabled="{Binding Path=HasErrors, ElementName=me}" 
 		BorderThickness="{Binding Path=HasErrors, Converter={x:Static m:Converters.BoolToInt}, ElementName=me}"
 		BorderBrush="Red">
-            </Expander>
-            <Popup IsOpen="{Binding Path=IsExpanded, ElementName=expander, Mode=TwoWay}" PlacementTarget="{Binding ElementName=expander, Mode=OneWay}">
+           <!-- </Expander>-->
+           <!-- <Popup IsOpen="{Binding Path=IsExpanded, ElementName=expander, Mode=TwoWay}" PlacementTarget="{Binding ElementName=expander, Mode=OneWay}">-->
                 <ItemsControl x:Name="lb" 
                      Visibility="{Binding Path=IsEnabled, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=expander, Mode=Default}" 
                      Background="Pink">
                 </ItemsControl>
-            </Popup>
+            <!--</Popup>-->
+        </Expander>
         </Grid>
     </m:ShyBorder>
 </UserControl>

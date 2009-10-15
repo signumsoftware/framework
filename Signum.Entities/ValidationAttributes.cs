@@ -66,7 +66,7 @@ namespace Signum.Entities
 
     public class NotNullValidatorAttribute : ValidatorAttribute
     {
-      
+
         protected override string OverrideError(object obj)
         {
             return obj != null ? null : (ErrorMessage ?? Resources.Property0HasNoValue);
