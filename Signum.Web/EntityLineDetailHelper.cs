@@ -131,23 +131,25 @@ namespace Signum.Web
             }
             else
             {
-                //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
-                sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
+                sb.AppendLine(helper.Div(TypeContext.Compose(idValueField, EntityBaseKeys.Entity), "", "", new Dictionary<string, object>()));
+              
+                ////It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
+                //sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
 
-                string url = settings.Url ?? 
-                    Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(type)).PartialViewName;
+                //string url = settings.Url ?? 
+                //    Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(type)).PartialViewName;
 
-                using (var sc = StyleContext.RegisterCleanStyleContext(true))
-                {
-                    ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
-                    { 
-                        //{ ViewDataKeys.MainControlUrl, url},
-                        { ViewDataKeys.PopupPrefix, idValueField}
-                    };
-                    helper.PropagateSFKeys(vdd);
-                    sb.Append(helper.RenderPartialToString(url, vdd));
-                }
-                sb.AppendLine("</div>");
+                //using (var sc = StyleContext.RegisterCleanStyleContext(true))
+                //{
+                //    ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
+                //    { 
+                //        //{ ViewDataKeys.MainControlUrl, url},
+                //        { ViewDataKeys.PopupPrefix, idValueField}
+                //    };
+                //    helper.PropagateSFKeys(vdd);
+                //    sb.Append(helper.RenderPartialToString(url, vdd));
+                //}
+                //sb.AppendLine("</div>");
             }
 
             if (settings.Implementations != null || settings.View)
