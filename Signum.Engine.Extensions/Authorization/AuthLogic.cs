@@ -15,6 +15,7 @@ using System.Threading;
 using Signum.Services;
 using Signum.Utilities.Reflection;
 using System.Reflection;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Authorization
 {
@@ -81,9 +82,9 @@ namespace Signum.Engine.Authorization
                 }
         }
 
-        static void Schema_Saving(RoleDN role)
+        static void Schema_Saving(RoleDN role, ref bool graphModified)
         {
-            if (!role.IsNew && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
+            if (!role.IsNew && role.Roles != null && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
             {
                 using (new EntityCache())
                 {
@@ -143,7 +144,7 @@ namespace Signum.Engine.Authorization
             {
                 user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
                 if (user == null)
-                    throw new ApplicationException("Username {0} is not valid".Formato(username));
+                    throw new ApplicationException(Resources.Username0IsNotValid.Formato(username));
             }
 
             return User(user);
@@ -193,10 +194,10 @@ namespace Signum.Engine.Authorization
             {
                 UserDN user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
                 if (user == null)
-                    throw new ApplicationException("Username {0} is not valid".Formato(username));
+                    throw new ApplicationException(Resources.Username0IsNotValid.Formato(username));
 
                 if (user.PasswordHash != passwordHash)
-                    throw new ApplicationException("Incorrect password");
+                    throw new ApplicationException(Resources.IncorrectPassword);
 
                 return user;
             }

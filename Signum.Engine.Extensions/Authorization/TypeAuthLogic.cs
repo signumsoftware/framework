@@ -52,7 +52,7 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void Schema_Saving(IdentifiableEntity ident)
+        static void Schema_Saving(IdentifiableEntity ident, ref bool graphModified)
         {
             if (AuthLogic.IsEnabled)
             {

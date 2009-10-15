@@ -79,8 +79,6 @@ namespace Signum.Entities.Files
             internal set { Set(ref fileType, value, "FileType"); }
         }
 
-
-
         FileRepositoryDN repository;
         [LocDescription]
         public FileRepositoryDN Repository
@@ -92,13 +90,13 @@ namespace Signum.Entities.Files
         static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => fp.Repository.PhysicalPrefix + '\\' + fp.Sufix;
         public string FullPhysicalPath
         {
-            get { return Repository.PhysicalPrefix + '\\' + Sufix; }
+            get { return Repository == null ? null : Repository.PhysicalPrefix + '\\' + Sufix; }
         }
 
         static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => fp.Repository.WebPrefix + "/" + fp.Sufix.Replace('\\', '/');
         public string FullWebPath
         {
-            get { return Repository.WebPrefix + "/" + Sufix.Replace('\\', '/'); }
+            get { return Repository == null ? null : Repository.WebPrefix + "/" + Sufix.Replace('\\', '/'); }
         }
     }
 
@@ -130,7 +128,7 @@ namespace Signum.Entities.Files
 
         [NotNullable, SqlDbType(Size = 500)]
         string webPrefix;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 500), LocDescription]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 500), LocDescription]
         public string WebPrefix
         {
             get { return webPrefix; }

@@ -129,4 +129,10 @@
   <data name="SufixNotSet" xml:space="preserve">
     <value>No se ha establecido el sufijo para el archivo</value>
   </data>
+  <data name="IncorrectPassword" xml:space="preserve">
+    <value>Contraseña incorrecta</value>
+  </data>
+  <data name="Username0IsNotValid" xml:space="preserve">
+    <value>El nombre de usuario {0} no es válido</value>
+  </data>
 </root>

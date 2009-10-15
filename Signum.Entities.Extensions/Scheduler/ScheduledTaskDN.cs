@@ -44,9 +44,9 @@ namespace Signum.Entities.Scheduler
             set { Set(ref suspended, value, "Suspended"); }
         }
 
-        protected override void PreSaving()
+        protected override void PreSaving(ref bool graphModified)
         {
-            base.PreSaving();
+            base.PreSaving(ref graphModified);
             NewPlan();
         }
 

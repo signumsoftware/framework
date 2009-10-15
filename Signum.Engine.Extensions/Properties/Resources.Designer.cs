@@ -70,6 +70,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incorrect password.
+        /// </summary>
+        internal static string IncorrectPassword {
+            get {
+                return ResourceManager.GetString("IncorrectPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Last Execution.
         /// </summary>
         internal static string LastExecution {
@@ -93,6 +102,15 @@ namespace Signum.Engine.Extensions.Properties {
         internal static string SufixNotSet {
             get {
                 return ResourceManager.GetString("SufixNotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username {0} is not valid.
+        /// </summary>
+        internal static string Username0IsNotValid {
+            get {
+                return ResourceManager.GetString("Username0IsNotValid", resourceCulture);
             }
         }
     }

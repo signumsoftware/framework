@@ -216,6 +216,12 @@ namespace Signum.Web.Authorization
 
             u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.SaveNew);
 
+            if (Navigator.ExtractIsReactive(Request.Form))
+            {
+                string tabID = Navigator.ExtractTabID(Request.Form);
+                Session[tabID] = u;
+            }
+
             return Navigator.View(this, u);
         }
 
@@ -281,10 +287,12 @@ namespace Signum.Web.Authorization
             }
             else
             {
-                if (sfId.HasValue)
-                    entity = Database.Retrieve<UserDN>(sfId.Value);
-                else
-                    entity = (UserDN)Navigator.CreateInstance(type);
+                //if (sfId.HasValue)
+                //    entity = Database.Retrieve<UserDN>(sfId.Value);
+                //else
+                //    entity = (UserDN)Navigator.CreateInstance(type);
+
+                entity = (UserDN)Navigator.ExtractEntity(this, Request.Form);
 
                 Dictionary<string, List<string>> errors = UserOperationApplyChanges(Request.Form, ref entity);
 
@@ -295,6 +303,12 @@ namespace Signum.Web.Authorization
                 }
 
                 entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+
+                if (Navigator.ExtractIsReactive(Request.Form))
+                {
+                    string tabID = Navigator.ExtractTabID(Request.Form);
+                    Session[tabID] = entity;
+                }
             }
 
             if (prefix.HasText())

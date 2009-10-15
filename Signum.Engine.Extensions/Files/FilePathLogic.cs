@@ -68,7 +68,7 @@ namespace Signum.Engine.Files
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
-        static void FilePath_Saving(FilePathDN fp)
+        static void FilePath_Saving(FilePathDN fp, ref bool graphModified)
         {
             if (fp.IsNew)
             {

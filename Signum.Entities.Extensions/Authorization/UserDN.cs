@@ -80,13 +80,20 @@ namespace Signum.Entities.Authorization
             set { Set(ref state, value, "State"); }
         }
 
-        protected override void PreSaving()
+        public override string this[string columnName]
         {
+            get
+            {
+                string error = base[columnName];
 
-            if (anulationDate != null && state != UserState.Disabled)
-                throw new ApplicationException("The user state must be Anulated {0}".Formato(this.ToString()));
-            
-            base.PreSaving();
+                if (columnName == "State")
+                { 
+                    if (anulationDate != null && state != UserState.Disabled)
+                        error = error.AddLine("The user state must be Anulated {0}".Formato(this.ToString()));
+                }
+
+                return error;
+            }
         }
 
         public override string ToString()
