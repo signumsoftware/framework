@@ -62,9 +62,9 @@ namespace Signum.Entities
             return base.Set<T>(ref variable, value, propertyName);
         }
 
-        protected internal override void PreSaving()
+        protected internal override void PreSaving(ref bool graphModified)
         {
-            base.PreSaving();
+            base.PreSaving(ref graphModified);
 
             ToStr = ToString();
         }

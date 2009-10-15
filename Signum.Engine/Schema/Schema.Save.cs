@@ -41,7 +41,8 @@ namespace Signum.Engine.Maps
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident)
         {
-            ident.PreSaving(); 
+            bool dirty = false; 
+            ident.PreSaving(ref dirty); 
 
             List<SqlParameter> parameters = new List<SqlParameter>();
             
@@ -78,9 +79,10 @@ namespace Signum.Engine.Maps
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident)
         {
-            string oldToStr = ident.ToStr; 
+            string oldToStr = ident.ToStr;
 
-            ident.PreSaving(); 
+            bool dirty = false; 
+            ident.PreSaving(ref dirty); 
 
             if (!ident.SelfModified)
                 return null;

@@ -146,11 +146,13 @@ namespace Signum.Entities
             this.UntypedEntityOrNull = null;
         }
 
-        protected internal override void PreSaving()
+        protected internal override void PreSaving(ref bool graphModified)
         {
-            UntypedEntityOrNull.TryDoC(e => e.PreSaving());
             if (UntypedEntityOrNull != null)
+            {
+                UntypedEntityOrNull.PreSaving(ref graphModified);
                 toStr = UntypedEntityOrNull.ToStr;
+            }
             //Is better to have an old string than having nothing
         }
 

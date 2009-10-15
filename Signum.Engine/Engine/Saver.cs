@@ -18,27 +18,29 @@ namespace Signum.Engine
     {
         public static void SaveAll(IdentifiableEntity[] idents)
         {
-             GraphExplorer.PreSaving(GraphExplorer.FromRoots(idents));
-
-             Save(GraphExplorer.FromRoots(idents));
+             Save(()=>GraphExplorer.FromRoots(idents));
         }
 
         public static void Save<T>(T ident) where T : IdentifiableEntity
         {
             //Generate a graph from the root visiting all the modifiables
-            GraphExplorer.PreSaving(GraphExplorer.FromRoot(ident));
 
-            Save(GraphExplorer.FromRoot(ident));
+            Save(()=>GraphExplorer.FromRoot(ident));
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
 
-        static void Save(DirectedGraph<Modifiable> modifiables)
+        static void Save(Func<DirectedGraph<Modifiable>> createGraph)
         {
-            string error = GraphExplorer.Integrity(modifiables);
-            if (error.HasText())
-                throw new ApplicationException(error); 
+            DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
 
+            Schema schema = ConnectionScope.Current.Schema;
+            modifiables = GraphExplorer.ModifyGraph(modifiables, (Modifiable m, ref bool graphModified) =>
+                {
+                    if (m is IdentifiableEntity)
+                        schema.OnSaving((IdentifiableEntity)m, ref graphModified);
+                }, createGraph);
+            
             GraphExplorer.PropagateModifications(modifiables.Inverse());
 
             //colapsa modifiables (collections and embeddeds) keeping indentifiables only
@@ -52,10 +54,7 @@ namespace Signum.Engine
 
             notModified.ForEach(node=>identifiables.RemoveFullNode(node, None));
 
-            Schema schema = ConnectionScope.Current.Schema;
-
-            foreach (var node in identifiables)
-                schema.OnSaving(node);
+  
 
             ////calculate saving dependencies (edges to new identifiables)
             //DirectedGraph<IdentifiableEntity> dependencies = identifiables.WhereEdges(e => e.To.IsNew);

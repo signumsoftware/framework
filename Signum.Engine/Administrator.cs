@@ -99,7 +99,7 @@ namespace Signum.Engine
                     let enumType = Reflector.ExtractEnumProxy(t.Type)
                     where enumType != null
                     select (from item in Enum.GetValues(enumType).Cast<object>()
-                            let ei = EnumProxy.FromEnum((Enum)item).Do(e => e.PreSaving())
+                            let ei = EnumProxy.FromEnum((Enum)item)
                             select t.InsertSqlSync(ei)).Combine(Spacing.Simple)).Combine(Spacing.Double);
         }
 

@@ -91,12 +91,37 @@ namespace Signum.Entities.Reflection
                 .Where(e => e.HasText()).ToString("\r\n");
         }
 
-        public static void PreSaving(DirectedGraph<Modifiable> modifiable)
+        public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
         {
-            foreach (var m in modifiable)
+            return ModifyGraph(recreate(), (Modifiable m, ref bool graphModified) => m.PreSaving(ref graphModified), recreate);
+        }
+
+        public delegate void ModifyEntityEventHandler(Modifiable m, ref bool graphModified);
+
+        public static DirectedGraph<Modifiable> ModifyGraph(DirectedGraph<Modifiable> graph, ModifyEntityEventHandler modifier, Func<DirectedGraph<Modifiable>> recreate)
+        {
+            bool graphModified = false; 
+            foreach (var m in graph)
             {
-                m.PreSaving();
+                modifier(m, ref graphModified);
             }
+
+            if(!graphModified)
+                return graph; //common case
+
+            do
+            {
+                var newGraph = recreate();
+                graphModified = false;
+                foreach (var m in newGraph.Except(graph))
+                {
+                    modifier(m, ref graphModified);
+                }
+
+                graph = newGraph;
+            } while (graphModified);
+
+            return graph; 
         }
 
 

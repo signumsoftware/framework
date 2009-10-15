@@ -346,8 +346,8 @@ namespace Signum.Windows
 
         public static bool AssertErrors(Modifiable mod)
         {
-            GraphExplorer.PreSaving(GraphExplorer.FromRoot(mod));
-            string error = GraphExplorer.Integrity(GraphExplorer.FromRoot(mod));
+            var graph = GraphExplorer.PreSaving(()=>GraphExplorer.FromRoot(mod));
+            string error = GraphExplorer.Integrity(graph);
 
             if (error.HasText())
             {

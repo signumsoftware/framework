@@ -54,14 +54,14 @@ namespace Signum.Engine.Maps
             return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
         }
 
-        internal void OnSaving(IdentifiableEntity entity)
+        internal void OnSaving(IdentifiableEntity entity, ref bool graphModified)
         {
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnSaving(entity);
+                ee.OnSaving(entity, ref graphModified);
 
-            entityEventsGlobal.OnSaving(entity); 
+            entityEventsGlobal.OnSaving(entity, ref graphModified); 
         }
 
         internal void OnSaved(IdentifiableEntity entity)
@@ -266,7 +266,7 @@ namespace Signum.Engine.Maps
 
     internal interface IEntityEvents
     {
-        void OnSaving(IdentifiableEntity entity);
+        void OnSaving(IdentifiableEntity entity, ref bool graphModified);
         void OnSaved(IdentifiableEntity entity);
         void OnRetrieving(Type type, int id);
         void OnRetrieved(IdentifiableEntity entity);
@@ -277,7 +277,7 @@ namespace Signum.Engine.Maps
     public class EntityEvents<T> : IEntityEvents
         where T : IdentifiableEntity
     {
-        public event EntityEventHandler<T> Saving;
+        public event SavingEntityEventHandler<T> Saving;
         public event EntityEventHandler<T> Saved;
 
         public event TypeIdEventHandler Retrieving;
@@ -286,10 +286,10 @@ namespace Signum.Engine.Maps
         public event TypeIdEventHandler Deleting;
         public event TypeIdEventHandler Deleted;
 
-        void IEntityEvents.OnSaving(IdentifiableEntity entity)
+        void IEntityEvents.OnSaving(IdentifiableEntity entity, ref bool graphModified)
         {
             if (Saving != null)
-                Saving((T)entity);
+                Saving((T)entity, ref graphModified);
         }
 
         void IEntityEvents.OnSaved(IdentifiableEntity entity)
@@ -322,7 +322,8 @@ namespace Signum.Engine.Maps
                 Deleted(type, id);
         }
     }
-     
+
+    public delegate void SavingEntityEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
     public delegate void EntityEventHandler<T>(T ident) where T : IdentifiableEntity;
     public delegate void TypeIdEventHandler(Type type, int id);
 

@@ -24,10 +24,11 @@ namespace Signum.Entities
                 return base.SetIfNew(ref variable, value, propertyName);
         }
 
-        protected internal override void PreSaving()
+
+        protected internal override void PreSaving(ref bool graphModified)
         {
             if (AllowChange)
-                base.PreSaving();
+                base.PreSaving(ref graphModified);
             else
                 if (SelfModified)
                     throw new ApplicationException("Attempt to save a not new modified ImmutableEntity");

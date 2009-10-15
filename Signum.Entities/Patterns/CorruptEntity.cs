@@ -16,9 +16,9 @@ namespace Signum.Entities
             set { Set(ref corrupt, value, "Corrupt"); }
         }
 
-        protected internal override void PreSaving()
+        protected internal override void PreSaving(ref bool graphModified)
         {
-            base.PreSaving();
+            base.PreSaving(ref graphModified);
 
             if (Corrupt)
             {

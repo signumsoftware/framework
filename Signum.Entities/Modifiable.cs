@@ -49,7 +49,7 @@ namespace Signum.Entities
             return GraphExplorer.IntegrityDictionary(GraphExplorer.FromRoot(this));
         }
 
-        protected internal virtual void PreSaving()
+        protected internal virtual void PreSaving(ref bool graphModified)
         {
         }
 
