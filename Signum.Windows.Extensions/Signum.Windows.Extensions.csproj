@@ -102,6 +102,10 @@
     <Compile Include="Authorization\User.xaml.cs">
       <DependentUpon>User.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Basic\DateSpan.xaml.cs">
+      <DependentUpon>DateSpan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Basic\BasicClient.cs" />
     <Compile Include="Calendars\CalendarStrip.cs" />
     <Compile Include="Calendars\CalendarStripHeader.xaml.cs">
       <DependentUpon>CalendarStripHeader.xaml</DependentUpon>
@@ -261,6 +265,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Authorization\User.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Basic\DateSpan.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

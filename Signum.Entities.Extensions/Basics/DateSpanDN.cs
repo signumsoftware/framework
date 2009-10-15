@@ -10,6 +10,7 @@ namespace Signum.Entities.Extensions.Basics
     public class DateSpanDN : EmbeddedEntity
     {
         int years;
+        [LocDescription ]
         public int Years
         {
             get { return years; }
@@ -17,6 +18,7 @@ namespace Signum.Entities.Extensions.Basics
         }
 
         int months;
+        [LocDescription]
         public int Months
         {
             get { return months; }
@@ -24,6 +26,7 @@ namespace Signum.Entities.Extensions.Basics
         }
 
         int days;
+        [LocDescription]
         public int Days
         {
             get { return days; }

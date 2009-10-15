@@ -123,6 +123,9 @@
   <data name="CustomReport" xml:space="preserve">
     <value>Custom Report</value>
   </data>
+  <data name="Days" xml:space="preserve">
+    <value>Days</value>
+  </data>
   <data name="Excel2003XmlSpreadsheet" xml:space="preserve">
     <value>Excel XML 2003 Spreadsheet (*.xml)|*.xml</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="FindLocationFoExcelReport" xml:space="preserve">
     <value>Find location for Excel Report</value>
   </data>
+  <data name="Months" xml:space="preserve">
+    <value>Months</value>
+  </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
   </data>
@@ -161,5 +167,8 @@
   </data>
   <data name="View" xml:space="preserve">
     <value>View</value>
+  </data>
+  <data name="Years" xml:space="preserve">
+    <value>Years</value>
   </data>
 </root>

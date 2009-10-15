@@ -120,6 +120,9 @@
   <data name="CustomReport" xml:space="preserve">
     <value>Informe Personalizado</value>
   </data>
+  <data name="Days" xml:space="preserve">
+    <value>Dias</value>
+  </data>
   <data name="Excel2003XmlSpreadsheet" xml:space="preserve">
     <value>Hoja de cálculo XML 2003(*.xml)|*.xml</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="FindLocationFoExcelReport" xml:space="preserve">
     <value>Elija la ubicación del informe Excel</value>
   </data>
+  <data name="Months" xml:space="preserve">
+    <value>Meses</value>
+  </data>
   <data name="Name" xml:space="preserve">
     <value>Nombre</value>
   </data>
@@ -152,5 +158,8 @@
   </data>
   <data name="Removed" xml:space="preserve">
     <value>Eliminado</value>
+  </data>
+  <data name="Years" xml:space="preserve">
+    <value>Años</value>
   </data>
 </root>
