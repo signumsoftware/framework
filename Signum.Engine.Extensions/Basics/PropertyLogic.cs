@@ -63,6 +63,7 @@ namespace Signum.Engine.Basics
         private static List<PropertyDN> GenerateProperties(TypeDN typeDN, Type type)
         {
             return Reflector.InstancePropertiesInOrder(type)
+                .GroupBy(a => a.Name).Select(g => g.First()) //Overriden properties
                 .Where(p => !Attribute.IsDefined(p, typeof(HiddenPropertyAttribute)))
                 .SelectMany(pi =>
                 {
@@ -91,6 +92,7 @@ namespace Signum.Engine.Basics
         static List<PropertyDN> GenerateAllEmbeddedFields(TypeDN typeDN, Type type, string prefix)
         {
             return Reflector.InstancePropertiesInOrder(type)
+                .GroupBy(a => a.Name).Select(g => g.First()) //Overriden properties
                 .Where(p => !Attribute.IsDefined(p, typeof(HiddenPropertyAttribute)))
                 .SelectMany(pi =>
                 {
