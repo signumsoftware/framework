@@ -59,6 +59,15 @@ namespace Signum.Windows
 
     public class FilterOptions : Freezable
     {
+        public FilterOptions(){}
+
+        public FilterOptions(string columnName, object value)
+        {
+            this.ColumnName = columnName;
+            this.Operation = FilterOperation.EqualTo;
+            this.Value = value; 
+        }
+
         public Column Column { get; set; }
         public string ColumnName { get; set; }
         public bool Frozen { get; set; }
