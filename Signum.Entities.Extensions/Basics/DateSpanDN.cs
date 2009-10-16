@@ -47,5 +47,9 @@ namespace Signum.Entities.Extensions.Basics
         {
             return new DateSpan(years, months, days); 
         }
+        public override string ToString()
+        {
+            return ToDateSpan().ToString();
+        }   
     }
 }
