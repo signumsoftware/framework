@@ -37,5 +37,12 @@ namespace Signum.Entities.Patterns
             return base.Set<T>(ref variable, value, propertyName);
         }
 
+        [HiddenProperty]
+        public override string ToStr
+        {
+            get { return toStr; }
+            protected set { UnsafeSet(ref toStr, value, "ToStr"); }
+        }
+
     }
 }

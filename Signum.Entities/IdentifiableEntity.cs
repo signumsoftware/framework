@@ -39,10 +39,10 @@ namespace Signum.Entities
         }
 
         [HiddenProperty]
-        public string ToStr
+        public virtual string ToStr
         {
             get { return toStr; }
-            private set { Set(ref toStr, value, "ToStr"); }
+            protected set { Set(ref toStr, value, "ToStr"); }
         }
 
         [Ignore]
