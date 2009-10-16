@@ -23,7 +23,8 @@
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"
 		/>
 		<ComboBox Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" Background="{DynamicResource BlueBackground}"  x:Name="combo" 
-		ItemTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" SelectionChanged="combo_SelectionChanged"/>
+		ItemTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" SelectionChanged="combo_SelectionChanged"
+        IsEnabled="{Binding m:Common.IsReadOnly, ElementName=me, Converter={x:Static m:Converters.Not}}" />
 		<StackPanel Orientation="Horizontal" Grid.Column="2" x:Name="buttons">
 			<Button x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
 			<Button x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>

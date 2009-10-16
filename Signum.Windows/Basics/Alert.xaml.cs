@@ -30,9 +30,9 @@ namespace Signum.Windows.Basics
 
         public static void Start()
         {
-            WidgetPanel.GetWidgets += (obj, mainControl) => obj is IdentifiableEntity && !(obj is IAlert || ((IdentifiableEntity)obj).IsNew) ? new AlertsWidget() : null;
+            WidgetPanel.GetWidgets += (obj, mainControl) => obj is IdentifiableEntity && !(obj is IAlertDN || ((IdentifiableEntity)obj).IsNew) ? new AlertsWidget() : null;
 
-            AlertsWidget.CreateAlert = ei => ei.IsNew ? null : new Signum.Entities.Basics.Alert { Entity = ei.ToLazy() };
+            AlertsWidget.CreateAlert = ei => ei.IsNew ? null : new Signum.Entities.Basics.AlertDN { Entity = ei.ToLazy() };
             AlertsWidget.RetrieveAlerts = ei => ei == null ? null : Server.Service<IAlertsServer>().RetrieveAlerts(ei.ToLazy());
 
             Navigator.Manager.Settings.Add(typeof(Alert), new EntitySettings { View = () => new Alert(), IsCreable = admin => false, Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/alert.png", typeof(AlertsWidget))) });

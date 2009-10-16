@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Entities;
 using Signum.Entities.Basics;
+using Signum.Utilities;
 
 namespace Signum.Windows.Widgets
 {
@@ -28,15 +29,18 @@ namespace Signum.Windows.Widgets
 
         #endregion
 
-        public static Func<IdentifiableEntity, IAlert> CreateAlert { get; set; }
-        public static Func<IdentifiableEntity, List<Lazy<IAlert>>> RetrieveAlerts { get; set; }
-
+        public static Func<IdentifiableEntity, IAlertDN> CreateAlert { get; set; }
+        public static Func<IdentifiableEntity, List<Lazy<IAlertDN>>> RetrieveAlerts { get; set; }
+        public static Action<IdentifiableEntity, AlertsWidget> WarnedAlerts { get; set; }
+        public static Action<IdentifiableEntity, AlertsWidget> CheckedAlerts { get; set; }
+        public static Action<IdentifiableEntity, AlertsWidget> FutureAlerts { get; set; }
+        public static Func<IdentifiableEntity, CountAlerts> CountAlerts { get; set; }
 
         public AlertsWidget()
         {
             InitializeComponent();
 
-            lvAlerts.AddHandler(Button.ClickEvent, new RoutedEventHandler(Alert_MouseDown));
+            //lvAlerts.AddHandler(Button.ClickEvent, new RoutedEventHandler(Alert_MouseDown));
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(AlertsWidget_DataContextChanged);
         }
 
@@ -50,7 +54,7 @@ namespace Signum.Windows.Widgets
             if (e.OriginalSource is Button) //Not to capture the mouseDown of the scrollbar buttons
             {
                 Button b = (Button)e.OriginalSource;
-                Lazy<IAlert> alert = (Lazy<IAlert>)b.Tag;
+                Lazy<IAlertDN> alert = (Lazy<IAlertDN>)b.Tag;
                 ViewAlert(Server.RetrieveAndForget(alert));
             }
         }
@@ -63,21 +67,21 @@ namespace Signum.Windows.Widgets
             if (DataContext == null)
                 return;
 
-            IAlert alert = CreateAlert((IdentifiableEntity)DataContext);
+            IAlertDN alert = CreateAlert((IdentifiableEntity)DataContext);
 
             ViewAlert(alert);
         }
 
-        private void ViewAlert(IAlert alert)
+        private void ViewAlert(IAlertDN alert)
         {
-            IAlert result = (IAlert)Navigator.View(new ViewOptions
+            IAlertDN result = (IAlertDN)Navigator.View(new ViewOptions
             {
                 Buttons = ViewButtons.Save,
                 Closed = (o, e) => ReloadAlerts(),
             }, alert);
         }
 
-        private void ReloadAlerts()
+        public void ReloadAlerts()
         {
             if (CreateAlert == null)
                 throw new ApplicationException("AlertsWidget.RetrieveAlerts is null");
@@ -85,11 +89,11 @@ namespace Signum.Windows.Widgets
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
             if (entity == null || entity.IsNew)
             {
-                lvAlerts.ItemsSource = null;
+                //lvAlerts.ItemsSource = null;
                 return;
             }
 
-            List<Lazy<IAlert>> alerts = RetrieveAlerts((IdentifiableEntity)DataContext);
+            List<Lazy<IAlertDN>> alerts = RetrieveAlerts((IdentifiableEntity)DataContext);
 
             if (alerts != null)
             {
@@ -99,7 +103,73 @@ namespace Signum.Windows.Widgets
                     ForceShow();
             }
 
-            lvAlerts.ItemsSource = alerts;
+            //lvAlerts.ItemsSource = alerts;
+
+            CountAlerts count = CountAlerts(entity);
+
+            if (count == null || count.CheckedAlerts == 0)
+            {
+                btnCheckedAlerts.Visibility = Visibility.Collapsed;
+                btnCheckedAlerts.Content = "{0} (0)".Formato(Properties.Resources.CheckedAlerts);
+            }
+            else
+            {
+                btnCheckedAlerts.Visibility = Visibility.Visible;
+                btnCheckedAlerts.Content = "{0} ({1})".Formato(Properties.Resources.CheckedAlerts, count.CheckedAlerts);
+            }
+
+            if (count == null || count.WarnedAlerts == 0)
+            {
+                btnWarnedAlerts.Visibility = Visibility.Collapsed;
+                btnWarnedAlerts.Content = "{0} (0)".Formato(Properties.Resources.WarnedAlerts);
+            }
+            else
+            {
+                btnWarnedAlerts.Visibility = Visibility.Visible;
+                btnWarnedAlerts.Content = "{0} ({1})".Formato(Properties.Resources.WarnedAlerts, count.WarnedAlerts);
+            }
+
+            if (count == null || count.FutureAlerts == 0)
+            {
+                btnFutureAlerts.Visibility = Visibility.Collapsed;
+                btnFutureAlerts.Content = "{0} (0)".Formato(Properties.Resources.FutureAlerts);
+            }
+            else
+            {
+                btnFutureAlerts.Visibility = Visibility.Visible;
+                btnFutureAlerts.Content = "{0} ({1})".Formato(Properties.Resources.FutureAlerts, count.FutureAlerts);
+            }
+
+        }
+
+        private void btnAlertsWarn_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext == null)
+                return;
+
+            IdentifiableEntity entity = DataContext as IdentifiableEntity;
+
+            WarnedAlerts(entity, this);
+        }
+
+        private void btnAlertsChecked_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext == null)
+                return;
+
+            IdentifiableEntity entity = DataContext as IdentifiableEntity;
+
+            CheckedAlerts(entity, this);
+        }
+
+        private void btnFutureAlerts_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext == null)
+                return;
+
+            IdentifiableEntity entity = DataContext as IdentifiableEntity;
+
+            FutureAlerts(entity, this);
         }
 
 

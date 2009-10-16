@@ -6,10 +6,17 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Basics
 {
-    public interface IAlert : IIdentifiable
+    public class CountAlerts
+    {
+        public int WarnedAlerts;
+        public int CheckedAlerts;
+        public int FutureAlerts;
+    }
+
+    public interface IAlertDN : IIdentifiable
     { }
 
-    public class Alert : IdentifiableEntity, IAlert
+    public class AlertDN : IdentifiableEntity, IAlertDN
     {
         [ImplementedByAll]
         Lazy<IdentifiableEntity> entity;

@@ -281,6 +281,8 @@ namespace Signum.Windows
             EntitySettings es = (findOptions.QueryName as Type).TryCC(t => Settings.TryGetC(t));
             if (TaskViewWindow != null)
                 TaskViewWindow(sw, WindowsType.Find, findOptions.QueryName);
+            
+            sw.Closed += findOptions.Closed;
 
             if (findOptions.Modal)
             {

@@ -55,6 +55,9 @@ namespace Signum.Windows
             get { return filterMode; }
             set { this.filterMode = value; }
         }
+
+        public EventHandler Closed { get; set; }
+
     }
 
     public class FilterOptions : Freezable

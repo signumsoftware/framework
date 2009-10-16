@@ -99,7 +99,7 @@ namespace Signum.Windows
             if (GetButtonBarElement != null)
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(DataContext, MainControl))
+                    .Select(d => d(e.NewValue, MainControl))
                     .NotNull().SelectMany(d => d).ToList());
 
             stackPanel.Children.Clear();
@@ -112,7 +112,7 @@ namespace Signum.Windows
 
         public static void Start()
         {
-            ButtonBar.GetButtonBarElement += (obj, mainControl) => mainControl is IHaveToolBarElements ? ((IHaveToolBarElements)mainControl).ToolBarElements : null;
+            ButtonBar.GetButtonBarElement += (obj, mainControl) => mainControl is IHaveToolBarElements ? ((IHaveToolBarElements)mainControl).GetToolBarElements(obj): null;
         }
     }
 
@@ -120,6 +120,6 @@ namespace Signum.Windows
 
     public interface IHaveToolBarElements
     {
-        List<FrameworkElement> ToolBarElements { get; }
+        List<FrameworkElement> GetToolBarElements(object dataContext);
     }
 }

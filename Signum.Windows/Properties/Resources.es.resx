@@ -318,4 +318,16 @@
   <data name="RelatedEntity" xml:space="preserve">
     <value>Entidad Asociada</value>
   </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alertas</value>
+  </data>
+  <data name="CheckedAlerts" xml:space="preserve">
+    <value>Atendidas</value>
+  </data>
+  <data name="WarnedAlerts" xml:space="preserve">
+    <value>No Atendidas</value>
+  </data>
+  <data name="FutureAlerts" xml:space="preserve">
+    <value>Futuras</value>
+  </data>
 </root>

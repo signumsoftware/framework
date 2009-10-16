@@ -92,7 +92,7 @@ namespace Signum.Windows
                 Type cleanType = typeof(Lazy).IsAssignableFrom(type) ? Reflector.ExtractLazy(type) : type;
                 if (Reflector.IsLowPopulation(cleanType))
                 {
-                    EntityCombo ec = new EntityCombo { Type = type, LoadDataTrigger = LoadDataTrigger.OnLoad, Style = (Style)FindResource("toolTip") };
+                    EntityCombo ec = new EntityCombo { Type = type, Style = (Style)FindResource("toolTip") };
                     ec.SetBinding(EntityCombo.EntityProperty, new Binding
                     {
                         Path = new PropertyPath(FilterOptions.RealValueProperty),

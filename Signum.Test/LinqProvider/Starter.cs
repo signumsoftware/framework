@@ -9,6 +9,7 @@ using Signum.Test.Properties;
 using System.IO;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Signum.Entities.Basics;
 
 namespace Signum.Test.LinqProvider
 {
@@ -42,6 +43,7 @@ namespace Signum.Test.LinqProvider
             TypeLogic.Start(sb, false); 
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
+            sb.Include<AlertDN>();
             sb.Include<PersonalAwardDN>();
             ConnectionScope.Default = new Connection(connectionString, sb.Schema); 
         }

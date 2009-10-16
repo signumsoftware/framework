@@ -301,7 +301,7 @@
     <value>Results.</value>
   </data>
   <data name="Limitation" xml:space="preserve">
-    <value> Limitation:</value>
+    <value>Limitation:</value>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
@@ -317,5 +317,17 @@
   </data>
   <data name="RelatedEntity" xml:space="preserve">
     <value>Related Entity</value>
+  </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alerts</value>
+  </data>
+  <data name="CheckedAlerts" xml:space="preserve">
+    <value>Checked</value>
+  </data>
+  <data name="WarnedAlerts" xml:space="preserve">
+    <value>Warned</value>
+  </data>
+  <data name="FutureAlerts" xml:space="preserve">
+    <value>Futures</value>
   </data>
 </root>

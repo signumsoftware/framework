@@ -17,7 +17,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Image Source="..\Images\alert.png" Stretch="Fill" Margin="-2,-2,-2,-2"/>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Text="Alerts" TextWrapping="Wrap" x:Name="tbAlerts"/>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Text="{m:Loc Alerts}" TextWrapping="Wrap" x:Name="tbAlerts"/>
             </Grid>
         </Expander.Header>
         <Grid>
@@ -25,7 +25,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto" MinHeight="20"/>
             </Grid.RowDefinitions>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="2,2,2,2" MinHeight="10" MaxHeight="200">
+            <!--<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="2,2,2,2" MinHeight="10" MaxHeight="200">
                 <ItemsControl x:Name="lvAlerts" MaxWidth="120">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -33,7 +33,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </ScrollViewer>
+            </ScrollViewer>-->
             <Border CornerRadius="7,7,7,7" Grid.Row="1" BorderThickness="0">
                 <Border.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -41,7 +41,12 @@
                         <GradientStop Color="#3F000000" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
-                <Button x:Name="btnNewAlert" Click="btnNewAlert_Click" Content="{m:Loc NewAlert}" Style="{DynamicResource LinkButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Comic Sans MS" Foreground="#FF077500" Margin="5,0,5,0" />
+                <StackPanel>
+                    <Button x:Name="btnWarnedAlerts" Click="btnAlertsWarn_Click" Content="{m:Loc WarnedAlerts}" Style="{DynamicResource LinkButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Comic Sans MS" Foreground="#FF077500" Margin="5,0,5,0" />
+                    <Button x:Name="btnCheckedAlerts" Click="btnAlertsChecked_Click" Content="{m:Loc CheckedAlerts}" Style="{DynamicResource LinkButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Comic Sans MS" Foreground="#FF077500" Margin="5,0,5,0" />
+                    <Button x:Name="btnFutureAlerts" Click="btnFutureAlerts_Click" Content="{m:Loc FutureAlerts}" Style="{DynamicResource LinkButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Comic Sans MS" Foreground="#FF077500" Margin="5,0,5,0" />
+                    <Button x:Name="btnNewAlert" Click="btnNewAlert_Click" Content="{m:Loc NewAlert}" Style="{DynamicResource LinkButtonStyle}" HorizontalAlignment="Right" VerticalAlignment="Top" FontFamily="Comic Sans MS" Foreground="#FF077500" Margin="5,0,5,0" />
+                </StackPanel>
             </Border>
         </Grid>
     </Expander>

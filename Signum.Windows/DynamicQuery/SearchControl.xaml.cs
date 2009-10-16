@@ -208,16 +208,14 @@ namespace Signum.Windows
                     Create = Navigator.IsCreable(EntityType, true);
             }
 
-            var columns = view.Columns.Where(a => a.Filterable).ToList();
-
             foreach (var fo in FilterOptions)
             {
-                fo.Column = columns.Where(c => c.Name == fo.ColumnName)
+                fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
                     .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, QueryName));
                 fo.RefreshRealValue();
             }
 
-            filterBuilder.Columns = columns;
+            filterBuilder.Columns = view.Columns.Where(a => a.Filterable).ToList();
             filterBuilder.Filters = new ObservableCollection<FilterOptions>(FilterOptions);
 
             GenerateListViewColumns(view);

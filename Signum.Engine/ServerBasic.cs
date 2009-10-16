@@ -146,12 +146,33 @@ namespace Signum.Services
 
         #region IAlertsServer Members
 
-        public virtual List<Lazy<IAlert>> RetrieveAlerts(Lazy<IdentifiableEntity> lazy)
+        public virtual List<Lazy<IAlertDN>> RetrieveAlerts(Lazy<IdentifiableEntity> lazy)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => (from n in Database.Query<Alert>()
+             () => (from n in Database.Query<AlertDN>()
                     where n.Entity == lazy
-                    select n.ToLazy<IAlert>()).ToList());
+                    select n.ToLazy<IAlertDN>()).ToList());
+        }
+
+        public virtual IAlertDN CheckAlert(IAlertDN alert)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), () =>
+                {
+                    AlertDN a = (AlertDN)alert;
+                    a.CheckDate = DateTime.Now;
+                    return Database.Save((AlertDN)alert);
+                });
+        }
+
+        public CountAlerts CountAlerts(Lazy<IdentifiableEntity> lazy)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), () =>
+                new CountAlerts() 
+                {
+                    CheckedAlerts = Database.Query<AlertDN>().Count(a => a.CheckDate.HasValue),
+                    WarnedAlerts = Database.Query<AlertDN>().Count(a => a.AlertDate.HasValue && a.AlertDate <= DateTime.Now),
+                    FutureAlerts = Database.Query<AlertDN>().Count(a => (!a.AlertDate.HasValue || a.AlertDate > DateTime.Now) && !a.CheckDate.HasValue), 
+                });
         }
 
         #endregion
