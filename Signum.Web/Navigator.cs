@@ -514,6 +514,12 @@ namespace Signum.Web
         protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
         {
             Type cleanType = entity != null ? entity.GetType() : typeof(T);
+            if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
+            {
+                TypeContext entityTC = (TypeContext)(object)entity;
+                cleanType = Reflector.ExtractLazy(entityTC.ContextType) ?? entityTC.ContextType;
+            }
+
             string url = partialViewName ??
                 Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType)).PartialViewName;
 
@@ -535,6 +541,12 @@ namespace Signum.Web
         protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
         {
             Type cleanType = entity != null ? entity.GetType() : typeof(T);
+            if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
+            {
+                TypeContext entityTC = (TypeContext)(object)entity;
+                cleanType = Reflector.ExtractLazy(entityTC.ContextType) ?? entityTC.ContextType;
+            }
+
             string url = partialViewName ??
                 Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType)).PartialViewName;
 
@@ -543,8 +555,8 @@ namespace Signum.Web
             if (changeTicks != null)
                 controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
 
-            if (controller.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
-                controller.Response.Write("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(TypeContext.Compose(prefix, EntityBaseKeys.IsNew))); 
+            //if (controller.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
+            //    controller.Response.Write("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(TypeContext.Compose(prefix, EntityBaseKeys.IsNew))); 
 
             return new PartialViewResult
             {

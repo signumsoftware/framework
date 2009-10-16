@@ -15,6 +15,8 @@ using System.Reflection;
 using System.Collections;
 using System.Diagnostics;
 using System.Web.Mvc;
+using System.Collections.Specialized;
+using System.Linq.Expressions;
 
 namespace Signum.Web
 {
@@ -137,6 +139,63 @@ namespace Signum.Web
             }
 
             return (Modifiable)currentEntity;
+        }
+
+        protected internal static TypeContext GetTCforEmbeddedEntity(NameValueCollection form, Modifiable entity, ref string prefix)
+        {
+            if (!prefix.HasText())
+                return null;
+
+            string originalPrefix = prefix;
+
+            int propertyStart = prefix.LastIndexOf(TypeContext.Separator);
+            string propertyName = prefix.Substring(propertyStart + 1);
+            prefix = prefix.Left(propertyStart, true);
+
+            string idString = (string)form[TypeContext.Compose(prefix, TypeContext.Id)];
+            int? id = null;
+            if (idString.HasText())
+                id = int.Parse(idString);
+
+            int index;
+            if (int.TryParse(propertyName, out index)) //If it's a list item, use the list property
+            {
+                propertyStart = prefix.LastIndexOf(TypeContext.Separator);
+                propertyName = prefix.Substring(propertyStart + 1);
+                prefix = prefix.Left(propertyStart, true);
+            }
+
+            string typeName = form[TypeContext.Compose(prefix, TypeContext.RuntimeType)];
+            if (!typeName.HasText())
+                typeName = form[TypeContext.Compose(prefix, TypeContext.StaticType)];
+
+            Type type = Navigator.ResolveType(typeName);
+            
+            Modifiable parent;
+            if (id.HasValue)
+                parent = Database.Retrieve(type, id.Value);
+            else
+            {
+                object result = Navigator.CreateInstance(type);
+                if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
+                    parent = (ModifiableEntity)result;
+                else
+                    throw new ApplicationException("Invalid result type for a Constructor");
+            }
+
+            PropertyInfo pi = parent.GetType().GetProperty(propertyName);
+            
+
+            if (typeof(IdentifiableEntity).IsAssignableFrom(parent.GetType()))
+            {
+                Type ts = typeof(TypeContext<>).MakeGenericType(new Type[] { parent.GetType() });
+                return (TypeContext)Activator.CreateInstance(ts, new object[] { parent, originalPrefix });
+            }
+            else
+            {
+                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { parent.GetType() });
+                return (TypeContext)Activator.CreateInstance(ts, new object[] { parent, GetTCforEmbeddedEntity(form, parent, ref prefix), new PropertyInfo[] { pi } });
+            }
         }
     }
 

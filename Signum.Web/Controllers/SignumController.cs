@@ -61,6 +61,16 @@ namespace Signum.Web.Controllers
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
+            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
+            {
+                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
+
+                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
+                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[] { } });
+
+                return Navigator.PopupView(this, tc, prefix, sfUrl);
+            }
+
             return Navigator.PopupView(this, entity, prefix, sfUrl);
         }
 
@@ -93,12 +103,19 @@ namespace Signum.Web.Controllers
                 }
             }
 
-            if (sfEmbeddedControl != null && sfEmbeddedControl.Value)
-                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
-
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
+            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
+            {
+                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
+
+                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
+                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[]{} });
+            
+                return Navigator.PartialView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
+            }
+                        
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
 

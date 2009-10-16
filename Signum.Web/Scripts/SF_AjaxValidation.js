@@ -109,25 +109,35 @@ function TrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, 
 //	return TypedValidatePartial(urlController, itemPrefix, prefixToIgnore, showInlineError, fixedInlineErrorText, typeName, "");
 //}
 
-//function GetPath(prefix) {
-//    var path = prefix.split("_");
-//    var formChildren = $("#" + sfId + ", #" + sfRuntimeType);
-//    for (var i = 0; i < path.length; i++) { 
-//        var currPrefix = concat(path, i);
-//        formChildren = formChildren.add("#" + currPrefix + sfId + ", #" + currPrefix + sfRuntimeType + ", #" + currPrefix + sfStaticType + ", #" + currPrefix + sfIsNew + ", #" + currPrefix + sfIndex);
-//    }
-//    return formChildren;
-//}
+function GetPath(prefix) {
+    var path = prefix.split("_");
+    var formChildren = $("#" + sfId + ", #" + sfRuntimeType);
+    for (var i = 0; i < path.length; i++) { 
+        var currPrefix = concat(path, i);
+        formChildren = formChildren.add("#" + currPrefix + sfId + ", #" + currPrefix + sfRuntimeType + ", #" + currPrefix + sfStaticType + ", #" + currPrefix + sfIsNew + ", #" + currPrefix + sfIndex);
+    }
+    return formChildren;
+}
 
-//function concat(array, toIndex)
-//{
-//    var path = "";
-//    for (var i = 0; i <= toIndex; i++) {
-//        if (array[i] != "")
-//            path += "_" + array[i];
-//    }
-//    return path;
-//}
+function GetPathIdsAndTypes(prefix) {
+    var path = prefix.split("_");
+    var formChildren = $("#" + sfId + ", #" + sfRuntimeType);
+    for (var i = 0; i < path.length; i++) {
+        var currPrefix = concat(path, i);
+        formChildren = formChildren.add("#" + currPrefix + sfId + ", #" + currPrefix + sfRuntimeType + ", #" + currPrefix + sfStaticType);
+    }
+    return formChildren.serialize();
+}
+
+function concat(array, toIndex)
+{
+    var path = "";
+    for (var i = 0; i <= toIndex; i++) {
+        if (array[i] != "")
+            path += "_" + array[i];
+    }
+    return path;
+}
 
 function SFparams(prefix) {
     return $("#" + prefix + sfId + ", #" + prefix + sfRuntimeType + ", #" + prefix + sfStaticType + ", #" + prefix + sfIsNew + ", #" + prefix + sfIndex + ", #" + prefix + sfTicks);
@@ -146,10 +156,10 @@ function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError,
     }
     else {
         formChildren = $('#' + prefix + panelPopupKey + " *, #" + sfTabId);
-        if (formChildren.filter('#' + prefix + sfId).length == 0)
-            idQueryParam = qp(prefix + sfId, $('#' + prefix + sfId));
-        if (formChildren.filter('#' + prefix + sfRuntimeType).length == 0)
-            typeNameParam = qp(prefix + sfRuntimeType, $('#' + prefix + sfRuntimeType));    
+        if (formChildren.filter('#' + prefix + sfId).length == 0 && $('#' + prefix + sfId).length > 0)
+            idQueryParam = qp(prefix + sfId, $('#' + prefix + sfId).val());
+        if (formChildren.filter('#' + prefix + sfRuntimeType).length == 0 && $('#' + prefix + sfRuntimeType).length > 0)
+            typeNameParam = qp(prefix + sfRuntimeType, $('#' + prefix + sfRuntimeType).val());    
     }    
 	$.ajax({
 		type: "POST",

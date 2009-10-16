@@ -79,6 +79,11 @@ function OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, d
     var idField = $('#' + prefix + sfId);
     if (idField.length > 0)
         idQueryParam = qp("sfId", idField.val());
+    else {  //Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
+        var pathInfo = GetPathIdsAndTypes(prefix);
+        if (pathInfo.length > 0)
+            idQueryParam += "&" + pathInfo;
+    }
 
     var reactiveParam = "";
     if ($('#' + sfReactive).length > 0) { //If reactive => send also tabId and Id & Runtime of the main entity
