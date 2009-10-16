@@ -79,13 +79,18 @@ namespace Signum.Utilities
 
         public static T Single<T>(this IEnumerable<T> collection, string errorMessage)
         {
+            return collection.Single<T>(errorMessage, errorMessage);
+        }
+
+        public static T Single<T>(this IEnumerable<T> collection, string errorZero, string errorMoreThanOne)
+        {
             if (collection == null)
                 throw new ArgumentNullException("collection");
 
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException(errorMessage);
+                    throw new InvalidOperationException(errorZero);
 
                 T current = enumerator.Current;
 
@@ -93,7 +98,7 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException(errorMessage);
+            throw new InvalidOperationException(errorMoreThanOne);
         }
 
         public static T SingleOrDefault<T>(this IEnumerable<T> collection, string errorMessage)
@@ -104,7 +109,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    return default(T); 
+                    return default(T);
 
                 T current = enumerator.Current;
 
@@ -388,7 +393,7 @@ namespace Signum.Utilities
             return new MinMax<V>(min, max);
         }
 
-   
+
         #endregion
 
         #region Operation
@@ -404,7 +409,7 @@ namespace Signum.Utilities
                 if (!enumerator.MoveNext())
                     yield break;
 
-                
+
                 T firstItem = enumerator.Current;
                 if (options == BiSelectOptions.Initial || options == BiSelectOptions.InitialAndFinal)
                     yield return func(default(T), firstItem);
@@ -414,14 +419,14 @@ namespace Signum.Utilities
                 {
                     T item = enumerator.Current;
                     yield return func(lastItem, item);
-                    lastItem = item; 
+                    lastItem = item;
                 }
 
                 if (options == BiSelectOptions.Final || options == BiSelectOptions.InitialAndFinal)
                     yield return func(lastItem, default(T));
 
                 if (options == BiSelectOptions.Circular)
-                    yield return func(lastItem, firstItem); 
+                    yield return func(lastItem, firstItem);
             }
         }
 
@@ -436,7 +441,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static List<IGrouping<T,T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
+        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
         {
             List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
             Grouping<T, T> group = null;
@@ -444,7 +449,7 @@ namespace Signum.Utilities
             {
                 if (isGroupKey(item))
                 {
-                    group = new Grouping<T, T>(item); 
+                    group = new Grouping<T, T>(item);
                     result.Add(group);
                 }
                 else
@@ -505,14 +510,14 @@ namespace Signum.Utilities
 
         public static IEnumerable<R> Zip<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> mixer)
         {
-           using (var enumA = colA.GetEnumerator())
-           using (var enumB = colB.GetEnumerator())
-           {
-               while (enumA.MoveNext() && enumB.MoveNext())
-               {
-                   yield return mixer(enumA.Current, enumB.Current);
-               }
-           }
+            using (var enumA = colA.GetEnumerator())
+            using (var enumB = colB.GetEnumerator())
+            {
+                while (enumA.MoveNext() && enumB.MoveNext())
+                {
+                    yield return mixer(enumA.Current, enumB.Current);
+                }
+            }
         }
 
         public static void ZipForeach<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB, Action<A, B> actions)
@@ -541,14 +546,14 @@ namespace Signum.Utilities
 
         public static IEnumerable<R> ZipStrict<A, B, R>(this IEnumerable<A> colA, IEnumerable<B> colB, Func<A, B, R> mixer)
         {
-             using (var enumA = colA.GetEnumerator())
-             using (var enumB = colB.GetEnumerator())
-             {
-                 while (AssertoTwo(enumA.MoveNext(), enumB.MoveNext()))
-                 {
-                     yield return mixer(enumA.Current, enumB.Current);
-                 }
-             }
+            using (var enumA = colA.GetEnumerator())
+            using (var enumB = colB.GetEnumerator())
+            {
+                while (AssertoTwo(enumA.MoveNext(), enumB.MoveNext()))
+                {
+                    yield return mixer(enumA.Current, enumB.Current);
+                }
+            }
         }
 
         public static void ZipForeachStrict<A, B>(this IEnumerable<A> colA, IEnumerable<B> colB, Action<A, B> action)
@@ -576,7 +581,7 @@ namespace Signum.Utilities
         #endregion
 
         #region Conversions
-       
+
 
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source)
         {
@@ -600,7 +605,7 @@ namespace Signum.Utilities
             return (IEnumerable<T>)pi;
         }
 
-       
+
 
         public static void PushRange<T>(this Stack<T> stack, IEnumerable<T> elements)
         {
@@ -646,7 +651,7 @@ namespace Signum.Utilities
 
     public enum BiSelectOptions
     {
-        None, 
+        None,
         Initial,
         Final,
         InitialAndFinal,
