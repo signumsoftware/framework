@@ -36,10 +36,10 @@
       <Code Language="csharp">
         <![CDATA[static Expression<Func<$type$, $returnType$>> $propertyName$Expression = 
             $paramName$ => ; 
-        static Func<$type$, $returnType$> $methodName$Func = $propertyName$Expression.Compile();
+        static Func<$type$, $returnType$> $propertyName$Func = $propertyName$Expression.Compile();
         public $returnType$ $propertyName$
         {
-            get{ return $propertyName$Func(value); }
+            get{ return $propertyName$Func(this); }
         }]]>
       </Code>
     </Snippet>
