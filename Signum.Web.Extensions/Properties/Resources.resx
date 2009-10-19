@@ -174,4 +174,7 @@
   <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
     <value>Couldn't create FilePath with unknown FileType for field {{0}}</value>
   </data>
+  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
+    <value>Argument {filePathID} was not passed to the controller</value>
+  </data>
 </root>

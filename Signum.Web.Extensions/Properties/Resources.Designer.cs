@@ -61,6 +61,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Argument {filePathID} was not passed to the controller.
+        /// </summary>
+        internal static string ArgumentFilePathIDWasNotPassedToTheController {
+            get {
+                return ResourceManager.GetString("ArgumentFilePathIDWasNotPassedToTheController", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Change password.
         /// </summary>
         internal static string ChangePassword {

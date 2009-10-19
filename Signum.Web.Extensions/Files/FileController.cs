@@ -58,6 +58,7 @@ namespace Signum.Web.Files
             }
 
             StringBuilder sb = new StringBuilder();
+            //Use plain javascript not to have to add also the reference to jquery in the result iframe
             sb.AppendLine("<html><head><title>-</title></head><body>");
             sb.AppendLine("<script type='text/javascript'>");
             sb.AppendLine("var parDoc = window.parent.document;");
@@ -65,17 +66,11 @@ namespace Signum.Web.Files
             if (fp.TryCS(f => f.IdOrNull) != null)
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
-                //sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStr), fp.FileName));
-                //sb.AppendLine("$('#{0}').val('{1}');".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStr), fp.FileName));
                 sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));                
-                //sb.AppendLine("$('#{0}').val('{1}');".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));
                 sb.AppendLine("parDoc.getElementById('{0}').value='FilePathDN';".Formato(TypeContext.Compose(formFieldId, TypeContext.RuntimeType)));
-                //sb.AppendLine("$('#{0}').val('FilePathDN');".Formato(TypeContext.Compose(formFieldId, TypeContext.RuntimeType)));
                 sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id.ToString()));                
-                //sb.AppendLine("$('#{0}').val({1});".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id));
                 sb.AppendLine("parDoc.getElementById('div{0}New').style.display='none';".Formato(formFieldId));
                 sb.AppendLine("parDoc.getElementById('div{0}Old').style.display='block';".Formato(formFieldId));
-                //sb.AppendLine("$('document #div{0}New').hide(); $('#div{0}Old').show();".Formato(formFieldId));
             }
             else
                 sb.AppendLine("window.alert('ERROR');");
@@ -84,6 +79,37 @@ namespace Signum.Web.Files
             sb.AppendLine("</body></html>");
 
             return Content(sb.ToString());
+        }
+
+        public FileResult Download(int? filePathID)
+        { 
+            if (filePathID == null)
+                throw new ArgumentException(Resources.ArgumentFilePathIDWasNotPassedToTheController);
+
+            FilePathDN fp = Database.Retrieve<FilePathDN>(filePathID.Value);
+
+            if (fp == null)
+                throw new ArgumentException(Resources.ArgumentFilePathIDWasNotPassedToTheController);
+
+            return File(fp.BinaryFile, GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
+        }
+
+        private string GetMimeType(string extension)
+        {
+            string mimeType = String.Empty;
+
+            // Attempt to get the mime-type from the registry.
+            Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(extension);
+
+            if (regKey != null)
+            {
+                string type = (string)regKey.GetValue("Content Type");
+
+                if (type != null)
+                    mimeType = type;
+            }
+
+            return mimeType;
         }
     }
 }
