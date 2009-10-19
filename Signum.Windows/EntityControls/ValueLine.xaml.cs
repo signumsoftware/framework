@@ -108,8 +108,9 @@ namespace Signum.Windows
             bool nullable = nType != null;
             type = nType ?? type;
             Control control = Configurator.constructor[lineType](type, nullable, Format);
-            control.Style = (Style)FindResource("toolTip"); 
-
+            if(Configurator.SetToolTipStyle(lineType, type, nullable))
+              control.Style = (Style)FindResource("toolTip"); 
+            
             Binding b; 
             BindingExpression bindingExpression = BindingOperations.GetBindingExpression(this, ValueProperty);
             if (bindingExpression != null) // is something is binded to ValueProperty, bind the new control to there
@@ -294,6 +295,14 @@ namespace Signum.Windows
                 return NotNullValidationRule.Instance;
 
             return null;
+        }
+
+        public virtual bool SetToolTipStyle(ValueLineType lineType, Type type, bool nullable)
+        {
+            if (lineType == ValueLineType.String)
+                return false;
+
+            return true; 
         }
 
         public virtual IValueConverter GetReadOnlyConverter(ValueLineType lineType, Type type, bool nullable)
