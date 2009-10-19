@@ -363,6 +363,14 @@ function RemoveFileLineEntity(prefix, reloadOnChangeFunction) {
     }
 }
 
+function DownloadFile(urlController, prefix) {
+    var id = $('#' + prefix + sfId).val();
+    if (empty(id) || id < 0)
+        return;
+
+    window.open(urlController + "?filePathID=" + id);
+}
+
 function RemoveDetailContainedEntity(prefix, detailDiv, reloadOnChangeFunction) {
     $('#' + prefix + sfToStr).val("");
     $('#' + prefix + sfToStr).html("");
