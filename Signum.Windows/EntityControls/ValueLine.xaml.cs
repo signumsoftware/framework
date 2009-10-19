@@ -85,9 +85,6 @@ namespace Signum.Windows
 
             base.OnLoad(sender, e);
 
-            if (this.Type == null)
-                throw new ApplicationException(Properties.Resources.TypeForValueLineNotDetermined.Formato(this.LabelText));
-
             if (this.NotSet(ValueLineTypeProperty))
                 this.ValueLineType = Configurator.GetDefaultValueLineType(this.Type);
 

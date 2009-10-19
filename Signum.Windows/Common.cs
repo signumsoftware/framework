@@ -95,25 +95,54 @@ namespace Signum.Windows
             obj.SetValue(RouteProperty, value);
         }
 
-        [ThreadStatic]
-        static List<Tuple<FrameworkElement, string>> delayedRoutes;
-        public static  IDisposable DelayRoutes()
-        {
-            if (delayedRoutes != null)
-                return null;
+        //[ThreadStatic]
+        //static bool delayRoutes = false; 
+        
+        ////static List<Tuple<FrameworkElement, string>> delayedRoutes;
+        //public static IDisposable DelayRoutes()
+        //{
+        //    if (delayRoutes)
+        //        return null;
 
-            delayedRoutes = new List<Tuple<FrameworkElement, string>>();
-            return new Disposable(() =>
-            {
-                foreach (var tuple in delayedRoutes)
-                {
-                    InititializeRoute(tuple.First, tuple.Second); 
-                }
+        //    delayRoutes = true;
 
-                delayedRoutes = null;
-            }); 
-        }
-     
+        //    //delayedRoutes = new List<Tuple<FrameworkElement, string>>();
+        //    return new Disposable(() =>
+        //    {
+        //        delayRoutes = false;
+        //        //foreach (var tuple in delayedRoutes)
+        //        //{
+        //        //    InititializeRoute(tuple.First, tuple.Second);
+        //        //}
+
+        //        //delayedRoutes = null;
+        //    });
+        //}
+
+        //public static bool GetDelayedRoutes(DependencyObject obj)
+        //{
+        //    return (bool)obj.GetValue(DelayedRoutesProperty);
+        //}
+
+        //public static void SetDelayedRoutes(DependencyObject obj, bool value)
+        //{
+        //    obj.SetValue(DelayedRoutesProperty, value);
+        //}
+
+        //// Using a DependencyProperty as the backing store for DelayedRoutes.  This enables animation, styling, binding, etc...
+        //public static readonly DependencyProperty DelayedRoutesProperty =
+        //    DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
+
+        //public static void DelayedRoutesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        //{
+        //    FrameworkElement fe = (FrameworkElement)d;
+
+        //    IDisposable del = DelayRoutes();
+
+        //    if (del != null)
+        //        fe.Initialized += (s, e2) => del.Dispose();
+        //}
+       
         static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -134,10 +163,10 @@ namespace Signum.Windows
 
             string route = (string)e.NewValue;
 
-            if (delayedRoutes != null)
-                delayedRoutes.Add(Tuple.New(fe, route));
+            if(fe is IPreLoad)
+                ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route);
             else
-                InititializeRoute(fe, route);
+                fe.Loaded += (s, e2) => InititializeRoute(fe, route);
         }
 
         private static void InititializeRoute(FrameworkElement fe, string route)
@@ -145,7 +174,7 @@ namespace Signum.Windows
             TypeContext context = GetTypeContext(fe.Parent);
 
             if (context == null)
-                throw new ApplicationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext);
+                throw new ApplicationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext + ": '{0}'".Formato(route));
 
             bool pseudoRoute = route.StartsWith("$");
             if (pseudoRoute)
