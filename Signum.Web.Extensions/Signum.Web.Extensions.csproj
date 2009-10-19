@@ -88,7 +88,11 @@
     <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
     <Compile Include="Captcha\CaptchaImage.cs" />
     <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
+    <Compile Include="Files\AsyncFileUploadHelper.cs" />
+    <Compile Include="Files\FileLine.cs" />
     <Compile Include="Files\FilesClient.cs" />
+    <Compile Include="Files\FileController.cs" />
+    <Compile Include="Files\FilePathModification.cs" />
     <Compile Include="Operations\OperationController.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />

@@ -153,6 +153,9 @@
   <data name="Property0NotExistsInType1" xml:space="preserve">
     <value>La propiedad {0} no existe en el tipo {1}</value>
   </data>
+  <data name="TheresNotAViewForType0" xml:space="preserve">
+    <value>No hay una vista asociada al tipo {0}</value>
+  </data>
   <data name="TheSpecifiedPasswordsDontMatch" xml:space="preserve">
     <value>Las contraseñas especificadas no coinciden</value>
   </data>
@@ -167,5 +170,8 @@
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Debes repetir la nueva contraseña</value>
+  </data>
+  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
+    <value>No se pudo crear un FilePathDN con un FileType desconocido para el campo {{0}}</value>
   </data>
 </root>
