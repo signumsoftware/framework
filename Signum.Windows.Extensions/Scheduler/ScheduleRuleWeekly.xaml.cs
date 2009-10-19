@@ -24,8 +24,8 @@ namespace Signum.Windows.Scheduler
     {
         public ScheduleRuleWeekly()
         {
-            using (Common.DelayRoutes())
-                InitializeComponent();
+            //using (Common.DelayRoutes())
+            InitializeComponent();
         }
     }
 }

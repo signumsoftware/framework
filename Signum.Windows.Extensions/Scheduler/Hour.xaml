@@ -4,7 +4,7 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     MinWidth="300">
         <StackPanel Orientation="Horizontal" m:Common.LabelVisible="False" x:Name="sp">
-            <Label Content="Hour" Target="{Binding ElementName=hour}" Width="{Binding m:Common.LabelWidth, ElementName=sp}" />
+            <Label Content="Hour" Target="{Binding ElementName=hour}" Width="{Binding (m:Common.LabelWidth), ElementName=sp}" />
             <m:ValueLine m:Common.Route="Hour" x:Name="hour" Width="30"/>
             <TextBlock Text=":" VerticalAlignment="Center" Margin="4" FontWeight="bold"/>
             <m:ValueLine m:Common.Route="Minute" Width="30"/>
