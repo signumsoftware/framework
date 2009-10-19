@@ -38,101 +38,10 @@ namespace Signum.Web.Files
                 }
             }
 
-            if (propertyName == "OldPassword")
-            {
-                PropertyPack ppCP = propertyValidators.GetOrThrow("PasswordHash", Resources.Property0NotExistsInType1.Formato("PasswordHash", RuntimeType));
-                ValueModification pCP = new ValueModification(typeof(string), subControlID);
-
-                string formCP = (string)formValues[subControlID];
-                if (!formCP.HasText())
-                {
-                    pCP.BindingError = Resources.PasswordMustHaveAValue;
-                    Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return subInterval.Max - 1;
-                }
-                
-                string passwordHash = Signum.Services.Security.EncodePassword(formCP);
-
-                if (passwordHash != Database.Retrieve<UserDN>(EntityId.Value).PasswordHash)
-                {
-                    pCP.BindingError = Resources.PasswordDoesNotMatchCurrent;
-                    Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return subInterval.Max - 1;
-                }
-
-                pCP.Value = passwordHash;
-
-                Properties.Add(propertyName, new PropertyPackModification{Modification = pCP, PropertyPack = ppCP});
+            if (propertyName == FileLineKeys.FileType)
                 return subInterval.Max - 1;
-            }
-
-            if (propertyName == "NewPassword")
-            {
-                PropertyPack ppCP = propertyValidators.GetOrThrow("PasswordHash", Resources.Property0NotExistsInType1.Formato("PasswordHash", RuntimeType));
-                ValueModification pCP = new ValueModification(typeof(string), subControlID);
-
-                string formCP = (string)formValues[subControlID];
-                if (!formCP.HasText())
-                {
-                    pCP.BindingError = Resources.PasswordMustHaveAValue;
-                    Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return subInterval.Max - 1;
-                }
-
-                string passwordHash = Signum.Services.Security.EncodePassword(formCP);
-
-                pCP.Value = passwordHash;
-
-                Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                return subInterval.Max - 1;
-            }
-
-            if (propertyName == "NewPasswordBis")
-            {
-                PropertyPack ppCP = propertyValidators.GetOrThrow("PasswordHash", Resources.Property0NotExistsInType1.Formato("PasswordHash", RuntimeType));
-                ValueModification pCP = new ValueModification(typeof(string), subControlID);
-
-                string formCP = (string)formValues[subControlID];
-                if (!formCP.HasText())
-                {
-                    pCP.BindingError = Resources.YouMustRepeatTheNewPassword;
-                    Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return subInterval.Max - 1;
-                }
-
-                string formCPBis = (string)formValues[subControlID.RemoveRight(3)];
-                if (formCP != formCPBis)
-                {
-                    pCP.BindingError = Resources.TheSpecifiedPasswordsDontMatch;
-                    Properties.Add(propertyName, new PropertyPackModification { Modification = pCP, PropertyPack = ppCP });
-                    return subInterval.Max - 1;
-                }
-
-                return subInterval.Max - 1;
-            }
 
             return base.GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, index, propertyValidators);
-        }
-
-        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
-        {
-            if (Properties != null)
-            {
-                foreach (var ppm in Properties.Values)
-                {
-                    ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors, prefix);
-
-                    if (ppm.PropertyPack.PropertyInfo.Name == "PasswordHash")
-                        continue;
-
-                    string error = ((ModifiableEntity)entity)[ppm.PropertyPack.PropertyInfo.Name];
-                    if (error != null)
-                        errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
-                }
-            }
-
-            if (!string.IsNullOrEmpty(BindingError))
-                errors.GetOrCreate(ControlID).Add(BindingError);
         }
     }
 }
