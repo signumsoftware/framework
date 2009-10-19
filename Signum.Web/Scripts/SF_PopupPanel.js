@@ -371,6 +371,18 @@ function DownloadFile(urlController, prefix) {
     window.open(urlController + "?filePathID=" + id);
 }
 
+function UploadFile(urlController, prefix) {
+    $('#' + prefix)[0].setAttribute('value', $('#' + prefix)[0].value);
+    $('#' + prefix + 'loading').show();
+    var mform = $('form');
+    var cEncType = mform.attr('enctype');
+    var cEncoding = mform.attr('encoding');
+    var cTarget = mform.attr('target');
+    var cAction = mform.attr('action');
+    mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data').attr('target', 'frame' + prefix).attr('action', urlController).submit();
+    mform.attr('enctype', cEncType).attr('encoding', cEncoding).attr('target', cTarget).attr('action', cAction);
+}
+
 function RemoveDetailContainedEntity(prefix, detailDiv, reloadOnChangeFunction) {
     $('#' + prefix + sfToStr).val("");
     $('#' + prefix + sfToStr).html("");
