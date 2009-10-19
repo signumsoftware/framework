@@ -37,24 +37,23 @@ namespace Signum.Web.Files
                 string idStr = (string)Request.Form[TypeContext.Compose(file, TypeContext.Id)];
                 int id;
                 if (int.TryParse(idStr, out id))
-                    fp = Database.Retrieve<FilePathDN>(id);
-                else
-                {
-                    string fileType = (string)Request.Form[TypeContext.Compose(file, FileLineKeys.FileType)];
-                    if (!fileType.HasText())
-                        throw new ApplicationException(Resources.CouldntCreateFilePathWithUnknownFileTypeForField0.Formato(file));
-                    fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
-                }
-
+                    continue; //Only new files will come with content
+                
                 HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
                 if (hpf.ContentLength == 0)
-                    continue;
-                formFieldId = file;
+                    continue; 
+                
+                string fileType = (string)Request.Form[TypeContext.Compose(file, FileLineKeys.FileType)];
+                if (!fileType.HasText())
+                    throw new ApplicationException(Resources.CouldntCreateFilePathWithUnknownFileTypeForField0.Formato(file));
 
-                fp.FileName = hpf.FileName;
-                fp.BinaryFile = hpf.InputStream.ReadAllBytes();
+                formFieldId = file; //This is the uploaded file
 
-                fp = fp.Save();
+                fp = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType))
+                {
+                    FileName = Path.GetFileName(hpf.FileName),
+                    BinaryFile = hpf.InputStream.ReadAllBytes()
+                }.Save();
             }
 
             StringBuilder sb = new StringBuilder();
@@ -62,18 +61,21 @@ namespace Signum.Web.Files
             sb.AppendLine("<html><head><title>-</title></head><body>");
             sb.AppendLine("<script type='text/javascript'>");
             sb.AppendLine("var parDoc = window.parent.document;");
-            
+
             if (fp.TryCS(f => f.IdOrNull) != null)
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));                
+                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));
                 sb.AppendLine("parDoc.getElementById('{0}').value='FilePathDN';".Formato(TypeContext.Compose(formFieldId, TypeContext.RuntimeType)));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id.ToString()));                
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id.ToString()));
                 sb.AppendLine("parDoc.getElementById('div{0}New').style.display='none';".Formato(formFieldId));
                 sb.AppendLine("parDoc.getElementById('div{0}Old').style.display='block';".Formato(formFieldId));
             }
             else
-                sb.AppendLine("window.alert('ERROR');");
+            {
+                sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
+                sb.AppendLine("window.alert('Error guardando el archivo');");
+            }
 
             sb.AppendLine("</script>");
             sb.AppendLine("</body></html>");

@@ -169,17 +169,15 @@ namespace Signum.Web.Files
                 string viewingUrl = "javascript:DownloadFile('File.aspx/Download','{0}');".Formato(idValueField); // "javascript:OpenPopup(" + popupOpeningParameters + ");";
                 sb.AppendLine(
                         helper.Href(TypeContext.Compose(idValueField, EntityBaseKeys.ToStrLink),
-                            value.FileName,
+                            value.TryCC(f => f.FileName) ?? "",
                             viewingUrl,
                             "View",
                             "valueLine",
-                            new Dictionary<string, object> { { "style", "display:" + (hasEntity ? "block" : "none") } }));
+                            null));
             }
             else
             {
-                Dictionary<string, object> dic = new Dictionary<string, object>(settings.ValueHtmlProps);
-                dic.Add("style", "display:none");
-                sb.AppendLine(helper.Span(TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), value.FileName, "", dic));
+                sb.AppendLine(helper.Span(TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "valueLine", null));
             }
             if (settings.Remove)
             {
@@ -188,13 +186,15 @@ namespace Signum.Web.Files
                               "x",
                               "RemoveFileLineEntity('{0}');".Formato(idValueField),
                               "lineButton remove",
-                              (hasEntity) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
+                              null));
             }
             sb.AppendLine("</div>");
 
             sb.AppendLine("<div id='div{0}New' style='display:{1}'>".Formato(idValueField, hasEntity ? "none" : "block"));
-            sb.AppendLine("<input type='file' id='{0}' name='{0}' class='valueLine'/>".Formato(idValueField));
-            sb.AppendLine("<input type='button' value='Submit' onclick=\"$('#{0}loading').show(); $('form').attr('enctype','multipart/form-data').attr('target','frame{0}').attr('action','File/Upload').submit();\" />".Formato(idValueField));
+            //sb.AppendLine("<input type='file' onblur=\"window.alert('blur');\" onchange=\"window.alert('change');\" id='{0}' name='{0}' class='valueLine'/>".Formato(idValueField));
+            //sb.AppendLine("<input type='file' id='{0}' name='{0}' class='valueLine'/>".Formato(idValueField));
+            sb.AppendLine("<input type='file' onchange=\"UploadFile('File/Upload',this.id);\" id='{0}' name='{0}' class='valueLine'/>".Formato(idValueField));
+            //sb.AppendLine("<input type='button' value='Submit' onclick=\"UploadFile('File/Upload','{0}');\" />".Formato(idValueField));
             sb.AppendLine("<img src='Images/loading.gif' id='{0}loading' alt='loading' style='display:none'/>".Formato(idValueField));
             sb.AppendLine("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(idValueField));
             sb.AppendLine("</div>");
