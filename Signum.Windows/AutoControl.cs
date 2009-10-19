@@ -50,7 +50,7 @@ namespace Signum.Windows
 
             XElement element = GenerateEntityStackPanel(type);
             //using (Common.DelayRoutes())
-                this.Content = XamlReader.Load(element.CreateReader());
+            this.Content = XamlReader.Load(element.CreateReader());
         }
 
 

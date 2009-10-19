@@ -96,9 +96,8 @@ namespace Signum.Windows
         }
 
         //[ThreadStatic]
-        //static bool delayRoutes = false; 
-        
-        ////static List<Tuple<FrameworkElement, string>> delayedRoutes;
+        //static bool delayRoutes = false;
+
         //public static IDisposable DelayRoutes()
         //{
         //    if (delayRoutes)
@@ -106,18 +105,16 @@ namespace Signum.Windows
 
         //    delayRoutes = true;
 
-        //    //delayedRoutes = new List<Tuple<FrameworkElement, string>>();
         //    return new Disposable(() =>
         //    {
         //        delayRoutes = false;
-        //        //foreach (var tuple in delayedRoutes)
-        //        //{
-        //        //    InititializeRoute(tuple.First, tuple.Second);
-        //        //}
-
-        //        //delayedRoutes = null;
         //    });
         //}
+
+
+        //public static readonly DependencyProperty DelayedRoutesProperty =
+        //    DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
+
 
         //public static bool GetDelayedRoutes(DependencyObject obj)
         //{
@@ -128,10 +125,6 @@ namespace Signum.Windows
         //{
         //    obj.SetValue(DelayedRoutesProperty, value);
         //}
-
-        //// Using a DependencyProperty as the backing store for DelayedRoutes.  This enables animation, styling, binding, etc...
-        //public static readonly DependencyProperty DelayedRoutesProperty =
-        //    DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
 
         //public static void DelayedRoutesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         //{
@@ -163,7 +156,7 @@ namespace Signum.Windows
 
             string route = (string)e.NewValue;
 
-            if(fe is IPreLoad)
+            if (fe is IPreLoad)
                 ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route);
             else
                 fe.Loaded += (s, e2) => InititializeRoute(fe, route);

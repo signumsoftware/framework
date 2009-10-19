@@ -181,7 +181,7 @@ namespace Signum.Windows
         public NavigationManager()
         {
             TaskViewWindow += TaskSetSetIcon;
-            TaskViewWindow += TaskSetLabelShortcuts;
+            //TaskViewWindow += TaskSetLabelShortcuts;
         }
 
         public void TaskSetSetIcon(Window windows, WindowsType winType, object typeOrQueryName)
@@ -201,7 +201,7 @@ namespace Signum.Windows
             if (winType == WindowsType.Find)
                 return;
 
-            //windows.Loaded += (s, e) =>ShortcutHelper.SetLabelShortcuts(windows);
+            ShortcutHelper.SetLabelShortcuts(windows);
         }
 
 
