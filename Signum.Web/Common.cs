@@ -30,7 +30,7 @@ namespace Signum.Web
             CommonTask += new CommonTask(TaskSetReloadOnChange);
         }
 
-        internal static void FireCommonTasks(BaseLine eb, Type parent, TypeContext context)
+        public static void FireCommonTasks(BaseLine eb, Type parent, TypeContext context)
         {
             CommonTask(eb, parent, context);
         }
@@ -125,7 +125,7 @@ namespace Signum.Web
             return (TypeContext)mi.MakeGenericMethod(tc.ContextType, returnType).Invoke(null, new object[] { tc, lambda });
         }
 
-        internal static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
+        public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             PropertyInfo[] pi = MemberAccessGatherer.GetMemberList(lambda).Cast<PropertyInfo>().ToArray();
 

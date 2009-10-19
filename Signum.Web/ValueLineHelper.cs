@@ -33,12 +33,7 @@ namespace Signum.Web
                 if (StyleContext.Current.ValueFirst)
                     sb.AppendLine("<div class='valueFirst'>");
                 else
-                {
-                    if (settings.LabelHtmlProps != null && settings.LabelHtmlProps.Count > 0)
-                        sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
-                    else
-                        sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel));
-                }
+                    sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
             }
             string valueStr = (value != null) ? value.ToString() : "";
             if (StyleContext.Current.ReadOnly)
@@ -69,7 +64,7 @@ namespace Signum.Web
                 else
                 {
                     if (settings.ValueHtmlProps.ContainsKey("class"))
-                        settings.ValueHtmlProps["class"] = "valueLine inlineVal " + settings.ValueHtmlProps["class"];
+                        settings.ValueHtmlProps["class"] = "valueLine " + settings.ValueHtmlProps["class"];
                     else
                         settings.ValueHtmlProps.Add("class", "valueLine");
                     sb.AppendLine(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings, typeof(T))));
@@ -260,6 +255,13 @@ namespace Signum.Web
         public ValueLineType? ValueLineType;
         public List<SelectListItem> EnumComboItems;
         public DatePickerOptions DatePickerOptions;
+
+        public ValueLine() { }
+
+        public ValueLine(Dictionary<string, object> valueHtmlProps)
+        {
+            ValueHtmlProps = valueHtmlProps;
+        }
 
         public override void SetReadOnly()
         {

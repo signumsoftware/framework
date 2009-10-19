@@ -148,6 +148,10 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
         popup.style.left = left;
         popup.style.top = top;
         popup.style.width = popupWidth + "px";
+
+        if ($('#' + prefix + panelPopupKey + " :file").length > 0)
+            popup.style.minWidth = "500px";
+        
         $('#' + globalKey).show('fast');
         $('#' + prefix + modalBackgroundKey)[0].style.left=0;
         $('#' + prefix + modalBackgroundKey).css('filter','alpha(opacity=40)').fadeIn('slow');
@@ -328,10 +332,30 @@ function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
     $('#' + prefix + sfIsNew).remove();
     window[prefix + sfEntityTemp] = "";
     
-    var idField = $('#' + prefix + sfId);
     $('#' + prefix + sfEntity).html("");
     $('#' + prefix + sfId).val("");
     toggleButtonsDisplay(prefix, false);
+
+    if (!empty(reloadOnChangeFunction)) {
+        $('#' + prefix + sfTicks).val(new Date().getTime());
+        reloadOnChangeFunction();
+    }
+}
+
+function RemoveFileLineEntity(prefix, reloadOnChangeFunction) {
+    $('#' + prefix + sfToStr).val("");
+    $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
+    $('#' + prefix + sfLink).val("");
+    $('#' + prefix + sfLink).removeClass(sfInputErrorClass);
+    $('#' + prefix + sfRuntimeType).val("");
+    $('#' + prefix + sfIsNew).remove();
+    window[prefix + sfEntityTemp] = "";
+
+    $('#' + prefix + sfEntity).html("");
+    $('#' + prefix + sfId).val("");
+
+    $('#div' + prefix + 'Old').hide();
+    $('#div' + prefix + 'New').show();
 
     if (!empty(reloadOnChangeFunction)) {
         $('#' + prefix + sfTicks).val(new Date().getTime());

@@ -272,7 +272,7 @@ namespace Signum.Web
     public class TypeSubContext<T> : TypeContext<T>, IDisposable
     {
         PropertyInfo[] properties; 
-        internal TypeContext Parent { get; private set; }
+        public TypeContext Parent { get; private set; }
 
         public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties)
             : base(value)

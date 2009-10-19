@@ -8,8 +8,8 @@ namespace Signum.Web
 {
     public static class AjaxExtensions
     {
-        private static string _microsoftAjaxLibraryUrl = "/Scripts/MicrosoftAjax.js";
-        private static string _toolkitFolderUrl = "/Scripts/AjaxControlToolkit/3.0.20820.16598/3.0.20820.0/";
+        private static string _microsoftAjaxLibraryUrl = "Scripts/MicrosoftAjax.js";
+        private static string _toolkitFolderUrl = "Scripts/AjaxControlToolkit/3.0.20820.16598/3.0.20820.0/";
 
         public static string MicrosoftAjaxLibraryInclude(this HtmlHelper helper)
         {
