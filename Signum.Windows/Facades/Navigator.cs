@@ -201,7 +201,7 @@ namespace Signum.Windows
             if (winType == WindowsType.Find)
                 return;
 
-            ShortcutHelper.SetLabelShortcuts(windows);
+            //windows.Loaded += (s, e) =>ShortcutHelper.SetLabelShortcuts(windows);
         }
 
 
