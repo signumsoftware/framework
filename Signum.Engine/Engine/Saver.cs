@@ -40,6 +40,10 @@ namespace Signum.Engine
                     if (m is IdentifiableEntity)
                         schema.OnSaving((IdentifiableEntity)m, ref graphModified);
                 }, createGraph);
+
+            string error = GraphExplorer.Integrity(modifiables);
+            if (error.HasText())
+                throw new ApplicationException(error);
             
             GraphExplorer.PropagateModifications(modifiables.Inverse());
 
