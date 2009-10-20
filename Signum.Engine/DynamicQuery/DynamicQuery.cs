@@ -11,6 +11,8 @@ using Signum.Utilities;
 using Signum.Engine.Properties;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Linq;
+using Signum.Entities;
+using System.Diagnostics;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -18,6 +20,7 @@ namespace Signum.Engine.DynamicQuery
     {
         QueryDescription GetDescription();
         QueryResult ExecuteQuery(List<Filter> filters, int? limit);
+        string GetErrors(); 
     }
 
     public class DynamicQuery<T> : IDynamicQuery
@@ -57,6 +60,11 @@ namespace Signum.Engine.DynamicQuery
 
             columns = members.Cast<IMemberEntry>().Select(e =>
                     new Column(e.MemberInfo, metas.TryGetC(e.MemberInfo.Name))).ToList();
+        }
+
+        public string GetErrors()
+        {
+            return columns.Where(c => typeof(ModifiableEntity).IsAssignableFrom(c.Type)).ToString(c => c.Name, ", ");
         }
 
         public QueryDescription GetDescription()
@@ -225,5 +233,14 @@ namespace Signum.Engine.DynamicQuery
         {
             return MetadataVisitor.GatherMetadata(query.Expression); 
         }
+
+        public static string GetQueryName(object queryKey)
+        {
+            return
+                queryKey is Type ? ((Type)queryKey).FullName :
+                queryKey is Enum ? "{0}.{1}".Formato(queryKey.GetType().Name, queryKey.ToString()) :
+                queryKey.ToString();
+        }
+
     }
 }

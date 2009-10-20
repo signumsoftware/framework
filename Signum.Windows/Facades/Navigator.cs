@@ -181,7 +181,7 @@ namespace Signum.Windows
         public NavigationManager()
         {
             TaskViewWindow += TaskSetSetIcon;
-            //TaskViewWindow += TaskSetLabelShortcuts;
+            TaskViewWindow += TaskSetLabelShortcuts;
         }
 
         public void TaskSetSetIcon(Window windows, WindowsType winType, object typeOrQueryName)

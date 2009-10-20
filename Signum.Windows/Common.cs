@@ -95,46 +95,46 @@ namespace Signum.Windows
             obj.SetValue(RouteProperty, value);
         }
 
-        //[ThreadStatic]
-        //static bool delayRoutes = false;
+        [ThreadStatic]
+        static bool delayRoutes = false;
 
-        //public static IDisposable DelayRoutes()
-        //{
-        //    if (delayRoutes)
-        //        return null;
+        public static IDisposable DelayRoutes()
+        {
+            if (delayRoutes)
+                return null;
 
-        //    delayRoutes = true;
+            delayRoutes = true;
 
-        //    return new Disposable(() =>
-        //    {
-        //        delayRoutes = false;
-        //    });
-        //}
-
-
-        //public static readonly DependencyProperty DelayedRoutesProperty =
-        //    DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
+            return new Disposable(() =>
+            {
+                delayRoutes = false;
+            });
+        }
 
 
-        //public static bool GetDelayedRoutes(DependencyObject obj)
-        //{
-        //    return (bool)obj.GetValue(DelayedRoutesProperty);
-        //}
+        public static readonly DependencyProperty DelayedRoutesProperty =
+            DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
 
-        //public static void SetDelayedRoutes(DependencyObject obj, bool value)
-        //{
-        //    obj.SetValue(DelayedRoutesProperty, value);
-        //}
 
-        //public static void DelayedRoutesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        //{
-        //    FrameworkElement fe = (FrameworkElement)d;
+        public static bool GetDelayedRoutes(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(DelayedRoutesProperty);
+        }
 
-        //    IDisposable del = DelayRoutes();
+        public static void SetDelayedRoutes(DependencyObject obj, bool value)
+        {
+            obj.SetValue(DelayedRoutesProperty, value);
+        }
 
-        //    if (del != null)
-        //        fe.Initialized += (s, e2) => del.Dispose();
-        //}
+        public static void DelayedRoutesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            FrameworkElement fe = (FrameworkElement)d;
+
+            IDisposable del = DelayRoutes();
+
+            if (del != null)
+                fe.Initialized += (s, e2) => del.Dispose();
+        }
        
         static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -156,10 +156,15 @@ namespace Signum.Windows
 
             string route = (string)e.NewValue;
 
-            if (fe is IPreLoad)
-                ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route);
+            if (!delayRoutes)
+                InititializeRoute(fe, route);
             else
-                fe.Loaded += (s, e2) => InititializeRoute(fe, route);
+            {
+                if (fe is IPreLoad)
+                    ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route);
+                else
+                    fe.Loaded += (s, e2) => InititializeRoute(fe, route);
+            }
         }
 
         private static void InititializeRoute(FrameworkElement fe, string route)

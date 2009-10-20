@@ -360,6 +360,7 @@ namespace Signum.Engine.Linq
                     {
                         return nex.Arguments[0];
                     }
+
                     if (nex.Members != null)
                     {
                         MethodInfo mi = ((PropertyInfo)member).GetGetMethod();

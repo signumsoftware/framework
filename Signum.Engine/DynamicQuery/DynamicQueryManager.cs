@@ -27,7 +27,15 @@ namespace Signum.Engine.DynamicQuery
             {
                 return TryGet(queryName).ThrowIfNullC(Resources.TheView0IsNotOnQueryManager.Formato(queryName));
             }
-            set { queries[queryName] = value; }
+            set {
+
+                string error = value.GetErrors();
+
+                if (error.HasText())
+                    Console.WriteLine("Query {0} -> {1}".Formato(DynamicQuery.GetQueryName(queryName), error));
+
+                queries[queryName] = value;
+            }
         }
 
         IDynamicQuery TryGet(object queryName)
