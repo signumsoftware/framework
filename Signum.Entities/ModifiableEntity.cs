@@ -111,7 +111,7 @@ namespace Signum.Entities
         [HiddenProperty]
         public string ToStringMethod
         {
-            get { return ToString(); }
+            get { return ToString().HasText() ? ToString() : this.GetType().Name; }
         }
 
         public bool SetToStr<T>(ref T variable, T valor, string propertyName)
