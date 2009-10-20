@@ -176,14 +176,14 @@ namespace Signum.Windows.Operations
                         Lazy lazy = Lazy.Create(ident.GetType(), ident);
                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLazy(lazy, operationInfo.Key, null);
                         if (operationInfo.Returns)
-                            Navigator.View(newIdent);
+                            Navigator.View(new ViewOptions { Buttons = ViewButtons.Save }, newIdent);
                     }
                 }
                 else
                 {
                     IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
                     if (operationInfo.Returns)
-                        Navigator.View(newIdent);
+                        Navigator.View(new ViewOptions { Buttons = ViewButtons.Save }, newIdent);
                 }
             }
         }
