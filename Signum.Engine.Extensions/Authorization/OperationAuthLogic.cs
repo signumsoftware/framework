@@ -38,19 +38,6 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing += Schema_Initializing;
                 sb.Schema.EntityEvents<RuleOperationDN>().Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
-
-                dqm[typeof(LogOperationDN)] = (from o in Database.Query<LogOperationDN>()
-                                               select new
-                                               {
-                                                   Entity = o.ToLazy(),
-                                                   o.Id,
-                                                   o.Target,
-                                                   o.Operation,
-                                                   o.User,
-                                                   o.Start,
-                                                   o.End,
-                                                   o.Exception,
-                                               }).ToDynamic();
             }
         }
 

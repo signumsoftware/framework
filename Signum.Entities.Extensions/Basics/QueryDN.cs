@@ -18,14 +18,6 @@ namespace Signum.Entities.Basics
             set { SetToStr(ref name, value, "Name"); }
         }
 
-        public static string GetQueryName(object queryKey)
-        {
-            return
-                queryKey is Type ? ((Type)queryKey).FullName :
-                queryKey is Enum ? EnumDN.UniqueKey((Enum)queryKey) :
-                queryKey.ToString();
-        }
-
         public override string ToString()
         {
             return name;
