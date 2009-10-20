@@ -13,7 +13,7 @@ namespace Signum.Engine
 {
     /// <summary>
     /// Allows easy nesting of transaction 
-    /// keeping  manteniendo una pila implícita de objetos Transaccion apollada sobre la pila del hilo
+    /// keeping una pila implícita de objetos Transaccion apoyada sobre la pila del hilo
     /// y una pila explicita thread static de transacciones reales.
     /// Por lo general solo la primera Transaccion genera una TransaccionReal, a no ser que se cree 
     /// otra transaccion interior con forzarNueva = true
