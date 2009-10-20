@@ -70,7 +70,6 @@
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
-    <Compile Include="Files\IHasFiles.cs" />
     <Compile Include="Operations\IOperationServer.cs" />
     <Compile Include="Operations\OperationDN.cs" />
     <Compile Include="Operations\LogOperationDN.cs" />

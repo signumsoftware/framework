@@ -115,6 +115,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to FileType property of FileLine settings must be specified for FileLine {{0}}.
+        /// </summary>
+        internal static string FileTypePropertyOfFileLineSettingsMustBeSpecified {
+            get {
+                return ResourceManager.GetString("FileTypePropertyOfFileLineSettingsMustBeSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid new password.
         /// </summary>
         internal static string InvalidNewPassword {

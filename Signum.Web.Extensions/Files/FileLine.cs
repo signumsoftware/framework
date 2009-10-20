@@ -23,7 +23,14 @@ namespace Signum.Web.Files
     public class FileLine : BaseLine
     {
         public readonly Dictionary<string, object> ValueHtmlProps = new Dictionary<string, object>(0);
-        
+
+        Enum fileType;
+        public Enum FileType
+        {
+            get { return fileType; }
+            set { fileType = value; }
+        }
+
         bool view = true;
         public bool View
         {
@@ -80,7 +87,10 @@ namespace Signum.Web.Files
         {
             if (!settings.Visible)
                 return null;
-            
+
+            if (settings.FileType == null)
+                throw new ArgumentException(Resources.FileTypePropertyOfFileLineSettingsMustBeSpecified.Formato(typeContext.Name));
+
             string idValueField = helper.GlobalName(typeContext.Name);
             FilePathDN value = typeContext.Value;
             Type type = typeof(FilePathDN);
@@ -106,7 +116,7 @@ namespace Signum.Web.Files
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, FileLineKeys.FileType),
                 EnumDN.UniqueKey((value != null) ? 
                     value.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(value.FileType) : 
-                    ((IHasFiles)((TypeSubContext<S>)typeContext).Parent.UntypedValue).GetFileType(typeContext.LastProperty.Name))));
+                    settings.FileType)));
 
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.RuntimeType), runtimeType));
 
@@ -223,6 +233,25 @@ namespace Signum.Web.Files
             //Navigator.ConfigureEntityBase(el, runtimeType, false);
 
             Common.FireCommonTasks(fl, typeof(T), context);
+
+            helper.ViewContext.HttpContext.Response.Write(
+                SetFileLineOptions(helper, context, fl));
+        }
+
+        public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)
+            where S : FilePathDN
+        {
+            TypeContext<S> context = Common.WalkExpression(tc, property);
+
+            Type runtimeType = typeof(FilePathDN);
+
+            FileLine fl = new FileLine();
+
+            //Navigator.ConfigureEntityBase(el, runtimeType, false);
+
+            Common.FireCommonTasks(fl, typeof(T), context);
+
+            settingsModifier(fl);
 
             helper.ViewContext.HttpContext.Response.Write(
                 SetFileLineOptions(helper, context, fl));

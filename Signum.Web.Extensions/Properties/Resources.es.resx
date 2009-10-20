@@ -177,4 +177,7 @@
   <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
     <value>No se ha pasado al controlador el parámetro {filePathID}</value>
   </data>
+  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
+    <value>La propiedad {FileType} del FileLine settings debe ser especificada para el FileLine {{0}}</value>
+  </data>
 </root>
