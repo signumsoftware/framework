@@ -124,6 +124,9 @@
     </Compile>
     <Compile Include="Calendars\DatePanel.cs" />
     <Compile Include="Converters.cs" />
+    <Compile Include="ExecutionInfo\ElapsedTime.xaml.cs">
+      <DependentUpon>ElapsedTime.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
@@ -291,6 +294,10 @@
     <Page Include="Calendars\CalendarStripWithTitles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ExecutionInfo\ElapsedTime.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Files\FileLine.xaml">
       <Generator>MSBuild:Compile</Generator>
