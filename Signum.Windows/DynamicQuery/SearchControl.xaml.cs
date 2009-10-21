@@ -42,9 +42,15 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+        public static readonly DependencyProperty ItemsCountProperty =
+        DependencyProperty.Register("ItemsCount", typeof(int), typeof(SearchControl), new UIPropertyMetadata(0));
         public int ItemsCount
         {
-            get { return (int) lvResult.Items.Count; }
+            get { return (int)GetValue(ItemsCountProperty); }
+            set
+            {
+                SetValue(ItemsCountProperty, value);
+            }
         }
 
         public static readonly DependencyProperty FilterVisibleProperty =
@@ -306,6 +312,7 @@ namespace Signum.Windows
                             lvResult.SelectedIndex = 0;
                             lvResult.ScrollIntoView(queryResult.Data.First());
                         }
+                        ItemsCount = lvResult.Items.Count;
                         lvResult.Background = Brushes.White;
                         lvResult.Focus();
                         tbResultados.Visibility = Visibility.Visible;
