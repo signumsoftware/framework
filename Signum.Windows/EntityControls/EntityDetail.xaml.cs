@@ -77,35 +77,5 @@ namespace Signum.Windows
             else
                 contentPresenter.DataContext = newValue;
         }
-      
-        private void btCreate_Click(object sender, RoutedEventArgs e)
-        {
-            object entity = OnCreate();
-
-            if (entity != null)
-                SetEntityUserInteraction(entity);
-        }
-
-        private void btFind_Click(object sender, RoutedEventArgs e)
-        {
-            object entity = OnFinding(false);
-
-            if (entity != null)
-                SetEntityUserInteraction(entity);
-        }
-
-        private void btView_Click(object sender, RoutedEventArgs e)
-        {
-            object entity = OnViewing(Entity);
-
-            if (entity != null)
-                SetEntityUserInteraction(entity);
-        }
-
-        private void btRemove_Click(object sender, RoutedEventArgs e)
-        {
-            if (OnRemoving(Entity))
-                SetEntityUserInteraction(null);
-        }
     }
 }

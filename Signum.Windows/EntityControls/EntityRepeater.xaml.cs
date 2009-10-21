@@ -37,7 +37,7 @@ namespace Signum.Windows
             Common.SetCurrentWindow((DependencyObject)sender, this.FindCurrentWindow()); 
         }
 
-        private void btCreate_Click(object sender, RoutedEventArgs e)
+        protected override void btCreate_Click(object sender, RoutedEventArgs e)
         {
             object value = OnCreate();
 
@@ -51,7 +51,7 @@ namespace Signum.Windows
             }
         }
 
-        private void btRemove_Click(object sender, RoutedEventArgs e)
+        protected override void btRemove_Click(object sender, RoutedEventArgs e)
         {
             object value = ((Grid)(((Button)sender).Parent)).DataContext;
 

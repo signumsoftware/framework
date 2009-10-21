@@ -41,7 +41,7 @@
                     HorizontalContentAlignment="Left" 
                     VerticalContentAlignment="Center"
                     HorizontalAlignment="Stretch" 
-                    VerticalAlignment="Stretch"/>
+                    VerticalAlignment="Stretch" />
                 <m:AutoCompleteTextBox 
                     x:Name="autoCompleteTextBox"
                     AutoCompleting="autoCompleteTextBox_AutoCompleting" 
@@ -54,10 +54,10 @@
                 VerticalContentAlignment="Center"  />-->
 		</Border>
 		<StackPanel Orientation="Horizontal" Grid.Column="2" x:Name="buttons">
-			<Button x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
-			<Button x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
-			<Button x:Name="btView" Style="{StaticResource RoundButton}" Click="btView_Click" Content="{StaticResource View}" ToolTip="{m:Loc View}"/>
-			<Button x:Name="btRemove" Style="{StaticResource RoundButton}" Click="btRemove_Click" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
+			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
+			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
+			<Button Focusable="False" x:Name="btView" Style="{StaticResource RoundButton}" Click="btView_Click" Content="{StaticResource View}" ToolTip="{m:Loc View}"/>
+			<Button Focusable="False" x:Name="btRemove" Style="{StaticResource RoundButton}" Click="btRemove_Click" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
 		</StackPanel>
 	</Grid>
 

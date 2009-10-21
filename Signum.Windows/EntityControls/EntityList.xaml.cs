@@ -96,7 +96,7 @@ namespace Signum.Windows
             InitializeComponent();
         }
 
-        private void btCreate_Click(object sender, RoutedEventArgs e)
+        protected override void btCreate_Click(object sender, RoutedEventArgs e)
         {
             object value = OnCreate();
 
@@ -124,7 +124,7 @@ namespace Signum.Windows
             return Entity != null ? Entities.IndexOf(entity) + 1 : Entities.Count;
         }
 
-        private void btFind_Click(object sender, RoutedEventArgs e)
+        protected override void btFind_Click(object sender, RoutedEventArgs e)
         {
             IList list = EnsureEntities();
 
@@ -161,7 +161,7 @@ namespace Signum.Windows
             }
         }
 
-        private void btView_Click(object sender, RoutedEventArgs e)
+        protected override void btView_Click(object sender, RoutedEventArgs e)
         {
             object entity = OnViewing(this.listBox.SelectedItem);
 
@@ -204,7 +204,7 @@ namespace Signum.Windows
             }
         }
 
-        private void btRemove_Click(object sender, RoutedEventArgs e)
+        protected override void btRemove_Click(object sender, RoutedEventArgs e)
         {
             RemoveElements();
         }

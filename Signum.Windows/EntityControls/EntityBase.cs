@@ -8,11 +8,21 @@ using System.ComponentModel;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
+using System.Windows.Input;
 
 namespace Signum.Windows
 {
     public class EntityBase : LineBase
     {
+        public static RoutedCommand CreateCommand =
+          new RoutedCommand("Create", typeof(EntityLine), new InputGestureCollection(new InputGesture[] { new KeyGesture(Key.N, ModifierKeys.Control, "Create") }));
+        public static RoutedCommand ViewCommand =
+            new RoutedCommand("View", typeof(EntityLine), new InputGestureCollection(new InputGesture[] { new KeyGesture(Key.G, ModifierKeys.Control, "View") }));
+        public static RoutedCommand RemoveCommand =
+            new RoutedCommand("Remove", typeof(EntityLine), new InputGestureCollection(new InputGesture[] { new KeyGesture(Key.R, ModifierKeys.Control, "Remove") }));
+        public static RoutedCommand FindCommand =
+            new RoutedCommand("Find", typeof(EntityLine), new InputGestureCollection(new InputGesture[] { new KeyGesture(Key.F, ModifierKeys.Control, "Find") }));
+
         public static readonly DependencyProperty EntityProperty =
             DependencyProperty.Register("Entity", typeof(object), typeof(EntityBase), new FrameworkPropertyMetadata(null,
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (d, e) => ((EntityBase)d).OnEntityChanged(e.OldValue, e.NewValue)));
@@ -94,6 +104,14 @@ namespace Signum.Windows
         {
             LineBase.TypeProperty.OverrideMetadata(typeof(EntityBase), 
                 new UIPropertyMetadata((d, e) => ((EntityBase)d).SetType((Type)e.NewValue)));
+        }
+
+        public EntityBase()
+        {
+            this.CommandBindings.Add(new CommandBinding(CreateCommand, btCreate_Click));
+            this.CommandBindings.Add(new CommandBinding(FindCommand, btFind_Click));
+            this.CommandBindings.Add(new CommandBinding(RemoveCommand, btRemove_Click));
+            this.CommandBindings.Add(new CommandBinding(ViewCommand, btView_Click));
         }
 
         protected internal override DependencyProperty CommonRouteValue()
@@ -205,6 +223,36 @@ namespace Signum.Windows
         protected virtual bool CanCreate()
         {
             return Entity == null && Create && !Common.GetIsReadOnly(this);
+        }
+
+        protected virtual void btCreate_Click(object sender, RoutedEventArgs e)
+        {
+            object entity = OnCreate();
+
+            if (entity != null)
+                SetEntityUserInteraction(entity);
+        }
+
+        protected virtual void btFind_Click(object sender, RoutedEventArgs e)
+        {
+            object entity = OnFinding(false);
+
+            if (entity != null)
+                SetEntityUserInteraction(entity);
+        }
+
+        protected virtual void btView_Click(object sender, RoutedEventArgs e)
+        {
+            object entity = OnViewing(Entity);
+
+            if (entity != null)
+                SetEntityUserInteraction(entity);
+        }
+
+        protected virtual void btRemove_Click(object sender, RoutedEventArgs e)
+        {
+            if (OnRemoving(Entity))
+                SetEntityUserInteraction(null);
         }
 
         protected virtual void OnEntityChanged(object oldValue, object newValue)

@@ -136,7 +136,6 @@ namespace Signum.Engine
             where O : class
             where N : class
         {
-        restart:
             var oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
             var newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
 
@@ -154,17 +153,12 @@ namespace Signum.Engine
                 sms.Select((s, i) => "- {0}: {1} ".Formato(i, s)).ToConsole();
                 Console.WriteLine();
                 Console.WriteLine("- n: None");
-                Console.WriteLine("- r: Restart");
 
                 string answer = Console.ReadLine().ToLower();
                 int option = 0;
                 if (answer == "n")
                 {
                     oldOnly.RemoveAt(0);
-                }
-                else if (answer == "r")
-                {
-                    goto restart;
                 }
                 else if (answer == "" || int.TryParse(answer, out option))
                 {

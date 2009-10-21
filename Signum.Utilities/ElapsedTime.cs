@@ -9,8 +9,8 @@ namespace Signum.Utilities
     public static class ElapsedTime
     {
         public static bool ShowDebug = false;
-        public static Dictionary<string, ElapsedTimeEnty> IdentifiedElapseds =
-            new Dictionary<string, ElapsedTimeEnty>();
+        public static Dictionary<string, ElapsedTimeEntity> IdentifiedElapseds =
+            new Dictionary<string, ElapsedTimeEntity>();
 
         public static IDisposable Start(string identifier)
         {
@@ -24,10 +24,10 @@ namespace Signum.Utilities
         {
             lock (IdentifiedElapseds)
             {
-                ElapsedTimeEnty entry;
+                ElapsedTimeEntity entry;
                 if (!IdentifiedElapseds.TryGetValue(identifier, out entry))
                 {
-                    entry = new ElapsedTimeEnty();
+                    entry = new ElapsedTimeEntity();
                     IdentifiedElapseds.Add(identifier, entry);
                 }
 
@@ -45,7 +45,7 @@ namespace Signum.Utilities
         }
     }
 
-    public class ElapsedTimeEnty
+    public class ElapsedTimeEntity
     {
         public long LastTime = 0;
         public long TotalTime = 0;

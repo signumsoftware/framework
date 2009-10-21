@@ -17,9 +17,9 @@
 	</UserControl.Resources>
 
 	<StackPanel Orientation="{Binding Path=Orientation, ElementName=me}" x:Name="buttons">
-		<Button x:Name="btCreate" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" Visibility="{Binding Create, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
-		<Button x:Name="btFind" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" Visibility="{Binding Find, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
-		<Button x:Name="btView" Style="{StaticResource RoundButton}" Content="{StaticResource View}" Visibility="{Binding View, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
-		<Button x:Name="btRemove" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" Visibility="{Binding Remove, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+		<Button Focusable="False" x:Name="btCreate" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" Visibility="{Binding Create, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+		<Button Focusable="False" x:Name="btFind" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" Visibility="{Binding Find, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+		<Button Focusable="False" x:Name="btView" Style="{StaticResource RoundButton}" Content="{StaticResource View}" Visibility="{Binding View, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+		<Button Focusable="False" x:Name="btRemove" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" Visibility="{Binding Remove, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
 	</StackPanel>
 </UserControl>

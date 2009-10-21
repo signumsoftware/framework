@@ -167,7 +167,7 @@ namespace Signum.Windows
             {
                 switch (listBox.Items.Count) {
                     case 0: textBox.Text = string.Empty;
-                            e.Handled = true;
+                            //e.Handled = true;
                             break;
 
                     case 1: listBox.SelectedItem = listBox.Items[0];

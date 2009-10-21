@@ -14,7 +14,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <m:ShyBorder Horizontal="True">
+
         <Grid>
             <TextBlock  x:Name="tb" Grid.Row="0" Margin="25,2,2,2"
 					FontWeight="{Binding Path=HasErrors, Converter={x:Static m:Converters.BoolToBold}, ElementName=me}"
@@ -24,13 +24,9 @@
 		IsEnabled="{Binding Path=HasErrors, ElementName=me}" 
 		BorderThickness="{Binding Path=HasErrors, Converter={x:Static m:Converters.BoolToInt}, ElementName=me}"
 		BorderBrush="Red">
+              <ItemsControl x:Name="lb" 
+                     Visibility="{Binding Path=IsExpanded, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=expander, Mode=Default}" 
+                     Background="Pink"></ItemsControl>
             </Expander>
-            <Popup IsOpen="{Binding Path=IsExpanded, ElementName=expander, Mode=TwoWay}" PlacementTarget="{Binding ElementName=expander, Mode=OneWay}">
-                <ItemsControl x:Name="lb" 
-                     Visibility="{Binding Path=IsEnabled, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=expander, Mode=Default}" 
-                     Background="Pink">
-                </ItemsControl>
-            </Popup>
         </Grid>
-    </m:ShyBorder>
 </UserControl>

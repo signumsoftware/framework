@@ -23,7 +23,7 @@
 		<Label  Name="label" Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
 		Width="{Binding Path=(m:Common.LabelWidth), ElementName=me, Mode=OneWay}"
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
-		<ContentControl Margin="1" Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Content="{Binding Path=ValueControl, ElementName=me, Mode=TwoWay}"/>
+		<ContentPresenter Margin="1" Grid.Column="1" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Content="{Binding Path=ValueControl, ElementName=me, Mode=TwoWay}"/>
         <TextBlock Text="{Binding Path=UnitText, ElementName=me, Mode=Default}" Grid.Column="2" VerticalAlignment="Center"  />
 	</Grid>
 

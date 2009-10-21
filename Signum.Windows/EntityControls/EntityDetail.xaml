@@ -25,10 +25,10 @@
         <ContentPresenter Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" x:Name="contentPresenter"
              VerticalAlignment="Top" HorizontalAlignment="Left" Content="{Binding EntityControl, ElementName=me, Mode=Default}" />
 		<StackPanel Orientation="{Binding Orientation, ElementName=me, Mode=Default}" Grid.Column="2" x:Name="buttons">
-			<Button x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
-			<Button x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
-			<Button x:Name="btView" Style="{StaticResource RoundButton}" Click="btView_Click" Content="{StaticResource View}" ToolTip="{m:Loc View}"/> 
-			<Button x:Name="btRemove" Style="{StaticResource RoundButton}" Click="btRemove_Click" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
+			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
+			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
+			<Button Focusable="False" x:Name="btView" Style="{StaticResource RoundButton}" Click="btView_Click" Content="{StaticResource View}" ToolTip="{m:Loc View}"/> 
+			<Button Focusable="False" x:Name="btRemove" Style="{StaticResource RoundButton}" Click="btRemove_Click" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
 		</StackPanel>
 	</Grid>
 
