@@ -27,20 +27,19 @@ namespace Signum.Engine
             set { dnToType = value;  }
         }
 
-        public static void Start(SchemaBuilder sb, bool fillStaticCache)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<TypeDN>();
 
-                sb.Schema.Synchronizing += SynchronizeTypesScript;
-                sb.Schema.Generating += InsertTypesScript;
-                sb.Schema.Initializing += s => Cache(s, fillStaticCache);
-             
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+                sb.Schema.Generating += Schema_Generating;
+                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
             }
         }
 
-        static void Cache(Schema sender, bool fillStaticCache)
+        static void Schema_Initializing(Schema sender)
         {
             List<TypeDN> types = Database.RetrieveAll<TypeDN>();
 
@@ -50,14 +49,11 @@ namespace Signum.Engine
                 Resources.CachingTypesTableFrom0.Formato(sender.Table(typeof(TypeDN)).Name)
                 ).ToDictionary(a => a.type, a => a.typeDN);
 
-            sender.IDsForType = dict.SelectDictionary(k=>k, v=>v.Id);
+            sender.IDsForType = dict.SelectDictionary(k => k, v => v.Id);
             sender.TablesForID = sender.IDsForType.ToDictionary(p => p.Value, p => sender.Table(p.Key));
 
-            if (fillStaticCache)
-            {
-                typeToDN = dict;
-                dnToType = typeToDN.Inverse();
-            }
+            typeToDN = dict;
+            dnToType = typeToDN.Inverse();
         }
 
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
@@ -67,7 +63,7 @@ namespace Signum.Engine
                     select new { dn, t }).ToDictionary(a => a.dn, a => a.t);
         }
 
-        public static SqlPreCommand SynchronizeTypesScript(Replacements replacements)
+        public static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
             Table table = Schema.Current.Table<TypeDN>();
 
@@ -89,7 +85,7 @@ namespace Signum.Engine
                 }, Spacing.Double);
         }
 
-        public static SqlPreCommand InsertTypesScript()
+        public static SqlPreCommand Schema_Generating()
         {
             Table table = Schema.Current.Table<TypeDN>();
 

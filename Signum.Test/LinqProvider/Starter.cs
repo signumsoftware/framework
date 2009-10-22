@@ -24,7 +24,7 @@ namespace Signum.Test.LinqProvider
 
                 Administrator.TotalGeneration();
 
-                Administrator.Initialize();
+                Schema.Current.Initialize();
 
                 Load();
 
@@ -40,7 +40,7 @@ namespace Signum.Test.LinqProvider
         public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();
-            TypeLogic.Start(sb, false); 
+            TypeLogic.Start(sb); 
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
             sb.Include<AlertDN>();

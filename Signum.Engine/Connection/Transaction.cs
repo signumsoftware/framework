@@ -12,12 +12,12 @@ using Signum.Engine.Properties;
 namespace Signum.Engine
 {
     /// <summary>
-    /// Allows easy nesting of transaction 
-    /// keeping una pila implícita de objetos Transaccion apoyada sobre la pila del hilo
-    /// y una pila explicita thread static de transacciones reales.
-    /// Por lo general solo la primera Transaccion genera una TransaccionReal, a no ser que se cree 
-    /// otra transaccion interior con forzarNueva = true
-    /// Todas pueden cancelar pero solo la Transaccion que ha creado una TransaccionReal puede confirmar
+    /// Allows easy nesting of transaction using 'using' statement
+    /// Keeps an implicit stack of Transaction objects over the StackTrace of the current Thread
+    /// and an explicit ThreadStatic stack of RealTransaction objects.
+    /// Usually, just the first Transaccion creates a RealTransaction, but you can create more using 
+    /// forceNew = true
+    /// All Transaction can cancel but only the one that created the RealTransaction can Commit 
     /// </summary>
     public class Transaction : IDisposable
     {

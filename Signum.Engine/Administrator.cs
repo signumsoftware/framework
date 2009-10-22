@@ -68,11 +68,6 @@ namespace Signum.Engine
             }
         }
 
-        public static void Initialize()
-        {
-            Schema.Current.Initialize();  
-        }
-
         public static SqlPreCommand TotalGenerationScript()
         {
             return Schema.Current.GenerationScipt();

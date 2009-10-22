@@ -14,6 +14,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Maps
 {
@@ -128,9 +129,6 @@ namespace Signum.Engine.Maps
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
-        public event Func<SqlPreCommand> Generating;
-        public event InitEventHandler Initializing;
-
         internal SqlPreCommand SynchronizationScript(string schemaName)
         {
             if (Synchronizing == null)
@@ -161,6 +159,7 @@ namespace Signum.Engine.Maps
                 new SqlPreCommandSimple("--- END OF SYNC SCRIPT")); 
         }
 
+        public event Func<SqlPreCommand> Generating;
         internal SqlPreCommand GenerationScipt()
         {
             if (Generating == null)
@@ -172,19 +171,37 @@ namespace Signum.Engine.Maps
                 .Select(e => e())
                 .Combine(Spacing.Triple);
         }
-
-
-        bool initialized = false; 
-        internal void Initialize()
+        
+        class InitPair
         {
-            if (initialized)
-                throw new InvalidOperationException("The Schema has already been initialized"); 
+            public InitLevel Level;
+            public InitEventHandler Handler; 
+        }
 
-            if (Initializing != null)
-                foreach (InitEventHandler init in Initializing.GetInvocationList())
-                    init(this);
+        List<InitPair> initializing = new List<InitPair>();
+        public void Initializing(InitLevel level, InitEventHandler handler)
+        {
+            initializing.Add(new InitPair { Level = level, Handler = handler }); 
+        }
 
-            initialized = true; 
+        InitLevel? initLevel;
+        
+        public void Initialize()
+        {
+            Initialize(InitLevel.Level4BackgroundProcesses);
+        }
+
+        public void Initialize(InitLevel topLevel)
+        {
+            if (initLevel.HasValue && initLevel.Value > initLevel)
+                return;
+
+            var handlers = initializing.Where(pair => (initLevel == null || initLevel < pair.Level) && pair.Level <= topLevel).ToList();
+
+            foreach(InitPair pair in handlers)
+                pair.Handler(this);
+
+            initLevel = topLevel;
         }
         #endregion
 
@@ -739,5 +756,12 @@ namespace Signum.Engine.Maps
         View = 8,
     }
 
-   
+    public enum InitLevel
+    {
+        Level0SyncEntities,
+        Level1SimpleEntities,
+        Level2NormalEntities,
+        Level3MainEntities,
+        Level4BackgroundProcesses,
+    }
 }
