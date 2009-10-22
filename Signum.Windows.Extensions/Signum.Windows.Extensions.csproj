@@ -74,6 +74,7 @@
     <Compile Include="Authorization\OperationRules.xaml.cs">
       <DependentUpon>OperationRules.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Authorization\PermissionExtension.cs" />
     <Compile Include="Authorization\PermissionRules.xaml.cs">
       <DependentUpon>PermissionRules.xaml</DependentUpon>
     </Compile>
