@@ -681,4 +681,52 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style TargetType="{x:Type RadioButton}" x:Key="HorizRB">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RadioButton}">
+                    <ControlTemplate.Resources>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+
+                        <Style TargetType="{x:Type Label}">
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </ControlTemplate.Resources>
+
+                    <Border
+                        x:Name="PART_border" 
+                        CornerRadius="0" 
+                            Padding="2px" 
+                        Margin="0, 0, -1, 0" 
+                        Background="Transparent" 
+                        BorderThickness="1,0,1,0"
+                        BorderBrush="{x:Static SystemColors.ControlDarkBrush}"
+                        SnapsToDevicePixels="True">
+                        <ContentPresenter x:Name="PART_content" HorizontalAlignment="Center" />
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="PART_content" Property="TextBlock.FontWeight" Value="Bold"/>
+                            <Setter TargetName="PART_border" Property="Background">
+                                <Setter.Value>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="{x:Static SystemColors.ControlLightColor}" Offset="0"/>
+                                        <GradientStop Color="{x:Static SystemColors.ControlColor}" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                       <!-- <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="gray"/>
+                        </Trigger>-->
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
