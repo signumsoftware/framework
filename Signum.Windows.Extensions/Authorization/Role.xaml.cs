@@ -49,7 +49,7 @@ namespace Signum.Windows.Authorization
                     links.Add(new QuickLink("Type Rules") { Action = () => new TypeRules { Role = Lazy }.Show() });
 
                 if (Server.Implements<IPermissionAuthServer>())
-                    links.Add(new QuickLink("Persmission Rules") { Action = () => new PermissionRules { Role = Lazy }.Show() });
+                    links.Add(new QuickLink("Permission Rules") { Action = () => new PermissionRules { Role = Lazy }.Show() });
 
                 if (Server.Implements<IOperationAuthServer>())
                     links.Add(new QuickLink("Operation Rules") { Action = () => new OperationRules { Role = Lazy }.Show() });

@@ -12,9 +12,9 @@ namespace Signum.Windows.Authorization
     public class PermissionExtension : MarkupExtension
     {
         Enum permission;
-        public PermissionExtension(Enum value)
+        public PermissionExtension(object value)
         {
-            this.permission = permission;
+            this.permission = (Enum) value;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
@@ -27,9 +27,9 @@ namespace Signum.Windows.Authorization
     public class PermissionVisiblityExtension : MarkupExtension
     {
         Enum permission;
-        public PermissionVisiblityExtension(Enum value)
+        public PermissionVisiblityExtension(object value)
         {
-            this.permission = permission;
+            this.permission = (Enum)value;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
