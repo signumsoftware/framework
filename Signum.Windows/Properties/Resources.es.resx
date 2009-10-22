@@ -145,7 +145,7 @@
     <value>Nota:</value>
   </data>
   <data name="NoDirectErrors" xml:space="preserve">
-    <value>No hay Errores Directos</value>
+    <value>No hay errores directos</value>
   </data>
   <data name="_1Error" xml:space="preserve">
     <value>1 Error: {0}</value>
@@ -172,13 +172,13 @@
     <value>Columna</value>
   </data>
   <data name="CreateNew" xml:space="preserve">
-    <value>Crear Nueva</value>
+    <value>Crear nueva</value>
   </data>
   <data name="Find" xml:space="preserve">
     <value>Buscar</value>
   </data>
   <data name="NewFilter" xml:space="preserve">
-    <value>_Nuevo Filtro:</value>
+    <value>_Nuevo filtro:</value>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Operación</value>
@@ -190,22 +190,22 @@
     <value>Ver</value>
   </data>
   <data name="ViewSelected" xml:space="preserve">
-    <value>Ver Seleccionada</value>
+    <value>Ver seleccionada</value>
   </data>
   <data name="MoveDown" xml:space="preserve">
-    <value>Mover Abajo</value>
+    <value>Mover abajo</value>
   </data>
   <data name="MoveUp" xml:space="preserve">
-    <value>Mover Arriba</value>
+    <value>Mover arriba</value>
   </data>
   <data name="OpenFile" xml:space="preserve">
-    <value>Abrir Archivo</value>
+    <value>Abrir archivo</value>
   </data>
   <data name="SaveFile" xml:space="preserve">
-    <value>Guardar Archivo</value>
+    <value>Guardar archivo</value>
   </data>
   <data name="ViewFile" xml:space="preserve">
-    <value>Ver Archivo</value>
+    <value>Ver archivo</value>
   </data>
   <data name="DragHorizontallyAndVertically" xml:space="preserve">
     <value>Arrastra horizontal o verticalmente</value>

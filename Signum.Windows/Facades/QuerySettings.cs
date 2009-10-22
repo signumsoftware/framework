@@ -45,7 +45,11 @@ namespace Signum.Windows
                     c=>true, 
                     c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, null)),
 
-                new FormatterRule(FormatterPriority.Type, "Enum",
+                new FormatterRule(FormatterPriority.Type, "Checkbox",
+                    c=>c.Type.UnNullify() == typeof(bool), 
+                    c=> b => FormatTools.CheckBoxTemplate(b, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
+
+                    new FormatterRule(FormatterPriority.Type, "Enum",
                     c=>c.Type.IsEnum, 
                     c=> b => FormatTools.TextBlockTemplate(b, TextAlignment.Left, Converters.EnumDescriptionConverter)),
                 new FormatterRule(FormatterPriority.Type, "Number",
@@ -121,6 +125,18 @@ namespace Signum.Windows
             return new DataTemplate { VisualTree = factory };
         }
 
+        public static DataTemplate CheckBoxTemplate(Binding binding, IValueConverter converter)
+        {
+            if (converter != null)
+                binding.Converter = converter;
+
+            FrameworkElementFactory factory = new FrameworkElementFactory(typeof(CheckBox));
+
+            factory.SetValue(CheckBox.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            factory.SetValue(CheckBox.IsEnabledProperty, false);
+            factory.SetBinding(CheckBox.IsCheckedProperty, binding);
+            return new DataTemplate { VisualTree = factory };
+        }
 
         public static DataTemplate LightEntityLineTemplate(Binding b)
         {
