@@ -30,7 +30,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertIsStarted(sb);
                 PropertyLogic.Start(sb); 
                 sb.Include<RulePropertyDN>();
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RulePropertyDN>().Saved +=Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
 

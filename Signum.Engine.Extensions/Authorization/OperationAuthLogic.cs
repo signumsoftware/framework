@@ -35,7 +35,7 @@ namespace Signum.Engine.Authorization
                 OperationLogic.BeginOperation += new OperationHandler(OperationLogic_BeginOperation); 
 
                 sb.Include<RuleOperationDN>();
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RuleOperationDN>().Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }

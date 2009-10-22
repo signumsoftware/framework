@@ -18,7 +18,7 @@ namespace Signum.Engine.Basics
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                TypeLogic.Start(sb, true);
+                TypeLogic.Start(sb);
                 sb.Include<PropertyDN>();
 
                 sb.Schema.Synchronizing += SyncronizeProperties;

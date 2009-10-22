@@ -22,7 +22,7 @@ namespace Signum.Engine.Basics
             {
 
                 QueryManagers = queryManagers;
-                sb.Schema.Initializing += new InitEventHandler(Schema_Initializing);
+                sb.Schema.Initializing(InitLevel.Level0SyncEntities, new InitEventHandler(Schema_Initializing));
 
                 sb.Include<QueryDN>();
 

@@ -53,7 +53,7 @@ namespace Signum.Engine.Scheduler
 
                 CustomTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_InitializingApplicaton);
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saved += Schema_Saved;
 
                 dqm[typeof(ScheduledTaskDN)] =
@@ -71,7 +71,7 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        static void Schema_Initializing(Schema sender)
+        static void Schema_InitializingApplicaton(Schema sender)
         {
             ReloadPlan();
         }

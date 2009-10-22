@@ -28,7 +28,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertIsStarted(sb);
                 FacadeMethodLogic.Start(sb, serviceInterface);
                 sb.Include<RuleFacadeMethodDN>();
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RuleFacadeMethodDN>().Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }

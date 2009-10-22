@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
                 sb.Include<PermissionDN>();
 
                 EnumLogic<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet());
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RulePermissionDN>().Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }

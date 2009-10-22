@@ -27,9 +27,9 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
-                TypeLogic.Start(sb, true);
+                TypeLogic.Start(sb);
                 sb.Include<RuleTypeDN>();
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RuleTypeDN>().Saved += RuleType_Saved;
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving;
                 sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;

@@ -45,7 +45,7 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
                 sb.Schema.EntityEvents<RoleDN>().Saved += Schema_Saved;
 

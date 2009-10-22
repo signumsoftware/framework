@@ -32,7 +32,7 @@ namespace Signum.Engine.Authorization
                 QueryLogic.Start(sb, queryManagers);
                
                 sb.Include<RuleQueryDN>();
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RuleQueryDN>().Saved += Rule_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }

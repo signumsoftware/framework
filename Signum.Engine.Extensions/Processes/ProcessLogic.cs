@@ -56,9 +56,9 @@ namespace Signum.Engine.Processes
 
                 OperationLogic.AssertIsStarted(sb);
                 AuthLogic.AssertIsStarted(sb); 
-                new ExecutingProcessGraph().Register();   
+                new ExecutingProcessGraph().Register();
 
-                sb.Schema.Initializing += Schema_Initializing;
+                sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_InitializingApplication);
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saved += ProcessExecution_Saved;
 
                 dqm[typeof(ProcessDN)] =
@@ -187,7 +187,7 @@ namespace Signum.Engine.Processes
             process.Suspend();
         }
 
-        static void Schema_Initializing(Schema sender)
+        static void Schema_InitializingApplication(Schema sender)
         {
             using (new EntityCache(true))
             {
