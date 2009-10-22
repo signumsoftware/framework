@@ -61,7 +61,6 @@ namespace Signum.Windows
             set
             {
                 SetValue(FilterVisibleProperty, value);
-                if (value == false) { rdFilter.MinHeight = 0; rdFilter.Height = new GridLength(0); }
             }
         }
 
@@ -70,9 +69,7 @@ namespace Signum.Windows
         public bool FooterVisible
         {
             get { return (bool)GetValue(FooterVisibleProperty); }
-            set { SetValue(FooterVisibleProperty, value);
-            if (value == false) { rdFooter.MinHeight = 0; rdFooter.Height = new GridLength(0); }
-            }
+            set { SetValue(FooterVisibleProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedItemProperty =

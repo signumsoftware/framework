@@ -15,9 +15,9 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Name="rdFilter" Height="Auto" MinHeight="32" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*"/>
-            <RowDefinition Name="rdFooter" Height="Auto" MinHeight="24" />
+            <RowDefinition Height="Auto"  />
         </Grid.RowDefinitions>
         <Expander Visibility="{Binding ElementName=me,Path=FilterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" VerticalAlignment="Top" ExpandDirection="Up" x:Name="expander" Expanded="expander_Expanded" Collapsed="expander_Expanded">
             <Expander.Header>
@@ -75,7 +75,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <StackPanel Visibility="{Binding ElementName=me,Path=FooterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" Orientation="Horizontal" Grid.Row="2" Margin="6,4,6,4" HorizontalAlignment="Left"  >
+        <StackPanel Height="24" Visibility="{Binding ElementName=me,Path=FooterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" Orientation="Horizontal" Grid.Row="2" Margin="6,4,6,4" HorizontalAlignment="Left"  >
             <TextBlock TextWrapping="Wrap" x:Name="tbResultados" Visibility="Hidden" VerticalAlignment="Center">
                 <InlineUIContainer>
         		    <TextBlock Text="{Binding Path=Items.Count, ElementName=lvResult, Mode=Default}" TextWrapping="Wrap" FontWeight="Bold"/>
