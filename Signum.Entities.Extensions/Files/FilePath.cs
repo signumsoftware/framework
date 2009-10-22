@@ -47,7 +47,18 @@ namespace Signum.Entities.Files
         public byte[] BinaryFile
         {
             get { return binaryFile; }
-            set { Set(ref binaryFile, value, "BinaryFile"); }
+            set 
+            {
+                if (Set(ref binaryFile, value, "BinaryFile"))
+                    fileLength = binaryFile.Length;
+            }
+        }
+
+        int fileLength;
+        public int FileLength
+        {
+            get { return fileLength; }
+            private set { Set(ref fileLength, value, "FileLength"); }
         }
 
         [NotNullable, SqlDbType(Size = 260)]
@@ -93,10 +104,15 @@ namespace Signum.Entities.Files
             get { return Repository == null ? null : Repository.PhysicalPrefix + '\\' + Sufix; }
         }
 
-        static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => fp.Repository.WebPrefix + "/" + fp.Sufix.Replace('\\', '/');
+        static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => 
+            fp.Repository != null && fp.Repository.WebPrefix.HasText() ? 
+                fp.Repository.WebPrefix + "/" + fp.Sufix.Replace('\\', '/').Replace(" ", "") :
+                string.Empty;
         public string FullWebPath
         {
-            get { return Repository == null ? null : Repository.WebPrefix + "/" + Sufix.Replace('\\', '/'); }
+            get { return Repository != null && Repository.WebPrefix.HasText() ? 
+                    Repository.WebPrefix + "/" + Sufix.Replace('\\', '/').Replace(" ", "") : 
+                    string.Empty; }
         }
 
         public Uri WebPath
