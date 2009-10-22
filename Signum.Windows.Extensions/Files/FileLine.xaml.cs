@@ -23,6 +23,8 @@ using Microsoft.Win32;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Entities.Files;
+using System.Net;
+using Signum.Entities.Extensions.Files;
 
 namespace Signum.Windows.Files
 {
@@ -154,6 +156,10 @@ namespace Signum.Windows.Files
             else if (typeof(IFile).IsAssignableFrom(cleanType))
             {
                 IFile file = (IFile)Server.Convert(entity, cleanType);
+
+                if (file.BinaryFile == null)
+                    file.BinaryFile = OnResolveBinaryFile(file); 
+
                 string filePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), file.FileName);
                 File.WriteAllBytes(filePath, file.BinaryFile);
                 Process.Start(filePath);
@@ -172,6 +178,9 @@ namespace Signum.Windows.Files
             {
                 IFile file = (IFile)Server.Convert(entity, cleanType);
 
+                if (file.BinaryFile == null)
+                    file.BinaryFile = OnResolveBinaryFile(file); 
+
                 SaveFileDialog sfd = new SaveFileDialog();
                 if (CustomizeFileDialog != null)
                     CustomizeFileDialog(sfd); 
@@ -183,6 +192,17 @@ namespace Signum.Windows.Files
             }
             else
                 throw new ApplicationException("Saving has no default implementation for {0}".Formato(Type)); 
+        }
+
+
+        public Func<IFile, byte[]> ResolveBinaryFile;
+
+        private byte[] OnResolveBinaryFile(IFile file)
+        {
+            if (ResolveBinaryFile != null)
+                return ResolveBinaryFile(file);
+
+            return DefaultResolveBinaryFile(file);
         }
 
         private object OnOpening()
@@ -254,5 +274,18 @@ namespace Signum.Windows.Files
             if (entity != null)
                 Entity = entity;
         }
+
+        public static byte[] DefaultResolveBinaryFile(IFile f)
+        {
+            if (f.WebPath != null)
+            {
+                return new WebClient().DownloadData(f.WebPath);
+            }
+            else
+            {
+                return Server.Service<IFileServer>().GetBinaryFile(f);
+            }
+        }
+
     }
 }

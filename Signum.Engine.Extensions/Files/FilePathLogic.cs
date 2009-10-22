@@ -126,12 +126,17 @@ namespace Signum.Engine.Files
 
         static void FilePath_Retrieved(FilePathDN fp)
         {
-            fp.BinaryFile = System.IO.File.ReadAllBytes(fp.FullPhysicalPath);
+            //fp.BinaryFile = System.IO.File.ReadAllBytes(fp.FullPhysicalPath); -> It's a late binding with the binaryfile
         }
 
         public static void Register(Enum fileTypeKey, FileTypeAlgorithm algorithm)
         {
             fileTypes.Add(fileTypeKey, algorithm);
+        }
+
+        public static byte[] GetByteArray(FilePathDN fp)
+        { 
+            return File.ReadAllBytes(fp.FullPhysicalPath);
         }
     }
 

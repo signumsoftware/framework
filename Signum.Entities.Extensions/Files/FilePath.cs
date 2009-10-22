@@ -98,6 +98,11 @@ namespace Signum.Entities.Files
         {
             get { return Repository == null ? null : Repository.WebPrefix + "/" + Sufix.Replace('\\', '/'); }
         }
+
+        public Uri WebPath
+        {
+            get { return FullWebPath.HasText() ? new Uri(FullWebPath) : null; }
+        }
     }
 
     [Serializable]

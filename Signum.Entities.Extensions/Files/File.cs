@@ -39,5 +39,10 @@ namespace Signum.Entities.Files
         {
             return fileName;
         }
+
+        public Uri WebPath
+        {
+            get { return null; }
+        }
     }
 }

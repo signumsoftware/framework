@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities;
-using Signum.Utilities; 
+using Signum.Utilities;
 
 namespace Signum.Entities.Files
 {
@@ -11,6 +11,7 @@ namespace Signum.Entities.Files
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
+        Uri WebPath { get; }
     }
 
     [Serializable]
@@ -34,9 +35,19 @@ namespace Signum.Entities.Files
             set { Set(ref fileName, value, "FileName"); }
         }
 
+        public Uri WebPath
+        {
+            get
+            {
+                return null;
+            }
+        }
+        
         public override string ToString()
         {
             return "{0} {1}".Formato(fileName, BinaryFile.TryCC(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
+
+
     }
 }
