@@ -269,4 +269,12 @@
   <data name="_0Seconds" xml:space="preserve">
     <value>{0} segundos</value>
   </data>
+  <data name="Error0Extra1" xml:space="preserve">
+    <value>Error {0}:
+ Sobran: {1}</value>
+  </data>
+  <data name="Error0Lacking1" xml:space="preserve">
+    <value>Error {0}:
+ Faltan: {1}</value>
+  </data>
 </root>

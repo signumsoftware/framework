@@ -55,6 +55,12 @@ namespace Signum.Engine.DynamicQuery
             return this[queryName].ExecuteQuery(filter, limit);
         }
 
+
+        public int ExecuteQueryCount(object queryName, List<Filter> filters)
+        {
+            return this[queryName].ExecuteQueryCount(filters);
+        }
+
         public QueryDescription QueryDescription(object queryName)
         {
             return this[queryName].GetDescription();

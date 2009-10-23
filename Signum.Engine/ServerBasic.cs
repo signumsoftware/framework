@@ -127,6 +127,12 @@ namespace Signum.Services
              () => GetQueryManager().ExecuteQuery(queryName, filters, limit));
         }
 
+        public int GetQueryCount(object queryName, List<Filter> filters)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), "GetQueryCount {0}".Formato(queryName),
+          () => GetQueryManager().ExecuteQueryCount(queryName, filters));
+        }
+
         public List<object> GetQueryNames()
         {
             return Return(MethodInfo.GetCurrentMethod(),

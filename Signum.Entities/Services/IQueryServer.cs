@@ -17,6 +17,9 @@ namespace Signum.Services
         QueryResult GetQueryResult(object queryName, List<Filter> filters, int? limit);
 
         [OperationContract, NetDataContract]
+        int GetQueryCount(object queryName, List<Filter> filters);
+
+        [OperationContract, NetDataContract]
         List<object> GetQueryNames();
     }
 }

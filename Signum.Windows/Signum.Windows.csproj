@@ -104,6 +104,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="DynamicQuery\CountSearchControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="EntityControls\EntityDetail.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -248,6 +252,9 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
+    <Compile Include="DynamicQuery\CountSearchControl.xaml.cs">
+      <DependentUpon>CountSearchControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EntityControls\EntityDetail.xaml.cs">
       <DependentUpon>EntityDetail.xaml</DependentUpon>
     </Compile>

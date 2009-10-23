@@ -642,8 +642,14 @@ namespace Signum.Utilities
             var oldOnly = oldDictionary.Keys.Where(k => !newDictionary.ContainsKey(k)).ToList();
             var newOnly = newDictionary.Keys.Where(k => !oldDictionary.ContainsKey(k)).ToList();
 
-            if (oldOnly.Count != 0 || newOnly.Count != 0)
-                throw new InvalidOperationException(Resources.Error0Lacking1Extra2.Formato(action, newOnly.ToString(", "), oldOnly.ToString(", ")));
+            if (oldOnly.Count != 0)
+                if (newOnly.Count != 0)
+                    throw new InvalidOperationException(Resources.Error0Lacking1Extra2.Formato(action, newOnly.ToString(", "), oldOnly.ToString(", ")));
+                else
+                    throw new InvalidOperationException(Resources.Error0Extra1.Formato(action, oldOnly.ToString(", ")));
+            else
+                if (newOnly.Count != 0)
+                    throw new InvalidOperationException(Resources.Error0Lacking1.Formato(action, newOnly.ToString(", ")));
 
             return oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key]));
         }

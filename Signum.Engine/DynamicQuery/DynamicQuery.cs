@@ -20,7 +20,8 @@ namespace Signum.Engine.DynamicQuery
     {
         QueryDescription GetDescription();
         QueryResult ExecuteQuery(List<Filter> filters, int? limit);
-        string GetErrors(); 
+        int ExecuteQueryCount(List<Filter> filters);
+        string GetErrors();
     }
 
     public class DynamicQuery<T> : IDynamicQuery
@@ -85,7 +86,14 @@ namespace Signum.Engine.DynamicQuery
 
                 return ToQueryResult(result);
             }
+        }
 
+        public int ExecuteQueryCount(List<Filter> filters)
+        {
+            if (execute != null)
+                return execute(filters, null).Count();
+            else
+                return query.WhereFilters(filters).Count();
         }
 
         QueryResult ToQueryResult(IEnumerable<T> result)
