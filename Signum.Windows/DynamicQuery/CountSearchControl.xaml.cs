@@ -18,17 +18,26 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Windows.Media;
 using Signum.Services;
+using Signum.Windows.Properties;
 
 namespace Signum.Windows
 {
     public partial class CountSearchControl
     {
         public static readonly DependencyProperty TextProperty =
-        DependencyProperty.Register("Text", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata("Total: {0}"));
+        DependencyProperty.Register("Text", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public string Text
         {
             get { return (string)GetValue(TextProperty); }
             set { SetValue(TextProperty, value); }
+        }
+
+        public static readonly DependencyProperty TextZeroItemsProperty =
+        DependencyProperty.Register("TextZeroItems", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
+        public string TextZeroItems
+        {
+            get { return (string)GetValue(TextZeroItemsProperty); }
+            set { SetValue(TextZeroItemsProperty, value); }
         }
 
         private static readonly DependencyProperty FormattedTextProperty =
@@ -117,7 +126,17 @@ namespace Signum.Windows
                 () =>
                 {
                     ItemsCount = queryCount;
-                    FormattedText = Text.Formato(ItemsCount);
+                    if (ItemsCount == 0)
+                    {
+                        FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
+                            .Formato(QueryUtils.GetNiceQueryName(QueryName));
+                        tb.FontWeight = FontWeights.Bold;
+                    }
+                    else
+                    {
+                        FormattedText = (Text ?? "{1}: {0}")
+                            .Formato(ItemsCount, QueryUtils.GetNiceQueryName(QueryName));
+                    }
                 },
                 () => { });
         }

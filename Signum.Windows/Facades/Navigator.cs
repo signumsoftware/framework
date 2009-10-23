@@ -256,11 +256,7 @@ namespace Signum.Windows
 
         public virtual string SearchTitle(object queryName)
         {
-            string title = (queryName is Type) ? ((Type)queryName).NiceName() :
-                           (queryName is Enum) ? ((Enum)queryName).NiceToString() :
-                            queryName.ToString();
-
-            return Resources.FinderOf0.Formato(title);
+            return Resources.FinderOf0.Formato(QueryUtils.GetNiceQueryName(queryName));
         }
 
         public virtual object Find(FindOptions findOptions)

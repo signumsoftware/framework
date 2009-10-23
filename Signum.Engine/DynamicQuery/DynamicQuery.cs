@@ -241,14 +241,5 @@ namespace Signum.Engine.DynamicQuery
         {
             return MetadataVisitor.GatherMetadata(query.Expression); 
         }
-
-        public static string GetQueryName(object queryKey)
-        {
-            return
-                queryKey is Type ? ((Type)queryKey).FullName :
-                queryKey is Enum ? "{0}.{1}".Formato(queryKey.GetType().Name, queryKey.ToString()) :
-                queryKey.ToString();
-        }
-
     }
 }

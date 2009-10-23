@@ -32,7 +32,7 @@ namespace Signum.Engine.DynamicQuery
                 string error = value.GetErrors();
 
                 if (error.HasText())
-                    Console.WriteLine("Query {0} -> {1}".Formato(DynamicQuery.GetQueryName(queryName), error));
+                    Console.WriteLine("Query {0} -> {1}".Formato(Signum.Entities.DynamicQuery.QueryUtils.GetQueryName(queryName), error));
 
                 queries[queryName] = value;
             }

@@ -330,4 +330,7 @@
   <data name="FutureAlerts" xml:space="preserve">
     <value>Futuras</value>
   </data>
+  <data name="ThereIsNo0" xml:space="preserve">
+    <value>No hay {0}</value>
+  </data>
 </root>

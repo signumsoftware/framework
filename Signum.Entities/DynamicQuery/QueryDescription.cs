@@ -20,10 +20,7 @@ namespace Signum.Entities.DynamicQuery
 
         public List<Column> VisibleColums
         {
-            get
-            {
-                return Columns.Where(c => c.Visible).ToList();
-            }
+            get { return Columns.Where(c => c.Visible).ToList(); }
         }
 
         public DataTable ToDataTable()
@@ -113,5 +110,24 @@ namespace Signum.Entities.DynamicQuery
         {
             return "{0} {1}".Formato(Type.TypeName(), Name); ;
         }
+    }
+
+    public static class QueryUtils {
+        public static string GetQueryName(object queryKey)
+        {
+            return
+                queryKey is Type ? ((Type)queryKey).FullName :
+                queryKey is Enum ? "{0}.{1}".Formato(queryKey.GetType().Name, queryKey.ToString()) :
+                queryKey.ToString();
+        }
+
+        public static string GetNiceQueryName(object queryKey)
+        {
+            return
+                queryKey is Type ? ((Type)queryKey).NiceName() :
+                queryKey is Enum ? ((Enum)queryKey).NiceToString() :
+                queryKey.ToString();
+        }
+    
     }
 }
