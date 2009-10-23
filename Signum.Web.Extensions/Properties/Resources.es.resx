@@ -180,4 +180,19 @@
   <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
     <value>La propiedad {FileType} del FileLine settings debe ser especificada para el FileLine {{0}}</value>
   </data>
+  <data name="CompilerErrorMessage" xml:space="preserve">
+    <value>Mensaje de error del compilador</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Descripción</value>
+  </data>
+  <data name="Line" xml:space="preserve">
+    <value>Línea</value>
+  </data>
+  <data name="SourceCodeError" xml:space="preserve">
+    <value>Error de código fuente</value>
+  </data>
+  <data name="SourceFile" xml:space="preserve">
+    <value>Archivo de origen</value>
+  </data>
 </root>

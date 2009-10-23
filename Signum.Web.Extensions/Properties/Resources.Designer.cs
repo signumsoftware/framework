@@ -79,6 +79,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Compiler error message.
+        /// </summary>
+        internal static string CompilerErrorMessage {
+            get {
+                return ResourceManager.GetString("CompilerErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Construct From Many Operation {{{0}}} needs source Ids as parameter.
         /// </summary>
         internal static string ConstructFromManyOperation0NeedsSourceIdsAsParameter {
@@ -115,6 +124,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Description.
+        /// </summary>
+        internal static string Description {
+            get {
+                return ResourceManager.GetString("Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to FileType property of FileLine settings must be specified for FileLine {{0}}.
         /// </summary>
         internal static string FileTypePropertyOfFileLineSettingsMustBeSpecified {
@@ -138,6 +156,15 @@ namespace Signum.Web.Extensions.Properties {
         internal static string InvalidUsernameOrPassword {
             get {
                 return ResourceManager.GetString("InvalidUsernameOrPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Line.
+        /// </summary>
+        internal static string Line {
+            get {
+                return ResourceManager.GetString("Line", resourceCulture);
             }
         }
         
@@ -192,6 +219,24 @@ namespace Signum.Web.Extensions.Properties {
         internal static string Property0NotExistsInType1 {
             get {
                 return ResourceManager.GetString("Property0NotExistsInType1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source code error.
+        /// </summary>
+        internal static string SourceCodeError {
+            get {
+                return ResourceManager.GetString("SourceCodeError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source file.
+        /// </summary>
+        internal static string SourceFile {
+            get {
+                return ResourceManager.GetString("SourceFile", resourceCulture);
             }
         }
         

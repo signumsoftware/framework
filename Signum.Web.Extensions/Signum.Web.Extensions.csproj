@@ -110,6 +110,8 @@
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />
     <Compile Include="ScriptCombiner\CssScriptCombiner.cs" />
+    <Compile Include="ViewsChecker\ViewError.cs" />
+    <Compile Include="ViewsChecker\ViewsCheckerController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
@@ -171,6 +173,9 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
+    <EmbeddedResource Include="ViewsChecker\ViewsChecker.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
