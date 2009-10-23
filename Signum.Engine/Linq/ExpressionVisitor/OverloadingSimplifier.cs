@@ -326,7 +326,12 @@ namespace Signum.Engine.Linq
         {
             MethodCallExpression mce = expression as MethodCallExpression;
 
-            if (mce == null || !mce.Method.GetGenericMethodDefinition().Map(m => ReflectionTools.MethodEqual(m, miDefaultIfEmptyE) || ReflectionTools.MethodEqual(m, miDefaultIfEmptyQ)))
+            if (mce == null || !mce.Method.IsGenericMethod)
+                return false;
+
+            MethodInfo me = mce.Method.GetGenericMethodDefinition();
+
+            if (!ReflectionTools.MethodEqual(me, miDefaultIfEmptyE) && !ReflectionTools.MethodEqual(me, miDefaultIfEmptyQ))
                 return false;
 
             expression = mce.GetArgument("source");
