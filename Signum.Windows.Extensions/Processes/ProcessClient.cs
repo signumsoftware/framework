@@ -23,7 +23,7 @@ namespace Signum.Windows.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.Add(typeof(ProcessDN), new EntitySettings(EntityType.ServerOnly) { View = () => new Process(), IsReadOnly = a => true, IsCreable = a => false, Icon = Image("process.png") });
+                Navigator.Manager.Settings.Add(typeof(ProcessDN), new EntitySettings(EntityType.ServerOnly) { View = () => new ProcessUI(), IsReadOnly = a => true, IsCreable = a => false, Icon = Image("process.png") });
                 Navigator.Manager.Settings.Add(typeof(ProcessExecutionDN), new EntitySettings(EntityType.ServerOnly) { View = () => new ProcessExecution(), Icon = Image("processExecution.png") });
 
                 OperationClient.Manager.Settings.Add(ProcessOperation.FromProcess, new EntityOperationSettings { Icon = Image("execute.png") });

@@ -20,9 +20,9 @@ namespace Signum.Windows.Processes
     /// <summary>
     /// Interaction logic for Process.xaml
     /// </summary>
-    public partial class Process : UserControl
+    public partial class ProcessUI : UserControl
     {
-        public Process()
+        public ProcessUI()
         {
             InitializeComponent();
         }

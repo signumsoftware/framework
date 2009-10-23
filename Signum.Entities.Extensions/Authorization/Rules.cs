@@ -116,46 +116,72 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    //Only for client-side communication
     [Serializable]
-    public class AllowedRule : EmbeddedEntity
+    public class RulePropertyDN : IdentifiableEntity
     {
-        public AllowedRule(bool allowedBase)
+        RoleDN role;
+        [NotNullValidator]
+        public RoleDN Role
         {
-            this.allowedBase = allowedBase;
+            get { return role; }
+            set { Set(ref role, value, "Role"); }
         }
 
-        bool allowedBase;
-        public bool AllowedBase
+        PropertyDN property;
+        [NotNullValidator]
+        public PropertyDN Property
         {
-            get { return allowedBase; }
+            get { return property; }
+            set { Set(ref property, value, "Property"); }
         }
 
-        bool? allowedOverride;
-        public bool Allowed
+        Access access;
+        public Access Access
         {
-            get { return allowedOverride ?? allowedBase; }
-            set
-            {
-                bool? val = value == allowedBase ? (bool?)null : value;
+            get { return access; }
+            set { Set(ref access, value, "Access"); }
+        }
+    }
 
-                if (Set(ref allowedOverride, val, "Allowed"))
-                {
-                    Notify("Overriden");
-                }
-            }
+    public enum Access
+    {
+        None,
+        Read,
+        Modify,
+    }
+
+    [Serializable]
+    public class RuleTypeDN : IdentifiableEntity
+    {
+        RoleDN role;
+        [NotNullValidator]
+        public RoleDN Role
+        {
+            get { return role; }
+            set { Set(ref role, value, "Role"); }
         }
 
-        public bool Overriden
+        TypeDN type;
+        [NotNullValidator]
+        public TypeDN Type
         {
-            get { return allowedOverride.HasValue; }
+            get { return type; }
+            set { Set(ref type, value, "Type"); }
         }
 
-        IdentifiableEntity resource;
-        public IdentifiableEntity Resource
+        TypeAccess access;
+        public TypeAccess Access
         {
-            get { return resource; }
-            set { Set(ref resource, value, "Resource"); }
+            get { return access; }
+            set { Set(ref access, value, "TypeAccess"); }
         }
+    }
+
+    public enum TypeAccess
+    {
+        None,
+        Read,
+        Modify,
+        Create,
     }
 }
