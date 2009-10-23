@@ -103,7 +103,7 @@ namespace Signum.Web
             {
                 response.Flush();
                 CapturingResponseFilter newFilter = new CapturingResponseFilter(originalFilter);
-                response.Filter = newFilter; 
+                response.Filter = newFilter;
                 render();
                 response.Flush();
                 return newFilter.GetContents(response.ContentEncoding);
