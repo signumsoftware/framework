@@ -97,7 +97,6 @@ namespace Signum.Windows.Reports
 
         }
 
-
         private void MenuItemAdmin_Clicked(object sender, RoutedEventArgs e)
         {
             Navigator.Find(new FindOptions(typeof(ExcelReportDN))
