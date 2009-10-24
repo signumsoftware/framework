@@ -331,13 +331,10 @@ namespace Signum.Windows
                     MainControl = ctrl
                 };
 
-                if (ShowOkSave(entity.GetType(), viewOptions.Admin))
-                {
-                    if (viewOptions.Buttons == ViewButtons.Ok)
-                        nw.ButtonBar.OkVisible = true;
-                    else
-                        nw.ButtonBar.SaveVisible = true;
-                }
+                if (viewOptions.Buttons == ViewButtons.Ok)
+                    nw.ButtonBar.OkVisible = true;
+                else
+                    nw.ButtonBar.SaveVisible = ShowSave(entity.GetType(), viewOptions.Admin);
 
                 win = nw;
             }
@@ -415,11 +412,11 @@ namespace Signum.Windows
             return es.IsViewable(admin);
         }
 
-        internal protected virtual bool ShowOkSave(Type type, bool admin)
+        internal protected virtual bool ShowSave(Type type, bool admin)
         {
             EntitySettings es = Settings.TryGetC(type);
-            if (es != null && es.ShowOkSave != null)
-                return es.ShowOkSave(admin);
+            if (es != null && es.ShowSave != null)
+                return es.ShowSave(admin);
 
             return true;
         }

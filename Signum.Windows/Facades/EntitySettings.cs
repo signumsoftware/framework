@@ -21,7 +21,7 @@ namespace Signum.Windows
         public Func<bool, bool> IsCreable { get; set; }
         public Func<bool, bool> IsReadOnly { get; set; }
         public Func<bool, bool> IsViewable { get; set; }
-        public Func<bool, bool> ShowOkSave { get; set; }
+        public Func<bool, bool> ShowSave { get; set; }
 
         public Action<bool, ICollectionView> CollectionViewOperations { get; set; }
         public DataTemplate DataTemplate { get; set; }
@@ -54,11 +54,11 @@ namespace Signum.Windows
                     };
                     break;
                 case EntityType.NotSaving:
-                    ShowOkSave = admin => false; 
+                    ShowSave = admin => false; 
                     break;
                 case EntityType.ServerOnly:
                     IsReadOnly = admin => true;
-                    ShowOkSave = admin => false; 
+                    ShowSave = admin => false; 
                     IsCreable = admin => false;
                     break;
                 case EntityType.Content:
