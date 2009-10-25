@@ -66,7 +66,7 @@ namespace Signum.Windows
             return Find(new FindOptions(queryName)
             {
                 OnLoadMode = OnLoadMode.Search,
-                Buttons = SearchButtons.OkCancel ,//TODO: olmo cambio esto alex
+                Buttons = SearchButtons.Close ,
                 FilterOptions = new List<FilterOptions>
                 {
                     new FilterOptions { 
