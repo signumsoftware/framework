@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization
 {
@@ -68,6 +69,111 @@ namespace Signum.Entities.Authorization
             set { Set(ref resource, value, "Resource"); }
         }
     }
+
+    //[Serializable]
+    //public class EntityGroupAccessRule : EmbeddedEntity
+    //{
+    //    public EntityGroupAccessRule(Access accessInBase, Access accessOutBase)
+    //    {
+    //        this.accessInBase = accessInBase;
+    //    }
+
+    //    Access accessInBase;
+    //    public Access AccessInBase
+    //    {
+    //        get { return accessInBase; }
+    //    }
+
+    //    Access accessOutBase;
+    //    public Access AccessOutBase
+    //    {
+    //        get { return accessOutBase; }
+    //    }
+
+    //    Access? accessInOverride;
+    //    public Access AccessIn
+    //    {
+    //        get { return accessInOverride ?? accessInBase; }
+    //        set
+    //        {
+    //            Access? val = value == accessInBase ? (Access?)null : value;
+
+    //            if (Set(ref accessInOverride, val, "AccessIn"))
+    //            {
+    //                Notify("Overriden");
+    //                Notify("ModifyIn");
+    //                Notify("ReadIn");
+    //                Notify("NoneIn");
+    //            }
+    //        }
+    //    }
+
+    //    Access? accessOutOverride;
+    //    public Access AccessOut
+    //    {
+    //        get { return accessOutOverride ?? accessOutBase; }
+    //        set
+    //        {
+    //            Access? val = value == accessOutBase ? (Access?)null : value;
+
+    //            if (Set(ref accessOutOverride, val, "AccessOut"))
+    //            {
+    //                Notify("Overriden");
+    //                Notify("ModifyOut");
+    //                Notify("ReadOut");
+    //                Notify("NoneOut");
+    //            }
+    //        }
+    //    }
+
+    //    public bool ModifyIn
+    //    {
+    //        get { return AccessIn == Access.Modify; }
+    //        set { if (value) AccessIn = Access.Modify; }
+    //    }
+
+    //    public bool ReadIn
+    //    {
+    //        get { return AccessIn == Access.Read; }
+    //        set { if (value) AccessIn = Access.Read; }
+    //    }
+
+    //    public bool NoneIn
+    //    {
+    //        get { return AccessIn == Access.None; }
+    //        set { if (value) AccessIn = Access.None; }
+    //    }
+
+    //    public bool ModifyOut
+    //    {
+    //        get { return AccessOut == Access.Modify; }
+    //        set { if (value) AccessOut = Access.Modify; }
+    //    }
+
+    //    public bool ReadOut
+    //    {
+    //        get { return AccessOut == Access.Read; }
+    //        set { if (value) AccessOut = Access.Read; }
+    //    }
+
+    //    public bool NoneOut
+    //    {
+    //        get { return AccessOut == Access.None; }
+    //        set { if (value) AccessOut = Access.None; }
+    //    }
+
+    //    public bool Overriden
+    //    {
+    //        get { return accessInOverride.HasValue || accessOutOverride.HasValue; }
+    //    }
+
+    //    EntityGroupDN group;
+    //    public EntityGroupDN Group
+    //    {
+    //        get { return group; }
+    //        set { Set(ref group, value, "Group"); }
+    //    }
+    //}
 
 
     //Only for client-side communication

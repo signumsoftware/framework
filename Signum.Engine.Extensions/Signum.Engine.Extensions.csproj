@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -57,12 +57,12 @@
   <ItemGroup>
     <Compile Include="Authorization\AuthUtils.cs" />
     <Compile Include="Authorization\AuthLogic.cs" />
+    <Compile Include="Authorization\PropertyAuthLogic.cs" />
     <Compile Include="Authorization\OperationAuthLogic.cs" />
     <Compile Include="Authorization\PermissionAuthLogic.cs" />
     <Compile Include="Authorization\TypeAuthLogic.cs" />
     <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
-    <Compile Include="Authorization\PropertyAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
     <Compile Include="Basics\EnumLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
