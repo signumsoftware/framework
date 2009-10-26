@@ -157,6 +157,13 @@ namespace Signum.Windows
                 changing = false;
             }
         }
+
+  /*      private void combo_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Down) {
+                ((ComboBox)sender).IsDropDownOpen = true;
+            }
+        }*/
     }
 
     public enum LoadDataTrigger
