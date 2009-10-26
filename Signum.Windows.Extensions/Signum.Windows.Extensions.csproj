@@ -131,6 +131,10 @@
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Files\FilePathClient.cs" />
+    <Compile Include="Files\FileRepository.xaml.cs">
+      <DependentUpon>FileRepository.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Operations\ConstructorSelectorWindow.xaml.cs">
       <DependentUpon>ConstructorSelectorWindow.xaml</DependentUpon>
     </Compile>
@@ -303,6 +307,10 @@
     <Page Include="Files\FileLine.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Files\FileRepository.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Operations\ConstructorSelectorWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

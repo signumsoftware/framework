@@ -54,6 +54,13 @@ namespace Signum.Engine.Files
                                                p.FullWebPath,
                                                Repository = p.Repository.ToLazy()
                                            }).ToDynamic();
+
+                dqm[typeof(FileTypeDN)] = (from f in Database.Query<FileTypeDN>()
+                                           select new
+                                           {
+                                               Entity = f.ToLazy(),
+                                               f.Name
+                                           }).ToDynamic();
             }
         }
 

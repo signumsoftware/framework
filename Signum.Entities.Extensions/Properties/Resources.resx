@@ -495,4 +495,7 @@
   <data name="LogOperationQueries_InProcess" xml:space="preserve">
     <value>In Process</value>
   </data>
+  <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
+    <value>File Types</value>
+  </data>
 </root>
