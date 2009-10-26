@@ -158,6 +158,14 @@ namespace Signum.Windows
             }
         }
 
+        private void combo_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Down)
+            {
+                ((ComboBox)sender).IsDropDownOpen = true;
+            }
+        }
+
   /*      private void combo_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Down) {
