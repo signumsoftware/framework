@@ -79,15 +79,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Compiler error message.
-        /// </summary>
-        internal static string CompilerErrorMessage {
-            get {
-                return ResourceManager.GetString("CompilerErrorMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Construct From Many Operation {{{0}}} needs source Ids as parameter.
         /// </summary>
         internal static string ConstructFromManyOperation0NeedsSourceIdsAsParameter {
@@ -124,15 +115,6 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Description.
-        /// </summary>
-        internal static string Description {
-            get {
-                return ResourceManager.GetString("Description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to FileType property of FileLine settings must be specified for FileLine {{0}}.
         /// </summary>
         internal static string FileTypePropertyOfFileLineSettingsMustBeSpecified {
@@ -160,11 +142,11 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Line.
+        ///   Looks up a localized string similar to Message.
         /// </summary>
-        internal static string Line {
+        internal static string Message {
             get {
-                return ResourceManager.GetString("Line", resourceCulture);
+                return ResourceManager.GetString("Message", resourceCulture);
             }
         }
         
@@ -223,20 +205,29 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Source code error.
+        ///   Looks up a localized string similar to Source.
         /// </summary>
-        internal static string SourceCodeError {
+        internal static string Source {
             get {
-                return ResourceManager.GetString("SourceCodeError", resourceCulture);
+                return ResourceManager.GetString("Source", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Source file.
+        ///   Looks up a localized string similar to StackTrace.
         /// </summary>
-        internal static string SourceFile {
+        internal static string StackTrace {
             get {
-                return ResourceManager.GetString("SourceFile", resourceCulture);
+                return ResourceManager.GetString("StackTrace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target site.
+        /// </summary>
+        internal static string TargetSite {
+            get {
+                return ResourceManager.GetString("TargetSite", resourceCulture);
             }
         }
         
@@ -273,6 +264,15 @@ namespace Signum.Web.Extensions.Properties {
         internal static string UserNameMustHaveAValue {
             get {
                 return ResourceManager.GetString("UserNameMustHaveAValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nombre vista.
+        /// </summary>
+        internal static string ViewName {
+            get {
+                return ResourceManager.GetString("ViewName", resourceCulture);
             }
         }
         

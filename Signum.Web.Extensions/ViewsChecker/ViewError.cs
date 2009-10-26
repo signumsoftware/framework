@@ -8,20 +8,20 @@ namespace Signum.Web.ViewsChecker
 {
     public class ViewError
     {
-        public static string DescriptionLbl = Resources.Description;
-        public static string CompilerErrorMsgLbl = Resources.CompilerErrorMessage;
-        public static string SourceCodeErrorLbl = Resources.SourceCodeError;
-        public static string SourceFileLbl = Resources.SourceFile;
-        public static string LineLbl = Resources.Line;
+        public static string ViewNameLbl = Resources.ViewName;
+        public static string MessageLbl = Resources.Message;
+        public static string SourceLbl = Resources.Source;
+        public static string StackTraceLbl = Resources.StackTrace;
+        public static string TargetSiteLbl = Resources.TargetSite;
 
-        public string Description { get; set; }
+        public string ViewName { get; set; }
 
-        public string CompilerErrorMsg { get; set; }
+        public string Message { get; set; }
 
-        public string SourceCodeError { get; set; }
+        public string Source { get; set; }
 
-        public string SourceFile { get; set; }
+        public string StackTrace { get; set; }
 
-        public string Line { get; set; }
+        public string TargetSite { get; set; }
     }
 }

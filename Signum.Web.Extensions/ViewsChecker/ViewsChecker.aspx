@@ -20,34 +20,34 @@
         {
         %>
      <div>
-        <table>
-            <tr>
+        <table border="solid 1px black" cellpadding="5px" cellspacing="1">
+            <tr valign="top" style="font-weight:bold">
                 <td>
-                    <%= ViewError.DescriptionLbl%>
+                    <%= ViewError.ViewNameLbl%>
                 </td>
                 <td>
-                    <%= ViewError.CompilerErrorMsgLbl%>
+                    <%= ViewError.MessageLbl%>
                 </td>
                 <td>
-                    <%= ViewError.SourceCodeErrorLbl%>
+                    <%= ViewError.SourceLbl%>
                 </td>
                 <td>
-                    <%= ViewError.SourceFileLbl%>
+                    <%= ViewError.StackTraceLbl%>
                 </td>
                 <td>
-                    <%= ViewError.LineLbl%>
+                    <%= ViewError.TargetSiteLbl%>
                 </td>
             </tr>
             <%
                 foreach (ViewError error in errors)
                 { 
                     %>
-                    <tr>
-                        <td><%= error.Description %></td>
-                        <td><%= error.CompilerErrorMsg %></td>
-                        <td><%= error.SourceCodeError %></td>
-                        <td><%= error.SourceFile %></td>
-                        <td><%= error.Line%></td>
+                    <tr valign="top">
+                        <td><%= error.ViewName%></td>
+                        <td><%= error.Message%></td>
+                        <td><%= error.Source%></td>
+                        <td><%= error.StackTrace%></td>
+                        <td><%= error.TargetSite%></td>
                     </tr>
                     <%
                 }

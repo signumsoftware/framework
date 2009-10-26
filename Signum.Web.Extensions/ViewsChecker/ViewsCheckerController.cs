@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,6 +17,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Web.Controllers;
 using Signum.Web.Extensions.Properties;
+#endregion
 
 namespace Signum.Web.ViewsChecker
 {
@@ -41,22 +43,16 @@ namespace Signum.Web.ViewsChecker
                 }
                 catch (Exception ex)
                 {
-                    int i = 0;
-                }
-                if (result.Contains(Resources.CompilerErrorMessage))
-                {
-                    ViewError error = new ViewError();
-                    result = result.Substring(result.IndexOf(Resources.Description));
+                    Exception firstEx = FindMostInnerException(ex);
 
-                    error.Description = FindRegion(result, Resources.CompilerErrorMessage);
-
-                    error.CompilerErrorMsg = FindRegion(result, Resources.SourceCodeError);
-
-                    error.SourceCodeError = FindRegion(result, Resources.SourceFile);
-
-                    error.SourceFile = FindRegion(result, Resources.Line);
-
-                    error.Line = FindRegion(result, "<br>");
+                    ViewError error = new ViewError
+                    {
+                        ViewName = entry.Value.PartialViewName,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        StackTrace = ex.StackTrace,
+                        TargetSite = ex.TargetSite.ToString()
+                    };
 
                     errors.Add(error);
                 }
@@ -71,6 +67,14 @@ namespace Signum.Web.ViewsChecker
             string region = result.Substring(result.IndexOf("</b>"), index).Replace("<b>","");
             result = result.Substring(index);
             return region;
+        }
+
+        private Exception FindMostInnerException(Exception ex)
+        {
+            if (ex.InnerException == null)
+                return ex;
+
+            return FindMostInnerException(ex.InnerException);
         }
     }
 }
