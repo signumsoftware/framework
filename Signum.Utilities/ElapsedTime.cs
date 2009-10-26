@@ -17,10 +17,10 @@ namespace Signum.Utilities
             Stopwatch sp = new Stopwatch();
             sp.Start();
 
-            return new Disposable(() => { sp.Stop(); InsertEnty(sp.ElapsedMilliseconds, identifier); });
+            return new Disposable(() => { sp.Stop(); InsertEntity(sp.ElapsedMilliseconds, identifier); });
         }
 
-        static void InsertEnty(long milliseconds, string identifier)
+        static void InsertEntity(long milliseconds, string identifier)
         {
             lock (IdentifiedElapseds)
             {
