@@ -121,7 +121,6 @@ namespace Signum.Windows
             if (alignment != TextAlignment.Left)
                 factory.SetValue(TextBlock.TextAlignmentProperty, alignment);
             factory.SetBinding(TextBlock.TextProperty, binding);
-
             return new DataTemplate { VisualTree = factory };
         }
 
