@@ -26,6 +26,8 @@ namespace Signum.Web.Authorization
     [HandleError]
     public class AuthController : Controller
     {
+        public static event Action<UserDN> OnUserLogged;
+
         public AuthController()
             : this(null, null)
         {
@@ -323,6 +325,9 @@ namespace Signum.Web.Authorization
             Thread.CurrentPrincipal = usuario;
 
             FormsAuth.SetAuthCookie(username, rememberMe ?? false);
+
+            if (OnUserLogged != null)
+                OnUserLogged(usuario);
         }
 
         public ActionResult Logout()
