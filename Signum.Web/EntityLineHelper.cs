@@ -46,8 +46,6 @@ namespace Signum.Web
 
     public static class EntityLineHelper
     {
-        static MethodInfo mi = ReflectionTools.GetMethodInfo((Lazy<TypeDN> l)=>l.Retrieve()).GetGenericMethodDefinition(); 
-
         internal static string InternalEntityLine<T>(this HtmlHelper helper, TypeContext<T> typeContext, EntityLine settings)
         {
             if (!settings.Visible)
@@ -100,15 +98,14 @@ namespace Signum.Web
                     sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
 
                     EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? Reflector.ExtractLazy(type) ?? type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? type));
-                    
                     TypeContext tc = typeContext;
                     if (isLazy)
                     {
-                        ParameterExpression pe = Expression.Parameter(typeContext.ContextType, "p");
-                        Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLazy(type)),pe);
-                        LambdaExpression lambda = Expression.Lambda(call, pe);
-                       // var  Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(Reflector.ExtractLazy(type)), Database.Retrieve((Lazy)typeContext.Value));
-                        tc = Common.UntypedTypeContext(typeContext, lambda, cleanRuntimeType ?? Reflector.ExtractLazy(type));
+                        //ParameterExpression pe = Expression.Parameter(typeContext.ContextType, "p");
+                        //Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLazy(type)),pe);
+                        //LambdaExpression lambda = Expression.Lambda(call, pe);
+                        //tc = Common.UntypedTypeContext(typeContext, lambda, cleanRuntimeType ?? Reflector.ExtractLazy(type));
+                        tc = typeContext.ExtractLazy(); 
                     }
                     ViewDataDictionary vdd = new ViewDataDictionary(tc) //value
                     { 

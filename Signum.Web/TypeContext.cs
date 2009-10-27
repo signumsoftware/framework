@@ -11,6 +11,8 @@ using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
 using Signum.Web.Properties;
+using Signum.Utilities.Reflection;
+using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -105,6 +107,19 @@ namespace Signum.Web
             }
 
             return null;
+        }
+
+        static MethodInfo mi = ReflectionTools.GetMethodInfo((Lazy<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
+
+        public static TypeContext ExtractLazy<T>(this TypeContext<T> lazyTypeContext)
+        {
+            if (!typeof(Lazy).IsAssignableFrom(lazyTypeContext.ContextType))
+                return null;
+
+            ParameterExpression pe = Expression.Parameter(lazyTypeContext.ContextType, "p");
+            Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLazy(lazyTypeContext.ContextType)), pe);
+            LambdaExpression lambda = Expression.Lambda(call, pe);
+            return Common.UntypedTypeContext(lazyTypeContext, lambda, Reflector.ExtractLazy(lazyTypeContext.ContextType));
         }
 
         static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool? writeIdAndRuntime)
