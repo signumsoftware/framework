@@ -322,12 +322,22 @@ namespace Signum.Web
 
         public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form)
         {
-            return Manager.ExtractEntity(controller, form, null);
+            return Manager.ExtractEntity(controller, form, null, null);
+        }
+
+        public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, bool clone)
+        {
+            return Manager.ExtractEntity(controller, form, null, clone);
         }
 
         public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
         {
-            return Manager.ExtractEntity(controller, form, prefix);
+            return Manager.ExtractEntity(controller, form, prefix, null);
+        }
+
+        public static ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, bool clone, string prefix)
+        {
+            return Manager.ExtractEntity(controller, form, prefix, clone);
         }
 
         public static object CreateInstance(Controller controller, Type type)
@@ -921,7 +931,7 @@ namespace Signum.Web
         //    return Modification.Create(obj.GetType(), formValues, interval, prefix);
         //}
 
-        protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix)
+        protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix, bool? clone)
         {
             string typeName = form[TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType)];
             string id = form[TypeContext.Compose(prefix ?? "", TypeContext.Id)];
@@ -940,7 +950,11 @@ namespace Signum.Web
                 Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resources.Type0NotFoundInTheSchema);
                 if (mod.GetType() == parentType &&
                     (typeof(EmbeddedEntity).IsAssignableFrom(parentType) || ((IIdentifiable)mod).IdOrNull.TryToString("") == parentId))
-                    return (ModifiableEntity)((ICloneable)mod).Clone();
+                {
+                    if (clone == null || clone.Value) 
+                        return (ModifiableEntity)((ICloneable)mod).Clone();
+                    return mod;
+                }
                 else
                     throw new ApplicationException(Resources.IncorrectEntityInSession);
             }
