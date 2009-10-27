@@ -38,10 +38,20 @@ namespace Signum.Web
             string valueStr = (value != null) ? value.ToString() : "";
             if (StyleContext.Current.ReadOnly)
             {
-                if (value != null && typeof(T).UnNullify() == typeof(DateTime) && settings.ValueLineType != null && settings.ValueLineType == ValueLineType.Date)
-                    sb.AppendLine(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
+                if (value != null && typeof(T).UnNullify() == typeof(Boolean))
+                {
+                    settings.ValueHtmlProps.Add("disabled", "disabled");
+                    sb.AppendLine(helper.CheckBox(idValueField,
+                        Convert.ToBoolean(value),
+                        settings));
+                }
                 else
-                    sb.AppendLine(helper.Span(idValueField, value, "valueLine", typeof(T)));
+                {
+                    if (value != null && typeof(T).UnNullify() == typeof(DateTime) && settings.ValueLineType != null && settings.ValueLineType == ValueLineType.Date)
+                        sb.AppendLine(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
+                    else
+                        sb.AppendLine(helper.Span(idValueField, value, "valueLine", typeof(T)));
+                }
             }
             else
             {
