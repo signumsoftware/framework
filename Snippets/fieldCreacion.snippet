@@ -16,7 +16,7 @@
         public DateTime FechaCreacion
         {
             get { return fechaCreacion; }
-            private set { Set(ref fechaCreacion, value, "FechaCreacion"); }
+            private set { Set(ref fechaCreacion, value, () => FechaCreacion); }
         }$end$]]>
 			</Code>
 		</Snippet>

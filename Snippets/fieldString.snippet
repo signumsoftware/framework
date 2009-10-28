@@ -38,7 +38,7 @@
         public string $property$
         {
             get { return $field$; }
-            set { Set(ref $field$, value, "$property$"); }
+            set { Set(ref $field$, value, () => $property$); }
         }$end$]]>
 			</Code>
 		</Snippet>

@@ -16,33 +16,28 @@
         public DateTime? FechaInicio
         {
             get { return fechaInicio; }
-            set { if (Set(ref fechaInicio, value, "FechaInicio"))Notify("FechaFin"); }
+            set { if (Set(ref fechaInicio, value, () => FechaInicio))Notify(() => FechaFin); }
         }
 
         DateTime? fechafin;
         public DateTime? FechaFin
         {
             get { return fechafin; }
-            set { if (Set(ref fechafin, value, "FechaFin"))Notify("FechaInicio"); }
+            set { if (Set(ref fechafin, value, () => FechaFin))Notify(() => FechaInicio); }
         }
 
-        public override string this[string columnName]
+        protected override string PropertyCheck(PropertyInfo pi)
         {
-            get
+            if (pi.Is(() => FechaInicio) || pi.Is(() => FechaFin))
             {
-                string result = base[columnName];
-
-                if (columnName == "FechaInicio" || columnName == "FechaFin")
-                {
-                    if(this.FechaFin < this.FechaInicio)
-                      result = result.AddLine("Fecha Inicio es mayor que Fecha Fin");
-                    
-                    if(this.FechaInicio == null && this.FechaFin != null)
-                       result = result.AddLine("Fecha Inicio es nulo pero Fecha Fin no lo es");
-                }
+                if(this.FechaFin < this.FechaInicio)
+                   return "Fecha Inicio es mayor que Fecha Fin";
                 
-                return result;
+                if(this.FechaInicio == null && this.FechaFin != null)
+                   return "Fecha Inicio es nulo pero Fecha Fin no lo es";
             }
+                
+            return base.PropertyCheck(pi);
         }$end$]]>
 			</Code>
 		</Snippet>
