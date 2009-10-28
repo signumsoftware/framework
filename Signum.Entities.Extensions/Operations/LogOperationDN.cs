@@ -16,7 +16,7 @@ namespace Signum.Entities.Operations
         public Lite<IdentifiableEntity> Target
         {
             get { return target; }
-            set { Set(ref target, value, "Target"); }
+            set { Set(ref target, value, () => Target); }
         }
 
         OperationDN operation;
@@ -24,7 +24,7 @@ namespace Signum.Entities.Operations
         public OperationDN Operation
         {
             get { return operation; }
-            set { Set(ref operation, value, "Operation"); }
+            set { Set(ref operation, value, () => Operation); }
         }
 
         UserDN user;
@@ -32,7 +32,7 @@ namespace Signum.Entities.Operations
         public UserDN User
         {
             get { return user; }
-            set { Set(ref user, value, "User"); }
+            set { Set(ref user, value, () => User); }
         }
 
         DateTime start;
@@ -40,7 +40,7 @@ namespace Signum.Entities.Operations
         public DateTime Start
         {
             get { return start; }
-            set { Set(ref start, value, "Start"); }
+            set { Set(ref start, value, () => Start); }
         }
 
         DateTime? end;
@@ -48,7 +48,7 @@ namespace Signum.Entities.Operations
         public DateTime? End
         {
             get { return end; }
-            set { Set(ref end, value, "End"); }
+            set { Set(ref end, value, () => End); }
         }
 
         string exception;
@@ -56,7 +56,7 @@ namespace Signum.Entities.Operations
         public string Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, "Exception"); }
+            set { Set(ref exception, value, () => Exception); }
         }
     }
 }

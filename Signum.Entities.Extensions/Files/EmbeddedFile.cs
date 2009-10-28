@@ -23,7 +23,7 @@ namespace Signum.Entities.Files
         public byte[] BinaryFile
         {
             get { return binaryFile; }
-            set { Set(ref binaryFile, value, "BinaryFile"); }
+            set { Set(ref binaryFile, value, () => BinaryFile); }
         }
 
         [NotNullable]
@@ -32,7 +32,7 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { Set(ref fileName, value, "FileName"); }
+            set { Set(ref fileName, value, () => FileName); }
         }
 
         public Uri WebPath

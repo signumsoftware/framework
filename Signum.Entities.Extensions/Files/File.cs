@@ -25,14 +25,14 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value, "FileName"); }
+            set { SetToStr(ref fileName, value, () => FileName); }
         }
 
         byte[] binaryFile;
         public byte[] BinaryFile
         {
             get { return binaryFile; }
-            set { Set(ref binaryFile, value, "BinaryFile"); }
+            set { Set(ref binaryFile, value, () => BinaryFile); }
         }
 
         public override string ToString()

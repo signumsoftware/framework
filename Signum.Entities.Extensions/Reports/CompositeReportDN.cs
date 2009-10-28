@@ -18,7 +18,7 @@ namespace Signum.Entities.Reports
         public string Name
         {
             get { return name; }
-            set { Set(ref name, value, "Name"); }
+            set { Set(ref name, value, () => Name); }
         }
         
         MList<Lite<ExcelReportDN>> excelReports;
@@ -26,7 +26,7 @@ namespace Signum.Entities.Reports
         public MList<Lite<ExcelReportDN>> ExcelReports
         {
             get { return excelReports; }
-            set { Set(ref excelReports, value, "Excelreports"); }
+            set { Set(ref excelReports, value, () => ExcelReports); }
         }
 
         public override string ToString()

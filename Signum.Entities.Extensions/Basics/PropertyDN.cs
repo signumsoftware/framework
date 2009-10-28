@@ -14,7 +14,7 @@ namespace Signum.Entities.Basics
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         TypeDN type;
@@ -22,7 +22,7 @@ namespace Signum.Entities.Basics
         public TypeDN Type
         {
             get { return type; }
-            set { Set(ref type, value, "Type"); }
+            set { Set(ref type, value, () => Type); }
         }
 
         public override string ToString()

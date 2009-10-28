@@ -19,7 +19,7 @@ namespace Signum.Entities.Reports
         public string QueryName
         {
             get { return queryName; }
-            set { Set(ref queryName, value, "QueryName"); }
+            set { Set(ref queryName, value, () => QueryName); }
         }
 
         [NotNullable]
@@ -28,7 +28,7 @@ namespace Signum.Entities.Reports
         public string DisplayName
         {
             get { return displayName; }
-            set { SetToStr(ref displayName, value, "DisplayName"); }
+            set { SetToStr(ref displayName, value, () => DisplayName); }
         }
 
         EmbeddedFileDN file;
@@ -36,7 +36,7 @@ namespace Signum.Entities.Reports
         public EmbeddedFileDN File
         {
             get { return file; }
-            set { Set(ref file, value, "File"); }
+            set { Set(ref file, value, () => File); }
         }
 
         bool deleted;
@@ -44,7 +44,7 @@ namespace Signum.Entities.Reports
         public bool Deleted
         {
             get { return deleted; }
-            set { Set(ref deleted, value, "Deleted"); }
+            set { Set(ref deleted, value, () => Deleted); }
         }
 
         public override string ToString()

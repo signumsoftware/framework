@@ -16,7 +16,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         QueryDN query;
@@ -24,14 +24,14 @@ namespace Signum.Entities.Authorization
         public QueryDN Query
         {
             get { return query; }
-            set { Set(ref query, value, "Query"); }
+            set { Set(ref query, value, () => Query); }
         }
 
         bool allowed;
         public bool Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, "Allowed"); }
+            set { Set(ref allowed, value, () => Allowed); }
         }
     }
 
@@ -43,7 +43,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         FacadeMethodDN serviceOperation;
@@ -51,14 +51,14 @@ namespace Signum.Entities.Authorization
         public FacadeMethodDN ServiceOperation
         {
             get { return serviceOperation; }
-            set { Set(ref serviceOperation, value, "ServiceOperation"); }
+            set { Set(ref serviceOperation, value, () => ServiceOperation); }
         }
 
         bool allowed;
         public bool Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, "Allowed"); }
+            set { Set(ref allowed, value, () => Allowed); }
         }
     }
 
@@ -70,7 +70,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         PermissionDN permission;
@@ -78,14 +78,14 @@ namespace Signum.Entities.Authorization
         public PermissionDN Permission
         {
             get { return permission; }
-            set { Set(ref permission, value, "Permission"); }
+            set { Set(ref permission, value, () => Permission); }
         }
 
         bool allowed;
         public bool Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, "Allowed"); }
+            set { Set(ref allowed, value, () => Allowed); }
         }
     }
 
@@ -97,7 +97,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         OperationDN operation;
@@ -105,14 +105,14 @@ namespace Signum.Entities.Authorization
         public OperationDN Operation
         {
             get { return operation; }
-            set { Set(ref operation, value, "Operation"); }
+            set { Set(ref operation, value, () => Operation); }
         }
 
         bool allowed;
         public bool Allowed
         {
             get { return allowed; }
-            set { Set(ref allowed, value, "Allowed"); }
+            set { Set(ref allowed, value, () => Allowed); }
         }
     }
 
@@ -124,7 +124,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         PropertyDN property;
@@ -132,14 +132,14 @@ namespace Signum.Entities.Authorization
         public PropertyDN Property
         {
             get { return property; }
-            set { Set(ref property, value, "Property"); }
+            set { Set(ref property, value, () => Property); }
         }
 
         Access access;
         public Access Access
         {
             get { return access; }
-            set { Set(ref access, value, "Access"); }
+            set { Set(ref access, value, () => Access); }
         }
     }
 
@@ -151,7 +151,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         EntityGroupDN group;
@@ -159,21 +159,21 @@ namespace Signum.Entities.Authorization
         public EntityGroupDN Group
         {
             get { return group; }
-            set { Set(ref group, value, "Group"); }
+            set { Set(ref group, value, () => Group); }
         }
 
         bool allowedIn;
         public bool AllowedIn
         {
             get { return allowedIn; }
-            set { Set(ref allowedIn, value, "AllowedIn"); }
+            set { Set(ref allowedIn, value, () => AllowedIn); }
         }
 
         bool allowedOut;
         public bool AllowedOut
         {
             get { return allowedOut; }
-            set { Set(ref allowedOut, value, "AllowedOut"); }
+            set { Set(ref allowedOut, value, () => AllowedOut); }
         }
     }
 
@@ -192,7 +192,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         TypeDN type;
@@ -200,14 +200,14 @@ namespace Signum.Entities.Authorization
         public TypeDN Type
         {
             get { return type; }
-            set { Set(ref type, value, "Type"); }
+            set { Set(ref type, value, () => Type); }
         }
 
         TypeAccess access;
         public TypeAccess Access
         {
             get { return access; }
-            set { Set(ref access, value, "TypeAccess"); }
+            set { Set(ref access, value, () => Access); }
         }
     }
 

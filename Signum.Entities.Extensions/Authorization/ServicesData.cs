@@ -30,12 +30,12 @@ namespace Signum.Entities.Authorization
             {
                 Access? val = value == accessBase ? (Access?)null : value;
 
-                if (Set(ref accessOverride, val, "Access"))
+                if (Set(ref accessOverride, val, () => Access))
                 {
-                    Notify("Overriden");
-                    Notify("Modify");
-                    Notify("Read");
-                    Notify("None");
+                    Notify(()=>Overriden);
+                    Notify(()=>Modify);
+                    Notify(()=>Read);
+                    Notify(()=>None);
                 }
             }
         }
@@ -67,7 +67,7 @@ namespace Signum.Entities.Authorization
         public IdentifiableEntity Resource
         {
             get { return resource; }
-            set { Set(ref resource, value, "Resource"); }
+            set { Set(ref resource, value, () => Resource); }
         }
     }
 
@@ -100,9 +100,9 @@ namespace Signum.Entities.Authorization
             {
                 bool? val = value == allowedInBase ? (bool?)null : value;
 
-                if (Set(ref allowedInOverride, val, "AllowedIn"))
+                if (Set(ref allowedInOverride, val, () => AllowedIn))
                 {
-                    Notify("Overriden");
+                    Notify(() => Overriden);
                 }
             }
         }
@@ -115,9 +115,9 @@ namespace Signum.Entities.Authorization
             {
                 bool? val = value == allowedOutBase ? (bool?)null : value;
 
-                if (Set(ref allowedOutOverride, val, "AllowedOut"))
+                if (Set(ref allowedOutOverride, val, () => AllowedOut))
                 {
-                    Notify("Overriden");
+                    Notify(() => Overriden);
                 }
             }
         }
@@ -131,7 +131,7 @@ namespace Signum.Entities.Authorization
         public EntityGroupDN Group
         {
             get { return group; }
-            set { Set(ref group, value, "Group"); }
+            set { Set(ref group, value, () => Group); }
         }
     }
 
@@ -159,9 +159,9 @@ namespace Signum.Entities.Authorization
             {
                 bool? val = value == allowedBase ? (bool?)null : value;
 
-                if (Set(ref allowedOverride, val, "Allowed"))
+                if (Set(ref allowedOverride, val, () => Allowed))
                 {
-                    Notify("Overriden");
+                    Notify(()=>Overriden);
                 }
             }
         }
@@ -175,7 +175,7 @@ namespace Signum.Entities.Authorization
         public IdentifiableEntity Resource
         {
             get { return resource; }
-            set { Set(ref resource, value, "Resource"); }
+            set { Set(ref resource, value, () => Resource); }
         }
     }
 
@@ -203,13 +203,13 @@ namespace Signum.Entities.Authorization
             {
                 TypeAccess? val = value == accessBase ? (TypeAccess?)null : value;
 
-                if (Set(ref accessOverride, val, "Access"))
+                if (Set(ref accessOverride, val, () => Access))
                 {
-                    Notify("Overriden");
-                    Notify("Create");
-                    Notify("Modify");
-                    Notify("Read");
-                    Notify("None");
+                    Notify(()=>Overriden);
+                    Notify(()=>Create);
+                    Notify(()=>Modify);
+                    Notify(()=>Read);
+                    Notify(()=>None);
                 }
             }
         }
@@ -247,7 +247,7 @@ namespace Signum.Entities.Authorization
         public IdentifiableEntity Resource
         {
             get { return resource; }
-            set { Set(ref resource, value, "Resource"); }
+            set { Set(ref resource, value, () => Resource); }
         }
     }
 }

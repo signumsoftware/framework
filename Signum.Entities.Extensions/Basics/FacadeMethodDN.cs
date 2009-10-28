@@ -14,7 +14,7 @@ namespace Signum.Entities.Basics
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         public override string ToString()

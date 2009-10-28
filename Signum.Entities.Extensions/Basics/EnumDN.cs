@@ -16,7 +16,7 @@ namespace Signum.Entities.Basics
         public string Name
         {
             get { return name; }
-            internal set { SetToStr(ref name, value, "Name"); }
+            internal set { SetToStr(ref name, value, () => Name); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -25,7 +25,7 @@ namespace Signum.Entities.Basics
         public string Key
         {
             get { return key; }
-            internal set { Set(ref key, value, "Key"); }
+            internal set { Set(ref key, value, () => Key); }
         }
 
         public override string ToString()

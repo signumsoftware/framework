@@ -39,7 +39,7 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value, "FileName"); }
+            set { SetToStr(ref fileName, value, () => FileName); }
         }
 
         [Ignore]
@@ -49,7 +49,7 @@ namespace Signum.Entities.Files
             get { return binaryFile; }
             set 
             {
-                if (Set(ref binaryFile, value, "BinaryFile"))
+                if (Set(ref binaryFile, value, () => BinaryFile))
                     fileLength = binaryFile.Length;
             }
         }
@@ -58,7 +58,7 @@ namespace Signum.Entities.Files
         public int FileLength
         {
             get { return fileLength; }
-            private set { Set(ref fileLength, value, "FileLength"); }
+            private set { Set(ref fileLength, value, () => FileLength); }
         }
 
         [NotNullable, SqlDbType(Size = 260)]
@@ -67,7 +67,7 @@ namespace Signum.Entities.Files
         public string Sufix
         {
             get { return sufix; }
-            internal set { Set(ref sufix, value, "Sufix"); }
+            internal set { Set(ref sufix, value, () => Sufix); }
         }
 
         [Ignore]
@@ -87,7 +87,7 @@ namespace Signum.Entities.Files
         public FileTypeDN FileType
         {
             get { return fileType; }
-            internal set { Set(ref fileType, value, "FileType"); }
+            internal set { Set(ref fileType, value, () => FileType); }
         }
 
         FileRepositoryDN repository;
@@ -95,7 +95,7 @@ namespace Signum.Entities.Files
         public FileRepositoryDN Repository
         {
             get { return repository; }
-            internal set { Set(ref repository, value, "Repository"); }
+            internal set { Set(ref repository, value, () => Repository); }
         }
 
         static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => fp.Repository.PhysicalPrefix + '\\' + fp.Sufix;

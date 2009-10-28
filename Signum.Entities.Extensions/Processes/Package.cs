@@ -14,21 +14,21 @@ namespace Signum.Entities.Processes
         public OperationDN Operation
         {
             get { return operation; }
-            set { Set(ref operation, value, "Operation"); }
+            set { Set(ref operation, value, () => Operation); }
         }
 
         int numLines;
         public int NumLines
         {
             get { return numLines; }
-            set { Set(ref numLines, value, "NumLines"); }
+            set { Set(ref numLines, value, () => NumLines); }
         }
 
         int numErrors;
         public int NumErrors
         {
             get { return numErrors; }
-            set { Set(ref numErrors, value, "NumErrors"); }
+            set { Set(ref numErrors, value, () => NumErrors); }
         }
 
         public override string ToString()
@@ -45,7 +45,7 @@ namespace Signum.Entities.Processes
         public Lite<PackageDN> Package
         {
             get { return package; }
-            set { Set(ref package, value, "Package"); }
+            set { Set(ref package, value, () => Package); }
         }
 
         [ImplementedByAll]
@@ -54,7 +54,7 @@ namespace Signum.Entities.Processes
         public Lite<IdentifiableEntity> Target
         {
             get { return target; }
-            set { Set(ref target, value, "Target"); }
+            set { Set(ref target, value, () => Target); }
         }
 
         DateTime? finishTime;
@@ -62,7 +62,7 @@ namespace Signum.Entities.Processes
         public DateTime? FinishTime
         {
             get { return finishTime; }
-            set { Set(ref finishTime, value, "FinishTime"); }
+            set { Set(ref finishTime, value, () => FinishTime); }
         }
 
 
@@ -72,7 +72,7 @@ namespace Signum.Entities.Processes
         public string Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, "Exception"); }
+            set { Set(ref exception, value, () => Exception); }
         }
     }
 }

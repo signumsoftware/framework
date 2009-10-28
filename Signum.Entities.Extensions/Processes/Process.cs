@@ -25,7 +25,7 @@ namespace Signum.Entities.Processes
     {
         private ProcessExecutionDN() { }
 
-        public ProcessExecutionDN(ProcessDN process) 
+        public ProcessExecutionDN(ProcessDN process)
         {
             this.process = process;
         }
@@ -42,7 +42,7 @@ namespace Signum.Entities.Processes
         public IProcessDataDN ProcessData
         {
             get { return processData; }
-            set { Set(ref processData, value, "ProcessData"); }
+            set { Set(ref processData, value, () => ProcessData); }
         }
 
         ProcessState state;
@@ -50,7 +50,7 @@ namespace Signum.Entities.Processes
         public ProcessState State
         {
             get { return state; }
-            set { Set(ref state, value, "State"); }
+            set { Set(ref state, value, () => State); }
         }
 
         DateTime creationDate = DateTime.Now;
@@ -58,15 +58,15 @@ namespace Signum.Entities.Processes
         public DateTime CreationDate
         {
             get { return creationDate; }
-            private set { Set(ref creationDate, value, "CreationDate"); }
+            private set { Set(ref creationDate, value, () => CreationDate); }
         }
-        
+
         DateTime? plannedDate;
         [LocDescription]
         public DateTime? PlannedDate
         {
             get { return plannedDate; }
-            set { Set(ref plannedDate, value, "PlannedDate"); }
+            set { Set(ref plannedDate, value, () => PlannedDate); }
         }
 
         DateTime? cancelationDate;
@@ -74,7 +74,7 @@ namespace Signum.Entities.Processes
         public DateTime? CancelationDate
         {
             get { return cancelationDate; }
-            set { Set(ref cancelationDate, value, "CancelationDate"); }
+            set { Set(ref cancelationDate, value, () => CancelationDate); }
         }
 
         DateTime? queuedDate;
@@ -82,7 +82,7 @@ namespace Signum.Entities.Processes
         public DateTime? QueuedDate
         {
             get { return queuedDate; }
-            set { Set(ref queuedDate, value, "QueuedDate"); }
+            set { Set(ref queuedDate, value, () => QueuedDate); }
         }
 
         DateTime? executionStart;
@@ -90,7 +90,7 @@ namespace Signum.Entities.Processes
         public DateTime? ExecutionStart
         {
             get { return executionStart; }
-            set { if (Set(ref executionStart, value, "ExecutionStart"))Notify("ExecutionEnd"); }
+            set { if (Set(ref executionStart, value, () => ExecutionStart))Notify(()=>ExecutionEnd); }
         }
 
         DateTime? executionEnd;
@@ -98,7 +98,7 @@ namespace Signum.Entities.Processes
         public DateTime? ExecutionEnd
         {
             get { return executionEnd; }
-            set { if (Set(ref executionEnd, value, "ExecutionEnd"))Notify("ExecutionStart"); }
+            set { if (Set(ref executionEnd, value, () => ExecutionEnd))Notify(()=>ExecutionStart); }
         }
 
         DateTime? suspendDate;
@@ -106,7 +106,7 @@ namespace Signum.Entities.Processes
         public DateTime? SuspendDate
         {
             get { return suspendDate; }
-            set { Set(ref suspendDate, value, "SuspendDate"); }
+            set { Set(ref suspendDate, value, () => SuspendDate); }
         }
 
         DateTime? exceptionDate;
@@ -114,7 +114,7 @@ namespace Signum.Entities.Processes
         public DateTime? ExceptionDate
         {
             get { return exceptionDate; }
-            set { Set(ref exceptionDate, value, "ExceptionDate"); }
+            set { Set(ref exceptionDate, value, () => ExceptionDate); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -123,7 +123,7 @@ namespace Signum.Entities.Processes
         public string Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, "Exception"); }
+            set { Set(ref exception, value, () => Exception); }
         }
 
         decimal? progress;
@@ -131,11 +131,11 @@ namespace Signum.Entities.Processes
         public decimal? Progress
         {
             get { return progress; }
-            set { Set(ref progress, value, "Progress"); }
+            set { Set(ref progress, value, () => Progress); }
         }
 
         static StateValidator<ProcessExecutionDN, ProcessState> stateValidator = new StateValidator<ProcessExecutionDN, ProcessState>
-        (e => e.State, e=>e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e=>e.ExceptionDate, e=>e.Exception)
+        (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception)
         {
        {ProcessState.Created,   false,   false,                  false,             false,                 false,               false,              false,            false,         false}, 
        {ProcessState.Planned,   true,    null,                   null,              null,                  false,               null,               null,             null,          null}, 
@@ -146,28 +146,22 @@ namespace Signum.Entities.Processes
        {ProcessState.Suspended, null,    null,                   true,              true,                  false,               true,               true,             false,         false},
        {ProcessState.Finished,  null,    null,                   true,              true,                  true,                false,              false,            false,         false},
        {ProcessState.Error,     null,    null,                   null,              null,                  null,                null,               null,             true,          true},
-        }; 
+        };
 
-        public override string this[string columnName]
+        protected override string PropertyCheck(PropertyInfo pi)
         {
-            get
+            if (pi.Is(()=>ExecutionStart) || pi.Is(()=>ExecutionEnd))
             {
-                string result = base[columnName];
+                if (this.ExecutionEnd < this.ExecutionStart)
+                    return "Process Start es greater than Process End";
 
-                if (columnName == "ProcessStart" || columnName == "ProcessEnd")
-                {
-                    if (this.ExecutionEnd < this.ExecutionStart)
-                        result = result.AddLine("Process Start es greater than Process End");
-
-                    if (this.ExecutionStart == null && this.ExecutionEnd != null)
-                        result = result.AddLine("Process Start is nulo but Process End is not");
-                }
-
-                result = result.AddLine(stateValidator.Validate(this, columnName)); 
-
-                return result;
+                if (this.ExecutionStart == null && this.ExecutionEnd != null)
+                    return "Process Start is nulo but Process End is not";
             }
+
+            return stateValidator.Validate(this, pi) ?? base.PropertyCheck(pi);
         }
+
 
         public override string ToString()
         {

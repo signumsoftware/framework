@@ -17,7 +17,7 @@ namespace Signum.Entities.Scheduler
         public IScheduleRuleDN Rule
         {
             get { return rule; }
-            set { Set(ref rule, value, "Rule"); }
+            set { Set(ref rule, value, () => Rule); }
         }
 
         ITaskDN task;
@@ -25,7 +25,7 @@ namespace Signum.Entities.Scheduler
         public ITaskDN Task
         {
             get { return task; }
-            set { Set(ref task, value, "Task"); }
+            set { Set(ref task, value, () => Task); }
         }
 
         DateTime? nextDate = DateTime.Now;
@@ -33,7 +33,7 @@ namespace Signum.Entities.Scheduler
         public DateTime? NextDate
         {
             get { return nextDate; }
-            private set { Set(ref nextDate, value, "NextDate"); }
+            private set { Set(ref nextDate, value, () => NextDate); }
         }
 
         bool suspended;
@@ -41,7 +41,7 @@ namespace Signum.Entities.Scheduler
         public bool Suspended
         {
             get { return suspended; }
-            set { Set(ref suspended, value, "Suspended"); }
+            set { Set(ref suspended, value, () => Suspended); }
         }
 
         protected override void PreSaving(ref bool graphModified)

@@ -39,7 +39,7 @@ namespace Signum.Entities.Scheduler
         public CustomTaskDN CustomTask
         {
             get { return customTask; }
-            set { Set(ref customTask, value, "CustomTask"); }
+            set { Set(ref customTask, value, () => CustomTask); }
         }
 
         DateTime startTime;
@@ -47,7 +47,7 @@ namespace Signum.Entities.Scheduler
         public DateTime StartTime
         {
             get { return startTime; }
-            set { Set(ref startTime, value, "StartTime"); }
+            set { Set(ref startTime, value, () => StartTime); }
         }
 
         DateTime? endTime;
@@ -55,7 +55,7 @@ namespace Signum.Entities.Scheduler
         public DateTime? EndTime
         {
             get { return endTime; }
-            set { Set(ref endTime, value, "EndTime"); }
+            set { Set(ref endTime, value, () => EndTime); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -64,7 +64,7 @@ namespace Signum.Entities.Scheduler
         public string Exception
         {
             get { return exception; }
-            set { Set(ref exception, value, "Exception"); }
+            set { Set(ref exception, value, () => Exception); }
         }
 
         public override string ToString()

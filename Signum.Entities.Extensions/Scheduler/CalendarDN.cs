@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
+using System.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
@@ -16,7 +17,7 @@ namespace Signum.Entities.Scheduler
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         MList<HolidayDN> holidays;
@@ -24,39 +25,35 @@ namespace Signum.Entities.Scheduler
         public MList<HolidayDN> Holidays
         {
             get { return holidays; }
-            set { Set(ref holidays, value, "Holidays"); }
+            set { Set(ref holidays, value, () => Holidays); }
         }
 
         public void CleanOldHolidays()
         {
-            holidays.RemoveAll(h => h.Date < DateTime.Now); 
+            holidays.RemoveAll(h => h.Date < DateTime.Now);
         }
 
         public bool IsHoliday(DateTime date)
         {
-            return holidays.Any(h => h.Date == date); 
+            return holidays.Any(h => h.Date == date);
         }
 
-        public override string this[string columnName]
+        protected override string PropertyCheck(PropertyInfo pi)
         {
-            get
+            if (pi.Is(()=>Holidays) && holidays != null)
             {
-                string result = base[columnName];
+                string rep = (from h in holidays
+                              group 1 by h.Date into g
+                              where g.Count() > 2
+                              select new { Date = g.Key, Num = g.Count() }).ToString(g => "{0} ({1})".Formato(g.Date, g.Num), ", ");
 
-                if (columnName == "Holydais" && holidays != null)
-                {
-                    string rep = (from h in holidays
-                                  group 1 by h.Date into g
-                                  where g.Count() > 2
-                                  select new { Date = g.Key, Num = g.Count() }).ToString(g => "{0} ({1})".Formato(g.Date, g.Num), ", ");
-
-                    if (rep.HasText())
-                        result = result.AddLine("Some dates have been repeated: " + rep); 
-                }
-
-                return result;
+                if (rep.HasText())
+                    return "Some dates have been repeated: " + rep;
             }
+
+            return base.PropertyCheck(pi);
         }
+
 
         public override string ToString()
         {
@@ -72,7 +69,7 @@ namespace Signum.Entities.Scheduler
         public DateTime Date
         {
             get { return date; }
-            set { SetToStr(ref date, value, "Date"); }
+            set { SetToStr(ref date, value, () => Date); }
         }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -81,7 +78,7 @@ namespace Signum.Entities.Scheduler
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         public override string ToString()

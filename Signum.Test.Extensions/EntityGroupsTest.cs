@@ -124,7 +124,7 @@ namespace Signum.Test.Extensions
         public UserDN Propietary
         {
             get { return propietary; }
-            set { Set(ref propietary, value, "Propietary"); }
+            set { Set(ref propietary, value, () => Propietary); }
         }
 
         [NotNullable, SqlDbType( Size = 100)]
@@ -133,7 +133,7 @@ namespace Signum.Test.Extensions
         public string Name
         {
             get { return name; }
-            set { Set(ref name, value, "Name"); }
+            set { Set(ref name, value, () => Name); }
         }
     }
 }

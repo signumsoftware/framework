@@ -14,7 +14,7 @@ namespace Signum.Entities.Extensions.Basics
         public int Years
         {
             get { return years; }
-            set { Set(ref years, value, "Years"); }
+            set { Set(ref years, value, () => Years); }
         }
 
         int months;
@@ -22,7 +22,7 @@ namespace Signum.Entities.Extensions.Basics
         public int Months
         {
             get { return months; }
-            set { Set(ref months, value, "Months"); }
+            set { Set(ref months, value, () => Months); }
         }
 
         int days;
@@ -30,7 +30,7 @@ namespace Signum.Entities.Extensions.Basics
         public int Days
         {
             get { return days; }
-            set { Set(ref days, value, "Days"); }
+            set { Set(ref days, value, () => Days); }
         }
 
         public bool EsNulo()

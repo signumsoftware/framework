@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Threading;
 using System.Security.Cryptography;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
@@ -19,7 +20,7 @@ namespace Signum.Entities.Authorization
         public string UserName
         {
             get { return userName; }
-            set { SetToStr(ref userName, value, "UserName"); }
+            set { SetToStr(ref userName, value, () => UserName); }
         }
 
         [NotNullable]
@@ -28,7 +29,7 @@ namespace Signum.Entities.Authorization
         public string PasswordHash
         {
             get { return passwordHash; }
-            set { Set(ref passwordHash, value, "PasswordHash"); }
+            set { Set(ref passwordHash, value, () => PasswordHash); }
         }
 
         Lite<IEmployeeDN> employee;
@@ -36,7 +37,7 @@ namespace Signum.Entities.Authorization
         public Lite<IEmployeeDN> Employee
         {
             get { return employee; }
-            set { Set(ref employee, value, "Related;"); }
+            set { Set(ref employee, value, () => Employee); }
         }
 
         RoleDN role;
@@ -44,7 +45,7 @@ namespace Signum.Entities.Authorization
         public RoleDN Role
         {
             get { return role; }
-            set { Set(ref role, value, "Role"); }
+            set { Set(ref role, value, () => Role); }
         }
 
         string email;
@@ -52,7 +53,7 @@ namespace Signum.Entities.Authorization
         public string EMail
         {
             get { return email; }
-            set { Set(ref email, value, "EMail"); }
+            set { Set(ref email, value, () => EMail); }
         }
 
         IIdentity IPrincipal.Identity
@@ -70,30 +71,26 @@ namespace Signum.Entities.Authorization
         public DateTime? AnulationDate
         {
             get { return anulationDate; }
-            set { Set(ref anulationDate, value, "AnulationDate"); }
+            set { Set(ref anulationDate, value, () => AnulationDate); }
         } 
 
         UserState state;
         public UserState State
         {
             get { return state; }
-            set { Set(ref state, value, "State"); }
+            set { Set(ref state, value, () => State); }
         }
 
-        public override string this[string columnName]
+        protected override string PropertyCheck(PropertyInfo pi)
         {
-            get
+            
+            if (pi.Is(()=>State))
             {
-                string error = base[columnName];
-
-                if (columnName == "State")
-                { 
-                    if (anulationDate != null && state != UserState.Disabled)
-                        error = error.AddLine("The user state must be Anulated {0}".Formato(this.ToString()));
-                }
-
-                return error;
+                if (anulationDate != null && state != UserState.Disabled)
+                    return "The user state must be Anulated {0}".Formato(this.ToString());
             }
+
+            return base.PropertyCheck(pi);
         }
 
         public override string ToString()

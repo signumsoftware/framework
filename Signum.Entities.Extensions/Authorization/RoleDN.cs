@@ -16,7 +16,7 @@ namespace Signum.Entities.Authorization
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         MList<RoleDN> roles;
@@ -24,7 +24,7 @@ namespace Signum.Entities.Authorization
         public MList<RoleDN> Roles
         {
             get { return roles; }
-            set { Set(ref roles, value, "Roles"); }
+            set { Set(ref roles, value, () => Roles); }
         }
 
         public override string ToString()

@@ -6,6 +6,7 @@ using System.Globalization;
 using Signum.Utilities;
 using System.ComponentModel;
 using Signum.Entities.Extensions.Properties;
+using System.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
@@ -23,7 +24,7 @@ namespace Signum.Entities.Scheduler
         public int Hour
         {
             get { return hour; }
-            set { SetToStr(ref hour, value, "Hour"); }
+            set { SetToStr(ref hour, value, () => Hour); }
         }
 
         int minute;
@@ -31,7 +32,7 @@ namespace Signum.Entities.Scheduler
         public int Minute
         {
             get { return minute; }
-            set { SetToStr(ref minute, value, "Minute"); }
+            set { SetToStr(ref minute, value, () => Minute); }
         }
 
         DateTime startingOn = DateTime.Today;
@@ -39,14 +40,14 @@ namespace Signum.Entities.Scheduler
         public DateTime StartingOn
         {
             get { return startingOn; }
-            set { Set(ref startingOn, value, "StartingOn"); }
+            set { Set(ref startingOn, value, () => StartingOn); }
         }
 
         public abstract DateTime Next();
 
         protected DateTime BaseNext()
         {
-            DateTime result =  DateTimeExtensions.Max(DateTime.Today, startingOn).AddHours(hour).AddMinutes(minute);
+            DateTime result = DateTimeExtensions.Max(DateTime.Today, startingOn).AddHours(hour).AddMinutes(minute);
 
             if (result < DateTime.Now)
                 result = result.AddDays(1);
@@ -66,7 +67,7 @@ namespace Signum.Entities.Scheduler
         public override string ToString()
         {
             return Resources.ScheduleRuleDailyDN_Everydayat + base.ToString();
-        }     
+        }
 
         public override DateTime Next()
         {
@@ -82,13 +83,13 @@ namespace Signum.Entities.Scheduler
         public DayOfWeek DayOfTheWeek
         {
             get { return dayOfTheWeek; }
-            set { Set(ref dayOfTheWeek, value, "DayOfTheWeek"); }
+            set { Set(ref dayOfTheWeek, value, () => DayOfTheWeek); }
         }
 
         public override string ToString()
         {
             return "{0} {1} {2}".Formato(
-                CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)dayOfTheWeek], 
+                CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)dayOfTheWeek],
                 Resources.ScheduleRuleWeekDaysDN_At,
                 base.ToString());
         }
@@ -103,7 +104,9 @@ namespace Signum.Entities.Scheduler
 
             return result;
         }
+
     }
+
 
     [Serializable, LocDescription]
     public class ScheduleRuleWeekDaysDN : ScheduleRuleDayDN
@@ -113,7 +116,7 @@ namespace Signum.Entities.Scheduler
         public bool Monday
         {
             get { return monday; }
-            set { SetToStr(ref monday, value, "Monday"); }
+            set { SetToStr(ref monday, value, () => Monday); }
         }
 
         bool tuesday;
@@ -121,7 +124,7 @@ namespace Signum.Entities.Scheduler
         public bool Tuesday
         {
             get { return tuesday; }
-            set { SetToStr(ref tuesday, value, "Tuesday"); }
+            set { SetToStr(ref tuesday, value, () => Tuesday); }
         }
 
         bool wednesday;
@@ -129,7 +132,7 @@ namespace Signum.Entities.Scheduler
         public bool Wednesday
         {
             get { return wednesday; }
-            set { SetToStr(ref wednesday, value, "Wednesday"); }
+            set { SetToStr(ref wednesday, value, () => Wednesday); }
         }
 
         bool thursday;
@@ -138,7 +141,7 @@ namespace Signum.Entities.Scheduler
         {
 
             get { return thursday; }
-            set { SetToStr(ref thursday, value, "Thursday"); }
+            set { SetToStr(ref thursday, value, () => Thursday); }
         }
 
         bool friday;
@@ -146,7 +149,7 @@ namespace Signum.Entities.Scheduler
         public bool Friday
         {
             get { return friday; }
-            set { SetToStr(ref friday, value, "Friday"); }
+            set { SetToStr(ref friday, value, () => Friday); }
         }
 
         bool saturday;
@@ -154,7 +157,7 @@ namespace Signum.Entities.Scheduler
         public bool Saturday
         {
             get { return saturday; }
-            set { SetToStr(ref saturday, value, "Saturday"); }
+            set { SetToStr(ref saturday, value, () => Saturday); }
         }
 
         bool sunday;
@@ -162,7 +165,7 @@ namespace Signum.Entities.Scheduler
         public bool Sunday
         {
             get { return sunday; }
-            set { SetToStr(ref sunday, value, "Sunday"); }
+            set { SetToStr(ref sunday, value, () => Sunday); }
         }
 
         CalendarDN calendar;
@@ -172,7 +175,7 @@ namespace Signum.Entities.Scheduler
             get { return calendar; }
             set
             {
-                if (Set(ref calendar, value, "Calendar"))
+                if (Set(ref calendar, value, () => Calendar))
                     Holiday = calendar == null ? (bool?)null : false;
             }
         }
@@ -182,7 +185,7 @@ namespace Signum.Entities.Scheduler
         public bool? Holiday
         {
             get { return holiday; }
-            set { SetToStr(ref holiday, value, "Holiday"); }
+            set { SetToStr(ref holiday, value, () => Holiday); }
         }
 
         public override DateTime Next()
@@ -209,8 +212,8 @@ namespace Signum.Entities.Scheduler
                 case DayOfWeek.Thursday: return thursday;
                 case DayOfWeek.Friday: return friday;
                 case DayOfWeek.Saturday: return saturday;
-                default: throw new InvalidOperationException(); 
-            }            
+                default: throw new InvalidOperationException();
+            }
         }
 
         public override string ToString()
@@ -228,23 +231,19 @@ namespace Signum.Entities.Scheduler
                 base.ToString());
         }
 
-        public override string this[string columnName]
+        protected override string PropertyCheck(PropertyInfo pi)
         {
-            get
+            if (pi.Is(()=>Holiday))
             {
-                string result = base[columnName];
+                if (calendar != null && holiday == null)
+                    return Resources.Holidayhavetobetrueorfalsewhenacalendarisset;
 
-                if (columnName == "Holiday")
-                {
-                    if (calendar != null && holiday == null)
-                        result = result.AddLine(Resources.Holidayhavetobetrueorfalsewhenacalendarisset);
-
-                    if (calendar == null && holiday != null)
-                        result = result.AddLine(Resources.Holidayhavetobenullwhennocalendarisset); 
-                }
-
-                return result;
+                if (calendar == null && holiday != null)
+                    return Resources.Holidayhavetobenullwhennocalendarisset;
             }
+
+            return base.PropertyCheck(pi);
         }
+
     }
 }
