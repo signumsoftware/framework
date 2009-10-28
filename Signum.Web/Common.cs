@@ -117,7 +117,6 @@ namespace Signum.Web
             }
         }
 #endregion
-
         static MethodInfo mi = ReflectionTools.GetMethodInfo(() => Common.WalkExpression<TypeDN, TypeDN>(null, null)).GetGenericMethodDefinition();
         //static MethodInfo mi = typeof(Common).GetMethod("WalkExpression", BindingFlags.Static | BindingFlags.Public); 
 

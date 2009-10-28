@@ -163,7 +163,7 @@
     <value>There's not an IdentifiableEntity property in the TypeContext path</value>
   </data>
   <data name="NoPropertyWithName0FoundInType1" xml:space="preserve">
-    <value>No property with name {{0}} found in type {{1}}</value>
+    <value>No property with name {{0}} found in type {1}</value>
   </data>
   <data name="NoQueryWithName0" xml:space="preserve">
     <value>There's no query with name {{{0}}}</value>
