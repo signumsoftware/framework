@@ -61,7 +61,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saved(RulePropertyDN rule)
         {
-                Transaction.RealCommit += () => _runtimeRules = null;
+            Transaction.RealCommit += () => _runtimeRules = null;
         }
 
         static void UserAndRoleLogic_RolesModified()
@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
 
         public static Access GetPropertyAccess(Type type, string property)
         {
-            return GetAccess(UserDN.Current.Role, type, property);
+            return GetAccess(RoleDN.Current, type, property);
         }
 
         public static List<AccessRule> GetAccessRule(Lazy<RoleDN> roleLazy, TypeDN typeDN)

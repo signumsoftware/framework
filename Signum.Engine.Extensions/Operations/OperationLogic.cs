@@ -41,7 +41,7 @@ namespace Signum.Engine.Operations
 
         public static void AssertIsStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(typeof(OperationLogic).GetMethod("Start")); 
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null,null))); 
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -58,7 +58,7 @@ namespace Signum.Engine.Operations
                                                {
                                                    Entity = lo.ToLazy(),
                                                    lo.Id,
-                                                   lo.Target,
+                                                   Target_nf_ = lo.Target,
                                                    Operation = lo.Operation.ToLazy(),
                                                    User = lo.User.ToLazy(),
                                                    lo.Start,

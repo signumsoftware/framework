@@ -34,7 +34,7 @@ namespace Signum.Engine.Authorization
 
         public static void AssertIsStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(typeof(AuthLogic).GetMethod("Start"));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null)));
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName)
@@ -201,6 +201,17 @@ namespace Signum.Engine.Authorization
 
                 return user;
             }
+        }
+
+        public static void StartAllModules(SchemaBuilder sb, Type serviceInterface, params DynamicQueryManager[] queryManagers)
+        {
+            TypeAuthLogic.Start(sb);
+            PropertyAuthLogic.Start(sb, true);
+            FacadeMethodAuthLogic.Start(sb, serviceInterface);
+            QueryAuthLogic.Start(sb, queryManagers);
+            OperationAuthLogic.Start(sb);
+            PermissionAuthLogic.Start(sb);
+            EntityGroupAuthLogic.Start(sb);
         }
     }
 }

@@ -12,6 +12,7 @@ using Signum.Utilities.DataStructures;
 using System.Threading;
 using Signum.Entities;
 using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -27,7 +28,7 @@ namespace Signum.Engine.Authorization
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(typeof(PermissionAuthLogic).GetMethod("Start")); 
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null))); 
         }
 
         public static void Start(SchemaBuilder sb)
@@ -68,13 +69,13 @@ namespace Signum.Engine.Authorization
 
         public static void Authorize(Enum permissionKey)
         {
-            if (!GetAllowed(UserDN.Current.Role, EnumDN.UniqueKey(permissionKey)))
+            if (!GetAllowed(RoleDN.Current, EnumDN.UniqueKey(permissionKey)))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
         public static bool IsAuthorizedFor(Enum permissionKey)
         {
-            return GetAllowed(UserDN.Current.Role, EnumDN.UniqueKey(permissionKey));
+            return GetAllowed(RoleDN.Current, EnumDN.UniqueKey(permissionKey));
         }
 
         static bool GetAllowed(RoleDN role, string permissionKey)

@@ -11,6 +11,7 @@ using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using System.Reflection;
 using Signum.Entities.Scheduler;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Processes
 {
@@ -18,7 +19,7 @@ namespace Signum.Engine.Processes
     {
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(typeof(ProcessLogic).GetMethod("StartPackages"));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
         }
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)

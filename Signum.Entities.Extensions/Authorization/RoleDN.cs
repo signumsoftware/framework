@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.Security.Authentication;
 
 namespace Signum.Entities.Authorization
 {
@@ -29,6 +30,18 @@ namespace Signum.Entities.Authorization
         public override string ToString()
         {
             return name;
+        }
+
+        public static RoleDN Current
+        {
+            get
+            {
+                UserDN user = UserDN.Current;
+                if (user == null)
+                    throw new AuthenticationException("Not user logged");
+
+                return user.Role;
+            }
         }
     }
 }

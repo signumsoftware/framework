@@ -25,7 +25,7 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -58,7 +58,7 @@ namespace Signum.Engine.Authorization
 
         static void OperationLogic_BeginOperation(IOperation operation, IdentifiableEntity entity)
         {
-            if (!GetAllowed(UserDN.Current.Role, operation.Key))
+            if (!GetAllowed(RoleDN.Current, operation.Key))
                 throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(operation.Key));
         }
 
@@ -75,7 +75,7 @@ namespace Signum.Engine.Authorization
 
         public static List<OperationInfo> Filter(List<OperationInfo> operationInfos)
         {
-            RoleDN role = UserDN.Current.Role;
+            RoleDN role = RoleDN.Current;
 
             return operationInfos.Where(ai => GetAllowed(role, ai.Key)).ToList(); 
         }

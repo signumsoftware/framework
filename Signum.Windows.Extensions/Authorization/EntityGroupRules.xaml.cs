@@ -13,32 +13,24 @@ using System.Windows.Shapes;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
-using Signum.Utilities;
 
 namespace Signum.Windows.Authorization
 {
     /// <summary>
     /// Interaction logic for Test.xaml
     /// </summary>
-    public partial class PropertyRules : Window
+    public partial class EntityGroupRules : Window
     {
-        public static readonly DependencyProperty TypeProperty =
-         DependencyProperty.Register("Type", typeof(TypeDN), typeof(PropertyRules), new UIPropertyMetadata(null));
-        public TypeDN Type
-        {
-            get { return (TypeDN)GetValue(TypeProperty); }
-            set { SetValue(TypeProperty, value); }
-        }
-
-        public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(PropertyRules), new UIPropertyMetadata(null));
         public Lazy<RoleDN> Role
         {
             get { return (Lazy<RoleDN>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 
-        public PropertyRules()
+        public static readonly DependencyProperty RoleProperty =
+            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(QueryRules), new UIPropertyMetadata(null));
+
+        public EntityGroupRules()
         {
             InitializeComponent();
             this.Loaded += new RoutedEventHandler(Test_Loaded);
@@ -47,23 +39,28 @@ namespace Signum.Windows.Authorization
         void Test_Loaded(object sender, RoutedEventArgs e)
         {
             Load();
-            this.Title = "Property Rules for {0}".Formato(Type.FriendlyName);
         }
 
         private void Load()
         {
-            listView.ItemsSource = Server.Service<IPropertyAuthServer>().GetPropertyAccessRules(Role, Type);
+            listView.ItemsSource = Server.Service<IEntityGroupAuthServer>().GetEntityGroupAllowedRules(Role);
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Service<IPropertyAuthServer>().SetPropertyAccessRules((List<AccessRule>)listView.ItemsSource, Role, Type);
+            Server.Service<IEntityGroupAuthServer>().SetEntityGroupAllowedRules((List<EntityGroupRule>)listView.ItemsSource, Role);
             Load(); 
         }
+
+        private void btClose_Click(object sender, RoutedEventArgs e)
+        {
+            Close(); 
+        }     
 
         private void btReload_Click(object sender, RoutedEventArgs e)
         {
             Load(); 
         }
+
     }
 }

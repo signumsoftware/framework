@@ -10,6 +10,7 @@ using Signum.Engine.Basics;
 using System.Reflection;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Services;
 
 namespace Signum.Engine.Authorization
 {
@@ -88,7 +89,7 @@ namespace Signum.Engine.Authorization
 
         public static void AuthorizeAccess(MethodInfo mi)
         {
-            if (!GetAllowed(UserDN.Current.Role, mi.Name))
+            if (!GetAllowed(RoleDN.Current, mi.Name))
                 throw new UnauthorizedAccessException("Access to Service Operation '{0}' is not allowed".Formato(mi.Name));
         }
 

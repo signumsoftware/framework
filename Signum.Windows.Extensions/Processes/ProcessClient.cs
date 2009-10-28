@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using Signum.Entities;
 using Signum.Services;
 using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Windows.Processes
 {
@@ -16,7 +17,7 @@ namespace Signum.Windows.Processes
     {
         internal static void AsserIsStarted()
         {
-            Navigator.Manager.AssertDefined(typeof(ProcessClient).GetMethod("Start"));
+            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start()));
         }
 
         public static void Start()

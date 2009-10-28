@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
+using Signum.Entities;
 
 namespace Signum.Entities.Authorization
 {
@@ -70,110 +71,69 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    //[Serializable]
-    //public class EntityGroupAccessRule : EmbeddedEntity
-    //{
-    //    public EntityGroupAccessRule(Access accessInBase, Access accessOutBase)
-    //    {
-    //        this.accessInBase = accessInBase;
-    //    }
+    [Serializable]
+    public class EntityGroupRule : EmbeddedEntity
+    {
+        public EntityGroupRule(bool allowedInBase, bool allowedOutBase)
+        {
+            this.allowedInBase = allowedInBase;
+            this.allowedOutBase = allowedOutBase; 
+        }
 
-    //    Access accessInBase;
-    //    public Access AccessInBase
-    //    {
-    //        get { return accessInBase; }
-    //    }
+        bool allowedInBase;
+        public bool AllowedInBase
+        {
+            get { return allowedInBase; }
+        }
 
-    //    Access accessOutBase;
-    //    public Access AccessOutBase
-    //    {
-    //        get { return accessOutBase; }
-    //    }
+        bool allowedOutBase;
+        public bool AllowedOutBase
+        {
+            get { return allowedOutBase; }
+        }
 
-    //    Access? accessInOverride;
-    //    public Access AccessIn
-    //    {
-    //        get { return accessInOverride ?? accessInBase; }
-    //        set
-    //        {
-    //            Access? val = value == accessInBase ? (Access?)null : value;
+        bool? allowedInOverride;
+        public bool AllowedIn
+        {
+            get { return allowedInOverride ?? allowedInBase; }
+            set
+            {
+                bool? val = value == allowedInBase ? (bool?)null : value;
 
-    //            if (Set(ref accessInOverride, val, "AccessIn"))
-    //            {
-    //                Notify("Overriden");
-    //                Notify("ModifyIn");
-    //                Notify("ReadIn");
-    //                Notify("NoneIn");
-    //            }
-    //        }
-    //    }
+                if (Set(ref allowedInOverride, val, "AllowedIn"))
+                {
+                    Notify("Overriden");
+                }
+            }
+        }
 
-    //    Access? accessOutOverride;
-    //    public Access AccessOut
-    //    {
-    //        get { return accessOutOverride ?? accessOutBase; }
-    //        set
-    //        {
-    //            Access? val = value == accessOutBase ? (Access?)null : value;
+        bool? allowedOutOverride;
+        public bool AllowedOut
+        {
+            get { return allowedOutOverride ?? allowedOutBase; }
+            set
+            {
+                bool? val = value == allowedOutBase ? (bool?)null : value;
 
-    //            if (Set(ref accessOutOverride, val, "AccessOut"))
-    //            {
-    //                Notify("Overriden");
-    //                Notify("ModifyOut");
-    //                Notify("ReadOut");
-    //                Notify("NoneOut");
-    //            }
-    //        }
-    //    }
+                if (Set(ref allowedOutOverride, val, "AllowedOut"))
+                {
+                    Notify("Overriden");
+                }
+            }
+        }
 
-    //    public bool ModifyIn
-    //    {
-    //        get { return AccessIn == Access.Modify; }
-    //        set { if (value) AccessIn = Access.Modify; }
-    //    }
+        public bool Overriden
+        {
+            get { return allowedInOverride.HasValue || allowedOutOverride.HasValue; }
+        }
 
-    //    public bool ReadIn
-    //    {
-    //        get { return AccessIn == Access.Read; }
-    //        set { if (value) AccessIn = Access.Read; }
-    //    }
-
-    //    public bool NoneIn
-    //    {
-    //        get { return AccessIn == Access.None; }
-    //        set { if (value) AccessIn = Access.None; }
-    //    }
-
-    //    public bool ModifyOut
-    //    {
-    //        get { return AccessOut == Access.Modify; }
-    //        set { if (value) AccessOut = Access.Modify; }
-    //    }
-
-    //    public bool ReadOut
-    //    {
-    //        get { return AccessOut == Access.Read; }
-    //        set { if (value) AccessOut = Access.Read; }
-    //    }
-
-    //    public bool NoneOut
-    //    {
-    //        get { return AccessOut == Access.None; }
-    //        set { if (value) AccessOut = Access.None; }
-    //    }
-
-    //    public bool Overriden
-    //    {
-    //        get { return accessInOverride.HasValue || accessOutOverride.HasValue; }
-    //    }
-
-    //    EntityGroupDN group;
-    //    public EntityGroupDN Group
-    //    {
-    //        get { return group; }
-    //        set { Set(ref group, value, "Group"); }
-    //    }
-    //}
+        EntityGroupDN group;
+        public EntityGroupDN Group
+        {
+            get { return group; }
+            set { Set(ref group, value, "Group"); }
+        }
+    }
 
 
     //Only for client-side communication

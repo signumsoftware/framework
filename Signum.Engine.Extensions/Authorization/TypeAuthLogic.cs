@@ -11,6 +11,7 @@ using System.Threading;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Reflection;
+using System.Security.Authentication;
 
 namespace Signum.Engine.Authorization
 {
@@ -56,10 +57,7 @@ namespace Signum.Engine.Authorization
         {
             if (AuthLogic.IsEnabled)
             {
-                if (UserDN.Current == null)
-                    throw new ApplicationException("Not user logged");
-
-                TypeAccess access = GetAccess(UserDN.Current.Role, ident.GetType());
+                TypeAccess access = GetAccess(RoleDN.Current, ident.GetType());
                 if (access < TypeAccess.Modify || ident.IsNew && access != TypeAccess.Create)
                     throw new UnauthorizedAccessException("Not authorized to Save '{0}'".Formato(ident.GetType()));
             }
@@ -69,10 +67,7 @@ namespace Signum.Engine.Authorization
         {
             if (AuthLogic.IsEnabled)
             {
-                if (UserDN.Current == null)
-                    throw new ApplicationException("Not user logged");
-
-                TypeAccess access = GetAccess(UserDN.Current.Role, type);
+                TypeAccess access = GetAccess(RoleDN.Current, type);
                 if (access < TypeAccess.Read)
                     throw new UnauthorizedAccessException("Not authorized to Retrieve '{0}'".Formato(type));
             }
@@ -117,12 +112,12 @@ namespace Signum.Engine.Authorization
 
         public static TypeAccess GetTypeAccess(Type type)
         {
-            return GetAccess(UserDN.Current.Role, type);
+            return GetAccess(RoleDN.Current, type);
         }
 
         public static Dictionary<Type, TypeAccess> AuthorizedTypes()
         {
-            return RuntimeRules.TryGetC(UserDN.Current.Role) ?? new Dictionary<Type, TypeAccess>();
+            return RuntimeRules.TryGetC(RoleDN.Current) ?? new Dictionary<Type, TypeAccess>();
         }
 
         public static Dictionary<RoleDN, Dictionary<Type, TypeAccess>> NewCache()

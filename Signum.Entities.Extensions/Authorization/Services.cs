@@ -94,12 +94,12 @@ namespace Signum.Services
     }
 
     [ServiceContract]
-    public interface IProcessAuthServer
+    public interface IEntityGroupAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetOperationAllowedRules(Lazy<RoleDN> role);
+        List<EntityGroupRule> GetEntityGroupAllowedRules(Lazy<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+        void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lazy<RoleDN> role);
     }
 }

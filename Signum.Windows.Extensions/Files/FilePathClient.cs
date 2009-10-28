@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Windows.Processes;
 using System.Reflection;
 using Signum.Entities.Files;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Windows.Extensions.Files
 {
@@ -12,7 +13,7 @@ namespace Signum.Windows.Extensions.Files
     {
         internal static void AsserIsStarted()
         {
-            Navigator.Manager.AssertDefined(typeof(ProcessClient).GetMethod("Start"));
+            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathClient.Start()));
         }
 
         public static void Start()

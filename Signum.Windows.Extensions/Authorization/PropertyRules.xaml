@@ -26,7 +26,7 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Service Operation" DisplayMemberBinding="{Binding Resource}" />
+                    <GridViewColumn Header="Property" DisplayMemberBinding="{Binding Resource}" />
                     <GridViewColumn Header="Modify" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>

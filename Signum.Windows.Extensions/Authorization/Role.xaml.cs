@@ -53,6 +53,9 @@ namespace Signum.Windows.Authorization
 
                 if (Server.Implements<IOperationAuthServer>())
                     links.Add(new QuickLink("Operation Rules") { Action = () => new OperationRules { Role = Lazy }.Show() });
+
+                if (Server.Implements<IEntityGroupAuthServer>())
+                    links.Add(new QuickLink("Entity Groups") { Action = () => new EntityGroupRules { Role = Lazy }.Show() });
             }
 
             return links;

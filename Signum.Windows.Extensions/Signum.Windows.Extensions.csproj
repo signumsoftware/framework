@@ -71,6 +71,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authorization\AuthClient.cs" />
+    <Compile Include="Authorization\EntityGroupRules.xaml.cs">
+      <DependentUpon>EntityGroupRules.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Authorization\OperationRules.xaml.cs">
       <DependentUpon>OperationRules.xaml</DependentUpon>
     </Compile>
@@ -235,6 +238,10 @@
     <Page Include="Authorization\AuthResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Authorization\EntityGroupRules.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Authorization\OperationRules.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -55,12 +55,14 @@ namespace Signum.Engine.Authorization
 
         public static HashSet<object> AuthorizedQueryNames(DynamicQueryManager dqm)
         {
-            return dqm.GetQueryNames().Where(q => GetAllowed(UserDN.Current.Role, q.ToString())).ToHashSet();
+            RoleDN role = RoleDN.Current;
+
+            return dqm.GetQueryNames().Where(q => GetAllowed(role, q.ToString())).ToHashSet();
         }
 
         public static void AuthorizeQuery(object queryName)
         {
-            if (!GetAllowed(UserDN.Current.Role,queryName.ToString()))
+            if (!GetAllowed(RoleDN.Current, queryName.ToString()))
                 throw new UnauthorizedAccessException("Access to Query '{0}' is not allowed".Formato(queryName));
         }
 
@@ -78,9 +80,9 @@ namespace Signum.Engine.Authorization
         public static bool GetQueryAllowed(object queryName)
         {
             if (!AuthLogic.IsEnabled)
-                return true; 
+                return true;
 
-            return GetAllowed(UserDN.Current.Role, queryName.ToString());
+            return GetAllowed(RoleDN.Current, queryName.ToString());
         }
 
         public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)

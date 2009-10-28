@@ -143,39 +143,39 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    //[Serializable]
-    //public class RuleEntityGroupDN : IdentifiableEntity
-    //{
-    //    RoleDN role;
-    //    [NotNullValidator]
-    //    public RoleDN Role
-    //    {
-    //        get { return role; }
-    //        set { Set(ref role, value, "Role"); }
-    //    }
+    [Serializable]
+    public class RuleEntityGroupDN : IdentifiableEntity
+    {
+        RoleDN role;
+        [NotNullValidator]
+        public RoleDN Role
+        {
+            get { return role; }
+            set { Set(ref role, value, "Role"); }
+        }
 
-    //    EntityGroupDN group;
-    //    [NotNullValidator]
-    //    public EntityGroupDN Group
-    //    {
-    //        get { return group; }
-    //        set { Set(ref group, value, "Group"); }
-    //    }
+        EntityGroupDN group;
+        [NotNullValidator]
+        public EntityGroupDN Group
+        {
+            get { return group; }
+            set { Set(ref group, value, "Group"); }
+        }
 
-    //    Access inGroupAccess;
-    //    public Access InGroupAccess
-    //    {
-    //        get { return inGroupAccess; }
-    //        set { Set(ref inGroupAccess, value, "InGroupAccess"); }
-    //    }
+        bool allowedIn;
+        public bool AllowedIn
+        {
+            get { return allowedIn; }
+            set { Set(ref allowedIn, value, "AllowedIn"); }
+        }
 
-    //    Access notInGroupAccess;
-    //    public Access NotInGroupAccess
-    //    {
-    //        get { return notInGroupAccess; }
-    //        set { Set(ref notInGroupAccess, value, "NotInGroupAccess"); }
-    //    }
-    //}
+        bool allowedOut;
+        public bool AllowedOut
+        {
+            get { return allowedOut; }
+            set { Set(ref allowedOut, value, "AllowedOut"); }
+        }
+    }
 
     public enum Access
     {
