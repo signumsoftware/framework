@@ -238,6 +238,61 @@ namespace Signum.Entities
             return innerList.IndexOf(item);
         }
 
+        public int IndexOf(T item, int index)
+        {
+            return innerList.IndexOf(item, index);
+        }
+
+        public int IndexOf(T item, int index, int count)
+        {
+            return innerList.IndexOf(item, index, count);
+        }
+
+        public int LastIndexOf(T item)
+        {
+            return innerList.LastIndexOf(item);
+        }
+
+        public int LastIndexOf(T item, int index)
+        {
+            return innerList.LastIndexOf(item, index); 
+        }
+
+        public int LastIndexOf(T item, int index, int count)
+        {
+            return innerList.LastIndexOf(item, index, count);
+        }
+
+        public int FindIndex(Predicate<T> match)
+        {
+            return innerList.FindIndex(match);
+        }
+
+        public int FindIndex(int startIndex, Predicate<T> match)
+        {
+            return innerList.FindIndex(startIndex, match);
+        }
+
+        public int FindIndex(int startIndex, int count, Predicate<T> match)
+        {
+            return innerList.FindIndex(startIndex, count, match);
+        }
+
+        public int FindLastIndex(Predicate<T> match)
+        {
+            return innerList.FindLastIndex(match);
+        }
+
+        public int FindLastIndex(int startIndex, Predicate<T> match)
+        {
+            return innerList.FindLastIndex(startIndex, match);
+        }
+
+        public int FindLastIndex(int startIndex, int count, Predicate<T> match)
+        {
+            return innerList.FindLastIndex(startIndex, count, match);
+        }
+
         public bool Contains(T item)
         {
             return innerList.Contains(item);
@@ -246,6 +301,30 @@ namespace Signum.Entities
         public void CopyTo(T[] array, int arrayIndex)
         {
             innerList.CopyTo(array, arrayIndex);
+        }
+
+        public void ForEach(Action<T> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException("action");
+
+            int count = innerList.Count;
+            for (int i = 0; i < count; i++)
+            {
+                action(this.innerList[i]);
+            }
+        }
+
+        public void ForEach(Action<T, int> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException("action");
+
+            int count = innerList.Count;
+            for (int i = 0; i < count; i++)
+            {
+                action(this.innerList[i], i);
+            }
         }
 
         public bool IsReadOnly

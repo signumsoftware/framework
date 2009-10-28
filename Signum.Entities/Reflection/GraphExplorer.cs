@@ -59,6 +59,12 @@ namespace Signum.Entities.Reflection
             return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.FullExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
+        public static DirectedGraph<Modifiable> FromRootsIdentifiable<T>(IEnumerable<T> roots)
+            where T : Modifiable
+        {
+            return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.IdentifiableExplore, ReferenceEqualityComparer<Modifiable>.Default);
+        }
+
         public static Dictionary<Modifiable, string> IntegrityDictionary(DirectedGraph<Modifiable> graph)
         {
             var result = graph.Select(m => new { m, Error = m.IntegrityCheck() })
