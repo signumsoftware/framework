@@ -322,7 +322,7 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Removing entity from a new lazy is not allowed.
+        ///   Looks up a localized string similar to Removing entity from a new lite is not allowed.
         /// </summary>
         internal static string RemovingEntityNotAllowedInNewLazies {
             get {
@@ -367,7 +367,7 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The lazy is pointing to a new entity and has no id yet.
+        ///   Looks up a localized string similar to The lite is pointing to a new entity and has no id yet.
         /// </summary>
         internal static string TheLiteIsPointingToANewEntityAndHasNoIdYet {
             get {

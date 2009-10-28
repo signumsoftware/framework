@@ -54,32 +54,32 @@ namespace Signum.Windows
             return Service<IBaseServer>().Retrieve(type, id);
         }
 
-        public static IdentifiableEntity Retrieve(Lite lazy)
+        public static IdentifiableEntity Retrieve(Lite lite)
         {
-            if (lazy.UntypedEntityOrNull == null)
+            if (lite.UntypedEntityOrNull == null)
             {
-                lazy.SetEntity(Service<IBaseServer>().Retrieve(lazy.RuntimeType, lazy.Id));
+                lite.SetEntity(Service<IBaseServer>().Retrieve(lite.RuntimeType, lite.Id));
             }
-            return lazy.UntypedEntityOrNull;
+            return lite.UntypedEntityOrNull;
         }
 
-        public static T Retrieve<T>(this Lite<T> lazy) where T : class, IIdentifiable
+        public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            if (lazy.EntityOrNull == null)
+            if (lite.EntityOrNull == null)
             {
-                lazy.SetEntity((IdentifiableEntity)(IIdentifiable)Service<IBaseServer>().Retrieve(lazy.RuntimeType, lazy.Id));
+                lite.SetEntity((IdentifiableEntity)(IIdentifiable)Service<IBaseServer>().Retrieve(lite.RuntimeType, lite.Id));
             }
-            return lazy.EntityOrNull;
+            return lite.EntityOrNull;
         }
 
-        public static IdentifiableEntity RetrieveAndForget(Lite lazy)
+        public static IdentifiableEntity RetrieveAndForget(Lite lite)
         {
-            return Service<IBaseServer>().Retrieve(lazy.RuntimeType, lazy.Id);
+            return Service<IBaseServer>().Retrieve(lite.RuntimeType, lite.Id);
         }
 
-        public static T RetrieveAndForget<T>(this Lite<T> lazy) where T : class, IIdentifiable
+        public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Service<IBaseServer>().Retrieve(lazy.RuntimeType, lazy.Id);
+            return (T)(IIdentifiable)Service<IBaseServer>().Retrieve(lite.RuntimeType, lite.Id);
         }
 
         public static List<T> RetrieveAll<T>()
@@ -92,14 +92,14 @@ namespace Signum.Windows
             return Service<IBaseServer>().RetrieveAll(type);
         }
 
-        public static List<Lite> RetriveAllLite(Type lazyType, Type[] types)
+        public static List<Lite> RetriveAllLite(Type liteType, Type[] types)
         {
-            return Service<IBaseServer>().RetrieveAllLite(lazyType, types);
+            return Service<IBaseServer>().RetrieveAllLite(liteType, types);
         }
 
-        public static List<Lite> FindLiteLike(Type lazyType, Type[] types, string subString, int count)
+        public static List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
         {
-            return Service<IBaseServer>().FindLiteLike(lazyType, types, subString, count);
+            return Service<IBaseServer>().FindLiteLike(liteType, types, subString, count);
         }
 
         public static List<T> SaveList<T>(List<T> list)
@@ -108,9 +108,9 @@ namespace Signum.Windows
             return Service<IBaseServer>().SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList();
         }
 
-        public static Type[] FindImplementations(Type lazyType, MemberInfo[] implementations)
+        public static Type[] FindImplementations(Type liteType, MemberInfo[] implementations)
         {
-            return Service<IBaseServer>().FindImplementations(lazyType, implementations); 
+            return Service<IBaseServer>().FindImplementations(liteType, implementations); 
         }
 
 
@@ -131,23 +131,23 @@ namespace Signum.Windows
             
             if (typeof(Lite).IsAssignableFrom(type))
             {
-                Type lazyType = Reflector.ExtractLite(type); 
+                Type liteType = Reflector.ExtractLite(type); 
                 
                 if(typeof(Lite).IsAssignableFrom(sourceType))
                 {
-                    Lite lazy = (Lite)obj;
-                    if (lazyType.IsAssignableFrom(lazy.RuntimeType))
+                    Lite lite = (Lite)obj;
+                    if (liteType.IsAssignableFrom(lite.RuntimeType))
                     {
-                        if (lazy.UntypedEntityOrNull != null)
-                            return Lite.Create(lazyType, lazy.UntypedEntityOrNull);
+                        if (lite.UntypedEntityOrNull != null)
+                            return Lite.Create(liteType, lite.UntypedEntityOrNull);
                         else
-                            return Lite.Create(lazyType, lazy.Id, lazy.RuntimeType, lazy.ToStr); 
+                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToStr); 
                     }
                 }
 
-                else if(lazyType.IsAssignableFrom(sourceType))
+                else if(liteType.IsAssignableFrom(sourceType))
                 {
-                    return Lite.Create(lazyType, (IdentifiableEntity)obj);
+                    return Lite.Create(liteType, (IdentifiableEntity)obj);
                 }
             }
 
@@ -169,8 +169,8 @@ namespace Signum.Windows
                 return true;
             }
 
-            Type lazyType;
-            if (typeof(Lite).IsAssignableFrom(type) && (lazyType = Reflector.ExtractLite(type)).IsAssignableFrom(sourceType))
+            Type liteType;
+            if (typeof(Lite).IsAssignableFrom(type) && (liteType = Reflector.ExtractLite(type)).IsAssignableFrom(sourceType))
             {
                 return true;
             }

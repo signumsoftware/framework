@@ -71,9 +71,9 @@ namespace Signum.Windows
         {
             base.OnEntityChanged(oldValue, newValue);
 
-            Lite lazy = newValue as Lite;
-            if (lazy != null)
-                contentPresenter.DataContext = Server.Retrieve(lazy);
+            Lite lite = newValue as Lite;
+            if (lite != null)
+                contentPresenter.DataContext = Server.Retrieve(lite);
             else
                 contentPresenter.DataContext = newValue;
         }

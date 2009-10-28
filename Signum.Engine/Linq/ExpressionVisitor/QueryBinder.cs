@@ -128,9 +128,9 @@ namespace Signum.Engine.Linq
 
                 if (m.Method.GetParameters().First().ParameterType == typeof(Lite))
                 {
-                    LiteReferenceExpression lazyRef = (LiteReferenceExpression)Visit(m.GetArgument("lazy"));
+                    LiteReferenceExpression liteRef = (LiteReferenceExpression)Visit(m.GetArgument("lite"));
 
-                    return new LiteReferenceExpression(m.Type, lazyRef.Reference, lazyRef.Id, toStr ?? lazyRef.ToStr, lazyRef.TypeId);
+                    return new LiteReferenceExpression(m.Type, liteRef.Reference, liteRef.Id, toStr ?? liteRef.ToStr, liteRef.TypeId);
                 }
                 else
                 {
@@ -466,7 +466,7 @@ namespace Signum.Engine.Linq
                 if (typeof(IIdentifiable).IsAssignableFrom(colType))
                     return SmartEqualizer.EntityIn(newItem, col.Cast<IIdentifiable>().Select(ie => ToFieldInitExpression(colType, ie)).ToArray());
                 else if (typeof(Lite).IsAssignableFrom(colType))
-                    return SmartEqualizer.EntityIn(newItem, col.Cast<Lite>().Select(lazy => ToLiteReferenceExpression(colType, lazy)).ToArray());
+                    return SmartEqualizer.EntityIn(newItem, col.Cast<Lite>().Select(lite => ToLiteReferenceExpression(colType, lite)).ToArray());
                 else
                     return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
             }
@@ -794,13 +794,13 @@ namespace Signum.Engine.Linq
             return c;
         }
 
-        static Expression ToLiteReferenceExpression(Type lazyType, Lite lazy)
+        static Expression ToLiteReferenceExpression(Type liteType, Lite lite)
         {
-            Expression id = Expression.Constant(lazy.IdOrNull ?? int.MinValue);
+            Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-            return new LiteReferenceExpression(lazyType,
-                new FieldInitExpression(lazy.RuntimeType, null, id, null),
-                id, Expression.Constant(lazy.ToStr), TypeConstant(lazy.RuntimeType));
+            return new LiteReferenceExpression(liteType,
+                new FieldInitExpression(lite.RuntimeType, null, id, null),
+                id, Expression.Constant(lite.ToStr), TypeConstant(lite.RuntimeType));
         }
 
         static Expression ToFieldInitExpression(Type entityType, IIdentifiable ei)
@@ -895,16 +895,16 @@ namespace Signum.Engine.Linq
                 }
                 case (ExpressionType)DbExpressionType.LiteReference:
                 {
-                    LiteReferenceExpression lazyRef = (LiteReferenceExpression)source;
+                    LiteReferenceExpression liteRef = (LiteReferenceExpression)source;
                     PropertyInfo pi = m.Member as PropertyInfo;
                     if (pi != null)
                     {
                         if (pi.Name == "Id")
-                            return lazyRef.Id;
+                            return liteRef.Id;
                         if (pi.Name == "EntityOrNull")
-                            return lazyRef.Reference;
+                            return liteRef.Reference;
                         if (pi.Name == "ToStr")
-                            return lazyRef.ToStr.ThrowIfNullC("ToStr is no accesible on queries in ImplementedByAll");
+                            return liteRef.ToStr.ThrowIfNullC("ToStr is no accesible on queries in ImplementedByAll");
                     }
 
                     throw new ApplicationException("The member {0} of Lite is no accesible on queries, use EntityOrNull instead".Formato(m.Member));

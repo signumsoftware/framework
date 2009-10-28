@@ -90,11 +90,11 @@ namespace Signum.Web
                     {
                         items.AddRange(
                             Database.RetrieveAllLite(Reflector.ExtractLite(type) ?? type)
-                                .Select(lazy => new SelectListItem()
+                                .Select(lite => new SelectListItem()
                                 {
-                                    Text = lazy.ToString(),
-                                    Value = lazy.Id.ToString(),
-                                    Selected = (value != null) && (lazy.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
+                                    Text = lite.ToString(),
+                                    Value = lite.Id.ToString(),
+                                    Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
                                 })
                             );
                     }

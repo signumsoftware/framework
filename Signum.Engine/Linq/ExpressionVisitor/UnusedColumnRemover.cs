@@ -63,9 +63,9 @@ namespace Signum.Engine.Linq
         }
 
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lazy)
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
         {   
-            return base.VisitLiteReference(lazy);
+            return base.VisitLiteReference(lite);
         }
 
         protected override Expression VisitProjection(ProjectionExpression projection)

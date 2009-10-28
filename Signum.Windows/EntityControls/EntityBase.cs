@@ -163,7 +163,7 @@ namespace Signum.Windows
             {
                 var type = Type;
 
-                if (this is EntityCombo && !typeof(Lite).IsAssignableFrom(type)) //Allways going to be lazy
+                if (this is EntityCombo && !typeof(Lite).IsAssignableFrom(type)) //Allways going to be lite
                     type = Reflector.GenerateLite(type);
 
                 EntityTemplate = Navigator.FindDataTemplate(this, type);

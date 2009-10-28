@@ -38,11 +38,11 @@ namespace Signum.Engine.Maps
 
         static string toStr = ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr).Name;
 
-        internal void FillLite(DataRow row, Lite lazy)
+        internal void FillLite(DataRow row, Lite lite)
         {
             FieldValue campo = (FieldValue)Fields[toStr].Field;
-            lazy.ToStr = (string)campo.GenerateValue(row, null);
-            lazy.Modified = false;
+            lite.ToStr = (string)campo.GenerateValue(row, null);
+            lite.Modified = false;
         }
     }
 

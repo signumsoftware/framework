@@ -84,9 +84,9 @@ namespace Signum.Windows
 
         public static object View(object entity, TypeContext typeContext)
         {
-            Lite lazy = entity as Lite;
+            Lite lite = entity as Lite;
 
-            ViewButtons vb = lazy != null && (lazy.UntypedEntityOrNull == null || !lazy.UntypedEntityOrNull.IsNew) ? ViewButtons.Save : ViewButtons.Ok;
+            ViewButtons vb = lite != null && (lite.UntypedEntityOrNull == null || !lite.UntypedEntityOrNull.IsNew) ? ViewButtons.Save : ViewButtons.Ok;
 
             return Manager.View(entity, new ViewOptions { Buttons = vb, TypeContext = typeContext });
         }
@@ -298,10 +298,10 @@ namespace Signum.Windows
             if (entity == null)
                 throw new ArgumentNullException("entity");
 
-            Type lazyType = null;
+            Type liteType = null;
             if (entity is Lite)
             {
-                lazyType = Reflector.ExtractLite(entity.GetType());
+                liteType = Reflector.ExtractLite(entity.GetType());
 
                 entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveAndForget((Lite)entity) :
                                                                    Server.Retrieve((Lite)entity);
@@ -359,9 +359,9 @@ namespace Signum.Windows
                     return null;
 
                 object result = win.DataContext;
-                if (lazyType != null)
+                if (liteType != null)
                 {
-                    return Lite.Create(lazyType, (IdentifiableEntity)result);
+                    return Lite.Create(liteType, (IdentifiableEntity)result);
                 }
                 return result;
             }

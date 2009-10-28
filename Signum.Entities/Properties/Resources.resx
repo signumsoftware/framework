@@ -127,7 +127,7 @@
     <value>Entity do not Match with the Lite</value>
   </data>
   <data name="RemovingEntityNotAllowedInNewLazies" xml:space="preserve">
-    <value>Removing entity from a new lazy is not allowed</value>
+    <value>Removing entity from a new lite is not allowed</value>
   </data>
   <data name="ToLiteLightNotAllowedForNewEntities" xml:space="preserve">
     <value>ToLiteLight not allowed for new entities</value>
@@ -214,7 +214,7 @@
     <value>'{0}' is New and has no id</value>
   </data>
   <data name="TheLiteIsPointingToANewEntityAndHasNoIdYet" xml:space="preserve">
-    <value>The lazy is pointing to a new entity and has no id yet</value>
+    <value>The lite is pointing to a new entity and has no id yet</value>
   </data>
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
     <value>The lenght of {{0}} has to be equal to {0}</value>

@@ -542,17 +542,17 @@ namespace Signum.Web
             if (RuntimeType == null)
                 return null;
 
-            Lite lazy = (Lite)obj;
+            Lite lite = (Lite)obj;
 
             if (IsNew)
             {
-                if (lazy != null && lazy.UntypedEntityOrNull != null && lazy.UntypedEntityOrNull.IsNew)
+                if (lite != null && lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
                     return Lite.Create(CleanType,
-                            (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull, onFinish));
+                            (IdentifiableEntity)EntityModification.ApplyChanges(controller, lite.UntypedEntityOrNull, onFinish));
                 return Lite.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null, onFinish));
             }
 
-            if (lazy == null)
+            if (lite == null)
             {
                 if (EntityModification == null)
                     return Lite.Create(CleanType, EntityId.Value, RuntimeType);
@@ -564,19 +564,19 @@ namespace Signum.Web
 
             if (EntityId == null)
             {
-                Debug.Assert(lazy.IdOrNull == null && RuntimeType == lazy.GetType() && EntityModification != null);
+                Debug.Assert(lite.IdOrNull == null && RuntimeType == lite.GetType() && EntityModification != null);
                 return Lite.Create(CleanType,
-                    (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull, onFinish));
+                    (IdentifiableEntity)EntityModification.ApplyChanges(controller, lite.UntypedEntityOrNull, onFinish));
             }
             else
             {
-                if (EntityId.Value == lazy.IdOrNull && RuntimeType == lazy.RuntimeType)
+                if (EntityId.Value == lite.IdOrNull && RuntimeType == lite.RuntimeType)
                 {
                     if (EntityModification == null)
-                        return lazy;
+                        return lite;
                     else
                         return Lite.Create(CleanType,
-                            (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lazy), onFinish));
+                            (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lite), onFinish));
                 }
                 else
                 {

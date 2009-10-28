@@ -51,24 +51,24 @@ namespace Signum.Engine
         #endregion
 
         #region Retrieve
-        public static T Retrieve<T>(this Lite<T> lazy) where T : class, IIdentifiable
+        public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return lazy.EntityOrNull ?? (lazy.EntityOrNull = (T)(object)Retrieve(lazy.RuntimeType, lazy.Id));
+            return lite.EntityOrNull ?? (lite.EntityOrNull = (T)(object)Retrieve(lite.RuntimeType, lite.Id));
         }
 
-        public static T RetrieveAndForget<T>(this Lite<T> lazy) where T : class, IIdentifiable
+        public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return (T)(object)Retrieve(lazy.RuntimeType, lazy.Id);
+            return (T)(object)Retrieve(lite.RuntimeType, lite.Id);
         }
 
-        public static IdentifiableEntity Retrieve(Lite lazy)
+        public static IdentifiableEntity Retrieve(Lite lite)
         {
-            return lazy.UntypedEntityOrNull ?? (lazy.UntypedEntityOrNull = Retrieve(lazy.RuntimeType, lazy.Id));
+            return lite.UntypedEntityOrNull ?? (lite.UntypedEntityOrNull = Retrieve(lite.RuntimeType, lite.Id));
         }
 
-        public static IdentifiableEntity RetrieveAndForget(Lite lazy)
+        public static IdentifiableEntity RetrieveAndForget(Lite lite)
         {
-            return Retrieve(lazy.RuntimeType, lazy.Id);
+            return Retrieve(lite.RuntimeType, lite.Id);
         }
 
         public static T Retrieve<T>(int id) where T : IdentifiableEntity
@@ -185,7 +185,7 @@ namespace Signum.Engine
             }
         }
 
-        public static List<T> RetrieveFromListOfLite<T>(List<Lite<T>> lazys)
+        public static List<T> RetrieveFromListOfLite<T>(List<Lite<T>> lites)
          where T : class, IIdentifiable
         {
             using (new EntityCache())
@@ -193,7 +193,7 @@ namespace Signum.Engine
             {
                 Retriever rec = new Retriever();
 
-                List<T> ident = lazys.Select(l => (T)(IIdentifiable)rec.GetIdentifiable(l)).ToList();
+                List<T> ident = lites.Select(l => (T)(IIdentifiable)rec.GetIdentifiable(l)).ToList();
 
                 rec.ProcessAll();
 
@@ -201,14 +201,14 @@ namespace Signum.Engine
             }
         }
 
-        public static List<IdentifiableEntity> RetrieveFromListOfLite(List<Lite> lazys)
+        public static List<IdentifiableEntity> RetrieveFromListOfLite(List<Lite> lites)
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
 
-                List<IdentifiableEntity> ident = lazys.Select(l => rec.GetIdentifiable(l)).ToList();
+                List<IdentifiableEntity> ident = lites.Select(l => rec.GetIdentifiable(l)).ToList();
 
                 rec.ProcessAll(); 
 

@@ -153,15 +153,15 @@ namespace Signum.Engine.Linq
             return ml;
         }
 
-        protected virtual Expression VisitLiteReference(LiteReferenceExpression lazy)
+        protected virtual Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var newRef = Visit(lazy.Reference);
-            var newToStr = Visit(lazy.ToStr);
-            var newId = Visit(lazy.Id);
-            var newTypeId = Visit(lazy.TypeId);
-            if (newRef != lazy.Reference || newToStr != lazy.ToStr || newId != lazy.Id || newTypeId != lazy.TypeId)
-                return new LiteReferenceExpression(lazy.Type, newRef, newId, newToStr, newTypeId);
-            return lazy;
+            var newRef = Visit(lite.Reference);
+            var newToStr = Visit(lite.ToStr);
+            var newId = Visit(lite.Id);
+            var newTypeId = Visit(lite.TypeId);
+            if (newRef != lite.Reference || newToStr != lite.ToStr || newId != lite.Id || newTypeId != lite.TypeId)
+                return new LiteReferenceExpression(lite.Type, newRef, newId, newToStr, newTypeId);
+            return lite;
         }
 
         protected virtual Expression VisitSqlEnum(SqlEnumExpression sqlEnum)

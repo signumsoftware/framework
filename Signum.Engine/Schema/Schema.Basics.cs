@@ -261,12 +261,12 @@ namespace Signum.Engine.Maps
             return result; 
         }
 
-        public Type[] FindImplementations(Type lazyType, MemberInfo[] members)
+        public Type[] FindImplementations(Type liteType, MemberInfo[] members)
         {
-            if (!Tables.ContainsKey(lazyType))
+            if (!Tables.ContainsKey(liteType))
                 return null;
             
-            Field field = FindField(Table(lazyType), members, false); 
+            Field field = FindField(Table(liteType), members, false); 
 
             FieldImplementedBy ibaField = field as FieldImplementedBy;
             if (ibaField != null)

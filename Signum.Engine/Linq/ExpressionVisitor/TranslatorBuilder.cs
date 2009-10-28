@@ -186,23 +186,23 @@ namespace Signum.Engine.Linq
                     Visit(NullifyColumn(rba.TypeId)));
             }
 
-            protected override Expression VisitLiteReference(LiteReferenceExpression lazy)
+            protected override Expression VisitLiteReference(LiteReferenceExpression lite)
             {
-                var id = Visit(NullifyColumn(lazy.Id));
-                var toStr = Visit(lazy.ToStr);
-                var typeId = Visit(lazy.TypeId);
+                var id = Visit(NullifyColumn(lite.Id));
+                var toStr = Visit(lite.ToStr);
+                var typeId = Visit(lite.TypeId);
 
-                Type lazyType = Reflector.ExtractLite(lazy.Type);
+                Type liteType = Reflector.ExtractLite(lite.Type);
 
                 if (id == null)
-                    return Expression.Constant(null, lazy.Type);
+                    return Expression.Constant(null, lite.Type);
                 else if (toStr == null)
                 {
                     HasFullObjects = true;
-                    return Expression.Call(row, miGetLiteImplementedByAll.MakeGenericMethod(lazyType), id, typeId.Nullify());
+                    return Expression.Call(row, miGetLiteImplementedByAll.MakeGenericMethod(liteType), id, typeId.Nullify());
                 }
                 else
-                    return Expression.Call(row, miGetLiteIdentifiable.MakeGenericMethod(lazyType), id, typeId, toStr);
+                    return Expression.Call(row, miGetLiteIdentifiable.MakeGenericMethod(liteType), id, typeId, toStr);
             }
         }
     }

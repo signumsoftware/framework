@@ -64,22 +64,22 @@ namespace Signum.Services
              () => { Database.Save(entidad); return entidad; });
         }
 
-        public List<Lite> RetrieveAllLite(Type lazyType, Type[] types)
+        public List<Lite> RetrieveAllLite(Type liteType, Type[] types)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(lazyType),
-             () => AutoCompleteUtils.RetriveAllLite(lazyType, types));
+            return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(liteType),
+             () => AutoCompleteUtils.RetriveAllLite(liteType, types));
         }
 
-        public List<Lite> FindLiteLike(Type lazyType, Type[] types, string subString, int count)
+        public List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "FindLiteLike {0}".Formato(lazyType),
-             () => AutoCompleteUtils.FindLiteLike(lazyType, types, subString, count));
+            return Return(MethodInfo.GetCurrentMethod(), "FindLiteLike {0}".Formato(liteType),
+             () => AutoCompleteUtils.FindLiteLike(liteType, types, subString, count));
         }
 
-        public Type[] FindImplementations(Type lazyType, MemberInfo[] members)
+        public Type[] FindImplementations(Type liteType, MemberInfo[] members)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => Schema.Current.FindImplementations(lazyType, members));
+             () => Schema.Current.FindImplementations(liteType, members));
         }
 
         public List<IdentifiableEntity> RetrieveAll(Type type)
@@ -141,22 +141,22 @@ namespace Signum.Services
         #endregion
 
         #region INotesServer Members
-        public virtual List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lazy)
+        public virtual List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(),
              () => (from n in Database.Query<NoteDN>()
-                    where n.Entity == lazy
+                    where n.Entity == lite
                     select n.ToLite<INoteDN>()).ToList());
         }
         #endregion
 
         #region IAlertsServer Members
 
-        public virtual List<Lite<IAlertDN>> RetrieveAlerts(Lite<IdentifiableEntity> lazy)
+        public virtual List<Lite<IAlertDN>> RetrieveAlerts(Lite<IdentifiableEntity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(),
              () => (from n in Database.Query<AlertDN>()
-                    where n.Entity == lazy
+                    where n.Entity == lite
                     select n.ToLite<IAlertDN>()).ToList());
         }
 
@@ -170,7 +170,7 @@ namespace Signum.Services
                 });
         }
 
-        public CountAlerts CountAlerts(Lite<IdentifiableEntity> lazy)
+        public CountAlerts CountAlerts(Lite<IdentifiableEntity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(), () =>
                 new CountAlerts() 

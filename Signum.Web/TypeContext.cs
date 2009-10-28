@@ -111,15 +111,15 @@ namespace Signum.Web
 
         static MethodInfo mi = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
 
-        public static TypeContext ExtractLite<T>(this TypeContext<T> lazyTypeContext)
+        public static TypeContext ExtractLite<T>(this TypeContext<T> liteTypeContext)
         {
-            if (!typeof(Lite).IsAssignableFrom(lazyTypeContext.ContextType))
+            if (!typeof(Lite).IsAssignableFrom(liteTypeContext.ContextType))
                 return null;
 
-            ParameterExpression pe = Expression.Parameter(lazyTypeContext.ContextType, "p");
-            Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLite(lazyTypeContext.ContextType)), pe);
+            ParameterExpression pe = Expression.Parameter(liteTypeContext.ContextType, "p");
+            Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLite(liteTypeContext.ContextType)), pe);
             LambdaExpression lambda = Expression.Lambda(call, pe);
-            return Common.UntypedTypeContext(lazyTypeContext, lambda, Reflector.ExtractLite(lazyTypeContext.ContextType));
+            return Common.UntypedTypeContext(liteTypeContext, lambda, Reflector.ExtractLite(liteTypeContext.ContextType));
         }
 
         static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool? writeIdAndRuntime)

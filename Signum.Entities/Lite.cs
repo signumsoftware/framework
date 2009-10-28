@@ -211,16 +211,16 @@ namespace Signum.Entities
             if (this == obj)
                 return true;
 
-            Lite lazy = obj as Lite;
-            if (lazy != null)
+            Lite lite = obj as Lite;
+            if (lite != null)
             {
-                if (RuntimeType != lazy.RuntimeType)
+                if (RuntimeType != lite.RuntimeType)
                     return false;
 
                 if (UntypedEntityOrNull == null)
-                    return Id == lazy.IdOrNull;
+                    return Id == lite.IdOrNull;
                 else
-                    return object.ReferenceEquals(this.UntypedEntityOrNull, lazy.UntypedEntityOrNull);
+                    return object.ReferenceEquals(this.UntypedEntityOrNull, lite.UntypedEntityOrNull);
             }
 
             return false;
@@ -238,34 +238,34 @@ namespace Signum.Entities
 
     public static class LiteUtils
     {
-        public static Lite<T> ToLite<T>(this Lite lazy)
+        public static Lite<T> ToLite<T>(this Lite lite)
             where T : class, IIdentifiable
         {
-            if (lazy == null)
+            if (lite == null)
                 return null;
 
-            if (lazy is Lite<T>)
-                return (Lite<T>)lazy;
+            if (lite is Lite<T>)
+                return (Lite<T>)lite;
 
-            if (lazy.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = lazy.ToStr };
+            if (lite.UntypedEntityOrNull != null)
+                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = lite.ToStr };
             else
-                return new Lite<T>(lazy.RuntimeType, lazy.Id) { ToStr = lazy.ToStr };
+                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = lite.ToStr };
         }
 
-        public static Lite<T> ToLite<T>(this Lite lazy, string toStr)
+        public static Lite<T> ToLite<T>(this Lite lite, string toStr)
             where T : class, IIdentifiable
         {
-            if (lazy == null)
+            if (lite == null)
                 return null;
 
-            if (lazy is Lite<T>)
-                return (Lite<T>)lazy;
+            if (lite is Lite<T>)
+                return (Lite<T>)lite;
 
-            if (lazy.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = toStr };
+            if (lite.UntypedEntityOrNull != null)
+                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = toStr };
             else
-                return new Lite<T>(lazy.RuntimeType, lazy.Id) { ToStr = toStr };
+                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = toStr };
         }
 
         public static Lite<T> ToLite<T>(this T entity)
@@ -326,30 +326,30 @@ namespace Signum.Entities
         }
 
         [MethodExpander(typeof(RefersToExpander))]
-        public static bool RefersTo<T>(this Lite<T> lazy, T entity)
+        public static bool RefersTo<T>(this Lite<T> lite, T entity)
             where T : class, IIdentifiable
         {
-            if (lazy == null && entity == null)
+            if (lite == null && entity == null)
                 return true;
 
             if (entity == null || entity == null)
                 return false;
 
-            if (lazy.RuntimeType != entity.GetType())
+            if (lite.RuntimeType != entity.GetType())
                 return false;
 
-            if (lazy.IdOrNull != null)
-                return lazy.Id == entity.IdOrNull;
+            if (lite.IdOrNull != null)
+                return lite.Id == entity.IdOrNull;
             else
-                return object.ReferenceEquals(lazy.EntityOrNull, entity);
+                return object.ReferenceEquals(lite.EntityOrNull, entity);
         }
 
         class RefersToExpander : IMethodExpander
         {
             public Expression Expand(Expression instance, Expression[] arguments)
             {
-                Expression lazy = arguments[0];
-                return Expression.Equal(Expression.MakeMemberAccess(lazy, lazy.Type.GetProperty("EntityOrNull", BindingFlags.Instance| BindingFlags.Public)), arguments[1]);
+                Expression lite = arguments[0];
+                return Expression.Equal(Expression.MakeMemberAccess(lite, lite.Type.GetProperty("EntityOrNull", BindingFlags.Instance| BindingFlags.Public)), arguments[1]);
             }
         }
 
@@ -381,22 +381,22 @@ namespace Signum.Entities
         }
 
         [MethodExpander(typeof(IsExpander))]
-        public static bool Is<T>(this Lite<T> lazy1, Lite<T> lazy2)
+        public static bool Is<T>(this Lite<T> lite1, Lite<T> lite2)
             where T : class, IIdentifiable
         {
-            if (lazy1 == null && lazy2 == null)
+            if (lite1 == null && lite2 == null)
                 return true;
 
-            if (lazy1 == null || lazy2 == null)
+            if (lite1 == null || lite2 == null)
                 return false;
 
-            if (lazy1.GetType() != lazy2.GetType())
+            if (lite1.GetType() != lite2.GetType())
                 return false;
 
-            if (lazy1.IdOrNull != null && lazy2.IdOrNull != null)
-                return lazy1.Id == lazy2.Id;
+            if (lite1.IdOrNull != null && lite2.IdOrNull != null)
+                return lite1.Id == lite2.Id;
             else
-                return object.ReferenceEquals(lazy1.EntityOrNull, lazy2.EntityOrNull);
+                return object.ReferenceEquals(lite1.EntityOrNull, lite2.EntityOrNull);
         }
     }
 }

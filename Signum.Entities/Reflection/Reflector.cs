@@ -108,10 +108,10 @@ namespace Signum.Entities.Reflection
             return typeof(Lite<>).MakeGenericType(identificableType);
         }
 
-        public static Type ExtractLite(Type lazyType)
+        public static Type ExtractLite(Type liteType)
         {
-            if (lazyType.IsGenericType && lazyType.GetGenericTypeDefinition() == typeof(Lite<>))
-                return lazyType.GetGenericArguments()[0];
+            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
+                return liteType.GetGenericArguments()[0];
             return null;
         }
 

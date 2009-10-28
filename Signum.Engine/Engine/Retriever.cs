@@ -19,7 +19,7 @@ namespace Signum.Engine
     {
         Dictionary<Table, Dictionary<int, IdentifiableEntity>> reqIdentifiables = new Dictionary<Table, Dictionary<int, IdentifiableEntity>>();
         
-        // no se garantiza unicidad para lazys ni colecciones
+        // no se garantiza unicidad para lites ni colecciones
         Dictionary<Table, Dictionary<int, List<Lite>>> reqLite = new Dictionary<Table, Dictionary<int, List<Lite>>>(); 
         Dictionary<RelationalTable, Dictionary<int, IList>> reqList = new Dictionary<RelationalTable, Dictionary<int, IList>>();
 
@@ -125,16 +125,16 @@ namespace Signum.Engine
                 foreach (DataRow row in dt.Rows)
                 {
                     int id = (int)row[SqlBuilder.PrimaryKeyName];
-                    List<Lite> lazys = dic[id];
-                    foreach (var lazy in lazys)
+                    List<Lite> lites = dic[id];
+                    foreach (var lite in lites)
                     {
-                        table.FillLite(row, lazy);
-                        PostRetrieving.Add(lazy); 
+                        table.FillLite(row, lite);
+                        PostRetrieving.Add(lite); 
                     }
                     dic.Remove(id);
                 }
             }
-            reqLite.Remove(table); // se puede borrar pues la inclusion de lazys no amplia la corteza
+            reqLite.Remove(table); // se puede borrar pues la inclusion de lites no amplia la corteza
         }
 
         void ProcessRelationalTable(RelationalTable relationalTable)
@@ -169,9 +169,9 @@ namespace Signum.Engine
         #endregion
 
         #region Schema Interface
-        public IdentifiableEntity GetIdentifiable(Lite lazy)
+        public IdentifiableEntity GetIdentifiable(Lite lite)
         {
-            return GetIdentifiable(Schema.Current.Table(lazy.RuntimeType), lazy.Id);
+            return GetIdentifiable(Schema.Current.Table(lite.RuntimeType), lite.Id);
         }
 
         public IdentifiableEntity GetIdentifiable(Table table, int id)
@@ -192,13 +192,13 @@ namespace Signum.Engine
                 });
         }
 
-        public Lite GetLite(Table table, Type lazyType, int id)
+        public Lite GetLite(Table table, Type liteType, int id)
         {
             IdentifiableEntity ident = EntityCache.Get(table.Type, id);
 
-            if (ident != null) return Lite.Create(lazyType, ident);
+            if (ident != null) return Lite.Create(liteType, ident);
 
-            Lite req = Lite.Create(lazyType, id, table.Type);
+            Lite req = Lite.Create(liteType, id, table.Type);
 
             List<Lite> lista = reqLite.GetOrCreate(table).GetOrCreate(id);
 

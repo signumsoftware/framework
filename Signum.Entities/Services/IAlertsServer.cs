@@ -12,10 +12,10 @@ namespace Signum.Services
     public interface IAlertsServer
     {
         [OperationContract, NetDataContract]
-        List<Lite<IAlertDN>> RetrieveAlerts(Lite<IdentifiableEntity> lazy);
+        List<Lite<IAlertDN>> RetrieveAlerts(Lite<IdentifiableEntity> lite);
 
         [OperationContract, NetDataContract]
-        CountAlerts CountAlerts(Lite<IdentifiableEntity> lazy);
+        CountAlerts CountAlerts(Lite<IdentifiableEntity> lite);
 
         [OperationContract, NetDataContract]
         IAlertDN CheckAlert(IAlertDN alert);

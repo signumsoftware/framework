@@ -20,12 +20,12 @@ namespace Signum.Engine.Linq
             return pc.Visit(source);
         }
 
-        protected override Expression VisitLiteReference(LiteReferenceExpression lazy)
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var newToStr = Visit(lazy.ToStr);
-            var newId = Visit(lazy.Id);
-            var newTypeId = Visit(lazy.TypeId);
-            return new LiteReferenceExpression(lazy.Type, null, newId, newToStr, newTypeId);
+            var newToStr = Visit(lite.ToStr);
+            var newId = Visit(lite.Id);
+            var newTypeId = Visit(lite.TypeId);
+            return new LiteReferenceExpression(lite.Type, null, newId, newToStr, newTypeId);
         }
 
         protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
