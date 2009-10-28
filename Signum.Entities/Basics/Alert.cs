@@ -19,8 +19,8 @@ namespace Signum.Entities.Basics
     public class AlertDN : IdentifiableEntity, IAlertDN
     {
         [ImplementedByAll]
-        Lazy<IdentifiableEntity> entity;
-        public Lazy<IdentifiableEntity> Entity
+        Lite<IdentifiableEntity> entity;
+        public Lite<IdentifiableEntity> Entity
         {
             get { return entity; }
             set { Set(ref entity, value, "Entity"); }

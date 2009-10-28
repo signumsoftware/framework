@@ -32,7 +32,7 @@
                {
                    Type type = column.Type.UnNullify();
                    %>
-                   <option id="<%=Html.GlobalName("option__" + column.Name) %>" value="<%=typeof(Lazy).IsAssignableFrom(type) ? Reflector.ExtractLazy(type).Name : type.Name %>"><%=column.DisplayName%></option>
+                   <option id="<%=Html.GlobalName("option__" + column.Name) %>" value="<%=typeof(Lite).IsAssignableFrom(type) ? Reflector.ExtractLite(type).Name : type.Name %>"><%=column.DisplayName%></option>
                <%
                } 
             %>

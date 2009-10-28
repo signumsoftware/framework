@@ -90,8 +90,8 @@ namespace Signum.Web
                 return binder(formValues, interval, controlID);
             if (typeof(ModifiableEntity).IsAssignableFrom(staticType)  || typeof(IIdentifiable).IsAssignableFrom(staticType))
                 return new EntityModification(staticType, formValues, interval, controlID);
-            else if (typeof(Lazy).IsAssignableFrom(staticType))
-                return new LazyModification(staticType, formValues, interval, controlID);
+            else if (typeof(Lite).IsAssignableFrom(staticType))
+                return new LiteModification(staticType, formValues, interval, controlID);
             else if (Reflector.IsMList(staticType))
                 return new MListModification(staticType, formValues, interval, controlID);
             else
@@ -123,7 +123,7 @@ namespace Signum.Web
                     }
                     else
                     {
-                        Type cleanType = (currentEntity as Lazy).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
+                        Type cleanType = (currentEntity as Lite).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
                         PropertyInfo pi = cleanType.GetProperty(property);
                         pis.Add(pi);
                         currentEntity = pi.GetValue(currentEntity, null);
@@ -497,7 +497,7 @@ namespace Signum.Web
         }
     }
 
-    public class LazyModification : Modification
+    public class LiteModification : Modification
     {
         public Type RuntimeType;
         public int? EntityId; //optional
@@ -505,11 +505,11 @@ namespace Signum.Web
         public EntityModification EntityModification;
         public bool IsNew;
 
-        public LazyModification(Type staticType, string controlID)
+        public LiteModification(Type staticType, string controlID)
             : base(staticType, controlID) 
         { }
 
-        public LazyModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
+        public LiteModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
             : base(staticType, controlID)
         {
             if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
@@ -526,7 +526,7 @@ namespace Signum.Web
 
             IsNew = formValues.ContainsKey(TypeContext.Compose(controlID, EntityBaseKeys.IsNew));
 
-            CleanType = Reflector.ExtractLazy(staticType);
+            CleanType = Reflector.ExtractLite(staticType);
 
             if (CustomModificationBinders.Binders.ContainsKey(CleanType))
                 EntityModification = (EntityModification)CustomModificationBinders.Binders[CleanType](formValues, interval, controlID);
@@ -542,22 +542,22 @@ namespace Signum.Web
             if (RuntimeType == null)
                 return null;
 
-            Lazy lazy = (Lazy)obj;
+            Lite lazy = (Lite)obj;
 
             if (IsNew)
             {
                 if (lazy != null && lazy.UntypedEntityOrNull != null && lazy.UntypedEntityOrNull.IsNew)
-                    return Lazy.Create(CleanType,
+                    return Lite.Create(CleanType,
                             (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull, onFinish));
-                return Lazy.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null, onFinish));
+                return Lite.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, null, onFinish));
             }
 
             if (lazy == null)
             {
                 if (EntityModification == null)
-                    return Lazy.Create(CleanType, EntityId.Value, RuntimeType);
+                    return Lite.Create(CleanType, EntityId.Value, RuntimeType);
                 else
-                    return Lazy.Create(CleanType,
+                    return Lite.Create(CleanType,
                         (IdentifiableEntity)EntityModification.ApplyChanges(
                            controller, Database.Retrieve(RuntimeType, EntityId.Value), onFinish));
             }
@@ -565,7 +565,7 @@ namespace Signum.Web
             if (EntityId == null)
             {
                 Debug.Assert(lazy.IdOrNull == null && RuntimeType == lazy.GetType() && EntityModification != null);
-                return Lazy.Create(CleanType,
+                return Lite.Create(CleanType,
                     (IdentifiableEntity)EntityModification.ApplyChanges(controller, lazy.UntypedEntityOrNull, onFinish));
             }
             else
@@ -575,15 +575,15 @@ namespace Signum.Web
                     if (EntityModification == null)
                         return lazy;
                     else
-                        return Lazy.Create(CleanType,
+                        return Lite.Create(CleanType,
                             (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lazy), onFinish));
                 }
                 else
                 {
                     if (EntityModification == null)
-                        return Lazy.Create(CleanType, EntityId.Value, RuntimeType);
+                        return Lite.Create(CleanType, EntityId.Value, RuntimeType);
                     else
-                        return Lazy.Create(CleanType,
+                        return Lite.Create(CleanType,
                             (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(RuntimeType, EntityId.Value), onFinish));
                 }
             }
@@ -592,7 +592,7 @@ namespace Signum.Web
         public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             if (EntityModification != null)
-                EntityModification.Validate(((Lazy)entity).TryCC(l => l.UntypedEntityOrNull), errors, prefix); 
+                EntityModification.Validate(((Lite)entity).TryCC(l => l.UntypedEntityOrNull), errors, prefix); 
         }
 
         public override string ToString()
@@ -602,7 +602,7 @@ namespace Signum.Web
                 EntityId == null ? RuntimeType.TypeName() :
                 "{0}({1})".Formato(RuntimeType.TypeName(), EntityId);
 
-            return "Lazy({0}-Ticks:{1}): {2}\r\n{{\r\n{3}\r\n}}".Formato(
+            return "Lite({0}-Ticks:{1}): {2}\r\n{{\r\n{3}\r\n}}".Formato(
                 identity,
                 TicksLastChange != null ? TicksLastChange.ToString() : "",
                 ControlID,

@@ -12,6 +12,6 @@ namespace Signum.Services
     public interface INotesServer
     {
         [OperationContract, NetDataContract]
-        List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lazy); 
+        List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lazy); 
     }
 }

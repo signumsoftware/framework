@@ -122,20 +122,20 @@ namespace Signum.Engine.Linq
                         return BindSkip(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                 }
             }
-            else if (m.Method.DeclaringType == typeof(LazyUtils) && m.Method.Name == "ToLazy")
+            else if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
 
-                if (m.Method.GetParameters().First().ParameterType == typeof(Lazy))
+                if (m.Method.GetParameters().First().ParameterType == typeof(Lite))
                 {
-                    LazyReferenceExpression lazyRef = (LazyReferenceExpression)Visit(m.GetArgument("lazy"));
+                    LiteReferenceExpression lazyRef = (LiteReferenceExpression)Visit(m.GetArgument("lazy"));
 
-                    return new LazyReferenceExpression(m.Type, lazyRef.Reference, lazyRef.Id, toStr ?? lazyRef.ToStr, lazyRef.TypeId);
+                    return new LiteReferenceExpression(m.Type, lazyRef.Reference, lazyRef.Id, toStr ?? lazyRef.ToStr, lazyRef.TypeId);
                 }
                 else
                 {
                     var entity = Visit(m.GetArgument("entity"));
-                    return MakeLazy(m.Type, entity, toStr);
+                    return MakeLite(m.Type, entity, toStr);
                 }
             }
             else if (m.Method.DeclaringType == typeof(object) && m.Method.Name == "ToString" && typeof(IdentifiableEntity).IsAssignableFrom(m.Object.Type))
@@ -465,8 +465,8 @@ namespace Signum.Engine.Linq
                 Type colType = ReflectionTools.CollectionType(source.Type);
                 if (typeof(IIdentifiable).IsAssignableFrom(colType))
                     return SmartEqualizer.EntityIn(newItem, col.Cast<IIdentifiable>().Select(ie => ToFieldInitExpression(colType, ie)).ToArray());
-                else if (typeof(Lazy).IsAssignableFrom(colType))
-                    return SmartEqualizer.EntityIn(newItem, col.Cast<Lazy>().Select(lazy => ToLazyReferenceExpression(colType, lazy)).ToArray());
+                else if (typeof(Lite).IsAssignableFrom(colType))
+                    return SmartEqualizer.EntityIn(newItem, col.Cast<Lite>().Select(lazy => ToLiteReferenceExpression(colType, lazy)).ToArray());
                 else
                     return InExpression.FromValues(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
             }
@@ -787,18 +787,18 @@ namespace Signum.Engine.Linq
             {
                 return ToFieldInitExpression(c.Type, (IdentifiableEntity)c.Value);// podria ser null y lo meteriamos igualmente
             }
-            else if (typeof(Lazy).IsAssignableFrom(c.Type))
+            else if (typeof(Lite).IsAssignableFrom(c.Type))
             {
-                return ToLazyReferenceExpression(c.Type, (Lazy)c.Value);
+                return ToLiteReferenceExpression(c.Type, (Lite)c.Value);
             }
             return c;
         }
 
-        static Expression ToLazyReferenceExpression(Type lazyType, Lazy lazy)
+        static Expression ToLiteReferenceExpression(Type lazyType, Lite lazy)
         {
             Expression id = Expression.Constant(lazy.IdOrNull ?? int.MinValue);
 
-            return new LazyReferenceExpression(lazyType,
+            return new LiteReferenceExpression(lazyType,
                 new FieldInitExpression(lazy.RuntimeType, null, id, null),
                 id, Expression.Constant(lazy.ToStr), TypeConstant(lazy.RuntimeType));
         }
@@ -893,9 +893,9 @@ namespace Signum.Engine.Linq
                     Expression result = efie.GetBinding(fi);
                     return result;
                 }
-                case (ExpressionType)DbExpressionType.LazyReference:
+                case (ExpressionType)DbExpressionType.LiteReference:
                 {
-                    LazyReferenceExpression lazyRef = (LazyReferenceExpression)source;
+                    LiteReferenceExpression lazyRef = (LiteReferenceExpression)source;
                     PropertyInfo pi = m.Member as PropertyInfo;
                     if (pi != null)
                     {
@@ -907,7 +907,7 @@ namespace Signum.Engine.Linq
                             return lazyRef.ToStr.ThrowIfNullC("ToStr is no accesible on queries in ImplementedByAll");
                     }
 
-                    throw new ApplicationException("The member {0} of Lazy is no accesible on queries, use EntityOrNull instead".Formato(m.Member));
+                    throw new ApplicationException("The member {0} of Lite is no accesible on queries, use EntityOrNull instead".Formato(m.Member));
                 }
                 case (ExpressionType)DbExpressionType.ImplementedBy:
                 {
@@ -937,11 +937,11 @@ namespace Signum.Engine.Linq
 
         private Expression Collapse(List<Expression> list, Type returnType)
         {
-            if (list.All(e => e is LazyReferenceExpression))
+            if (list.All(e => e is LiteReferenceExpression))
             {
-                Expression entity = Collapse(list.Select(exp => ((LazyReferenceExpression)exp).Reference).ToList(), Reflector.ExtractLazy(returnType));
+                Expression entity = Collapse(list.Select(exp => ((LiteReferenceExpression)exp).Reference).ToList(), Reflector.ExtractLite(returnType));
 
-                return MakeLazy(returnType, entity, null); 
+                return MakeLite(returnType, entity, null); 
             }
 
             if(list.Any(e=>e is ImplementedByAllExpression))
@@ -1038,14 +1038,14 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
-        internal Expression MakeLazy(Type type, Expression entity, Expression toStr)
+        internal Expression MakeLite(Type type, Expression entity, Expression toStr)
         {
             if (toStr == null && !(entity is ImplementedByAllExpression))
                 toStr = BindMemberAccess(Expression.MakeMemberAccess(entity, ToStrProperty));
 
             Expression id = GetId(entity);
             Expression typeId = GetTypeId(entity);
-            return new LazyReferenceExpression(type, entity, id, toStr, typeId);
+            return new LiteReferenceExpression(type, entity, id, toStr, typeId);
         }
 
         protected override Expression VisitInvocation(InvocationExpression iv)
@@ -1221,9 +1221,9 @@ namespace Signum.Engine.Linq
             {
                 return new[] { new ColumnAssignment((ColumnExpression)colExpression, expression) };
             }
-            else if (colExpression is LazyReferenceExpression && expression is LazyReferenceExpression)
+            else if (colExpression is LiteReferenceExpression && expression is LiteReferenceExpression)
             {
-                return Assign(((LazyReferenceExpression)colExpression).Reference, ((LazyReferenceExpression)expression).Reference); 
+                return Assign(((LiteReferenceExpression)colExpression).Reference, ((LiteReferenceExpression)expression).Reference); 
             }
             else if (colExpression is FieldInitExpression)
             {

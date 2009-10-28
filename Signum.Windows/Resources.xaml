@@ -296,7 +296,7 @@
 		</Border>
 	</DataTemplate>
 
-    <DataTemplate x:Key="{x:Type dn:Lazy}"  DataType="{x:Type dn:Lazy}">
+    <DataTemplate x:Key="{x:Type dn:Lite}"  DataType="{x:Type dn:Lite}">
             <TextBlock Text="{Binding ToStr}" VerticalAlignment="Center" />
     </DataTemplate>
 

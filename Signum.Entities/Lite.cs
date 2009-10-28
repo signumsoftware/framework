@@ -12,29 +12,29 @@ using System.Linq.Expressions;
 namespace Signum.Entities
 {
     [Serializable]
-    public class Lazy<T> : Lazy
+    public class Lite<T> : Lite
         where T : class, IIdentifiable
     {
         T entityOrNull;
 
         // Methods
-        protected Lazy()
+        protected Lite()
         {
         }
 
-        public Lazy(int id)
+        public Lite(int id)
             : base(typeof(T), id)
         {
         }
 
-        public Lazy(Type runtimeType, int id)
+        public Lite(Type runtimeType, int id)
             : base(runtimeType, id)
         {
             if (!typeof(T).IsAssignableFrom(runtimeType))
                 throw new ApplicationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(T)));
         }
 
-        internal Lazy(T entidad)
+        internal Lite(T entidad)
             : base((IdentifiableEntity)(IIdentifiable)entidad)
         {
         }
@@ -53,17 +53,17 @@ namespace Signum.Entities
     }
 
     [Serializable]
-    public abstract class Lazy : Modifiable
+    public abstract class Lite : Modifiable
     {
         Type runtimeType;
         int? id;
         string toStr;
 
-        protected Lazy()
+        protected Lite()
         {
         }
 
-        protected Lazy(Type runtimeType, int id)
+        protected Lite(Type runtimeType, int id)
         {
             if (runtimeType == null || !typeof(IdentifiableEntity).IsAssignableFrom(runtimeType))
                 throw new ApplicationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(IIdentifiable)));
@@ -72,7 +72,7 @@ namespace Signum.Entities
             this.id = id;
         }
 
-        protected Lazy(IdentifiableEntity entidad)
+        protected Lite(IdentifiableEntity entidad)
         {
             if (entidad == null)
                 throw new ArgumentNullException("entidad");
@@ -99,7 +99,7 @@ namespace Signum.Entities
             get
             {
                 if (id == null)
-                    throw new ApplicationException(Resources.TheLazyIsPointingToANewEntityAndHasNoIdYet);
+                    throw new ApplicationException(Resources.TheLiteIsPointingToANewEntityAndHasNoIdYet);
                 return id.Value;
             }
         }
@@ -166,33 +166,33 @@ namespace Signum.Entities
             return "[{0}]".Formato(this.UntypedEntityOrNull);
         }
 
-        public static Lazy Create(Type type, int id)
+        public static Lite Create(Type type, int id)
         {
-            return (Lazy)Activator.CreateInstance(Reflector.GenerateLazy(type), type, id);
+            return (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), type, id);
         }
 
-        public static Lazy Create(Type type, int id, Type runtimeType)
+        public static Lite Create(Type type, int id, Type runtimeType)
         {
-            return (Lazy)Activator.CreateInstance(Reflector.GenerateLazy(type), runtimeType, id);
+            return (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id);
         }
 
-        public static Lazy Create(Type type, int id, Type runtimeType, string toStr)
+        public static Lite Create(Type type, int id, Type runtimeType, string toStr)
         {
-            Lazy result = (Lazy)Activator.CreateInstance(Reflector.GenerateLazy(type), runtimeType, id);
+            Lite result = (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), runtimeType, id);
             result.ToStr = toStr;
             return result;
         }
 
-        public static Lazy Create(Type type, IdentifiableEntity entidad)
+        public static Lite Create(Type type, IdentifiableEntity entidad)
         {
             if (entidad == null)
                 throw new ArgumentNullException("entidad");
 
             BindingFlags bf = BindingFlags.Default | BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic;
 
-            ConstructorInfo ci = Reflector.GenerateLazy(type).GetConstructor(bf, null, new[] { type }, null);
+            ConstructorInfo ci = Reflector.GenerateLite(type).GetConstructor(bf, null, new[] { type }, null);
 
-            Lazy result = (Lazy)ci.Invoke(new[] { entidad });
+            Lite result = (Lite)ci.Invoke(new[] { entidad });
             result.ToStr = entidad.TryToString();
             return result;
         }
@@ -211,7 +211,7 @@ namespace Signum.Entities
             if (this == obj)
                 return true;
 
-            Lazy lazy = obj as Lazy;
+            Lite lazy = obj as Lite;
             if (lazy != null)
             {
                 if (RuntimeType != lazy.RuntimeType)
@@ -236,39 +236,39 @@ namespace Signum.Entities
     }
 
 
-    public static class LazyUtils
+    public static class LiteUtils
     {
-        public static Lazy<T> ToLazy<T>(this Lazy lazy)
+        public static Lite<T> ToLite<T>(this Lite lazy)
             where T : class, IIdentifiable
         {
             if (lazy == null)
                 return null;
 
-            if (lazy is Lazy<T>)
-                return (Lazy<T>)lazy;
+            if (lazy is Lite<T>)
+                return (Lite<T>)lazy;
 
             if (lazy.UntypedEntityOrNull != null)
-                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = lazy.ToStr };
+                return new Lite<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = lazy.ToStr };
             else
-                return new Lazy<T>(lazy.RuntimeType, lazy.Id) { ToStr = lazy.ToStr };
+                return new Lite<T>(lazy.RuntimeType, lazy.Id) { ToStr = lazy.ToStr };
         }
 
-        public static Lazy<T> ToLazy<T>(this Lazy lazy, string toStr)
+        public static Lite<T> ToLite<T>(this Lite lazy, string toStr)
             where T : class, IIdentifiable
         {
             if (lazy == null)
                 return null;
 
-            if (lazy is Lazy<T>)
-                return (Lazy<T>)lazy;
+            if (lazy is Lite<T>)
+                return (Lite<T>)lazy;
 
             if (lazy.UntypedEntityOrNull != null)
-                return new Lazy<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = toStr };
+                return new Lite<T>((T)(object)lazy.UntypedEntityOrNull) { ToStr = toStr };
             else
-                return new Lazy<T>(lazy.RuntimeType, lazy.Id) { ToStr = toStr };
+                return new Lite<T>(lazy.RuntimeType, lazy.Id) { ToStr = toStr };
         }
 
-        public static Lazy<T> ToLazy<T>(this T entity)
+        public static Lite<T> ToLite<T>(this T entity)
           where T : class, IIdentifiable
         {
             if (entity == null)
@@ -276,57 +276,57 @@ namespace Signum.Entities
 
 
             if (entity.IsNew)
-                throw new ApplicationException(Resources.ToLazyLightNotAllowedForNewEntities);
+                throw new ApplicationException(Resources.ToLiteLightNotAllowedForNewEntities);
 
-            return new Lazy<T>(entity.GetType(), entity.Id) { ToStr = entity.ToString() };
+            return new Lite<T>(entity.GetType(), entity.Id) { ToStr = entity.ToString() };
         }
 
-        public static Lazy<T> ToLazy<T>(this T entity, string toStr)
+        public static Lite<T> ToLite<T>(this T entity, string toStr)
             where T : class, IIdentifiable
         {
             if (entity == null)
                 return null;
 
             if (entity.IsNew)
-                throw new ApplicationException(Resources.ToLazyLightNotAllowedForNewEntities);
+                throw new ApplicationException(Resources.ToLiteLightNotAllowedForNewEntities);
 
-            return new Lazy<T>(entity.GetType(), entity.Id) { ToStr = toStr };
+            return new Lite<T>(entity.GetType(), entity.Id) { ToStr = toStr };
         }
 
-        public static Lazy<T> ToLazy<T>(this T entity, bool fat) where T : class, IIdentifiable
+        public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IIdentifiable
         {
             if (fat)
-                return entity.ToLazyFat();
+                return entity.ToLiteFat();
             else
-                return entity.ToLazy();
+                return entity.ToLite();
         }
 
-        public static Lazy<T> ToLazy<T>(this T entity, bool fat, string toStr) where T : class, IIdentifiable
+        public static Lite<T> ToLite<T>(this T entity, bool fat, string toStr) where T : class, IIdentifiable
         {
             if (fat)
-                return entity.ToLazyFat(toStr);
+                return entity.ToLiteFat(toStr);
             else
-                return entity.ToLazy(toStr);
+                return entity.ToLite(toStr);
         }
 
-        public static Lazy<T> ToLazyFat<T>(this T entity) where T : class, IIdentifiable
+        public static Lite<T> ToLiteFat<T>(this T entity) where T : class, IIdentifiable
         {
             if (entity == null)
                 return null;
 
-            return new Lazy<T>(entity) { ToStr = entity.ToString() };
+            return new Lite<T>(entity) { ToStr = entity.ToString() };
         }
 
-        public static Lazy<T> ToLazyFat<T>(this T entity, string toStr) where T : class, IIdentifiable
+        public static Lite<T> ToLiteFat<T>(this T entity, string toStr) where T : class, IIdentifiable
         {
             if (entity == null)
                 return null;
 
-            return new Lazy<T>(entity) { ToStr = toStr };
+            return new Lite<T>(entity) { ToStr = toStr };
         }
 
         [MethodExpander(typeof(RefersToExpander))]
-        public static bool RefersTo<T>(this Lazy<T> lazy, T entity)
+        public static bool RefersTo<T>(this Lite<T> lazy, T entity)
             where T : class, IIdentifiable
         {
             if (lazy == null && entity == null)
@@ -381,7 +381,7 @@ namespace Signum.Entities
         }
 
         [MethodExpander(typeof(IsExpander))]
-        public static bool Is<T>(this Lazy<T> lazy1, Lazy<T> lazy2)
+        public static bool Is<T>(this Lite<T> lazy1, Lite<T> lazy2)
             where T : class, IIdentifiable
         {
             if (lazy1 == null && lazy2 == null)

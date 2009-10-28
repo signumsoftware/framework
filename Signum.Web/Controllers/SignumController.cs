@@ -297,7 +297,7 @@ namespace Signum.Web.Controllers
                         implementationTypes[i] = t;
                 }
             }
-            var result = AutoCompleteUtils.FindLazyLike(type, implementationTypes, input, limit)
+            var result = AutoCompleteUtils.FindLiteLike(type, implementationTypes, input, limit)
                 .ToDictionary(l => l.Id.ToString() + "_" + l.RuntimeType.Name, l => l.ToStr);
 
             return Content(result.ToJSonObject(idAndType => idAndType.Quote(), str => str.Quote()));

@@ -142,13 +142,13 @@
     <value>El tipo {0} no es menor que {1}</value>
   </data>
   <data name="EntitiesDoNotMatch" xml:space="preserve">
-    <value>La entidad no coincide con el Lazy</value>
+    <value>La entidad no coincide con el Lite</value>
   </data>
   <data name="RemovingEntityNotAllowedInNewLazies" xml:space="preserve">
-    <value>No se puede eliminar la entidad a un Lazy sin id</value>
+    <value>No se puede eliminar la entidad a un Lite sin id</value>
   </data>
-  <data name="ToLazyLightNotAllowedForNewEntities" xml:space="preserve">
-    <value>Sólo se permite ToLazyLight para Entidades con Id</value>
+  <data name="ToLiteLightNotAllowedForNewEntities" xml:space="preserve">
+    <value>Sólo se permite ToLiteLight para Entidades con Id</value>
   </data>
   <data name="_0NotSupported" xml:space="preserve">
     <value>{0} no soportado</value>

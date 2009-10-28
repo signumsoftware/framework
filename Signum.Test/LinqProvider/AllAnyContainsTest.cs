@@ -54,11 +54,11 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void ContainsListLazy()
+        public void ContainsListLite()
         {
-            var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members).Select(a => a.ToLazy()).ToList();
+            var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members).Select(a => a.ToLite()).ToList();
 
-            var michael = Database.Query<ArtistDN>().Single(a => !artistsInBands.Contains(a.ToLazy()));
+            var michael = Database.Query<ArtistDN>().Single(a => !artistsInBands.Contains(a.ToLite()));
         }
 
         [TestMethod]
@@ -70,17 +70,17 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void ContainsListLazyIB()
+        public void ContainsListLiteIB()
         {
-            var bands = new List<Lazy<IAuthorDN>>
+            var bands = new List<Lite<IAuthorDN>>
             {
-                new Lazy<IAuthorDN>(typeof(ArtistDN), 5),
-                new Lazy<IAuthorDN>(typeof(BandDN), 1)
+                new Lite<IAuthorDN>(typeof(ArtistDN), 5),
+                new Lite<IAuthorDN>(typeof(BandDN), 1)
             };
 
             var albums = (from a in Database.Query<AlbumDN>()
-                          where !bands.Contains(a.Author.ToLazy())
-                          select a.ToLazy()).ToList();
+                          where !bands.Contains(a.Author.ToLite())
+                          select a.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -94,18 +94,18 @@ namespace Signum.Test.LinqProvider
 
             var albums = (from a in Database.Query<AlbumDN>()
                           where !bands.Contains(a.Author)
-                          select a.ToLazy()).ToList();
+                          select a.ToLite()).ToList();
         }
 
         [TestMethod]
-        public void ContainsListLazyIBA()
+        public void ContainsListLiteIBA()
         {
-            var lazies = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => a.ToLazy<IIdentifiable>()).ToArray()
-                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => a.ToLazy<IIdentifiable>())).ToArray();
+            var lazies = Database.Query<ArtistDN>().Where(a => a.Dead).Select(a => a.ToLite<IIdentifiable>()).ToArray()
+                .Concat(Database.Query<BandDN>().Where(a => a.Name.StartsWith("Smash")).Select(a => a.ToLite<IIdentifiable>())).ToArray();
 
             var albums = (from a in Database.Query<NoteDN>()
-                          where lazies.Contains(a.Target.ToLazy())
-                          select a.ToLazy()).ToList();
+                          where lazies.Contains(a.Target.ToLite())
+                          select a.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -116,7 +116,7 @@ namespace Signum.Test.LinqProvider
 
             var albums = (from a in Database.Query<NoteDN>()
                           where entities.Contains(a.Target)
-                          select a.ToLazy()).ToList();
+                          select a.ToLite()).ToList();
         }
 
         [TestMethod]

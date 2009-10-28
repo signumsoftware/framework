@@ -42,7 +42,7 @@ namespace Signum.Windows
             {
                 btView.Visibility = Visibility.Visible;
 
-                Type cleanType = Entity is Lazy ? ((Lazy)Entity).RuntimeType : Entity.GetType(); 
+                Type cleanType = Entity is Lite ? ((Lite)Entity).RuntimeType : Entity.GetType(); 
 
                 btView.IsEnabled = Navigator.IsViewable(cleanType, false);
             }

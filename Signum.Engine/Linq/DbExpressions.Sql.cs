@@ -50,7 +50,7 @@ namespace Signum.Engine.Linq
         EmbeddedFieldInit,
         ImplementedBy,
         ImplementedByAll,
-        LazyReference,
+        LiteReference,
         MList,
     }
 

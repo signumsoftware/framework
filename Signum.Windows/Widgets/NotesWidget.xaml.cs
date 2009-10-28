@@ -26,7 +26,7 @@ namespace Signum.Windows
         public event Action ForceShow;
 
         public static Func<IdentifiableEntity, INoteDN> CreateNote { get; set; }
-        public static Func<IdentifiableEntity, List<Lazy<INoteDN>>> RetrieveNotes { get; set; }
+        public static Func<IdentifiableEntity, List<Lite<INoteDN>>> RetrieveNotes { get; set; }
 
         public NotesWidget()
         {
@@ -46,7 +46,7 @@ namespace Signum.Windows
             if (e.OriginalSource is Button) //Not to capture the mouseDown of the scrollbar buttons
             {
                 Button b = (Button)e.OriginalSource;
-                Lazy<INoteDN> nota = (Lazy<INoteDN>)b.Tag;
+                Lite<INoteDN> nota = (Lite<INoteDN>)b.Tag;
                 ViewNote(Server.RetrieveAndForget(nota));
             }
         }
@@ -85,7 +85,7 @@ namespace Signum.Windows
                 return; 
             }
 
-            List<Lazy<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)DataContext);
+            List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)DataContext);
 
             if (notes != null)
             {

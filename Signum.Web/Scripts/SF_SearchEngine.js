@@ -168,9 +168,9 @@ function CloseChooser(urlController, onOk, onCancel, prefix) {
 	});
 }
 
-function OperationExecute(urlController, typeName, id, operationKey, isLazy, prefix, onOk, onCancel) {
+function OperationExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
 	var formChildren = "";
-	if (isLazy == false || isLazy == "false" || isLazy == "False") {
+	if (isLite == false || isLite == "false" || isLite == "False") {
 		if (prefix != "") //PopupWindow
 		    formChildren = $('#' + prefix + "panelPopup *, #" + sfReactive + ", #" + sfTabId).serialize();
 		else //NormalWindow
@@ -180,7 +180,7 @@ function OperationExecute(urlController, typeName, id, operationKey, isLazy, pre
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "isLazy=" + isLazy + qp("sfTypeName",typeName) + qp("sfId",id) + qp("sfOperationFullKey",operationKey) + qp(sfPrefix,prefix) + qp("sfOnOk",singleQuote(onOk)) + qp("sfOnCancel",singleQuote(onCancel)) + formChildren,
+		data: "isLite=" + isLite + qp("sfTypeName",typeName) + qp("sfId",id) + qp("sfOperationFullKey",operationKey) + qp(sfPrefix,prefix) + qp("sfOnOk",singleQuote(onOk)) + qp("sfOnCancel",singleQuote(onCancel)) + formChildren,
 		async: false,
 		dataType: "html",
 		success: function (msg) {
@@ -350,7 +350,7 @@ function SerializeFilter(index, prefix) {
 	var valBool = $("input:checkbox[id=" + prefix + "value_" + index + "]"); //it's a checkbox
 	if (valBool.length > 0) value = valBool[0].checked;
 
-	var id = $("#" + prefix + "value_" + index + sfId); //If it's a Lazy, the value is the Id
+	var id = $("#" + prefix + "value_" + index + sfId); //If it's a Lite, the value is the Id
 	if (id.length > 0) value = id.val();
 
 	var typeName = $("#" + prefix + "type_" + index);

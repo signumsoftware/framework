@@ -50,7 +50,7 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
             
-            Type elementsCleanType = Reflector.ExtractLazy(typeof(T)) ?? typeof(T);
+            Type elementsCleanType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
             
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), elementsCleanType.Name));
 
@@ -132,7 +132,7 @@ namespace Signum.Web
 
             if (settings.Find && !typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanType))
             {
-                    string popupFindingParameters = "'{0}','{1}','true',function(){{OnListSearchOk('{2}','{3}');}},function(){{OnListSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLazy(typeof(T)) ?? typeof(T)), idValueField, divASustituir);
+                    string popupFindingParameters = "'{0}','{1}','true',function(){{OnListSearchOk('{2}','{3}');}},function(){{OnListSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLite(typeof(T)) ?? typeof(T)), idValueField, divASustituir);
                     string findingUrl = (settings.Implementations == null) ?
                         "Find({0});".Formato(popupFindingParameters) :
                         "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
@@ -183,7 +183,7 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
             
             bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
-            bool isLazy = typeof(Lazy).IsAssignableFrom(typeof(T));
+            bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
 
             string indexedPrefix = TypeContext.Compose(idValueField, index.ToString());
 
@@ -191,20 +191,20 @@ namespace Signum.Web
             if (value != null)
             {
                 Type cleanRuntimeType = value.GetType();
-                if (typeof(Lazy).IsAssignableFrom(value.GetType()))
-                    cleanRuntimeType = (value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(value.GetType()))
+                    cleanRuntimeType = (value as Lite).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
             sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, TypeContext.RuntimeType), runtimeType));
             sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityListKeys.Index), index.ToString()));
 
-            if (isIdentifiable || isLazy)
+            if (isIdentifiable || isLite)
             {
                 sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(indexedPrefix, TypeContext.Id),
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
-                       : ((Lazy)(object)value).TryCS(i => i.IdOrNull)));
+                       : ((Lite)(object)value).TryCS(i => i.IdOrNull)));
 
 
                 if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
@@ -238,7 +238,7 @@ namespace Signum.Web
                     sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.ToStr)) +
                                     ((isIdentifiable)
                                         ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToString())
-                                        : ((Lazy)(object)value).TryCC(i => i.ToStr)) +
+                                        : ((Lite)(object)value).TryCC(i => i.ToStr)) +
                                     "</option>");
             }
             else
@@ -283,9 +283,9 @@ namespace Signum.Web
             EntityList el = new EntityList() { EntitiesType = entitiesType };
             
             //if (el.Implementations == null)
-                Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(typeof(S)) ?? typeof(S), false);
+                Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
 
-            Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
+            Common.FireCommonTasks(el, Reflector.ExtractLite(entitiesType) ?? entitiesType, context);
 
             helper.InternalEntityList<S>(context, el);
         }
@@ -299,9 +299,9 @@ namespace Signum.Web
             EntityList el = new EntityList() { EntitiesType = entitiesType };
             
             //if (el.Implementations == null)
-                Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(typeof(S)) ?? typeof(S), false);
+                Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
 
-            Common.FireCommonTasks(el, Reflector.ExtractLazy(entitiesType) ?? entitiesType, context);
+            Common.FireCommonTasks(el, Reflector.ExtractLite(entitiesType) ?? entitiesType, context);
 
             settingsModifier(el);
                         

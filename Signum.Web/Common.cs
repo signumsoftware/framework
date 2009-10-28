@@ -161,7 +161,7 @@ namespace Signum.Web
 
         protected override Expression VisitMemberAccess(MemberExpression me)
         {
-            if (!typeof(Lazy).IsAssignableFrom(me.Expression.Type) && me.Member.Name != "EntityOrNull")
+            if (!typeof(Lite).IsAssignableFrom(me.Expression.Type) && me.Member.Name != "EntityOrNull")
                 members = members.Push(me.Member);
 
             Expression exp = this.Visit(me.Expression);

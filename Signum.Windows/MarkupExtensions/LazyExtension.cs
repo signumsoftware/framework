@@ -12,10 +12,10 @@ using Signum.Entities.Reflection;
 namespace Signum.Windows
 {
     [MarkupExtensionReturnType(typeof(Type))]
-    public class LazyExtension : MarkupExtension
+    public class LiteExtension : MarkupExtension
     {
         string typeName;
-        public LazyExtension(string typeName)
+        public LiteExtension(string typeName)
         {
             this.typeName = typeName;
         }
@@ -24,7 +24,7 @@ namespace Signum.Windows
         {
             IXamlTypeResolver typeResolver = (IXamlTypeResolver)serviceProvider.GetService(typeof(IXamlTypeResolver));
 
-            return Reflector.GenerateLazy(typeResolver.Resolve(typeName)); 
+            return Reflector.GenerateLite(typeResolver.Resolve(typeName)); 
         }
     }
 }

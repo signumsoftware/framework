@@ -77,8 +77,8 @@ namespace Signum.Engine.Linq
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
                 case DbExpressionType.ImplementedByAll:
                     return this.VisitImplementedByAll((ImplementedByAllExpression)exp);     
-                case  DbExpressionType.LazyReference:
-                    return this.VisitLazyReference((LazyReferenceExpression)exp);
+                case  DbExpressionType.LiteReference:
+                    return this.VisitLiteReference((LiteReferenceExpression)exp);
                 case DbExpressionType.MList:
                     return this.VisitMList((MListExpression)exp);
 
@@ -153,14 +153,14 @@ namespace Signum.Engine.Linq
             return ml;
         }
 
-        protected virtual Expression VisitLazyReference(LazyReferenceExpression lazy)
+        protected virtual Expression VisitLiteReference(LiteReferenceExpression lazy)
         {
             var newRef = Visit(lazy.Reference);
             var newToStr = Visit(lazy.ToStr);
             var newId = Visit(lazy.Id);
             var newTypeId = Visit(lazy.TypeId);
             if (newRef != lazy.Reference || newToStr != lazy.ToStr || newId != lazy.Id || newTypeId != lazy.TypeId)
-                return new LazyReferenceExpression(lazy.Type, newRef, newId, newToStr, newTypeId);
+                return new LiteReferenceExpression(lazy.Type, newRef, newId, newToStr, newTypeId);
             return lazy;
         }
 

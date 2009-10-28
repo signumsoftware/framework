@@ -20,7 +20,7 @@ namespace Signum.Engine.Maps
             return SqlBuilder.SelectByIds(Name, new[] { "*" }, SqlBuilder.PrimaryKeyName, ids); 
         }
 
-        internal SqlPreCommand BatchSelectLazy(int[] ids)
+        internal SqlPreCommand BatchSelectLite(int[] ids)
         {
             return SqlBuilder.SelectByIds(Name, new[] { SqlBuilder.PrimaryKeyName, SqlBuilder.ToStrName }, SqlBuilder.PrimaryKeyName, ids); 
         }
@@ -38,7 +38,7 @@ namespace Signum.Engine.Maps
 
         static string toStr = ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr).Name;
 
-        internal void FillLazy(DataRow row, Lazy lazy)
+        internal void FillLite(DataRow row, Lite lazy)
         {
             FieldValue campo = (FieldValue)Fields[toStr].Field;
             lazy.ToStr = (string)campo.GenerateValue(row, null);
@@ -90,8 +90,8 @@ namespace Signum.Engine.Maps
                 if(!Nullable)throw new InvalidOperationException(Resources.Field0HasNullAndOsNotNullable.Formato(Name));
                 else return null;
 
-            if (IsLazy)
-                return retriever.GetLazy(ReferenceTable, Reflector.ExtractLazy(FieldType), id.Value);
+            if (IsLite)
+                return retriever.GetLite(ReferenceTable, Reflector.ExtractLite(FieldType), id.Value);
             else
                 return retriever.GetIdentifiable(ReferenceTable, id.Value); 
         }
@@ -154,8 +154,8 @@ namespace Signum.Engine.Maps
 
             int? id = (int?)row.Cell(col.Name);
 
-             if(IsLazy)
-                return retriever.GetLazy(col.ReferenceTable, Reflector.ExtractLazy(FieldType), id.Value);
+             if(IsLite)
+                return retriever.GetLite(col.ReferenceTable, Reflector.ExtractLite(FieldType), id.Value);
             else
                 return retriever.GetIdentifiable(col.ReferenceTable, id.Value); 
         }
@@ -174,8 +174,8 @@ namespace Signum.Engine.Maps
             if (id == null)
                 return null;
 
-            if (IsLazy)
-                return retriever.GetLazy(Schema.Current.TablesForID[idTipo.Value], Reflector.ExtractLazy(FieldType), id.Value);
+            if (IsLite)
+                return retriever.GetLite(Schema.Current.TablesForID[idTipo.Value], Reflector.ExtractLite(FieldType), id.Value);
             else
                 return retriever.GetIdentifiable(Schema.Current.TablesForID[idTipo.Value], id.Value); 
         }

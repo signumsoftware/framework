@@ -13,7 +13,7 @@ namespace Signum.Web
 {
     public static class LightEntityLineHelper
     {
-        public static void LightEntityLine(this HtmlHelper helper, Lazy lazy, bool admin)
+        public static void LightEntityLine(this HtmlHelper helper, Lite lazy, bool admin)
         {
             if (lazy == null)
                 return;

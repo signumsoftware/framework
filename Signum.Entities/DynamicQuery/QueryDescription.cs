@@ -75,7 +75,7 @@ namespace Signum.Entities.DynamicQuery
             Meta = meta;
 
             if (typeof(IdentifiableEntity).IsInstanceOfType(Type))
-                Debug.Write("{0} column returns subtype of IdentifiableEntity, use a Lazy instead!!".Formato(mi.MemberName()));
+                Debug.Write("{0} column returns subtype of IdentifiableEntity, use a Lite instead!!".Formato(mi.MemberName()));
 
             TwinProperty = (meta as CleanMeta).TryCC(cm => (PropertyInfo)cm.Member);
 

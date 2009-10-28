@@ -14,8 +14,8 @@ namespace Signum.Entities.Basics
     public class NoteDN : IdentifiableEntity, INoteDN
     {
         [ImplementedByAll]
-        Lazy<IdentifiableEntity> entity;
-        public Lazy<IdentifiableEntity> Entity
+        Lite<IdentifiableEntity> entity;
+        public Lite<IdentifiableEntity> Entity
         {
             get { return entity; }
             set { Set(ref entity, value, "Entity"); }

@@ -86,7 +86,7 @@ namespace Signum.Windows
                 if (es!= null && es.CollectionViewOperations != null)
                 {
                     var colView = CollectionViewSource.GetDefaultView(e.NewValue);
-                    es.CollectionViewOperations(CleanLazy, colView);
+                    es.CollectionViewOperations(CleanLite, colView);
                 }
             }
         }

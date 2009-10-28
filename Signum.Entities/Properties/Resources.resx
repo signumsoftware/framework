@@ -124,13 +124,13 @@
     <value>Type {0} is not smaller than {1}</value>
   </data>
   <data name="EntitiesDoNotMatch" xml:space="preserve">
-    <value>Entity do not Match with the Lazy</value>
+    <value>Entity do not Match with the Lite</value>
   </data>
   <data name="RemovingEntityNotAllowedInNewLazies" xml:space="preserve">
     <value>Removing entity from a new lazy is not allowed</value>
   </data>
-  <data name="ToLazyLightNotAllowedForNewEntities" xml:space="preserve">
-    <value>ToLazyLight not allowed for new entities</value>
+  <data name="ToLiteLightNotAllowedForNewEntities" xml:space="preserve">
+    <value>ToLiteLight not allowed for new entities</value>
   </data>
   <data name="_0NotSupported" xml:space="preserve">
     <value>{0} not supported</value>
@@ -213,7 +213,7 @@
   <data name="_0IsNewAndHasNoId" xml:space="preserve">
     <value>'{0}' is New and has no id</value>
   </data>
-  <data name="TheLazyIsPointingToANewEntityAndHasNoIdYet" xml:space="preserve">
+  <data name="TheLiteIsPointingToANewEntityAndHasNoIdYet" xml:space="preserve">
     <value>The lazy is pointing to a new entity and has no id yet</value>
   </data>
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">

@@ -57,7 +57,7 @@ namespace Signum.Web
             string divASustituir = helper.GlobalName("divASustituir");
 
             StringBuilder sb = new StringBuilder();
-            sb.Append(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), (Reflector.ExtractLazy(type) ?? type).Name));
+            sb.Append(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), (Reflector.ExtractLite(type) ?? type).Name));
              
             if (StyleContext.Current.LabelVisible)
                 sb.Append(helper.Label(idValueField + "lbl", settings.LabelText ?? "", TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), TypeContext.CssLineLabel));
@@ -67,8 +67,8 @@ namespace Signum.Web
             if (value != null)
             {
                 cleanRuntimeType = value.GetType();
-                if (typeof(Lazy).IsAssignableFrom(value.GetType()))
-                    cleanRuntimeType = (value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(value.GetType()))
+                    cleanRuntimeType = (value as Lite).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
             sb.Append(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.RuntimeType), runtimeType));
@@ -83,29 +83,29 @@ namespace Signum.Web
             string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}',{4});}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial", reloadOnChangeFunction);
 
             bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(type);
-            bool isLazy = typeof(Lazy).IsAssignableFrom(type);
-            if (isIdentifiable || isLazy)
+            bool isLite = typeof(Lite).IsAssignableFrom(type);
+            if (isIdentifiable || isLite)
             {
                 sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(idValueField, TypeContext.Id), 
                     (isIdentifiable) 
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("")
-                       : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()));
+                       : ((Lite)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()));
 
                 if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
                     (isIdentifiable && value != null && ((IIdentifiable)(object)value).IdOrNull == null))
                 {
                     sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Entity)));
 
-                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? Reflector.ExtractLazy(type) ?? type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? type));
+                    EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? Reflector.ExtractLite(type) ?? type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? type));
                     TypeContext tc = typeContext;
-                    if (isLazy)
+                    if (isLite)
                     {
                         //ParameterExpression pe = Expression.Parameter(typeContext.ContextType, "p");
-                        //Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLazy(type)),pe);
+                        //Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLite(type)),pe);
                         //LambdaExpression lambda = Expression.Lambda(call, pe);
-                        //tc = Common.UntypedTypeContext(typeContext, lambda, cleanRuntimeType ?? Reflector.ExtractLazy(type));
-                        tc = typeContext.ExtractLazy(); 
+                        //tc = Common.UntypedTypeContext(typeContext, lambda, cleanRuntimeType ?? Reflector.ExtractLite(type));
+                        tc = typeContext.ExtractLite(); 
                     }
                     ViewDataDictionary vdd = new ViewDataDictionary(tc) //value
                     { 
@@ -128,7 +128,7 @@ namespace Signum.Web
                     TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), 
                     (isIdentifiable) 
                         ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToStr) 
-                        : ((Lazy)(object)value).TryCC(i => i.ToStr), 
+                        : ((Lite)(object)value).TryCC(i => i.ToStr), 
                     new Dictionary<string, object>() 
                     { 
                         { "class", "valueLine" }, 
@@ -136,10 +136,10 @@ namespace Signum.Web
                         { "style", "display:" + ((value==null) ? "block" : "none")}
                     }));
 
-                if (settings.Autocomplete && Navigator.NameToType.ContainsKey((Reflector.ExtractLazy(type) ?? type).Name))
+                if (settings.Autocomplete && Navigator.NameToType.ContainsKey((Reflector.ExtractLite(type) ?? type).Name))
                     sb.AppendLine(helper.AutoCompleteExtender(TypeContext.Compose(idValueField, EntityLineKeys.DDL),
                                                       TypeContext.Compose(idValueField, EntityBaseKeys.ToStr),
-                                                      (Reflector.ExtractLazy(type) ?? type).Name,
+                                                      (Reflector.ExtractLite(type) ?? type).Name,
                                                       (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name, ",") : "",
                                                       TypeContext.Compose(idValueField, TypeContext.Id),
                                                       "Signum/Autocomplete", 1, 5, 500, reloadOnChangeFunction));
@@ -237,9 +237,9 @@ namespace Signum.Web
                                   "lineButton remove",
                                   (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
-            if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLazy)))
+            if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLite)))
                 {
-                    Type cleanType = Reflector.ExtractLazy(type) ?? type;
+                    Type cleanType = Reflector.ExtractLite(type) ?? type;
                     string searchType = Navigator.TypesToURLNames.TryGetC(cleanType);
                     string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", searchType, idValueField, divASustituir, reloadOnChangeFunction);
                     string findingUrl = (settings.Implementations == null) ?
@@ -274,14 +274,14 @@ namespace Signum.Web
             Type runtimeType = typeof(S);
             if (context.Value != null)
             {
-                if (typeof(Lazy).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
+                    runtimeType = (context.Value as Lite).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
             }
             else
             {
-                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
+                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
 
             EntityLine el = new EntityLine();
@@ -302,14 +302,14 @@ namespace Signum.Web
             Type runtimeType = typeof(S);
             if (context.Value != null)
             {
-                if (typeof(Lazy).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
+                    runtimeType = (context.Value as Lite).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
             }
             else
             {
-                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
+                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
 
             EntityLine el = new EntityLine();

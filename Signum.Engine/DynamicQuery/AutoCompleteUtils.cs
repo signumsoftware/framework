@@ -18,18 +18,18 @@ namespace Signum.Engine.DynamicQuery
 {
     public static class AutoCompleteUtils
     {
-        public static List<Lazy> FindLazyLike(Type lazyType, Type[] types, string subString, int count)
+        public static List<Lite> FindLiteLike(Type lazyType, Type[] types, string subString, int count)
         {
-            List<Lazy> result = new List<Lazy>();
+            List<Lite> result = new List<Lite>();
 
-            foreach (var mi in new[] { miLazyStarting, miLazyContaining })
+            foreach (var mi in new[] { miLiteStarting, miLiteContaining })
             {
                 foreach (var type in types ?? new[] { lazyType })
                 {
                     MethodInfo mig = mi.MakeGenericMethod(lazyType, type);
                     try
                     {
-                        List<Lazy> part = (List<Lazy>)mig.Invoke(null, new object[] { subString, count - result.Count });
+                        List<Lite> part = (List<Lite>)mig.Invoke(null, new object[] { subString, count - result.Count });
                         result.AddRange(part);
 
                         if (result.Count >= count)
@@ -44,32 +44,32 @@ namespace Signum.Engine.DynamicQuery
             return result;
         }
 
-        static MethodInfo miLazyStarting = ReflectionTools.GetMethodInfo(()=>LazyStarting<TypeDN,TypeDN>(null, 1)).GetGenericMethodDefinition();
-        static List<Lazy> LazyStarting<LT, RT>(string subString, int count)
+        static MethodInfo miLiteStarting = ReflectionTools.GetMethodInfo(()=>LiteStarting<TypeDN,TypeDN>(null, 1)).GetGenericMethodDefinition();
+        static List<Lite> LiteStarting<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLazy<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToStr).Cast<Lazy>().ToList();
+            return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToStr).Cast<Lite>().ToList();
         }
 
-        static MethodInfo miLazyContaining = ReflectionTools.GetMethodInfo(() => LazyContaining<TypeDN, TypeDN>(null, 1)).GetGenericMethodDefinition();
-        static List<Lazy> LazyContaining<LT, RT>(string subString, int count)
+        static MethodInfo miLiteContaining = ReflectionTools.GetMethodInfo(() => LiteContaining<TypeDN, TypeDN>(null, 1)).GetGenericMethodDefinition();
+        static List<Lite> LiteContaining<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLazy<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToStr).Cast<Lazy>().ToList();
+            return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToStr).Cast<Lite>().ToList();
         }
 
-        public static List<Lazy> RetriveAllLazy(Type lazyType, Type[] types)
+        public static List<Lite> RetriveAllLite(Type lazyType, Type[] types)
         {
-            List<Lazy> result = new List<Lazy>();
+            List<Lite> result = new List<Lite>();
 
             foreach (var type in types ?? new[] { lazyType })
             {
-                MethodInfo mi = miAllLazy.MakeGenericMethod(lazyType, type);
+                MethodInfo mi = miAllLite.MakeGenericMethod(lazyType, type);
                 try
                 {
-                    List<Lazy> part = (List<Lazy>)mi.Invoke(null, null);
+                    List<Lite> part = (List<Lite>)mi.Invoke(null, null);
                     result.AddRange(part);
                 }
                 catch (TargetInvocationException te)
@@ -80,12 +80,12 @@ namespace Signum.Engine.DynamicQuery
             return result;
         }
 
-        static MethodInfo miAllLazy = ReflectionTools.GetMethodInfo(() => AllLazy<TypeDN, TypeDN>()).GetGenericMethodDefinition();
-        static List<Lazy> AllLazy<LT, RT>()
+        static MethodInfo miAllLite = ReflectionTools.GetMethodInfo(() => AllLite<TypeDN, TypeDN>()).GetGenericMethodDefinition();
+        static List<Lite> AllLite<LT, RT>()
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
         {
-            return Database.Query<RT>().Select(a => a.ToLazy<LT>()).AsEnumerable().Cast<Lazy>().ToList();
+            return Database.Query<RT>().Select(a => a.ToLite<LT>()).AsEnumerable().Cast<Lite>().ToList();
         }
     }
 }

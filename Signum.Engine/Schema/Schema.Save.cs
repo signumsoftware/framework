@@ -167,14 +167,14 @@ namespace Signum.Engine.Maps
 
     public static partial class ReferenceFieldExtensions
     {
-        public static int? GetIdForLazy(this IFieldReference cr, object value, Forbidden forbidden)
+        public static int? GetIdForLite(this IFieldReference cr, object value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
 
-            if (cr.IsLazy)
+            if (cr.IsLite)
             {
-                Lazy l = (Lazy)value;
+                Lite l = (Lite)value;
                 return l.UntypedEntityOrNull == null ? l.Id :
                        forbidden.Contains(l.UntypedEntityOrNull) ? (int?)null :
                        l.RefreshId();
@@ -186,14 +186,14 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public static Type GetTypeForLazy(this IFieldReference cr, object value, Forbidden forbidden)
+        public static Type GetTypeForLite(this IFieldReference cr, object value, Forbidden forbidden)
         {
             if (value == null)
                 return null;
 
-            if (cr.IsLazy)
+            if (cr.IsLite)
             {
-                Lazy l = (Lazy)value;
+                Lite l = (Lite)value;
                 return l.UntypedEntityOrNull == null ? l.RuntimeType :
                      forbidden.Contains(l.UntypedEntityOrNull) ? null :
                      l.RuntimeType;
@@ -210,7 +210,7 @@ namespace Signum.Engine.Maps
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
-            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, Nullable, this.GetIdForLazy(value, forbidden)));
+            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, Nullable, this.GetIdForLite(value, forbidden)));
         }
     }
 
@@ -246,7 +246,7 @@ namespace Signum.Engine.Maps
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
             Type valType = value == null ? null :
-                value is Lazy ? ((Lazy)value).RuntimeType :
+                value is Lite ? ((Lite)value).RuntimeType :
                 value.GetType();
 
             if (valType != null && !ImplementationColumns.ContainsKey(valType))
@@ -254,7 +254,7 @@ namespace Signum.Engine.Maps
 
             var param = ImplementationColumns.Select(p =>
                 SqlParameterBuilder.CreateReferenceParameter(p.Value.Name, true,
-                       p.Key != valType ? null : this.GetIdForLazy(value, forbidden))).ToList();
+                       p.Key != valType ? null : this.GetIdForLite(value, forbidden))).ToList();
 
             parameters.AddRange(param);          
         }     
@@ -271,8 +271,8 @@ namespace Signum.Engine.Maps
         {
             if (value != null)
             {   
-                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Column.Name, Column.Nullable, this.GetIdForLazy(value, forbidden)));
-                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(ColumnTypes.Name,ColumnTypes.Nullable, this.GetTypeForLazy(value, forbidden).TryCS(t => Schema.Current.IDsForType[t])));
+                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Column.Name, Column.Nullable, this.GetIdForLite(value, forbidden)));
+                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(ColumnTypes.Name,ColumnTypes.Nullable, this.GetTypeForLite(value, forbidden).TryCS(t => Schema.Current.IDsForType[t])));
             }
         }
     }

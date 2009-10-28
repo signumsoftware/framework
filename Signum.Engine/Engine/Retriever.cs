@@ -20,7 +20,7 @@ namespace Signum.Engine
         Dictionary<Table, Dictionary<int, IdentifiableEntity>> reqIdentifiables = new Dictionary<Table, Dictionary<int, IdentifiableEntity>>();
         
         // no se garantiza unicidad para lazys ni colecciones
-        Dictionary<Table, Dictionary<int, List<Lazy>>> reqLazy = new Dictionary<Table, Dictionary<int, List<Lazy>>>(); 
+        Dictionary<Table, Dictionary<int, List<Lite>>> reqLite = new Dictionary<Table, Dictionary<int, List<Lite>>>(); 
         Dictionary<RelationalTable, Dictionary<int, IList>> reqList = new Dictionary<RelationalTable, Dictionary<int, IList>>();
 
         internal List<Modifiable> PostRetrieving = new List<Modifiable>();
@@ -47,11 +47,11 @@ namespace Signum.Engine
             {
                 if (bestList == null)
                 {
-                    Table mejorLazy = reqLazy.WithMax(k => k.Value.Count).Key;
-                    if (mejorLazy == null)
+                    Table mejorLite = reqLite.WithMax(k => k.Value.Count).Key;
+                    if (mejorLite == null)
                         return null;
                     else
-                        return () => ProcessLazies(mejorLazy);
+                        return () => ProcessLazies(mejorLite);
                 }
                 else
                     return () => ProcessRelationalTable(bestList);
@@ -108,13 +108,13 @@ namespace Signum.Engine
 
         void ProcessLazies(Table table)
         {
-            Dictionary<int, List<Lazy>> dic = reqLazy[table];
+            Dictionary<int, List<Lite>> dic = reqLite[table];
 
             while (dic.Count > 0)
             {
                 var array = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
 
-                SqlPreCommandSimple preComand = table.BatchSelectLazy(array).ToSimple();
+                SqlPreCommandSimple preComand = table.BatchSelectLite(array).ToSimple();
 
                 DataTable dt = Executor.ExecuteDataTable(preComand);
 
@@ -125,16 +125,16 @@ namespace Signum.Engine
                 foreach (DataRow row in dt.Rows)
                 {
                     int id = (int)row[SqlBuilder.PrimaryKeyName];
-                    List<Lazy> lazys = dic[id];
+                    List<Lite> lazys = dic[id];
                     foreach (var lazy in lazys)
                     {
-                        table.FillLazy(row, lazy);
+                        table.FillLite(row, lazy);
                         PostRetrieving.Add(lazy); 
                     }
                     dic.Remove(id);
                 }
             }
-            reqLazy.Remove(table); // se puede borrar pues la inclusion de lazys no amplia la corteza
+            reqLite.Remove(table); // se puede borrar pues la inclusion de lazys no amplia la corteza
         }
 
         void ProcessRelationalTable(RelationalTable relationalTable)
@@ -169,7 +169,7 @@ namespace Signum.Engine
         #endregion
 
         #region Schema Interface
-        public IdentifiableEntity GetIdentifiable(Lazy lazy)
+        public IdentifiableEntity GetIdentifiable(Lite lazy)
         {
             return GetIdentifiable(Schema.Current.Table(lazy.RuntimeType), lazy.Id);
         }
@@ -192,15 +192,15 @@ namespace Signum.Engine
                 });
         }
 
-        public Lazy GetLazy(Table table, Type lazyType, int id)
+        public Lite GetLite(Table table, Type lazyType, int id)
         {
             IdentifiableEntity ident = EntityCache.Get(table.Type, id);
 
-            if (ident != null) return Lazy.Create(lazyType, ident);
+            if (ident != null) return Lite.Create(lazyType, ident);
 
-            Lazy req = Lazy.Create(lazyType, id, table.Type);
+            Lite req = Lite.Create(lazyType, id, table.Type);
 
-            List<Lazy> lista = reqLazy.GetOrCreate(table).GetOrCreate(id);
+            List<Lite> lista = reqLite.GetOrCreate(table).GetOrCreate(id);
 
             lista.Add(req);
 

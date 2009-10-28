@@ -43,9 +43,9 @@
         {
             %>
             <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=Html.GlobalName("trResults_" + row.ToString())%>" name="<%=Html.GlobalName("trResults_" + row.ToString())%>">
-                <% Lazy entityField = null;
+                <% Lite entityField = null;
                    if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
-                       entityField = (Lazy)queryResult.Data[row][EntityColumnIndex.Value];
+                       entityField = (Lite)queryResult.Data[row][EntityColumnIndex.Value];
                    //if (entityField != null)
                    //{
                        if (allowMultiple.HasValue)

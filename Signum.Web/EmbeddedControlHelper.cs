@@ -22,8 +22,8 @@ namespace Signum.Web
             Type runtimeType = typeof(S);
             if (context.Value != null)
             {
-                if (typeof(Lazy).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
+                    runtimeType = (context.Value as Lite).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
                 if (runtimeType != typeof(S))
@@ -37,7 +37,7 @@ namespace Signum.Web
             }
             else
             {
-                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
+                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
             EmbeddedControl(helper, context, Navigator.Manager.EntitySettings[runtimeType].PartialViewName);
         }
@@ -49,14 +49,14 @@ namespace Signum.Web
             Type runtimeType = typeof(S);
             if (context.Value != null)
             {
-                if (typeof(Lazy).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
+                    runtimeType = (context.Value as Lite).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
             }
             else
             {
-                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
+                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
 
             EmbeddedControl(helper, context, ViewName);

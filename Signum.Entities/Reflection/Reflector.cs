@@ -25,7 +25,7 @@ namespace Signum.Entities.Reflection
      * An identifiable can be accesed thought:
      *   Normal Reference
      *   Interface
-     *   Lazy
+     *   Lite
      */
 
 
@@ -103,14 +103,14 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-        public static Type GenerateLazy(Type identificableType)
+        public static Type GenerateLite(Type identificableType)
         {
-            return typeof(Lazy<>).MakeGenericType(identificableType);
+            return typeof(Lite<>).MakeGenericType(identificableType);
         }
 
-        public static Type ExtractLazy(Type lazyType)
+        public static Type ExtractLite(Type lazyType)
         {
-            if (lazyType.IsGenericType && lazyType.GetGenericTypeDefinition() == typeof(Lazy<>))
+            if (lazyType.IsGenericType && lazyType.GetGenericTypeDefinition() == typeof(Lite<>))
                 return lazyType.GetGenericArguments()[0];
             return null;
         }

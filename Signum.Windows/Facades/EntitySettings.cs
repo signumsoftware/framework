@@ -42,12 +42,12 @@ namespace Signum.Windows
                     IsReadOnly = admin => !admin;
                     IsCreable = admin => admin;
                     IsViewable = admin => admin;
-                    CollectionViewOperations = (isLazy, cv) =>
+                    CollectionViewOperations = (isLite, cv) =>
                     {
                         ListCollectionView lcv = cv as ListCollectionView;
                         if (lcv != null)
-                            lcv.CustomSort = isLazy ?
-                                (IComparer)new LambdaComparer<Lazy, int>(la => la.IdOrNull ?? int.MaxValue) :
+                            lcv.CustomSort = isLite ?
+                                (IComparer)new LambdaComparer<Lite, int>(la => la.IdOrNull ?? int.MaxValue) :
                                 (IComparer)new LambdaComparer<IdentifiableEntity, int>(ie => ie.IdOrNull ?? int.MaxValue);
                         else
                             cv.SortDescriptions.Add(new SortDescription("IdOrNull", ListSortDirection.Ascending));

@@ -494,7 +494,7 @@ namespace Signum.Engine.Maps
 
     public interface IFieldReference
     {
-        bool IsLazy { get; set; }
+        bool IsLite { get; set; }
     }
 
     public partial class FieldPrimaryKey : Field, IColumn
@@ -604,7 +604,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
 
-        public bool IsLazy { get; set; }
+        public bool IsLite { get; set; }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
@@ -613,7 +613,7 @@ namespace Signum.Engine.Maps
             return "{0} -> {1} {4} ({2}) {3}".Formato(
                 Name,
                 ReferenceTable.Name,
-                IsLazy ? "Lazy" : "",
+                IsLite ? "Lite" : "",
                 Nullable ? "Nullable" : "",
                 Index == Index.None ? "" : Index.ToString());
         }
@@ -631,7 +631,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedBy : Field, IFieldReference
     {
-        public bool IsLazy { get; set; }
+        public bool IsLite { get; set; }
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns{get;set;}
 
@@ -650,7 +650,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll : Field, IFieldReference
     {
-        public bool IsLazy { get; set; }
+        public bool IsLite { get; set; }
         public ImplementationColumn Column { get; set; }
         public ImplementationColumn ColumnTypes { get; set; }
 

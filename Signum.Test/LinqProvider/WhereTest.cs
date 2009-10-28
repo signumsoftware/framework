@@ -38,7 +38,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereSelect()
         {
-            var list = Database.Query<AlbumDN>().Where(a => a.Year < 1995).Select(a => new { a.Year, Author = a.Author.ToLazy(), a.Name }).ToList();
+            var list = Database.Query<AlbumDN>().Where(a => a.Year < 1995).Select(a => new { a.Year, Author = a.Author.ToLite(), a.Name }).ToList();
         }
         
         [TestMethod]
@@ -89,13 +89,13 @@ namespace Signum.Test.LinqProvider
 
 
         [TestMethod]
-        public void WhereLazyEquals()
+        public void WhereLiteEquals()
         {
             ArtistDN wretzky = Database.Query<ArtistDN>().Single(a => a.Sex == Sex.Female);
 
             BandDN smashing = (from b in Database.Query<BandDN>()
                                from a in b.Members
-                               where a.ToLazy() == wretzky.ToLazy()
+                               where a.ToLite() == wretzky.ToLite()
                                select b).Single();
         }
 
@@ -107,7 +107,7 @@ namespace Signum.Test.LinqProvider
 
             var albums = (from a in Database.Query<AlbumDN>()
                           where a.Author == michael
-                          select a.ToLazy()).ToList();
+                          select a.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -117,27 +117,27 @@ namespace Signum.Test.LinqProvider
 
             var albums = (from n in Database.Query<NoteDN>()
                           where n.Target == michael
-                          select n.ToLazy()).ToList();
+                          select n.ToLite()).ToList();
         }
 
         [TestMethod]
-        public void WhereLazyEqualsIB()
+        public void WhereLiteEqualsIB()
         {
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
             var albums = (from a in Database.Query<AlbumDN>()
-                          where a.Author.ToLazy() == michael.ToLazy<IAuthorDN>()
-                          select a.ToLazy()).ToList();
+                          where a.Author.ToLite() == michael.ToLite<IAuthorDN>()
+                          select a.ToLite()).ToList();
         }
 
         [TestMethod]
-        public void WhereLazyEqualsIBA()
+        public void WhereLiteEqualsIBA()
         {
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
             var albums = (from n in Database.Query<NoteDN>()
-                          where n.Target.ToLazy() == michael.ToLazy<IIdentifiable>()
-                          select n.ToLazy()).ToList();
+                          where n.Target.ToLite() == michael.ToLite<IIdentifiable>()
+                          select n.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -145,7 +145,7 @@ namespace Signum.Test.LinqProvider
         {
             var albums = (from a in Database.Query<AlbumDN>()
                           where a.Author is ArtistDN
-                          select a.ToLazy()).ToList();
+                          select a.ToLite()).ToList();
         }
 
 

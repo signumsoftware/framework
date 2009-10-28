@@ -71,7 +71,7 @@ namespace Signum.Windows
         {
             base.OnEntityChanged(oldValue, newValue);
 
-            Lazy lazy = newValue as Lazy;
+            Lite lazy = newValue as Lite;
             if (lazy != null)
                 contentPresenter.DataContext = Server.Retrieve(lazy);
             else

@@ -153,7 +153,7 @@ namespace Signum.Engine.Linq
             }
 
 
-            if (m.Method.DeclaringType == typeof(LazyUtils) && m.Method.Name == "ToLazy")
+            if (m.Method.DeclaringType == typeof(LiteUtils) && m.Method.Name == "ToLite")
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
             if (m.Method.DeclaringType == typeof(Math) &&

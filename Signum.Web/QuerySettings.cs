@@ -39,7 +39,7 @@ namespace Signum.Web
             FormatRules = new List<FormatterRule>
             {
                 new FormatterRule(c=>true, (h,o) => h.Write(o.TryToString())),
-                new FormatterRule(c=>typeof(Lazy).IsAssignableFrom(c.Type), (h,o)=>h.LightEntityLine((Lazy)o, false)),
+                new FormatterRule(c=>typeof(Lite).IsAssignableFrom(c.Type), (h,o)=>h.LightEntityLine((Lite)o, false)),
             };
         }
 

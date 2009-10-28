@@ -130,7 +130,7 @@ namespace Signum.Engine.Maps
             if (contexto == Contexts.Normal || contexto == Contexts.Embedded || contexto == Contexts.View)
                 name = name.Add(GenerateFieldName(fi, kof));
             else if (contexto == Contexts.MList && (kof == KindOfField.Enum || kof == KindOfField.Reference))
-                name = name.Add(GenerateFieldName(Reflector.ExtractLazy(fieldType) ?? fieldType, kof));
+                name = name.Add(GenerateFieldName(Reflector.ExtractLite(fieldType) ?? fieldType, kof));
 
             switch (kof)
             {
@@ -140,7 +140,7 @@ namespace Signum.Engine.Maps
                     return GenerateFieldValue(type, fi, fieldType, name);
                 case KindOfField.Reference:
                     {
-                        Attribute at = Settings.GetReferenceFieldType(type, fi, Reflector.ExtractLazy(fieldType) ?? fieldType);
+                        Attribute at = Settings.GetReferenceFieldType(type, fi, Reflector.ExtractLite(fieldType) ?? fieldType);
                         if (at == null)
                             return GenerateFieldReference(type, fi, fieldType, name);
                         else if (at is ImplementedByAttribute)
@@ -180,7 +180,7 @@ namespace Signum.Engine.Maps
             if (fieldType.UnNullify().IsEnum)
                 return KindOfField.Enum;
 
-            if (Reflector.IsIIdentifiable(Reflector.ExtractLazy(fieldType) ?? fieldType))
+            if (Reflector.IsIIdentifiable(Reflector.ExtractLite(fieldType) ?? fieldType))
                 return KindOfField.Reference;
 
             if (Reflector.IsEmbeddedEntity(fieldType))
@@ -225,7 +225,7 @@ namespace Signum.Engine.Maps
             return new FieldEnum(fieldType)
             {
                 Nullable = Settings.IsNullable(type, fi, fieldType),
-                IsLazy = false,
+                IsLite = false,
                 Index = Settings.IndexType(type, fi) ?? Index.None,
                 Name = name.ToString(),
                 ReferenceTable = Include(Reflector.GenerateEnumProxy(fieldType.UnNullify())),
@@ -237,16 +237,16 @@ namespace Signum.Engine.Maps
             return new FieldReference(fieldType)
             {
                 Name = name.ToString(),
-                ReferenceTable = Include(Reflector.ExtractLazy(fieldType) ?? fieldType),
+                ReferenceTable = Include(Reflector.ExtractLite(fieldType) ?? fieldType),
                 Index = Settings.IndexType(type, fi) ?? DefaultReferenceIndex(),
                 Nullable = Settings.IsNullable(type, fi, fieldType),
-                IsLazy  = Reflector.ExtractLazy(fieldType) != null
+                IsLite  = Reflector.ExtractLite(fieldType) != null
             };
         }
 
         protected virtual Field GenerateFieldImplmentedBy(Type type, FieldInfo fi, Type fieldType, NameSequence name, ImplementedByAttribute ib)
         {
-            Type cleanType = Reflector.ExtractLazy(fieldType) ?? fieldType;
+            Type cleanType = Reflector.ExtractLite(fieldType) ?? fieldType;
             string erroneos = ib.ImplementedTypes.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
             if (erroneos.Length != 0)
                 throw new InvalidOperationException(Resources.Types0DoNotImplement1.Formato(erroneos, cleanType));
@@ -264,7 +264,7 @@ namespace Signum.Engine.Maps
                     Index = indice,
                     Nullable = true,
                 }),
-                IsLazy  = Reflector.ExtractLazy(fieldType) != null
+                IsLite  = Reflector.ExtractLite(fieldType) != null
             };
         }
 
@@ -289,7 +289,7 @@ namespace Signum.Engine.Maps
                     Nullable = nullable,
                     ReferenceTable = Include(typeof(TypeDN))
                 },
-                IsLazy = Reflector.ExtractLazy(fieldType) != null
+                IsLite = Reflector.ExtractLite(fieldType) != null
             };
         }
 
@@ -332,7 +332,7 @@ namespace Signum.Engine.Maps
 
         public virtual string TypeName(Type type)
         {
-            type = Reflector.ExtractLazy(type) ?? type;
+            type = Reflector.ExtractLite(type) ?? type;
             type = Reflector.ExtractEnumProxy(type) ?? type;
             return type.Name;
         }

@@ -51,22 +51,22 @@ namespace Signum.Engine
         #endregion
 
         #region Retrieve
-        public static T Retrieve<T>(this Lazy<T> lazy) where T : class, IIdentifiable
+        public static T Retrieve<T>(this Lite<T> lazy) where T : class, IIdentifiable
         {
             return lazy.EntityOrNull ?? (lazy.EntityOrNull = (T)(object)Retrieve(lazy.RuntimeType, lazy.Id));
         }
 
-        public static T RetrieveAndForget<T>(this Lazy<T> lazy) where T : class, IIdentifiable
+        public static T RetrieveAndForget<T>(this Lite<T> lazy) where T : class, IIdentifiable
         {
             return (T)(object)Retrieve(lazy.RuntimeType, lazy.Id);
         }
 
-        public static IdentifiableEntity Retrieve(Lazy lazy)
+        public static IdentifiableEntity Retrieve(Lite lazy)
         {
             return lazy.UntypedEntityOrNull ?? (lazy.UntypedEntityOrNull = Retrieve(lazy.RuntimeType, lazy.Id));
         }
 
-        public static IdentifiableEntity RetrieveAndForget(Lazy lazy)
+        public static IdentifiableEntity RetrieveAndForget(Lite lazy)
         {
             return Retrieve(lazy.RuntimeType, lazy.Id);
         }
@@ -114,7 +114,7 @@ namespace Signum.Engine
         }
         #endregion
 
-        #region Retrieve All Lists Lazys
+        #region Retrieve All Lists Lites
         public static List<T> RetrieveAll<T>()
             where T : IdentifiableEntity
         {
@@ -128,17 +128,17 @@ namespace Signum.Engine
             return list.Cast<IdentifiableEntity>().ToList();
         }
 
-        public static List<Lazy<T>> RetrieveAllLazy<T>()
+        public static List<Lite<T>> RetrieveAllLite<T>()
             where T : IdentifiableEntity 
         {
-            return Database.Query<T>().Select(e => e.ToLazy()).ToList(); 
+            return Database.Query<T>().Select(e => e.ToLite()).ToList(); 
         }
 
-        static readonly MethodInfo miRetrieveAllLazy = ReflectionTools.GetMethodInfo(() => Database.RetrieveAllLazy<TypeDN>()).GetGenericMethodDefinition();
-        public static List<Lazy> RetrieveAllLazy(Type type)
+        static readonly MethodInfo miRetrieveAllLite = ReflectionTools.GetMethodInfo(() => Database.RetrieveAllLite<TypeDN>()).GetGenericMethodDefinition();
+        public static List<Lite> RetrieveAllLite(Type type)
         {
-            IList list = (IList)miRetrieveAllLazy.MakeGenericMethod(type).Invoke(null, null);
-            return list.Cast<Lazy>().ToList();
+            IList list = (IList)miRetrieveAllLite.MakeGenericMethod(type).Invoke(null, null);
+            return list.Cast<Lite>().ToList();
         }
 
         public static List<T> RetrieveList<T>(List<int> ids)
@@ -163,13 +163,13 @@ namespace Signum.Engine
             }
         }
 
-        public static List<Lazy<T>> RetrieveListLazy<T>(List<int> ids)
+        public static List<Lite<T>> RetrieveListLite<T>(List<int> ids)
             where T : class, IIdentifiable
         {
-            return RetrieveListLazy(typeof(T), ids).Cast<Lazy<T>>().ToList();
+            return RetrieveListLite(typeof(T), ids).Cast<Lite<T>>().ToList();
         }
 
-        public static List<Lazy> RetrieveListLazy(Type type, List<int> ids)
+        public static List<Lite> RetrieveListLite(Type type, List<int> ids)
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
@@ -177,7 +177,7 @@ namespace Signum.Engine
                 Retriever rec = new Retriever();
                 Table table = Schema.Current.Table(type);
 
-                List<Lazy> ident = ids.Select(id => rec.GetLazy(table, type, id)).ToList();
+                List<Lite> ident = ids.Select(id => rec.GetLite(table, type, id)).ToList();
 
                 rec.ProcessAll();
 
@@ -185,7 +185,7 @@ namespace Signum.Engine
             }
         }
 
-        public static List<T> RetrieveFromListOfLazy<T>(List<Lazy<T>> lazys)
+        public static List<T> RetrieveFromListOfLite<T>(List<Lite<T>> lazys)
          where T : class, IIdentifiable
         {
             using (new EntityCache())
@@ -201,7 +201,7 @@ namespace Signum.Engine
             }
         }
 
-        public static List<IdentifiableEntity> RetrieveFromListOfLazy(List<Lazy> lazys)
+        public static List<IdentifiableEntity> RetrieveFromListOfLite(List<Lite> lazys)
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())

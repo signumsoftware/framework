@@ -39,8 +39,8 @@ namespace Signum.Entities.DynamicQuery
                      if (type.IsEnum)
                         return FilterType.Enum;
 
-                     if (Reflector.ExtractLazy(type) != null)
-                         return FilterType.Lazy;
+                     if (Reflector.ExtractLite(type) != null)
+                         return FilterType.Lite;
 
                      goto default; 
                 default:
@@ -83,7 +83,7 @@ namespace Signum.Entities.DynamicQuery
                 }
             },
             { 
-                FilterType.Lazy, new List<FilterOperation>
+                FilterType.Lite, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,

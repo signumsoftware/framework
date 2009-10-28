@@ -58,8 +58,8 @@ namespace Signum.Windows
                 new FormatterRule(FormatterPriority.Type, "DateTime",
                     c=>c.Type.UnNullify() == typeof(DateTime), 
                     c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, c.Format == null ? null : ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format, null)))),
-                new FormatterRule(FormatterPriority.Type, "Lazy",
-                    c=>typeof(Lazy).IsAssignableFrom(c.Type), //Not on entities! 
+                new FormatterRule(FormatterPriority.Type, "Lite",
+                    c=>typeof(Lite).IsAssignableFrom(c.Type), //Not on entities! 
                     c=> b=> FormatTools.LightEntityLineTemplate(b)),
 
                 new FormatterRule(FormatterPriority.Property, "NumberUnit",

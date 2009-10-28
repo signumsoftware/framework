@@ -275,7 +275,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class LazyReferenceExpression : DbExpression
+    internal class LiteReferenceExpression : DbExpression
     {
         public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
 
@@ -283,13 +283,13 @@ namespace Signum.Engine.Linq
         public readonly Expression ToStr;
         public readonly Expression TypeId;
 
-        public LazyReferenceExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId) :
-            base(DbExpressionType.LazyReference, type)
+        public LiteReferenceExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId) :
+            base(DbExpressionType.LiteReference, type)
         {
             if (reference != null)
             {
-                if (!Reflector.ExtractLazy(type).IsAssignableFrom(reference.Type))
-                    throw new ApplicationException(Resources.TheType0IsNotTheLazyVersionOf1.Formato(type.TypeName(), reference.Type.TypeName()));
+                if (!Reflector.ExtractLite(type).IsAssignableFrom(reference.Type))
+                    throw new ApplicationException(Resources.TheType0IsNotTheLiteVersionOf1.Formato(type.TypeName(), reference.Type.TypeName()));
             }
 
             this.Reference = reference;
@@ -300,7 +300,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "({0}).ToLazy({1},{2},{3})".Formato(Reference.NiceToString(), Id.NiceToString(), ToStr.NiceToString(), TypeId.NiceToString());
+            return "({0}).ToLite({1},{2},{3})".Formato(Reference.NiceToString(), Id.NiceToString(), ToStr.NiceToString(), TypeId.NiceToString());
         }
     }
 

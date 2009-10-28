@@ -52,8 +52,8 @@ namespace Signum.Engine.Linq
 
         internal static Expression EntityIn(Expression newItem, Expression[] expression)
         {
-            if(newItem is LazyReferenceExpression)
-                return EntityIn(((LazyReferenceExpression)newItem).Reference, expression.Cast<LazyReferenceExpression>().Select(l=>l.Reference).ToArray()); 
+            if(newItem is LiteReferenceExpression)
+                return EntityIn(((LiteReferenceExpression)newItem).Reference, expression.Cast<LiteReferenceExpression>().Select(l=>l.Reference).ToArray()); 
 
             Dictionary<Type, object[]> entityIDs = expression.Cast<FieldInitExpression>().AgGroupToDictionary(a=>a.Type, gr=> gr.Select(a=>((ConstantExpression)a.ExternalId).Value??int.MaxValue).ToArray()); 
 
@@ -78,10 +78,10 @@ namespace Signum.Engine.Linq
 
         public static Expression EntityEquals(Expression e1, Expression e2)
         {   
-            if (e1 is LazyReferenceExpression || e2 is LazyReferenceExpression )
+            if (e1 is LiteReferenceExpression || e2 is LiteReferenceExpression )
             {
-                e1 = e1.IsNull() ? e1 : ((LazyReferenceExpression)e1).Reference;
-                e2 = e2.IsNull() ? e2 : ((LazyReferenceExpression)e2).Reference;
+                e1 = e1.IsNull() ? e1 : ((LiteReferenceExpression)e1).Reference;
+                e2 = e2.IsNull() ? e2 : ((LiteReferenceExpression)e2).Reference;
             }
 
             var tE1 = (DbExpressionType)e1.NodeType;

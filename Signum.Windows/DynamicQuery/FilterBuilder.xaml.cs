@@ -87,9 +87,9 @@ namespace Signum.Windows
             Common.SetIsReadOnly(g, f.Frozen); 
 
             Type type = f.Column.Type;
-            if (typeof(Lazy).IsAssignableFrom(type) || typeof(IdentifiableEntity).IsAssignableFrom(type))
+            if (typeof(Lite).IsAssignableFrom(type) || typeof(IdentifiableEntity).IsAssignableFrom(type))
             {
-                Type cleanType = typeof(Lazy).IsAssignableFrom(type) ? Reflector.ExtractLazy(type) : type;
+                Type cleanType = typeof(Lite).IsAssignableFrom(type) ? Reflector.ExtractLite(type) : type;
                 if (Reflector.IsLowPopulation(cleanType))
                 {
                     EntityCombo ec = new EntityCombo { Type = type, Style = (Style)FindResource("toolTip") };

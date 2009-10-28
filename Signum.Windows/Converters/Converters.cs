@@ -25,8 +25,8 @@ namespace Signum.Windows
         public static readonly IValueConverter Identity =
         ConverterFactory.New((object v) => v, (object v) => v);
 
-        public static readonly IValueConverter ToLazy =
-           ConverterFactory.New((IIdentifiable ei) => ei.TryCC(e => Lazy.Create(e.GetType(), (IdentifiableEntity)e)));
+        public static readonly IValueConverter ToLite =
+           ConverterFactory.New((IIdentifiable ei) => ei.TryCC(e => Lite.Create(e.GetType(), (IdentifiableEntity)e)));
 
         public static readonly IValueConverter NullableEnumConverter =
             ConverterFactory.New((object v) => v == null ? "-" : v, (object v) => (v as string) == "-" ? null : v);

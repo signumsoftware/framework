@@ -527,7 +527,7 @@ namespace Signum.Web
             if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
             {
                 TypeContext entityTC = (TypeContext)(object)entity;
-                cleanType = Reflector.ExtractLazy(entityTC.ContextType) ?? entityTC.ContextType;
+                cleanType = Reflector.ExtractLite(entityTC.ContextType) ?? entityTC.ContextType;
             }
 
             string url = partialViewName ??
@@ -554,7 +554,7 @@ namespace Signum.Web
             if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
             {
                 TypeContext entityTC = (TypeContext)(object)entity;
-                cleanType = Reflector.ExtractLazy(entityTC.ContextType) ?? entityTC.ContextType;
+                cleanType = Reflector.ExtractLite(entityTC.ContextType) ?? entityTC.ContextType;
             }
 
             string url = partialViewName ??
@@ -580,7 +580,7 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
-            Type entitiesType = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
@@ -617,7 +617,7 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
-            Type entitiesType = Reflector.ExtractLazy(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
@@ -717,11 +717,11 @@ namespace Signum.Web
                     value = (vals[0] == "true") ? true : false;
                 }
 
-                if (typeof(Lazy).IsAssignableFrom(type))
+                if (typeof(Lite).IsAssignableFrom(type))
                 {
                     int intValue;
                     if (value!=null && int.TryParse(value.ToString(), out intValue))
-                        value = Lazy.Create(Reflector.ExtractLazy(type), intValue);
+                        value = Lite.Create(Reflector.ExtractLite(type), intValue);
                     else
                         value = null;
                 }
@@ -770,11 +770,11 @@ namespace Signum.Web
                     string[] vals = ((string)value).Split(',');
                     value = (vals[0] == "true") ? true : false;
                 }
-                if (typeof(Lazy).IsAssignableFrom(type))
+                if (typeof(Lite).IsAssignableFrom(type))
                 {
                     int intValue;
                     if (value != null && int.TryParse(value.ToString(), out intValue))
-                        value = Lazy.Create(Reflector.ExtractLazy(type), intValue);
+                        value = Lite.Create(Reflector.ExtractLite(type), intValue);
                     else
                         value = null;
                 }

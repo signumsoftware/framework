@@ -62,7 +62,7 @@ namespace Signum.Entities.DynamicQuery
         Number,
         String, 
         DateTime,
-        Lazy,   
+        Lite,   
         Boolean, 
         Enum,
     }

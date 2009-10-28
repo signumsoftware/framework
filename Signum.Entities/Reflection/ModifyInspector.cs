@@ -35,7 +35,7 @@ namespace Signum.Entities.Reflection
         /// <returns></returns>
         public static IEnumerable<Modifiable> FullExplore(Modifiable obj)
         {
-            if (obj == null)//|| obj is Lazy)
+            if (obj == null)//|| obj is Lite)
                 yield break;
 
             if (Reflector.IsMList(obj.GetType()))
@@ -64,7 +64,7 @@ namespace Signum.Entities.Reflection
 
         public static IEnumerable<Modifiable> IdentifiableExplore(Modifiable obj)
         {
-            if (obj == null)//|| obj is Lazy)
+            if (obj == null)//|| obj is Lite)
                 yield break;
 
             if (Reflector.IsMList(obj.GetType()))

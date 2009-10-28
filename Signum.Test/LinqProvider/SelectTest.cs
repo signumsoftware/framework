@@ -58,7 +58,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectNoColumns()
         {
-            var list = Database.Query<AlbumDN>().Select(a => new { DateTime.Now, Album = (AlbumDN)null, Artist = (Lazy<ArtistDN>)null }).ToList();
+            var list = Database.Query<AlbumDN>().Select(a => new { DateTime.Now, Album = (AlbumDN)null, Artist = (Lite<ArtistDN>)null }).ToList();
         }
 
         [TestMethod]
@@ -68,29 +68,29 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectLazy()
+        public void SelectLite()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.ToLazy()).ToList();
+            var list = Database.Query<AlbumDN>().Select(a => a.ToLite()).ToList();
         }
 
         [TestMethod]
-        public void SelectLazyToStr()
+        public void SelectLiteToStr()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.ToLazy(a.Label.Name)).ToList();
+            var list = Database.Query<AlbumDN>().Select(a => a.ToLite(a.Label.Name)).ToList();
         }
 
         [TestMethod]
-        public void SelectLazyIB()
+        public void SelectLiteIB()
         {
             var list = Database.Query<AlbumDN>()
-                .Select(a => a.Author.ToLazy())
+                .Select(a => a.Author.ToLite())
                 .Where(a => a.ToStr.StartsWith("Michael")).ToList();
         }
 
         [TestMethod]
-        public void SelectLazyIBA()
+        public void SelectLiteIBA()
         {
-            var list = Database.Query<NoteDN>().Select(a => a.Target.ToLazy()).ToList();
+            var list = Database.Query<NoteDN>().Select(a => a.Target.ToLite()).ToList();
         }
 
         [TestMethod]
@@ -142,7 +142,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCastIBPolymorphicIB()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        select a.Author.LastAward.ToLazy()).ToList();
+                        select a.Author.LastAward.ToLite()).ToList();
         }
 
         [TestMethod]

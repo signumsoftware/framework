@@ -25,7 +25,7 @@ namespace Signum.Windows
 {
     public partial class EntityCombo : EntityBase
     {
-        public static readonly Lazy[] EmptyList = new Lazy[0];
+        public static readonly Lite[] EmptyList = new Lite[0];
 
         public static readonly DependencyProperty LoadDataTriggerProperty =
             DependencyProperty.Register("LoadDataTrigger", typeof(LoadDataTrigger), typeof(EntityCombo), new UIPropertyMetadata(LoadDataTrigger.OnExpand));
@@ -35,7 +35,7 @@ namespace Signum.Windows
             set { SetValue(LoadDataTriggerProperty, value); }
         }
 
-        public event Func<IEnumerable<Lazy>> LoadData;
+        public event Func<IEnumerable<Lite>> LoadData;
 
         static EntityCombo()
         {
@@ -61,7 +61,7 @@ namespace Signum.Windows
             {
                 changing = true;
 
-                object newEntity = CleanLazy ? Entity : Server.Convert(Entity, Reflector.GenerateLazy(CleanType ?? Type));
+                object newEntity = CleanLite ? Entity : Server.Convert(Entity, Reflector.GenerateLite(CleanType ?? Type));
 
                 if (!isLoaded || newEntity != null && !combo.Items.Contains(newEntity))
                     combo.Items.Add(newEntity);
@@ -134,7 +134,7 @@ namespace Signum.Windows
             if (LoadData != null)
                 data = LoadData();
             else
-                data = Server.RetriveAllLazy(CleanType, safeImplementations);
+                data = Server.RetriveAllLite(CleanType, safeImplementations);
 
             try
             {
@@ -145,7 +145,7 @@ namespace Signum.Windows
                     combo.Items.Add(o);
                 }
 
-                var selectedItem = !CleanLazy ? Server.Convert(Entity, Reflector.GenerateLazy(Type)) : Entity;
+                var selectedItem = !CleanLite ? Server.Convert(Entity, Reflector.GenerateLite(Type)) : Entity;
 
                 if (selectedItem != null && !combo.Items.Contains(selectedItem))
                     combo.Items.Add(selectedItem);

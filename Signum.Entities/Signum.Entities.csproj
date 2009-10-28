@@ -90,7 +90,7 @@
     <Compile Include="Services\Security.cs" />
     <Compile Include="TypeDN.cs" />
     <Compile Include="ModifiableEntity.cs" />
-    <Compile Include="Lazy.cs" />
+    <Compile Include="Lite.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="EmbeddedEntity.cs" />
     <Compile Include="IdentifiableEntity.cs" />

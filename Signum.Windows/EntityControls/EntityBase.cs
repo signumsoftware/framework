@@ -121,20 +121,20 @@ namespace Signum.Windows
 
         private void SetType(Type type)
         {
-            if (typeof(Lazy).IsAssignableFrom(type))
+            if (typeof(Lite).IsAssignableFrom(type))
             {
-                CleanLazy = true;
-                CleanType = Reflector.ExtractLazy(type);
+                CleanLite = true;
+                CleanType = Reflector.ExtractLite(type);
             }
             else
             {
-                CleanLazy = false;
+                CleanLite = false;
                 CleanType = type;
             }
         }
 
         protected internal Type CleanType { get; private set; }
-        protected internal bool CleanLazy { get; private set; }
+        protected internal bool CleanLite { get; private set; }
 
         protected bool isUserInteraction = false;
 
@@ -163,8 +163,8 @@ namespace Signum.Windows
             {
                 var type = Type;
 
-                if (this is EntityCombo && !typeof(Lazy).IsAssignableFrom(type)) //Allways going to be lazy
-                    type = Reflector.GenerateLazy(type);
+                if (this is EntityCombo && !typeof(Lite).IsAssignableFrom(type)) //Allways going to be lazy
+                    type = Reflector.GenerateLite(type);
 
                 EntityTemplate = Navigator.FindDataTemplate(this, type);
             }
@@ -207,7 +207,7 @@ namespace Signum.Windows
 
             if (View && this.NotSet(ViewProperty) && Implementations != null)
             {
-                Type runtimeType = CleanLazy ? ((Lazy)entity).RuntimeType : entity.GetType();
+                Type runtimeType = CleanLite ? ((Lite)entity).RuntimeType : entity.GetType();
 
                 return Navigator.IsViewable(runtimeType, false);
             }

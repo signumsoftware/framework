@@ -28,10 +28,10 @@ namespace Signum.Services
         List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list);
 
         [OperationContract, NetDataContract]
-        List<Lazy> RetrieveAllLazy(Type lazyType, Type[] types);
+        List<Lite> RetrieveAllLite(Type lazyType, Type[] types);
 
         [OperationContract, NetDataContract]
-        List<Lazy> FindLazyLike(Type lazyType, Type[] types, string subString, int count);
+        List<Lite> FindLiteLike(Type lazyType, Type[] types, string subString, int count);
 
         [OperationContract, NetDataContract]
         Type[] FindImplementations(Type lazyType, MemberInfo[] members);
@@ -43,6 +43,6 @@ namespace Signum.Services
         DateTime ServerNow();
 
         [OperationContract, NetDataContract]
-        List<Lazy<TypeDN>> TypesAssignableFrom(Type type);
+        List<Lite<TypeDN>> TypesAssignableFrom(Type type);
     }
 }

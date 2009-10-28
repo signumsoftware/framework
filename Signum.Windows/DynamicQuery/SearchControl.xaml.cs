@@ -202,7 +202,7 @@ namespace Signum.Windows
             if (entity != null)
             {
                 entityIndex = view.Columns.IndexOf(entity);
-                SetValue(EntityTypeKey, Reflector.ExtractLazy(entity.Type));
+                SetValue(EntityTypeKey, Reflector.ExtractLite(entity.Type));
 
                 if (this.NotSet(ViewProperty) && View)
                     View = Navigator.IsViewable(EntityType, true);

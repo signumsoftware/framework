@@ -30,7 +30,7 @@ namespace Signum.Windows.Widgets
         #endregion
 
         public static Func<IdentifiableEntity, IAlertDN> CreateAlert { get; set; }
-        public static Func<IdentifiableEntity, List<Lazy<IAlertDN>>> RetrieveAlerts { get; set; }
+        public static Func<IdentifiableEntity, List<Lite<IAlertDN>>> RetrieveAlerts { get; set; }
         public static Action<IdentifiableEntity, AlertsWidget> WarnedAlerts { get; set; }
         public static Action<IdentifiableEntity, AlertsWidget> CheckedAlerts { get; set; }
         public static Action<IdentifiableEntity, AlertsWidget> FutureAlerts { get; set; }
@@ -54,7 +54,7 @@ namespace Signum.Windows.Widgets
             if (e.OriginalSource is Button) //Not to capture the mouseDown of the scrollbar buttons
             {
                 Button b = (Button)e.OriginalSource;
-                Lazy<IAlertDN> alert = (Lazy<IAlertDN>)b.Tag;
+                Lite<IAlertDN> alert = (Lite<IAlertDN>)b.Tag;
                 ViewAlert(Server.RetrieveAndForget(alert));
             }
         }
@@ -93,7 +93,7 @@ namespace Signum.Windows.Widgets
                 return;
             }
 
-            List<Lazy<IAlertDN>> alerts = RetrieveAlerts((IdentifiableEntity)DataContext);
+            List<Lite<IAlertDN>> alerts = RetrieveAlerts((IdentifiableEntity)DataContext);
 
             if (alerts != null)
             {

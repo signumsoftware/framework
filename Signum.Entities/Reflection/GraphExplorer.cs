@@ -149,17 +149,17 @@ namespace Signum.Entities.Reflection
             {
                 Node = n,
 
-                Fillcolor =  n is Lazy? "white": color(n.GetType()),
+                Fillcolor =  n is Lite? "white": color(n.GetType()),
                 Color = 
-                    n is Lazy ? color(Reflector.ExtractLazy(n.GetType())):
+                    n is Lite ? color(Reflector.ExtractLite(n.GetType())):
                     (n.SelfModified ? "red" : n.Modified ? "red4" :"black"),
 
-                Shape = n is Lazy ? "ellipse" :
+                Shape = n is Lite ? "ellipse" :
                         n is IdentifiableEntity ? "ellipse" :
                         n is EmbeddedEntity ? "box" :
                         Reflector.IsMList(n.GetType()) ? "hexagon" : "plaintext",
                 Style = n is Entity ? ", style=\"diagonals,filled,bold\"" : 
-                        n is Lazy? "style=\"solid,bold\"": "",
+                        n is Lite? "style=\"solid,bold\"": "",
 
                 Label = n.ToString().Etc(30, "..").RemoveDiacritics()
 

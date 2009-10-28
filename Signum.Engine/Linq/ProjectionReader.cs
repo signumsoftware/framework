@@ -24,8 +24,8 @@ namespace Signum.Engine.Linq
         S GetImplementedBy<S>(Type[] types, params int?[] ids) where S :  IIdentifiable;
         S GetImplementedByAll<S>(int? id, int? typeId) where S :  IIdentifiable;
 
-        Lazy<S> GetLazyIdentifiable<S>(int? id, int? typeId, string str) where S : class, IIdentifiable;
-        Lazy<S> GetLazyImplementedByAll<S>(int? id, int? typeId) where S :class,  IIdentifiable;
+        Lite<S> GetLiteIdentifiable<S>(int? id, int? typeId, string str) where S : class, IIdentifiable;
+        Lite<S> GetLiteImplementedByAll<S>(int? id, int? typeId) where S :class,  IIdentifiable;
     }
 
     internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
@@ -143,19 +143,19 @@ namespace Signum.Engine.Linq
             return (S)(object)Retriever.GetIdentifiable(table, id.Value);
         }
 
-        public Lazy<S> GetLazyIdentifiable<S>( int? id, int? idType, string str) where S : class, IIdentifiable
+        public Lite<S> GetLiteIdentifiable<S>( int? id, int? idType, string str) where S : class, IIdentifiable
         {
             if (id == null) return null;
 
             Type runtimeType = Schema.Current.TablesForID[idType.Value].Type;
-            return new Lazy<S>(runtimeType, id.Value) { ToStr = str }; 
+            return new Lite<S>(runtimeType, id.Value) { ToStr = str }; 
         }
 
-        public Lazy<S> GetLazyImplementedByAll<S>(int? id, int? idType) where S : class, IIdentifiable
+        public Lite<S> GetLiteImplementedByAll<S>(int? id, int? idType) where S : class, IIdentifiable
         {
             if (id == null) return null; 
             Table table = Schema.Current.TablesForID[idType.Value];
-            return (Lazy<S>)Retriever.GetLazy(table, typeof(S), id.Value);
+            return (Lite<S>)Retriever.GetLite(table, typeof(S), id.Value);
         }
     }
 

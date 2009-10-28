@@ -370,8 +370,8 @@ WRITETEXT</value>
   <data name="TypeOfExpressionIs0ButTypeOfFieldIs1" xml:space="preserve">
     <value>El tipo de la expresion es {0} pero el del campo es {1}</value>
   </data>
-  <data name="TheType0IsNotTheLazyVersionOf1" xml:space="preserve">
-    <value>El tipo {0} no es la versiona Lazy de {1}</value>
+  <data name="TheType0IsNotTheLiteVersionOf1" xml:space="preserve">
+    <value>El tipo {0} no es la versiona Lite de {1}</value>
   </data>
   <data name="CannotEnumerateMoreThanOnce" xml:space="preserve">
     <value>No se puede enumerar más de una vez</value>

@@ -72,7 +72,7 @@ namespace Signum.Web
 
             sb.AppendLine("<div class='EntityLineDetail'>");
 
-            sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), (Reflector.ExtractLazy(type) ?? type).Name));
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.StaticType), (Reflector.ExtractLite(type) ?? type).Name));
              
             if (StyleContext.Current.LabelVisible)
                 sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText ?? "", TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), TypeContext.CssLineLabel));
@@ -82,8 +82,8 @@ namespace Signum.Web
             if (value != null)
             {
                 cleanRuntimeType = value.GetType();
-                if (typeof(Lazy).IsAssignableFrom(value.GetType()))
-                    cleanRuntimeType = (value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(value.GetType()))
+                    cleanRuntimeType = (value as Lite).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.RuntimeType), runtimeType));
@@ -98,14 +98,14 @@ namespace Signum.Web
             string popupOpeningParameters = "'{0}','{1}','{2}','{3}'".Formato("Signum/PartialView", divASustituir, idValueField, settings.DetailDiv);
 
             bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(type);
-            bool isLazy = typeof(Lazy).IsAssignableFrom(type);
-            if (isIdentifiable || isLazy)
+            bool isLite = typeof(Lite).IsAssignableFrom(type);
+            if (isIdentifiable || isLite)
             {
                 sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(idValueField, TypeContext.Id), 
                     (isIdentifiable) 
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("")
-                       : ((Lazy)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()) + "\n");
+                       : ((Lite)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()) + "\n");
 
                 sb.AppendLine(helper.Div(TypeContext.Compose(idValueField, EntityBaseKeys.Entity), "", "", new Dictionary<string, object>()));
               
@@ -187,9 +187,9 @@ namespace Signum.Web
                                   "lineButton remove",
                                   (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
-            if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLazy)))
+            if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLite)))
             {
-                string popupFindingParameters = "'{0}','{1}','false',function(){{OnDetailSearchOk('{4}','{2}','{3}',{5},'{6}'{7});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}','{6}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLazy(type) ?? type), idValueField, divASustituir, "Signum.aspx/PartialView", reloadOnChangeFunction, settings.DetailDiv, (settings.Url.HasText() ? ",'" + settings.Url + "'" : ""));
+                string popupFindingParameters = "'{0}','{1}','false',function(){{OnDetailSearchOk('{4}','{2}','{3}',{5},'{6}'{7});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}','{6}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLite(type) ?? type), idValueField, divASustituir, "Signum.aspx/PartialView", reloadOnChangeFunction, settings.DetailDiv, (settings.Url.HasText() ? ",'" + settings.Url + "'" : ""));
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
@@ -246,14 +246,14 @@ namespace Signum.Web
             Type runtimeType = typeof(S);
             if (context.Value != null)
             {
-                if (typeof(Lazy).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
+                    runtimeType = (context.Value as Lite).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
             }
             else
             {
-                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
+                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
 
             EntityLineDetail el = new EntityLineDetail();
@@ -274,14 +274,14 @@ namespace Signum.Web
             Type runtimeType = typeof(S);
             if (context.Value != null)
             {
-                if (typeof(Lazy).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lazy).RuntimeType;
+                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
+                    runtimeType = (context.Value as Lite).RuntimeType;
                 else
                     runtimeType = context.Value.GetType();
             }
             else
             {
-                runtimeType = Reflector.ExtractLazy(runtimeType) ?? runtimeType;
+                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
 
             EntityLineDetail el = new EntityLineDetail();

@@ -86,7 +86,7 @@ namespace Signum.Web
             }
 
             Column entityColumn = queryDescription.Columns.SingleOrDefault(a => a.IsEntity);
-            Type entitiesType = entityColumn != null ? Reflector.ExtractLazy(entityColumn.Type) : null;
+            Type entitiesType = entityColumn != null ? Reflector.ExtractLite(entityColumn.Type) : null;
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
@@ -121,9 +121,9 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
             Type columnType = GetType(filterTypeName);
-            //Client doesn't know about Lazys, check it ourselves
+            //Client doesn't know about Lites, check it ourselves
             if (typeof(IdentifiableEntity).IsAssignableFrom(columnType))
-                columnType = Reflector.GenerateLazy(columnType);
+                columnType = Reflector.GenerateLite(columnType);
             FilterType filterType = FilterOperationsUtils.GetFilterType(columnType);
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
 
@@ -221,10 +221,10 @@ namespace Signum.Web
         private static string PrintValueField(HtmlHelper helper, FilterType filterType, Type columnType, string id, object value, string propertyName)
         {
             StringBuilder sb = new StringBuilder();
-            if (filterType == FilterType.Lazy)
+            if (filterType == FilterType.Lite)
             {
                 EntityLine el = new EntityLine();
-                Navigator.ConfigureEntityBase(el, Reflector.ExtractLazy(columnType) ?? columnType, false);
+                Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(columnType) ?? columnType, false);
                 el.Create = false;
 
                 if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix) && ((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText())

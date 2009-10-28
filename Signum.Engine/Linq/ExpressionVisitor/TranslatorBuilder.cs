@@ -90,7 +90,7 @@ namespace Signum.Engine.Linq
             ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
             ImmutableStack<string> prevAliases;
 
-            public PropertyInfo piToStrLazy = ReflectionTools.GetPropertyInfo<Lazy>(l => l.ToStr);
+            public PropertyInfo piToStrLite = ReflectionTools.GetPropertyInfo<Lite>(l => l.ToStr);
 
             static MethodInfo miGetValue = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetValue<int>(null, null)).GetGenericMethodDefinition();
 
@@ -102,8 +102,8 @@ namespace Signum.Engine.Linq
             static MethodInfo miGetImplementedBy = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetImplementedBy<TypeDN>(null, null)).GetGenericMethodDefinition(); 
             static MethodInfo miGetImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition();
 
-            static MethodInfo miGetLazyIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLazyIdentifiable<TypeDN>(null, null, null)).GetGenericMethodDefinition(); 
-            static MethodInfo miGetLazyImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLazyImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition(); 
+            static MethodInfo miGetLiteIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteIdentifiable<TypeDN>(null, null, null)).GetGenericMethodDefinition(); 
+            static MethodInfo miGetLiteImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition(); 
 
             static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, ImmutableStack<string> prevAliases, out bool hasFullObjects)
             {
@@ -186,23 +186,23 @@ namespace Signum.Engine.Linq
                     Visit(NullifyColumn(rba.TypeId)));
             }
 
-            protected override Expression VisitLazyReference(LazyReferenceExpression lazy)
+            protected override Expression VisitLiteReference(LiteReferenceExpression lazy)
             {
                 var id = Visit(NullifyColumn(lazy.Id));
                 var toStr = Visit(lazy.ToStr);
                 var typeId = Visit(lazy.TypeId);
 
-                Type lazyType = Reflector.ExtractLazy(lazy.Type);
+                Type lazyType = Reflector.ExtractLite(lazy.Type);
 
                 if (id == null)
                     return Expression.Constant(null, lazy.Type);
                 else if (toStr == null)
                 {
                     HasFullObjects = true;
-                    return Expression.Call(row, miGetLazyImplementedByAll.MakeGenericMethod(lazyType), id, typeId.Nullify());
+                    return Expression.Call(row, miGetLiteImplementedByAll.MakeGenericMethod(lazyType), id, typeId.Nullify());
                 }
                 else
-                    return Expression.Call(row, miGetLazyIdentifiable.MakeGenericMethod(lazyType), id, typeId, toStr);
+                    return Expression.Call(row, miGetLiteIdentifiable.MakeGenericMethod(lazyType), id, typeId, toStr);
             }
         }
     }

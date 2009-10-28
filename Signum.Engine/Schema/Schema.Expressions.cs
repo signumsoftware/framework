@@ -96,11 +96,11 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            var result = new FieldInitExpression(IsLazy ? Reflector.ExtractLazy(FieldType) : FieldType, null,
+            var result = new FieldInitExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType, null,
                 new ColumnExpression(this.ReferenceType(), tableAlias, Name), null);
 
-            if(this.IsLazy)
-                return binder.MakeLazy(this.FieldType, result, null);
+            if(this.IsLite)
+                return binder.MakeLite(this.FieldType, result, null);
             else 
                 return result; 
         }
@@ -143,10 +143,10 @@ namespace Signum.Engine.Maps
                                             new FieldInitExpression(kvp.Key, null,
                                                 new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), null))).ToReadOnly();
 
-            var result = new ImplementedByExpression(IsLazy ? Reflector.ExtractLazy(FieldType) : FieldType, implementations);
+            var result = new ImplementedByExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType, implementations);
 
-            if (this.IsLazy)
-                return binder.MakeLazy(this.FieldType, result, null);
+            if (this.IsLite)
+                return binder.MakeLite(this.FieldType, result, null);
             else
                 return result; 
         }
@@ -156,12 +156,12 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(string tableAlias, QueryBinder binder)
         {
-            Expression result = new ImplementedByAllExpression(IsLazy ? Reflector.ExtractLazy(FieldType) : FieldType,
+            Expression result = new ImplementedByAllExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType,
                 new ColumnExpression(Column.ReferenceType(), tableAlias, Column.Name),
                 new ColumnExpression(Column.ReferenceType(), tableAlias, ColumnTypes.Name));
 
-            if (this.IsLazy)
-                return binder.MakeLazy(this.FieldType, result, null);
+            if (this.IsLite)
+                return binder.MakeLite(this.FieldType, result, null);
             else
                 return result; 
         }

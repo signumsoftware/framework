@@ -84,7 +84,7 @@ namespace Signum.Windows
 
         public static object View(object entity, TypeContext typeContext)
         {
-            Lazy lazy = entity as Lazy;
+            Lite lazy = entity as Lite;
 
             ViewButtons vb = lazy != null && (lazy.UntypedEntityOrNull == null || !lazy.UntypedEntityOrNull.IsNew) ? ViewButtons.Save : ViewButtons.Ok;
 
@@ -117,9 +117,9 @@ namespace Signum.Windows
             if (template != null)
                 return template;
 
-            if (typeof(Lazy).IsAssignableFrom(entityType))
+            if (typeof(Lite).IsAssignableFrom(entityType))
             {
-                template = (DataTemplate)element.FindResource(typeof(Lazy));
+                template = (DataTemplate)element.FindResource(typeof(Lite));
                 if (template != null)
                     return template;
             }
@@ -299,12 +299,12 @@ namespace Signum.Windows
                 throw new ArgumentNullException("entity");
 
             Type lazyType = null;
-            if (entity is Lazy)
+            if (entity is Lite)
             {
-                lazyType = Reflector.ExtractLazy(entity.GetType());
+                lazyType = Reflector.ExtractLite(entity.GetType());
 
-                entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveAndForget((Lazy)entity) :
-                                                                   Server.Retrieve((Lazy)entity);
+                entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveAndForget((Lite)entity) :
+                                                                   Server.Retrieve((Lite)entity);
             }
 
             if (!IsViewable(entity.GetType(), true))
@@ -361,7 +361,7 @@ namespace Signum.Windows
                 object result = win.DataContext;
                 if (lazyType != null)
                 {
-                    return Lazy.Create(lazyType, (IdentifiableEntity)result);
+                    return Lite.Create(lazyType, (IdentifiableEntity)result);
                 }
                 return result;
             }
