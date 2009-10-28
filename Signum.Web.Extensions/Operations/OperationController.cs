@@ -31,8 +31,8 @@ namespace Signum.Web.Operations
             {
                 if (sfId.HasValue)
                 {
-                    Lite lazy = Lite.Create(type, sfId.Value);
-                    entity = OperationLogic.ServiceExecuteLite((Lite)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                    Lite lite = Lite.Create(type, sfId.Value);
+                    entity = OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
                     throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));

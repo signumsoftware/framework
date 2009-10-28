@@ -94,10 +94,10 @@ namespace Signum.Services
                () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ExecuteOperationLite(Lite lazy, Enum operationKey, params object[] args)
+        public IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperationLite {0}".Formato(operationKey),
-              () => OperationLogic.ServiceExecuteLite(lazy, operationKey, args));
+              () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
         }
 
         public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
@@ -112,10 +112,10 @@ namespace Signum.Services
               () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFromLite(Lite lazy, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), "ConstructFromLite {0}".Formato(operationKey),
-              () => OperationLogic.ServiceConstructFromLite(lazy, operationKey, args));
+              () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromMany(List<Lite> lazies, Type type, Enum operationKey, params object[] args)

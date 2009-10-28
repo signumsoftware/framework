@@ -152,10 +152,10 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)entity;
         }
 
-        public static IdentifiableEntity ServiceExecuteLite(Lite lazy, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceExecuteLite(Lite lite, Enum operationKey, params object[] args)
         {
-            IdentifiableEntity entity = Database.RetrieveAndForget(lazy);
-            Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true).Execute(entity, args);
+            IdentifiableEntity entity = Database.RetrieveAndForget(lite);
+            Find<IExecuteOperation>(lite.RuntimeType, operationKey, true).Execute(entity, args);
             return entity;
         }
 
@@ -166,11 +166,11 @@ namespace Signum.Engine.Operations
             return (T)(IIdentifiable)entity;
         }
 
-        public static T ExecuteLite<T>(this Lite<T> lazy, Enum operationKey, params object[] args)
+        public static T ExecuteLite<T>(this Lite<T> lite, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            T  entity = lazy.RetrieveAndForget(); 
-            Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true).Execute(entity, args);
+            T  entity = lite.RetrieveAndForget(); 
+            Find<IExecuteOperation>(lite.RuntimeType, operationKey, true).Execute(entity, args);
             return entity;
         }
 
@@ -181,10 +181,10 @@ namespace Signum.Engine.Operations
              return entity;
         }
 
-        public static T ExecuteLiteBase<T>(this Lite<T> lazy, Type baseType, Enum operationKey, params object[] args)
+        public static T ExecuteLiteBase<T>(this Lite<T> lite, Type baseType, Enum operationKey, params object[] args)
             where T:class, IIdentifiable
         {
-            T entity = lazy.RetrieveAndForget(); 
+            T entity = lite.RetrieveAndForget(); 
             Find<IExecuteOperation>(baseType, operationKey, true).Execute(entity, args);
             return entity;
         }
@@ -209,9 +209,9 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
         }
 
-        public static IdentifiableEntity ServiceConstructFromLite(Lite lazy, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
+            return (IdentifiableEntity)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lite), args);
         }
 
 
@@ -221,10 +221,10 @@ namespace Signum.Engine.Operations
             return (T)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
         }
 
-        public static T ConstructFromLite<T>(this Lite lazy, Enum operationKey, params object[] args)
+        public static T ConstructFromLite<T>(this Lite lite, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
+            return (T)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lite), args);
         }
 
 
@@ -234,10 +234,10 @@ namespace Signum.Engine.Operations
             return (T)Find<IConstructorFromOperation>(baseType, operationKey, false).Construct(entity, args);
         }
 
-        public static T ConstructFromLiteBase<T>(this Lite lazy, Type baseType, Enum operationKey, params object[] args)
+        public static T ConstructFromLiteBase<T>(this Lite lite, Type baseType, Enum operationKey, params object[] args)
                where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(baseType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
+            return (T)Find<IConstructorFromOperation>(baseType, operationKey, true).Construct(Database.RetrieveAndForget(lite), args);
         }
         #endregion
 

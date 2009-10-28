@@ -281,8 +281,8 @@ namespace Signum.Web.Authorization
             {
                 if (sfId.HasValue)
                 {
-                    Lite lazy = Lite.Create(type, sfId.Value);
-                    entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                    Lite lite = Lite.Create(type, sfId.Value);
+                    entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
                     throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));

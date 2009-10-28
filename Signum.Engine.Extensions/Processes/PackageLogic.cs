@@ -96,10 +96,10 @@ namespace Signum.Engine.Processes
 
             package.NumLines = lazies.Count; 
             
-            lazies.Select(lazy => new PackageLineDN
+            lazies.Select(lite => new PackageLineDN
             {
                 Package = package.ToLite(),
-                Target = lazy.ToLite<IdentifiableEntity>()
+                Target = lite.ToLite<IdentifiableEntity>()
             }).SaveList();
 
             return package;

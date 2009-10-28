@@ -154,8 +154,8 @@ namespace Signum.Windows.Operations
                  {
                      if (entityControl.LooseChangesIfAny())
                      {
-                         Lite<IdentifiableEntity> lazy = ident.ToLite();
-                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lazy, operationInfo.Key, null);
+                         Lite<IdentifiableEntity> lite = ident.ToLite();
+                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lite, operationInfo.Key, null);
                          if (operationInfo.Returns)
                              entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                      }
@@ -173,8 +173,8 @@ namespace Signum.Windows.Operations
                 {
                     if (entityControl.LooseChangesIfAny())
                     {
-                        Lite lazy = Lite.Create(ident.GetType(), ident);
-                        IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLite(lazy, operationInfo.Key, null);
+                        Lite lite = Lite.Create(ident.GetType(), ident);
+                        IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLite(lite, operationInfo.Key, null);
                         if (operationInfo.Returns)
                             Navigator.View(new ViewOptions { Buttons = ViewButtons.Save }, newIdent);
                     }
