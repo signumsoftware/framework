@@ -12,7 +12,7 @@ namespace Signum.Engine.Operations
 {
     public interface IConstructorFromManyOperation : IOperation
     {
-        IIdentifiable Construct(List<Lazy> lazies, params object[] parameters);
+        IIdentifiable Construct(List<Lite> lazies, params object[] parameters);
     }
 
     public class BasicConstructorFromMany<F, T> : IConstructorFromManyOperation
@@ -23,20 +23,20 @@ namespace Signum.Engine.Operations
         public Type Type { get { return typeof(F); } }
         public OperationType OperationType { get { return OperationType.ConstructorFromMany; } }
         
-        public bool Lazy { get { return true; } }
+        public bool Lite { get { return true; } }
         public bool Returns { get { return true; } }
 
-        public Func<List<Lazy<F>>, object[], T> Constructor { get; set; }
+        public Func<List<Lite<F>>, object[], T> Constructor { get; set; }
 
         public BasicConstructorFromMany(Enum key)
         {
             this.Key = key; 
         }
 
-        IIdentifiable IConstructorFromManyOperation.Construct(List<Lazy> lazies, params object[] args)
+        IIdentifiable IConstructorFromManyOperation.Construct(List<Lite> lazies, params object[] args)
         {
             if (Constructor == null)
-                throw new ArgumentException("FromLazy");
+                throw new ArgumentException("FromLite");
 
             if (!OperationLogic.OnAllowOperation(Key))
                 throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key)); 
@@ -54,13 +54,13 @@ namespace Signum.Engine.Operations
 
                     OperationLogic.OnBeginOperation(this, null);
 
-                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lazies.Select(l => l.ToLazy<F>()).ToList(), args);
+                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lazies.Select(l => l.ToLite<F>()).ToList(), args);
 
                     OperationLogic.OnEndOperation(this, result);
 
                     if (!result.IsNew)
                     {
-                        log.Target = result.ToLazy();
+                        log.Target = result.ToLite();
                         log.End = DateTime.Now;
                         log.Save();
                     }
@@ -75,7 +75,7 @@ namespace Signum.Engine.Operations
             }
         }
 
-        protected virtual T OnConstructor(List<Lazy<F>> lazies, object[] args)
+        protected virtual T OnConstructor(List<Lite<F>> lazies, object[] args)
         {
             return Constructor(lazies, args);
         }

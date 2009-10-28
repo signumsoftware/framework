@@ -85,9 +85,9 @@ namespace Signum.Engine.Authorization
             return GetAccess(RoleDN.Current, type, property);
         }
 
-        public static List<AccessRule> GetAccessRule(Lazy<RoleDN> roleLazy, TypeDN typeDN)
+        public static List<AccessRule> GetAccessRule(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
-            var role = roleLazy.Retrieve(); 
+            var role = roleLite.Retrieve(); 
 
             Type type = TypeLogic.DnToType[typeDN]; 
             List<PropertyDN> properties = PropertyLogic.RetrieveOrGenerateProperty(typeDN);
@@ -98,9 +98,9 @@ namespace Signum.Engine.Authorization
                     }).ToList();
         }
 
-        public static void SetAccessRule(List<AccessRule> rules, Lazy<RoleDN> roleLazy, TypeDN typeDN)
+        public static void SetAccessRule(List<AccessRule> rules, Lite<RoleDN> roleLite, TypeDN typeDN)
         {
-            var role = roleLazy.Retrieve(); 
+            var role = roleLite.Retrieve(); 
 
             var current = Database.Query<RulePropertyDN>().Where(r => r.Role == role && r.Property.Type == typeDN).ToDictionary(a => a.Property.Name);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => ((PropertyDN)r.Resource).Name);

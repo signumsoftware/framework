@@ -150,12 +150,12 @@ namespace Signum.Windows.Operations
             }
             else if(operationInfo.OperationType == OperationType.Execute)
             {
-                 if (operationInfo.Lazy)
+                 if (operationInfo.Lite)
                  {
                      if (entityControl.LooseChangesIfAny())
                      {
-                         Lazy<IdentifiableEntity> lazy = ident.ToLazy();
-                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ExecuteOperationLazy(lazy, operationInfo.Key, null);
+                         Lite<IdentifiableEntity> lazy = ident.ToLite();
+                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lazy, operationInfo.Key, null);
                          if (operationInfo.Returns)
                              entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                      }
@@ -169,12 +169,12 @@ namespace Signum.Windows.Operations
             }
             else if (operationInfo.OperationType == OperationType.ConstructorFrom)
             {
-                if (operationInfo.Lazy)
+                if (operationInfo.Lite)
                 {
                     if (entityControl.LooseChangesIfAny())
                     {
-                        Lazy lazy = Lazy.Create(ident.GetType(), ident);
-                        IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLazy(lazy, operationInfo.Key, null);
+                        Lite lazy = Lite.Create(ident.GetType(), ident);
+                        IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLite(lazy, operationInfo.Key, null);
                         if (operationInfo.Returns)
                             Navigator.View(new ViewOptions { Buttons = ViewButtons.Save }, newIdent);
                     }

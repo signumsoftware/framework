@@ -27,9 +27,9 @@ namespace Signum.Windows.Authorization
             InitializeComponent();
         }
 
-        Lazy<RoleDN> Lazy
+        Lite<RoleDN> Lite
         {
-            get { return ((RoleDN)DataContext).ToLazy(); }
+            get { return ((RoleDN)DataContext).ToLite(); }
         }
 
 
@@ -40,22 +40,22 @@ namespace Signum.Windows.Authorization
             if (!Server.Implements<IPermissionAuthServer>() || Server.Service<IPermissionAuthServer>().IsAuthorizedFor(BasicPermissions.AdminRules))
             {
                 if (Server.Implements<IQueryAuthServer>())
-                    links.Add(new QuickLink("Query Rules") { Action = () => new QueryRules { Role = Lazy }.Show() });
+                    links.Add(new QuickLink("Query Rules") { Action = () => new QueryRules { Role = Lite }.Show() });
 
                 if (Server.Implements<IFacadeMethodAuthServer>())
-                    links.Add(new QuickLink("Facade Method Rules") { Action = () => new FacadeMethodRules { Role = Lazy }.Show() });
+                    links.Add(new QuickLink("Facade Method Rules") { Action = () => new FacadeMethodRules { Role = Lite }.Show() });
 
                 if (Server.Implements<ITypeAuthServer>())
-                    links.Add(new QuickLink("Type Rules") { Action = () => new TypeRules { Role = Lazy }.Show() });
+                    links.Add(new QuickLink("Type Rules") { Action = () => new TypeRules { Role = Lite }.Show() });
 
                 if (Server.Implements<IPermissionAuthServer>())
-                    links.Add(new QuickLink("Permission Rules") { Action = () => new PermissionRules { Role = Lazy }.Show() });
+                    links.Add(new QuickLink("Permission Rules") { Action = () => new PermissionRules { Role = Lite }.Show() });
 
                 if (Server.Implements<IOperationAuthServer>())
-                    links.Add(new QuickLink("Operation Rules") { Action = () => new OperationRules { Role = Lazy }.Show() });
+                    links.Add(new QuickLink("Operation Rules") { Action = () => new OperationRules { Role = Lite }.Show() });
 
                 if (Server.Implements<IEntityGroupAuthServer>())
-                    links.Add(new QuickLink("Entity Groups") { Action = () => new EntityGroupRules { Role = Lazy }.Show() });
+                    links.Add(new QuickLink("Entity Groups") { Action = () => new EntityGroupRules { Role = Lite }.Show() });
             }
 
             return links;

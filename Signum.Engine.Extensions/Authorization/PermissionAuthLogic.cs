@@ -89,9 +89,9 @@ namespace Signum.Engine.Authorization
                   role.Roles.Select(r => GetAllowed(r, permissionKey)).MaxAllowed();
         }
 
-        public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)
+        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve();
+            var role = roleLite.Retrieve();
 
             return EnumLogic<PermissionDN>.AllEntities()
                     .Select(p => new AllowedRule(GetBaseAllowed(role, p.Key))
@@ -101,9 +101,9 @@ namespace Signum.Engine.Authorization
                    }).ToList();
         }
 
-        public static void SetAllowedRule(List<AllowedRule> rules, Lazy<RoleDN> roleLazy)
+        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve();
+            var role = roleLite.Retrieve();
 
             var current = Database.Query<RulePermissionDN>().Where(r => r.Role == role).ToDictionary(a => a.Permission);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => (PermissionDN)r.Resource);

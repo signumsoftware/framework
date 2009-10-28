@@ -32,13 +32,13 @@ namespace Signum.Windows.Reports
 
             this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
 
-            List<Lazy<ExcelReportDN>> reports = Server.Service<IExcelReportServer>().GetExcelReports(SearchControl.QueryName.ToString());
+            List<Lite<ExcelReportDN>> reports = Server.Service<IExcelReportServer>().GetExcelReports(SearchControl.QueryName.ToString());
             
             if (reports.Count > 0)
             {
                 Header = new TextBlock { Inlines = { new Run(Prop.Resources.CustomReport), new Bold(new Run(" (" + reports.Count + ")")) } };
 
-                foreach (Lazy<ExcelReportDN> report in reports)
+                foreach (Lite<ExcelReportDN> report in reports)
                 {
                     MenuItem mi = new MenuItem()
                     {
@@ -69,9 +69,9 @@ namespace Signum.Windows.Reports
             if (e.OriginalSource is MenuItem) //Not to capture the mouseDown of the scrollbar buttons
             {
                 MenuItem b = (MenuItem)e.OriginalSource;
-                Lazy<ExcelReportDN> reportLazy = (Lazy<ExcelReportDN>)b.Tag;
+                Lite<ExcelReportDN> reportLite = (Lite<ExcelReportDN>)b.Tag;
 
-                ExcelReportDN report = reportLazy.RetrieveAndForget();
+                ExcelReportDN report = reportLite.RetrieveAndForget();
                 string extension = Path.GetExtension(report.File.FileName);
                 if (extension != ".xls" && extension != ".xlsx")
                     throw new ApplicationException("El template de los ficheros Excel personalizados debe tener la extensión .xls o .xlsx, y el fichero seleccionado tiene " + extension);

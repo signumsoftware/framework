@@ -21,21 +21,21 @@ namespace Signum.Web.Operations
     [HandleError]
     public class OperationController : Controller
     {
-        public ActionResult OperationExecute(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLazy, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult OperationExecute(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfTypeName);
 
             IdentifiableEntity entity = null;
             ChangesLog changesLog = null;
-            if (isLazy)
+            if (isLite)
             {
                 if (sfId.HasValue)
                 {
-                    Lazy lazy = Lazy.Create(type, sfId.Value);
-                    entity = OperationLogic.ServiceExecuteLazy((Lazy)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                    Lite lazy = Lite.Create(type, sfId.Value);
+                    entity = OperationLogic.ServiceExecuteLite((Lite)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
-                    throw new ArgumentException(Resources.CouldNotCreateLazyWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+                    throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
             }
             else
             {
@@ -69,13 +69,13 @@ namespace Signum.Web.Operations
         {
             Type type = Navigator.ResolveType(sfTypeName);
 
-            List<Lazy> sourceEntities = null;
+            List<Lite> sourceEntities = null;
             if (sfIds.HasText())
             {
                 string[] ids = sfIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 if (ids == null || ids.Length == 0)
                     throw new ArgumentException(Resources.ConstructFromManyOperation0NeedsSourceIdsAsParameter.Formato(sfOperationFullKey));
-                sourceEntities = ids.Select(idstr => Lazy.Create(type, int.Parse(idstr))).ToList();
+                sourceEntities = ids.Select(idstr => Lite.Create(type, int.Parse(idstr))).ToList();
             }
             if (sourceEntities == null)
                 throw new ArgumentException(Resources.ConstructFromManyOperation0NeedsSourceLazies.Formato(sfOperationFullKey));

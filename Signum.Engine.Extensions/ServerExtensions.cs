@@ -94,10 +94,10 @@ namespace Signum.Services
                () => OperationLogic.ServiceExecute(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum operationKey, params object[] args)
+        public IdentifiableEntity ExecuteOperationLite(Lite lazy, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperationLazy {0}".Formato(operationKey),
-              () => OperationLogic.ServiceExecuteLazy(lazy, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperationLite {0}".Formato(operationKey),
+              () => OperationLogic.ServiceExecuteLite(lazy, operationKey, args));
         }
 
         public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
@@ -112,13 +112,13 @@ namespace Signum.Services
               () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromLite(Lite lazy, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromLazy {0}".Formato(operationKey),
-              () => OperationLogic.ServiceConstructFromLazy(lazy, operationKey, args));
+            return Return(MethodInfo.GetCurrentMethod(), "ConstructFromLite {0}".Formato(operationKey),
+              () => OperationLogic.ServiceConstructFromLite(lazy, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromMany(List<Lite> lazies, Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), "ConstructFromMany {0}".Formato(operationKey),
               () => OperationLogic.ServiceConstructFromMany(lazies, type, operationKey, args));
@@ -127,13 +127,13 @@ namespace Signum.Services
 
         #region IPropertyAuthServer Members
 
-        public List<AccessRule> GetPropertyAccessRules(Lazy<RoleDN> role, TypeDN typeDN)
+        public List<AccessRule> GetPropertyAccessRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             return Return(MethodInfo.GetCurrentMethod(),
              () => PropertyAuthLogic.GetAccessRule(role, typeDN));
         }
 
-        public void SetPropertyAccessRules(List<AccessRule> rules, Lazy<RoleDN> role, TypeDN typeDN)
+        public void SetPropertyAccessRules(List<AccessRule> rules, Lite<RoleDN> role, TypeDN typeDN)
         {
             Execute(MethodInfo.GetCurrentMethod(),
              () => PropertyAuthLogic.SetAccessRule(rules, role, typeDN));
@@ -149,13 +149,13 @@ namespace Signum.Services
 
         #region ITypeAuthServer Members
 
-        public List<TypeAccessRule> GetTypesAccessRules(Lazy<RoleDN> role)
+        public List<TypeAccessRule> GetTypesAccessRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => TypeAuthLogic.GetAccessRule(role));
         }
 
-        public void SetTypesAccessRules(List<TypeAccessRule> rules, Lazy<RoleDN> role)
+        public void SetTypesAccessRules(List<TypeAccessRule> rules, Lite<RoleDN> role)
         {
             Execute(MethodInfo.GetCurrentMethod(),
               () => TypeAuthLogic.SetAccessRule(rules, role));
@@ -171,13 +171,13 @@ namespace Signum.Services
 
         #region IFacadeMethodAuthServer Members
 
-        public List<AllowedRule> GetFacadeMethodAllowedRules(Lazy<RoleDN> role)
+        public List<AllowedRule> GetFacadeMethodAllowedRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => FacadeMethodAuthLogic.GetAllowedRule(role));
         }
 
-        public void SetFacadeMethodAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role)
+        public void SetFacadeMethodAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
         {
             Execute(MethodInfo.GetCurrentMethod(),
               () => FacadeMethodAuthLogic.SetAllowedRule(rules, role));
@@ -187,13 +187,13 @@ namespace Signum.Services
 
         #region IQueryAuthServer Members
 
-        public List<AllowedRule> GetQueryAllowedRules(Lazy<RoleDN> role)
+        public List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => QueryAuthLogic.GetAllowedRule(role));
         }
 
-        public void SetQueryAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role)
+        public void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
         {
             Execute(MethodInfo.GetCurrentMethod(),
                () => QueryAuthLogic.SetAllowedRule(rules, role));
@@ -209,13 +209,13 @@ namespace Signum.Services
 
         #region IPermissionAuthServer Members
 
-        public List<AllowedRule> GetPermissionAllowedRules(Lazy<RoleDN> role)
+        public List<AllowedRule> GetPermissionAllowedRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => PermissionAuthLogic.GetAllowedRule(role));
         }
 
-        public void SetPermissionAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role)
+        public void SetPermissionAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
         {
             Execute(MethodInfo.GetCurrentMethod(),
             () => PermissionAuthLogic.SetAllowedRule(rules, role));
@@ -231,14 +231,14 @@ namespace Signum.Services
 
         #region IOperationAuthServer Members
 
-        public List<AllowedRule> GetOperationAllowedRules(Lazy<RoleDN> role)
+        public List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => OperationAuthLogic.GetAllowedRule(role));
         }
 
 
-        public void SetOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role)
+        public void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
         {
             Execute(MethodInfo.GetCurrentMethod(),
                () => OperationAuthLogic.SetAllowedRule(rules, role));
@@ -248,13 +248,13 @@ namespace Signum.Services
 
         #region IEntityGroupAuthServer Members
 
-        public List<EntityGroupRule> GetEntityGroupAllowedRules(Lazy<RoleDN> role)
+        public List<EntityGroupRule> GetEntityGroupAllowedRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
              () => EntityGroupAuthLogic.GetEntityGroupRules(role));
         }
 
-        public void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lazy<RoleDN> role)
+        public void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lite<RoleDN> role)
         {
             Execute(MethodInfo.GetCurrentMethod(),
                () => EntityGroupAuthLogic.SetEntityGroupRules(rules, role));

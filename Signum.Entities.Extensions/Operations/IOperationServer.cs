@@ -25,7 +25,7 @@ namespace Signum.Services
         IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperationLazy(Lazy lazy, Enum operationKey, params object[] args);
+        IdentifiableEntity ExecuteOperationLite(Lite lazy, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
@@ -36,9 +36,9 @@ namespace Signum.Services
         IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args);
+        IdentifiableEntity ConstructFromLite(Lite lazy, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args);
+        IdentifiableEntity ConstructFromMany(List<Lite> lazies, Type type, Enum operationKey, params object[] args);
     }
 }

@@ -23,7 +23,7 @@ namespace Signum.Engine.Operations
         Enum Key { get; }
         Type Type { get; }
         OperationType OperationType { get; }
-        bool Lazy { get; }
+        bool Lite { get; }
         bool Returns { get; }
 
         void AssertIsValid();
@@ -56,11 +56,11 @@ namespace Signum.Engine.Operations
                 dqm[typeof(LogOperationDN)] = (from lo in Database.Query<LogOperationDN>()
                                                select new
                                                {
-                                                   Entity = lo.ToLazy(),
+                                                   Entity = lo.ToLite(),
                                                    lo.Id,
                                                    Target_nf_ = lo.Target,
-                                                   Operation = lo.Operation.ToLazy(),
-                                                   User = lo.User.ToLazy(),
+                                                   Operation = lo.Operation.ToLite(),
+                                                   User = lo.User.ToLite(),
                                                    lo.Start,
                                                    lo.End,
                                                    lo.Exception
@@ -114,7 +114,7 @@ namespace Signum.Engine.Operations
             return new OperationInfo
             {
                 Key = operation.Key,
-                Lazy = operation.Lazy,
+                Lite = operation.Lite,
                 Returns = operation.Returns,
                 OperationType = operation.OperationType,
                 CanExecute = canExecute,
@@ -152,7 +152,7 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)entity;
         }
 
-        public static IdentifiableEntity ServiceExecuteLazy(Lazy lazy, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceExecuteLite(Lite lazy, Enum operationKey, params object[] args)
         {
             IdentifiableEntity entity = Database.RetrieveAndForget(lazy);
             Find<IExecuteOperation>(lazy.RuntimeType, operationKey, true).Execute(entity, args);
@@ -166,7 +166,7 @@ namespace Signum.Engine.Operations
             return (T)(IIdentifiable)entity;
         }
 
-        public static T ExecuteLazy<T>(this Lazy<T> lazy, Enum operationKey, params object[] args)
+        public static T ExecuteLite<T>(this Lite<T> lazy, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
             T  entity = lazy.RetrieveAndForget(); 
@@ -181,7 +181,7 @@ namespace Signum.Engine.Operations
              return entity;
         }
 
-        public static T ExecuteLazyBase<T>(this Lazy<T> lazy, Type baseType, Enum operationKey, params object[] args)
+        public static T ExecuteLiteBase<T>(this Lite<T> lazy, Type baseType, Enum operationKey, params object[] args)
             where T:class, IIdentifiable
         {
             T entity = lazy.RetrieveAndForget(); 
@@ -209,7 +209,7 @@ namespace Signum.Engine.Operations
             return (IdentifiableEntity)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
         }
 
-        public static IdentifiableEntity ServiceConstructFromLazy(Lazy lazy, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromLite(Lite lazy, Enum operationKey, params object[] args)
         {
             return (IdentifiableEntity)Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
         }
@@ -221,7 +221,7 @@ namespace Signum.Engine.Operations
             return (T)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
         }
 
-        public static T ConstructFromLazy<T>(this Lazy lazy, Enum operationKey, params object[] args)
+        public static T ConstructFromLite<T>(this Lite lazy, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
             return (T)Find<IConstructorFromOperation>(lazy.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
@@ -234,7 +234,7 @@ namespace Signum.Engine.Operations
             return (T)Find<IConstructorFromOperation>(baseType, operationKey, false).Construct(entity, args);
         }
 
-        public static T ConstructFromLazyBase<T>(this Lazy lazy, Type baseType, Enum operationKey, params object[] args)
+        public static T ConstructFromLiteBase<T>(this Lite lazy, Type baseType, Enum operationKey, params object[] args)
                where T : class, IIdentifiable
         {
             return (T)Find<IConstructorFromOperation>(baseType, operationKey, true).Construct(Database.RetrieveAndForget(lazy), args);
@@ -242,31 +242,31 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFromMany
-        public static IdentifiableEntity ServiceConstructFromMany(List<Lazy> lazies, Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromMany(List<Lite> lazies, Type type, Enum operationKey, params object[] args)
         {
             return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationKey, true).Construct(lazies, args);
         }
 
-        public static T ConstructFromMany<F, T>(List<Lazy<F>> lazies, Enum operationKey, params object[] args)
+        public static T ConstructFromMany<F, T>(List<Lite<F>> lazies, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), operationKey, true).Construct(lazies.Cast<Lazy>().ToList(), args);
+            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), operationKey, true).Construct(lazies.Cast<Lite>().ToList(), args);
         }
         #endregion
 
-        static T Find<T>(Type type, Enum operationKey, bool isLazy)
+        static T Find<T>(Type type, Enum operationKey, bool isLite)
             where T : IOperation
         {
             IOperation result = TryFind(type, operationKey);
             if (result == null)
                 throw new ApplicationException("Operation {0} not found for Type {1}".Formato(operationKey, type));
 
-            if (isLazy && !result.Lazy)
+            if (isLite && !result.Lite)
                 throw new ApplicationException("Operation {0} is not allowed for lazies".Formato(operationKey));
 
-            if (!isLazy && result.Lazy)
-                throw new ApplicationException("Operation {0} needs a Lazy".Formato(operationKey));
+            if (!isLite && result.Lite)
+                throw new ApplicationException("Operation {0} needs a Lite".Formato(operationKey));
 
             if (!(result is T))
                 throw new ApplicationException("Operation {0} is a {1} not a {2}, use '{3}' instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),

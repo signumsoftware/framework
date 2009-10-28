@@ -22,7 +22,7 @@ namespace Signum.Engine.Operations
         public Enum Key { get; private set; }
         public Type Type { get { return typeof(T); } }
         public OperationType OperationType { get { return OperationType.Execute; } }
-        public bool Lazy { get; set; }
+        public bool Lite { get; set; }
         public bool Returns { get; set; }
 
         public bool AllowsNew { get; set; }
@@ -33,7 +33,7 @@ namespace Signum.Engine.Operations
         public BasicExecute(Enum key)
         {
             this.Key = key;
-            this.Lazy = true;
+            this.Lite = true;
             this.Returns = true;
         }
 
@@ -81,7 +81,7 @@ namespace Signum.Engine.Operations
 
                     ((IdentifiableEntity)entity).Save(); //Nothing happens if already saved
 
-                    log.Target = ((IdentifiableEntity)entity).ToLazy(); //in case AllowsNew == true
+                    log.Target = ((IdentifiableEntity)entity).ToLite(); //in case AllowsNew == true
                     log.End = DateTime.Now;
                     log.Save();
 
@@ -100,7 +100,7 @@ namespace Signum.Engine.Operations
                         {
                             Operation = EnumLogic<OperationDN>.ToEntity(Key),
                             Start = DateTime.Now,
-                            Target = ((IdentifiableEntity)entity).ToLazy(),
+                            Target = ((IdentifiableEntity)entity).ToLite(),
                             Exception = ex.Message,
                             User = UserDN.Current
                         }.Save();

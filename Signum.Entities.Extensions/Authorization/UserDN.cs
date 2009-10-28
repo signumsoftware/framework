@@ -31,9 +31,9 @@ namespace Signum.Entities.Authorization
             set { Set(ref passwordHash, value, "PasswordHash"); }
         }
 
-        Lazy<IEmployeeDN> employee;
+        Lite<IEmployeeDN> employee;
         [LocDescription]
-        public Lazy<IEmployeeDN> Employee
+        public Lite<IEmployeeDN> Employee
         {
             get { return employee; }
             set { Set(ref employee, value, "Related;"); }

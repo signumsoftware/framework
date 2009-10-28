@@ -97,11 +97,11 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not create Lazy without an id to call Operation {{{0}}}.
+        ///   Looks up a localized string similar to Could not create Lite without an id to call Operation {{{0}}}.
         /// </summary>
-        internal static string CouldNotCreateLazyWithoutAnIdToCallOperation0 {
+        internal static string CouldNotCreateLiteWithoutAnIdToCallOperation0 {
             get {
-                return ResourceManager.GetString("CouldNotCreateLazyWithoutAnIdToCallOperation0", resourceCulture);
+                return ResourceManager.GetString("CouldNotCreateLiteWithoutAnIdToCallOperation0", resourceCulture);
             }
         }
         

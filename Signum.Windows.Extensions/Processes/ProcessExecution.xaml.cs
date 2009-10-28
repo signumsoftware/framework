@@ -40,7 +40,7 @@ namespace Signum.Windows.Processes
             ProcessExecutionDN pe = DataContext as ProcessExecutionDN;
             if (pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending))
             {
-                ProcessExecutionDN npe = pe.ToLazy().RetrieveAndForget();
+                ProcessExecutionDN npe = pe.ToLite().RetrieveAndForget();
                 RaiseEvent(new ChangeDataContextEventArgs(npe));
             }
         }

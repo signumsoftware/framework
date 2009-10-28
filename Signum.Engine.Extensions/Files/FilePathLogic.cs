@@ -35,7 +35,7 @@ namespace Signum.Engine.Files
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
                                                  select new
                                                  {
-                                                     Entity = r.ToLazy(),
+                                                     Entity = r.ToLite(),
                                                      r.Id,
                                                      r.Name,
                                                      r.Active,
@@ -46,19 +46,19 @@ namespace Signum.Engine.Files
                 dqm[typeof(FilePathDN)] = (from p in Database.Query<FilePathDN>()
                                            select new
                                            {
-                                               Entity = p.ToLazy(),
+                                               Entity = p.ToLite(),
                                                p.Id,
                                                p.FileName,
-                                               FileType = p.FileType.ToLazy(),
+                                               FileType = p.FileType.ToLite(),
                                                p.FullPhysicalPath,
                                                p.FullWebPath,
-                                               Repository = p.Repository.ToLazy()
+                                               Repository = p.Repository.ToLite()
                                            }).ToDynamic();
 
                 dqm[typeof(FileTypeDN)] = (from f in Database.Query<FileTypeDN>()
                                            select new
                                            {
-                                               Entity = f.ToLazy(),
+                                               Entity = f.ToLite(),
                                                f.Name
                                            }).ToDynamic();
             }

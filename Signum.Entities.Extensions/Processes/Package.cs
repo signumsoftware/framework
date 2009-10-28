@@ -40,18 +40,18 @@ namespace Signum.Entities.Processes
     [Serializable, LocDescription]
     public class PackageLineDN : IdentifiableEntity
     {
-        Lazy<PackageDN> package;
+        Lite<PackageDN> package;
         [LocDescription]
-        public Lazy<PackageDN> Package
+        public Lite<PackageDN> Package
         {
             get { return package; }
             set { Set(ref package, value, "Package"); }
         }
 
         [ImplementedByAll]
-        Lazy<IdentifiableEntity> target;
+        Lite<IdentifiableEntity> target;
         [LocDescription]
-        public Lazy<IdentifiableEntity> Target
+        public Lite<IdentifiableEntity> Target
         {
             get { return target; }
             set { Set(ref target, value, "Target"); }

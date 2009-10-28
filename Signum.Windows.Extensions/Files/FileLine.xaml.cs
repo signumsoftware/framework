@@ -118,9 +118,9 @@ namespace Signum.Windows.Files
                 EntityTemplate = Navigator.FindDataTemplate(this, Type);
             }
 
-            if (typeof(Lazy).IsAssignableFrom(Type))
+            if (typeof(Lite).IsAssignableFrom(Type))
             {
-                cleanType = Reflector.ExtractLazy(Type);
+                cleanType = Reflector.ExtractLite(Type);
             }
             else
             {

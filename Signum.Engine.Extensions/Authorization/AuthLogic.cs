@@ -52,7 +52,7 @@ namespace Signum.Engine.Authorization
                 dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
                                        select new
                                        {
-                                           Entity = r.ToLazy(),
+                                           Entity = r.ToLite(),
                                            r.Id,
                                            r.Name,                                          
                                        }).ToDynamic();
@@ -60,10 +60,10 @@ namespace Signum.Engine.Authorization
                 dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
                                        select new
                                        {
-                                           Entity = e.ToLazy(),
+                                           Entity = e.ToLite(),
                                            e.Id,
                                            e.UserName,
-                                           Rol = e.Role.ToLazy(),
+                                           Rol = e.Role.ToLite(),
                                            //Empleado = e.Related.ToString(),
                                        }).ToDynamic();
             }

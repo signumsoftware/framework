@@ -21,14 +21,14 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class FacadeMethodRules : Window
     {
-        public Lazy<RoleDN> Role
+        public Lite<RoleDN> Role
         {
-            get { return (Lazy<RoleDN>)GetValue(RoleProperty); }
+            get { return (Lite<RoleDN>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(FacadeMethodRules), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(FacadeMethodRules), new UIPropertyMetadata(null));
 
         public FacadeMethodRules()
         {

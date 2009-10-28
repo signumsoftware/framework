@@ -272,20 +272,20 @@ namespace Signum.Web.Authorization
             return changesLog.Errors;
         }
 
-        public ActionResult UserExecOperation(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLazy, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult UserExecOperation(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfTypeName);
 
             UserDN entity = null;
-            if (isLazy)
+            if (isLite)
             {
                 if (sfId.HasValue)
                 {
-                    Lazy lazy = Lazy.Create(type, sfId.Value);
-                    entity = (UserDN)OperationLogic.ServiceExecuteLazy((Lazy)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                    Lite lazy = Lite.Create(type, sfId.Value);
+                    entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lazy, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
-                    throw new ArgumentException(Resources.CouldNotCreateLazyWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+                    throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
             }
             else
             {

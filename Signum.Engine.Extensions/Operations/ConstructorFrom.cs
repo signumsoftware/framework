@@ -23,7 +23,7 @@ namespace Signum.Engine.Operations
         public Type Type { get { return typeof(F); } }
         public OperationType OperationType { get { return OperationType.ConstructorFrom; } }
 
-        public bool Lazy { get; set; }
+        public bool Lite { get; set; }
         public bool Returns { get; set; }
 
         public bool AllowsNew { get; set; }
@@ -81,7 +81,7 @@ namespace Signum.Engine.Operations
 
                     if (!result.IsNew)
                     {
-                        log.Target = result.ToLazy();
+                        log.Target = result.ToLite();
                         log.End = DateTime.Now;
                         log.Save();
                     }

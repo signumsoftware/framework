@@ -60,7 +60,7 @@ namespace Signum.Windows.Operations
                 Type entityType = SearchControl.EntityType; 
                 object queryName = SearchControl.QueryName;
 
-                var lazies = SearchControl.SelectedItems.TryCC(a=>a.Cast<Lazy>().ToList()); 
+                var lazies = SearchControl.SelectedItems.TryCC(a=>a.Cast<Lite>().ToList()); 
 
                 if(lazies == null && lazies.Count == 0)
                     throw new ApplicationException("Select some rows first");

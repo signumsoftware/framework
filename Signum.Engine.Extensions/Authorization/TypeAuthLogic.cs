@@ -84,9 +84,9 @@ namespace Signum.Engine.Authorization
                   role.Roles.Select(r => GetAccess(r, type)).MaxTypeAccess();
         }
 
-        public static List<TypeAccessRule> GetAccessRule(Lazy<RoleDN> roleLazy)
+        public static List<TypeAccessRule> GetAccessRule(Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve();
+            var role = roleLite.Retrieve();
 
             return TypeLogic.TypeToDN.Select(t => new TypeAccessRule(GetBaseAccess(role, t.Key))
                     {
@@ -95,9 +95,9 @@ namespace Signum.Engine.Authorization
                     }).ToList();
         }
 
-        public static void SetAccessRule(List<TypeAccessRule> rules, Lazy<RoleDN> roleLazy)
+        public static void SetAccessRule(List<TypeAccessRule> rules, Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve(); 
+            var role = roleLite.Retrieve(); 
 
             var current = Database.Query<RuleTypeDN>().Where(r => r.Role == role).ToDictionary(a => a.Type);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => (TypeDN)r.Resource);

@@ -21,9 +21,9 @@ namespace Signum.Entities.Reports
             set { Set(ref name, value, "Name"); }
         }
         
-        MList<Lazy<ExcelReportDN>> excelReports;
+        MList<Lite<ExcelReportDN>> excelReports;
         [LocDescription]
-        public MList<Lazy<ExcelReportDN>> ExcelReports
+        public MList<Lite<ExcelReportDN>> ExcelReports
         {
             get { return excelReports; }
             set { Set(ref excelReports, value, "Excelreports"); }

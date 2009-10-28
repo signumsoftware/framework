@@ -40,17 +40,17 @@ namespace Signum.Engine.Processes
                      (from p in Database.Query<PackageDN>()
                       select new
                       {
-                          Entity = p.ToLazy(),
+                          Entity = p.ToLite(),
                           p.Id,
-                          Operation = p.Operation.ToLazy(),
-                          Lines = (int?)Database.Query<PackageLineDN>().Count(pl => pl.Package == p.ToLazy())
+                          Operation = p.Operation.ToLite(),
+                          Lines = (int?)Database.Query<PackageLineDN>().Count(pl => pl.Package == p.ToLite())
                       }).ToDynamic();
 
                 dqm[typeof(PackageLineDN)] =
                     (from pl in Database.Query<PackageLineDN>()
                      select new
                      {
-                         Entity = pl.ToLazy(),
+                         Entity = pl.ToLite(),
                          Package = pl.Package,
                          pl.Id,
                          pl.Target,
@@ -68,14 +68,14 @@ namespace Signum.Engine.Processes
     {
         Enum operationKey;
 
-        Func<List<Lazy>> getLazies;
+        Func<List<Lite>> getLazies;
 
         public PackageAlgorithm(Enum operationKey)
         {
             this.operationKey = operationKey;
         }
 
-        public PackageAlgorithm(Enum operationKey, Func<List<Lazy>> getLazies)
+        public PackageAlgorithm(Enum operationKey, Func<List<Lite>> getLazies)
         {
             this.operationKey = operationKey;
             this.getLazies = getLazies;
@@ -87,8 +87,8 @@ namespace Signum.Engine.Processes
             package.Save();
 
 
-            List<Lazy> lazies = 
-                args != null && args.Length > 0? (List<Lazy>)args[0]: 
+            List<Lite> lazies = 
+                args != null && args.Length > 0? (List<Lite>)args[0]: 
                 getLazies != null? getLazies(): null;
 
             if (lazies == null)
@@ -98,8 +98,8 @@ namespace Signum.Engine.Processes
             
             lazies.Select(lazy => new PackageLineDN
             {
-                Package = package.ToLazy(),
-                Target = lazy.ToLazy<IdentifiableEntity>()
+                Package = package.ToLite(),
+                Target = lazy.ToLite<IdentifiableEntity>()
             }).SaveList();
 
             return package;
@@ -109,10 +109,10 @@ namespace Signum.Engine.Processes
         {
             PackageDN package = (PackageDN)executingProcess.Data;
 
-            List<Lazy<PackageLineDN>> lines =
+            List<Lite<PackageLineDN>> lines =
                 (from pl in Database.Query<PackageLineDN>()
-                 where pl.Package == package.ToLazy() && pl.FinishTime == null && pl.Exception == null
-                 select pl.ToLazy()).ToList();
+                 where pl.Package == package.ToLite() && pl.FinishTime == null && pl.Exception == null
+                 select pl.ToLite()).ToList();
 
             int lastPercentage = 0;
             for (int i = 0; i < lines.Count; i++)
@@ -126,7 +126,7 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        OperationLogic.ServiceExecuteLazy(pl.Target, operationKey);
+                        OperationLogic.ServiceExecuteLite(pl.Target, operationKey);
                         pl.FinishTime = DateTime.Now;
                         pl.Save();
                         tr.Commit();

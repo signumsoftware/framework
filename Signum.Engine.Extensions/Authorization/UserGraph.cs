@@ -28,14 +28,14 @@ namespace Signum.Engine.Authorization
                    FromStates = new []{UserState.Created},
                    Execute = (u,_)=>{},
                    AllowsNew = true,
-                   Lazy =false 
+                   Lite =false 
                 },
                 new Goto(UserOperation.Save, UserState.Created)
                 {
                    FromStates = new []{UserState.Created},
                    Execute = (u,_)=>{},
                    AllowsNew = false,
-                   Lazy =false 
+                   Lite =false 
                 },
                   
                 new Goto(UserOperation.Disable, UserState.Disabled)
@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
                        u.State=UserState.Disabled; 
                    },
                    AllowsNew = false ,
-                   Lazy =false 
+                   Lite =false 
                 },
          
                 new Goto(UserOperation.Enable, UserState.Created)
@@ -59,7 +59,7 @@ namespace Signum.Engine.Authorization
                        u.State = UserState.Created; 
                    },
                    AllowsNew = false ,
-                   Lazy =true  
+                   Lite =true  
                 },
             };
         }

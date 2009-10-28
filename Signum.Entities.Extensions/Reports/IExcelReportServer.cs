@@ -13,6 +13,6 @@ namespace Signum.Services
     public interface IExcelReportServer
     {
         [OperationContract, NetDataContract]
-        List<Lazy<ExcelReportDN>> GetExcelReports(string queryName);
+        List<Lite<ExcelReportDN>> GetExcelReports(string queryName);
     }
 }

@@ -48,7 +48,7 @@ namespace Signum.Windows.Operations
     public class ConstructorFromManyEventArgs : EventArgs
     {
         public object QueryName { get; internal set;  }
-        public List<Lazy> Entities { get; internal set; }
+        public List<Lite> Entities { get; internal set; }
         public Window Window { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; }
 

@@ -54,9 +54,9 @@ namespace Signum.Test.Extensions
 
             sb.Schema.Initialize();
 
-            var list = EntityGroupAuthLogic.GetEntityGroupRules(role.ToLazy());
+            var list = EntityGroupAuthLogic.GetEntityGroupRules(role.ToLite());
             list[0].AllowedOut = false;
-            EntityGroupAuthLogic.SetEntityGroupRules(list, role.ToLazy());
+            EntityGroupAuthLogic.SetEntityGroupRules(list, role.ToLite());
 
             Connection.CurrentLog = new DebugTextWriter();
 
@@ -72,7 +72,7 @@ namespace Signum.Test.Extensions
                 Assert.AreEqual(0, Database.Query<ResourceDN>().Count(r => r.IsInGroup(EntityGroups.UserResources)));
 
                 Assert.AreEqual(2, Database.RetrieveAll<ResourceDN>().Count);
-                Assert.AreEqual(2, Database.RetrieveAllLazy<ResourceDN>().Count);
+                Assert.AreEqual(2, Database.RetrieveAllLite<ResourceDN>().Count);
 
                 Assert.AreEqual(2, Database.Query<ResourceDN>().WhereGroupsAllowed().Count());
             }
@@ -87,12 +87,12 @@ namespace Signum.Test.Extensions
                 Assert.AreEqual(1, Database.Query<ResourceDN>().Count(r => r.IsInGroup(EntityGroups.UserResources)));
 
                 Assert.AreEqual(1, Database.RetrieveAll<ResourceDN>().Count);
-                Assert.AreEqual(1, Database.RetrieveAllLazy<ResourceDN>().Count);
+                Assert.AreEqual(1, Database.RetrieveAllLite<ResourceDN>().Count);
 
                 using (EntityGroupAuthLogic.DisableAutoFilterQueries())
                 {
                     Assert.AreEqual(2, Database.Query<ResourceDN>().Count());
-                    Assert.AreEqual(2, Database.RetrieveAllLazy<ResourceDN>().Count);
+                    Assert.AreEqual(2, Database.RetrieveAllLite<ResourceDN>().Count);
                     Assert.AreEqual(1, Database.Query<ResourceDN>().WhereGroupsAllowed().Count());
                 }
             }

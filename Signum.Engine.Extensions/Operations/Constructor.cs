@@ -23,7 +23,7 @@ namespace Signum.Engine.Operations
         public Type Type { get { return typeof(T); } }
         public OperationType OperationType { get { return OperationType.Constructor; } }
         public bool Returns { get { return true; } }
-        public bool Lazy { get { return false; } }
+        public bool Lite { get { return false; } }
         public Func<object[], T> Constructor { get; set; }
 
         public BasicConstructor(Enum key)
@@ -56,7 +56,7 @@ namespace Signum.Engine.Operations
 
                      if (!entity.IsNew)
                      {
-                         log.Target = ((IdentifiableEntity)entity).ToLazy();
+                         log.Target = ((IdentifiableEntity)entity).ToLite();
                          log.End = DateTime.Now;
                          log.Save();
                      }

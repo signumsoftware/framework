@@ -107,9 +107,9 @@ namespace Signum.Web.Files
             if (value != null)
             {
                 cleanRuntimeType = value.GetType();
-                if (typeof(Lazy).IsAssignableFrom(value.GetType()))
+                if (typeof(Lite).IsAssignableFrom(value.GetType()))
                     throw new ApplicationException("FileLine doesn't support Lazies");
-                    //cleanRuntimeType = (value as Lazy).RuntimeType;
+                    //cleanRuntimeType = (value as Lite).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
 

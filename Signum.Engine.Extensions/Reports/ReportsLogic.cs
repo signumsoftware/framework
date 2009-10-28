@@ -19,7 +19,7 @@ namespace Signum.Engine.Extensions.Reports
                 dqm[typeof(ExcelReportDN)] = (from s in Database.Query<ExcelReportDN>()
                                              select new
                                              {
-                                                 Entity = s.ToLazy(),
+                                                 Entity = s.ToLite(),
                                                  s.Id,
                                                  s.QueryName,
                                                  s.File.FileName,
@@ -32,7 +32,7 @@ namespace Signum.Engine.Extensions.Reports
                     dqm[typeof(CompositeReportDN)] = (from e in Database.Query<CompositeReportDN>()
                                                       select new
                                                       {
-                                                          Entity = e.ToLazy(),
+                                                          Entity = e.ToLite(),
                                                           e.Id,
                                                           Nombre = e.Name,
                                                           Reports = e.ExcelReports.Count(),

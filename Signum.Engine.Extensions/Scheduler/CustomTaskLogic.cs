@@ -44,13 +44,13 @@ namespace Signum.Engine.Scheduler
                        join cte in Database.Query<CustomTaskExecutionDN>().DefaultIfEmpty() on ct equals cte.CustomTask into g
                        select new
                        {
-                           Entity = ct.ToLazy(),
+                           Entity = ct.ToLite(),
                            ct.Id,
                            ct.Name,
                            NumExecutions = (int?)g.Count(),
                            LastExecution = (from cte2 in g
                                             where cte2.Id == g.Max(a => a.Id)
-                                            select cte2.ToLazy()).SingleOrDefault()
+                                            select cte2.ToLite()).SingleOrDefault()
                        }).ToDynamic()
                        .ChangeColumn(a => a.NumExecutions, c => c.DisplayName = Resources.Executions)
                        .ChangeColumn(a => a.LastExecution, c => c.DisplayName = Resources.LastExecution);
@@ -59,12 +59,12 @@ namespace Signum.Engine.Scheduler
                      (from cte in Database.Query<CustomTaskExecutionDN>()
                       select new
                       {
-                          Entity = cte.ToLazy(),
+                          Entity = cte.ToLite(),
                           cte.Id,
                           cte.StartTime,
                           cte.EndTime,
                           cte.Exception,
-                          CustomTask = cte.CustomTask.ToLazy(),
+                          CustomTask = cte.CustomTask.ToLite(),
                       }).ToDynamic()
                       .ChangeColumn(p => p.CustomTask, c => c.Visible = false);
             }

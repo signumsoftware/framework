@@ -19,12 +19,12 @@ namespace Signum.Entities.Operations
         public Enum Key { get; set; }
         public OperationType OperationType { get; set; }
         public bool CanExecute { get; set; }
-        public bool Lazy { get; set; }
+        public bool Lite { get; set; }
         public bool Returns { get; set; }
 
         public override string ToString()
         {
-            return "{0} ({1}) CanExecute = {2}, Lazy = {3}, Returns {4}".Formato(Key, OperationType, CanExecute, Lazy, Returns);
+            return "{0} ({1}) CanExecute = {2}, Lite = {3}, Returns {4}".Formato(Key, OperationType, CanExecute, Lite, Returns);
         }
     }
 

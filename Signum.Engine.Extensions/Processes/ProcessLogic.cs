@@ -67,13 +67,13 @@ namespace Signum.Engine.Processes
                               join pe in Database.Query<ProcessExecutionDN>().DefaultIfEmpty() on p equals pe.Process into g
                               select new
                               {
-                                  Entity = p.ToLazy(),
+                                  Entity = p.ToLite(),
                                   p.Id,
                                   p.Name,
                                   NumExecutions = (int?)g.Count(),
                                   LastExecution = (from pe2 in Database.Query<ProcessExecutionDN>()
                                                    where pe2.Id == g.Max(a => (int?)a.Id)
-                                                   select pe2.ToLazy()).FirstOrDefault()
+                                                   select pe2.ToLite()).FirstOrDefault()
                               }).ToDynamic()
                               .ChangeColumn(a => a.NumExecutions, a => a.DisplayName = Resources.Executions)
                               .ChangeColumn(a => a.LastExecution, a => a.DisplayName = Resources.LastExecution);
@@ -82,10 +82,10 @@ namespace Signum.Engine.Processes
                              (from pe in Database.Query<ProcessExecutionDN>()
                               select new
                               {
-                                  Entity = pe.ToLazy(),
+                                  Entity = pe.ToLite(),
                                   pe.Id,
                                   Resume = pe.ToStr,
-                                  Process = pe.Process.ToLazy(),
+                                  Process = pe.Process.ToLite(),
                                   State = pe.State,
                                   pe.CreationDate,
                                   pe.PlannedDate,
@@ -106,10 +106,10 @@ namespace Signum.Engine.Processes
                                   pe.State == ProcessState.Suspended
                               select new
                               {
-                                  Entity = pe.ToLazy(),
+                                  Entity = pe.ToLite(),
                                   pe.Id,
                                   Resume = pe.ToStr,
-                                  Process = pe.Process.ToLazy(),
+                                  Process = pe.Process.ToLite(),
                                   State = pe.State,
                                   pe.QueuedDate,
                                   pe.ExecutionStart,
@@ -124,10 +124,10 @@ namespace Signum.Engine.Processes
                                   pe.State == ProcessState.Error
                               select new
                               {
-                                  Entity = pe.ToLazy(),
+                                  Entity = pe.ToLite(),
                                   pe.Id,
                                   Resume = pe.ToStr,
-                                  Process = pe.Process.ToLazy(),
+                                  Process = pe.Process.ToLite(),
                                   pe.CreationDate,
                                   pe.PlannedDate,
                                   pe.CancelationDate,

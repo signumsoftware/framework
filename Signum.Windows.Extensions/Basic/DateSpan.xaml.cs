@@ -27,9 +27,9 @@ namespace Signum.Windows.Extensions.Basics
             InitializeComponent();
         }
 
-        Lazy<RoleDN> Lazy
+        Lite<RoleDN> Lite
         {
-            get { return ((RoleDN)DataContext).ToLazy(); }
+            get { return ((RoleDN)DataContext).ToLite(); }
         }
 
    }

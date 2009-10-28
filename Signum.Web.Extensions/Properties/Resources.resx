@@ -126,8 +126,8 @@
   <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
     <value>Construct From Many Operation {{{0}}} needs source Lazies</value>
   </data>
-  <data name="CouldNotCreateLazyWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>Could not create Lazy without an id to call Operation {{{0}}}</value>
+  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
+    <value>Could not create Lite without an id to call Operation {{{0}}}</value>
   </data>
   <data name="InvalidNewPassword" xml:space="preserve">
     <value>Invalid new password</value>

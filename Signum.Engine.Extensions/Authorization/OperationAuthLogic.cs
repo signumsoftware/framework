@@ -80,9 +80,9 @@ namespace Signum.Engine.Authorization
             return operationInfos.Where(ai => GetAllowed(role, ai.Key)).ToList(); 
         }
 
-        public static List<AllowedRule> GetAllowedRule(Lazy<RoleDN> roleLazy)
+        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve();
+            var role = roleLite.Retrieve();
 
             var queries = Database.RetrieveAll<OperationDN>();
             return (from a in queries
@@ -94,9 +94,9 @@ namespace Signum.Engine.Authorization
                     }).ToList();    
         }
 
-        public static void SetAllowedRule(List<AllowedRule> rules, Lazy<RoleDN> roleLazy)
+        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve();
+            var role = roleLite.Retrieve();
 
             var current = Database.Query<RuleQueryDN>().Where(r => r.Role == role).ToDictionary(a => a.Query);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => (QueryDN)r.Resource);

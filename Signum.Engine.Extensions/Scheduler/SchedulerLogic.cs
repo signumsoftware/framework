@@ -60,7 +60,7 @@ namespace Signum.Engine.Scheduler
                     (from st in Database.Query<ScheduledTaskDN>()
                      select new
                      {
-                         Entity = st.ToLazy(),
+                         Entity = st.ToLite(),
                          st.Id,
                          st.ToStr,
                          st.NextDate,
@@ -148,7 +148,7 @@ namespace Signum.Engine.Scheduler
                 new Thread(() =>
                 {
                     using (AuthLogic.User(AuthLogic.SystemUser))
-                        st.Task.ToLazy().ExecuteLazy(TaskOperation.ExecutePrivate);
+                        st.Task.ToLite().ExecuteLite(TaskOperation.ExecutePrivate);
                 }).Start();
 
                 SetTimer(); 

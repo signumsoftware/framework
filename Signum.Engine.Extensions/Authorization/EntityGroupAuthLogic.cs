@@ -196,9 +196,9 @@ namespace Signum.Engine.Authorization
             return query;
         }
 
-        public static List<EntityGroupRule> GetEntityGroupRules(Lazy<RoleDN> roleLazy)
+        public static List<EntityGroupRule> GetEntityGroupRules(Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve();
+            var role = roleLite.Retrieve();
 
             return EntityGroupLogic.Groups.Select(eg => 
                 {
@@ -213,9 +213,9 @@ namespace Signum.Engine.Authorization
                 }).ToList();
         }
 
-        public static void SetEntityGroupRules(List<EntityGroupRule> rules, Lazy<RoleDN> roleLazy)
+        public static void SetEntityGroupRules(List<EntityGroupRule> rules, Lite<RoleDN> roleLite)
         {
-            var role = roleLazy.Retrieve();
+            var role = roleLite.Retrieve();
 
             var current = Database.Query<RuleEntityGroupDN>().Where(r => r.Role == role).ToDictionary(a => a.Group);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => r.Group);

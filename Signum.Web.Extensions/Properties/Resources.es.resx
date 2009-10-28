@@ -126,8 +126,8 @@
   <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
     <value>La operación Construct From Many {{{0}}} necesita los Lazies de origen</value>
   </data>
-  <data name="CouldNotCreateLazyWithoutAnIdToCallOperation0" xml:space="preserve">
-    <value>No se pude crear un Lazy sin Id para llamar a la operación {{{0}}}</value>
+  <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
+    <value>No se pude crear un Lite sin Id para llamar a la operación {{{0}}}</value>
   </data>
   <data name="InvalidNewPassword" xml:space="preserve">
     <value>La nueva contraseña es incorrecta</value>

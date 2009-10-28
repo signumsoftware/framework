@@ -31,10 +31,10 @@ namespace Signum.Windows.Authorization
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lazy<RoleDN>), typeof(PropertyRules), new UIPropertyMetadata(null));
-        public Lazy<RoleDN> Role
+            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(PropertyRules), new UIPropertyMetadata(null));
+        public Lite<RoleDN> Role
         {
-            get { return (Lazy<RoleDN>)GetValue(RoleProperty); }
+            get { return (Lite<RoleDN>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
 

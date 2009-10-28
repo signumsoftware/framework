@@ -148,7 +148,7 @@ namespace Signum.Web.Operations
                 ident.GetType().Name, 
                 ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
                 EnumDN.UniqueKey(oi.Key),
-                oi.Lazy,
+                oi.Lite,
                 httpContext.Request.Params["prefix"] ?? "",
                 ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
                 ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"

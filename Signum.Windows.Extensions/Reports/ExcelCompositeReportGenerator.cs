@@ -42,7 +42,7 @@ namespace Signum.Windows.Reports
             int errores = 0;
             string mensajes = "";
             string filename = "";
-            foreach (Lazy<ExcelReportDN> erl in cr.ExcelReports)
+            foreach (Lite<ExcelReportDN> erl in cr.ExcelReports)
             {
 
                 try

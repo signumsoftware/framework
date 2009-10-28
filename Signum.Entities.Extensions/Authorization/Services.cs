@@ -25,10 +25,10 @@ namespace Signum.Services
     public interface ITypeAuthServer
     {
         [OperationContract, NetDataContract]
-        List<TypeAccessRule> GetTypesAccessRules(Lazy<RoleDN> role);
+        List<TypeAccessRule> GetTypesAccessRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetTypesAccessRules(List<TypeAccessRule> rules, Lazy<RoleDN> role);
+        void SetTypesAccessRules(List<TypeAccessRule> rules, Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
         Dictionary<Type, TypeAccess> AuthorizedTypes(); 
@@ -38,20 +38,20 @@ namespace Signum.Services
     public interface IFacadeMethodAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetFacadeMethodAllowedRules(Lazy<RoleDN> role);
+        List<AllowedRule> GetFacadeMethodAllowedRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetFacadeMethodAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role); 
+        void SetFacadeMethodAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role); 
     }
 
     [ServiceContract]
     public interface IPermissionAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetPermissionAllowedRules(Lazy<RoleDN> role);
+        List<AllowedRule> GetPermissionAllowedRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetPermissionAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+        void SetPermissionAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
         bool IsAuthorizedFor(Enum permissionKey);
@@ -61,10 +61,10 @@ namespace Signum.Services
     public interface IPropertyAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AccessRule> GetPropertyAccessRules(Lazy<RoleDN> role, TypeDN typeDN);
+        List<AccessRule> GetPropertyAccessRules(Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
-        void SetPropertyAccessRules(List<AccessRule> rules, Lazy<RoleDN> role, TypeDN typeDN);
+        void SetPropertyAccessRules(List<AccessRule> rules, Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
         Dictionary<Type, Dictionary<string, Access>> AuthorizedProperties(); 
@@ -74,10 +74,10 @@ namespace Signum.Services
     public interface IQueryAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetQueryAllowedRules(Lazy<RoleDN> role);
+        List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetQueryAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+        void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
         HashSet<object> AuthorizedQueries();
@@ -87,19 +87,19 @@ namespace Signum.Services
     public interface IOperationAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetOperationAllowedRules(Lazy<RoleDN> role);
+        List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetOperationAllowedRules(List<AllowedRule> rules, Lazy<RoleDN> role);
+        void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role);
     }
 
     [ServiceContract]
     public interface IEntityGroupAuthServer
     {
         [OperationContract, NetDataContract]
-        List<EntityGroupRule> GetEntityGroupAllowedRules(Lazy<RoleDN> role);
+        List<EntityGroupRule> GetEntityGroupAllowedRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lazy<RoleDN> role);
+        void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lite<RoleDN> role);
     }
 }
