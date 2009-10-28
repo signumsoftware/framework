@@ -1127,11 +1127,10 @@ namespace Signum.Engine.Linq
         {
             Expression left = this.Visit(b.Left);
             Expression right = this.Visit(b.Right);
-            Expression conversion = this.Visit(b.Conversion);
-            if (left != b.Left || right != b.Right || conversion != b.Conversion)
+            if (left != b.Left || right != b.Right)
             {
-                if (b.NodeType == ExpressionType.Coalesce && b.Conversion != null)
-                    return Expression.Coalesce(left, right, conversion as LambdaExpression);
+                if (b.NodeType == ExpressionType.Coalesce)
+                    return Expression.Coalesce(left, right, b.Conversion);
                 else
                 {
                     if (left.Type.IsNullable() == right.Type.IsNullable())
