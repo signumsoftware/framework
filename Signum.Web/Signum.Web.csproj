@@ -97,6 +97,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.es.resx</DependentUpon>
     </Compile>
+    <Compile Include="Widgets\LinksWidgetHelper.cs" />
+    <Compile Include="Widgets\WidgetsHelper.cs" />
     <Compile Include="WwwRedirectAttributes.cs" />
     <Compile Include="MenuHelper.cs" />
     <Compile Include="LightEntityLineHelper.cs" />
