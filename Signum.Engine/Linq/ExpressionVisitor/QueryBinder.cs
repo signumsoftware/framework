@@ -153,12 +153,7 @@ namespace Signum.Engine.Linq
             {
                 return this.BindContains(m.Type, m.Object, m.Arguments[0], m == root);
             }
-            else
-            {
-                Expression exp = BindStaticLambdaMethod(m);
-                if (exp != null)
-                    return exp;
-            }
+
             return base.VisitMethodCall(m);
         }
 
@@ -881,32 +876,22 @@ namespace Signum.Engine.Linq
                         });
                     }
 
-                    if (fi != null)
-                    {
-                        Expression result = fie.GetOrCreateFieldBinding(fi, this);
-                        return result;
-                    }
-                    else
-                    {
-                        Expression result = BindStaticLambdaProperty((PropertyInfo)m.Member, fie);
-                        return result;
-                    }
+                    if (fi == null)
+                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member, fie.Type));
+
+                    Expression result = fie.GetOrCreateFieldBinding(fi, this);
+                    return result;
                 }
                 case (ExpressionType)DbExpressionType.EmbeddedFieldInit:
                 {
                     EmbeddedFieldInitExpression efie = (EmbeddedFieldInitExpression)source;
                     FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
 
-                    if (fi != null)
-                    {
-                        Expression result = efie.GetBinding(fi);
-                        return result;
-                    }
-                    else
-                    {
-                        Expression result = BindStaticLambdaProperty((PropertyInfo)m.Member, efie);
-                        return result;
-                    }
+                    if (fi == null)
+                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member, efie.Type));
+
+                    Expression result = efie.GetBinding(fi);
+                    return result;
                 }
                 case (ExpressionType)DbExpressionType.LazyReference:
                 {
@@ -949,54 +934,6 @@ namespace Signum.Engine.Linq
             return Expression.MakeMemberAccess(source, m.Member);
         }
 
-        private Expression BindStaticLambdaProperty(PropertyInfo pi, IPropertyInitExpression pie)
-        {
-            Expression result = pie.TryGetPropertyBinding(pi);
-            if (result != null)
-                return result;
-
-            LambdaExpression lambda = ExtractAndClean(pie.Type, pi);
-
-            if (lambda == null)
-                throw new ApplicationException("{0}.{1} has no implementing Field or static Expression".Formato(pie.Type, pi.Name));
-
-            result = Visit(Expression.Invoke(lambda, (Expression)pie));
-
-            pie.AddPropertyBinding(pi, result);
-            return result;
-        }
-
-        private Expression BindStaticLambdaMethod(MethodCallExpression mce)
-        {
-            LambdaExpression lambda = 
-                mce.Object.TryCC(o => ExtractAndClean(o.Type, mce.Method)) ?? 
-                ExtractAndClean(mce.Method.DeclaringType, mce.Method);
-
-            if (lambda == null)
-                return null;
-
-            Expression[] args = mce.Object == null ? mce.Arguments.ToArray() : mce.Arguments.PreAnd(mce.Object).ToArray();
-
-            args = args.Select(e => Visit(e)).ToArray(); 
-
-            Expression result = Visit(Expression.Invoke(lambda, args));
-            return result;
-        }
-
-        static LambdaExpression ExtractAndClean(Type type, MemberInfo mi)
-        {
-            FieldInfo fi = type.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (fi == null)
-                return null;
-
-            LambdaExpression lambda = fi.GetValue(null) as LambdaExpression;
-            if (lambda == null)
-                return null;
-
-            LambdaExpression cleaned = (LambdaExpression)QueryUtils.Clean(lambda);
-
-            return cleaned;
-        }
 
         private Expression Collapse(List<Expression> list, Type returnType)
         {

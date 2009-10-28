@@ -31,6 +31,9 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static object Eval(Expression expression)
         {
+            if (expression is ConstantExpression)
+                return ((ConstantExpression)expression).Value;
+
             Delegate fn = Expression.Lambda(expression).Compile();
 
             try

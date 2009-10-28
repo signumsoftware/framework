@@ -47,10 +47,22 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).ThenBy(a => a.Sex).ToList();
         }
 
+        [TestMethod]
+        public void OrderByFirst()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).First();
+        }
+
+        [TestMethod]
+        public void OrderByTop()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Take(3);
+        }
+
         [TestMethod, ExpectedException(typeof(InvalidOperationException))]
         public void OrderByNotLast()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Select(a => a.Name).ToList();
+            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();
         }
 
     }

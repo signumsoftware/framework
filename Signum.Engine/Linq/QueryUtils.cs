@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
@@ -24,11 +25,11 @@ namespace Signum.Engine.Linq
             Expression rewrited = AggregateRewriter.Rewrite(binded);
             Expression rebinded = QueryRebinder.Rebind(rewrited);
             Expression projCleaned = ProjectionCleaner.Clean(rebinded);
-            Expression ordered = OrderByAsserter.Assert(projCleaned);
-            Expression replaced = AliasProjectionReplacer.Replace(ordered);
+            Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
             Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
-            return subqueryCleaned; 
+            Expression ordered = OrderByAsserter.Assert(subqueryCleaned);
+            return ordered; 
         }
 
         internal static int Delete<T>(Expression<Func<T, bool>> predicate)

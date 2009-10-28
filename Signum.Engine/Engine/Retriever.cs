@@ -168,51 +168,12 @@ namespace Signum.Engine
         } 
         #endregion
 
-        #region Interface Database
-        public IdentifiableEntity Retrieve(Type type, int id)
-        {
-            return GetIdentifiable(Schema.Current.Table(type), id);
-        }
-
-        public IdentifiableEntity Retrieve(Lazy lazy)
+        #region Schema Interface
+        public IdentifiableEntity GetIdentifiable(Lazy lazy)
         {
             return GetIdentifiable(Schema.Current.Table(lazy.RuntimeType), lazy.Id);
         }
 
-        public List<IdentifiableEntity> RetrieveAll(Type type)
-        {
-            SqlPreCommandSimple spc = Schema.Current.Table(type).SelectAllIDs().ToSimple();
-
-            DataTable table = Executor.ExecuteDataTable(spc);
-
-            return RetrieveList(type, table.Rows.Cast<DataRow>().Select(r => (int)r.Cell(SqlBuilder.PrimaryKeyName)).ToList());
-        }
-
-        public List<Lazy> RetrieveAllLazy(Type type)
-        {
-            SqlPreCommandSimple spc = Schema.Current.Table(type).SelectAllIDs().ToSimple();
-
-            DataTable table = Executor.ExecuteDataTable(spc);
-
-            return RetrieveListLazy(type, table.Rows.Cast<DataRow>().Select(r => (int)r.Cell(SqlBuilder.PrimaryKeyName)).ToList());
-        }
-
-        public List<IdentifiableEntity> RetrieveList(Type type, List<int> list)
-        {
-            Table table = Schema.Current.Table(type);
-
-            return list.Select(id => GetIdentifiable(table, id)).ToList();
-        }
-
-        public List<Lazy> RetrieveListLazy(Type type, List<int> list)
-        {
-            Table table = Schema.Current.Table(type);
-
-            return list.Select(id => GetLazy(table, type, id)).ToList();
-        }
-        #endregion
-
-        #region Schema Interface
         public IdentifiableEntity GetIdentifiable(Table table, int id)
         {
             Schema.Current.OnRetrieving(table.Type, id); 

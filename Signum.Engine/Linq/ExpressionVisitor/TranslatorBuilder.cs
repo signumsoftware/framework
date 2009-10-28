@@ -33,7 +33,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        static MethodInfo miBuildPrivate = typeof(TranslatorBuilder).GetMethod("BuildTranslateResult", BindingFlags.NonPublic | BindingFlags.Static);
+        static MethodInfo miBuildPrivate = ReflectionTools.GetMethodInfo(() => BuildTranslateResult<int>(null, null)).GetGenericMethodDefinition();
 
         static internal TranslateResult<T> BuildTranslateResult<T>(ProjectionExpression proj, ImmutableStack<string> prevAliases)
         {
@@ -92,19 +92,18 @@ namespace Signum.Engine.Linq
 
             public PropertyInfo piToStrLazy = ReflectionTools.GetPropertyInfo<Lazy>(l => l.ToStr);
 
-            static MethodInfo miGetValue = typeof(IProjectionRow).GetMethod("GetValue");
-            //static MethodInfo miExecuteSubQuery = typeof(IProjectionRow).GetMethod("ExecuteSubQuery");
+            static MethodInfo miGetValue = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetValue<int>(null, null)).GetGenericMethodDefinition();
 
             bool HasFullObjects;
 
-            static MethodInfo miGetList = typeof(IProjectionRow).GetMethod("GetList");
+            static MethodInfo miGetList = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetList<int>(null, 1)).GetGenericMethodDefinition();
 
-            static MethodInfo miGetIdentifiable = typeof(IProjectionRow).GetMethod("GetIdentifiable");
-            static MethodInfo miGetImplementedBy = typeof(IProjectionRow).GetMethod("GetImplementedBy");
-            static MethodInfo miGetImplementedByAll = typeof(IProjectionRow).GetMethod("GetImplementedByAll");
+            static MethodInfo miGetIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetIdentifiable<TypeDN>(null)).GetGenericMethodDefinition();
+            static MethodInfo miGetImplementedBy = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetImplementedBy<TypeDN>(null, null)).GetGenericMethodDefinition(); 
+            static MethodInfo miGetImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition();
 
-            static MethodInfo miGetLazyIdentifiable = typeof(IProjectionRow).GetMethod("GetLazyIdentifiable");
-            static MethodInfo miGetLazyImplementedByAll = typeof(IProjectionRow).GetMethod("GetLazyImplementedByAll");
+            static MethodInfo miGetLazyIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLazyIdentifiable<TypeDN>(null, null, null)).GetGenericMethodDefinition(); 
+            static MethodInfo miGetLazyImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLazyImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition(); 
 
             static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, ImmutableStack<string> prevAliases, out bool hasFullObjects)
             {

@@ -15,11 +15,6 @@ namespace Signum.Engine.Maps
 {
     public partial class Table
     {
-        internal SqlPreCommand SelectAllIDs()
-        {
-            return SqlBuilder.SelectAll(Name, new[] { SqlBuilder.PrimaryKeyName });  
-        }
-
         internal SqlPreCommand BatchSelect(int[] ids)
         {
             return SqlBuilder.SelectByIds(Name, new[] { "*" }, SqlBuilder.PrimaryKeyName, ids); 

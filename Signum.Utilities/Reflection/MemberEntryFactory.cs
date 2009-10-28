@@ -40,7 +40,8 @@ namespace Signum.Utilities.Reflection
 
         static BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;
 
-        static MethodInfo mi1 = typeof(MemberEntryFactory).GetMethod("GenerateList", new[] { typeof(MemberOptions) });
+        static MethodInfo mi1 = ReflectionTools.GetMethodInfo(() => GenerateList<int>(MemberOptions.Default)).GetGenericMethodDefinition();
+        
         public static List<MemberEntry<T>> GenerateList<T>(MemberOptions options)
         {
             PropertyInfo[] properties = (options & MemberOptions.Properties) == 0 ? new PropertyInfo[0] : typeof(T).GetProperties(bf);

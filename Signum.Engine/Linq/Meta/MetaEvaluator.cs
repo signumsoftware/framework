@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Linq
 {
@@ -36,13 +37,12 @@ namespace Signum.Engine.Linq
             }
             if (this.candidates.Contains(exp) && exp.NodeType != ExpressionType.Constant)
             {
-                return (ConstantExpression)GetType().GetMethod("Constant", BindingFlags.Static| BindingFlags.NonPublic).MakeGenericMethod(exp.Type).Invoke(null, null); 
+                return (ConstantExpression)miConstant.MakeGenericMethod(exp.Type).Invoke(null, null); 
             }
             return base.Visit(exp);
         }
 
-
-
+        static MethodInfo miConstant = ReflectionTools.GetMethodInfo(() => Constant<int>()).GetGenericMethodDefinition();
         static ConstantExpression Constant<T>()
         {
             return Expression.Constant(default(T), typeof(T)); 

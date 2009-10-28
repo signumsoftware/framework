@@ -109,27 +109,17 @@ namespace Signum.Utilities.Reflection
             return ((MemberExpression)body).Member;
         }
 
+        public static MethodInfo GetMethodInfo(Expression<Action> lambda)
+        {
+            return BaseMethodInfo(lambda);
+        }
+
         public static MethodInfo GetMethodInfo(Expression<Func<object>> lambda)
         {
             return BaseMethodInfo(lambda);
         }
 
         public static MethodInfo GetMethodInfo<T1>(Expression<Func<T1, object>> lambda)
-        {
-            return BaseMethodInfo(lambda);
-        }
-
-        public static MethodInfo GetMethodInfo<T1, T2>(Expression<Func<T1, T2, object>> lambda)
-        {
-            return BaseMethodInfo(lambda);
-        }
-
-        public static MethodInfo GetMethodInfo<T1, T2, T3>(Expression<Func<T1, T2, T3, object>> lambda)
-        {
-            return BaseMethodInfo(lambda);
-        }
-
-        public static MethodInfo GetMethodInfo<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, object>> lambda)
         {
             return BaseMethodInfo(lambda);
         }

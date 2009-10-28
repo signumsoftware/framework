@@ -112,7 +112,8 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    public static class QueryUtils {
+    public static class QueryUtils
+    {
         public static string GetQueryName(object queryKey)
         {
             return
@@ -128,6 +129,5 @@ namespace Signum.Entities.DynamicQuery
                 queryKey is Enum ? ((Enum)queryKey).NiceToString() :
                 queryKey.ToString();
         }
-    
     }
 }

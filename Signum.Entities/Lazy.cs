@@ -5,7 +5,9 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities.Properties;
-using System.Reflection; 
+using System.Reflection;
+using Signum.Utilities.ExpressionTrees;
+using System.Linq.Expressions;
 
 namespace Signum.Entities
 {
@@ -34,7 +36,7 @@ namespace Signum.Entities
 
         internal Lazy(T entidad)
             : base((IdentifiableEntity)(IIdentifiable)entidad)
-        {   
+        {
         }
 
         public override IdentifiableEntity UntypedEntityOrNull
@@ -47,20 +49,6 @@ namespace Signum.Entities
         {
             get { return entityOrNull; }
             internal set { entityOrNull = value; }
-        }
-
-        public bool RefersTo(T entity)
-        {
-            if (entity == null)
-                return false;
-
-            if (RuntimeType != entity.GetType())
-                return false;
-
-            if (IdOrNull != null)
-                return Id == entity.IdOrNull;
-            else
-                return object.ReferenceEquals(this.EntityOrNull, entity);
         }
     }
 
@@ -93,12 +81,12 @@ namespace Signum.Entities
             this.UntypedEntityOrNull = entidad;
             this.id = entidad.IdOrNull;
         }
-      
+
         public int RefreshId()
         {
             if (UntypedEntityOrNull != null)
                 id = UntypedEntityOrNull.Id;
-            return id.Value; 
+            return id.Value;
         }
 
         public Type RuntimeType
@@ -130,7 +118,7 @@ namespace Signum.Entities
         public void SetEntity(IdentifiableEntity ei)
         {
             if (id == null)
-                throw new ApplicationException(Resources.NewEntitiesAreNotAllowed); 
+                throw new ApplicationException(Resources.NewEntitiesAreNotAllowed);
 
             if (id != ei.id || RuntimeType != ei.GetType())
                 throw new ApplicationException(Resources.EntitiesDoNotMatch);
@@ -204,7 +192,7 @@ namespace Signum.Entities
 
             ConstructorInfo ci = Reflector.GenerateLazy(type).GetConstructor(bf, null, new[] { type }, null);
 
-            Lazy result = (Lazy)ci.Invoke(new[] { entidad }); 
+            Lazy result = (Lazy)ci.Invoke(new[] { entidad });
             result.ToStr = entidad.TryToString();
             return result;
         }
@@ -212,14 +200,14 @@ namespace Signum.Entities
         public string ToStr
         {
             get { return toStr; }
-            internal set { toStr = value;  }
+            internal set { toStr = value; }
         }
 
         public override bool Equals(object obj)
         {
             if (obj == null)
                 return false;
-      
+
             if (this == obj)
                 return true;
 
@@ -234,11 +222,11 @@ namespace Signum.Entities
                 else
                     return object.ReferenceEquals(this.UntypedEntityOrNull, lazy.UntypedEntityOrNull);
             }
-           
+
             return false;
         }
 
-        const int MagicMask = 123456853; 
+        const int MagicMask = 123456853;
         public override int GetHashCode()
         {
             if (this.UntypedEntityOrNull != null)
@@ -265,7 +253,7 @@ namespace Signum.Entities
                 return new Lazy<T>(lazy.RuntimeType, lazy.Id) { ToStr = lazy.ToStr };
         }
 
-        public static Lazy<T> ToLazy<T>(this Lazy lazy, string toStr) 
+        public static Lazy<T> ToLazy<T>(this Lazy lazy, string toStr)
             where T : class, IIdentifiable
         {
             if (lazy == null)
@@ -293,7 +281,7 @@ namespace Signum.Entities
             return new Lazy<T>(entity.GetType(), entity.Id) { ToStr = entity.ToString() };
         }
 
-        public static Lazy<T> ToLazy<T>(this T entity, string toStr) 
+        public static Lazy<T> ToLazy<T>(this T entity, string toStr)
             where T : class, IIdentifiable
         {
             if (entity == null)
@@ -302,7 +290,7 @@ namespace Signum.Entities
             if (entity.IsNew)
                 throw new ApplicationException(Resources.ToLazyLightNotAllowedForNewEntities);
 
-            return new Lazy<T>(entity.GetType(), entity.Id){ ToStr = toStr};
+            return new Lazy<T>(entity.GetType(), entity.Id) { ToStr = toStr };
         }
 
         public static Lazy<T> ToLazy<T>(this T entity, bool fat) where T : class, IIdentifiable
@@ -310,7 +298,7 @@ namespace Signum.Entities
             if (fat)
                 return entity.ToLazyFat();
             else
-                return entity.ToLazy(); 
+                return entity.ToLazy();
         }
 
         public static Lazy<T> ToLazy<T>(this T entity, bool fat, string toStr) where T : class, IIdentifiable
@@ -335,6 +323,80 @@ namespace Signum.Entities
                 return null;
 
             return new Lazy<T>(entity) { ToStr = toStr };
-        } 
+        }
+
+        [MethodExpander(typeof(RefersToExpander))]
+        public static bool RefersTo<T>(this Lazy<T> lazy, T entity)
+            where T : class, IIdentifiable
+        {
+            if (lazy == null && entity == null)
+                return true;
+
+            if (entity == null || entity == null)
+                return false;
+
+            if (lazy.RuntimeType != entity.GetType())
+                return false;
+
+            if (lazy.IdOrNull != null)
+                return lazy.Id == entity.IdOrNull;
+            else
+                return object.ReferenceEquals(lazy.EntityOrNull, entity);
+        }
+
+        class RefersToExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments)
+            {
+                Expression lazy = arguments[0];
+                return Expression.Equal(Expression.MakeMemberAccess(lazy, lazy.Type.GetProperty("EntityOrNull", BindingFlags.Instance| BindingFlags.Public)), arguments[1]);
+            }
+        }
+
+        [MethodExpander(typeof(IsExpander))]
+        public static bool Is<T>(this T entity1, T entity2)
+             where T : class, IIdentifiable
+        {
+            if (entity1 == null && entity2 == null)
+                return true;
+
+            if (entity1 == null || entity2 == null)
+                return false;
+
+            if (entity1.GetType() != entity2.GetType())
+                return false;
+
+            if (entity1.IdOrNull != null)
+                return entity1.Id == entity2.IdOrNull;
+            else
+                return object.ReferenceEquals(entity1, entity2);
+        }
+
+        class IsExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments)
+            {
+                return Expression.Equal(arguments[0], arguments[1]);
+            }
+        }
+
+        [MethodExpander(typeof(IsExpander))]
+        public static bool Is<T>(this Lazy<T> lazy1, Lazy<T> lazy2)
+            where T : class, IIdentifiable
+        {
+            if (lazy1 == null && lazy2 == null)
+                return true;
+
+            if (lazy1 == null || lazy2 == null)
+                return false;
+
+            if (lazy1.GetType() != lazy2.GetType())
+                return false;
+
+            if (lazy1.IdOrNull != null && lazy2.IdOrNull != null)
+                return lazy1.Id == lazy2.Id;
+            else
+                return object.ReferenceEquals(lazy1.EntityOrNull, lazy2.EntityOrNull);
+        }
     }
 }

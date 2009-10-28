@@ -12,6 +12,8 @@ using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
 using Signum.Engine.Exceptions;
+using System.Collections;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine
 {
@@ -80,8 +82,8 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
-
-                IdentifiableEntity ident = rec.Retrieve(type, id);
+                Table table = Schema.Current.Table(type);
+                IdentifiableEntity ident = rec.GetIdentifiable(table, id);
 
                 rec.ProcessAll();
 
@@ -114,47 +116,33 @@ namespace Signum.Engine
 
         #region Retrieve All Lists Lazys
         public static List<T> RetrieveAll<T>()
+            where T : IdentifiableEntity
         {
-            return RetrieveAll(typeof(T)).Cast<T>().ToList();
+            return Database.Query<T>().ToList();
         }
 
+        static readonly MethodInfo miRetrieveAll = ReflectionTools.GetMethodInfo(()=>RetrieveAll<TypeDN>()).GetGenericMethodDefinition();
         public static List<IdentifiableEntity> RetrieveAll(Type type)
         {
-            using (new EntityCache())
-            using (Transaction tr = new Transaction())
-            {
-                Retriever rec = new Retriever();
-
-                List<IdentifiableEntity> ident = rec.RetrieveAll(type);
-
-                rec.ProcessAll(); 
-
-                return tr.Commit(ident);
-            }
+            IList list = (IList)miRetrieveAll.MakeGenericMethod(type).Invoke(null, null);
+            return list.Cast<IdentifiableEntity>().ToList();
         }
 
         public static List<Lazy<T>> RetrieveAllLazy<T>()
-            where T : class, IIdentifiable
+            where T : IdentifiableEntity 
         {
-            return RetrieveAllLazy(typeof(T)).Cast<Lazy<T>>().ToList();
+            return Database.Query<T>().Select(e => e.ToLazy()).ToList(); 
         }
 
+        static readonly MethodInfo miRetrieveAllLazy = ReflectionTools.GetMethodInfo(() => Database.RetrieveAllLazy<TypeDN>()).GetGenericMethodDefinition();
         public static List<Lazy> RetrieveAllLazy(Type type)
         {
-            using (new EntityCache())
-            using (Transaction tr = new Transaction())
-            {
-                Retriever rec = new Retriever();
-
-                List<Lazy> ident = rec.RetrieveAllLazy(type);
-
-                rec.ProcessAll(); 
-
-                return tr.Commit(ident);
-            }
+            IList list = (IList)miRetrieveAllLazy.MakeGenericMethod(type).Invoke(null, null);
+            return list.Cast<Lazy>().ToList();
         }
 
         public static List<T> RetrieveList<T>(List<int> ids)
+            where T : class, IIdentifiable
         {
             return RetrieveList(typeof(T), ids).Cast<T>().ToList();
         }
@@ -165,8 +153,9 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
+                Table table = Schema.Current.Table(type);
 
-                List<IdentifiableEntity> ident = rec.RetrieveList(type, ids);
+                List<IdentifiableEntity> ident = ids.Select(id => rec.GetIdentifiable(table, id)).ToList();
 
                 rec.ProcessAll();
 
@@ -186,8 +175,9 @@ namespace Signum.Engine
             using (Transaction tr = new Transaction())
             {
                 Retriever rec = new Retriever();
+                Table table = Schema.Current.Table(type);
 
-                List<Lazy> ident = rec.RetrieveListLazy(type, ids);
+                List<Lazy> ident = ids.Select(id => rec.GetLazy(table, type, id)).ToList();
 
                 rec.ProcessAll();
 
@@ -203,7 +193,7 @@ namespace Signum.Engine
             {
                 Retriever rec = new Retriever();
 
-                List<T> ident = lazys.Select(l => (T)(IIdentifiable)rec.Retrieve(l)).ToList();
+                List<T> ident = lazys.Select(l => (T)(IIdentifiable)rec.GetIdentifiable(l)).ToList();
 
                 rec.ProcessAll();
 
@@ -218,7 +208,7 @@ namespace Signum.Engine
             {
                 Retriever rec = new Retriever();
 
-                List<IdentifiableEntity> ident = lazys.Select(l => rec.Retrieve(l)).ToList();
+                List<IdentifiableEntity> ident = lazys.Select(l => rec.GetIdentifiable(l)).ToList();
 
                 rec.ProcessAll(); 
 
@@ -262,11 +252,16 @@ namespace Signum.Engine
         }
         #endregion
 
-        #region Query Back
+        #region Query
         public static IQueryable<T> Query<T>()
-         where T : IdentifiableEntity
+            where T : IdentifiableEntity
         {
-            return new Query<T>(DbQueryProvider.Single);
+            IQueryable<T> result = new Query<T>(DbQueryProvider.Single);
+
+            if (ConnectionScope.Current != null)
+                result = Schema.Current.OnFilterQuery(result);
+
+            return result;
         }
 
         public static IQueryable<T> View<T>()

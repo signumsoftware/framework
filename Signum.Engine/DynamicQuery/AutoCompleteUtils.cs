@@ -44,7 +44,7 @@ namespace Signum.Engine.DynamicQuery
             return result;
         }
 
-        static MethodInfo miLazyStarting = typeof(AutoCompleteUtils).GetMethod("LazyStarting", BindingFlags.NonPublic | BindingFlags.Static);
+        static MethodInfo miLazyStarting = ReflectionTools.GetMethodInfo(()=>LazyStarting<TypeDN,TypeDN>(null, 1)).GetGenericMethodDefinition();
         static List<Lazy> LazyStarting<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
             return Database.Query<RT>().Where(a => a.ToStr.StartsWith(subString)).Select(a => a.ToLazy<LT>()).Take(count).AsEnumerable().OrderBy(l=>l.ToStr).Cast<Lazy>().ToList();
         }
 
-        static MethodInfo miLazyContaining = typeof(AutoCompleteUtils).GetMethod("LazyContaining", BindingFlags.NonPublic | BindingFlags.Static);
+        static MethodInfo miLazyContaining = ReflectionTools.GetMethodInfo(() => LazyContaining<TypeDN, TypeDN>(null, 1)).GetGenericMethodDefinition();
         static List<Lazy> LazyContaining<LT, RT>(string subString, int count)
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT
@@ -80,7 +80,7 @@ namespace Signum.Engine.DynamicQuery
             return result;
         }
 
-        static MethodInfo miAllLazy = typeof(AutoCompleteUtils).GetMethod("AllLazy", BindingFlags.NonPublic | BindingFlags.Static);
+        static MethodInfo miAllLazy = ReflectionTools.GetMethodInfo(() => AllLazy<TypeDN, TypeDN>()).GetGenericMethodDefinition();
         static List<Lazy> AllLazy<LT, RT>()
             where LT : class, IIdentifiable
             where RT : IdentifiableEntity, LT

@@ -128,6 +128,16 @@ namespace Signum.Engine.Maps
             }
         }
 
+        internal IQueryable<T> OnFilterQuery<T>(IQueryable<T> query)
+            where T: IdentifiableEntity
+        {
+            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+            if (ee == null)
+                return query;
+
+            return ee.OnFilterQuery(query);
+        }
+
         public event Func<Replacements, SqlPreCommand> Synchronizing;
         internal SqlPreCommand SynchronizationScript(string schemaName)
         {
@@ -303,6 +313,17 @@ namespace Signum.Engine.Maps
         public event TypeIdEventHandler Deleting;
         public event TypeIdEventHandler Deleted;
 
+        public event FilterQueryEventHandler<T> FilterQuery; 
+
+        public IQueryable<T> OnFilterQuery(IQueryable<T> query)
+        {
+            if(FilterQuery != null)
+                foreach (FilterQueryEventHandler<T> filter in FilterQuery.GetInvocationList())
+                    query = filter(query); 
+
+            return query; 
+        }
+
         void IEntityEvents.OnSaving(IdentifiableEntity entity, ref bool graphModified)
         {
             if (Saving != null)
@@ -343,6 +364,7 @@ namespace Signum.Engine.Maps
     public delegate void SavingEntityEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
     public delegate void EntityEventHandler<T>(T ident) where T : IdentifiableEntity;
     public delegate void TypeIdEventHandler(Type type, int id);
+    public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
     public delegate void InitEventHandler(Schema sender); 
 

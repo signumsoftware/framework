@@ -421,7 +421,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        static MethodInfo c = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });
+        static MethodInfo c = ReflectionTools.GetMethodInfo(()=>string.Concat("",""));
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {

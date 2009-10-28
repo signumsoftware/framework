@@ -28,7 +28,7 @@ namespace Signum.Engine.Linq
         ImmutableStack<string> prevAliases; 
 
         ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
-        static MethodInfo miGetValue = typeof(IProjectionRow).GetMethod("GetValue");
+        static MethodInfo miGetValue = ReflectionTools.GetMethodInfo((IProjectionRow pr) => pr.GetValue<int>(null, null)).GetGenericMethodDefinition();
 
         List<Expression> parameterExpressions = new List<Expression>(); 
 

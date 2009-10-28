@@ -14,47 +14,28 @@ namespace Signum.Utilities.ExpressionTrees
 	/// </summary>
 	public interface IMethodExpander
 	{
-		/// <summary>
-		/// Converts calls to method. This method is called when converting
-		/// expression tree before it is converted to SQL/or other target.
-		/// </summary>
-		/// <param name="selfRef">Represents reference to object (on which the method is invoked)</param>
-		/// <param name="parameters">Represents other parameters</param>
-		/// <returns>Method should return converted string</returns>
-		Expression Expand(Expression selfRef, IEnumerable<Expression> parameters);
+        Expression Expand(Expression instance, Expression[] arguments);
 	}
 
-
 	/// <summary>
-	/// Using this attribute you can define class that should be used for expanding 
-	/// calls to the method befor converting Expression tree to SQL (or other target).
-	/// This attribute attaches implementation of <see cref="IMethodExpander"/> interface 
-	/// to method.
+    /// Attribute to define the class that should be used to convert calls to methods
+    /// in LINQ expression trees
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 	public sealed class MethodExpanderAttribute : Attribute
 	{
-		#region Members
-
-		private Type _type;
-
-		/// <summary>
-		/// Type that implements IMethodExpander interface
-		/// </summary>
+		private Type expanderType;
 		public Type ExpanderType
 		{
-			get { return _type; }
-			set { _type = value; }
+			get { return expanderType; }
 		}
 
+        /// <param name="type">A class that implements IMethodExpander</param>
 		public MethodExpanderAttribute(Type type)
 		{
-			_type = type;
+			expanderType = type;
 		}
-
-		#endregion
 	}
-
 
 	/// <summary>
 	/// Implementation of ExpressionVisiter that does the replacement
@@ -66,53 +47,87 @@ namespace Signum.Utilities.ExpressionTrees
             return new ExpressionExpander().Visit(expr);
         }
 
-		#region Initialization
-        Dictionary<ParameterExpression, Expression> _replaceVars = new Dictionary<ParameterExpression, Expression>();
-		#endregion
+        Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
 
-		#region Overrides
         protected override Expression VisitParameter(ParameterExpression p)
 		{
-			if ((_replaceVars != null) && (_replaceVars.ContainsKey(p)))
-				return Visit(_replaceVars[p]);
+			if ((replacements != null) && (replacements.ContainsKey(p)))
+				return Visit(replacements[p]);
 			else
 				return base.VisitParameter(p);
 		}
 
+        protected override Expression VisitInvocation(InvocationExpression iv)
+        {
+            LambdaExpression lambda = iv.Expression as LambdaExpression;
+            if (lambda != null)
+            {
+                for (int i = 0, n = lambda.Parameters.Count; i < n; i++)
+                    replacements[lambda.Parameters[i]] = iv.Arguments[i];
+
+                Expression result = this.Visit(lambda.Body);
+
+                for (int i = 0, n = lambda.Parameters.Count; i < n; i++)
+                    replacements.Remove(lambda.Parameters[i]);
+
+                return result; 
+            }
+            return base.VisitInvocation(iv);
+        }
+
+
 		protected override Expression VisitMethodCall(MethodCallExpression m)
 		{
-			// Expand expression tree 'calls'
-			object[] attrs = m.Method.GetCustomAttributes(typeof(MethodExpanderAttribute), false);
-			if (attrs.Length > 0)
+            MethodExpanderAttribute attribute = m.Method.SingleAttribute<MethodExpanderAttribute>();
+			if (attribute != null)
 			{
-				MethodExpanderAttribute attr = (MethodExpanderAttribute)attrs[0];
-				IMethodExpander exp = Activator.CreateInstance(attr.ExpanderType) as IMethodExpander;
-				if (exp == null) throw new InvalidOperationException(string.Format(
-					"LINQ method mapping expansion failed! Type '{0}' does not implement IMethodExpander interface.",
-					attr.ExpanderType.Name));
-				return exp.Expand(Visit(m.Arguments[0]), m.Arguments.Skip(1).Select(p => Visit(p)));
+                IMethodExpander exp = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
+				if (exp == null) 
+                    throw new InvalidOperationException("Expansion failed! '{0}' does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
+                return Visit(exp.Expand(Visit(m.Object), m.Arguments.Select(p => Visit(p)).ToArray()));
 			}
 
 			if (m.Method.DeclaringType == typeof(ExpressionExtensions))
 			{
 				LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
-				
-				for (int i = 0; i < lambda.Parameters.Count; i++)
-				{
-				   _replaceVars.Add(lambda.Parameters[i],  m.Arguments[i + 1]);
-				}
 
-                Expression result = Visit(lambda.Body);
-
-                for (int i = 0; i < lambda.Parameters.Count; i++)
-                {
-                    _replaceVars.Remove(lambda.Parameters[i]);
-                }
-
-                return result; 
+                return Visit(Expression.Invoke(lambda, m.Arguments.Skip(1).Select(a=>Visit(a)).ToArray()));
 			}
+
+            LambdaExpression lambdaExpression = ExtractAndClean(m.Method);
+            if(lambdaExpression != null)
+            {
+                Expression[] args =  m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
+
+                return Visit(Expression.Invoke(lambdaExpression, args.Select(e => Visit(e)).ToArray()));
+            }
+
 			return base.VisitMethodCall(m);
 		}
-		#endregion
+
+        protected override Expression VisitMemberAccess(MemberExpression m)
+        {
+            PropertyInfo pi = m.Member as PropertyInfo;
+            if(pi == null)
+                 return base.VisitMemberAccess(m);
+
+            LambdaExpression lambda = ExtractAndClean(pi); 
+            if(lambda ==null)
+                return base.VisitMemberAccess(m);
+
+            if(m.Expression == null)
+                return lambda.Body;
+            else 
+                return Visit(Expression.Invoke(lambda, Visit(m.Expression)));
+        }
+
+        static LambdaExpression ExtractAndClean(MemberInfo mi)
+        {
+            FieldInfo fi = mi.DeclaringType.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            if (fi == null)
+                return null;
+
+            return fi.GetValue(null) as LambdaExpression;
+        }
 	}
 }
