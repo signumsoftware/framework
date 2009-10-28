@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Linq.Expressions;
 
 namespace Signum.Entities
 {
@@ -13,17 +14,16 @@ namespace Signum.Entities
         public bool AllowChange
         {
             get { return allowTemporaly || IsNew; }
-            set { allowTemporaly = value; Notify("AllowChange"); }
+            set { allowTemporaly = value; Notify(()=>AllowChange); }
         }
 
-        protected override bool Set<T>(ref T variable, T value, string propertyName)
+        protected override bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
         {
             if (AllowChange)
-                return base.Set(ref variable, value, propertyName);
+                return base.Set(ref variable, value, property);
             else
-                return base.SetIfNew(ref variable, value, propertyName);
+                return base.SetIfNew(ref variable, value, property);
         }
-
 
         protected internal override void PreSaving(ref bool graphModified)
         {

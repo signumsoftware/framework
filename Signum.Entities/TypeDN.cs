@@ -13,7 +13,7 @@ namespace Signum.Entities
         public string ClassName
         {
             get { return className; }
-            set { Set(ref className, value, "ClassName"); }
+            set { Set(ref className, value, () => ClassName); }
         }
 
         [UniqueIndex]
@@ -21,7 +21,7 @@ namespace Signum.Entities
         public string TableName
         {
             get { return tableName; }
-            set { Set(ref tableName, value, "TableName"); }
+            set { Set(ref tableName, value, () => TableName); }
         }
 
         [NotNullable]
@@ -30,7 +30,7 @@ namespace Signum.Entities
         public string FriendlyName
         {
             get { return friendlyName; }
-            set { Set(ref friendlyName, value, "Name"); }
+            set { Set(ref friendlyName, value, () => FriendlyName); }
         }
 
         public override string ToString()

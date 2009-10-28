@@ -12,7 +12,7 @@ namespace Signum.Entities.Basics
         public string Hex
         {
             get { return hex; }
-            set { SetToStr(ref hex, value, "Hex"); }
+            set { SetToStr(ref hex, value, () => Hex); }
         }
 
         public override string ToString()

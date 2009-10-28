@@ -23,14 +23,14 @@ namespace Signum.Entities.Basics
         public Lite<IdentifiableEntity> Entity
         {
             get { return entity; }
-            set { Set(ref entity, value, "Entity"); }
+            set { Set(ref entity, value, () => Entity); }
         }
 
         DateTime? alertDate;
         public DateTime? AlertDate
         {
             get { return alertDate; }
-            set { Set(ref alertDate, value, "AlertDate"); }
+            set { Set(ref alertDate, value, () => AlertDate); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -39,14 +39,14 @@ namespace Signum.Entities.Basics
         public string Text
         {
             get { return text; }
-            set { Set(ref text, value, "Text"); }
+            set { Set(ref text, value, () => Text); }
         }
 
         DateTime? checkDate;
         public DateTime? CheckDate
         {
             get { return checkDate; }
-            set { Set(ref checkDate, value, "CheckDate"); }
+            set { Set(ref checkDate, value, () => CheckDate); }
         }
 
         public override string ToString()

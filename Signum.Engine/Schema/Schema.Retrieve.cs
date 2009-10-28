@@ -36,7 +36,7 @@ namespace Signum.Engine.Maps
             ei.IsNew = false; 
         }
 
-        static string toStr = ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr).Name;
+        static string toStr = ReflectionTools.GetFieldInfo((IdentifiableEntity ei) => ei.toStr).Name;
 
         internal void FillLite(DataRow row, Lite lite)
         {

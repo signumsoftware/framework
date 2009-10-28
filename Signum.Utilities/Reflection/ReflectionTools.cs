@@ -9,6 +9,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Resources;
 using System.Globalization;
+using Signum.Utilities.Properties;
 
 namespace Signum.Utilities.Reflection
 {
@@ -66,71 +67,115 @@ namespace Signum.Utilities.Reflection
             return true;
         }
 
-        public static PropertyInfo GetPropertyInfo(Expression<Func<object>> lambda)
+        public static PropertyInfo GetPropertyInfo<R>(Expression<Func<R>> property)
         {
-            return (PropertyInfo)BaseMemberInfo(lambda);
+            return BasePropertyInfo(property);
         }
 
-        public static PropertyInfo GetPropertyInfo<T1>(Expression<Func<T1, object>> lambda)
+        public static PropertyInfo GetPropertyInfo<T, R>(Expression<Func<T, R>> property)
         {
-            return (PropertyInfo)BaseMemberInfo(lambda);
+            return BasePropertyInfo(property);
         }
 
-        public static FieldInfo GetFieldInfo(Expression<Func<object>> lambda)
+        public static PropertyInfo BasePropertyInfo(LambdaExpression property)
         {
-            return (FieldInfo)BaseMemberInfo(lambda);
+            if (property == null)
+                throw new ArgumentNullException("property");
+
+            MemberExpression ex = property.Body as MemberExpression;
+            if (ex == null)
+                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
+
+            PropertyInfo pi = ex.Member as PropertyInfo;
+            if (pi == null)
+                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
+
+            return pi;
         }
 
-        public static FieldInfo GetFieldInfo<T1>(Expression<Func<T1, object>> lambda)
+        public static FieldInfo GetFieldInfo<R>(Expression<Func<R>> field)
         {
-            return (FieldInfo)BaseMemberInfo(lambda);
+            return BaseFieldInfo(field);
         }
 
-        public static MemberInfo GetMemberInfo<T1>(Expression<Func<T1, object>> lambda)
+        public static FieldInfo GetFieldInfo<T,R>(Expression<Func<T, R>> field)
         {
-            return BaseMemberInfo(lambda);
+            return BaseFieldInfo(field);
         }
 
-        public static Type GetReceiverType<T1>(Expression<Func<T1, object>> lambda)
+        public static FieldInfo BaseFieldInfo(LambdaExpression field)
+        {
+            if (field == null)
+                throw new ArgumentNullException("field");
+
+            MemberExpression ex = field.Body as MemberExpression;
+            if (ex == null)
+                throw new ArgumentException(Resources.FieldShouldBeAnExpressionAccessingAField);
+
+            FieldInfo pi = ex.Member as FieldInfo;
+            if (pi == null)
+                throw new ArgumentException(Resources.FieldShouldBeAnExpressionAccessingAField);
+
+            return pi;
+        }
+
+        public static MemberInfo GetMemberInfo<R>(Expression<Func<R>> member)
+        {
+            return BaseMemberInfo(member);
+        }
+
+        public static MemberInfo GetMemberInfo<T, R>(Expression<Func<T, R>> member)
+        {
+            return BaseMemberInfo(member);
+        }
+
+        public static MemberInfo BaseMemberInfo(LambdaExpression member)
+        {
+            if (member == null)
+                throw new ArgumentNullException("member");
+
+            MemberExpression ex = member.Body as MemberExpression;
+            if (ex == null)
+                throw new ArgumentException(Resources.MemberShouldBeAnExpressionAccessingAMember);
+
+            return  ex.Member;
+        }
+
+    
+        public static MethodInfo GetMethodInfo(Expression<Action> method)
+        {
+            return BaseMethodInfo(method);
+        }
+
+        public static MethodInfo GetMethodInfo<R>(Expression<Func<R>> method)
+        {
+            return BaseMethodInfo(method);
+        }
+
+        public static MethodInfo GetMethodInfo<T, R>(Expression<Func<T, R>> method)
+        {
+            return BaseMethodInfo(method);
+        }
+
+        public static MethodInfo BaseMethodInfo(LambdaExpression method)
+        {
+            if (method == null)
+                throw new ArgumentNullException("method");
+
+            MethodCallExpression ex = method.Body as MethodCallExpression;
+            if (ex == null)
+                throw new ArgumentException(Resources.MethodShouldBeAnExpressionCallingAMethod);
+
+            return ex.Method;
+        }
+
+        public static Type GetReceiverType<T, R>(Expression<Func<T, R>> lambda)
         {
             Expression body = lambda.Body;
             if (body.NodeType == ExpressionType.Convert)
                 body = ((UnaryExpression)body).Operand;
 
             return ((MemberExpression)body).Expression.Type;
-        }
-
-        public static MemberInfo BaseMemberInfo(LambdaExpression lambdaExpression)
-        {
-            Expression body = lambdaExpression.Body;
-            if (body.NodeType == ExpressionType.Convert)
-                body = ((UnaryExpression)body).Operand;
-
-            return ((MemberExpression)body).Member;
-        }
-
-        public static MethodInfo GetMethodInfo(Expression<Action> lambda)
-        {
-            return BaseMethodInfo(lambda);
-        }
-
-        public static MethodInfo GetMethodInfo(Expression<Func<object>> lambda)
-        {
-            return BaseMethodInfo(lambda);
-        }
-
-        public static MethodInfo GetMethodInfo<T1>(Expression<Func<T1, object>> lambda)
-        {
-            return BaseMethodInfo(lambda);
-        }
-
-        static MethodInfo BaseMethodInfo(LambdaExpression lambdaExpression)
-        {
-            Expression body = lambdaExpression.Body;
-            if (body.NodeType == ExpressionType.Convert)
-                body = ((UnaryExpression)body).Operand;
-
-            return ((MethodCallExpression)body).Method;
         }
 
         public static Func<T, object> CreateGetter<T>(MemberInfo m)

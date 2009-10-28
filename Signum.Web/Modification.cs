@@ -298,7 +298,7 @@ namespace Signum.Web
             Dictionary<string, PropertyPack> propertyValidators = null;
             Type myType = RuntimeType ?? StaticType;
             if (!myType.IsInterface && !myType.IsAbstract)
-                propertyValidators = Reflector.GetPropertyValidators(myType);
+                propertyValidators = Reflector.GetPropertyPacks(myType);
 
             Properties = new Dictionary<string, PropertyPackModification>();
 

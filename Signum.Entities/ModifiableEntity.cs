@@ -32,31 +32,33 @@ namespace Signum.Entities
             internal set { selfModified = value; }
         }
 
-        protected virtual bool Set<T>(ref T variable, T value, string propertyName)
+        protected virtual bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
         {
             if (EqualityComparer<T>.Default.Equals(variable, value))
                 return false;
 
+            PropertyInfo pi = ReflectionTools.BasePropertyInfo(property); 
+
             if (variable is INotifyCollectionChanged)
             {
-                if(AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), propertyName))
+                if(AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), pi))
                     ((INotifyCollectionChanged)variable).CollectionChanged -= ChildCollectionChanged;
 
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     foreach (INotifyPropertyChanged item in (IEnumerable)variable)
                         item.PropertyChanged -= ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     foreach (ModifiableEntity item in (IEnumerable)variable)
                         item.PropertyValidation -= ChildPropertyValidation;
             }
 
             if (variable is ModifiableEntity)
             {
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     ((INotifyPropertyChanged)variable).PropertyChanged -= ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     ((ModifiableEntity)(object)variable).PropertyValidation -= ChildPropertyValidation;
             }
 
@@ -64,48 +66,32 @@ namespace Signum.Entities
 
             if (variable is INotifyCollectionChanged)
             {
-                if (AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), pi))
                     ((INotifyCollectionChanged)variable).CollectionChanged += ChildCollectionChanged;
 
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     foreach (INotifyPropertyChanged item in (IEnumerable)variable)
                         item.PropertyChanged += ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     foreach (ModifiableEntity item in (IEnumerable)variable)
                         item.PropertyValidation += ChildPropertyValidation;
             }
 
             if (variable is ModifiableEntity)
             {
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     ((INotifyPropertyChanged)variable).PropertyChanged += ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), propertyName))
+                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     ((ModifiableEntity)(object)variable).PropertyValidation += ChildPropertyValidation;
             }
 
             selfModified = true;
-            Notify(propertyName);
-            NotifyError();
+            NotifyPrivate(pi.Name);
+            NotifyPrivate("Error");
 
             return true;
-        }
-
-        protected void NotifyToString()
-        {
-            Notify("ToStringMethod");
-        }
-
-        protected void NotifyError()
-        {
-            Notify("Error");
-        }
-
-        protected void NotifyError(string propertyName)
-        {
-            Notify(propertyName);
-            Notify("Error");
         }
 
         [HiddenProperty]
@@ -114,11 +100,11 @@ namespace Signum.Entities
             get { return ToString().HasText() ? ToString() : this.GetType().Name; }
         }
 
-        public bool SetToStr<T>(ref T variable, T valor, string propertyName)
+        public bool SetToStr<T>(ref T variable, T valor, Expression<Func<T>> property)
         {
-            if (this.Set(ref variable, valor, propertyName))
+            if (this.Set(ref variable, valor, property))
             {
-                NotifyToString();
+                NotifyPrivate("ToStringMethod");
                 return true;
             }
             return false;
@@ -207,7 +193,7 @@ namespace Signum.Entities
 
         }
 
-        protected virtual string ChildPropertyValidation(ModifiableEntity sender, string propertyName, object propertyValue)
+        protected virtual string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi, object propertyValue)
         {
             return null;
         }
@@ -219,16 +205,16 @@ namespace Signum.Entities
         [field: NonSerialized, Ignore]
         public event PropertyValidationEventHandler PropertyValidation;
 
-        protected void Notify(string propertyName)
+        protected void Notify<T>(Expression<Func<T>> property)
+        {
+            NotifyPrivate(ReflectionTools.BasePropertyInfo(property).Name);
+            NotifyPrivate("Error");
+        }
+
+        void NotifyPrivate(string propertyName)
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        protected void Notify(object sender, string propertyName)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(sender, new PropertyChangedEventArgs(propertyName));
         }
 
         static long temporalIdCounter = 0;
@@ -260,12 +246,12 @@ namespace Signum.Entities
         //override for full entitity integrity check. Remember to call base. 
         public override string IntegrityCheck()
         {
-            return Reflector.GetPropertyValidators(GetType()).Select(k => this[k.Key]).NotNull().ToString("\r\n");
+            return Reflector.GetPropertyPacks(GetType()).Select(k => this[k.Key]).NotNull().ToString("\r\n");
         }
 
         //override for per-property checks
         [HiddenProperty]
-        public virtual string this[string columnName]
+        public string this[string columnName]
         {
             get
             {
@@ -273,22 +259,32 @@ namespace Signum.Entities
                     return Error;
                 else
                 {
-                    PropertyPack pp = Reflector.GetPropertyValidators(GetType()).TryGetC(columnName);
+                    PropertyPack pp = Reflector.GetPropertyPacks(GetType()).TryGetC(columnName);
                     if (pp == null)
                         return null; //Hidden properties
 
                     object val = pp.GetValue(this);
                     string result = pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(pp.PropertyInfo.NiceName())).FirstOrDefault();
-                   
+
+                    if (result != null)
+                        return result;
+
+                    result = PropertyCheck(pp.PropertyInfo);
+
                     if (result != null)
                         return result;
 
                     if (PropertyValidation != null)
-                        return PropertyValidation(this, columnName, val);
+                        result = PropertyValidation(this, pp.PropertyInfo, val);
 
-                    return null; 
+                    return result;
                 }
             }
+        }
+
+        protected virtual string PropertyCheck(PropertyInfo pi)
+        {
+            return null;
         }
 
         #endregion
@@ -309,17 +305,17 @@ namespace Signum.Entities
         #endregion
     }
 
-    public delegate string PropertyValidationEventHandler(ModifiableEntity sender, string propertyName, object propertyValue);
+    public delegate string PropertyValidationEventHandler(ModifiableEntity sender, PropertyInfo pi, object propertyValue);
 
     public static class ModifiableEntityExtensions
     {
         public static PropertyValidationEventHandler AddValidation<T, P>(this T entity, Expression<Func<T, P>> property, Func<P, string> error)
             where T : ModifiableEntity
         {
-            PropertyInfo pi = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
+            PropertyInfo pi2 = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
 
-            PropertyValidationEventHandler val = (sender, propertyName, propertyValue) => 
-                sender == entity && propertyName == pi.Name ? 
+            PropertyValidationEventHandler val = (sender, pi, propertyValue) =>
+                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ? 
                     error((P)propertyValue) : 
                     null;
 
@@ -331,10 +327,10 @@ namespace Signum.Entities
         public static PropertyValidationEventHandler AddValidation<T, P>(this T entity, Expression<Func<T, P>> property, ValidatorAttribute validator)
            where T : ModifiableEntity
         {
-            PropertyInfo pi = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
+            PropertyInfo pi2 = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
 
-            PropertyValidationEventHandler val = (sender, propertyName, propertyValue) => 
-                sender == entity && propertyName == pi.Name ? 
+            PropertyValidationEventHandler val = (sender, pi, propertyValue) =>
+                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ? 
                     validator.Error(propertyValue).TryCC(str=>str.Formato(pi.NiceName())) : 
                     null;
 

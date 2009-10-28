@@ -571,7 +571,7 @@ namespace Signum.Engine.Linq
 
     public static class LinqProviderExtensions
     {
-        static MethodInfo miInSql = ReflectionTools.GetMethodInfo<int>(i => i.InSql()).GetGenericMethodDefinition();
+        static MethodInfo miInSql = ReflectionTools.GetMethodInfo((int i) => i.InSql()).GetGenericMethodDefinition();
 
         public static T InSql<T>(this T value)
         {

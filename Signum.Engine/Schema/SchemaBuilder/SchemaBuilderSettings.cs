@@ -84,10 +84,10 @@ namespace Signum.Engine.Maps
             types.GetOrCreate(type).TypeAttributes = attributes;
         }
 
-        public bool IsFieldAttributesOverriden<T>(Expression<Func<T, object>> lambda)
+        public bool IsFieldAttributesOverriden<T, R>(Expression<Func<T, R>> lambda)
         {
-            MemberInfo mi = ReflectionTools.GetMemberInfo<T>(lambda);
-            Type type = ReflectionTools.GetReceiverType<T>(lambda);
+            MemberInfo mi = ReflectionTools.GetMemberInfo(lambda);
+            Type type = ReflectionTools.GetReceiverType(lambda);
             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
             return IsFieldAttributesOverriden(typeof(T), fi.Name);
         }
@@ -98,10 +98,10 @@ namespace Signum.Engine.Maps
             return t != null && t.FieldAttributes.ContainsKey(fieldName);
         }
 
-        public void OverrideFieldAttributes<T>(Expression<Func<T, object>> lambda, params Attribute[] attributes)
+        public void OverrideFieldAttributes<T, R>(Expression<Func<T, R>> lambda, params Attribute[] attributes)
         {
-            MemberInfo mi = ReflectionTools.GetMemberInfo<T>(lambda);
-            Type type = ReflectionTools.GetReceiverType<T>(lambda);
+            MemberInfo mi = ReflectionTools.GetMemberInfo(lambda);
+            Type type = ReflectionTools.GetReceiverType(lambda);
             FieldInfo fi = Reflector.FindFieldInfo(type, mi, true); 
             OverrideFieldAttributes(typeof(T), fi.Name, attributes); 
         }

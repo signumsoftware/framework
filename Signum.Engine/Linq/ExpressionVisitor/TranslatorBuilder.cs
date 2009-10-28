@@ -90,7 +90,7 @@ namespace Signum.Engine.Linq
             ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
             ImmutableStack<string> prevAliases;
 
-            public PropertyInfo piToStrLite = ReflectionTools.GetPropertyInfo<Lite>(l => l.ToStr);
+            public PropertyInfo piToStrLite = ReflectionTools.GetPropertyInfo((Lite l) =>l.ToStr);
 
             static MethodInfo miGetValue = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetValue<int>(null, null)).GetGenericMethodDefinition();
 
@@ -135,7 +135,7 @@ namespace Signum.Engine.Linq
                     Expression.Constant(column.Name));
             }
 
-            MethodInfo miExecute = ReflectionTools.GetMethodInfo<ITranslateResult>(it => it.Execute(null));
+            MethodInfo miExecute = ReflectionTools.GetMethodInfo((ITranslateResult it) => it.Execute(null));
 
             protected override Expression VisitProjection(ProjectionExpression proj)
             {

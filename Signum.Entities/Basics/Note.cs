@@ -18,7 +18,7 @@ namespace Signum.Entities.Basics
         public Lite<IdentifiableEntity> Entity
         {
             get { return entity; }
-            set { Set(ref entity, value, "Entity"); }
+            set { Set(ref entity, value, () => Entity); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -27,7 +27,7 @@ namespace Signum.Entities.Basics
         public string Text
         {
             get { return text; }
-            set { Set(ref text, value, "Text"); }
+            set { Set(ref text, value, () => Text); }
         }
 
         public override string ToString()

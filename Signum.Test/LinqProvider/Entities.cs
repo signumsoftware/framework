@@ -18,7 +18,7 @@ namespace Signum.Test.LinqProvider
         public string Text
         {
             get { return text; }
-            set { SetToStr(ref text, value, "Text"); }
+            set { SetToStr(ref text, value, () => Text); }
         }
 
         [ImplementedByAll]
@@ -26,14 +26,14 @@ namespace Signum.Test.LinqProvider
         public IIdentifiable Target
         {
             get { return target; }
-            set { Set(ref target, value, "Target"); }
+            set { Set(ref target, value, () => Target); }
         }
 
         DateTime creationTime;
         public DateTime CreationTime
         {
             get { return creationTime; }
-            set { Set(ref creationTime, value, "CreationTime"); }
+            set { Set(ref creationTime, value, () => CreationTime); }
         }
 
         public override string ToString()
@@ -59,21 +59,21 @@ namespace Signum.Test.LinqProvider
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         bool dead;
         public bool Dead
         {
             get { return dead; }
-            set { Set(ref dead, value, "Dead"); }
+            set { Set(ref dead, value, () => Dead); }
         }
 
         Sex sex;
         public Sex Sex
         {
             get { return sex; }
-            set { Set(ref sex, value, "Sex"); }
+            set { Set(ref sex, value, () => Sex); }
         }
 
         static Expression<Func<ArtistDN, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
@@ -87,7 +87,7 @@ namespace Signum.Test.LinqProvider
         public AwardDN LastAward
         {
             get { return lastAward; }
-            set { Set(ref lastAward, value, "LastAward"); }
+            set { Set(ref lastAward, value, () => LastAward); }
         }
 
         public override string ToString()
@@ -111,21 +111,21 @@ namespace Signum.Test.LinqProvider
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         MList<ArtistDN> members;
         public MList<ArtistDN> Members
         {
             get { return members; }
-            set { Set(ref members, value, "Members"); }
+            set { Set(ref members, value, () => Members); }
         }
 
         AwardDN lastAward;
         public AwardDN LastAward
         {
             get { return lastAward; }
-            set { Set(ref lastAward, value, "LastAward"); }
+            set { Set(ref lastAward, value, () => LastAward); }
         }
 
         public override string ToString()
@@ -141,7 +141,7 @@ namespace Signum.Test.LinqProvider
         public int Year
         {
             get { return year; }
-            set { Set(ref year, value, "Year"); }
+            set { Set(ref year, value, () => Year); }
         }
 
         [NotNullable, SqlDbType( Size = 100)]
@@ -150,14 +150,14 @@ namespace Signum.Test.LinqProvider
         public string Category
         {
             get { return category; }
-            set { Set(ref category, value, "Category"); }
+            set { Set(ref category, value, () => Category); }
         }
 
         AwardResult result;
         public AwardResult Result
         {
             get { return result; }
-            set { Set(ref result, value, "Result"); }
+            set { Set(ref result, value, () => Result); }
         }
     }
 
@@ -192,7 +192,7 @@ namespace Signum.Test.LinqProvider
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         public override string ToString()
@@ -210,7 +210,7 @@ namespace Signum.Test.LinqProvider
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         int year;
@@ -218,7 +218,7 @@ namespace Signum.Test.LinqProvider
         public int Year
         {
             get { return year; }
-            set { Set(ref year, value, "Year"); }
+            set { Set(ref year, value, () => Year); }
         }
 
         IAuthorDN author;
@@ -226,21 +226,21 @@ namespace Signum.Test.LinqProvider
         public IAuthorDN Author
         {
             get { return author; }
-            set { Set(ref author, value, "Author"); }
+            set { Set(ref author, value, () => Author); }
         }
 
         MList<SongDN> songs;
         public MList<SongDN> Songs
         {
             get { return songs; }
-            set { Set(ref songs, value, "Song"); }
+            set { Set(ref songs, value, () => Songs); }
         }
 
         LabelDN label;
         public LabelDN Label
         {
             get { return label; }
-            set { Set(ref label, value, "Label"); }
+            set { Set(ref label, value, () => Label); }
         }
 
         public override string ToString()
@@ -258,7 +258,7 @@ namespace Signum.Test.LinqProvider
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         public override string ToString()

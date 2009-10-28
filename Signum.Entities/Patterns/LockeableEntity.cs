@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Properties;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Patterns
 {
@@ -15,34 +16,33 @@ namespace Signum.Entities.Patterns
             get { return locked; }
             set
             {
-                if (UnsafeSet(ref locked, value, "Locked"))
+                if (UnsafeSet(ref locked, value, () => Locked))
                     ItemLockedChanged(Locked);
             }
         }
 
-        protected bool UnsafeSet<T>(ref T variable, T value, string propertyName)
+        protected bool UnsafeSet<T>(ref T variable, T value, Expression<Func<T>> property)
         { 
-            return base.Set<T>(ref variable, value, propertyName);
+            return base.Set<T>(ref variable, value, property);
         }
 
         protected virtual void ItemLockedChanged(bool locked)
         {
         }
 
-        protected override bool Set<T>(ref T variable, T value, string propertyName)
+        protected override bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
         {
             if (this.locked)
                 throw new ApplicationException(Resources.LockedModificationException);
 
-            return base.Set<T>(ref variable, value, propertyName);
+            return base.Set<T>(ref variable, value, property);
         }
 
         [HiddenProperty]
         public override string ToStr
         {
             get { return toStr; }
-            protected set { UnsafeSet(ref toStr, value, "ToStr"); }
+            protected set { UnsafeSet(ref toStr, value, ()=>ToStr); }
         }
-
     }
 }

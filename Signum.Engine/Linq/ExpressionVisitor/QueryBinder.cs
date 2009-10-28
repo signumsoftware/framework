@@ -28,8 +28,8 @@ namespace Signum.Engine.Linq
         Dictionary<ProjectionToken, HashSet<TableCondition>> requests = new Dictionary<ProjectionToken, HashSet<TableCondition>>();
         Expression root;
 
-        internal static readonly PropertyInfo ToStrProperty = ReflectionTools.GetPropertyInfo<IIdentifiable>(ii => ii.ToStr);
-        internal static readonly PropertyInfo IdProperty = ReflectionTools.GetPropertyInfo<IIdentifiable>(ii => ii.Id); 
+        internal static readonly PropertyInfo ToStrProperty = ReflectionTools.GetPropertyInfo((IIdentifiable ii) => ii.ToStr);
+        internal static readonly PropertyInfo IdProperty = ReflectionTools.GetPropertyInfo((IIdentifiable ii) => ii.Id); 
 
         internal class TableCondition
         {
@@ -140,7 +140,7 @@ namespace Signum.Engine.Linq
             }
             else if (m.Method.DeclaringType == typeof(object) && m.Method.Name == "ToString" && typeof(IdentifiableEntity).IsAssignableFrom(m.Object.Type))
             {
-                return Visit(Expression.MakeMemberAccess(m.Object, ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.toStr)));
+                return Visit(Expression.MakeMemberAccess(m.Object, ReflectionTools.GetFieldInfo((IdentifiableEntity ei) =>ei.toStr)));
             }
             else if ( m.Method.DeclaringType.IsInstantiationOf(typeof(EnumProxy<>)) &&
                 m.Method.Name == "ToEnum")

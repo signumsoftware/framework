@@ -277,4 +277,16 @@
     <value>Error {0}:
  Lacking: {1}</value>
   </data>
+  <data name="FieldShouldBeAnExpressionAccessingAField" xml:space="preserve">
+    <value>field should be an expression accessing a field</value>
+  </data>
+  <data name="MemberShouldBeAnExpressionAccessingAMember" xml:space="preserve">
+    <value>member should be an expression accessing a member</value>
+  </data>
+  <data name="MethodShouldBeAnExpressionCallingAMethod" xml:space="preserve">
+    <value>method should be an expression calling a method</value>
+  </data>
+  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
+    <value>property should be an expression accessing a property</value>
+  </data>
 </root>

@@ -109,7 +109,7 @@ namespace Signum.Engine.DynamicQuery
             };
         }
 
-        public DynamicQuery<T> ChangeColumn(Expression<Func<T, object>> column, Action<Column> change)
+        public DynamicQuery<T> ChangeColumn<S>(Expression<Func<T, S>> column, Action<Column> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
             Column col = columns.Single(a => a.Name == member.Name);
@@ -141,10 +141,10 @@ namespace Signum.Engine.DynamicQuery
             return new DynamicQuery<T>(execute); 
         }
 
-        static MethodInfo miContains = ReflectionTools.GetMethodInfo<string>(s => s.Contains(s));
-        static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo<string>(s => s.StartsWith(s));
-        static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo<string>(s => s.EndsWith(s));
-        static MethodInfo miLike = ReflectionTools.GetMethodInfo<string>(s => s.Like(s));
+        static MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
+        static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
+        static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
+        static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
 
         public static Expression<Func<T, bool>> GetWhereExpression<T>(List<Filter> filters)
         {

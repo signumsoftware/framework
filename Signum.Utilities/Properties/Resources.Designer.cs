@@ -308,6 +308,15 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to field should be an expression accessing a field.
+        /// </summary>
+        internal static string FieldShouldBeAnExpressionAccessingAField {
+            get {
+                return ResourceManager.GetString("FieldShouldBeAnExpressionAccessingAField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The first collecton is shorter.
         /// </summary>
         internal static string FirstCollectionIsShorter {
@@ -389,6 +398,24 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to member should be an expression accessing a member.
+        /// </summary>
+        internal static string MemberShouldBeAnExpressionAccessingAMember {
+            get {
+                return ResourceManager.GetString("MemberShouldBeAnExpressionAccessingAMember", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to method should be an expression calling a method.
+        /// </summary>
+        internal static string MethodShouldBeAnExpressionCallingAMethod {
+            get {
+                return ResourceManager.GetString("MethodShouldBeAnExpressionCallingAMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to min and max should be greater than 0.
         /// </summary>
         internal static string MinAndMaxShouldBeGreaterThan0 {
@@ -448,6 +475,15 @@ namespace Signum.Utilities.Properties {
         internal static string NoMemberNamed0 {
             get {
                 return ResourceManager.GetString("NoMemberNamed0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to property should be an expression accessing a property.
+        /// </summary>
+        internal static string PropertyShouldBeAnExpressionAccessingAProperty {
+            get {
+                return ResourceManager.GetString("PropertyShouldBeAnExpressionAccessingAProperty", resourceCulture);
             }
         }
         

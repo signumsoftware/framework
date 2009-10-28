@@ -214,7 +214,7 @@ namespace Signum.Entities.Reflection
 
         static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();
 
-        public static Dictionary<string, PropertyPack> GetPropertyValidators(Type type)
+        public static Dictionary<string, PropertyPack> GetPropertyPacks(Type type)
         {
             lock (validators)
             {
@@ -326,7 +326,6 @@ namespace Signum.Entities.Reflection
             Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true).OfType<ValidatorAttribute>().ToReadOnly();
             this.GetValue = getValue;
             this.SetValue = setValue;
-
         }
 
         public readonly Func<object, object> GetValue;

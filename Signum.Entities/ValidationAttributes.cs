@@ -488,9 +488,9 @@ namespace Signum.Entities
             dictionary.Add(state, necessary);
         }
 
-        public string Validate(E entity, string propertyName)
+        public string Validate(E entity, PropertyInfo pi)
         {
-            int index = propertyNames.IndexOf(propertyName);
+            int index = propertyNames.IndexOf(pi.Name);
             if (index == -1)
                 return null;
 
@@ -518,4 +518,18 @@ namespace Signum.Entities
         }
     }
 
+    public static class ValidationExtensions
+    {
+        public static bool Is<T>(this PropertyInfo pi, Expression<Func<T>> property)
+        {
+            PropertyInfo pi2 = ReflectionTools.BasePropertyInfo(property);
+            return ReflectionTools.MemeberEquals(pi, pi2);
+        }
+
+        public static bool Is<S, T>(this PropertyInfo pi, Expression<Func<S, T>> property)
+        {
+            PropertyInfo pi2 = ReflectionTools.BasePropertyInfo(property);
+            return ReflectionTools.MemeberEquals(pi, pi2);
+        }
+    }
 }

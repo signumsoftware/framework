@@ -192,14 +192,14 @@ namespace Signum.Entities
             }
         }
 
-        public static bool HasToNotify(Type type, string propertyName)
+        public static bool HasToNotify(Type type, PropertyInfo pi)
         {
             TypeAttributePack pack = GetFieldsAndProperties(type);
 
             if(pack == null)
                 return false;
 
-            return pack.PropertyNames.Contains(propertyName);
+            return pack.PropertyNames.Contains(pi.Name);
         }
 
         readonly static Func<object, object>[] EmptyArray = new Func<object, object>[0]; 

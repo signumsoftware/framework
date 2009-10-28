@@ -40,8 +40,8 @@ namespace Signum.Engine.Linq
         }
 
         ConstructorInfo cons = typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(SqlDbType) });
-        PropertyInfo piValue = ReflectionTools.GetPropertyInfo<SqlParameter>(s => s.Value);
-        PropertyInfo piIsNullable = ReflectionTools.GetPropertyInfo<SqlParameter>(s => s.IsNullable); 
+        PropertyInfo piValue = ReflectionTools.GetPropertyInfo((SqlParameter s) => s.Value);
+        PropertyInfo piIsNullable = ReflectionTools.GetPropertyInfo((SqlParameter s) =>s.IsNullable); 
 
         public Expression CreateParameter(string name, Expression value)
         {

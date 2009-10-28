@@ -130,14 +130,14 @@ namespace Signum.Test
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value, "Name"); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         MList<TaxDN> taxes;
         public MList<TaxDN> Taxes
         {
             get { return taxes; }
-            set { Set(ref taxes, value, "Taxes"); }
+            set { Set(ref taxes, value, () => Taxes); }
         }
 
         public override string ToString()
@@ -153,14 +153,14 @@ namespace Signum.Test
         public ProductDN Product
         {
             get { return product; }
-            set { Set(ref product, value, "Product"); }
+            set { Set(ref product, value, () => Product); }
         }
 
         int num;
         public int Num
         {
             get { return num; }
-            set { Set(ref num, value, "Num"); }
+            set { Set(ref num, value, () => Num); }
         }
     }
 
@@ -171,14 +171,14 @@ namespace Signum.Test
         public int Val
         {
             get { return val; }
-            set { Set(ref val, value, "Val"); }
+            set { Set(ref val, value, () => Val); }
         }
 
         string taxName;
         public string TaxName
         {
             get { return taxName; }
-            set { Set(ref taxName, value, "TaxName"); }
+            set { Set(ref taxName, value, () => TaxName); }
         }
     }
 }

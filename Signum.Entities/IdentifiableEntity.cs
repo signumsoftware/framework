@@ -10,6 +10,8 @@ using Signum.Entities.Properties;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
 using System.ComponentModel;
+using System.Linq.Expressions;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
@@ -42,24 +44,27 @@ namespace Signum.Entities
         public virtual string ToStr
         {
             get { return toStr; }
-            protected set { Set(ref toStr, value, "ToStr"); }
+            protected set { Set(ref toStr, value, () => ToStr); }
         }
 
         [Ignore]
-        bool isNew = true; 
+        bool isNew = true;
         [HiddenProperty]
-        public bool IsNew 
+        public bool IsNew
         {
             get { return isNew; }
             internal set { isNew = value; }
         }
 
-        protected bool SetIfNew<T>(ref T variable, T value, string propertyName)
+        protected bool SetIfNew<T>(ref T variable, T value, Expression<Func<T>> property)
         {
             if (!IsNew)
-                throw new ApplicationException("Attempt to modify {0} when the entity is not new".Formato(propertyName));
+            {
+                PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
+                throw new ApplicationException("Attempt to modify {0} when the entity is not new".Formato(pi.Name));
+            }
 
-            return base.Set<T>(ref variable, value, propertyName);
+            return base.Set<T>(ref variable, value, property);
         }
 
         protected internal override void PreSaving(ref bool graphModified)

@@ -27,8 +27,8 @@ namespace Signum.Engine.Linq
 
     internal class FieldInitExpression : DbExpression, IPropertyInitExpression
     {
-        public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo<IdentifiableEntity>(ei => ei.id);
-        public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo<IdentifiableEntity>(ie => ie.toStr);
+        public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((IdentifiableEntity ei) =>ei.id);
+        public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((IdentifiableEntity ie) =>ie.toStr);
 
         public readonly Table Table;
         public readonly Expression ExternalId;

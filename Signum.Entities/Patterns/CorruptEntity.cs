@@ -13,7 +13,7 @@ namespace Signum.Entities
         public bool Corrupt
         {
             get { return corrupt; }
-            set { Set(ref corrupt, value, "Corrupt"); }
+            set { Set(ref corrupt, value, () => Corrupt); }
         }
 
         protected internal override void PreSaving(ref bool graphModified)
