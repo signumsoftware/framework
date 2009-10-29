@@ -67,7 +67,7 @@ namespace Signum.Web
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
                 reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
             
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id,{4});}},function(){{OnListPopupCancel(this.id);}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial", reloadOnChangeFunction);
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnListPopupOK('{3}','{2}',this.id,{4});}},function(){{OnListPopupCancel(this.id);}}".Formato(settings.DetailDiv.HasText() ? "Signum/PartialView": "Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial", reloadOnChangeFunction);
 
             if (settings.Implementations != null) //Interface with several possible implementations
             {

@@ -63,11 +63,13 @@ namespace Signum.Web
 
 
     public class OrderedMenu {
+        string currentUrl;
         public OrderedMenu() {
         }
         public string ToString(string currentUrl) {
             StringBuilder sb = new StringBuilder();
-            sb.Append("<ul>{0}</ul>".Formato(this.ToString(0)));
+            this.currentUrl = currentUrl;
+            sb.Append(this.ToString(0));
             return sb.ToString();
         }
 
@@ -80,7 +82,10 @@ namespace Signum.Web
             }*/
             if (children != null && children.Count > 0)
             {
-                sb.AppendLine("<ul{0}>".Formato((i > 1) ? " class='submenu'" : ""));
+                if (i == 0)
+                    sb.AppendLine("<ul id='nav'>");
+                else
+                    sb.AppendLine("<ul{0}>".Formato((i > 0) ? " class='submenu'" : ""));
                 foreach (OrderedMenu menu in children)
                 {
                     sb.Append(menu.ToString(i+1));
@@ -105,12 +110,23 @@ namespace Signum.Web
                 {
                     sb.AppendLine("<li class='{0}'>".Formato(i));
                     if (node.ManualHref.HasText())
+                    {
+                        if (node.ManualHref == currentUrl) { sb.Append("<b>"); }
                         sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(node.ManualHref, node.Title, node.Text));
+                        if (node.ManualHref == currentUrl) { sb.Append("/<b>"); }
+                    }
                     else if (node.ManualA.HasText())
+                    {
+                        if (node.ManualHref == currentUrl) { sb.Append("<b>"); }
                         sb.AppendLine(node.ManualA);
+                        if (node.ManualHref == currentUrl) { sb.Append("</b>"); }
+                    }
                     else
+                    {
+                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToStringNoName() == currentUrl) { sb.Append("<b>"); }
                         sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToStringNoName(), node.Title, node.Text));
-                 //   sb.AppendLine("</li>");
+                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToStringNoName() == currentUrl) { sb.Append("<b>"); }
+                    }
                 }
                 else {
                     if (node.FindOptions == null && node.ManualA == null && node.ManualHref == null)

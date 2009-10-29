@@ -37,6 +37,7 @@ namespace Signum.Web
         public const string Results = "sfResults";
         public const string EntityColumnIndex = "sfEntityColumnIndex";
         public const string EntityTypeName = "sfEntityTypeName";
+        public const string EntityTypeNiceName = "sfEntityTypeNiceName";
         public const string EntityType = "sfEntityType";
         public const string AllowMultiple = "sfAllowMultiple";
         public const string Create = "sfCreate";

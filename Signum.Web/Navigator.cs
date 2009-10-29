@@ -473,6 +473,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? es.PartialViewName;
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
+            controller.ViewData[ViewDataKeys.EntityTypeNiceName] = obj.GetType().NiceName();
             if (controller.ViewData.Keys.Count(s => s==ViewDataKeys.PageTitle)==0)
                 controller.ViewData[ViewDataKeys.PageTitle] = entity.ToStr;
             if (changeTicks != null)
