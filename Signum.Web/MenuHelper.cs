@@ -122,7 +122,6 @@ namespace Signum.Web
                         if (node.ManualHref == currentUrl) { sb.Append("</b>"); }
                     }
                     else
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?"), node.Title, node.Text));
                     {
                         if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?") == currentUrl) { sb.Append("<b>"); }
                         sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?"), node.Title, node.Text));
