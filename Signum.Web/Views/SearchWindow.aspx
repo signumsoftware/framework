@@ -3,7 +3,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <title><%=ViewData[ViewDataKeys.PageTitle] ?? ""%></title>
-        <link href="Content/Site.css" rel="stylesheet" type="text/css" />
+ 
     <link href="Content/LineStyles.css" rel="stylesheet" type="text/css" />
     
     <script src="<%=ClientScript.GetWebResourceUrl(typeof(Navigator), "Signum.Web.Scripts.SF_Globals.js")%>" type="text/javascript"></script>

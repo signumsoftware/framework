@@ -32,7 +32,7 @@
     <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], (string)ViewData[ViewDataKeys.PopupPrefix])%> 
 </div>
 <div class="clearall"></div>
-<div id="<%=Html.GlobalName("divResults")%>" name="<%=Html.GlobalName("divResults")%>">
+<div id="<%=Html.GlobalName("divResults")%>" name="<%=Html.GlobalName("divResults")%>" class="divResults">
 
 </div>
 <div id="<%=Html.GlobalName("divASustituir")%>"></div>

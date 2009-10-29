@@ -147,8 +147,9 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
         $('#' + globalKey).hide();
         popup.style.left = left;
         popup.style.top = top;
-        popup.style.width = popupWidth + "px";
-
+        popup.style.minWidth = popupWidth + "px";
+        popup.style.maxWidth = "95%";
+        
         if ($('#' + prefix + panelPopupKey + " :file").length > 0)
             popup.style.minWidth = "500px";
         
