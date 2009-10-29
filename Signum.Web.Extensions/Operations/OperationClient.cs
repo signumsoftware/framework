@@ -207,7 +207,7 @@ namespace Signum.Web.Operations
                     if (dic[oi.Key].OperationSettings.OnServerClickAjax != "")
                         onClick = "javascript:CloseChooser('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickAjax, onOk, onCancel, prefix);
                     else if (dic[oi.Key].OperationSettings.OnServerClickPost != "")
-                        onClick= "javascript:PostServer('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickPost, onOk, onCancel, prefix);
+                        onClick= "javascript:PostServer('{0}');".Formato(dic[oi.Key].OperationSettings.OnServerClickPost);
                     sb.AppendLine("<input type='button' value='{0}' onclick=\"{1}\"/><br />".Formato(oi.Key.ToString(), onClick));
                 }
                 controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;

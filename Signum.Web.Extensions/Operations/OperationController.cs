@@ -65,7 +65,7 @@ namespace Signum.Web.Operations
                 return Navigator.View(this, entity);
         }
 
-        public ActionResult ConstructFromManyExecute(string sfTypeName, string sfQueryName, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult ConstructFromManyExecute(string sfTypeName, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfTypeName);
 
