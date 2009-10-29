@@ -206,7 +206,7 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "isLite=" + isLite + qp("sfTypeName",typeName) + qp("sfId",id) + qp("sfOperationFullKey",operationKey) + qp(sfPrefix,prefix) + qp("sfOnOk",singleQuote(onOk)) + qp("sfOnCancel",singleQuote(onCancel)) + formChildren,
+		data: "isLite=" + isLite + qp("sfRuntimeType", typeName) + qp("sfId", id) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, prefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + formChildren,
 		async: false,
 		dataType: "html",
 		success: function (msg) {
@@ -240,26 +240,46 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 	});
 }
 
-function ConstructFromManyExecute(urlController, typeName, queryName, operationKey, prefix, onOk, onCancel) {
-	var ids = GetSelectedElements(prefix);
-	if (ids == "") return;
-	$.ajax({
-		type: "POST",
-		url: urlController,
-		data: "sfIds=" + ids + qp("sfTypeName", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, prefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
-		async: false,
-		dataType: "html",
-		success: function (msg) {
-			$('#' + prefix + "divASustituir").html(msg);
-			ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
-			$('#' + newPrefix + sfBtnOk).click(onOk);
-			$('#' + newPrefix + sfBtnCancel).click(onCancel);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
-		}
-	});
+function ConstructFromExecute(urlController, typeName, id, operationKey, prefix, onOk, onCancel) {
+    var newPrefix = prefix + "New";
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: "sfId=" + id + qp("sfRuntimeType", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
+        async: false,
+        dataType: "html",
+        success: function(msg) {
+            $('#' + prefix + "divASustituir").html(msg);
+            ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+            $('#' + newPrefix + sfBtnOk).click(onOk);
+            $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            ShowError(XMLHttpRequest, textStatus, errorThrown);
+        }
+    });
+}
 
+function ConstructFromManyExecute(urlController, typeName, operationKey, prefix, onOk, onCancel) {
+    var ids = GetSelectedElements(prefix);
+	if (ids == "") return;
+	var newPrefix = prefix + "New";
+	$.ajax({
+	    type: "POST",
+	    url: urlController,
+	    data: "sfIds=" + ids + qp("sfRuntimeType", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
+	    async: false,
+	    dataType: "html",
+	    success: function(msg) {
+	        $('#' + prefix + "divASustituir").html(msg);
+	        ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+	        $('#' + newPrefix + sfBtnOk).click(onOk);
+	        $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) {
+	        ShowError(XMLHttpRequest, textStatus, errorThrown);
+	    }
+	});
 }
 
 //function PostServer(urlController, prefix) {

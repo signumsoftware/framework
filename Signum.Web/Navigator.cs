@@ -935,11 +935,22 @@ namespace Signum.Web
 
         protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix, bool? clone)
         {
-            string typeName = form[TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType)];
-            string id = form[TypeContext.Compose(prefix ?? "", TypeContext.Id)];
-
+            string typeName = null; 
+            string typeNameKey = TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType);
+            if (form.AllKeys.Contains(typeNameKey))
+                typeName = form[typeNameKey];
+            else
+                typeName = controller.Request.Params[TypeContext.RuntimeType];
+                
             Type type = Navigator.NameToType.GetOrThrow(typeName, Resources.Type0NotFoundInTheSchema);
 
+            string id = null;
+            string idKey = TypeContext.Compose(prefix ?? "", TypeContext.Id);
+            if (form.AllKeys.Contains(idKey))
+                id = form[idKey];
+            else
+                id = controller.Request.Params[TypeContext.Id];
+            
             if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive))
             {
                 string tabID = ExtractTabID(form);
