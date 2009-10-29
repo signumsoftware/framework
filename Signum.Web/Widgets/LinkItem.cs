@@ -30,11 +30,8 @@ namespace Signum.Web
         {
             string queryUrlName = Navigator.Manager.QuerySettings[FindOptions.QueryName].UrlName;
             if (!AltText.HasText())
-                AltText = queryUrlName;
-            
-            if (!Id.HasText())
-                Id = FindOptions.QueryName.ToString().Right(10, false);
-
+                AltText = Navigator.SearchTitle(FindOptions.QueryName);
+                        
             if (OnClick.HasText() || OnServerClickAjax.HasText() || OnServerClickPost.HasText())
                 return base.ToString(helper, prefix);
 

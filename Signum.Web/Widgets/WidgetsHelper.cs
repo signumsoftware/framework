@@ -35,7 +35,8 @@ namespace Signum.Web
 
             foreach (string widget in widgets)
             {
-                sb.AppendLine(widget);
+                if (widget != "")
+                    sb.AppendLine(widget);
             }
 
             return sb.ToString();

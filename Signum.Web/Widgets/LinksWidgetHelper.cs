@@ -29,10 +29,10 @@ namespace Signum.Web
                     .NotNull()
                     .SelectMany(d => d).ToList());
 
-            return QuickLinsToString(helper, links, prefix);
+            return QuickLinksToString(helper, links, prefix);
         }
 
-        private static string QuickLinsToString(HtmlHelper helper, List<QuickLinkItem> links, string prefix)
+        private static string QuickLinksToString(HtmlHelper helper, List<QuickLinkItem> links, string prefix)
         {
             if (links == null || links.Count == 0)
                 return "";

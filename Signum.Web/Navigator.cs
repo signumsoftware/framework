@@ -75,6 +75,11 @@ namespace Signum.Web
             return Manager.ResolveQueryFromUrlName(queryUrlName);
         }
 
+        public static string SearchTitle(object queryName)
+        {
+            return  Manager.GetNiceQueryName(queryName);
+        }
+
         public static object ResolveQueryFromToStr(string queryNameToStr)
         {
             return Manager.ResolveQueryFromToStr(queryNameToStr);
@@ -466,6 +471,13 @@ namespace Signum.Web
                    queryName.ToString();
         }
 
+        protected internal virtual string GetNiceQueryName(object queryName)
+        {
+            return (queryName is Type) ? ((Type)queryName).NiceName() :
+                   (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
+                   queryName.ToString();
+        }
+
         protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
         {
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(obj.GetType()));
@@ -657,7 +669,7 @@ namespace Signum.Web
                     return qs.Title;
             }
 
-            return GetQueryName(queryName);
+            return GetNiceQueryName(queryName);
         }
 
         protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
