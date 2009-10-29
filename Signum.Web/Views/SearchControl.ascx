@@ -6,7 +6,7 @@
 <%@ Import Namespace="System.Configuration" %>
 
 <% FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];%>
-<%=Html.Hidden(Html.GlobalName("sfQueryName"), findOptions.QueryName.ToString())%>
+<%=Html.Hidden(Html.GlobalName("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName)%>
 <%=Html.Hidden(Html.GlobalName("sfAllowMultiple"), findOptions.AllowMultiple.ToString())%>
 
 <%= (findOptions.SearchOnLoad) ?

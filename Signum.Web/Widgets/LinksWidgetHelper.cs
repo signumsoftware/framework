@@ -4,49 +4,49 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public delegate List<QuickLink> GetLinksDelegate(HtmlHelper helper, object entity, string partialViewName);
+    public delegate List<QuickLinkItem> GetLinksDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
 
     public static class LinksWidgetHelper
     {
-        public static event GetLinksDelegate GetLinks; 
+        public static event GetLinksDelegate GetLinks;
 
         public static void Start()
         {
-            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName) => WidgetsHelper_GetWidgetsForView(helper, entity, partialViewName);
+            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => WidgetsHelper_GetWidgetsForView(helper, entity, partialViewName, prefix);
         }
 
-        private static List<IWidget> WidgetsHelper_GetWidgetsForView(HtmlHelper helper, object entity, string partialViewName)
+        private static string WidgetsHelper_GetWidgetsForView(HtmlHelper helper, object entity, string partialViewName, string prefix)
         {
-            return null;
-            //List<QuickLink> links = new List<QuickLink>();
-            //if (GetLinks != null)
-            //    links.AddRange(GetLinks.GetInvocationList()
-            //        .Cast<GetButtonBarElementDelegate>()
-            //        .Select(d => d(helper, entity, mainControlUrl))
-            //        .NotNull().SelectMany(d => d).ToList());
+            List<QuickLinkItem> links = new List<QuickLinkItem>();
+            if (GetLinks != null)
+                links.AddRange(GetLinks.GetInvocationList()
+                    .Cast<GetLinksDelegate>()
+                    .Select(d => d(helper, entity, partialViewName, prefix))
+                    .NotNull()
+                    .SelectMany(d => d).ToList());
 
-            //return ListMenuItemsToString(helper, links, prefix);  
+            return QuickLinsToString(helper, links, prefix);
         }
-    }
 
-    public class QuickLink
-    {
-        public QuickLink(string label)
+        private static string QuickLinsToString(HtmlHelper helper, List<QuickLinkItem> links, string prefix)
         {
-            this.Label = label;
+            if (links == null || links.Count == 0)
+                return "";
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("<div class='widgetDiv quickLinksDiv'>");
+            foreach (QuickLinkItem link in links)
+            {
+                sb.AppendLine(link.ToString(helper, prefix));
+            }
+            sb.AppendLine("</div>");
+
+            return sb.ToString();
         }
-
-        /// <summary>
-        /// Display name of the item
-        /// </summary>
-        public string Label { get; set; }
-
-        /// <summary>
-        /// Action to be executed on the mouseDoubleClick of the item
-        /// </summary>
-        public Action Action { get; set; }
     }
 }

@@ -11,20 +11,87 @@ namespace Signum.Web
 {
     public class WebMenuItem
     {
-        public string Id;
-        public string ImgSrc;
-        public string AltText;
-        public string OnClick;
+        public string Id { get; set; }
+        public string ImgSrc { get; set; }
+        public string AltText { get; set; }
+        public string OnClick { get; set; }
         /// <summary>
         /// Controller URL
         /// </summary>
-        public string OnServerClickAjax;
+        public string OnServerClickAjax { get; set; }
         /// <summary>
         /// Controller URL
         /// </summary>
-        public string OnServerClickPost;
+        public string OnServerClickPost { get; set; }
 
-        public readonly Dictionary<string, object> HtmlProps = new Dictionary<string, object>(0);
+        private string divCssClass = "OperationDiv";
+        public string DivCssClass 
+        { 
+            get { return divCssClass; } 
+            set { divCssClass = value; } 
+        }
+
+        Dictionary<string, object> htmlProps = new Dictionary<string, object>(0);
+        public Dictionary<string, object> HtmlProps
+        {
+            get { return htmlProps; }
+        }
+
+        public virtual string ToString(HtmlHelper helper, string prefix)
+        {
+            string onclick = "";
+            string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
+
+            //Add prefix to onclick
+            if (!string.IsNullOrEmpty(OnClick))
+            {
+                if (!string.IsNullOrEmpty(OnServerClickAjax) || !string.IsNullOrEmpty(OnServerClickPost))
+                    throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(Id));
+
+                int lastEnd = OnClick.LastIndexOf(")");
+                int lastStart = OnClick.LastIndexOf("(");
+                if (lastStart == lastEnd - 1)
+                    onclick = OnClick.Insert(lastEnd, strPrefix);
+                else
+                    onclick = OnClick.Insert(lastEnd, ", " + strPrefix);
+            }
+
+            //Constructo OnServerClick
+            if (!string.IsNullOrEmpty(OnServerClickAjax))
+            {
+                if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickPost))
+                    throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(Id));
+                onclick = OnServerClickAjax;
+            }
+
+            //Constructo OnServerClick
+            if (!string.IsNullOrEmpty(OnServerClickPost))
+            {
+                if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickAjax))
+                    throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(Id));
+                onclick = "PostServer('{0}');".Formato(OnServerClickPost);
+            }
+
+            //Add cursor pointer to the htmlProps
+            if (!HtmlProps.ContainsKey("style"))
+                HtmlProps.Add("style", "cursor: pointer");
+            else if (HtmlProps["style"].ToString().IndexOf("cursor") == -1)
+                HtmlProps["style"] = "cursor:pointer; " + HtmlProps["style"].ToString();
+
+            HtmlProps.Add("title", AltText);
+
+            if (ImgSrc.HasText())
+            {
+                HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top; " + HtmlProps["style"].ToString();
+                //sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                return helper.Div(Id, "", DivCssClass, HtmlProps);
+            }
+            else
+            {
+                HtmlProps.Add("onclick", onclick);
+                return helper.Div(Id, AltText, DivCssClass, HtmlProps);
+            }
+        }
     }
 
     public delegate List<WebMenuItem> GetButtonBarElementDelegate(HttpContextBase httpContext, object entity, string mainControlUrl);
@@ -65,58 +132,7 @@ namespace Signum.Web
 
             foreach (WebMenuItem mi in elements)
             {
-                string onclick = "";
-                string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
-
-                //Add prefix to onclick
-                if (!string.IsNullOrEmpty(mi.OnClick))
-                {
-                    if (!string.IsNullOrEmpty(mi.OnServerClickAjax) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                        throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(mi.Id));
-
-                    int lastEnd = mi.OnClick.LastIndexOf(")");
-                    int lastStart = mi.OnClick.LastIndexOf("(");
-                    if (lastStart == lastEnd - 1)
-                        onclick = mi.OnClick.Insert(lastEnd, strPrefix);
-                    else
-                        onclick = mi.OnClick.Insert(lastEnd, ", " + strPrefix);
-                }
-
-                //Constructo OnServerClick
-                if (!string.IsNullOrEmpty(mi.OnServerClickAjax))
-                {
-                    if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                        throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(mi.Id));
-                    onclick = mi.OnServerClickAjax;
-                }
-
-                //Constructo OnServerClick
-                if (!string.IsNullOrEmpty(mi.OnServerClickPost))
-                {
-                    if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
-                        throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(mi.Id));
-                    onclick = "PostServer('{0}',{1});".Formato(mi.OnServerClickPost, strPrefix);
-                }
-
-                //Add cursor pointer to the htmlProps
-                if (!mi.HtmlProps.ContainsKey("style"))
-                    mi.HtmlProps.Add("style", "cursor: pointer");
-                else if (mi.HtmlProps["style"].ToString().IndexOf("cursor") == -1)
-                    mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
-
-                mi.HtmlProps.Add("title", mi.AltText);
-
-                if (mi.ImgSrc.HasText())
-                {
-                    mi.HtmlProps["style"] = "background:transparent url(" + mi.ImgSrc + ")  no-repeat scroll left top; " + mi.HtmlProps["style"].ToString();
-                    //sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
-                    sb.AppendLine(helper.Div(mi.Id, "", "OperationDiv", mi.HtmlProps));
-                }
-                else
-                {
-                    mi.HtmlProps.Add("onclick", onclick);
-                    sb.AppendLine(helper.Div(mi.Id, mi.AltText, "OperationDiv", mi.HtmlProps));
-                }
+                sb.AppendLine(mi.ToString(helper, prefix));
             }
 
             return sb.ToString();

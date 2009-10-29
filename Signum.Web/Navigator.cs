@@ -170,9 +170,9 @@ namespace Signum.Web
             return Manager.PartialFind(controller, findOptions, prefix, prefixEnd);
         }
 
-        public static PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool? allowMultiple, string prefix)
+        public static PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
         {
-            return Manager.Search(controller, queryName, filters, resultsLimit, allowMultiple, prefix);
+            return Manager.Search(controller, findOptions, top, prefix);
         }
 
         internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
@@ -660,13 +660,13 @@ namespace Signum.Web
             return GetQueryName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(Controller controller, object queryName, List<Filter> filters, int? resultsLimit, bool? allowMultiple, string prefix)
+        protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
         {
-            QueryResult queryResult = Queries.ExecuteQuery(queryName, filters, resultsLimit);
+            QueryResult queryResult = Queries.ExecuteQuery(findOptions.QueryName, findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(), top);
 
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.Results] = queryResult;
-            controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
+            controller.ViewData[ViewDataKeys.AllowMultiple] = findOptions.AllowMultiple;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
 
             if (queryResult != null && queryResult.Data != null && queryResult.Data.Length > 0 && queryResult.VisibleColums.Count > 0)
@@ -675,7 +675,7 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.EntityColumnIndex] = entityColumnIndex;
             }
 
-            QuerySettings settings = QuerySettings[queryName];
+            QuerySettings settings = QuerySettings[findOptions.QueryName];
             controller.ViewData[ViewDataKeys.Formatters] = queryResult.Columns.Select(c =>settings.GetFormatter(c)).ToList();
 
             return new PartialViewResult
@@ -698,10 +698,10 @@ namespace Signum.Web
             string operation;
             Type type;
             NameValueCollection parameters = httpContext.Request.Params;
-            var names = parameters.AllKeys.Where(k => k.StartsWith("name"));
+            var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
             foreach(string nameKey in names)
             {
-                if (!int.TryParse(nameKey.RemoveLeft(4), out index))
+                if (!int.TryParse(nameKey.RemoveLeft(2), out index))
                     continue;
 
                 name = parameters[nameKey];
@@ -752,10 +752,10 @@ namespace Signum.Web
             bool frozen;
             Type type;
             NameValueCollection parameters = httpContext.Request.Params;
-            var names = parameters.AllKeys.Where(k => k.StartsWith("name"));
+            var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
             foreach (string nameKey in names)
             {
-                if (!int.TryParse(nameKey.RemoveLeft(4), out index))
+                if (!int.TryParse(nameKey.RemoveLeft(2), out index))
                     continue;
 
                 name = parameters[nameKey];
@@ -781,11 +781,12 @@ namespace Signum.Web
                 }
                 FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
 
-                frozen = parameters.AllKeys.Any(k => k == "frozen" + index.ToString());
+                frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
 
                 result.Add(new FilterOptions
                 {
                     ColumnName = name,
+                    Column = queryDescription.Columns.Single(c => c.Name == name),
                     Operation = filterOperation,
                     Frozen = frozen,
                     Value = value,

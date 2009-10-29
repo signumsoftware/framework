@@ -21,6 +21,11 @@ namespace Signum.Web.Controllers
     [HandleError]
     public class SignumController : Controller
     {
+        static SignumController()
+        {
+            ModelBinders.Binders.AddOrReplace(typeof(FindOptions), new FindOptionsModelBinder());
+        }
+
         public ViewResult View(string typeUrlName, int id)
         {
             Type t = Navigator.ResolveTypeFromUrlName(typeUrlName);
@@ -304,38 +309,21 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Get)]
-        public ActionResult Find([ModelBinder(typeof(FindOptionsModelBinder))]FindOptions findOptions)
+        public ActionResult Find(FindOptions findOptions)
         {
-            //object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
-
-            //FindOptions findOptions = new FindOptions(queryName);
-            
-            //if (allowMultiple.HasValue)
-            //   findOptions.AllowMultiple = allowMultiple.Value;
-
             return Navigator.Find(this, findOptions);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialFind(string queryUrlName, bool? allowMultiple, string prefix, string prefixEnd)
+        public PartialViewResult PartialFind(FindOptions findOptions, string prefix, string prefixEnd)
         {
-            object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
-
-            FindOptions findOptions = new FindOptions(queryName);
-
-            findOptions.AllowMultiple = allowMultiple;
-
             return Navigator.PartialFind(this, findOptions, prefix, prefixEnd);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(string sfQueryNameToStr, string sfFilters, int? sfTop, bool? sfAllowMultiple, string prefix)
+        public PartialViewResult Search(FindOptions findOptions, int? sfTop, string prefix)
         {
-            object queryName = Navigator.ResolveQueryFromToStr(sfQueryNameToStr);
-
-            List<Filter> filters = Navigator.ExtractFilters(this.HttpContext, queryName);
-
-            return Navigator.Search(this, queryName, filters, sfTop, sfAllowMultiple, prefix);
+            return Navigator.Search(this, findOptions, sfTop, prefix);
         }
         
         [AcceptVerbs(HttpVerbs.Post)]

@@ -192,4 +192,7 @@
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
     <value>Your Session has timed out, click F5 to reload the entity from the Database</value>
   </data>
+  <data name="QuickLinkIsNotInitialized" xml:space="preserve">
+    <value>QuickLink doesn't have its FindOptions initialized</value>
+  </data>
 </root>

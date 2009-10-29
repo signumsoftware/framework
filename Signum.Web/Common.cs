@@ -96,7 +96,7 @@ namespace Signum.Web
                         int max = atribute.Max; //-1 if not set
                         if (max != -1)
                         {
-                            ((ValueLine)vl).ValueHtmlProps.AddRange(new
+                            ((ValueLine)vl).ValueHtmlProps.AddRangeFromAnonymousType(new
                             {
                                 maxlength = max,
                                 size = max

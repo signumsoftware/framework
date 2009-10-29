@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Web
 {
@@ -43,27 +44,34 @@ namespace Signum.Web
 
         public bool? Create { get; set; }
 
-        public string ToStringNoName()
+        public string ToString(bool writeQueryUrlName, string firstCharacter)
         {
             StringBuilder sb = new StringBuilder();
-            //sb.Append("&queryUrlName=" + Navigator.Manager.QuerySettings[QueryName].UrlName);
+            if (writeQueryUrlName)
+                sb.Append("&sfQueryUrlName=" + Navigator.Manager.QuerySettings[QueryName].UrlName);
+
             if (SearchOnLoad)
-                sb.Append("&searchOnLoad=true");
+                sb.Append("&sfSearchOnLoad=true");
             if (AllowMultiple==null || !AllowMultiple.Value)
-                sb.Append("&allowMultiple=false");
+                sb.Append("&sfAllowMultiple=false");
             if (filterOptions != null && filterOptions.Count > 0)
             {
                 for (int i = 0; i < filterOptions.Count; i++)
                 {
                     FilterOptions fo = filterOptions[i];
-                    sb.Append("&name{0}={1}&sel{0}={2}&val{0}={3}".Formato(i, fo.ColumnName, fo.Operation.ToString(), fo.Value.ToString()));
+                    string value;
+                    if (typeof(Lite).IsAssignableFrom(fo.Value.GetType()))
+                        value = ((Lite)fo.Value).Id.ToString();
+                    else
+                        value = fo.Value.ToString();
+                    sb.Append("&cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(i, fo.ColumnName, fo.Operation.ToString(), value));
                     if (filterOptions[i].Frozen)
-                        sb.Append("&frozen{0}=true".Formato(i));
+                        sb.Append("&fz{0}=true".Formato(i));
                 }
             }
             string result = sb.ToString();
             if (result.HasText())
-                return "?" + result.RemoveLeft(1);
+                return firstCharacter + result.RemoveLeft(1);
             else
                 return result;
         }

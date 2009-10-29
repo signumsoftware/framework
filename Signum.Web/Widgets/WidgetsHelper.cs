@@ -8,39 +8,34 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public delegate List<IWidget> GetWidgetDelegate(HtmlHelper helper, object entity, string partialViewName);
-
-    public interface IWidget
-    {
-        event Action ForceShow;
-    }
+    public delegate string GetWidgetDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
 
     public static class WidgetsHelper
     {
         public static event GetWidgetDelegate GetWidgetsForView;
 
-        public static string GetWidgetsForViewName(this HtmlHelper helper, object entity, string partialViewName)
+        public static string GetWidgetsForViewName(this HtmlHelper helper, object entity, string partialViewName, string prefix)
         {
-            List<IWidget> widgets = new List<IWidget>();
+            List<string> widgets = new List<string>();
             if (GetWidgetsForView != null)
                 widgets.AddRange(GetWidgetsForView.GetInvocationList()
                     .Cast<GetWidgetDelegate>()
-                    .Select(d => d(helper, entity, partialViewName))
-                    .NotNull().SelectMany(d => d).ToList());
+                    .Select(d => d(helper, entity, partialViewName, prefix))
+                    .NotNull().ToList());
 
             return WidgetsToString(helper, widgets);
         }
 
-        private static string WidgetsToString(HtmlHelper helper, List<IWidget> widgets)
+        private static string WidgetsToString(HtmlHelper helper, List<string> widgets)
         {
             if (widgets == null || widgets.Count == 0)
                 return "";
 
             StringBuilder sb = new StringBuilder();
 
-            foreach (IWidget widget in widgets)
-            { 
-                
+            foreach (string widget in widgets)
+            {
+                sb.AppendLine(widget);
             }
 
             return sb.ToString();

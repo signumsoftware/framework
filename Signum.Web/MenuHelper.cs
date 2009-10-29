@@ -122,10 +122,11 @@ namespace Signum.Web
                         if (node.ManualHref == currentUrl) { sb.Append("</b>"); }
                     }
                     else
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?"), node.Title, node.Text));
                     {
-                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToStringNoName() == currentUrl) { sb.Append("<b>"); }
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToStringNoName(), node.Title, node.Text));
-                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToStringNoName() == currentUrl) { sb.Append("<b>"); }
+                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?") == currentUrl) { sb.Append("<b>"); }
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?"), node.Title, node.Text));
+                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?") == currentUrl) { sb.Append("<b>"); }
                     }
                 }
                 else {
@@ -190,7 +191,7 @@ namespace Signum.Web
                     else if (menuItem.ManualA.HasText())
                         sb.AppendLine(menuItem.ManualA);
                     else
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.FindOptions.QueryName) + menuItem.FindOptions.ToStringNoName(), menuItem.Title, menuItem.Text));
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.FindOptions.QueryName) + menuItem.FindOptions.ToString(false, "?"), menuItem.Title, menuItem.Text));
                     sb.AppendLine("</li>");
                 }
             }

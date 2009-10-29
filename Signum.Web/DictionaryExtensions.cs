@@ -8,7 +8,7 @@ namespace Signum.Web
 {
     public static class DictionaryExtensions
     {
-        public static void AddRange(this Dictionary<string, object> dictionary, object values)
+        public static void AddRangeFromAnonymousType(this Dictionary<string, object> dictionary, object values)
         {
             if (values != null)
             {

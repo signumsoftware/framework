@@ -192,4 +192,7 @@
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
     <value>La sesión ha expirado, haz click en F5 para recargar la entidad de la base de datos</value>
   </data>
+  <data name="QuickLinkIsNotInitialized" xml:space="preserve">
+    <value>El QuickLink no tiene sus FindOptions inicializadas</value>
+  </data>
 </root>

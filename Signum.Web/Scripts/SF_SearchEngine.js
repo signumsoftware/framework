@@ -2,7 +2,7 @@
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "queryUrlName=" + queryUrlName + qp("allowMultiple",allowMultiple) + qp(sfPrefix,prefix) + qp("prefixEnd","S"),
+		data: "sfQueryUrlName=" + queryUrlName + qp("sfAllowMultiple", allowMultiple) + qp(sfPrefix, prefix) + qp("prefixEnd", "S"),
 		async: false,
 		dataType: "html",
 		success: function (msg) {
@@ -168,6 +168,32 @@ function CloseChooser(urlController, onOk, onCancel, prefix) {
 	});
 }
 
+function QuickLinkClickServerAjax(urlController,findOptionsRaw,prefix) {
+    var newPrefix = prefix + "New";
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: findOptionsRaw + qp(sfPrefix, newPrefix) + qp("prefixEnd", "S"),
+        async: false,
+        dataType: "html",
+        success: function(msg) {
+            if (msg.indexOf("ModelState") > 0) {
+                eval('var result=' + msg);
+                var modelState = result["ModelState"];
+                ShowErrorMessages(newPrefix, modelState, true, "*");
+            }
+            else {
+                $('#' + prefix + "divASustituir").html(msg);
+                ShowPopup(newPrefix, prefix + "divASustituir", "modalBackgroundS", "panelPopupS");
+                $('#' + newPrefix + sfBtnCancelS).click(function() { $('#' + prefix + "divASustituir").html("") });
+            }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            ShowError(XMLHttpRequest, textStatus, errorThrown);
+        }
+    });
+}
+
 function OperationExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
 	var formChildren = "";
 	if (isLite == false || isLite == "false" || isLite == "False") {
@@ -220,7 +246,7 @@ function ConstructFromManyExecute(urlController, typeName, queryName, operationK
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "sfIds=" + ids + qp("sfTypeName",typeName) + qp("sfQueryName",queryName) + qp("sfOperationFullKey",operationKey) + qp(sfPrefix,prefix) + qp("sfOnOk",singleQuote(onOk)) + qp("sfOnCancel",singleQuote(onCancel)),
+		data: "sfIds=" + ids + qp("sfTypeName", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, prefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
 		async: false,
 		dataType: "html",
 		success: function (msg) {
@@ -236,14 +262,14 @@ function ConstructFromManyExecute(urlController, typeName, queryName, operationK
 
 }
 
-function PostServer(urlController, prefix) {
-	var ids = GetSelectedElements(prefix);
-	if (ids == "") return;
+//function PostServer(urlController, prefix) {
+//	var ids = GetSelectedElements(prefix);
+//	if (ids == "") return;
 
-	document.forms[0].innerHTML = "<input type='hidden' id='sfIds' name='sfIds' value='" + ids + "' />";
-	document.forms[0].action = urlController;
-	document.forms[0].submit();
-}
+//	document.forms[0].innerHTML = "<input type='hidden' id='sfIds' name='sfIds' value='" + ids + "' />";
+//	document.forms[0].action = urlController;
+//	document.forms[0].submit();
+//}
 
 function PostServer(urlController) {
 	document.forms[0].action = urlController;
@@ -319,7 +345,7 @@ function Search(urlController, prefix, callBack) {
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "sfQueryNameToStr=" + $("#" + prefix + "sfQueryName").val() + qp("sfTop",top) + qp("sfAllowMultiple",allowMultiple) + qp(sfPrefix,prefix) + serializedFilters,
+		data: "sfQueryUrlName=" + $("#" + prefix + "sfQueryUrlName").val() + qp("sfTop", top) + qp("sfAllowMultiple", allowMultiple) + qp(sfPrefix, prefix) + serializedFilters,
 		async: false,
 		dataType: "html",
 		success: function (msg) {
@@ -354,7 +380,7 @@ function SerializeFilter(index, prefix) {
 	if (id.length > 0) value = id.val();
 
 	var typeName = $("#" + prefix + "type_" + index);
-	return qp("name" + index, columnName) + qp("sel" + index, selector.val()) + qp("val" + index, value);
+	return qp("cn" + index, columnName) + qp("sel" + index, selector.val()) + qp("val" + index, value);
 }
 
 function OnSearchImplementationsOk(urlController, queryUrlNameToIgnore, allowMultiple, onOk, onCancel, divASustituir, prefix, selectedType) {
