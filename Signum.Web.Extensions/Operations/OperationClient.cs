@@ -67,7 +67,9 @@ namespace Signum.Web.Operations
                         OnServerClickAjax = GetServerClickAjax(httpContext, oi, dic[oi.Key].OperationSettings, ident),
                         OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
                     };
-                    item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps));
+                    Dictionary<string, object> settings = dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps);
+                    if (settings != null) 
+                        item.HtmlProps.AddRange(settings);
 
                     items.Add(item);
                 }
@@ -109,7 +111,9 @@ namespace Signum.Web.Operations
                         OnServerClickAjax = GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationSettings, queryName, entityType),
                         OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
                     };
-                    item.HtmlProps.AddRange(dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps));
+                    Dictionary<string, object> settings = dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps);
+                    if (settings != null)
+                        item.HtmlProps.AddRange(settings);
 
                     items.Add(item);
                 }
