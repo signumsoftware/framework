@@ -171,7 +171,7 @@ namespace Signum.Engine.Maps
 
         private KindOfField? GetKindOfField(Type type, FieldInfo fi, Type fieldType)
         {
-            if (fi.FieldEquals<IdentifiableEntity>(i => i.id))
+            if (fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                 return KindOfField.PrimaryKey;
 
             if (Settings.GetSqlDbType(type, fi, fieldType.UnNullify()) != null)

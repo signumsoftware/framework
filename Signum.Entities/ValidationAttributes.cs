@@ -473,10 +473,30 @@ namespace Signum.Entities
         public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties)
         {
             this.getState = getState;
-            PropertyInfo[] pis = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
+            PropertyInfo[] pis = properties.Select(p => SlowPropertyInfo(p)).ToArray();
             propertyNames = pis.Select(pi => pi.Name).ToArray();
             propertyNiceNames = pis.Select(pi => pi.NiceName()).ToArray();
             getters = properties.Select(p => p.Compile()).ToArray();
+        }
+
+        public static PropertyInfo SlowPropertyInfo(LambdaExpression property)
+        {
+            if (property == null)
+                throw new ArgumentNullException("property");
+
+            Expression body = property.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            MemberExpression ex = body as MemberExpression;
+            if (ex == null)
+                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
+
+            PropertyInfo pi = ex.Member as PropertyInfo;
+            if (pi == null)
+                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
+
+            return pi;
         }
 
         public void Add(S state, params bool?[] necessary)

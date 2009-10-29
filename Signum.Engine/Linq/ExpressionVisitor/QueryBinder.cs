@@ -861,7 +861,7 @@ namespace Signum.Engine.Linq
                     FieldInitExpression fie = (FieldInitExpression)source;
                     FieldInfo fi = Reflector.FindFieldInfo(fie.Type, m.Member, false);
 
-                    if (fi != null && fi.FieldEquals<IdentifiableEntity>(ei => ei.id))
+                    if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                         return fie.ExternalId;
 
                     if (fie.TableAlias == null)

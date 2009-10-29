@@ -234,4 +234,7 @@
   <data name="Telephone" xml:space="preserve">
     <value>Telephone</value>
   </data>
+  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
+    <value>property should be an expression accessing a property</value>
+  </data>
 </root>

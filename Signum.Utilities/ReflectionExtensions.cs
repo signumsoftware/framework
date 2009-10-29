@@ -50,14 +50,14 @@ namespace Signum.Utilities
             return type.IsGenericType && type.GetGenericTypeDefinition() == genericType;
         }
 
-        public static bool FieldEquals<T>(this FieldInfo fi, Expression<Func<T, object>> lambdaToFiel)
+        public static bool FieldEquals<S,T>(this FieldInfo fi, Expression<Func<S, T>> field)
         {
-            return ReflectionTools.FieldEquals(ReflectionTools.GetFieldInfo(lambdaToFiel), fi);
+            return ReflectionTools.FieldEquals(ReflectionTools.BaseFieldInfo(field), fi);
         }
 
-        public static bool PropertyEquals<T>(this PropertyInfo fi, Expression<Func<T, object>> lambdaToProperty)
+        public static bool PropertyEquals<S, T>(this PropertyInfo pi, Expression<Func<S, T>> property)
         {
-            return ReflectionTools.PropertyEquals(ReflectionTools.GetPropertyInfo(lambdaToProperty), fi);
+            return ReflectionTools.PropertyEquals(ReflectionTools.BasePropertyInfo(property), pi);
         }
     }
 }

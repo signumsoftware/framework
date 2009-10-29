@@ -322,6 +322,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to property should be an expression accessing a property.
+        /// </summary>
+        internal static string PropertyShouldBeAnExpressionAccessingAProperty {
+            get {
+                return ResourceManager.GetString("PropertyShouldBeAnExpressionAccessingAProperty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Removing entity from a new lite is not allowed.
         /// </summary>
         internal static string RemovingEntityNotAllowedInNewLazies {
