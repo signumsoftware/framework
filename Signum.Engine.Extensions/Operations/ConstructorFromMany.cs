@@ -12,7 +12,7 @@ namespace Signum.Engine.Operations
 {
     public interface IConstructorFromManyOperation : IOperation
     {
-        IIdentifiable Construct(List<Lite> lazies, params object[] parameters);
+        IIdentifiable Construct(List<Lite> lites, params object[] parameters);
     }
 
     public class BasicConstructorFromMany<F, T> : IConstructorFromManyOperation
@@ -33,7 +33,7 @@ namespace Signum.Engine.Operations
             this.Key = key; 
         }
 
-        IIdentifiable IConstructorFromManyOperation.Construct(List<Lite> lazies, params object[] args)
+        IIdentifiable IConstructorFromManyOperation.Construct(List<Lite> lites, params object[] args)
         {
             if (Constructor == null)
                 throw new ArgumentException("FromLite");
@@ -54,7 +54,7 @@ namespace Signum.Engine.Operations
 
                     OperationLogic.OnBeginOperation(this, null);
 
-                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lazies.Select(l => l.ToLite<F>()).ToList(), args);
+                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lites.Select(l => l.ToLite<F>()).ToList(), args);
 
                     OperationLogic.OnEndOperation(this, result);
 
@@ -75,9 +75,9 @@ namespace Signum.Engine.Operations
             }
         }
 
-        protected virtual T OnConstructor(List<Lite<F>> lazies, object[] args)
+        protected virtual T OnConstructor(List<Lite<F>> lites, object[] args)
         {
-            return Constructor(lazies, args);
+            return Constructor(lites, args);
         }
 
         public void AssertIsValid()

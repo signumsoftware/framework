@@ -195,4 +195,7 @@
   <data name="ViewName" xml:space="preserve">
     <value>Nombre vista</value>
   </data>
+  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
+    <value>Invalid Operation Type {{0}} in the construction of the operation {{1}}</value>
+  </data>
 </root>

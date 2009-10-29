@@ -133,6 +133,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Operation Type {{0}} in the construction of the operation {{1}}.
+        /// </summary>
+        internal static string InvalidOperationType0inTheConstructionOfOperation1 {
+            get {
+                return ResourceManager.GetString("InvalidOperationType0inTheConstructionOfOperation1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid username or password.
         /// </summary>
         internal static string InvalidUsernameOrPassword {

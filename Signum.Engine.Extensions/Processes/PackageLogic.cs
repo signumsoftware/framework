@@ -87,16 +87,16 @@ namespace Signum.Engine.Processes
             package.Save();
 
 
-            List<Lite> lazies = 
+            List<Lite> lites = 
                 args != null && args.Length > 0? (List<Lite>)args[0]: 
                 getLazies != null? getLazies(): null;
 
-            if (lazies == null)
+            if (lites == null)
                 throw new ApplicationException("No entities to process found");
 
-            package.NumLines = lazies.Count; 
+            package.NumLines = lites.Count; 
             
-            lazies.Select(lite => new PackageLineDN
+            lites.Select(lite => new PackageLineDN
             {
                 Package = package.ToLite(),
                 Target = lite.ToLite<IdentifiableEntity>()

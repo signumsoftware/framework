@@ -118,10 +118,10 @@ namespace Signum.Services
               () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
         }
 
-        public IdentifiableEntity ConstructFromMany(List<Lite> lazies, Type type, Enum operationKey, params object[] args)
+        public IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), "ConstructFromMany {0}".Formato(operationKey),
-              () => OperationLogic.ServiceConstructFromMany(lazies, type, operationKey, args));
+              () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
         #endregion
 

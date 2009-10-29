@@ -60,9 +60,9 @@ namespace Signum.Windows.Operations
                 Type entityType = SearchControl.EntityType; 
                 object queryName = SearchControl.QueryName;
 
-                var lazies = SearchControl.SelectedItems.TryCC(a=>a.Cast<Lite>().ToList()); 
+                var lites = SearchControl.SelectedItems.TryCC(a=>a.Cast<Lite>().ToList()); 
 
-                if(lazies == null && lazies.Count == 0)
+                if(lites == null && lites.Count == 0)
                     throw new ApplicationException("Select some rows first");
 
                 ConstructorFromManySettings settings = (ConstructorFromManySettings)OperationClient.Manager.Settings.TryGetC(operationInfo.Key);
@@ -70,13 +70,13 @@ namespace Signum.Windows.Operations
                 if (settings != null && settings.Constructor != null)
                     settings.Constructor(new ConstructorFromManyEventArgs
                     {
-                        Entities = lazies,
+                        Entities = lites,
                         Window = b.FindCurrentWindow(),
                         OperationInfo = operationInfo,
                         QueryName = queryName
                     });
 
-               IdentifiableEntity entity = Server.Service<IOperationServer>().ConstructFromMany(lazies, entityType, operationInfo.Key);
+               IdentifiableEntity entity = Server.Service<IOperationServer>().ConstructFromMany(lites, entityType, operationInfo.Key);
 
                if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
                    Navigator.View(entity); 

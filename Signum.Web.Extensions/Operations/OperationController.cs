@@ -21,9 +21,9 @@ namespace Signum.Web.Operations
     [HandleError]
     public class OperationController : Controller
     {
-        public ActionResult OperationExecute(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
-            Type type = Navigator.ResolveType(sfTypeName);
+            Type type = Navigator.ResolveType(sfRuntimeType);
 
             IdentifiableEntity entity = null;
             ChangesLog changesLog = null;
@@ -32,7 +32,7 @@ namespace Signum.Web.Operations
                 if (sfId.HasValue)
                 {
                     Lite lite = Lite.Create(type, sfId.Value);
-                    entity = OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                    entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
                     throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
@@ -65,9 +65,25 @@ namespace Signum.Web.Operations
                 return Navigator.View(this, entity);
         }
 
-        public ActionResult ConstructFromManyExecute(string sfTypeName, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult ConstructFromExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
-            Type type = Navigator.ResolveType(sfTypeName);
+            Type type = Navigator.ResolveType(sfRuntimeType);
+
+            IdentifiableEntity entity = null;
+            if (sfId.HasValue)
+            {
+                Lite lite = Lite.Create(type, sfId.Value);
+                entity = OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+            }
+            else
+                throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+
+            return Navigator.PopupView(this, entity, prefix);
+        }
+
+        public ActionResult ConstructFromManyExecute(string sfRuntimeType, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        {
+            Type type = Navigator.ResolveType(sfRuntimeType);
 
             List<Lite> sourceEntities = null;
             if (sfIds.HasText())

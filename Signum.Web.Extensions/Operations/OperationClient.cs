@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using System.Web;
 using Signum.Entities.Basics;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
@@ -143,20 +144,40 @@ namespace Signum.Web.Operations
             if (os != null && (os.OnClick.HasText() || os.OnServerClickPost.HasText()))
                 return null;
 
-            string controllerUrl = "Operation.aspx/OperationExecute";
-            if (os != null && os.OnServerClickAjax.HasText())
-                controllerUrl = os.OnServerClickAjax;
+            if (oi.OperationType == OperationType.Execute)
+            {
+                string controllerUrl = "Operation.aspx/OperationExecute";
+                if (os != null && os.OnServerClickAjax.HasText())
+                    controllerUrl = os.OnServerClickAjax;
 
-            return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7});".Formato(
-                controllerUrl,
-                ident.GetType().Name, 
-                ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
-                EnumDN.UniqueKey(oi.Key),
-                oi.Lite,
-                httpContext.Request.Params["prefix"] ?? "",
-                ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
-                ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
-                );
+                return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7});".Formato(
+                    controllerUrl,
+                    ident.GetType().Name,
+                    ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
+                    EnumDN.UniqueKey(oi.Key),
+                    oi.Lite,
+                    httpContext.Request.Params["prefix"] ?? "",
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
+                    );
+            }
+            else if (oi.OperationType == OperationType.ConstructorFrom)
+            {
+                string controllerUrl = "Operation.aspx/ConstructFromExecute";
+                if (os != null && os.OnServerClickAjax.HasText())
+                    controllerUrl = os.OnServerClickAjax;
+
+                return "javascript:ConstructFromExecute('{0}','{1}','{2}','{3}','{4}',{5},{6});".Formato(
+                    controllerUrl,
+                    ident.GetType().Name,
+                    ident.IdOrNull.HasValue ? ident.Id.ToString() : "",
+                    EnumDN.UniqueKey(oi.Key),
+                    httpContext.Request.Params["prefix"] ?? "",
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
+                    );
+            }
+            throw new ApplicationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(oi.OperationType.ToString(), EnumDN.UniqueKey(oi.Key)));
         }
 
         protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, WebMenuItem os, object queryName, Type entityType)
@@ -168,10 +189,9 @@ namespace Signum.Web.Operations
             if (os != null && os.OnServerClickAjax.HasText())
                 controllerUrl = os.OnServerClickAjax;
 
-            return "javascript:ConstructFromManyExecute('{0}','{1}','{2}','{3}','{4}',{5},{6});".Formato(
+            return "javascript:ConstructFromManyExecute('{0}','{1}','{2}','{3}',{4},{5});".Formato(
                 controllerUrl,
                 entityType.Name,
-                queryName.ToString(),
                 EnumDN.UniqueKey(key),
                 httpContext.Request.Params["prefix"] ?? "",
                 ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",

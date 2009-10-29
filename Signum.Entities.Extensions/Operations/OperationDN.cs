@@ -19,7 +19,7 @@ namespace Signum.Entities.Operations
         public Enum Key { get; set; }
         public OperationType OperationType { get; set; }
         public bool CanExecute { get; set; }
-        public bool Lite { get; set; }
+        public bool? Lite { get; set; }
         public bool Returns { get; set; }
 
         public override string ToString()

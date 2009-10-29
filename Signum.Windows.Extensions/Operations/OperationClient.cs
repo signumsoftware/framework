@@ -150,7 +150,7 @@ namespace Signum.Windows.Operations
             }
             else if(operationInfo.OperationType == OperationType.Execute)
             {
-                 if (operationInfo.Lite)
+                 if (operationInfo.Lite.Value)
                  {
                      if (entityControl.LooseChangesIfAny())
                      {
@@ -169,7 +169,7 @@ namespace Signum.Windows.Operations
             }
             else if (operationInfo.OperationType == OperationType.ConstructorFrom)
             {
-                if (operationInfo.Lite)
+                if (operationInfo.Lite.Value)
                 {
                     if (entityControl.LooseChangesIfAny())
                     {

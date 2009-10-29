@@ -272,9 +272,9 @@ namespace Signum.Web.Authorization
             return changesLog.Errors;
         }
 
-        public ActionResult UserExecOperation(string sfTypeName, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult UserExecOperation(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
-            Type type = Navigator.ResolveType(sfTypeName);
+            Type type = Navigator.ResolveType(sfRuntimeType);
 
             UserDN entity = null;
             if (isLite)

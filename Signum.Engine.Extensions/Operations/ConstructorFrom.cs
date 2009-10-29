@@ -35,6 +35,7 @@ namespace Signum.Engine.Operations
         {
             this.Key = key;
             this.Returns = true;
+            this.Lite = true;
         }
 
         bool IEntityOperation.CanExecute(IIdentifiable entity)

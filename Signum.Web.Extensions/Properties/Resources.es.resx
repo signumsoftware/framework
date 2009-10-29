@@ -195,4 +195,7 @@
   <data name="ViewName" xml:space="preserve">
     <value>View name</value>
   </data>
+  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
+    <value>El tipo de operación {{0}} es inválido para la operación {{1}}</value>
+  </data>
 </root>

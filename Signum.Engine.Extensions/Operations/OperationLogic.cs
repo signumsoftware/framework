@@ -23,7 +23,6 @@ namespace Signum.Engine.Operations
         Enum Key { get; }
         Type Type { get; }
         OperationType OperationType { get; }
-        bool Lite { get; }
         bool Returns { get; }
 
         void AssertIsValid();
@@ -31,6 +30,7 @@ namespace Signum.Engine.Operations
 
     public interface IEntityOperation : IOperation
     {
+        bool Lite { get; }
         bool AllowsNew { get; }
         bool CanExecute(IIdentifiable entity); 
     }
@@ -114,7 +114,7 @@ namespace Signum.Engine.Operations
             return new OperationInfo
             {
                 Key = operation.Key,
-                Lite = operation.Lite,
+                Lite = (operation as IEntityOperation).TryCS(eo=>eo.Lite),
                 Returns = operation.Returns,
                 OperationType = operation.OperationType,
                 CanExecute = canExecute,
@@ -148,44 +148,44 @@ namespace Signum.Engine.Operations
         #region Execute
         public static IdentifiableEntity ServiceExecute(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            Find<IExecuteOperation>(entity.GetType(), operationKey, false).Execute(entity, args);
+            Find<IExecuteOperation>(entity.GetType(), operationKey).AssertLite(false).Execute(entity, args);
             return (IdentifiableEntity)entity;
         }
 
         public static IdentifiableEntity ServiceExecuteLite(Lite lite, Enum operationKey, params object[] args)
         {
             IdentifiableEntity entity = Database.RetrieveAndForget(lite);
-            Find<IExecuteOperation>(lite.RuntimeType, operationKey, true).Execute(entity, args);
+            Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite(true).Execute(entity, args);
             return entity;
         }
 
         public static T Execute<T>(this T entity, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
-            Find<IExecuteOperation>(entity.GetType(), operationKey, false).Execute(entity, args);
+            Find<IExecuteOperation>(entity.GetType(), operationKey).AssertLite(false).Execute(entity, args);
             return (T)(IIdentifiable)entity;
         }
 
         public static T ExecuteLite<T>(this Lite<T> lite, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            T  entity = lite.RetrieveAndForget(); 
-            Find<IExecuteOperation>(lite.RuntimeType, operationKey, true).Execute(entity, args);
+            T  entity = lite.RetrieveAndForget();
+            Find<IExecuteOperation>(lite.RuntimeType, operationKey).AssertLite(true).Execute(entity, args);
             return entity;
         }
 
         public static T ExecuteBase<T>(this T entity, Type baseType, Enum operationKey, params object[] args)
              where T : class, IIdentifiable
         {
-             Find<IExecuteOperation>(baseType, operationKey, false).Execute(entity, args);
-             return entity;
+            Find<IExecuteOperation>(baseType, operationKey).AssertLite(false).Execute(entity, args);
+            return entity;
         }
 
         public static T ExecuteLiteBase<T>(this Lite<T> lite, Type baseType, Enum operationKey, params object[] args)
             where T:class, IIdentifiable
         {
-            T entity = lite.RetrieveAndForget(); 
-            Find<IExecuteOperation>(baseType, operationKey, true).Execute(entity, args);
+            T entity = lite.RetrieveAndForget();
+            Find<IExecuteOperation>(baseType, operationKey).AssertLite(true).Execute(entity, args);
             return entity;
         }
         #endregion
@@ -193,80 +193,74 @@ namespace Signum.Engine.Operations
         #region Construct
         public static IdentifiableEntity ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
-            return Find<IConstructorOperation>(type, operationKey, false).Construct(args);
+            return Find<IConstructorOperation>(type, operationKey).Construct(args);
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Find<IConstructorOperation>(typeof(T), operationKey, false).Construct(args);
+            return (T)(IIdentifiable)Find<IConstructorOperation>(typeof(T), operationKey).Construct(args);
         }
         #endregion
 
         #region ConstructFrom
         public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
+            return (IdentifiableEntity)Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertLite(false).Construct(entity, args);
         }
 
         public static IdentifiableEntity ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lite), args);
+            return (IdentifiableEntity)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
         }
 
 
         public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
               where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(entity.GetType(), operationKey, false).Construct(entity, args);
+            return (T)Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertLite(false).Construct(entity, args);
         }
 
         public static T ConstructFromLite<T>(this Lite lite, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey, true).Construct(Database.RetrieveAndForget(lite), args);
+            return (T)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
         }
 
 
         public static T ConstructFromBase<T>(this IIdentifiable entity, Type baseType, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(baseType, operationKey, false).Construct(entity, args);
+            return (T)Find<IConstructorFromOperation>(baseType, operationKey).AssertLite(false).Construct(entity, args);
         }
 
         public static T ConstructFromLiteBase<T>(this Lite lite, Type baseType, Enum operationKey, params object[] args)
                where T : class, IIdentifiable
         {
-            return (T)Find<IConstructorFromOperation>(baseType, operationKey, true).Construct(Database.RetrieveAndForget(lite), args);
+            return (T)Find<IConstructorFromOperation>(baseType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
         }
         #endregion
 
         #region ConstructFromMany
-        public static IdentifiableEntity ServiceConstructFromMany(List<Lite> lazies, Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity ServiceConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationKey, true).Construct(lazies, args);
+            return (IdentifiableEntity)Find<IConstructorFromManyOperation>(type, operationKey).Construct(lites, args);
         }
 
-        public static T ConstructFromMany<F, T>(List<Lite<F>> lazies, Enum operationKey, params object[] args)
+        public static T ConstructFromMany<F, T>(List<Lite<F>> lites, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
             where F : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), operationKey, true).Construct(lazies.Cast<Lite>().ToList(), args);
+            return (T)(IIdentifiable)Find<IConstructorFromManyOperation>(typeof(F), operationKey).Construct(lites.Cast<Lite>().ToList(), args);
         }
         #endregion
 
-        static T Find<T>(Type type, Enum operationKey, bool isLite)
+        static T Find<T>(Type type, Enum operationKey)
             where T : IOperation
         {
             IOperation result = TryFind(type, operationKey);
             if (result == null)
                 throw new ApplicationException("Operation {0} not found for Type {1}".Formato(operationKey, type));
-
-            if (isLite && !result.Lite)
-                throw new ApplicationException("Operation {0} is not allowed for lazies".Formato(operationKey));
-
-            if (!isLite && result.Lite)
-                throw new ApplicationException("Operation {0} needs a Lite".Formato(operationKey));
 
             if (!(result is T))
                 throw new ApplicationException("Operation {0} is a {1} not a {2}, use '{3}' instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
@@ -276,6 +270,18 @@ namespace Signum.Engine.Operations
                     result is IConstructorFromManyOperation ? "ConstructFromMany" : null));
 
             return (T)result;
+        }
+
+        static T AssertLite<T>(this T result, bool isLite)
+             where T : IEntityOperation
+        {
+            if (isLite && !result.Lite)
+                throw new ApplicationException("Operation {0} is not allowed for lites".Formato(result.Key));
+
+            if (!isLite && result.Lite)
+                throw new ApplicationException("Operation {0} needs a Lite".Formato(result.Key));
+
+            return result; 
         }
 
         static IOperation TryFind(Type type, Enum operationKey)

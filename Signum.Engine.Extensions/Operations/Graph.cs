@@ -114,9 +114,9 @@ namespace Signum.Engine.Operations
                 this.TargetState = targetState;
             }
 
-            protected override E OnConstructor(List<Lite<F>> lazies, object[] args)
+            protected override E OnConstructor(List<Lite<F>> lites, object[] args)
             {
-                E result = base.OnConstructor(lazies, args);
+                E result = base.OnConstructor(lites, args);
 
                 Graph.AssertEnterState(result, this);
 
