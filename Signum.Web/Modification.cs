@@ -98,7 +98,7 @@ namespace Signum.Web
                 return new ValueModification(staticType, formValues, controlID);
         }
 
-        protected internal static Modifiable GetPropertyValue(Modifiable entity, string prefix)
+        public static Modifiable GetPropertyValue(Modifiable entity, string prefix)
         {
             if (!prefix.HasText())
                 return entity;

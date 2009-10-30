@@ -378,6 +378,7 @@ namespace Signum.Web
             if (Manager.EntitySettings.ContainsKey(entityType))
             {
                 el.Create = Navigator.IsCreable(entityType, admin);
+                el.PopupView = Navigator.IsPopupViewable(entityType, admin);
                 el.View = Navigator.IsViewable(entityType, admin);
                 el.Find = Navigator.IsFindable(entityType);
             }
@@ -386,6 +387,10 @@ namespace Signum.Web
         public static bool IsViewable(Type type, bool admin)
         {
             return Manager.IsViewable(type, admin);
+        }
+        public static bool IsPopupViewable(Type type, bool admin)
+        {
+            return Manager.IsPopupViewable(type, admin);
         }
         public static bool IsReadOnly(Type type, bool admin)
         {
@@ -420,6 +425,7 @@ namespace Signum.Web
         protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
 
         public event Func<Type, bool> GlobalIsCreable;
+        public event Func<Type, bool> GlobalIsPopupViewable;
         public event Func<Type, bool> GlobalIsViewable;
         public event Func<Type, bool> GlobalIsReadOnly;
         public event Func<object, bool> GlobalIsFindable;
@@ -990,6 +996,14 @@ namespace Signum.Web
                 return Database.Retrieve(type, int.Parse(id));
             else
                 return (ModifiableEntity)Constructor.Construct(type, controller);
+        }
+
+        protected internal virtual bool IsPopupViewable(Type type, bool admin)
+        {
+            if (GlobalIsPopupViewable != null && !GlobalIsPopupViewable(type))
+                return false;
+
+            return EntitySettings[type].IsPopupViewable(admin);
         }
 
         protected internal virtual bool IsViewable(Type type, bool admin)

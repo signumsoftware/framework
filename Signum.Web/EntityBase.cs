@@ -61,6 +61,13 @@ namespace Signum.Web
             set { runtimeType = value; }
         }
 
+        bool popupView = true;
+        public bool PopupView
+        {
+            get { return popupView; }
+            set { popupView = value; }
+        }
+
         bool view = true;
         public bool View
         {

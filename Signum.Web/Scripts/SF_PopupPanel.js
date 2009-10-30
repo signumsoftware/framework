@@ -204,7 +204,7 @@ function ReloadEntity(urlController, prefix, parentDiv) {
         success:
                    function(msg) {
                        if (!empty(parentDiv))
-                            $('#' + parentDiv).html(msg);
+                           $('#' + parentDiv).html(msg);
                        else
                             $('#' + prefix + "divMainControl").html(msg);
                    },

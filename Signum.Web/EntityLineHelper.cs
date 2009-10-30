@@ -84,13 +84,14 @@ namespace Signum.Web
 
             bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(type);
             bool isLite = typeof(Lite).IsAssignableFrom(type);
+            string id = (isIdentifiable) ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("") : 
+                (isLite) ? ((Lite)(object)value).TryCS(i => i.Id).TrySS(lid => lid).TryToString("") : "";
+            
             if (isIdentifiable || isLite)
             {
                 sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(idValueField, TypeContext.Id), 
-                    (isIdentifiable) 
-                       ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("")
-                       : ((Lite)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()));
+                    id));
 
                 if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
                     (isIdentifiable && value != null && ((IIdentifiable)(object)value).IdOrNull == null))
@@ -182,80 +183,91 @@ namespace Signum.Web
 
                 sb.AppendLine(helper.Span(TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
+            sb.AppendLine("<script type=\"text/javascript\">var " + TypeContext.Compose(idValueField, EntityBaseKeys.EntityTemp) + " = '';</script>");
 
-            if (settings.View)
+            if (settings.View && (isIdentifiable || isLite) && id.HasText())
             {
-                string viewingUrl = "javascript:OpenPopup(" + popupOpeningParameters + ");";
+                string viewingUrl = Navigator.ViewRoute(cleanRuntimeType, int.Parse(id));
                 sb.AppendLine(
-                        helper.Href(TypeContext.Compose(idValueField, EntityBaseKeys.ToStrLink),
-                            (value != null) ? value.ToString() : "&nbsp;",
-                            viewingUrl,
-                            "View",
-                            "valueLine",
-                            new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+                    helper.Href(TypeContext.Compose(idValueField, EntityBaseKeys.ToStrLink),
+                        (value != null) ? value.ToString() : "&nbsp;",
+                        viewingUrl,
+                        "View",
+                        "valueLine",
+                        new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
             }
             else
             {
                 sb.AppendLine(
-                        helper.Span(TypeContext.Compose(idValueField, EntityBaseKeys.ToStrLink),
-                            (value != null) ? value.ToString() : "&nbsp;",
-                            "valueLine",
-                            new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+                    helper.Span(TypeContext.Compose(idValueField, EntityBaseKeys.ToStrLink),
+                        (value != null) ? value.ToString() : "&nbsp;",
+                        "valueLine",
+                        new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
             }
-            sb.AppendLine("<script type=\"text/javascript\">var " + TypeContext.Compose(idValueField, EntityBaseKeys.EntityTemp) + " = '';</script>");
+
+            if (settings.PopupView)
+            {
+                string popupViewUrl = "javascript:OpenPopup(" + popupOpeningParameters + ");";
+                sb.AppendLine(
+                    helper.Button(TypeContext.Compose(idValueField, "btnView"),
+                              "->",
+                              popupViewUrl,
+                              "lineButton go",
+                             (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
+            }
 
             if (settings.Implementations != null || settings.Create)
-                {
-                    string creatingUrl = (settings.Implementations == null) ?
-                        "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(type))) :
-                        "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
-                            "$('#' + this.id).unbind('click').click(function(){" +
-                                "OnImplementationsOk({0},'{1}',this.id);".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type)) +
-                            "});" +
+            {
+                string creatingUrl = (settings.Implementations == null) ?
+                    "NewPopup({0},'{1}');".Formato(popupOpeningParameters, (typeof(EmbeddedEntity).IsAssignableFrom(type))) :
+                    "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
+                        "$('#' + this.id).unbind('click').click(function(){" +
+                            "OnImplementationsOk({0},'{1}',this.id);".Formato(popupOpeningParameters, typeof(EmbeddedEntity).IsAssignableFrom(type)) +
                         "});" +
-                        ((settings.Implementations.Count() == 1) ? 
-                            "$('#{0} :button').click();".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) :
-                            "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
+                    "});" +
+                    ((settings.Implementations.Count() == 1) ? 
+                        "$('#{0} :button').click();".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) :
+                        "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
 
-                    sb.AppendLine(
-                        helper.Button(TypeContext.Compose(idValueField, "btnCreate"),
-                                  "+",
-                                  creatingUrl,
-                                  "lineButton create",
-                                  (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
-                }
+                sb.AppendLine(
+                    helper.Button(TypeContext.Compose(idValueField, "btnCreate"),
+                              "+",
+                              creatingUrl,
+                              "lineButton create",
+                              (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
+            }
 
             if (settings.Implementations != null || settings.Remove)
-                    sb.AppendLine(
-                        helper.Button(TypeContext.Compose(idValueField, "btnRemove"),
-                                  "x",
-                                  "RemoveContainedEntity('{0}',{1});".Formato(idValueField, reloadOnChangeFunction),
-                                  "lineButton remove",
-                                  (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
+                sb.AppendLine(
+                    helper.Button(TypeContext.Compose(idValueField, "btnRemove"),
+                              "x",
+                              "RemoveContainedEntity('{0}',{1});".Formato(idValueField, reloadOnChangeFunction),
+                              "lineButton remove",
+                              (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
             if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLite)))
-                {
-                    Type cleanType = Reflector.ExtractLite(type) ?? type;
-                    string searchType = Navigator.TypesToURLNames.TryGetC(cleanType);
-                    string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", searchType, idValueField, divASustituir, reloadOnChangeFunction);
-                    string findingUrl = (settings.Implementations == null) ?
-                        "Find({0});".Formato(popupFindingParameters) :
-                        "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
-                            "$('#' + this.id).unbind('click').click(function(){" +
-                                "OnSearchImplementationsOk({0},this.id);".Formato(popupFindingParameters) +
-                            "});" +
+            {
+                Type cleanType = Reflector.ExtractLite(type) ?? type;
+                string searchType = Navigator.TypesToURLNames.TryGetC(cleanType);
+                string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", searchType, idValueField, divASustituir, reloadOnChangeFunction);
+                string findingUrl = (settings.Implementations == null) ?
+                    "Find({0});".Formato(popupFindingParameters) :
+                    "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +
+                        "$('#' + this.id).unbind('click').click(function(){" +
+                            "OnSearchImplementationsOk({0},this.id);".Formato(popupFindingParameters) +
                         "});" +
-                        ((settings.Implementations.Count() == 1) ? 
-                            "$('#{0} :button').click();".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) :
-                            "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
-                        
-                    sb.AppendLine(
-                        helper.Button(TypeContext.Compose(idValueField, "btnFind"),
-                                     "O",
-                                     findingUrl,
-                                     "lineButton find",
-                                     (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
-                }
+                    "});" +
+                    ((settings.Implementations.Count() == 1) ? 
+                        "$('#{0} :button').click();".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) :
+                        "ChooseImplementation('{0}','{1}',function(){{}},function(){{OnImplementationsCancel('{1}');}});".Formato(divASustituir, idValueField));
+                    
+                sb.AppendLine(
+                    helper.Button(TypeContext.Compose(idValueField, "btnFind"),
+                                 "O",
+                                 findingUrl,
+                                 "lineButton find",
+                                 (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } }));
+            }
 
             if (StyleContext.Current.BreakLine)
                 sb.AppendLine("<div class='clearall'></div>");
