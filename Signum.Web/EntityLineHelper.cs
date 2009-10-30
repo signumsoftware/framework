@@ -101,10 +101,6 @@ namespace Signum.Web
                     TypeContext tc = typeContext;
                     if (isLite)
                     {
-                        //ParameterExpression pe = Expression.Parameter(typeContext.ContextType, "p");
-                        //Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLite(type)),pe);
-                        //LambdaExpression lambda = Expression.Lambda(call, pe);
-                        //tc = Common.UntypedTypeContext(typeContext, lambda, cleanRuntimeType ?? Reflector.ExtractLite(type));
                         tc = typeContext.ExtractLite(); 
                     }
                     ViewDataDictionary vdd = new ViewDataDictionary(tc) //value
@@ -158,7 +154,7 @@ namespace Signum.Web
                         new ViewDataDictionary(value) 
                         { 
                             { ViewDataKeys.CustomHtml, strButtons},
-                            //{ ViewDataKeys.PopupPrefix, idValueField},
+                            { ViewDataKeys.PopupPrefix, idValueField},
                         }
                     ));
                     sb.AppendLine("</div>");
