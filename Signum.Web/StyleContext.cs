@@ -117,5 +117,10 @@ namespace Signum.Web
                 current = parent;
             //throw new InvalidOperationException("StyleContext not registered");
         }
+
+        public override string ToString()
+        {
+            return ReadOnly.ToString() + ((parent != null) ? parent.ToString() : "");
+        }
     }
 }

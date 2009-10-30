@@ -62,12 +62,13 @@ namespace Signum.Web
         {
             if (vl != null)
             {
-                if (context.LastProperty.IsReadOnly())
+                if (context.LastProperty.IsReadOnly() || StyleContext.Current.ReadOnly)
                 {
                     //if (vl.StyleContext == null)
                     //    vl.StyleContext = new StyleContext();
                     //vl.StyleContext.ReadOnly = true;
                     vl.ReadOnly = true;
+                    vl.SetReadOnly();
                 }
             }
         }

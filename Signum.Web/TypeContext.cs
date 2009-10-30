@@ -132,11 +132,17 @@ namespace Signum.Web
             if (!writeIdAndRuntime.HasValue || writeIdAndRuntime.Value)
                 WriteRuntimeAndId<T>(helper, tc);
 
-            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)) && value != null && 
-                typeof(IIdentifiable).IsAssignableFrom(typeof(T)) && !((IIdentifiable)value).IsNew)
+            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)) && !((IIdentifiable)value).IsNew) 
             {
                 StyleContext sc = new StyleContext() { ReadOnly = true };
+                tc.OwnsStyleContext = true;
             }
+            if (helper.ViewData.ContainsKey(ViewDataKeys.StyleContext))
+            {
+                ((StyleContext)helper.ViewData[ViewDataKeys.StyleContext]).Register();
+                tc.OwnsStyleContext = true;
+            }
+
             return tc;
         }
 
@@ -190,6 +196,9 @@ namespace Signum.Web
         public const string RuntimeType = "sfRuntimeType";
         public const string Ticks = "sfTicks";
         public const string CssLineLabel = "labelLine";
+        
+        public bool ownsStyleContext = false;
+        public bool OwnsStyleContext { get { return ownsStyleContext; } set { ownsStyleContext = value; } }
 
         public static string Compose(string prefix, params string[] namesToAppend)
         {
@@ -210,7 +219,8 @@ namespace Signum.Web
 
         public virtual void Dispose()
         {
-            //Do nothing
+            if (ownsStyleContext)
+                StyleContext.Current.Dispose();
         }
     }
     #endregion
@@ -273,12 +283,6 @@ namespace Signum.Web
         public override Type ContextType
         {
             get { return typeof(T); }
-        }
-        
-        public override void Dispose()
-        {
-            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)))
-                StyleContext.Current.Dispose();
         }
     }
     #endregion
@@ -345,12 +349,6 @@ namespace Signum.Web
         {
             get { return LastProperty.NiceName(); }
         }
-
-        public override void Dispose()
-        {
-            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)))
-                StyleContext.Current.Dispose();
-        }
     }
     #endregion
 
@@ -408,12 +406,6 @@ namespace Signum.Web
         public override string FriendlyName
         {
             get { throw new NotImplementedException("TypeElementContext has no FriendlyName"); }
-        }
-
-        public override void Dispose()
-        {
-            if (typeof(ImmutableEntity).IsAssignableFrom(typeof(T)))
-                StyleContext.Current.Dispose();
         }
     }
     #endregion

@@ -133,7 +133,7 @@ namespace Signum.Web
                     { 
                         { "class", "valueLine" }, 
                         { "autocomplete", "off" }, 
-                        { "style", "display:" + ((value==null) ? "block" : "none")}
+                        { "style", "display:" + ((value==null && !settings.ReadOnly) ? "block" : "none")}
                     }));
 
                 if (settings.Autocomplete && Navigator.NameToType.ContainsKey((Reflector.ExtractLite(type) ?? type).Name))
@@ -184,7 +184,7 @@ namespace Signum.Web
                 
                 sb.AppendLine("</div>");
 
-                sb.Append(helper.Span(TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
+                sb.AppendLine(helper.Span(TypeContext.Compose(idValueField, EntityBaseKeys.ToStr), value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
             if (settings.View)

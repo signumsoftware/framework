@@ -446,7 +446,7 @@ namespace Signum.Web
                 foreach (object o in Queries.GetQueryNames())
                 {
                     if (!QuerySettings.ContainsKey(o))
-                        QuerySettings.Add(o, new QuerySettings() { Top = 5 });
+                        QuerySettings.Add(o, new QuerySettings() { Top = 10 });
                     if (!QuerySettings[o].UrlName.HasText())
                         QuerySettings[o].UrlName = GetQueryName(o);
                 }
@@ -467,7 +467,7 @@ namespace Signum.Web
         protected internal virtual string GetQueryName(object queryName)
         {
             return (queryName is Type) ? (TypesToURLNames.TryGetC<Type, string>((Type)queryName) ?? ((Type)queryName).Name) :
-                   (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
+                   //(queryName is Enum) ? queryName.ToString() : 
                    queryName.ToString();
         }
 
@@ -550,6 +550,8 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             if (changeTicks != null)
                 controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
+
+            controller.ViewData[ViewDataKeys.StyleContext] = StyleContext.RegisterCleanStyleContext(false);
 
             controller.ViewData.Model = entity;
             
