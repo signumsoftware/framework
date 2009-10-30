@@ -10,8 +10,8 @@
         <m:ValueLine m:Common.Route="PhysicalPrefix" />
         <m:ValueLine m:Common.Route="WebPrefix" />
         <m:ValueLine m:Common.Route="Active" />
-        <GroupBox Header="FileTypes">
-            <m:EntityList m:Common.Route="FileTypes" />
+        <GroupBox Header="{m:Loc FileTypes}">
+            <m:EntityList m:Common.Route="FileTypes" Create="False"/>
         </GroupBox>
     </StackPanel>
 </UserControl>
