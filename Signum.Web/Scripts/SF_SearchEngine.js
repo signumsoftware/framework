@@ -240,19 +240,42 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 	});
 }
 
-function ConstructFromExecute(urlController, typeName, id, operationKey, prefix, onOk, onCancel) {
+function ConstructFromExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
+    var formChildren = "";
+	if (isLite == false || isLite == "false" || isLite == "False") {
+		if (prefix != "") //PopupWindow
+		    formChildren = $('#' + prefix + "panelPopup *, #" + sfReactive + ", #" + sfTabId).serialize();
+		else //NormalWindow
+		    formChildren = $("form").serialize();
+	}
+	if (formChildren.length > 0) formChildren = "&" + formChildren;
     var newPrefix = prefix + "New";
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "sfId=" + id + qp("sfRuntimeType", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
+        data: "isLite=" + isLite + qp("sfRuntimeType", typeName) + qp("sfId", id) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, prefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + formChildren,
         async: false,
         dataType: "html",
         success: function(msg) {
+        if (msg.indexOf("ModelState") > 0) {
+        if (prefix != "") { //PopupWindow
+        eval('var result=' + msg);
+					var modelState = result["ModelState"];
+					ShowErrorMessages(prefix, modelState, true, "*");
+        }
+        else{
+        eval('var result=' + msg);
+					var modelState = result["ModelState"];
+					ShowErrorMessages(prefix, modelState, true, "*");
+        }
+        }
+        else
+        {
             $('#' + prefix + "divASustituir").html(msg);
             ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
             $('#' + newPrefix + sfBtnOk).click(onOk);
             $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
+            }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
             ShowError(XMLHttpRequest, textStatus, errorThrown);
