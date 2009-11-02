@@ -26,14 +26,43 @@ namespace Signum.Web.Controllers
             ModelBinders.Binders.AddOrReplace(typeof(FindOptions), new FindOptionsModelBinder());
         }
 
-        public ViewResult View(string typeUrlName, int id)
+        public ViewResult View(string typeUrlName, int? id)
         {
             Type t = Navigator.ResolveTypeFromUrlName(typeUrlName);
             
-            return Navigator.View(this, Database.Retrieve(t,id));
+            if (id.HasValue && id.Value > 0)
+                return Navigator.View(this, Database.Retrieve(t, id.Value));
+
+            IIdentifiable entity = null;
+            object result = Navigator.CreateInstance(this, t);
+            if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
+                entity = (IIdentifiable)result;
+            else
+                throw new ApplicationException("Invalid result type for a Direct Constructor");
+
+            return Navigator.View(this, entity);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Create(string sfRuntimeType, string sfOnOk, string sfOnCancel, string prefix)
+        { 
+            Type type = Navigator.ResolveType(sfRuntimeType);
+
+            IIdentifiable entity = null;
+            object result = Navigator.CreateInstance(this, type);
+            if (result.GetType() == typeof(PartialViewResult))
+                return (PartialViewResult)result;
+            else if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
+                entity = (IIdentifiable)result;
+            else
+                throw new ApplicationException("Invalid result type for a Constructor");
+
+            return Content(
+                "<script type=\"text/javaScript\">" +
+                "PostServer('{0}');".Formato(Navigator.ViewRoute(type, null)) +
+                "</script>"
+                );
+        }
+
         public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);

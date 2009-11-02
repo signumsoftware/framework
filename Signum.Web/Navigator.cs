@@ -25,13 +25,13 @@ namespace Signum.Web
 
     public static class Navigator
     {
-        private static Func<Type, int, string> viewRoute;
-        public static Func<Type, int, string> ViewRoute 
+        private static Func<Type, int?, string> viewRoute;
+        public static Func<Type, int?, string> ViewRoute 
         { 
             get 
             {
                 return viewRoute ??
-                       (viewRoute = (Type type, int id) => "View/{0}/{1}".Formato(Navigator.TypesToURLNames[type], id));
+                       (viewRoute = (Type type, int? id) => "View/{0}/{1}".Formato(Navigator.TypesToURLNames[type], id.TryToString("")));
             }
             set 
             {
