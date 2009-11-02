@@ -167,11 +167,12 @@ namespace Signum.Web.Operations
                 if (os != null && os.OnServerClickAjax.HasText())
                     controllerUrl = os.OnServerClickAjax;
 
-                return "javascript:ConstructFromExecute('{0}','{1}','{2}','{3}','{4}',{5},{6});".Formato(
+                return "javascript:ConstructFromExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7});".Formato(
                     controllerUrl,
                     ident.GetType().Name,
                     ident.IdOrNull.HasValue ? ident.Id.ToString() : "",
                     EnumDN.UniqueKey(oi.Key),
+                    oi.Lite,
                     httpContext.Request.Params["prefix"] ?? "",
                     ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
                     ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"

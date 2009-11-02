@@ -65,20 +65,49 @@ namespace Signum.Web.Operations
                 return Navigator.View(this, entity);
         }
 
-        public ActionResult ConstructFromExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult ConstructFromExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
 
             IdentifiableEntity entity = null;
-            if (sfId.HasValue)
+            ChangesLog changesLog = null;
+            if (isLite)
             {
-                Lite lite = Lite.Create(type, sfId.Value);
-                entity = OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                if (sfId.HasValue)
+                {
+                    Lite lite = Lite.Create(type, sfId.Value);
+                    entity = OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                }
+                else
+                    throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
             }
             else
-                throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+            {
+                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form);
 
-            return Navigator.PopupView(this, entity, prefix);
+                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, "");
+                //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", "");
+
+                if (changesLog.Errors != null && changesLog.Errors.Count > 0)
+                {
+                    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+                    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+                }
+
+                entity = OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+
+                //TODO Anto: Reactiva?            
+                //if (Navigator.ExtractIsReactive(Request.Form))
+                //{
+                //    string tabID = Navigator.ExtractTabID(Request.Form);
+                //    Session[tabID] = entity;
+                //}
+            }
+
+            if (prefix.HasText())
+                return Navigator.PopupView(this, entity, prefix);
+            else //NormalWindow
+                return Navigator.View(this, entity);
         }
 
         public ActionResult ConstructFromManyExecute(string sfRuntimeType, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
