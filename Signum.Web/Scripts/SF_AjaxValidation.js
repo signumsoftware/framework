@@ -5,8 +5,27 @@
 	}
 }
 
+function NotifyInfo(s,t){
+    $("#loading-area-text").html(s);
+    if (console) console.log("Mostrando " + s);
+    $("#loading-area").show();
+    if (t!=undefined){
+        
+        console.time('Muestra el mensaje');
+        if (console) console.log("Estableciendo timer a " + t + "ms");  
+        var timer = setTimeout(function(){
+            if (console) console.log("Quitando " + s);        
+            $("#loading-area").fadeOut("slow");
+            clearTimeout(timer);
+            timer = null;
+            console.timeEnd('Muestra el mensaje');
+        }, t);
+    }
+}
+
 //fixedInlineErrorText = "" for it to be populated from ModelState error messages
 function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErrorText, parentDiv) {
+    NotifyInfo(lang['saving']);
     var returnValue = false;
 	var formChildren = empty(parentDiv) ? $("form") : $("#" + parentDiv + " *, #" + sfTabId);
 	$.ajax({
@@ -24,6 +43,7 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 				$("#" + (parentDiv != undefined ? parentDiv : "content")).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
 				returnValue = true;
 			}
+			NotifyInfo(lang['saved'],10000);
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 			ShowError(XMLHttpRequest, textStatus, errorThrown);

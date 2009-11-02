@@ -36,6 +36,12 @@ var sfEntityTypeName = "sfEntityTypeName";
 var sfEmbeddedControl = "sfEmbeddedControl";
 var sfTabId = "sfTabId";
 
+var lang = {
+    "saving" : "Guardando...",
+    "saved" : "Guardado"
+}; 
+    
+
 function qp(name, value) {
     return "&" + name + "=" + value;
 }
