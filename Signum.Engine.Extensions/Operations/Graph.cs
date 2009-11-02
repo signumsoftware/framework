@@ -14,6 +14,7 @@ using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Operations
 {
@@ -42,7 +43,7 @@ namespace Signum.Engine.Operations
             {
                 S state = Graph.GetState(entity);
                 if (FromStates != null && !FromStates.Contains(state))
-                    return "Impossible to execute {0} from state {1}".Formato(Key, state); 
+                    return Resources.ImpossibleToExecute0FromState1.Formato(Key, state); 
 
                 return base.OnCanExecute(entity);
             }

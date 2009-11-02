@@ -135,4 +135,7 @@
   <data name="Username0IsNotValid" xml:space="preserve">
     <value>Username {0} is not valid</value>
   </data>
+  <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
+    <value>Impossible to execute {0} from state {1}</value>
+  </data>
 </root>
