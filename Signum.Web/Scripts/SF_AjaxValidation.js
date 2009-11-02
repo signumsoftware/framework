@@ -5,10 +5,15 @@
 	}
 }
 
+function NotifyError(s,t) {
+    NotifyInfo(s,t);
+}
 function NotifyInfo(s,t){
     $("#loading-area-text").html(s);
+    //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
+    $("#loading-area").css({marginLeft: - parseInt($("#loading-area").outerWidth() / 2) + "px"});   
     $("#loading-area").show();
-    if (t!=undefined){    
+    if (t!=undefined){   
         var timer = setTimeout(function(){     
             $("#loading-area").fadeOut("slow");
             clearTimeout(timer);

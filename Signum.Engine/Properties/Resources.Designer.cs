@@ -120,8 +120,7 @@ namespace Signum.Engine.Properties {
         ///DUMMY
         ///DUMP
         ///ELSE
-        ///END
-        /// [rest of string was truncated]&quot;;.
+        ///END        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string @__SqlKeywords__ {
             get {

@@ -37,8 +37,11 @@ var sfEmbeddedControl = "sfEmbeddedControl";
 var sfTabId = "sfTabId";
 
 var lang = {
+    "error" : "Error",
     "saving" : "Guardando...",
-    "saved" : "Guardado"
+    "saved" : "Guardado",
+    "executingOperation" : "Ejecutando operación...",
+    "operationExecuted" : "Operación ejecutada"
 }; 
     
 
@@ -64,6 +67,7 @@ function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     else {
         error = textStatus;
     }
+    NotifyError(lang['error'], 2000);    
     window.alert("Error: " + error);
 }
 

@@ -195,6 +195,7 @@ function QuickLinkClickServerAjax(urlController,findOptionsRaw,prefix) {
 }
 
 function OperationExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
+    NotifyInfo(lang['executingOperation']);
 	var formChildren = "";
 	if (isLite == false || isLite == "false" || isLite == "False") {
 		if (prefix != "") //PopupWindow
@@ -230,9 +231,11 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 					//var newForm = new RegExp("<form[\w\W]*</form>");
 					//$('form').html(newForm.exec(msg));
 					$("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+					NotifyInfo(lang['operationExecuted'], 2000);
 					return;
 				}
 			}
+			NotifyInfo(lang['operationExecuted'], 2000);
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 			ShowError(XMLHttpRequest, textStatus, errorThrown);
@@ -241,6 +244,7 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 }
 
 function ConstructFromExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
+    NotifyInfo(lang['executingOperation']);
     var formChildren = "";
 	if (isLite == false || isLite == "false" || isLite == "False") {
 		if (prefix != "") //PopupWindow
@@ -253,7 +257,7 @@ function ConstructFromExecute(urlController, typeName, id, operationKey, isLite,
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "isLite=" + isLite + qp("sfRuntimeType", typeName) + qp("sfId", id) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, prefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + formChildren,
+        data: "isLite=" + isLite + qp("sfRuntimeType", typeName) + qp("sfId", id) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + formChildren,
         async: false,
         dataType: "html",
         success: function(msg) {
@@ -276,7 +280,9 @@ function ConstructFromExecute(urlController, typeName, id, operationKey, isLite,
             $('#' + newPrefix + sfBtnOk).click(onOk);
             $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
             }
-        },
+            NotifyInfo(lang['operationExecuted'], 2000);
+        }        
+        ,
         error: function(XMLHttpRequest, textStatus, errorThrown) {
             ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
