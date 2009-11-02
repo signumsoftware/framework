@@ -157,8 +157,8 @@ namespace Signum.Web.Operations
                     EnumDN.UniqueKey(oi.Key),
                     oi.Lite,
                     httpContext.Request.Params["prefix"] ?? "",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"","'") : "''",
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''"
                     );
             }
             else if (oi.OperationType == OperationType.ConstructorFrom)
@@ -174,8 +174,8 @@ namespace Signum.Web.Operations
                     EnumDN.UniqueKey(oi.Key),
                     oi.Lite,
                     httpContext.Request.Params["prefix"] ?? "",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'") : "''",
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'") : "''"
                     );
             }
             throw new ApplicationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(oi.OperationType.ToString(), EnumDN.UniqueKey(oi.Key)));
@@ -195,8 +195,8 @@ namespace Signum.Web.Operations
                 entityType.Name,
                 EnumDN.UniqueKey(key),
                 httpContext.Request.Params["prefix"] ?? "",
-                ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk] : "''",
-                ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel] : "''"
+                ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"","'") : "''",
+                ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''"
                 );
         }
 
@@ -223,8 +223,8 @@ namespace Signum.Web.Operations
             else
             {
                 StringBuilder sb = new StringBuilder();
-                string onOk = controller.Request.Params[ViewDataKeys.OnOk];
-                string onCancel = controller.Request.Params[ViewDataKeys.OnCancel];
+                string onOk = controller.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'");
+                string onCancel = controller.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'");
                 string prefix = controller.Request.Params["prefix"];
                 string onClick = "";
                 foreach (OperationInfo oi in list)
