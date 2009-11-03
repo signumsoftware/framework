@@ -299,7 +299,8 @@ namespace Signum.Engine.Processes
                 {   
                     new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess, ProcessState.Created)
                     {
-                         Construct = (process, args)=>
+                        Lite = false,
+                        Construct = (process, args)=>
                          {
                              IProcessDataDN data;
                              if(args != null && args.Length != 0 && args[0] is IProcessDataDN)
