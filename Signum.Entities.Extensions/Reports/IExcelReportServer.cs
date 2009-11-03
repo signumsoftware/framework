@@ -14,5 +14,11 @@ namespace Signum.Services
     {
         [OperationContract, NetDataContract]
         List<Lite<ExcelReportDN>> GetExcelReports(string queryName);
+
+        //public List<Lite<ExcelReportDN>> GetExcelReports(string queryName)
+        //{
+        //    return Return(MethodInfo.GetCurrentMethod(), () => ReportsLogic.GetExcelReports(queryName)); 
+        //}
+
     }
 }

@@ -6,7 +6,7 @@ using Signum.Services;
 using System.ServiceModel;
 using Signum.Entities.Files;
 
-namespace Signum.Entities.Extensions.Files
+namespace Signum.Services
 {
     [ServiceContract]
     public interface IFileServer

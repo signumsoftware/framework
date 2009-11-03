@@ -24,7 +24,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Entities.Files;
 using System.Net;
-using Signum.Entities.Extensions.Files;
+using Signum.Services;
 
 namespace Signum.Windows.Files
 {

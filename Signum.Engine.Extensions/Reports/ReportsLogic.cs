@@ -6,6 +6,8 @@ using Signum.Entities.Reports;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Engine.Maps;
+using Signum.Engine.Linq;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Reports
 {
@@ -17,15 +19,15 @@ namespace Signum.Engine.Reports
             {
                 sb.Include<ExcelReportDN>();
                 dqm[typeof(ExcelReportDN)] = (from s in Database.Query<ExcelReportDN>()
-                                             select new
-                                             {
-                                                 Entity = s.ToLite(),
-                                                 s.Id,
-                                                 s.QueryName,
-                                                 s.File.FileName,
-                                                 s.DisplayName,
-                                                 s.Deleted,
-                                             }).ToDynamic();
+                                              select new
+                                              {
+                                                  Entity = s.ToLite(),
+                                                  s.Id,
+                                                  s.QueryName,
+                                                  s.File.FileName,
+                                                  s.DisplayName,
+                                                  s.Deleted,
+                                              }).ToDynamic();
                 if (compositeReport)
                 {
                     sb.Include<CompositeReportDN>();
@@ -44,5 +46,12 @@ namespace Signum.Engine.Reports
                 throw new InvalidOperationException("ExcelReport is necessary for CompositeReports");
         }
 
+
+        public static List<Lite<ExcelReportDN>> GetExcelReports(string queryName)
+        {
+            return (from er in Database.Query<ExcelReportDN>()
+                    where er.QueryName == QueryUtils.GetQueryName(queryName)
+                    select er.ToLite()).ToList(); 
+        }
     }
 }
