@@ -91,8 +91,9 @@ namespace Signum.Engine.Linq
         {
             var source = (SourceExpression)Visit(cpe.Source);
             var projector = (FieldInitExpression)Visit(cpe.Projector);
-            if (projector != cpe.Projector || source != cpe.Source)
-                return new CommandProjectionExpression(source, projector);
+            var token = VisitProjectionToken(cpe.Token);
+            if (projector != cpe.Projector || source != cpe.Source || token != cpe.Token)
+                return new CommandProjectionExpression(source, projector, token);
             return cpe; 
         }
 
@@ -186,8 +187,10 @@ namespace Signum.Engine.Linq
             var implementations = reference.Implementations
                .NewIfChange(ri => Visit(ri.Field).Map(r => r == ri.Field ? ri : new ImplementationColumnExpression(ri.Type, (FieldInitExpression)r)));
 
-            if (id != reference.Id || typeId != reference.TypeId || implementations != reference.Implementations)
-                return new ImplementedByAllExpression(reference.Type, id, typeId) {  Implementations = implementations};
+            var token = VisitProjectionToken(reference.Token);
+
+            if (id != reference.Id || typeId != reference.TypeId || implementations != reference.Implementations || token != reference.Token)
+                return new ImplementedByAllExpression(reference.Type, id, typeId, token) { Implementations = implementations };
             return reference;
         }
 
@@ -203,28 +206,33 @@ namespace Signum.Engine.Linq
             return reference;
         }
 
+        protected virtual ProjectionToken VisitProjectionToken(ProjectionToken token)
+        {
+            return token;
+        }
+
         protected virtual Expression VisitFieldInit(FieldInitExpression fie)
         {
             var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
-            var propertyBindings = fie.PropertyBindings.NewIfChange(pb => Visit(pb.Binding).Map(r => r == pb.Binding ? pb : new PropertyBinding(pb.PropertyInfo, r)));
-            
+          
             var id = Visit(fie.ExternalId);
             var other = Visit(fie.OtherCondition);
 
-            if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.PropertyBindings != propertyBindings)
-            {
-                return new FieldInitExpression(fie.Type, fie.TableAlias, id, other) { Bindings = bindings, PropertyBindings = propertyBindings };
-            }
+            var token = VisitProjectionToken(fie.Token);
+
+            if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token)
+                return new FieldInitExpression(fie.Type, fie.TableAlias, id, other, token) { Bindings = bindings};
+
             return fie;
         }
 
         protected virtual Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
         {
             var bindings = efie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
-            var propertyBindings = efie.PropertyBindings.NewIfChange(pb => Visit(pb.Binding).Map(r => r == pb.Binding ? pb : new PropertyBinding(pb.PropertyInfo, r)));
-            if (efie.Bindings != bindings || efie.PropertyBindings != propertyBindings)
+          
+            if (efie.Bindings != bindings)
             {
-                return new EmbeddedFieldInitExpression(efie.Type, bindings) { PropertyBindings = propertyBindings };
+                return new EmbeddedFieldInitExpression(efie.Type, bindings);
             }
             return efie;
         }
@@ -358,9 +366,11 @@ namespace Signum.Engine.Linq
         {
             SelectExpression source = (SelectExpression)this.Visit(proj.Source);
             Expression projector = this.Visit(proj.Projector);
-            if (source != proj.Source || projector != proj.Projector)
+            ProjectionToken token = VisitProjectionToken(proj.Token);
+
+            if (source != proj.Source || projector != proj.Projector || token != proj.Token)
             {
-                return new ProjectionExpression(proj.Token, source, projector, proj.UniqueFunction);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
             }
             return proj;
         }

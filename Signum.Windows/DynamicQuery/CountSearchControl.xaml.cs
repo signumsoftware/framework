@@ -72,6 +72,8 @@ namespace Signum.Windows
             set { SetValue(ItemsCountProperty, value); }
         }
 
+        public event EventHandler LinkClick; 
+
         public CountSearchControl()
         {
             this.InitializeComponent();
@@ -143,11 +145,16 @@ namespace Signum.Windows
 
         private void ItemCount_Click(object sender, MouseButtonEventArgs e)
         {
-            Navigator.Find(new FindOptions{
-                FilterOptions=FilterOptions.ToList(),
-                FilterMode= FilterMode.VisibleAndReadOnly,
-                QueryName=QueryName
-            });  
+            if (LinkClick != null)
+                LinkClick(this, EventArgs.Empty);
+            else
+            {
+                Navigator.Find(new FindOptions
+                {
+                    FilterOptions = FilterOptions.ToList(),
+                    QueryName = QueryName
+                });
+            }
         }
     }
 }

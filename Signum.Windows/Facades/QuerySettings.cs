@@ -63,8 +63,8 @@ namespace Signum.Windows
                     c=> b=> FormatTools.LightEntityLineTemplate(b)),
 
                 new FormatterRule(FormatterPriority.Property, "NumberUnit",
-                    c=>Reflector.IsNumber(c.Type) && c.TwinProperty != null,
-                    c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.TwinProperty.SingleAttribute<UnitAttribute>().TryCC(u=>u.UnitName)))))
+                    c=>Reflector.IsNumber(c.Type) && c.Unit != null,
+                    c => b => FormatTools.TextBlockTemplate(b, TextAlignment.Right, ConverterFactory.New(Reflector.GetPropertyFormatter(c.Format,c.Unit))))
             }; 
         }
 

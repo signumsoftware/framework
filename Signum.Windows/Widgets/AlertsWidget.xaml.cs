@@ -74,11 +74,11 @@ namespace Signum.Windows.Widgets
 
         private void ViewAlert(IAlertDN alert)
         {
-            IAlertDN result = (IAlertDN)Navigator.View(new ViewOptions
+            IAlertDN result = (IAlertDN)Navigator.View(alert, new ViewOptions
             {
                 Buttons = ViewButtons.Save,
                 Closed = (o, e) => ReloadAlerts(),
-            }, alert);
+            });
         }
 
         public void ReloadAlerts()

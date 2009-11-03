@@ -53,7 +53,6 @@
     <Compile Include="LinqProvider\UpdateDeleteTest.cs" />
     <Compile Include="LinqProvider\SqlFunctionsTest.cs" />
     <Compile Include="LinqProvider\TakeSkipTest.cs" />
-    <Compile Include="LinqProvider\NestedQueriesTest.cs" />
     <Compile Include="LinqProvider\GroupByTest.cs" />
     <Compile Include="LinqProvider\OrderByTest.cs" />
     <Compile Include="LinqProvider\JoinGroupTest.cs" />
@@ -98,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

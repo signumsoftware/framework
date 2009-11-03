@@ -347,6 +347,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
         {
+            candidates.Add(aggregate);
             return aggregate;
         }
 

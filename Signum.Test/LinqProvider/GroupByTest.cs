@@ -72,6 +72,22 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void GroupExpandKey()
+        {
+            var songs = (from a in Database.Query<AlbumDN>()
+                         group a by a.Label.Name into g
+                         select new { g.Key, Count = g.Count() }).ToList();
+        }
+
+        [TestMethod]
+        public void GroupExpandResult()
+        {
+            var songs = (from a in Database.Query<AlbumDN>()
+                         group a by a.Label into g
+                         select new { g.Key.Name, Count = g.Count() }).ToList();
+        }
+
+        [TestMethod]
         public void GroupMax()
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>()
@@ -131,11 +147,38 @@ namespace Signum.Test.LinqProvider
         {
             var artistsBySex =
                 Database.Query<ArtistDN>()
-                .GroupBy(a=>a.Sex)
-                .Select(g=>g)
-                .Select(g=>new { Sex = g.Key, Count = g.Count() }).ToList();
+                .GroupBy(a => a.Sex)
+                .Select(g => g)
+                .Select(g => new { Sex = g.Key, Count = g.Count() }).ToList();
+        }
 
+        [TestMethod]
+        public void SelectExpansionCount()
+        {
+            var albums = (from b in Database.Query<BandDN>()
+                          from a in b.Members
+                          let count = Database.Query<ArtistDN>().Count(a2 => a2.Sex == a.Sex) //a should be expanded here
+                          select new
+                          {
+                              Album = a.ToLite(),
+                              Count = count
+                          }).ToList(); 
+        }
 
+        [TestMethod]
+        public void SelectGroupLast()
+        {
+            var result = (from lab in Database.Query<LabelDN>()
+                          join al in Database.Query<AlbumDN>().DefaultIfEmpty() on lab equals al.Label into g
+                          select new
+                          {
+                              lab.Id,
+                              lab.Name,
+                              NumExecutions = (int?)g.Count(),
+                              LastExecution = (from al2 in Database.Query<AlbumDN>()
+                                               where al2.Id == g.Max(a => (int?)a.Id)
+                                               select al2.ToLite()).FirstOrDefault()
+                          }).ToList();
         }
     }
 }

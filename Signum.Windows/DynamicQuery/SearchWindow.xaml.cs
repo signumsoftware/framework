@@ -38,7 +38,6 @@ namespace Signum.Windows
             set { SetValue(ButtonsProperty, value); }
         }
 
-
         public static readonly DependencyProperty FilterOptionsProperty =
           DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOptions>), typeof(SearchWindow), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOptions> FilterOptions
@@ -63,14 +62,37 @@ namespace Signum.Windows
             set { SetValue(MultiSelectionProperty, value); }
         }
 
-        public static readonly DependencyProperty ModeProperty =
-             DependencyProperty.Register("Mode", typeof(FilterMode), typeof(SearchWindow), new FrameworkPropertyMetadata(FilterMode.Visible));
-        public FilterMode Mode
+        public static readonly DependencyProperty ShowFiltersProperty =
+            DependencyProperty.Register("ShowFilters", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
+        public bool ShowFilters
         {
-            get { return (FilterMode)GetValue(ModeProperty); }
-            set { SetValue(ModeProperty, value); }
+            get { return (bool)GetValue(ShowFiltersProperty); }
+            set { SetValue(ShowFiltersProperty, value); }
         }
 
+        public static readonly DependencyProperty ShowFilterButtonProperty =
+            DependencyProperty.Register("ShowFilterButton", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
+        public bool ShowFilterButton
+        {
+            get { return (bool)GetValue(ShowFilterButtonProperty); }
+            set { SetValue(ShowFilterButtonProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowHeaderProperty =
+            DependencyProperty.Register("ShowHeader", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
+        public bool ShowHeader
+        {
+            get { return (bool)GetValue(ShowHeaderProperty); }
+            set { SetValue(ShowHeaderProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowFooterProperty =
+            DependencyProperty.Register("ShowFooter", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
+        public bool ShowFooter
+        {
+            get { return (bool)GetValue(ShowFooterProperty); }
+            set { SetValue(ShowFooterProperty, value); }
+        }
 
         public static readonly DependencyProperty OnLoadProperty =
             DependencyProperty.Register("OnLoad", typeof(OnLoadMode), typeof(SearchWindow), new FrameworkPropertyMetadata(OnLoadMode.None ));

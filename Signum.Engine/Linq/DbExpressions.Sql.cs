@@ -715,7 +715,23 @@ namespace Signum.Engine.Linq
         SingleOrDefault,
     }
 
-    public class ProjectionToken { }
+    public class ProjectionToken 
+    {
+        class ExternalToken : ProjectionToken
+        {
+            public override string ToString()
+            {
+                return "External";
+            }
+        }
+
+        public static readonly ProjectionToken External = new ExternalToken(); 
+
+        public override string ToString()
+        {
+            return GetHashCode().ToString();
+        }
+    }
 
     /// <summary>
     /// A custom expression representing the construction of one or more result objects from a 
@@ -723,31 +739,20 @@ namespace Signum.Engine.Linq
     /// </summary> 
     internal class ProjectionExpression : DbExpression
     {
-        public readonly ProjectionToken Token; 
         public readonly SelectExpression Source;
         public readonly Expression Projector;
         public readonly UniqueFunction?  UniqueFunction;
+        public readonly ProjectionToken Token; 
 
-        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction)
+        internal ProjectionExpression(SelectExpression source, Expression projector, UniqueFunction? uniqueFunction, ProjectionToken token)
             : base(DbExpressionType.Projection,
             uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) :
             projector.Type)
         {
-            this.Token = new ProjectionToken();
             this.Source = source;
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
-        }
-
-        internal ProjectionExpression(ProjectionToken token, SelectExpression source, Expression projector, UniqueFunction? uniqueFunction)
-            : base(DbExpressionType.Projection,
-            uniqueFunction == null ? typeof(IEnumerable<>).MakeGenericType(projector.Type) :
-            projector.Type)
-        {
             this.Token = token;
-            this.Source = source;
-            this.Projector = projector;
-            this.UniqueFunction = uniqueFunction;
         }
     
         internal bool IsOneCell
@@ -767,11 +772,11 @@ namespace Signum.Engine.Linq
         public readonly SourceExpression Source;
         public readonly FieldInitExpression Projector;
 
-        internal CommandProjectionExpression(SourceExpression source, FieldInitExpression projector)
+        internal CommandProjectionExpression(SourceExpression source, FieldInitExpression projector, ProjectionToken token)
             : base(DbExpressionType.CommandProjection,
             typeof(IEnumerable<>).MakeGenericType(projector.Type))
         {
-            this.Token = new ProjectionToken();
+            this.Token = token;
             this.Source = source;
             this.Projector = projector;
         }

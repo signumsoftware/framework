@@ -14,20 +14,15 @@ namespace Signum.Engine.Linq
 {
     internal sealed class ProjectedColumns
     {
-        Expression projector;
-        ReadOnlyCollection<ColumnDeclaration> columns;
-        internal ProjectedColumns(Expression projector, ReadOnlyCollection<ColumnDeclaration> columns)
+        public readonly Expression Projector;
+        public readonly ReadOnlyCollection<ColumnDeclaration> Columns;
+        public readonly ProjectionToken Token;
+
+        internal ProjectedColumns(Expression projector, ReadOnlyCollection<ColumnDeclaration> columns, ProjectionToken token)
         {
-            this.projector = projector;
-            this.columns = columns;
-        }
-        internal Expression Projector
-        {
-            get { return this.projector; }
-        }
-        internal ReadOnlyCollection<ColumnDeclaration> Columns
-        {
-            get { return this.columns; }
+            this.Projector = projector;
+            this.Columns = columns;
+            this.Token = token;
         }
     }
 
@@ -41,6 +36,8 @@ namespace Signum.Engine.Linq
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
         List<ColumnDeclaration> columns = new List<ColumnDeclaration>();
         HashSet<Expression> candidates;
+        ProjectionToken[] tokens;
+        ProjectionToken newToken;
         string[] knownAliases;
         string newAlias;
         int iColumn;
@@ -52,11 +49,20 @@ namespace Signum.Engine.Linq
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, params string[] knownAliases)
+        static internal ProjectedColumns ProjectColumns(ProjectionExpression projector, string newAlias)
         {
+            return ProjectColumns(projector.Projector, newAlias, projector.Source.KnownAliases, new[] { projector.Token });
+        }
+
+        static internal ProjectedColumns ProjectColumns(Expression projector, string newAlias, string[] knownAliases, ProjectionToken[] tokens)
+        {
+            ProjectionToken newToken = new ProjectionToken(); 
+
             Expression newProj;
             ColumnProjector cp = new ColumnProjector
             {
+                tokens = tokens,
+                newToken = newToken,
                 newAlias = newAlias,
                 knownAliases = knownAliases,
                 candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj)
@@ -64,7 +70,7 @@ namespace Signum.Engine.Linq
 
             Expression e = cp.Visit(newProj);
 
-            return new ProjectedColumns(e, cp.columns.AsReadOnly());
+            return new ProjectedColumns(e, cp.columns.AsReadOnly(), newToken);
         }
 
         protected override Expression Visit(Expression expression)
@@ -119,6 +125,14 @@ namespace Signum.Engine.Linq
         private string GetNextColumnName()
         {
             return this.GetUniqueColumnName("c" + (iColumn++));
+        }
+
+        protected override ProjectionToken VisitProjectionToken(ProjectionToken token)
+        {
+            if (token != null && tokens.Contains(token))
+                return newToken;
+
+            return token;
         }
     }
 }

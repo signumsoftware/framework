@@ -4,7 +4,7 @@
 	xmlns:m="clr-namespace:Signum.Windows"
 	x:Class="Signum.Windows.CountSearchControl"
 	x:Name="me"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"  xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" >
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -12,7 +12,9 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <TextBlock><Hyperlink>
-    <TextBlock Name="tb"  Text="{Binding Path=FormattedText, ElementName=me, Mode=Default}" MouseLeftButtonDown="ItemCount_Click" />
-    </Hyperlink></TextBlock>
+    <TextBlock>
+        <Hyperlink>
+            <TextBlock Name="tb"  Text="{Binding Path=FormattedText, ElementName=me, Mode=Default}" MouseLeftButtonDown="ItemCount_Click" />
+        </Hyperlink>
+    </TextBlock>
 </UserControl>

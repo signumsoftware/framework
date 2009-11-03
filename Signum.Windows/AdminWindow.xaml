@@ -21,7 +21,17 @@
 		</MultiBinding>
 	</m:AdminBase.Title>
 	<DockPanel>
-        <m:ButtonBar x:Name="buttonBar" DockPanel.Dock="Top" SaveVisible="True" ReloadVisible="True" SaveClick="Save_Click" ReloadClick="Reload_Click"/>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+            <StackPanel.Background>
+                <LinearGradientBrush StartPoint="0.5 0" EndPoint="0.5 1">
+                    <GradientStop Color="#FFF0F8FF" Offset="0"/>
+                    <GradientStop Color="#FFD8EBFF" Offset="1"/>
+                </LinearGradientBrush>
+            </StackPanel.Background>
+            <m:ToolBarButton x:Name="btSave" Image="Images\save.png" Background="Blue" Content="{m:Loc Save}" Visibility="{Binding SaveVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" MinWidth="50"/>
+            <m:ToolBarButton x:Name="btReload" Image="Images\reload.png" Background="RoyalBlue" Content="{m:Loc Reload}" Visibility="{Binding ReloadVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" MinWidth="50"/>
+        </StackPanel>
+        <m:ButtonBar x:Name="buttonBar"  SaveVisible="True" ReloadVisible="True" SaveClick="Save_Click" ReloadClick="Reload_Click"/>
         <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" m:Common.Route="/" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />
 		<m:ErrorSummary ValidationTarget="{Binding Path=MainControl, ElementName=Window}" DockPanel.Dock="Bottom"/>
 		<Grid Margin="5">

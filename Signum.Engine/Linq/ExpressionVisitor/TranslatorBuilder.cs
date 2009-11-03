@@ -13,6 +13,7 @@ using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections;
 
 namespace Signum.Engine.Linq
 {  
@@ -141,9 +142,13 @@ namespace Signum.Engine.Linq
             {
                 ITranslateResult tr = TranslatorBuilder.Build(proj, prevAliases);
                 HasFullObjects |= tr.HasFullObjects;
-                Type listType = typeof(IEnumerable<>).MakeGenericType(ReflectionTools.CollectionType(proj.Type));
 
-                return Expression.Convert(Expression.Call(Expression.Constant(tr), miExecute, this.row), listType);
+                Expression call = Expression.Call(Expression.Constant(tr), miExecute, this.row);
+
+                if (typeof(IEnumerable).IsAssignableFrom(proj.Type))
+                    return Expression.Convert(call, typeof(IEnumerable<>).MakeGenericType(ReflectionTools.CollectionType(proj.Type)));
+                else
+                    return call;
             }
 
             protected override Expression VisitFieldInit(FieldInitExpression fieldInit)

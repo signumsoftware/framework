@@ -27,6 +27,7 @@ namespace Signum.Windows
         public string Key { get; set; }
 
 
+        public LocExtension() { }
         /// <summary>
         /// Initializes new instance of the class.
         /// </summary>

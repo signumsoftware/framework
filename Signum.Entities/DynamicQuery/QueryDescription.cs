@@ -61,6 +61,7 @@ namespace Signum.Entities.DynamicQuery
         public PropertyInfo TwinProperty { get; set; }
 
         public string Format { get; set; }
+        public string Unit { get; set; }
 
         public const string Entity = "Entity";
         public bool IsEntity
@@ -83,6 +84,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 DisplayName = TwinProperty.NiceName();
                 Format = Reflector.FormatString(TwinProperty);
+                Unit = TwinProperty.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
             }
             else
             {

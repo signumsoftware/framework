@@ -33,11 +33,10 @@ namespace Signum.Engine.Linq
             Expression newID = Visit(fieldInit.ExternalId);
             if (newID != fieldInit.ExternalId)
             {
-                return new FieldInitExpression(fieldInit.Type, fieldInit.TableAlias, newID, null); // eliminamos los bindings
+                return new FieldInitExpression(fieldInit.Type, fieldInit.TableAlias, newID, null, null); // eliminamos los bindings
             }
 
             fieldInit.Bindings = null;
-            fieldInit.PropertyBindings = null;
             return fieldInit;
         }
 
@@ -50,7 +49,6 @@ namespace Signum.Engine.Linq
                 return new EmbeddedFieldInitExpression(efie.Type, bindings);
             }
 
-            efie.PropertyBindings = null;
             return efie;
         }
 
@@ -73,7 +71,7 @@ namespace Signum.Engine.Linq
 
             if (id != reference.Id || typeId != reference.TypeId)
             {
-                return new ImplementedByAllExpression(reference.Type, id, typeId);
+                return new ImplementedByAllExpression(reference.Type, id, typeId, null);
             }
             
             reference.Implementations = null;

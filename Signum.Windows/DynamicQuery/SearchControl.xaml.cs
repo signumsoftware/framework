@@ -43,33 +43,43 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ItemsCountProperty =
-        DependencyProperty.Register("ItemsCount", typeof(int), typeof(SearchControl), new UIPropertyMetadata(0));
+            DependencyProperty.Register("ItemsCount", typeof(int), typeof(SearchControl), new UIPropertyMetadata(0));
         public int ItemsCount
         {
             get { return (int)GetValue(ItemsCountProperty); }
-            set
-            {
-                SetValue(ItemsCountProperty, value);
-            }
+            set { SetValue(ItemsCountProperty, value); }
         }
 
-        public static readonly DependencyProperty FilterVisibleProperty =
-        DependencyProperty.Register("FilterVisible", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
-        public bool FilterVisible
+        public static readonly DependencyProperty ShowFiltersProperty =
+            DependencyProperty.Register("ShowFilters", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+        public bool ShowFilters
         {
-            get { return (bool)GetValue(FilterVisibleProperty); }
-            set
-            {
-                SetValue(FilterVisibleProperty, value);
-            }
+            get { return (bool)GetValue(ShowFiltersProperty); }
+            set { SetValue(ShowFiltersProperty, value); }
         }
 
-        public static readonly DependencyProperty FooterVisibleProperty =
-        DependencyProperty.Register("FooterVisible", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
-        public bool FooterVisible
+        public static readonly DependencyProperty ShowFilterButtonProperty =
+            DependencyProperty.Register("ShowFilterButton", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool ShowFilterButton
         {
-            get { return (bool)GetValue(FooterVisibleProperty); }
-            set { SetValue(FooterVisibleProperty, value); }
+            get { return (bool)GetValue(ShowFilterButtonProperty); }
+            set { SetValue(ShowFilterButtonProperty, value); }
+        } 
+
+        public static readonly DependencyProperty ShowHeaderProperty =
+            DependencyProperty.Register("ShowHeader", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool ShowHeader
+        {
+            get { return (bool)GetValue(ShowHeaderProperty); }
+            set { SetValue(ShowHeaderProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowFooterProperty =
+            DependencyProperty.Register("ShowFooter", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool ShowFooter
+        {
+            get { return (bool)GetValue(ShowFooterProperty); }
+            set { SetValue(ShowFooterProperty, value); }
         }
 
         public static readonly DependencyProperty SelectedItemProperty =
@@ -97,17 +107,10 @@ namespace Signum.Windows
             set { SetValue(MultiSelectionProperty, value); }
         }
 
-        public static readonly DependencyProperty ModeProperty =
-                DependencyProperty.Register("Mode", typeof(FilterMode), typeof(SearchControl), new FrameworkPropertyMetadata(FilterMode.Hidden,
-        (d, e) => ((SearchControl)d).ModeChanged()));
-        public FilterMode Mode
-        {
-            get { return (FilterMode)GetValue(ModeProperty); }
-            set { SetValue(ModeProperty, value); }
-        }
+
 
         public static readonly DependencyProperty SearchOnLoadProperty =
-          DependencyProperty.Register("SearchOnLoad", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+          DependencyProperty.Register("SearchOnLoad", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
         public bool SearchOnLoad
         {
             get { return (bool)GetValue(SearchOnLoadProperty); }
@@ -222,8 +225,6 @@ namespace Signum.Windows
             filterBuilder.Filters = new ObservableCollection<FilterOptions>(FilterOptions);
 
             GenerateListViewColumns(view);
-
-            ModeChanged();
 
             if (GetCustomMenuItems != null)
             {
@@ -373,7 +374,7 @@ namespace Signum.Windows
                 return;
 
             if (this.Viewing == null)
-                Navigator.View(new ViewOptions { Buttons = ViewButtons.Save, Admin = true }, entity);
+                Navigator.View(entity, new ViewOptions { Buttons = ViewButtons.Save, Admin = true });
             else
                 this.Viewing(entity);
         }
@@ -384,31 +385,21 @@ namespace Signum.Windows
             UpdateViewSelection();
         }
 
+        //bool ignoreExpanded = false;
 
-        private void expander_Expanded(object sender, RoutedEventArgs e)
-        {
-            if (!ignoreExpanded)
-            {
-                Mode = expander.IsExpanded ? (expander.IsEnabled ? FilterMode.Visible : FilterMode.VisibleAndReadOnly) :
-                       (expander.IsEnabled ? FilterMode.Visible : FilterMode.VisibleAndReadOnly);
-            }
-        }
-
-        bool ignoreExpanded = false;
-
-        private void ModeChanged()
-        {
-            expander.IsEnabled = Mode == FilterMode.Hidden || Mode == FilterMode.Visible;
-            try
-            {
-                ignoreExpanded = true;
-                expander.IsExpanded = Mode == FilterMode.VisibleAndReadOnly || Mode == FilterMode.Visible;
-            }
-            finally
-            {
-                ignoreExpanded = false;
-            }
-        }
+        //private void FilterModeChanged()
+        //{
+        //    expander.IsEnabled = FilterMode == FilterMode.Hidden || FilterMode == FilterMode.Visible;
+        //    try
+        //    {
+        //        ignoreExpanded = true;
+        //        expander.IsExpanded = FilterMode == FilterMode.VisibleAndReadOnly || FilterMode == FilterMode.Visible;
+        //    }
+        //    finally
+        //    {
+        //        ignoreExpanded = false;
+        //    }
+        //}
 
         private void lvResult_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {

@@ -5,7 +5,7 @@
 	x:Class="Signum.Windows.SearchControl"
 	x:Name="me"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" >
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -19,42 +19,31 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"  />
         </Grid.RowDefinitions>
-        <Expander Visibility="{Binding ElementName=me,Path=FilterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" VerticalAlignment="Top" ExpandDirection="Up" x:Name="expander" Expanded="expander_Expanded" Collapsed="expander_Expanded">
-            <Expander.Header>
-                <Label Content="{m:Loc Filters}" VerticalAlignment="Center" Height="28"/>
-            </Expander.Header>
-            <Grid>
-                <m:FilterBuilder  x:Name="filterBuilder"  />
-            </Grid>
-        </Expander>
-        <StackPanel Visibility="{Binding ElementName=me,Path=FilterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="80,0,0,2" Height="30" Background="Transparent">
-            <StackPanel.Resources>
-                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
-                    <Setter Property="Width" Value="24"/>
-                    <Setter Property="Height" Value="24"/>
-                    <Setter Property="Margin" Value="3"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
-                </Style>
-            </StackPanel.Resources>
-
-            <Button x:Name="btFind" Click="FilterBuilder_SearchClicked"  ToolTip="{m:Loc Find}" Style="{DynamicResource RoundBigButton}" Height="24">
-                <StackPanel Orientation="Horizontal">
-                    <Border Child="{StaticResource Find}" Width="20" Height="20"/>
-                    <TextBlock Text="{m:Loc Find}" TextWrapping="Wrap" Margin="3,0,0,0" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" ToolTip="{m:Loc CreateNew}" Style="{StaticResource big}"/>
-            <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
-            <Menu IsMainMenu="False" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="menu">
-                <!--<MenuItem x:Name="btExcel"  Click="btExcel_Click" ToolTip="{m:Loc ExcelReport}">
-                    <Image Source="../Images/excel.png" />
-                </MenuItem>
-                <MenuItem Header="{m:Loc ExcelReport}" ToolTip="{m:Loc ExportExcelReportPivotTable}">
-                    <MenuItem.Icon>
-                        <Image Source="../Images/excelDoc.png" Stretch="None"/>
-                    </MenuItem.Icon>
-                </MenuItem>-->
-            </Menu>
+        <StackPanel Visibility="{Binding ShowHeader, ElementName=me, Converter = {x:Static m:Converters.BoolToVisibility}}" >
+            <m:FilterBuilder  x:Name="filterBuilder"  
+                              Visibility="{Binding ShowFilters, ElementName=me, Converter = {x:Static m:Converters.BoolToVisibility}}" />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent">
+                <StackPanel.Resources>
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
+                        <Setter Property="Width" Value="24"/>
+                        <Setter Property="Height" Value="24"/>
+                        <Setter Property="Margin" Value="3"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                    </Style>
+                </StackPanel.Resources>
+                <ToggleButton x:Name="btFilters" Content="{m:Loc Filters}"  Style="{DynamicResource RoundBigButton}" 
+                              IsChecked="{Binding ShowFilters, ElementName=me}"
+                              Visibility="{Binding ShowFilterButton, ElementName=me, Converter = {x:Static m:Converters.BoolToVisibility}}" />
+                <Button x:Name="btFind" Click="FilterBuilder_SearchClicked"  ToolTip="{m:Loc Find}" Style="{DynamicResource RoundBigButton}" Height="24">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Child="{StaticResource Find}" Width="20" Height="20"/>
+                        <TextBlock Text="{m:Loc Find}" TextWrapping="Wrap" Margin="3,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" ToolTip="{m:Loc CreateNew}" Style="{StaticResource big}"/>
+                <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
+                <Menu IsMainMenu="False" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="menu"/>
+            </StackPanel>
         </StackPanel>
         <ListView x:Name="lvResult" 
                   Grid.Row="1" 
@@ -66,7 +55,7 @@
 			      VirtualizingStackPanel.IsVirtualizing="True"
                   ButtonBase.Click="GridViewColumnHeaderClickedHandler">
             <ListView.View>
-                <GridView x:Name="gvResults"/>
+                <GridView x:Name="gvResults" AllowsColumnReorder="False"/>
             </ListView.View>
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
@@ -75,7 +64,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <StackPanel Height="24" Visibility="{Binding ElementName=me,Path=FooterVisible, Converter = {x:Static m:Converters.BoolToVisibility}}" Orientation="Horizontal" Grid.Row="2" Margin="6,4,6,4" HorizontalAlignment="Left"  >
+        <StackPanel Height="24" Visibility="{Binding ElementName=me,Path=ShowFooter, Converter = {x:Static m:Converters.BoolToVisibility}}" Orientation="Horizontal" Grid.Row="2" Margin="6,4,6,4" HorizontalAlignment="Left"  >
             <TextBlock TextWrapping="Wrap" x:Name="tbResultados" Visibility="Hidden" VerticalAlignment="Center">
                 <InlineUIContainer>
         		    <TextBlock Text="{Binding Path=Items.Count, ElementName=lvResult, Mode=Default}" TextWrapping="Wrap" FontWeight="Bold"/>

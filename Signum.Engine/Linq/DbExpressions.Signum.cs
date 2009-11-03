@@ -18,14 +18,7 @@ using System.Diagnostics;
 
 namespace Signum.Engine.Linq
 {
-    public interface IPropertyInitExpression
-    {
-        Expression TryGetPropertyBinding(PropertyInfo pi);
-        void AddPropertyBinding(PropertyInfo pi, Expression binding);
-        Type Type { get; } 
-    }
-
-    internal class FieldInitExpression : DbExpression, IPropertyInitExpression
+    internal class FieldInitExpression : DbExpression
     {
         public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((IdentifiableEntity ei) =>ei.id);
         public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((IdentifiableEntity ie) =>ie.toStr);
@@ -33,12 +26,12 @@ namespace Signum.Engine.Linq
         public readonly Table Table;
         public readonly Expression ExternalId;
         public readonly Expression OtherCondition; //Used for IBA only, 
+        public readonly ProjectionToken Token; 
 
         public string TableAlias; //Changed on expansion 
         public List<FieldBinding> Bindings = new List<FieldBinding>();// not readonly!!!
-        public List<PropertyBinding> PropertyBindings = new List<PropertyBinding>();// not readonly!!!
 
-        public FieldInitExpression(Type type, string tableAlias, Expression externalId, Expression otherCondition)
+        public FieldInitExpression(Type type, string tableAlias, Expression externalId, Expression otherCondition, ProjectionToken token)
             : base(DbExpressionType.FieldInit, type)
         {
             if (type == null) 
@@ -51,21 +44,22 @@ namespace Signum.Engine.Linq
                 throw new ArgumentNullException("externalId");
             
             this.Table = Schema.Current.Table(type);
+            this.Token = token;
             this.TableAlias = tableAlias;
             this.ExternalId = externalId;
             this.OtherCondition = otherCondition;
         }
 
-        public Expression GetOrCreateFieldBinding(FieldInfo fi, QueryBinder binder)
+        public Expression GetOrCreateFieldBinding(ProjectionToken token, FieldInfo fi, QueryBinder binder)
         {
             FieldBinding binding = Bindings.SingleOrDefault(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
             if (binding != null)
                 return binding.Binding;
 
-            Expression ex = Table.CreateBinding(TableAlias, fi, binder);
+            Expression ex = Table.CreateBinding(token, TableAlias, fi, binder);
 
             if (ex is MListExpression)
-                ((MListExpression)ex).BackID = GetOrCreateFieldBinding(FieldInitExpression.IdField, binder);
+                ((MListExpression)ex).BackID = GetOrCreateFieldBinding(token, FieldInitExpression.IdField, binder);
 
             Bindings.Add(new FieldBinding(fi, ex));
 
@@ -79,27 +73,10 @@ namespace Signum.Engine.Linq
             return binding.Binding;
         }
 
-        public Expression TryGetPropertyBinding(PropertyInfo pi)
-        {
-            PropertyBinding binding = PropertyBindings.SingleOrDefault(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
-
-            if (binding == null)
-                return null;
-
-            return binding.Binding;
-        }
-
-        public void AddPropertyBinding(PropertyInfo pi, Expression binding)
-        {
-            PropertyBindings.Add(new PropertyBinding(pi, binding));
-        }
-
         public override string ToString()
         {
             string constructor = "new {0}({1})".Formato(Type.TypeName(), ExternalId.NiceToString());
-            string bindings =
-                (Bindings.TryCC(b => b.ToString(",\r\n ")).Add(
-                PropertyBindings.TryCC(b => b.ToString(",\r\n ")), "\r\n")) ?? "";
+            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
 
             return bindings.HasText() ?
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
@@ -108,16 +85,15 @@ namespace Signum.Engine.Linq
     }
 
   
-    internal class EmbeddedFieldInitExpression : DbExpression, IPropertyInitExpression
+    internal class EmbeddedFieldInitExpression : DbExpression
     {
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
-        public List<PropertyBinding> PropertyBindings = new List<PropertyBinding>();// not readonly!!!
 
         public EmbeddedFieldInitExpression(Type type, IEnumerable<FieldBinding> bindings)
             : base(DbExpressionType.EmbeddedFieldInit, type)
         {
             if (bindings == null)
-                throw new ArgumentNullException("bindings"); 
+                throw new ArgumentNullException("bindings");
 
             Bindings = bindings.ToReadOnly();
         }
@@ -127,28 +103,11 @@ namespace Signum.Engine.Linq
             return Bindings.Single(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).Binding;
         }
 
-        public Expression TryGetPropertyBinding(PropertyInfo pi)
-        {
-            PropertyBinding binding = PropertyBindings.SingleOrDefault(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
-
-            if (binding == null)
-                return null;
-
-            return binding.Binding;
-        }
-
-        public void AddPropertyBinding(PropertyInfo pi, Expression binding)
-        {
-            PropertyBindings.Add(new PropertyBinding(pi, binding));
-        }
-
         public override string ToString()
         {
             string constructor = "new {0}".Formato(Type.TypeName());
 
-            string bindings =
-                (Bindings.TryCC(b => b.ToString(",\r\n ")).Add(
-                PropertyBindings.TryCC(b => b.ToString(",\r\n ")), "\r\n")) ?? "";
+            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
 
             return bindings.HasText() ? 
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" : 
@@ -204,7 +163,7 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<ImplementationColumnExpression> Implementations;
 
         public List<PropertyBinding> PropertyBindings = new List<PropertyBinding>(); //For interface Access
-
+  
         public ImplementedByExpression(Type type, ReadOnlyCollection<ImplementationColumnExpression> implementations)
             : base(DbExpressionType.ImplementedBy, type)
         {
@@ -230,9 +189,9 @@ namespace Signum.Engine.Linq
         {
             string bindings = PropertyBindings.TryCC(b => b.ToString(",\r\n "));
 
-            string bindings2 = bindings.HasText() ? "Bindings = {{\r\n{0}\r\n}}}".Formato(bindings.Indent(4)) : null;
+            string bindings2 = bindings.HasText() ? "Bindings = {{\r\n{0}\r\n}}".Formato(bindings.Indent(4)) : null;
  
-            return "ImplementedBy{{\r\n{0}\r\n}".Formato(
+            return "ImplementedBy{{\r\n{0}\r\n}}".Formato(
                 Implementations.ToString(",\r\n").Add(bindings2, ",\r\n").Indent(4)
                 );
         }
@@ -260,13 +219,15 @@ namespace Signum.Engine.Linq
         public List<ImplementationColumnExpression> Implementations = new List<ImplementationColumnExpression>();
 
         public readonly Expression Id;
-        public readonly Expression TypeId;      
+        public readonly Expression TypeId;
+        public readonly ProjectionToken Token; 
 
-        public ImplementedByAllExpression(Type type, Expression id, Expression typeId)
+        public ImplementedByAllExpression(Type type, Expression id, Expression typeId, ProjectionToken token)
             : base(DbExpressionType.ImplementedByAll, type)
         {
             this.Id = id;
             this.TypeId = typeId;
+            this.Token = token;
         }
 
         public override string ToString()

@@ -266,6 +266,7 @@
       <DependentUpon>TextArea.xaml</DependentUpon>
     </Compile>
     <Compile Include="EntityControls\LineBase.cs" />
+    <Compile Include="ThemeManager.cs" />
     <Compile Include="ValueLineBox.xaml.cs">
       <DependentUpon>ValueLineBox.xaml</DependentUpon>
     </Compile>

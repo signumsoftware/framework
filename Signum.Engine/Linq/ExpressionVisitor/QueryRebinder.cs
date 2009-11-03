@@ -37,9 +37,11 @@ namespace Signum.Engine.Linq
             SelectExpression source = (SelectExpression)this.Visit(proj.Source);
             Expression projector = this.Visit(proj.Projector);
 
-            if (source != proj.Source || projector != proj.Projector)
+            ProjectionToken token = VisitProjectionToken(proj.Token);
+
+            if (source != proj.Source || projector != proj.Projector || token != proj.Token)
             {
-                return new ProjectionExpression(source, projector, proj.UniqueFunction);
+                return new ProjectionExpression(source, projector, proj.UniqueFunction, token);
             }
             return proj;       
         }

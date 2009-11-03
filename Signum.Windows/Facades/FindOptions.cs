@@ -10,9 +10,12 @@ namespace Signum.Windows
 {
     public class FindOptions : MarkupExtension
     {
-        public FindOptions() { }
+        public FindOptions()
+        {
+            this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
+        }
 
-        public FindOptions(object queryName)
+        public FindOptions(object queryName):this()
         {
             this.QueryName = queryName;
         }
@@ -49,12 +52,10 @@ namespace Signum.Windows
 
         public OnLoadMode OnLoadMode { get; set; }
 
-        FilterMode filterMode = FilterMode.Visible;
-        public FilterMode FilterMode
-        {
-            get { return filterMode; }
-            set { this.filterMode = value; }
-        }
+        public bool ShowFilters { get; set; }
+        public bool ShowFilterButton { get; set; }
+        public bool ShowHeader { get; set; }
+        public bool ShowFooter { get; set; }
 
         public EventHandler Closed { get; set; }
 
@@ -112,14 +113,6 @@ namespace Signum.Windows
         {
             throw new NotImplementedException();
         }
-    }
-
-    public enum FilterMode
-    {
-        Visible,
-        VisibleAndReadOnly,
-        Hidden,
-        AlwaysHidden,
     }
 
     public enum SearchButtons

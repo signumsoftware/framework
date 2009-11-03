@@ -5,36 +5,38 @@ using System.Text;
 using Signum.Utilities.Properties;
 using System.Globalization;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities
 {
     public static class DateTimeExtensions
     {
-        public static Expression<Func<DateTime, DateTime, DateTime, bool>> IsInIntervalExpression =
-            (date, firstDate, lastDate) => firstDate <= date && date < lastDate;
-
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
-        public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
+        [MethodExpander(typeof(IsInIntervalExpander1))]
+        public static bool IsInInterval(this DateTime date, DateTime minDate, DateTime maxDate)
         {
-            return firstDate <= date && date < lastDate;
+            return minDate <= date && date < maxDate;
         }
 
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
-        public static bool IsInInterval(this DateTime date, DateTime firstDate, DateTime? lastDate)
+        [MethodExpander(typeof(IsInIntervalExpander2))]
+        public static bool IsInInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
         {
-            return date.IsInInterval(firstDate, lastDate ?? DateTime.MinValue);
+            return minDate <= date && (maxDate == null || date < maxDate);
         }
 
         /// <summary>
         /// Checks if the date is inside a C interval defined by the two given dates
         /// </summary>
-        public static bool IsInInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate)
+        [MethodExpander(typeof(IsInIntervalExpander3))]
+        public static bool IsInInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
         {
-            return date.IsInInterval(firstDate ?? DateTime.MinValue, lastDate ?? DateTime.MaxValue);
+            return (minDate == null || minDate <= date) && 
+                   (maxDate == null || date < maxDate); 
         }
 
         private static void AssertDateOnly(params DateTime?[] args)
@@ -49,6 +51,7 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
         /// </summary>
+        [MethodExpander(typeof(IsInIntervalExpander1))]
         public static bool IsInDateInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
         {
             AssertDateOnly(date, firstDate, lastDate);
@@ -60,17 +63,53 @@ namespace Signum.Utilities
         /// <summary>
         /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
         /// </summary>
-        public static bool IsInDateInterval(this DateTime date, DateTime firstDate, DateTime? lastDate)
+        [MethodExpander(typeof(IsInIntervalExpander2))]
+        public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
         {
-            return date.IsInDateInterval(firstDate, lastDate ?? DateTime.MinValue.Date);
+            return (minDate == null || minDate <= date) &&
+                   (maxDate == null || date < maxDate); 
         }
 
         /// <summary>
         /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
         /// </summary>
-        public static bool IsInDateInterval(this DateTime date, DateTime? firstDate, DateTime? lastDate)
+        [MethodExpander(typeof(IsInIntervalExpander3))]
+        public static bool IsInDateInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
         {
-            return date.IsInDateInterval(firstDate ?? DateTime.MinValue.Date, lastDate ?? DateTime.MaxValue.Date);
+            return (minDate == null || minDate <= date) &&
+                   (maxDate == null || date < maxDate); 
+        }
+
+        class IsInIntervalExpander1 : IMethodExpander
+        {
+            static readonly Expression<Func<DateTime, DateTime, DateTime, bool>> func = (date, minDate, maxDate) => minDate <= date && date < maxDate;
+
+            public Expression Expand(Expression instance, Expression[] arguments)
+            {
+                return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
+            }
+        }
+
+        class IsInIntervalExpander2 : IMethodExpander
+        {
+            Expression<Func<DateTime, DateTime, DateTime?, bool>> func = (date, minDate, maxDate) => minDate <= date && (maxDate == null || date < maxDate);
+
+            public Expression Expand(Expression instance, Expression[] arguments)
+            {
+                return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
+            }
+        }
+
+        class IsInIntervalExpander3 : IMethodExpander
+        {
+            Expression<Func<DateTime, DateTime?, DateTime?, bool>> func = (date, minDate, maxDate) =>
+                (minDate == null || minDate <= date) &&
+                (maxDate == null || date < maxDate);
+
+            public Expression Expand(Expression instance, Expression[] arguments)
+            {
+                return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
+            }
         }
 
         public static int YearsTo(this DateTime min, DateTime max)

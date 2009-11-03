@@ -60,10 +60,7 @@ namespace Signum.Windows
        
         private void btView_Click(object sender, RoutedEventArgs e)
         {
-            Navigator.View(new ViewOptions
-            {
-                Buttons = ViewButtons.Save
-            }, this.Entity);
+            Navigator.View(this.Entity, ViewButtons.Save);
         }
 
     }

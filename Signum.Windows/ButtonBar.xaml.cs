@@ -30,16 +30,16 @@ namespace Signum.Windows
             set { SetValue(MainControlProperty, value); }
         }
 
-        public static readonly DependencyProperty OkVisibleProperty =
-            DependencyProperty.Register("OkVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
-        public bool OkVisible
+        public static readonly DependencyProperty ViewButtonsProperty =
+           DependencyProperty.Register("ViewButtons", typeof(ViewButtons), typeof(ButtonBar), new UIPropertyMetadata(ViewButtons.Ok));
+        public ViewButtons ViewButtons
         {
-            get { return (bool)GetValue(OkVisibleProperty); }
-            set { SetValue(OkVisibleProperty, value); }
+            get { return (ViewButtons)GetValue(ViewButtonsProperty); }
+            set { SetValue(ViewButtonsProperty, value); }
         }
 
         public static readonly DependencyProperty SaveVisibleProperty =
-            DependencyProperty.Register("SaveVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
+            DependencyProperty.Register("SaveVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(true));
         public bool SaveVisible
         {
             get { return (bool)GetValue(SaveVisibleProperty); }
@@ -90,7 +90,17 @@ namespace Signum.Windows
         public ButtonBar()
         {
             InitializeComponent();
+            this.Loaded += ButtonBar_Loaded;
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ToolBar_DataContextChanged);
+        }
+
+        void ButtonBar_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Loaded -= ButtonBar_Loaded;
+
+            btSave.Visibility = (ViewButtons == ViewButtons.Save && SaveVisible).ToVisibility();
+            btOk.Visibility = (ViewButtons == ViewButtons.Ok && SaveVisible).ToVisibility();
+            btReload.Visibility = (ReloadVisible).ToVisibility();
         }
 
         void ToolBar_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -99,7 +109,7 @@ namespace Signum.Windows
             if (GetButtonBarElement != null)
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(e.NewValue, MainControl))
+                    .Select(d => d(e.NewValue, MainControl, ViewButtons))
                     .NotNull().SelectMany(d => d).ToList());
 
             stackPanel.Children.Clear();
@@ -112,14 +122,15 @@ namespace Signum.Windows
 
         public static void Start()
         {
-            ButtonBar.GetButtonBarElement += (obj, mainControl) => mainControl is IHaveToolBarElements ? ((IHaveToolBarElements)mainControl).GetToolBarElements(obj): null;
+            ButtonBar.GetButtonBarElement += (obj, mainControl, viewButtons) => mainControl is IHaveToolBarElements ?
+                ((IHaveToolBarElements)mainControl).GetToolBarElements(obj, viewButtons) : null;
         }
     }
 
-    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, Control mainControl);
+    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, Control mainControl, ViewButtons buttons);
 
     public interface IHaveToolBarElements
     {
-        List<FrameworkElement> GetToolBarElements(object dataContext);
+        List<FrameworkElement> GetToolBarElements(object dataContext, ViewButtons buttons);
     }
 }

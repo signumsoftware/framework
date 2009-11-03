@@ -79,7 +79,7 @@ namespace Signum.Windows
 
         public static object View(object entity)
         {
-            return View(entity, null);
+            return View(entity, (TypeContext)null);
         }
 
         public static object View(object entity, TypeContext typeContext)
@@ -91,7 +91,12 @@ namespace Signum.Windows
             return Manager.View(entity, new ViewOptions { Buttons = vb, TypeContext = typeContext });
         }
 
-        public static object View(ViewOptions viewOptions, object entity)
+        public static object View(object entity, ViewButtons buttons)
+        {
+            return Manager.View(entity, new ViewOptions { Buttons = buttons });
+        }
+
+        public static object View(object entity, ViewOptions viewOptions)
         {
             return Manager.View(entity, viewOptions);
         }
@@ -270,7 +275,10 @@ namespace Signum.Windows
                 Buttons = findOptions.Buttons,
                 MultiSelection = findOptions.AllowMultiple,
                 FilterOptions = new FreezableCollection<FilterOptions>(findOptions.FilterOptions),
-                Mode = findOptions.FilterMode,
+                ShowFilters = findOptions.ShowFilters,
+                ShowFilterButton = findOptions.ShowFilterButton,
+                ShowFooter = findOptions.ShowFooter,
+                ShowHeader = findOptions.ShowHeader,
                 Title = SearchTitle(findOptions.QueryName)
             };
 
@@ -331,10 +339,9 @@ namespace Signum.Windows
                     MainControl = ctrl
                 };
 
-                if (viewOptions.Buttons == ViewButtons.Ok)
-                    nw.ButtonBar.OkVisible = true;
-                else
-                    nw.ButtonBar.SaveVisible = ShowSave(entity.GetType(), viewOptions.Admin);
+                nw.ButtonBar.ViewButtons = viewOptions.Buttons;
+                if (viewOptions.Buttons == ViewButtons.Save && !ShowSave(entity.GetType(), viewOptions.Admin))
+                    nw.ButtonBar.SaveVisible = false;
 
                 win = nw;
             }

@@ -117,7 +117,7 @@ namespace Signum.Windows
             }
             else
             {
-                ValueLine vl = new ValueLine() { Type = type };
+                ValueLine vl = new ValueLine() { Type = type, Format = f.Column.Format, UnitText = f.Column.Unit };
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
                     Path = new PropertyPath("RealValue"),
