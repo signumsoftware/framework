@@ -198,7 +198,7 @@ namespace Signum.Web
 
             Common.FireCommonTasks(el, Reflector.ExtractLite(entitiesType) ?? entitiesType, context);
 
-            helper.InternalEntityRepeater<S>(context, el);
+            CallInternalEntityRepeater(helper, context, el);
         }
 
         public static void EntityRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityRepeater> settingsModifier)
@@ -217,11 +217,22 @@ namespace Signum.Web
 
             settingsModifier(el);
 
-            if (el != null)
-                using(el)
-                    helper.InternalEntityRepeater<S>(context, el);
+            CallInternalEntityRepeater(helper, context, el);
+            //if (el != null)
+            //    using(el)
+            //        helper.InternalEntityRepeater<S>(context, el);
+            //else
+            //    helper.InternalEntityRepeater<S>(context, el);
+        }
+
+        private static void CallInternalEntityRepeater<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityRepeater settings)
+            where T : Modifiable
+        { 
+            if (settings != null)
+                using (settings)
+                    helper.InternalEntityRepeater<T>(typeContext, settings);
             else
-                helper.InternalEntityRepeater<S>(context, el);
+                helper.InternalEntityRepeater<T>(typeContext, settings);
         }
     }
 }

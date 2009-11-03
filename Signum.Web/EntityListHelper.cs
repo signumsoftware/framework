@@ -287,7 +287,7 @@ namespace Signum.Web
 
             Common.FireCommonTasks(el, Reflector.ExtractLite(entitiesType) ?? entitiesType, context);
 
-            helper.InternalEntityList<S>(context, el);
+            CallInternalEntityList<S>(helper, context, el);
         }
 
         public static void EntityList<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property, Action<EntityList> settingsModifier)
@@ -304,12 +304,22 @@ namespace Signum.Web
             Common.FireCommonTasks(el, Reflector.ExtractLite(entitiesType) ?? entitiesType, context);
 
             settingsModifier(el);
-                        
-            if (el != null)
-                using (el)
-                    helper.InternalEntityList<S>(context, el);
+
+            CallInternalEntityList<S>(helper, context, el);
+            //if (el != null)
+            //    using (el)
+            //        helper.InternalEntityList<S>(context, el);
+            //else
+            //    helper.InternalEntityList<S>(context, el);
+        }
+
+        private static void CallInternalEntityList<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityList settings)
+        {
+            if (settings != null)
+                using (settings)
+                    helper.InternalEntityList<T>(typeContext, settings);
             else
-                helper.InternalEntityList<S>(context, el);
+                helper.InternalEntityList<T>(typeContext, settings);
         }
     }
 }
