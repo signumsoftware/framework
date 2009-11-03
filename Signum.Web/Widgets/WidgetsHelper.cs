@@ -10,9 +10,30 @@ namespace Signum.Web
 {
     public delegate string GetWidgetDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
 
+    public class WidgetNode
+    {
+        public int Count { get; set; }
+        public string Content { get; set; }
+    }
+
     public static class WidgetsHelper
     {
         public static event GetWidgetDelegate GetWidgetsForView;
+
+        public static WidgetNode GetWidgetsListForViewName(this HtmlHelper helper, object entity, string partialViewName, string prefix)
+        {
+            List<string> widgets = new List<string>();
+            if (GetWidgetsForView != null)
+                widgets.AddRange(GetWidgetsForView.GetInvocationList()
+                    .Cast<GetWidgetDelegate>()
+                    .Select(d => d(helper, entity, partialViewName, prefix))
+                    .NotNull().ToList());
+            return new WidgetNode
+            {
+                Count = widgets.Count(),
+                Content = WidgetsToString(helper, widgets)
+            };
+        }
 
         public static string GetWidgetsForViewName(this HtmlHelper helper, object entity, string partialViewName, string prefix)
         {

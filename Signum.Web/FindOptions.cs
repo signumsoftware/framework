@@ -28,8 +28,8 @@ namespace Signum.Web
             set { this.filterOptions = value; }
         }
 
-        private bool? allowMultiple = true;
-        public bool? AllowMultiple
+        private bool allowMultiple = true;
+        public bool AllowMultiple
         {
             get { return allowMultiple; }
             set { allowMultiple = value; }
@@ -52,8 +52,7 @@ namespace Signum.Web
 
             if (SearchOnLoad)
                 sb.Append("&sfSearchOnLoad=true");
-            if (AllowMultiple==null || !AllowMultiple.Value)
-                sb.Append("&sfAllowMultiple=false");
+            sb.Append("&sfAllowMultiple="+AllowMultiple.ToString());
             if (filterOptions != null && filterOptions.Count > 0)
             {
                 for (int i = 0; i < filterOptions.Count; i++)

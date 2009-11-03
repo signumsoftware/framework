@@ -149,12 +149,11 @@ function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailD
         popup.style.top = top;
         popup.style.minWidth = popupWidth + "px";
         popup.style.maxWidth = "95%";
-        /*
-                var maxPercentageWidth = 0.95;
+        
+        var maxPercentageWidth = 0.95;
         popup.style.maxWidth = (maxPercentageWidth*100)+"%";
         popup.style.minWidth = ((popupWidth>(maxPercentageWidth*100)) ? (maxPercentageWidth*100) : popupWidth) + "px"; 
 
-        */
         if ($('#' + prefix + panelPopupKey + " :file").length > 0)
             popup.style.minWidth = "500px";
         
