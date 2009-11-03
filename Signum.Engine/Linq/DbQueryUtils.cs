@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
-    public static class QueryUtils
+    internal static class DbQueryUtils
     {
         internal static Expression Clean(Expression expression)
         {

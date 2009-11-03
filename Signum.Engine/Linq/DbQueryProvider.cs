@@ -45,9 +45,9 @@ namespace Signum.Engine.Linq
      
         private ITranslateResult Translate(Expression expression)
         {
-            Expression cleaned = QueryUtils.Clean(expression);
+            Expression cleaned = DbQueryUtils.Clean(expression);
             ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(cleaned);
-            ProjectionExpression optimized = (ProjectionExpression)QueryUtils.Optimize(binded);
+            ProjectionExpression optimized = (ProjectionExpression)DbQueryUtils.Optimize(binded);
 
             ITranslateResult result = TranslatorBuilder.Build((ProjectionExpression)optimized, ImmutableStack<string>.Empty);
             return result; 

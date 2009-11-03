@@ -73,7 +73,7 @@
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
-    <Compile Include="Linq\QueryUtils.cs" />
+    <Compile Include="Linq\DbQueryUtils.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateOptimizer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />

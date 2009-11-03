@@ -276,13 +276,13 @@ namespace Signum.Engine
         public static int UnsafeDelete<T>(Expression<Func<T, bool>> predicate)
               where T : IdentifiableEntity
         {
-            return QueryUtils.Delete<T>(predicate);
+            return DbQueryUtils.Delete<T>(predicate);
         }
 
         public static int UnsafeUpdate<T>(Expression<Func<T, T>> update, Expression<Func<T, bool>> predicate)
             where T : IdentifiableEntity
         {
-            return QueryUtils.Update<T>(update, predicate);
+            return DbQueryUtils.Update<T>(update, predicate);
         }
     }
 }

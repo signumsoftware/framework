@@ -1214,7 +1214,7 @@ namespace Signum.Engine.Linq
             {
                 MemberAssignment ma = (MemberAssignment)m;
                 Expression colExpression = Visit(Expression.MakeMemberAccess(obj, ma.Member));
-                Expression expression = Visit(QueryUtils.Clean(ma.Expression));
+                Expression expression = Visit(DbQueryUtils.Clean(ma.Expression));
                 return Assign(colExpression, expression);
             }
             else if (m is MemberMemberBinding)
