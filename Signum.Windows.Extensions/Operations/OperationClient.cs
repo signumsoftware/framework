@@ -68,7 +68,7 @@ namespace Signum.Windows.Operations
     {
         public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, Control entityControl)
+        protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, Control entityControl, ViewButtons viewButtons)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -77,16 +77,19 @@ namespace Signum.Windows.Operations
 
             var list = Server.Service<IOperationServer>().GetEntityOperationInfos(ident);
 
-            var result = list.Select(oi => GenerateButton(oi, ident, entityControl)).NotNull().ToList();
+            var result = list.Select(oi => GenerateButton(oi, ident, entityControl, viewButtons)).NotNull().ToList();
 
             return result;
-        } 
+        }
 
-        protected internal virtual Win.FrameworkElement GenerateButton(OperationInfo operationInfo, IdentifiableEntity entity, Win.FrameworkElement entityControl)
+        protected internal virtual Win.FrameworkElement GenerateButton(OperationInfo operationInfo, IdentifiableEntity entity, Win.FrameworkElement entityControl, ViewButtons viewButtons)
         {
             EntityOperationSettings os = (EntityOperationSettings)Settings.TryGetC(operationInfo.Key);
 
             if (os != null && os.IsVisible != null && !os.IsVisible(entity))
+                return null;
+
+            if (viewButtons == ViewButtons.Ok && (os == null || !os.VisibleOnOk))
                 return null;
 
             ToolBarButton button = new ToolBarButton
@@ -176,14 +179,14 @@ namespace Signum.Windows.Operations
                         Lite lite = Lite.Create(ident.GetType(), ident);
                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLite(lite, operationInfo.Key, null);
                         if (operationInfo.Returns)
-                            Navigator.View(new ViewOptions { Buttons = ViewButtons.Save }, newIdent);
+                            Navigator.View(newIdent, ViewButtons.Save);
                     }
                 }
                 else
                 {
                     IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
                     if (operationInfo.Returns)
-                        Navigator.View(new ViewOptions { Buttons = ViewButtons.Save }, newIdent);
+                        Navigator.View(newIdent, ViewButtons.Save);
                 }
             }
         }

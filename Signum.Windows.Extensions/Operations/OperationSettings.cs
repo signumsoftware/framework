@@ -21,6 +21,7 @@ namespace Signum.Windows.Operations
     {
         public Func<EntityOperationEventArgs, IdentifiableEntity> Click { get; set; }
         public Func<IdentifiableEntity, bool> IsVisible { get;  set; }
+        public bool VisibleOnOk { get; set; }
     }
 
     public class EntityOperationEventArgs : EventArgs

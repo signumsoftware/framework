@@ -7,7 +7,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Engine.Maps;
 
-namespace Signum.Engine.Extensions.Reports
+namespace Signum.Engine.Reports
 {
     public static class ReportsLogic
     {

@@ -9,7 +9,7 @@
     <StackPanel>
         <m:EntityCombo m:Common.Route="Operation" />
         <GroupBox Header="Lines">
-            <m:SearchControl Mode="Hidden" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400">
+            <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400">
                 <m:SearchControl.FilterOptions>
                     <m:FilterOptions ColumnName="Package" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
                 </m:SearchControl.FilterOptions>
