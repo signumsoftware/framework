@@ -337,7 +337,6 @@ namespace Signum.Web.Controllers
             return Content(result.ToJSonObject(idAndType => idAndType.Quote(), str => str.Quote()));
         }
 
-        [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult Find(FindOptions findOptions)
         {
             return Navigator.Find(this, findOptions);

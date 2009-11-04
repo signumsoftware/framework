@@ -8,28 +8,35 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public delegate List<QuickLinkItem> GetLinksDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
+    public delegate List<QuickLinkItem> GetQuickLinksDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
 
-    public static class LinksWidgetHelper
+    public static class QuickLinkWidgetHelper
     {
-        public static event GetLinksDelegate GetLinks;
+        public static event GetQuickLinksDelegate GetQuickLinks;
 
         public static void Start()
         {
             WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => WidgetsHelper_GetWidgetsForView(helper, entity, partialViewName, prefix);
         }
 
-        private static string WidgetsHelper_GetWidgetsForView(HtmlHelper helper, object entity, string partialViewName, string prefix)
+        private static WidgetNode WidgetsHelper_GetWidgetsForView(HtmlHelper helper, object entity, string partialViewName, string prefix)
         {
             List<QuickLinkItem> links = new List<QuickLinkItem>();
-            if (GetLinks != null)
-                links.AddRange(GetLinks.GetInvocationList()
-                    .Cast<GetLinksDelegate>()
+            if (GetQuickLinks != null)
+                links.AddRange(GetQuickLinks.GetInvocationList()
+                    .Cast<GetQuickLinksDelegate>()
                     .Select(d => d(helper, entity, partialViewName, prefix))
                     .NotNull()
                     .SelectMany(d => d).ToList());
 
-            return QuickLinksToString(helper, links, prefix);
+            return new WidgetNode
+            {
+                Content = QuickLinksToString(helper, links, prefix),
+                Count = links.Count.ToString(),
+                Label = "Quicklinks",
+                Id = "Quicklinks",
+                Show = links.Count > 0
+            };
         }
 
         private static string QuickLinksToString(HtmlHelper helper, List<QuickLinkItem> links, string prefix)

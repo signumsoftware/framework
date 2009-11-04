@@ -96,6 +96,11 @@ function OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, d
     var viewQueryParam = "";
     if (!empty(partialView))
         viewQueryParam = qp("sfUrl", partialView);
+
+    TypedOpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView, runtimeType, idQueryParam, reactiveParam, viewQueryParam);
+}
+
+function TypedOpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView, runtimeType, idQueryParam, reactiveParam, viewQueryParam) {
     $.ajax({
         type: "POST",
         url: urlController,

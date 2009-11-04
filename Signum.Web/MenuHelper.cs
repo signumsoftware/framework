@@ -92,7 +92,8 @@ namespace Signum.Web
                 }
                 sb.Append("</ul>");
             }
-            sb.Append("</li>");
+            if (i>0)
+                sb.Append("</li>");
             return sb.ToString();
         }
 

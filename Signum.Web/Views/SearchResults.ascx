@@ -46,13 +46,13 @@
                 <% Lite entityField = null;
                    if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
                        entityField = (Lite)queryResult.Data[row][EntityColumnIndex.Value];
-                   //if (entityField != null)
-                   //{
                        if (allowMultiple.HasValue)
                        {
                 %>
                 <td id="<%=Html.GlobalName("tdRowSelection")%>" name="<%=Html.GlobalName("tdRowSelection")%>">
                     <%
+                        if (entityField != null)
+                        {
             
                     if (allowMultiple.Value)
                     { 
@@ -64,6 +64,7 @@
                         <input type="radio" name="<%=Html.GlobalName("rowSelection")%>" id="<%=Html.GlobalName("radio_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                         <%
                     }
+                        }
                  %>
                  </td>
                  <%} %>
@@ -73,7 +74,7 @@
                 <% } %>
                 </td>
                 <%
-                  //  }
+                   
                     
                     for (int col = 0; col < queryResult.Data[row].Length; col++)
                 {

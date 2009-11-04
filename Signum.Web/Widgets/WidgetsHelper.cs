@@ -8,43 +8,53 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public delegate string GetWidgetDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
+    public delegate WidgetNode GetWidgetDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
 
     public class WidgetNode
     {
-        public int Count { get; set; }
+        public WidgetNode() {
+            Show = true;
+        }
+
+        /// <summary>
+        /// Indicates wheter the widget will be shown
+        /// </summary>
+        public bool Show { get; set; }
+
+        /// <summary>
+        /// Text that will be shown as a header
+        /// </summary>
+        public string Label { get; set; }
+
+
+        public string Count { get; set; }
+
+        /// <summary>
+        /// The different widgets
+        /// </summary>
         public string Content { get; set; }
+
+        public string Id { get; set; }
+
+        public string Href { get; set; }
     }
 
     public static class WidgetsHelper
     {
         public static event GetWidgetDelegate GetWidgetsForView;
 
-        public static WidgetNode GetWidgetsListForViewName(this HtmlHelper helper, object entity, string partialViewName, string prefix)
+        public static List<WidgetNode> GetWidgetsListForViewName(this HtmlHelper helper, object entity, string partialViewName, string prefix)
         {
-            List<string> widgets = new List<string>();
-            if (GetWidgetsForView != null)
-                widgets.AddRange(GetWidgetsForView.GetInvocationList()
-                    .Cast<GetWidgetDelegate>()
-                    .Select(d => d(helper, entity, partialViewName, prefix))
-                    .NotNull().ToList());
-            return new WidgetNode
+            List<WidgetNode> widgets = new List<WidgetNode>();
+            if (entity != null)
             {
-                Count = widgets.Count(),
-                Content = WidgetsToString(helper, widgets)
-            };
-        }
-
-        public static string GetWidgetsForViewName(this HtmlHelper helper, object entity, string partialViewName, string prefix)
-        {
-            List<string> widgets = new List<string>();
-            if (GetWidgetsForView != null)
-                widgets.AddRange(GetWidgetsForView.GetInvocationList()
-                    .Cast<GetWidgetDelegate>()
-                    .Select(d => d(helper, entity, partialViewName, prefix))
-                    .NotNull().ToList());
-
-            return WidgetsToString(helper, widgets);
+                if (GetWidgetsForView != null)
+                    widgets.AddRange(GetWidgetsForView.GetInvocationList()
+                        .Cast<GetWidgetDelegate>()
+                        .Select(d => d(helper, entity, partialViewName, prefix))
+                        .NotNull().ToList());
+            }
+            return widgets;
         }
 
         private static string WidgetsToString(HtmlHelper helper, List<string> widgets)

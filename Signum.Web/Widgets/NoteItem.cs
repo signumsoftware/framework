@@ -8,11 +8,11 @@ using Signum.Web.Properties;
 
 namespace Signum.Web
 {
-    public class QuickLinkItem : WebMenuItem
+    public class NoteItem : WebMenuItem
     {
-        public QuickLinkItem(object queryName, List<FilterOptions> filterOptions)
+        public NoteItem(object queryName, List<FilterOptions> filterOptions)
         {
-            DivCssClass = "QuickLink";
+            DivCssClass = "Note";
             FindOptions = new FindOptions 
             { 
                 QueryName = queryName,
@@ -48,12 +48,12 @@ namespace Signum.Web
             string controllerUrl = "Signum.aspx/PartialFind";
             if (OnServerClickAjax.HasText())
                 controllerUrl = OnServerClickAjax;
-
-            return "javascript:QuickLinkClickServerAjax('{0}','{1}','{2}');".Formato(
+            
+            return "javascript:OpenPopup('{0}','{1}','{2}');".Formato(
                 controllerUrl,
                 FindOptions.ToString(true, ""),
-                prefix
-                );
+                prefix,
+                "javascript:UpdateNoteCount();");
         }
     }
 }
