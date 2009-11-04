@@ -103,7 +103,7 @@ namespace Signum.Web
             string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
             string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
-            string tooltip = " " + (title.HasText() ? title : text);
+            string tooltip = " title='" + (title.HasText() ? title : text) + "' ";
             return "<a{0}{1}{2}{3} href=\"{4}\">{5}</a>".Formato(idname,css,tooltip,attributes,href,text);
         }
 

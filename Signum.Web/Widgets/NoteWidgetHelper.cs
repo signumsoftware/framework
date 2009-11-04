@@ -49,30 +49,34 @@ namespace Signum.Web
             string controllerUrl = "Signum.aspx/PartialFind";
             //if (OnServerClickAjax.HasText())
             //    controllerUrl = OnServerClickAjax;
+               /* return "javascript:QuickLinkClickServerAjax('{0}','{1}','{2}');".Formato(
+                controllerUrl,
 
-            return "javascript:OpenPopup('{0}','{1}','{2}');".Formato(
+                FindOptions.ToString(true, ""),
+                prefix
+                );*/
+            return "";
+            
+            /*return "javascript:QuickLinkClickServerAjax('{0}','{1}','{2}');".Formato(
                 controllerUrl,
                 "divASustituir",
+                ""
                 "NotaDN",   //TODO: Cambiar!
-                "javascript:UpdateNoteCount();");
+                "javascript:UpdateNoteCount();");*/
         }
+        //function OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, partialView) {
+
 
         private static string NotesToString(HtmlHelper helper, List<Lite<INoteDN>> notes, string prefix)
         {
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("<div class='widgetDiv notesDiv'>");
-            sb.Append("<div><i>Crear una nota nueva...</i></div><hr />");
+            sb.Append("<div><i>Crear una nota nueva...</i></div>");
+            if (notes.Count > 0) sb.Append("<hr />");
             foreach (Lite<INoteDN> note in notes)
             {
-                sb.AppendLine("<div onclick='{0}'>{1}</div>".Formato(
-                    "javascript:OpenPopup('{0}','{1}','{2}');".Formato(
-                    "Signum.aspx/PartialView",
-                    "divASustituir",
-                    "NotaDN",   //TODO: Cambiar!
-                    "javascript:UpdateNoteCount();"),
-                    note.ToStr.Etc(30)                    
-                    ));
+                sb.AppendLine("<div>" + note.ToStr.Etc(30) + "</div>");
                 //sb.AppendLine(new NoteItem{ note.ToString(helper, prefix));
             }
             sb.AppendLine("</div>");
