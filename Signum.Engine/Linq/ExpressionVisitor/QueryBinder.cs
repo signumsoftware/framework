@@ -372,7 +372,7 @@ namespace Signum.Engine.Linq
             Expression exp =
                 aggregateFunction == AggregateFunction.Count ? null :
                 selector != null ? DbExpressionNominator.FullNominate(MapAndVisitExpand(selector, ref projection), false) :
-                projection.Projector;
+                DbExpressionNominator.FullNominate(projection.Projector, false);
 
             string alias = this.GetNextSelectAlias();
             ColumnDeclaration cd = new ColumnDeclaration("a",

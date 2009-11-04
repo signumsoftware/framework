@@ -217,8 +217,8 @@ namespace Signum.Entities
                 if (RuntimeType != lite.RuntimeType)
                     return false;
 
-                if (UntypedEntityOrNull == null)
-                    return Id == lite.IdOrNull;
+                if (IdOrNull != null && lite.IdOrNull != null)
+                    return Id == lite.Id;
                 else
                     return object.ReferenceEquals(this.UntypedEntityOrNull, lite.UntypedEntityOrNull);
             }
