@@ -35,10 +35,26 @@ namespace Signum.Web
                 Content = NotesToString(helper, notes, prefix),
                 Count = notes.Count.ToString(),
                 Label = "Notas",
-                Href = "javascript:alert('Voy');",
+                Href = GetServerClickAjax(""),
                 Id = "Notas",
                 Show = true
             };
+        }
+
+        private static string GetServerClickAjax(string prefix)
+        {
+           // if (OnClick.HasText() || OnServerClickPost.HasText())
+            //    return null;
+
+            string controllerUrl = "Signum.aspx/PartialFind";
+            //if (OnServerClickAjax.HasText())
+            //    controllerUrl = OnServerClickAjax;
+
+            return "javascript:OpenPopup('{0}','{1}','{2}');".Formato(
+                controllerUrl,
+                "divASustituir",
+                "NotaDN",   //TODO: Cambiar!
+                "javascript:UpdateNoteCount();");
         }
 
         private static string NotesToString(HtmlHelper helper, List<Lite<INoteDN>> notes, string prefix)
@@ -46,9 +62,17 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("<div class='widgetDiv notesDiv'>");
-            sb.Append("<div><i>Crear una nota nueva...</i></div>");
+            sb.Append("<div><i>Crear una nota nueva...</i></div><hr />");
             foreach (Lite<INoteDN> note in notes)
             {
+                sb.AppendLine("<div onclick='{0}'>{1}</div>".Formato(
+                    "javascript:OpenPopup('{0}','{1}','{2}');".Formato(
+                    "Signum.aspx/PartialView",
+                    "divASustituir",
+                    "NotaDN",   //TODO: Cambiar!
+                    "javascript:UpdateNoteCount();"),
+                    note.ToStr.Etc(30)                    
+                    ));
                 //sb.AppendLine(new NoteItem{ note.ToString(helper, prefix));
             }
             sb.AppendLine("</div>");
