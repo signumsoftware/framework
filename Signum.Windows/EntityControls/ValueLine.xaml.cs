@@ -125,6 +125,7 @@ namespace Signum.Windows
                     ValidatesOnExceptions = true,
                     ValidatesOnDataErrors = true,
                     NotifyOnValidationError = true,
+                    Converter = binding.Converter,
                 };
             }
             else //otherwise bind to value property
@@ -138,7 +139,8 @@ namespace Signum.Windows
                 };
             }
 
-            b.Converter = Configurator.GetConverter(lineType, type, nullable);
+            if (b.Converter == null)
+                b.Converter = Configurator.GetConverter(lineType, type, nullable);
 
             ValidationRule validation = Configurator.GetValidation(lineType, type, nullable);
             if (validation != null)

@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Markup;
 using Signum.Entities.DynamicQuery;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -39,8 +40,8 @@ namespace Signum.Windows
             set { this.modal = new bool?(value); }
         }
 
-        List<FilterOptions> filterOptions = new List<FilterOptions>();
-        public List<FilterOptions> FilterOptions
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
         {
             get { return filterOptions; }
             set { this.filterOptions = value; }
@@ -61,11 +62,11 @@ namespace Signum.Windows
 
     }
 
-    public class FilterOptions : Freezable
+    public class FilterOption : Freezable
     {
-        public FilterOptions(){}
+        public FilterOption(){}
 
-        public FilterOptions(string columnName, object value)
+        public FilterOption(string columnName, object value)
         {
             this.ColumnName = columnName;
             this.Operation = FilterOperation.EqualTo;
@@ -78,7 +79,7 @@ namespace Signum.Windows
         public FilterOperation Operation { get; set; }
 
         public static readonly DependencyProperty ValueProperty =
-             DependencyProperty.Register("Value", typeof(object), typeof(FilterOptions), new UIPropertyMetadata((d, e) => ((FilterOptions)d).RefreshRealValue()));
+             DependencyProperty.Register("Value", typeof(object), typeof(FilterOption), new UIPropertyMetadata((d, e) => ((FilterOption)d).RefreshRealValue()));
         public object Value
         {
             get { return (object)GetValue(ValueProperty); }
@@ -86,7 +87,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty RealValueProperty =
-            DependencyProperty.Register("RealValue", typeof(object), typeof(FilterOptions), new UIPropertyMetadata(null));
+            DependencyProperty.Register("RealValue", typeof(object), typeof(FilterOption), new UIPropertyMetadata(null));
         public object RealValue
         {
             get { return (object)GetValue(RealValueProperty); }
@@ -112,6 +113,17 @@ namespace Signum.Windows
         protected override Freezable CreateInstanceCore()
         {
             throw new NotImplementedException();
+        }
+
+        public static object DefaultValue(Type type)
+        {
+            if (!type.IsValueType || type.IsNullable())
+                return null;
+
+            if (type == typeof(DateTime))
+                return DateTime.Now;
+
+            return Activator.CreateInstance(type);
         }
     }
 

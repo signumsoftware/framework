@@ -35,10 +35,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterOptionsProperty =
-          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOptions>), typeof(SearchControl), new UIPropertyMetadata(null));
-        public FreezableCollection<FilterOptions> FilterOptions
+          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public FreezableCollection<FilterOption> FilterOptions
         {
-            get { return (FreezableCollection<FilterOptions>)GetValue(FilterOptionsProperty); }
+            get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
             set { SetValue(FilterOptionsProperty, value); }
         }
 
@@ -171,8 +171,9 @@ namespace Signum.Windows
         public SearchControl()
         {
             this.InitializeComponent();
+            
 
-            FilterOptions = new FreezableCollection<FilterOptions>();
+            FilterOptions = new FreezableCollection<FilterOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
         }
 
@@ -222,9 +223,10 @@ namespace Signum.Windows
             }
 
             filterBuilder.Columns = view.Columns.Where(a => a.Filterable).ToList();
-            filterBuilder.Filters = new ObservableCollection<FilterOptions>(FilterOptions);
+            filterBuilder.Filters = new ObservableCollection<FilterOption>(FilterOptions);
 
             GenerateListViewColumns(view);
+            columns = view.Columns;
 
             if (GetCustomMenuItems != null)
             {
@@ -252,9 +254,13 @@ namespace Signum.Windows
                 SelectedItems = null;
         }
 
+        List<Column> columns = new List<Column>(); 
+        List<Column> visibleColumns = new List<Column>();
+
         private void GenerateListViewColumns(QueryDescription view)
         {
             gvResults.Columns.Clear();
+            visibleColumns.Clear();
 
             for (int i = 0; i < view.Columns.Count; i++)
             {
@@ -266,11 +272,13 @@ namespace Signum.Windows
                 Binding b = new Binding("[{0}]".Formato(i)) { Mode = BindingMode.OneTime };
                 DataTemplate dt = settings.GetFormatter(c)(b);
                 gvResults.Columns.Add(
-                new GridViewColumn
-                {
-                    Header = c.DisplayName,
-                    CellTemplate = dt,
-                });
+                    new GridViewColumn
+                    {
+                        Header = c.DisplayName,
+                        CellTemplate = dt,
+                    });
+
+                visibleColumns.Add(c); 
             }
         }
 
@@ -410,7 +418,7 @@ namespace Signum.Windows
             e.Handled = true;
         }
 
-        void GridViewColumnHeaderClickedHandler(object sender, RoutedEventArgs e)
+        void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
             if (queryResult == null || queryResult.Data == null)
                 return;
@@ -430,8 +438,9 @@ namespace Signum.Windows
                     direction = ListSortDirection.Ascending;
             }
 
-            string header = headerClicked.Column.Header as string;
-            int colIndex = queryResult.Columns.IndexOf(d => d.DisplayName == header);
+
+            int columHeaderIndex =  gvResults.Columns.IndexOf(headerClicked.Column);
+            int colIndex = columns.IndexOf(visibleColumns[columHeaderIndex]);
 
             btFind.IsEnabled = false;
 
@@ -463,6 +472,70 @@ namespace Signum.Windows
 
 
         public static event MenuItemForQueryName GetCustomMenuItems;
+
+        private void GridViewColumnHeader_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && this.ShowFilters && _startPoint != null)
+            {
+                Point position = e.GetPosition(null);
+
+                if (Math.Abs(position.X - _startPoint.Value.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                    Math.Abs(position.Y - _startPoint.Value.Y) > SystemParameters.MinimumVerticalDragDistance)
+                {
+                    _startPoint = null;
+                    GridViewColumnHeader header = (GridViewColumnHeader)sender;
+                    FilterOption filter = CreateFilter(header);
+              
+                    if (DragDrop.DoDragDrop(header, filter, DragDropEffects.Copy) == DragDropEffects.Copy)
+                    {
+
+                    }
+
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private FilterOption CreateFilter(GridViewColumnHeader header)
+        {
+            int columnHeaderIndex = gvResults.Columns.IndexOf(header.Column);
+            Column column = visibleColumns[columnHeaderIndex];
+
+            if (queryResult != null)
+            {
+                int columnIndex = columns.IndexOf(column);
+
+                object[] row = (object[])lvResult.SelectedItem;
+                if (row != null)
+                {
+                    return new FilterOption
+                    {
+                        Column = column,
+                        Operation = FilterOperation.EqualTo,
+                        Value = row[columnIndex]
+                    };
+                }
+            }
+
+            return new FilterOption
+            {
+                Column = column,
+                Operation = FilterOperation.EqualTo,
+                Value = FilterOption.DefaultValue(column.Type),
+            };
+        }
+
+        Point? _startPoint;
+
+        private void GridViewColumnHeader_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _startPoint = e.GetPosition(null);
+        }
+
+        private void GridViewColumnHeader_MouseLeave(object sender, MouseEventArgs e)
+        {
+            _startPoint = null;
+        }
     }
 
     public delegate MenuItem MenuItemForQueryName(object queryName, Type entityType);

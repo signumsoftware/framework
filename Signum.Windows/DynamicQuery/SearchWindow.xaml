@@ -13,8 +13,8 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</Window.Resources>
-	<Grid Margin="10,0,10,0">
-        <m:SearchControl x:Name="searchControl" Margin="0,0,0,8" 
+	<Grid>
+        <m:SearchControl x:Name="searchControl"
                          QueryName="{Binding QueryName, ElementName=me}"
                          FilterOptions="{Binding FilterOptions, ElementName=me}"
                          MultiSelection="{Binding MultiSelection, ElementName=me}"

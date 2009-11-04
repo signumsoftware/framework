@@ -39,10 +39,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterOptionsProperty =
-          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOptions>), typeof(SearchWindow), new UIPropertyMetadata(null));
-        public FreezableCollection<FilterOptions> FilterOptions
+          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public FreezableCollection<FilterOption> FilterOptions
         {
-            get { return (FreezableCollection<FilterOptions>)GetValue(FilterOptionsProperty); }
+            get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
             set { SetValue(FilterOptionsProperty, value); }
         }
 

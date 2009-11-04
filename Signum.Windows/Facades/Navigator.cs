@@ -67,9 +67,9 @@ namespace Signum.Windows
             {
                 OnLoadMode = OnLoadMode.Search,
                 Buttons = SearchButtons.Close ,
-                FilterOptions = new List<FilterOptions>
+                FilterOptions = new List<FilterOption>
                 {
-                    new FilterOptions { 
+                    new FilterOption { 
                         ColumnName = columnName, 
                         Operation = FilterOperation.EqualTo, 
                         Value = value }
@@ -274,7 +274,7 @@ namespace Signum.Windows
                 QueryName = findOptions.QueryName,
                 Buttons = findOptions.Buttons,
                 MultiSelection = findOptions.AllowMultiple,
-                FilterOptions = new FreezableCollection<FilterOptions>(findOptions.FilterOptions),
+                FilterOptions = new FreezableCollection<FilterOption>(findOptions.FilterOptions),
                 ShowFilters = findOptions.ShowFilters,
                 ShowFilterButton = findOptions.ShowFilterButton,
                 ShowFooter = findOptions.ShowFooter,

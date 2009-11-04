@@ -22,8 +22,8 @@ namespace Signum.Windows
 {
 	public partial class FilterBuilder
 	{  
-        ObservableCollection<FilterOptions> filters;
-        public ObservableCollection<FilterOptions> Filters
+        ObservableCollection<FilterOption> filters;
+        public ObservableCollection<FilterOption> Filters
         {
             get { return filters; }
             set
@@ -59,7 +59,7 @@ namespace Signum.Windows
 
             Column c = (Column)cbFilters.SelectedItem;
             FilterType ft = FilterOperationsUtils.GetFilterType(c.Type);
-            FilterOptions f = new FilterOptions
+            FilterOption f = new FilterOption
             {
                 Column = c,
                 Operation =  FilterOperationsUtils.FilterOperations[ft].First(),
@@ -72,7 +72,7 @@ namespace Signum.Windows
         private void ComboBox_Loaded(object sender, RoutedEventArgs e)
         {
             ComboBox cb = (ComboBox)sender;
-            FilterOptions f = (FilterOptions)cb.DataContext;
+            FilterOption f = (FilterOption)cb.DataContext;
             FilterType ft = FilterOperationsUtils.GetFilterType(f.Column.Type);
             cb.ItemsSource = FilterOperationsUtils.FilterOperations[ft];
             cb.IsEnabled = !f.Frozen;
@@ -82,7 +82,7 @@ namespace Signum.Windows
         {
             Grid g = (Grid)sender;
             Common.SetCurrentWindow(g, this.FindCurrentWindow());
-            FilterOptions f = (FilterOptions)g.DataContext;
+            FilterOption f = (FilterOption)g.DataContext;
 
             Common.SetIsReadOnly(g, f.Frozen); 
 
@@ -95,7 +95,7 @@ namespace Signum.Windows
                     EntityCombo ec = new EntityCombo { Type = type, Style = (Style)FindResource("toolTip") };
                     ec.SetBinding(EntityCombo.EntityProperty, new Binding
                     {
-                        Path = new PropertyPath(FilterOptions.RealValueProperty),
+                        Path = new PropertyPath(FilterOption.RealValueProperty),
                         NotifyOnValidationError = true,
                         ValidatesOnDataErrors = true,
                         ValidatesOnExceptions = true,
@@ -107,7 +107,7 @@ namespace Signum.Windows
                     EntityLine el = new EntityLine { Type = type, Create = false, HideAutoCompleteOnLostFocus = false };
                     el.SetBinding(EntityLine.EntityProperty, new Binding
                     {
-                        Path = new PropertyPath(FilterOptions.RealValueProperty),
+                        Path = new PropertyPath(FilterOption.RealValueProperty),
                         NotifyOnValidationError = true,
                         ValidatesOnDataErrors = true,
                         ValidatesOnExceptions = true
@@ -124,6 +124,7 @@ namespace Signum.Windows
                     NotifyOnValidationError = true,
                     ValidatesOnDataErrors = true,
                     ValidatesOnExceptions = true,
+                    Converter = Reflector.IsNumber(type) ?  Converters.Identity: null,
                 });
                 g.Children.Add(vl);
             }
@@ -136,7 +137,7 @@ namespace Signum.Windows
 
         private void RemoveFilters()
         {
-            var toRemove = lvFilters.SelectedItems.Cast<FilterOptions>().ToList();
+            var toRemove = lvFilters.SelectedItems.Cast<FilterOption>().ToList();
             foreach (var f in toRemove)
             {
                 filters.Remove(f);
@@ -148,6 +149,21 @@ namespace Signum.Windows
             if (e.Key == Key.Delete)
             {
                 RemoveFilters();
+            }
+        }
+
+        private void lvFilters_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = e.Data.GetDataPresent(typeof(FilterOption)) ? DragDropEffects.Copy : DragDropEffects.None;
+        }
+
+        private void lvFilters_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(FilterOption)))
+            {
+                FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
+
+                filters.Add(filter); 
             }
         }
 	}

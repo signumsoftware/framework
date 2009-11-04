@@ -57,10 +57,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterOptionsProperty =
-          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOptions>), typeof(CountSearchControl), new UIPropertyMetadata(null));
-        public FreezableCollection<FilterOptions> FilterOptions
+          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
+        public FreezableCollection<FilterOption> FilterOptions
         {
-            get { return (FreezableCollection<FilterOptions>)GetValue(FilterOptionsProperty); }
+            get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
             set { SetValue(FilterOptionsProperty, value); }
         }
 
@@ -78,7 +78,7 @@ namespace Signum.Windows
         {
             this.InitializeComponent();
 
-            FilterOptions = new FreezableCollection<FilterOptions>();
+            FilterOptions = new FreezableCollection<FilterOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
         }
 
