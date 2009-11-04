@@ -88,6 +88,14 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void GroupSum()
+        {
+            var songsAlbum = (from a in Database.Query<ArtistDN>()
+                              group a by a.Sex into g
+                              select new { Sex = g.Key, Max = g.Sum(a => a.Name.Length) }).ToList();
+        }
+
+        [TestMethod]
         public void GroupMax()
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>()
@@ -118,10 +126,41 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().Count();
         }
 
+
         [TestMethod]
         public void RootCountWhere()
         {
             var songsAlbum = Database.Query<ArtistDN>().Count(a => a.Name.StartsWith("M"));
+        }
+
+        [TestMethod]
+        public void RootCountWhereZero()
+        {
+            Assert.AreEqual(0, Database.Query<ArtistDN>().Count(a => false));
+        }
+
+        [TestMethod]
+        public void RootSum()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Sum(a => a.Name.Length);
+        }
+
+        [TestMethod]
+        public void RootSumZero()
+        {
+            Assert.AreEqual(0, Database.Query<ArtistDN>().Where(a => false).Sum(a => a.Name.Length));
+        }
+
+        [TestMethod]
+        public void RootSumNull()
+        {
+            Assert.IsNull(Database.Query<ArtistDN>().Where(a => false).Sum(a => (int?)a.Name.Length));
+        }
+
+        [TestMethod]
+        public void RootSumSomeNull()
+        {
+            Assert.IsTrue(Database.Query<ArtistDN>().Sum(a => a.LastAward.Id) > 0);
         }
 
         [TestMethod]
@@ -131,9 +170,21 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void RootMaxException()
+        {
+            Assert2.Throws<NullReferenceException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
+        }
+
+        [TestMethod]
         public void RootMin()
         {
             var songsAlbum = Database.Query<ArtistDN>().Min(a => a.Name.Length);
+        }
+
+        [TestMethod]
+        public void RootMinException()
+        {
+            Assert2.Throws<NullReferenceException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
         }
 
         [TestMethod]

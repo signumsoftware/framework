@@ -489,9 +489,9 @@ namespace Signum.Utilities
             return collection.OrderBy(a => a);
         }
 
-        public static IOrderedQueryable<T> Order<T>(this IQueryable<T> collection) where T : IComparable<T>
+        public static IOrderedEnumerable<T> OrderDescending<T>(this IEnumerable<T> collection) where T : IComparable<T>
         {
-            return collection.OrderBy(a => a);
+            return collection.OrderByDescending(a => a);
         }
         #endregion
 

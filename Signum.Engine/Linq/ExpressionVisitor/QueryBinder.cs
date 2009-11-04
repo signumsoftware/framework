@@ -366,17 +366,27 @@ namespace Signum.Engine.Linq
 
         private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector, bool isRoot)
         {
-            resultType = resultType.Nullify(); //SQL is Ork's language!
+            bool coalesceTrick = !resultType.IsNullable() && aggregateFunction == AggregateFunction.Sum;
 
             ProjectionExpression projection = this.VisitCastProjection(source);
             Expression exp =
                 aggregateFunction == AggregateFunction.Count ? null :
-                selector != null ? DbExpressionNominator.FullNominate(MapAndVisitExpand(selector, ref projection), false) :
+                selector != null ? MapAndVisitExpand(selector, ref projection):
                 DbExpressionNominator.FullNominate(projection.Projector, false);
 
+            if (coalesceTrick)
+                exp = Expression.Convert(exp, resultType.Nullify());
+
+            if(exp != null)
+                exp = DbExpressionNominator.FullNominate(exp, false);
+
             string alias = this.GetNextSelectAlias();
-            ColumnDeclaration cd = new ColumnDeclaration("a",
-                new AggregateExpression(resultType, exp, aggregateFunction));
+            var aggregate = !coalesceTrick ? new AggregateExpression(resultType, exp, aggregateFunction) :
+                (Expression)Expression.Coalesce(
+                    new AggregateExpression(resultType.Nullify(), exp, aggregateFunction),
+                    new SqlConstantExpression(Activator.CreateInstance(resultType), resultType));
+
+            ColumnDeclaration cd = new ColumnDeclaration("a", aggregate);
 
             SelectExpression select = new SelectExpression(alias, false, null, new[] { cd }, projection.Source, null, null, null);
 
@@ -924,6 +934,15 @@ namespace Signum.Engine.Linq
                     }
 
                     return result; 
+                }
+                case (ExpressionType)DbExpressionType.ImplementedByAll:
+                {
+                    ImplementedByAllExpression iba = (ImplementedByAllExpression)source;
+                    FieldInfo fi = Reflector.FindFieldInfo(iba.Type, m.Member, false);
+                    if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
+                        return iba.Id;
+
+                    throw new ApplicationException("The member {0} of ImplementedByAll is no accesible on queries".Formato(m.Member));
                 }
             }
       

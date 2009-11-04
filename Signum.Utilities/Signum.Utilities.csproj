@@ -52,6 +52,7 @@
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
+    <Compile Include="QueryableExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="CSV.cs" />
     <Compile Include="DataStructures\Grouping.cs" />
