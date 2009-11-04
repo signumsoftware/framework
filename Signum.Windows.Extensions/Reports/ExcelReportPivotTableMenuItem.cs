@@ -102,11 +102,11 @@ namespace Signum.Windows.Reports
             Navigator.Find(new FindOptions(typeof(ExcelReportDN))
             {
                 OnLoadMode = OnLoadMode.Search,
-                ShowFooter= false,
-                ShowHeader = false,
-                FilterOptions = new List<FilterOptions>
+                ShowFilters = false,
+                ShowFilterButton = false,
+                FilterOptions = new List<FilterOption>
                 {
-                    new FilterOptions 
+                    new FilterOption 
                     { 
                         ColumnName = "QueryName", 
                         Operation = FilterOperation.EqualTo, 

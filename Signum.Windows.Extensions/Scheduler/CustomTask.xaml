@@ -11,7 +11,7 @@
         <GroupBox Header="Executions">
             <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:CustomTaskExecutionDN}" MaxHeight="400">
                 <m:SearchControl.FilterOptions>
-                    <m:FilterOptions ColumnName="CustomTask" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
+                    <m:FilterOption ColumnName="CustomTask" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
                 </m:SearchControl.FilterOptions>
             </m:SearchControl>
         </GroupBox>
