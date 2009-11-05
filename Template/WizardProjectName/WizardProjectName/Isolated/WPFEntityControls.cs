@@ -54,7 +54,7 @@ namespace WizardProjectName
         {
             
             Type t = pi.PropertyType;
-            Type lt = Reflector.ExtractLazy(t) ?? t; 
+            Type lt = Reflector.ExtractLite(t) ?? t; 
             if (Reflector.IsIIdentifiable(lt))
             {
                 if(Reflector.IsLowPopulation(lt))
@@ -70,7 +70,7 @@ namespace WizardProjectName
             if (Reflector.IsMList(t))
             {
                 Type et = Reflector.CollectionType(t);
-                if (Reflector.IsIIdentifiable(Reflector.ExtractLazy(et) ?? et))
+                if (Reflector.IsIIdentifiable(Reflector.ExtractLite(et) ?? et))
                     return new XElement("GroupBox", new XAttribute("Header", pi.Name),
                         new XElement(m + "EntityList", new XAttribute(m + "Common.Route", pi.Name)));
 

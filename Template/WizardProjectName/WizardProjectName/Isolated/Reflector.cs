@@ -24,7 +24,7 @@ namespace WizardProjectName
             Modifiable = assembly.GetType("Signum.Entities.Modifiable", true);
             ModifiableEntity = assembly.GetType("Signum.Entities.ModifiableEntity", true);
             MList = assembly.GetType("Signum.Entities.MList`1", true);
-            Lazy = assembly.GetType("Signum.Entities.Lazy`1", true);
+            Lite = assembly.GetType("Signum.Entities.Lite`1", true);
             LowPopulationAttribute = assembly.GetType("Signum.Entities.LowPopulationAttribute", true);
             LowProperty = LowPopulationAttribute.GetProperty("Low");
 
@@ -44,7 +44,7 @@ namespace WizardProjectName
         public static Type MList { get; private set; }
         public static Type LowPopulationAttribute { get; private set; }
         public static PropertyInfo LowProperty { get; private set; }
-        public static Type Lazy { get; private set; }
+        public static Type Lite { get; private set; }
 
         public static List<string> CommonProperties { get; private set; }
 
@@ -86,10 +86,10 @@ namespace WizardProjectName
             return !Entity.IsAssignableFrom(type);
         }
 
-        public static Type ExtractLazy(Type lazyType)
+        public static Type ExtractLite(Type liteType)
         {
-            if (lazyType.IsGenericType && lazyType.GetGenericTypeDefinition() == Lazy)
-                return lazyType.GetGenericArguments()[0];
+            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == Lite)
+                return liteType.GetGenericArguments()[0];
             return null;
         }
     }
