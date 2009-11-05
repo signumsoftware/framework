@@ -60,7 +60,7 @@ namespace Signum.Windows
 
         public override Button GetSaveButton()
         {
-            return this.buttonBar.SaveButton;
+            return this.btSave;
         }
 
         public override List<IdentifiableEntity> GetEntities()
