@@ -79,7 +79,7 @@ namespace Signum.Engine.Authorization
             var current = Database.Query<RuleFacadeMethodDN>().Where(r => r.Role == role).ToDictionary(a => a.ServiceOperation);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => (FacadeMethodDN)r.Resource);
 
-            Synchronizer.Syncronize(current, should,
+            Synchronizer.Synchronize(current, should,
                 (s, sr) => sr.Delete(),
                 (s, ar) => new RuleFacadeMethodDN { ServiceOperation = s, Allowed = ar.Allowed, Role = role }.Save(),
                 (s, sr, ar) => { sr.Allowed = ar.Allowed; sr.Save(); });

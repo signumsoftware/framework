@@ -220,7 +220,7 @@ namespace Signum.Engine.Authorization
             var current = Database.Query<RuleEntityGroupDN>().Where(r => r.Role == role).ToDictionary(a => a.Group);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => r.Group);
 
-            Synchronizer.Syncronize(current, should,
+            Synchronizer.Synchronize(current, should,
                 (p, pr) => pr.Delete(),
                 (p, ar) => new RuleEntityGroupDN { Group = p, Role = role, AllowedIn = ar.AllowedIn, AllowedOut = ar.AllowedOut}.Save(),
                 (p, pr, ar) => { pr.AllowedIn = ar.AllowedIn; pr.AllowedOut = ar.AllowedOut; pr.Save(); });

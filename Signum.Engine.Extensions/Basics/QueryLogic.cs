@@ -55,7 +55,7 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<QueryDN>();
 
-            return Synchronizer.SyncronizeReplacing(replacements, QueriesKey,
+            return Synchronizer.SynchronizeReplacing(replacements, QueriesKey,
                 current.ToDictionary(a => a.Name),
                 should.ToDictionary(a => a.Name),
                 (n, c) => table.DeleteSqlSync(c),

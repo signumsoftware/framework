@@ -34,11 +34,11 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<PropertyDN>();
 
-            return Synchronizer.SyncronizeCommands(
+            return Synchronizer.SynchronizeScript(
                 current, should,
                 null, null,
                 (tn, dicCurr, dicShould) =>
-                    Synchronizer.SyncronizeReplacing(replacements, FieldsForKey.Formato(tn),
+                    Synchronizer.SynchronizeReplacing(replacements, FieldsForKey.Formato(tn),
                     dicCurr,
                     dicShould,
                     (fn, c) => table.DeleteSqlSync(c),

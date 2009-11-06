@@ -52,7 +52,7 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<FacadeMethodDN>();
 
-            return Synchronizer.SyncronizeReplacing(replacements, FacadeMethodKey,
+            return Synchronizer.SynchronizeReplacing(replacements, FacadeMethodKey,
                 current.ToDictionary(a => a.Name),
                 should.ToDictionary(a => a.Name),
                 (n, c) => table.DeleteSqlSync(c),

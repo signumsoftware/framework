@@ -104,7 +104,7 @@ namespace Signum.Engine.Authorization
             var current = Database.Query<RuleQueryDN>().Where(r => r.Role == role).ToDictionary(a => a.Query);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => (QueryDN)r.Resource);
 
-            Synchronizer.Syncronize(current, should,
+            Synchronizer.Synchronize(current, should,
                 (q,qr)=>qr.Delete(),
                 (q,ar)=>new RuleQueryDN{ Query = q, Allowed = ar.Allowed, Role = role}.Save(),
                 (q, qr, ar) => { qr.Allowed = ar.Allowed; qr.Save(); });
