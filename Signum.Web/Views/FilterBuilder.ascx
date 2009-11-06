@@ -9,22 +9,22 @@
 <%= Html.Hidden(Html.GlobalName(ViewDataKeys.EntityTypeName), ViewData[ViewDataKeys.EntityTypeName].ToString())%>
 
 <script type="text/javascript">
-  $(document).ready(function() {
-    $('#filters-header').click(function(){
-	    var R = $(this).attr('rev');
+  function toggleFilters(id){
+        var elem = $('#'+id+' .filters-header');
+        var R = elem.attr('rev');
 	    var D = $('#'+R);
 	    D.toggle('fast');
-	    $('#filters-list').toggle('fast');
-	    $(this).toggleClass('close');
-	    if ($(this).hasClass('close')) $(this).html('Mostrar filtros');else $(this).html('Ocultar filtros');
+	    $('#'+id+' .filters').toggle('fast');
+	    elem.toggleClass('close');
+	    if (elem.hasClass('close')) elem.html('Mostrar filtros');else elem.html('Ocultar filtros');
 	    return false;
-    });
-  });
+  }
 </script>
-<div id="fields-search">
-    <div id="fields-list">
-        <a href="#" id="filters-header" rev="filters-body">Ocultar filtros</a>
-        <div id="filters-body">
+<div class="fields-search" id="<%=Html.GlobalName("")%>">
+    <div class="fields-list">
+        <a onclick="javascript:toggleFilters('<%=Html.GlobalName("")%>');" class="filters-header" rev="<%=Html.GlobalName("filters-body")%>">Ocultar filtros</a>
+        <div class="filters">
+        <div class="filters-body">
             <label for="<%=Html.GlobalName("ddlNewFilters")%>">Filtrar por campo</label>
             <select id="<%=Html.GlobalName("ddlNewFilters")%>">
 
@@ -42,7 +42,7 @@
        </div>
     <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
   
-    <div id="filters-list">
+    <div class="filters-list">
     <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>">No se han especificado filtros</span>
     <table id="<%=Html.GlobalName("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
         <thead>
@@ -61,6 +61,7 @@
             %>
         </tbody>
     </table>
+    </div>
     </div>
     </div>
 </div>
