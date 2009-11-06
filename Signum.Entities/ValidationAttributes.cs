@@ -523,6 +523,9 @@ namespace Signum.Entities
 
             object val = getters[index](entity);
 
+            if (val is string && ((string)val).Length == 0)
+                val = null;
+
             if (val != null && !necessary.Value)
                 return "{0} is not allowed on state {1}".Formato(propertyNiceNames[index], state);
 

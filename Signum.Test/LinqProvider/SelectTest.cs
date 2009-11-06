@@ -199,7 +199,6 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<ArtistDN>().Select(a => new { a.Name, Count = a.AlbumCount() }).ToArray();
         }
-
     }
 
     public static class AuthorExtensions

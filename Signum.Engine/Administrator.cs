@@ -211,7 +211,7 @@ deallocate cur");
                     var should = Enum.GetValues(enumType).Cast<Enum>().Select(e => EnumProxy.FromEnum(e));
                     var current = Administrator.TryRetrieveAll(table.Type, replacements);
 
-                    SqlPreCommand com = Synchronizer.SyncronizeCommands(
+                    SqlPreCommand com = Synchronizer.SynchronizeScript(
                         current.ToDictionary(c => c.Id),
                         should.ToDictionary(s => s.Id),
                         (id, c) => table.DeleteSqlSync(c),

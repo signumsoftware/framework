@@ -284,19 +284,21 @@ namespace Signum.Engine.Linq
             string tableAlias = GetNextTableAlias();
             TableExpression tableExpression = new TableExpression(tableAlias, tr.Name);
 
-            ProjectionToken oldToken = new ProjectionToken();
+            ProjectionToken token = new ProjectionToken();
 
-            Expression expr = tr.FieldExpression(oldToken, tableAlias, this);
+            Expression expr = tr.FieldExpression(token, tableAlias, this);
 
             string selectAlias = GetNextSelectAlias();
 
             ColumnExpression ce = tr.BackColumnExpression(tableAlias);
 
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(expr, selectAlias, tableExpression.KnownAliases, new[] { oldToken });
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(expr, selectAlias, tableExpression.KnownAliases, new ProjectionToken[0]); // no Token
 
             var proj = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, SmartEqualizer.EqualNullable(mle.BackID, ce), null, null),
-                 pc.Projector, null, pc.Token);
+                 pc.Projector, null, token);
+
+            proj = ApplyExpansions(proj);
 
             return proj;
         }

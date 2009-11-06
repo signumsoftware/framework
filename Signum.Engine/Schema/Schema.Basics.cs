@@ -15,11 +15,19 @@ using Signum.Engine.Properties;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Utilities.DataStructures;
+using System.Diagnostics;
 
 namespace Signum.Engine.Maps
 {
     public class Schema
     {
+        bool silentMode = false;
+        public bool SilentMode
+        {
+            get { return silentMode; }
+            set { this.silentMode = value; }
+        }
+
         Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
         public Dictionary<Type, Table> Tables
         {
@@ -208,8 +216,25 @@ namespace Signum.Engine.Maps
 
             var handlers = initializing.Where(pair => (initLevel == null || initLevel < pair.Level) && pair.Level <= topLevel).ToList();
 
-            foreach(InitPair pair in handlers)
-                pair.Handler(this);
+            if (SilentMode)
+            {
+                foreach (InitPair pair in handlers)
+                {
+                    pair.Handler(this);
+                }
+            }
+            else
+            {
+                Stopwatch sw = new Stopwatch();
+                foreach (InitPair pair in handlers)
+                {
+                    sw.Reset();
+                    sw.Start();
+                    pair.Handler(this);
+                    sw.Stop();
+                    Debug.WriteLine("{1:0.00} ms initializing {0} ".Formato(pair.Handler.Method.DeclaringType.TypeName(), sw.Elapsed.TotalMilliseconds));
+                }
+            }
 
             initLevel = topLevel;
         }

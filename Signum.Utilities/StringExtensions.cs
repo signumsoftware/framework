@@ -245,6 +245,11 @@ namespace Signum.Utilities
               memberName.SpacePascal(true);
         }
 
+        public static string SpacePascal(this string pascalStr)
+        {
+            return SpacePascal(pascalStr, CultureInfo.CurrentCulture.TwoLetterISOLanguageName == "en");
+        }
+
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)
         {
             StringBuilder sb = new StringBuilder();
@@ -255,7 +260,7 @@ namespace Signum.Utilities
                 {
                     if (sb.Length > 0)
                         sb.Append(' ');
-                    sb.Append(preserveUppercase ? a : char.ToLower(a));
+                    sb.Append(preserveUppercase || i == 0 ? a : char.ToLower(a));
                 }
                 else
                     sb.Append(a);

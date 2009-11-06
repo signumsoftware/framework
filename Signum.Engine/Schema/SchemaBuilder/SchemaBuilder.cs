@@ -90,13 +90,6 @@ namespace Signum.Engine.Maps
                 throw new ApplicationException("Call {0} first".Formato(name)); 
         }
 
-        bool notifyFieldsWithoutProperty = true;
-        public bool NotifyFieldsWithoutProperty
-        {
-            get { return notifyFieldsWithoutProperty; }
-            set { this.notifyFieldsWithoutProperty = value; }
-        }
-
         #region Field Generator
         protected Dictionary<string, EntityField> GenerateFields(Type type, Contexts contexto, Table table, NameSequence preName)
         {
@@ -105,7 +98,7 @@ namespace Signum.Engine.Maps
             {
                 if (!Settings.FieldInfoAttributes(type, fi).Any(a=>a is IgnoreAttribute))
                 {
-                    if (NotifyFieldsWithoutProperty && Reflector.FindPropertyInfo(fi) == null)
+                    if (!SilentMode() && Reflector.FindPropertyInfo(fi) == null)
                         Debug.WriteLine(Resources.Field0OfTipe1HasNoCompatibleProperty.Formato(fi.Name, type.Name));
 
                     Field campo = GenerateField(type, fi, fi.FieldType, contexto, table, preName);
@@ -115,6 +108,11 @@ namespace Signum.Engine.Maps
             return result;
         }
 
+        protected virtual bool SilentMode()
+        {
+            return schema.SilentMode; 
+        }
+
         protected virtual Field GenerateField(Type type, FieldInfo fi, Type fieldType, Contexts contexto, Table table, NameSequence preName)
         {
             //fieldType: Va variando segun se entra en colecciones o contenidos
@@ -122,7 +120,7 @@ namespace Signum.Engine.Maps
 
             KindOfField kof = GetKindOfField(type, fi, fieldType).ThrowIfNullS(Resources.Field0OfType1HasNoDatabaseRepresentation.Formato(fi.Name, type.Name));
 
-            if ((contextosAdmitidos[kof] & contexto) != contexto)
+            if ((allowedContexts[kof] & contexto) != contexto)
                 throw new InvalidOperationException(Resources.Field0OfType1ShouldBeMappedAs2ButItIsIncompatibleWithContext3.Formato(fi.Name, type.Name, fieldType, contexto));
 
             //generacion del nombre del campo
@@ -159,14 +157,14 @@ namespace Signum.Engine.Maps
             }
         }
 
-        static Dictionary<KindOfField, Contexts> contextosAdmitidos = new Dictionary<KindOfField, Contexts>()
+        static Dictionary<KindOfField, Contexts> allowedContexts = new Dictionary<KindOfField, Contexts>()
         {
-            {KindOfField.PrimaryKey,      Contexts.Normal  },
-            {KindOfField.Value,           Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
-            {KindOfField.Reference,      Contexts.Normal  | Contexts.MList | Contexts.Embedded | Contexts.View },
-            {KindOfField.Enum,            Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
-            {KindOfField.Embedded,       Contexts.Normal   | Contexts.MList | Contexts.Embedded | Contexts.View},
-            {KindOfField.MList,       Contexts.Normal },
+            {KindOfField.PrimaryKey,    Contexts.Normal },
+            {KindOfField.Value,         Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
+            {KindOfField.Reference,     Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
+            {KindOfField.Enum,          Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
+            {KindOfField.Embedded,      Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
+            {KindOfField.MList,         Contexts.Normal },
         };
 
         private KindOfField? GetKindOfField(Type type, FieldInfo fi, Type fieldType)
@@ -388,12 +386,16 @@ namespace Signum.Engine.Maps
         public ViewBuilder(Schema schema)
         {
             this.Schema = schema;
-            this.NotifyFieldsWithoutProperty = false; 
         }
 
         public override Table Include(Type type)
         {
             return Schema.Table(type);
+        }
+
+        protected override bool SilentMode()
+        {
+            return true;
         }
 
         public Table NewView(Type type)

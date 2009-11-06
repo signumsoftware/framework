@@ -71,7 +71,7 @@ namespace Signum.Engine
             Dictionary<string, TypeDN> current = replacements.ApplyReplacements(
                 Administrator.TryRetrieveAll<TypeDN>(replacements).ToDictionary(c => c.TableName), Replacements.KeyTables);
 
-            return Synchronizer.SyncronizeCommands(
+            return Synchronizer.SynchronizeScript(
                 current,
                 should,
                 (tn, c) => table.DeleteSqlSync(c),

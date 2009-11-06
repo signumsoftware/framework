@@ -91,10 +91,10 @@ namespace Signum.Engine
 
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
-                 Synchronizer.SyncronizeCommands(database, model,
+                 Synchronizer.SynchronizeScript(database, model,
                  (tn, table) => table.Colums.Values.Select(c => c.IndexName != null && !c.PrimaryKey ? SqlBuilder.DropIndex(table.Name, c.IndexName) : null).Combine(Spacing.Simple),
                  null,
-                 (tn, dif, tab) => Synchronizer.SyncronizeCommands(dif.Colums, tab.Columns,
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
                      (cn, col) => col.IndexName != null ? SqlBuilder.DropIndex(tn, col.IndexName) : null, 
                      null,
                      (cn, coldb, colModel) => coldb.EqualsIndex(tn, colModel) || coldb.IndexName == null ? null : SqlBuilder.DropIndex(tn, coldb.IndexName), 
@@ -102,10 +102,10 @@ namespace Signum.Engine
                  Spacing.Double);
 
             SqlPreCommand dropForeignKeys =
-                 Synchronizer.SyncronizeCommands(database, model, 
+                 Synchronizer.SynchronizeScript(database, model, 
                  (tn, table) => table.Colums.Values.Select(c => c.ForeingKeyName != null ? SqlBuilder.AlterTableDropForeignKey(table.Name, c.ForeingKeyName) : null).Combine(Spacing.Simple),
                  null,
-                 (tn, dif, tab) => Synchronizer.SyncronizeCommands(dif.Colums, tab.Columns,
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
                      (cn, col) => col.ForeingKeyName != null ? SqlBuilder.AlterTableDropForeignKey(tn, col.ForeingKeyName) : null,
                      null,
                      (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || coldb.ForeingKeyName == null ? null : SqlBuilder.AlterTableDropForeignKey(tn, coldb.ForeingKeyName),
@@ -113,7 +113,7 @@ namespace Signum.Engine
                  Spacing.Double);
 
             SqlPreCommand tables =
-                Synchronizer.SyncronizeReplacing(replacements, Replacements.KeyTables,
+                Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyTables,
                 database,
                 model,
                 (tn, dif) => SqlBuilder.DropTable(tn),
@@ -121,7 +121,7 @@ namespace Signum.Engine
                 (tn, dif, tab) =>
                     SqlPreCommand.Combine(Spacing.Simple,
                     dif.Name != tab.Name ? SqlBuilder.RenameTable(dif.Name, tab.Name) : null,
-                    Synchronizer.SyncronizeReplacing(replacements, Replacements.KeyColumnsForTable(tn),
+                    Synchronizer.SynchronizeReplacing(replacements, Replacements.KeyColumnsForTable(tn),
                     dif.Colums,
                     tab.Columns,
                     (cn, difCol) => SqlBuilder.AlterTableDropColumn(tn, cn),
@@ -137,10 +137,10 @@ namespace Signum.Engine
                 replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
 
             SqlPreCommand addForeingKeys =
-                 Synchronizer.SyncronizeCommands(database, model,
+                 Synchronizer.SynchronizeScript(database, model,
                  null,
                  (tn, table) => SqlBuilder.AlterTableForeignKeys(table),
-                 (tn, dif, tab) => Synchronizer.SyncronizeCommands(dif.Colums, tab.Columns,
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
                      null,
                      (cn, colModel) => colModel.ReferenceTable != null ? SqlBuilder.AlterTableAddForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name) : null,
                      (cn, coldb, colModel) => coldb.EqualForeignKey(tn, colModel) || colModel.ReferenceTable == null ? null : SqlBuilder.AlterTableAddForeignKey(tn, colModel.Name, colModel.ReferenceTable.Name),
@@ -148,10 +148,10 @@ namespace Signum.Engine
                  Spacing.Double);
 
             SqlPreCommand addIndices =
-                 Synchronizer.SyncronizeCommands(database, model, 
+                 Synchronizer.SynchronizeScript(database, model, 
                  null,
                  (tn, table) => SqlBuilder.CreateIndicesSql(table), 
-                 (tn, dif, tab) => Synchronizer.SyncronizeCommands(dif.Colums, tab.Columns,
+                 (tn, dif, tab) => Synchronizer.SynchronizeScript(dif.Colums, tab.Columns,
                      null,
                      (cn, colModel) => colModel.Index != Index.None ? SqlBuilder.CreateIndex(colModel.Index, tn, colModel.Name) : null,
                      (cn, coldb, colModel) => coldb.EqualsIndex(tn, colModel) || colModel.Index == Index.None ? null : SqlBuilder.CreateIndex(colModel.Index, tn, colModel.Name),
@@ -171,8 +171,8 @@ namespace Signum.Engine
 
         static SqlPreCommand SyncronizeTables(Dictionary<string, DiffTable> database, Dictionary<string, ITable> model, Func<string, DiffTable, SqlPreCommand> dropTable, Func<string, ITable, SqlPreCommand> createTable, Func<string, DiffColumn, SqlPreCommand> dropColumn, Func<string, IColumn, SqlPreCommand> createColumn, Func<string, DiffColumn, IColumn, SqlPreCommand> mergeColumn)
         {
-            return Synchronizer.SyncronizeCommands(database, model, dropTable, createTable, (tn, dif, tab) =>
-                Synchronizer.SyncronizeCommands(dif.Colums, tab.Columns, dropColumn, createColumn, mergeColumn, Spacing.Simple),
+            return Synchronizer.SynchronizeScript(database, model, dropTable, createTable, (tn, dif, tab) =>
+                Synchronizer.SynchronizeScript(dif.Colums, tab.Columns, dropColumn, createColumn, mergeColumn, Spacing.Simple),
                 Spacing.Double);
         }
     }

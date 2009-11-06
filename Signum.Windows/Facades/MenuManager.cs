@@ -10,6 +10,7 @@ using System.Windows.Media;
 using Signum.Services;
 using System.Diagnostics;
 using System.IO;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Windows
 {
@@ -47,13 +48,15 @@ namespace Signum.Windows
                     return;
 
                 if (o is FindOptions)
-                    o = ((FindOptions)o).QueryName;
+                    menuItem.Header = QueryUtils.GetNiceQueryName(((FindOptions)o).QueryName);
                 else if (o is AdminOptions)
-                    o = ((AdminOptions)o).Type;
-
-                menuItem.Header =
-                    o is Enum ? ((Enum)o).NiceToString() :
-                    o is Type ? ((Type)o).NiceName() : null;
+                    menuItem.Header = ((AdminOptions)o).Type.NicePluralName();
+                else if (o is Type)
+                    menuItem.Header = ((Type)o).NicePluralName();
+                else if (o is Enum)
+                    menuItem.Header = ((Enum)o).NiceToString();
+                else
+                    menuItem.Header = o.ToString();
             }
         }
 

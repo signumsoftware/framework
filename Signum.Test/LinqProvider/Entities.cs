@@ -90,6 +90,13 @@ namespace Signum.Test.LinqProvider
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
+        MList<Lite<ArtistDN>> friends;
+        public MList<Lite<ArtistDN>> Friends
+        {
+            get { return friends; }
+            set { Set(ref friends, value, () => Friends); }
+        }
+
         public override string ToString()
         {
             return name;

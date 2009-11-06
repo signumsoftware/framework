@@ -10,7 +10,7 @@ namespace Signum.Engine
 {
     public static class Synchronizer
     {
-        public static SqlPreCommand SyncronizeCommands<K, O, N>(
+        public static SqlPreCommand SynchronizeScript<K, O, N>(
             Dictionary<K, O> oldDictionary,
             Dictionary<K, N> newDictionary,
             Func<K, O, SqlPreCommand> removeOld,
@@ -32,7 +32,7 @@ namespace Signum.Engine
             }).Values.Combine(spacing);
         }
 
-        public static void Syncronize<K, O, N>(
+        public static void Synchronize<K, O, N>(
             Dictionary<K, O> oldDictionary,
             Dictionary<K, N> newDictionary,
             Action<K, O> removeOld,
@@ -64,7 +64,7 @@ namespace Signum.Engine
             }
         }
 
-        public static SqlPreCommand SyncronizeReplacing<O, N>(
+        public static SqlPreCommand SynchronizeReplacing<O, N>(
             Replacements replacements, string replacementsKey,
             Dictionary<string, O> oldDictionary,
             Dictionary<string, N> newDictionary,

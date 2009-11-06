@@ -127,7 +127,7 @@ namespace Signum.Entities.DynamicQuery
         public static string GetNiceQueryName(object queryKey)
         {
             return
-                queryKey is Type ? ((Type)queryKey).NiceName() :
+                queryKey is Type ? ((Type)queryKey).NicePluralName() :
                 queryKey is Enum ? ((Enum)queryKey).NiceToString() :
                 queryKey.ToString();
         }

@@ -197,7 +197,13 @@ namespace Signum.Entities.Reflection
         public static string NiceName(this Type type)
         {
             return ReflectionTools.GetDescription(type) ??
-                type.Name.Map(n => n.EndsWith("DN") ? n.RemoveRight(2) : n).SpacePascal(true);
+                type.Name.Map(n => n.EndsWith("DN") ? n.RemoveRight(2) : n).SpacePascal();
+        }
+
+        public static string NicePluralName(this Type type)
+        {
+            return Pluralizer.GetPluralDescription(type) ??
+                   Pluralizer.Pluralize(type.NiceName());
         }
 
         public static bool IsLowPopulation(Type type)
