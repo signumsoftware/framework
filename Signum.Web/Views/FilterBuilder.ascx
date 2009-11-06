@@ -56,7 +56,7 @@
             <% for (int i=0; i<filterOptions.Count; i++)
             {
                 FilterOptions filter = filterOptions[i];
-                Html.NewFilter(filter, i, ViewData[ViewDataKeys.EntityTypeName].ToString());            
+                Html.NewFilter(filter, i);            
             } 
             %>
         </tbody>

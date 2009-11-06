@@ -57,7 +57,7 @@ namespace Signum.Web.Controllers
                 throw new ApplicationException("Invalid result type for a Constructor");
 
             return Content(
-                "<script type=\"text/javaScript\">" +
+                "<script type=\"text/javascript\">" +
                 "PostServer('{0}');".Formato(Navigator.ViewRoute(type, null)) +
                 "</script>"
                 );
@@ -355,9 +355,16 @@ namespace Signum.Web.Controllers
         }
         
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string entityTypeName, string prefix)
+        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string prefix)
         {
-            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, entityTypeName, prefix));
+            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, prefix, null, null));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult QuickFilter(string sfQueryUrlName, bool isLite, string typeUrlName, int? sfId, string sfValue, int sfColIndex, int index, string prefix)
+        {
+            object value = (isLite) ? (object)Lite.Create(Navigator.ResolveTypeFromUrlName(typeUrlName), sfId.Value) : (object)sfValue;
+            return Content(SearchControlHelper.QuickFilter(this, sfQueryUrlName, sfColIndex, index, value, prefix));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

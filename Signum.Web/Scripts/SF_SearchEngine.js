@@ -21,23 +21,25 @@ function SearchCreate(urlController, prefix, onOk, onCancel) {
 	var typeName = $('#' + prefix + sfEntityTypeName).val();
 	var newPrefix = prefix + "New";
 	$.ajax({
-		type: "POST",
-		url: urlController,
-		data: "sfRuntimeType=" + typeName + qp("sfOnOk",singleQuote(onOk)) + qp("sfOnCancel",singleQuote(onCancel)) + qp(sfPrefix,newPrefix),
-		async: false,
-		dataType: "html",
-		success: function (msg) {
-			$('#' + prefix + "divASustituir").html(msg);
-			ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
-			$('#' + newPrefix + sfBtnOk).click(onOk).after("\n" +
+	    type: "POST",
+	    url: urlController,
+	    data: "sfRuntimeType=" + typeName + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + qp(sfPrefix, newPrefix),
+	    async: false,
+	    dataType: "html",
+	    success: function(msg) {
+	        $('#' + prefix + "divASustituir").html(msg);
+	        if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
+	            return;
+	        ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+	        $('#' + newPrefix + sfBtnOk).click(onOk).after("\n" +
 			 "<input type='hidden' id='" + newPrefix + sfRuntimeType + "' name='" + newPrefix + sfRuntimeType + "' value='" + typeName + "' />\n" +
-			 "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" + 
+			 "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
 			 "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n");
-			$('#' + newPrefix + sfBtnCancel).click(onCancel);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
-		}
+	        $('#' + newPrefix + sfBtnCancel).click(onCancel);
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) {
+	        ShowError(XMLHttpRequest, textStatus, errorThrown);
+	    }
 	});
 }
 
@@ -335,6 +337,43 @@ function OnListSearchCancel(prefix, divASustituir) {
 	$('#' + divASustituir).hide().html("");
 }
 
+function QuickFilter(idTD, prefix) {
+    var params = "";
+    var ahref = $('#' + idTD + ' a');
+    if (ahref.length == 0)
+        params = qp("isLite", "false") + qp("sfValue", $('#' + idTD).html());
+    else
+    {
+        var route = ahref.attr("href");
+        var separator = route.indexOf("/");
+        var lastSeparator = route.lastIndexOf("/");
+        params = qp("isLite", "true") + qp("typeUrlName", route.substring(separator + 1, lastSeparator)) + qp("sfId", route.substring(lastSeparator + 1, route.length));
+    }
+    $.ajax({
+        type: "POST",
+        url: "Signum.aspx/QuickFilter",
+        data: "sfQueryUrlName=" + $("#" + prefix + "sfQueryUrlName").val() + qp("sfColIndex", parseInt(idTD.substring(idTD.indexOf("_")+1, idTD.length))-1) + params + qp(sfPrefix, prefix) + qp("index", GetNewFilterRowIndex(prefix)),
+        async: false,
+        dataType: "html",
+        success: function(msg) {
+            $("#filters-list .explanation").hide();
+            $("#filters-list table").show('fast');
+            $("#" + prefix + "tblFilters tbody").append(msg);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            ShowError(XMLHttpRequest, textStatus, errorThrown);
+        }
+    });
+}
+
+function GetNewFilterRowIndex(prefix) {
+    var lastRow = $("#" + prefix + "tblFilters tbody tr:last");
+    var lastRowIndex = -1;
+    if (lastRow.length != 0) 
+        lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
+     return parseInt(lastRowIndex) + 1;
+}
+
 function AddFilter(urlController, prefix) {
 
 	var selectedColumn = $("#" + prefix + "ddlNewFilters option:selected");
@@ -350,15 +389,12 @@ function AddFilter(urlController, prefix) {
 	var optionId = selectedColumn[0].id;
 	var filterName = optionId.substring(optionId.indexOf("__") + 2, optionId.length);
 
-	var lastRow = $("#" + prefix + "tblFilters tbody tr:last");
-	var lastRowIndex = -1;
-	if (lastRow.length != 0) lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
-	var newRowIndex = parseInt(lastRowIndex) + 1;
+	var newRowIndex = GetNewFilterRowIndex(prefix);
 
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "filterType=" + filterType + qp("columnName",filterName) + qp("displayName",selectedColumn.html()) + qp("index",newRowIndex) + qp("entityTypeName", $("#" + prefix + sfEntityTypeName).val()) + qp(sfPrefix,prefix),
+		data: "filterType=" + filterType + qp("columnName",filterName) + qp("displayName",selectedColumn.html()) + qp("index",newRowIndex) + qp(sfPrefix,prefix),
 		async: false,
 		dataType: "html",
 		success: function (msg) {

@@ -1,10 +1,20 @@
-<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
+﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
 <%@ Import Namespace="Signum.Entities.Reflection" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
+
+<%=  
+"<script type=\"text/javascript\">" + 
+    "$(document).ready(function() {" + 
+        "$('.tblResults td').bind('dblclick', function(e) {" + 
+            "QuickFilter(this.id, '" + Html.GlobalName("") + "');" + 
+        "});" + 
+    "});" + 
+"</script>"
+%>
 
 <%  QueryResult queryResult = (QueryResult)ViewData[ViewDataKeys.Results];
     int? EntityColumnIndex = (int?)ViewData[ViewDataKeys.EntityColumnIndex];
@@ -46,6 +56,7 @@
                 <% Lite entityField = null;
                    if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
                        entityField = (Lite)queryResult.Data[row][EntityColumnIndex.Value];
+                   
                        if (allowMultiple.HasValue)
                        {
                 %>
@@ -81,11 +92,7 @@
                     if (colVisibility[col])
                     {
                         %>
-                        <td id="<%=Html.GlobalName("tdResults_" + col.ToString())%>" name="<%=Html.GlobalName("tdResults_" + col.ToString())%>">
-                            <%                        
-                                formatters[col](Html, queryResult.Data[row][col]);
-                            %>
-                        </td>
+                        <td id="<%=Html.GlobalName("td_" + col.ToString())%>" name="<%=Html.GlobalName("td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Data[row][col]);%></td>
                         <%
                     }
                 }

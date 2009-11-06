@@ -115,7 +115,7 @@ namespace Signum.Web
                 helper.RenderPartialToString(Navigator.Manager.SearchControlUrl, helper.ViewData));
         }
 
-        public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string entityTypeName, string prefix)
+        public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string prefix, FilterOperation? filterOperation, object value)
         {
            // Type searchEntityType = Navigator.NameToType[entityTypeName];
 
@@ -127,33 +127,81 @@ namespace Signum.Web
             FilterType filterType = FilterOperationsUtils.GetFilterType(columnType);
             List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
 
-            sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato(prefix + "trFilter_" + index.ToString()));
+            sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(prefix + "trFilter_" + index.ToString()));
             
-            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato(prefix + "td" + index.ToString() + "__" + columnName));
-            sb.Append(displayName);
-            sb.Append("</td>\n");
+            sb.AppendLine("<td id='{0}' name='{0}'>".Formato(prefix + "td" + index.ToString() + "__" + columnName));
+            sb.AppendLine(displayName);
+            sb.AppendLine("</td>");
             
-            sb.Append("<td>\n");
-            sb.Append("<select id=\"{0}\" name=\"{0}\">\n".Formato(prefix + "ddlSelector_" + index.ToString()));
+            sb.AppendLine("<td>");
+            sb.AppendLine("<select id='{0}' name='{0}'>".Formato(prefix + "ddlSelector_" + index.ToString()));
             for (int j=0; j<possibleOperations.Count; j++)
-                sb.Append("<option value=\"{0}\">{1}</option>\n"
-                    .Formato(possibleOperations[j], possibleOperations[j].NiceToString()));
-            sb.Append("</select>\n");
-            sb.Append("</td>\n");
+                sb.AppendLine("<option value='{0}'{1}>{2}</option>"
+                    .Formato(possibleOperations[j], 
+                    (filterOperation.HasValue && filterOperation.Value == possibleOperations[j]) ? " selected='selected'" : "",
+                    possibleOperations[j].NiceToString()));
+            sb.AppendLine("</select>");
+            sb.AppendLine("</td>");
             
-            sb.Append("<td>\n");
-            sb.Append(PrintValueField(CreateHtmlHelper(controller), filterType, columnType, prefix + "value_" + index.ToString(), null, columnName));
-            sb.Append("</td>\n");
+            sb.Append("<td>");
+            sb.Append(PrintValueField(CreateHtmlHelper(controller), filterType, columnType, prefix + "value_" + index.ToString(), value, columnName));
+            sb.Append("</td>");
             
-            sb.Append("<td>\n");
-            sb.Append("<input type=\"button\" id=\"{0}\" name=\"{0}\" value=\"X\" onclick=\"DeleteFilter('{1}','{2}');\" />\n".Formato(prefix + "btnDelete_" + index, index, prefix));
-            sb.Append("</td>\n");
+            sb.AppendLine("<td>");
+            sb.AppendLine("<input type='button' id='{0}' name='{0}' value='X' onclick=\"DeleteFilter('{1}','{2}');\" />".Formato(prefix + "btnDelete_" + index, index, prefix));
+            sb.AppendLine("</td>");
             
-            sb.Append("</tr>\n");
+            sb.AppendLine("</tr>");
             return sb.ToString();
         }
 
-        public static void NewFilter(this HtmlHelper helper, FilterOptions filterOptions, int index, string entityTypeName)
+        public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix)
+        {
+            QueryDescription qd = Navigator.Manager.Queries.QueryDescription(Navigator.ResolveQueryFromUrlName(queryUrlName));
+            Column column = qd.Columns.Where(c => c.Visible == true).ToList()[visibleColumnIndex];
+            FilterOptions fo = new FilterOptions() { Column = column, ColumnName = column.Name, Operation = FilterOperation.EqualTo, Value = value };
+            Type type = Reflector.ExtractLite(column.Type) ?? column.Type;
+            
+            return NewFilter(controller, type.Name, column.Name, column.DisplayName, filterRowIndex, prefix, FilterOperation.EqualTo, value);
+        }
+
+        private static FilterType GetFilterType(Type type)
+        {
+            type = type.UnNullify();
+
+            if (type.IsEnum)
+                return FilterType.Enum;
+            if (typeof(Lite).IsAssignableFrom(type))
+                return FilterType.Lite;
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.DateTime:
+                    return FilterType.DateTime;
+                case TypeCode.Boolean:
+                    return FilterType.Boolean;
+                case TypeCode.Double:
+                case TypeCode.Decimal:
+                case TypeCode.Single:
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return FilterType.Number;
+                case TypeCode.Empty:
+                case TypeCode.Object:
+                case TypeCode.Char:
+                case TypeCode.String:
+                default:
+                    return FilterType.String;
+            }
+        }
+
+        public static void NewFilter(this HtmlHelper helper, FilterOptions filterOptions, int index)
         {
             StringBuilder sb = new StringBuilder();
 

@@ -222,7 +222,7 @@ namespace Signum.Web
                 throw new ArgumentException(Resources.LabelTextPropertyOfValueLineOptionsMustBeSpecifiedForManualValueLines);
 
             using (options)
-                    return helper.ManualValueLine(idValueField, value, options);
+                return helper.ManualValueLine(idValueField, value, options);
         }
 
         public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
