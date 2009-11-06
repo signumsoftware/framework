@@ -362,6 +362,21 @@ namespace Signum.Entities
         }
     }
 
+    public class NoRepeatValidator : ValidatorAttribute
+    {
+
+        protected override string OverrideError(object value)
+        {
+            IList list = (IList)value;
+            if (list == null || list.Count <= 1)
+                return null;
+            string ex = list.Cast<object>().GroupCount().Where(kvp => kvp.Value > 1).ToString(e => "{0} x {1}".Formato(e.Key, e.Value), ", ");
+            if (ex.HasText())
+                return Properties.Resources._0HasSomeRepeatedElements0.Formato(ex);
+            return null;
+        }
+    }
+
     public class CountIsValidatorAttribute : ValidatorAttribute
     {
         public ComparisonType ComparisonType;

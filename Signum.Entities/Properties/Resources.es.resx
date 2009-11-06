@@ -228,4 +228,7 @@
   <data name="Telephone" xml:space="preserve">
     <value>Teléfono</value>
   </data>
+  <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
+    <value>{{0}} tiene algunos elementos repetidos: {0}</value>
+  </data>
 </root>

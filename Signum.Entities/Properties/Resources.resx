@@ -237,4 +237,7 @@
   <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
     <value>property should be an expression accessing a property</value>
   </data>
+  <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
+    <value>{{0}} has some repeated elements: {0}</value>
+  </data>
 </root>
