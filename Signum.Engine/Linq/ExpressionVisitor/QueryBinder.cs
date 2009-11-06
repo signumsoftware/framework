@@ -97,6 +97,7 @@ namespace Signum.Engine.Linq
                     case "DefaultIfEmpty":
                         return Expression.Call(m.Method, Visit(m.GetArgument("source")));
                     case "Any":
+                        return this.BindAnyAll(m.Type, m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m.Method, m == root); 
                     case "All":
                         return this.BindAnyAll(m.Type, m.GetArgument("source"), m.GetArgument("predicate").StripQuotes(), m.Method, m == root); 
                     case "Contains":

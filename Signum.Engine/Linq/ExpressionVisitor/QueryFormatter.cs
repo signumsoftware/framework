@@ -427,7 +427,7 @@ namespace Signum.Engine.Linq
             }
 
             if (select.Columns.Count == 0)
-                sb.Append("0"); 
+                sb.Append("0 as Dummy"); 
             else
                 for (int i = 0, n = select.Columns.Count; i < n; i++)
                 {
