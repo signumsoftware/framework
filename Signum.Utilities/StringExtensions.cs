@@ -242,7 +242,7 @@ namespace Signum.Utilities
         {
             return memberName.Contains('_') ?
               memberName.Replace('_', ' ') :
-              memberName.SpacePascal(true);
+              memberName.SpacePascal();
         }
 
         public static string SpacePascal(this string pascalStr)

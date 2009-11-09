@@ -91,8 +91,7 @@ namespace Signum.Entities.DynamicQuery
                 DisplayName = Name
                    .Replace("_nf_", "")
                    .Replace("_nv_", "")
-                   .Replace("_p_", ".")
-                   .Replace("_", " ");
+                   .Replace("_p_", ".").NiceName();
                 Format = Reflector.FormatString(Type); 
             }
 
