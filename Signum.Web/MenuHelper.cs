@@ -124,9 +124,9 @@ namespace Signum.Web
                     }
                     else
                     {
-                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?") == currentUrl) { sb.Append("<b>"); }
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?"), node.Title, node.Text));
-                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, "?") == currentUrl) { sb.Append("<b>"); }
+                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, true, "?") == currentUrl) { sb.Append("<b>"); }
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, true, "?"), node.Title, node.Text));
+                        if (Navigator.FindRoute(node.FindOptions.QueryName) + node.FindOptions.ToString(false, true, "?") == currentUrl) { sb.Append("<b>"); }
                     }
                 }
                 else {
@@ -191,7 +191,7 @@ namespace Signum.Web
                     else if (menuItem.ManualA.HasText())
                         sb.AppendLine(menuItem.ManualA);
                     else
-                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.FindOptions.QueryName) + menuItem.FindOptions.ToString(false, "?"), menuItem.Title, menuItem.Text));
+                        sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(menuItem.FindOptions.QueryName) + menuItem.FindOptions.ToString(false, true, "?"), menuItem.Title, menuItem.Text));
                     sb.AppendLine("</li>");
                 }
             }

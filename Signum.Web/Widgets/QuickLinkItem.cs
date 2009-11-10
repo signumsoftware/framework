@@ -65,7 +65,7 @@ namespace Signum.Web
             if (OnServerClickPost.HasText())
                 controllerUrl = OnServerClickPost;
 
-            return Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, "?");
+            return Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?");
         }
     }
 }

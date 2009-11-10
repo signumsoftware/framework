@@ -44,7 +44,7 @@ namespace Signum.Web
 
         public bool? Create { get; set; }
 
-        public string ToString(bool writeQueryUrlName, string firstCharacter)
+        public string ToString(bool writeQueryUrlName, bool writeAllowMultiple, string firstCharacter)
         {
             StringBuilder sb = new StringBuilder();
             if (writeQueryUrlName)
@@ -52,7 +52,10 @@ namespace Signum.Web
 
             if (SearchOnLoad)
                 sb.Append("&sfSearchOnLoad=true");
-            sb.Append("&sfAllowMultiple="+AllowMultiple.ToString());
+
+            if (writeAllowMultiple)
+                sb.Append("&sfAllowMultiple="+AllowMultiple.ToString());
+            
             if (filterOptions != null && filterOptions.Count > 0)
             {
                 for (int i = 0; i < filterOptions.Count; i++)

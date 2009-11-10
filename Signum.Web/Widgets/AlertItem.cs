@@ -51,7 +51,7 @@ namespace Signum.Web
 
             return "javascript:AlertClickServerAjax('{0}','{1}','{2}');".Formato(
                 controllerUrl,
-                FindOptions.ToString(true, ""),
+                FindOptions.ToString(true, true, ""),
                 prefix
                 );
         }
