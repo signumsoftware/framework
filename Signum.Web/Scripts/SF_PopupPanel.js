@@ -1,197 +1,380 @@
-﻿var popup = function(url, _options){
-      options = $.extend({
+﻿var debug=false;
+function log(s){
+        if (debug)
+            if (typeof console != "undefined" && typeof console.debug != "undefined") {
+                console.log(s);
+            } else {
+                alert(s);
+            }
+}
+
+var popup = function(_url, _options, _visualOptions){
+      me = this;
+      me.url = _url;
+      me.options = $.extend({
 		            divASustituir: "divASustituir",
 		            prefix: "",
-		            onOk: null,
-		            onCancel: null,
+		            onOk: me.onPopupOk,
+		            onCancel: me.onPopupCancel,
 		            detailsDiv: "",
 		            partialView: "",
 					isEmbeded: false
                 }, _options);
+      me.visualOptions = $.extend({
+		            fade: false
+		            }, _options);                   
 };
+
 popup.prototype = {
-        var t = this;
-        init: function() {
-        },
-        
-		newPopup: function(){
-			$(t.pf(sfEntity)).after("<input type='hidden' id='" + options.prefix + sfIsNew + "' name='" + options.prefix + sfIsNew + "' value='' />\n");
-			if ($(t.pf(sfImplementations)).length == 0)
-                $(t.pf(sfRuntimeType)).val($(t.pf(sfStaticType)).val());
-			t.open();
-		},
-		
-        open: function() {
-            t.setTicksVal();
-            t.openCommon();
-        },
-        
-        setTicksVal: function() {
-             $(t.pf(sfTicks)).val(new Date().getTime());
-        }, 
-
-        openCommon: function() {
-			var containedEntity = $(t.pf(sfEntity)).html();
-			if (!empty(containedEntity)) { //Already has the containedEntity loaded => show it
-				window[options.prefix + sfEntityTemp] = containedEntity;
-				show(options.prefix + sfEntity, "modalBackground", "panelPopup");
-				$(t.pf(sfBtnOk)).unbind('click').click(options.onOk);
-				$(t.pf(sfBtnCancel)).unbind('click').click(options.onCancel);
-				return;
-			}
-			
-			var runtimeType = $(t.pf(sfRuntimeType)).val();
-			if (empty(runtimeType)) {
-				window.alert("Error: RuntimeType could not be solved");
-				return;
-			}
-			
-			var idQueryParam = "";
-			var idField = $(t.pf(sfId));
-			if (idField.length > 0)
-				idQueryParam = qp("sfId", idField.val());
-			else {  //Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
-				var pathInfo = GetPathIdsAndTypes(options.prefix);
-				if (pathInfo.length > 0)
-					idQueryParam += "&" + pathInfo;
-			}
-			
-			var reactiveParam = ""; 
-			if ($('#' + sfReactive).length > 0) { //If reactive => send also tabId and Id & Runtime of the main entity
-				reactiveParam = qp(sfReactive, true);
-				reactiveParam += qp(sfTabId, $('#' + sfTabId).val());
-				reactiveParam += qp(sfRuntimeType, $('#' + sfRuntimeType).val());
-				reactiveParam += qp(sfId, $('#' + sfId).val());
-			}
-			
-			var viewQueryParam = "";
-			if (!empty(options.partialView))
-				viewQueryParam = qp("sfUrl", options.partialView);
-			
-			t.typed(runtimeType, idQueryParam, reactiveParam, viewQueryParam);
-		},
-		
-		openList: function(select){
-            $('#' + select + sfTicks).val(new Date().getTime());   
-            if (!empty(detailDiv))
-                $("#" + detailDiv).hide();
     
-            var selected = $('#' + select + " > option:selected");
-            if (selected.length == 0)
-                return;
-    
-            var nameSelected = selected[0].id;
-            var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
-            t.openCommon();
-		},
-		
-		typed: function(runtimeType, idQueryParam, reactiveParam, viewQueryParam) {
-		    $.ajax({
-				type: "POST",
-				url: options.urlController,
-				data: "sfRuntimeType=" + runtimeType + qp("sfOnOk", options.onOk) + qp("sfOnCancel", options.onCancel) + qp(sfPrefix, options.prefix) + idQueryParam + reactiveParam + viewQueryParam,
-				async: false,
-				dataType: "html",
-				success:
-						   function(msg) {
-							   window[options.prefix + sfEntityTemp] = $("#" + options.prefix + sfEntity).html();
-							   if (!empty(options.detailDiv)) 
-									$('#' + options.detailDiv).html(msg);
-							   else
-									$("#" + options.prefix + sfEntity).html(msg);
-							    t.show(options.prefix + sfEntity, "modalBackground", "panelPopup");
-							   $("#" + options.prefix + sfBtnOk).click(options.onOk);
-							   $("#" + options.prefix + sfBtnCancel).click(options.onCancel);
-						   },
-				error:
-						   function(XMLHttpRequest, textStatus, errorThrown) {
-								ShowError(XMLHttpRequest, textStatus, errorThrown);
-						   }
-			});
-		},
-		
-		chooseImplementation: function() {
-			options.detailDiv=null;
-			t.show(options.prefix + sfImplementations, "modalBackground", "panelPopup");
-			$(t.pf(sfBtnOk)).unbind('click').click(options.onOk);
-			$(t.pf(sfBtnCancel)).unbind('click').click(options.onCancel);
-		},
-		
-		show: function(globalKey, modalBackgroundKey, panelPopupKey){
-			if (!empty(detailDiv))
-				$("#" + detailDiv).show();
-			else {
-				//$("#" + prefix + sfEntity).show();
-				$("#" + globalKey).show();
-				$(t.pf(modalBackgroundKey)).width(document.documentElement.clientWidth).height(document.documentElement.clientHeight).hide();
-
-				//Read offsetWidth and offsetHeight after display=block or otherwise it's 0
-				var popup2 = $(t.pf(panelPopupKey))[0];
-				var parentDiv = $(t.pf(sfEntity)).parent();
-				var popupWidth = popup2.offsetWidth;
-				var bodyWidth = document.body.clientWidth;
-				var left = Math.max((bodyWidth - popupWidth) / 2, 10) + "px";
-				var popupHeight = popup2.offsetHeight;
-				var bodyHeight = document.documentElement.clientHeight;
-				var top = Math.max((bodyHeight - popupHeight) / 2, 10) + "px";
-			   
-				$('#' + globalKey).hide();
-				popup2.style.left = left;
-				popup2.style.top = top;
-				popup2.style.minWidth = popupWidth + "px";
-				popup2.style.maxWidth = "95%";
-				
-				var maxPercentageWidth = 0.95;
-				popup2.style.maxWidth = (maxPercentageWidth*100)+"%";
-				popup2.style.minWidth = ((popupWidth>(maxPercentageWidth*100)) ? (maxPercentageWidth*100) : popupWidth) + "px"; 
-
-				if ($(t.pf(panelPopupKey) + " :file").length > 0)
-					popup2.style.minWidth = "500px";
-				
-				$('#' + globalKey).show('fast');
-				$(t.pf(modalBackgroundKey))[0].style.left=0;
-				$(t.pf(modalBackgroundKey)).css('filter','alpha(opacity=40)').fadeIn('slow');
-			}
-		},
-		pf: function(s){
-		    console.log("En pf");
-		    return ("#"+options.prefix+s);
-		}  
-	};
+	newPopup: function(){
+	    log("En newPopup");
+		$(me.pf(sfEntity)).after("<input type='hidden' id='" + me.options.prefix + sfIsNew + "' name='" + me.options.prefix + sfIsNew + "' value='' />\n");
+		if ($(me.pf(sfImplementations)).length == 0) 
+			$(me.pf(sfRuntimeType)).val($(me.pf(sfStaticType)).val());
+		me.open();
+	},
 	
+	newDetail: function(){
+	    log("En newDetail");
+		me.newPopup();
+		toggleButtonsDisplay(prefix, true);
+		me.setTicksVal();
+	},
+	
+	open: function(){
+	    log("En open");
+		me.setTicksVal();
+		me.openCommon();
+	},
+	
+	setTicksVal: function(){
+	    log("En setTicksVal");
+		$(me.pf(sfTicks)).val(new Date().getTime());
+	},
+	
+	openCommon: function(){
+	    log("En openCommon");
+		var containedEntity = $(me.pf(sfEntity)).html();
+		if (!empty(containedEntity)) { //Already has the containedEntity loaded => show it
+			window[me.options.prefix + sfEntityTemp] = containedEntity;
+			me.show(me.options.prefix + sfEntity, "modalBackground", "panelPopup");
+			$(me.pf(sfBtnOk)).unbind('click').click(me.options.onOk);
+			$(me.pf(sfBtnCancel)).unbind('click').click(me.options.onCancel);
+			return;
+		}
+		
+		var runtimeType = $(me.pf(sfRuntimeType)).val();
+		if (empty(runtimeType)) {
+			window.alert("Error: RuntimeType could not be solved");
+			return;
+		}
+		
+		var idQueryParam = "";
+		var idField = $(me.pf(sfId));
+		if (idField.length > 0) 
+			idQueryParam = qp("sfId", idField.val());
+		else { //Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
+			var pathInfo = GetPathIdsAndTypes(me.options.prefix);
+			if (pathInfo.length > 0) 
+				idQueryParam += "&" + pathInfo;
+		}
+		
+		var reactiveParam = "";
+		if ($('#' + sfReactive).length > 0) { //If reactive => send also tabId and Id & Runtime of the main entity
+			reactiveParam = qp(sfReactive, true) +
+			qp(sfTabId, $('#' + sfTabId).val()) +
+			qp(sfRuntimeType, $('#' + sfRuntimeType).val()) +
+			qp(sfId, $('#' + sfId).val());
+		}
+		
+		var viewQueryParam = "";
+		if (!empty(me.options.partialView)) 
+			viewQueryParam = qp("sfUrl", me.options.partialView);
+		
+		me.typed(runtimeType, idQueryParam, reactiveParam, viewQueryParam);
+	},
+	
+	openList: function(select){
+		$('#' + select + sfTicks).val(new Date().getTime());
+		if (!empty(me.options.detailDiv)) 
+			$("#" + me.options.detailDiv).hide();
+		
+		var selected = $('#' + select + " > option:selected");
+		if (selected.length == 0) 
+			return;
+		
+		var nameSelected = selected[0].id;
+		var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
+		me.openCommon();
+	},
+	
+	newList: function(select, runtimeType){
+		$('#' + select + sfTicks).val(new Date().getTime());
+		
+		if (!empty(me.options.detailDiv)) 
+			$("#" + me.options.detailDiv).hide();
+		
+		me.newListOption(select, runtimeType);
+		
+		var selected = $('#' + select + " > option:selected");
+		if (selected.length == 0) 
+			return;
+		
+		var nameSelected = selected[0].id;
+		me.options.prefix = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
+		$(me.pf(sfEntity)).after("<input type='hidden' id='" + me.options.prefix + sfIsNew + "' name='" + me.options.prefix + sfIsNew + "' value='' />\n");
+		
+		me.openCommon();
+	},
+	
+	typed: function(runtimeType, idQueryParam, reactiveParam, viewQueryParam){
+	    log("En typed");
+		$.ajax({
+			type: "POST",
+			url: me.url,
+			data: "sfRuntimeType=" + runtimeType + qp("sfOnOk", me.options.onOk) + qp("sfOnCancel", me.options.onCancel) + qp(sfPrefix, me.options.prefix) + idQueryParam + reactiveParam + viewQueryParam,
+			async: false,
+			dataType: "html",
+			success: function(msg){
+				window[me.options.prefix + sfEntityTemp] = $("#" + me.options.prefix + sfEntity).html();
+				if (!empty(me.options.detailDiv)) 
+					$('#' + me.options.detailDiv).html(msg);
+				else 
+					$(me.pf(sfEntity)).html(msg);
+				me.show(me.options.prefix + sfEntity, "modalBackground", "panelPopup");
+				$(me.pf(sfBtnOk)).click(me.options.onOk);
+				$(me.pf(sfBtnCancel)).click(me.options.onCancel);
+			},
+			error: function(XMLHttpRequest, textStatus, errorThrown){
+				ShowError(XMLHttpRequest, textStatus, errorThrown);
+			}
+		});
+	},
+	
+	typedDirect: function (runtimeType) {	
+	    log("En typedDirect");
+	    var oldPrefix = me.options.prefix;
+	    var newPrefix = me.options.prefix + "New";
+	    $.ajax({
+	        type: "POST",
+	        url: me.url,
+	        data: "sfRuntimeType=" + runtimeType + qp("sfOnOk", singleQuote(me.options.onOk)) + qp("sfOnCancel", singleQuote(me.options.onCancel)) + qp(sfPrefix, newPrefix),
+	        async: false,
+	        dataType: "html",
+	        success: function(msg) {
+	            console.log("Estableciendo el contenido del popup en el div con id " + me.options.prefix + "divASustituir");
+	            $('#' + me.options.prefix + "divASustituir").html(msg);
+	            if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
+	                return;
+	            me.options.prefix = newPrefix;
+	            me.show(oldPrefix + "divASustituir", "modalBackground", "panelPopup");
+	            console.log("Mostrando");
+				$(me.pf(sfBtnOk)).click(me.options.onOk);
+					            console.log("Añadiendo evento ok a " + me.pf(sfBtnOk) + " para llamar a " + me.options.onOk);
+				$(me.pf(sfBtnCancel)).click(me.options.onCancel);	            
+	        },
+	        error: function(XMLHttpRequest, textStatus, errorThrown) {
+	            ShowError(XMLHttpRequest, textStatus, errorThrown);
+	        }
+	    });
+    },
+	
+	chooseImplementation: function(){
+		me.options.detailDiv = null;
+		me.show(me.options.prefix + sfImplementations, "modalBackground", "panelPopup");
+		$(me.pf(sfBtnOk)).unbind('click').click(me.options.onOk);
+		$(me.pf(sfBtnCancel)).unbind('click').click(me.options.onCancel);
+	},
+	
+	show: function(globalKey, modalBackgroundKey, panelPopupKey){
+	    log("En show");
+		if (!empty(me.options.detailDiv)) 
+			$("#" + me.options.detailDiv).show();
+		else {
+			//$("#" + prefix + sfEntity).show();
+			$("#" + globalKey).show();
+			$(me.pf(modalBackgroundKey)).width(document.documentElement.clientWidth).height(document.documentElement.clientHeight).hide();
+			
+			//Read offsetWidth and offsetHeight after display=block or otherwise it's 0
+			console.log(me.pf(panelPopupKey));
+			console.log($(me.pf(panelPopupKey)).length);
+			var popup2 = $(me.pf(panelPopupKey))[0];
+			var parentDiv = $(me.pf(sfEntity)).parent();
+			var popupWidth = popup2.offsetWidth;
+			var bodyWidth = document.body.clientWidth;
+			var left = Math.max((bodyWidth - popupWidth) / 2, 10) + "px";
+			var popupHeight = popup2.offsetHeight;
+			var bodyHeight = document.documentElement.clientHeight;
+			var top = Math.max((bodyHeight - popupHeight) / 2, 10) + "px";
+			
+			$('#' + globalKey).hide();
+			popup2.style.left = left;
+			popup2.style.top = top;
+			popup2.style.minWidth = popupWidth + "px";
+			popup2.style.maxWidth = "95%";
+			
+			var maxPercentageWidth = 0.95;
+			popup2.style.maxWidth = (maxPercentageWidth * 100) + "%";
+			popup2.style.minWidth = ((popupWidth > (maxPercentageWidth * 100)) ? (maxPercentageWidth * 100) : popupWidth) + "px";
+			
+			if ($(me.pf(panelPopupKey) + " :file").length > 0) 
+				popup2.style.minWidth = "500px";
+			
+			$('#' + globalKey).show('fast');
+			var background = $(me.pf(modalBackgroundKey));
+			background[0].style.left = 0;
+			background.css('filter', 'alpha(opacity=40)')
+			if (me.visualOptions.fade) 
+				background.fadeIn('slow');
+			else 
+				background.show();
+		}
+	},
+	
+	onPopupOk: function(reloadOnChangeFunction){
+	    log("En onPopupOk");
+		var correct = ValidatePartial(me.url, me.options.prefix, "", true, "*");
+		me.endPopupOk(me.options.prefix, reloadOnChangeFunction);
+	},
+	
+	onListPopupOk: function(btnOkId, reloadOnChangeFunction){
+		var itemPrefix = btnOkId.substr(0, btnOkId.indexOf(sfBtnOk));
+		me.endPopupOk(itemPrefix, reloadOnChangeFunction);
+	},
+	
+	endPopupOk: function(itemPrefix, reloadOnChangeFunction){
+		var correct = ValidatePartial(me.url, itemPrefix, "", true, "*");
+		window[itemPrefix + sfEntityTemp] = "";
+		$(me.pf(sfEntity)).hide();
+		toggleButtonsDisplay(me.options.prefix, true);
+		log("Valor de reloadOnChangeFunction " + reloadOnChangeFunction);
+		if (!empty(reloadOnChangeFunction)) {
+			me.setTicksVal();
+			reloadOnChangeFunction();
+		}
+	},
+	
+	onImplementationsOk: function(selectedType){
+		if (empty(selectedType)) 
+			return;
+		$(me.pf(sfRuntimeType)).val(selectedType);
+		$(me.pf(sfImplementations)).hide();
+		me.newPopup();
+	},
+	
+	onListImplementationsOk: function(selectedType){
+		if (empty(selectedType)) 
+			return;
+		$(me.pf(sfImplementations)).hide();
+		me.newList(me.options.prefix, selectedType);
+	},
+	
+	onImplementationsCancel: function(){
+		$(me.pf(sfImplementations)).hide();
+	},
+	
+	onPopupCancel: function(){
+		var oldValue = window[me.options.prefix + sfEntityTemp];
+		$(me.pf(sfEntity)).html(oldValue);
+		
+		var id = $(me.pf(sfId));
+		if (id.length > 0 && id.val() != null && id.val() > 0) 
+			toggleButtonsDisplay(me.options.prefix, true);
+		else {
+			if (!empty(oldValue)) {
+				toggleButtonsDisplay(me.options.prefix, true);
+			}
+			else {
+				toggleButtonsDisplay(me.options.prefix, false);
+				$(me.pf(sfRuntimeType)).val("");
+				$(me.pf(sfIsNew)).remove();
+			}
+		}
+		window[me.options.prefix + sfEntityTemp] = "";
+		$(me.pf(sfEntity)).hide();
+	},
+	
+	onListPopupCancel: function(btnCancelId){
+		var itemPrefix = btnCancelId.substr(0, btnCancelId.indexOf(sfBtnCancel));
+		var prefix = itemPrefix.substr(0, itemPrefix.lastIndexOf("_"));
+		var oldValue = window[itemPrefix + sfEntityTemp];
+		$('#' + itemPrefix + sfEntity).html(oldValue);
+		
+		var id = $('#' + itemPrefix + sfId);
+		if (id.length > 0 && id.val() != null && id.val() > 0) {
+			toggleButtonsDisplayList(prefix, true);
+		}
+		else {
+			if (!empty(oldValue)) {
+				toggleButtonsDisplayList(prefix, true);
+			}
+			else {
+				toggleButtonsDisplayList(prefix, false);
+				$('#' + itemPrefix + sfId).remove();
+				$('#' + itemPrefix + sfRuntimeType).remove();
+				$('#' + itemPrefix + sfToStr).remove();
+				$('#' + itemPrefix + sfEntity).remove();
+				$('#' + itemPrefix + sfIsNew).remove();
+			}
+		}
+		
+		window[itemPrefix + sfEntityTemp] = "";
+		$('#' + itemPrefix + sfEntity).hide();
+	},
+	
+	onPopupComboOk: function(){
+		ValidatePartial(me.url, me.options.prefix, "", true, "");
+		
+		//Clean panelPopup
+		window[me.options.prefix + sfEntityTemp] = "";
+		$(me.pf(sfEntity)).hide();
+		
+		var runtimeType = $(me.pf(sfRuntimeType));
+		if (runtimeType.val() == "") 
+			runtimeType.val($(me.pf(sfStaticType)).val());
+		
+		toggleButtonsDisplay(me.options.prefix, true);
+	},
+	
+	onPopupComboCancel: function(){
+		window[me.options.prefix + sfEntityTemp] = "";
+		$(me.pf(sfEntity)).hide();
+	},
+	
+	pf: function(s){ return "#"+me.options.prefix+s;}
+}
 
-function OpenPopup(urlController, _divASustituir, prefix, onOk, onCancel, detailDiv, partialView) {
+function OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, partialView) {
     new popup(urlController, {
-        divASustituir:_divASustituir,
-        "prefix":prefix,
-        "onOk":onOk,
-        "onCancel":onCancel,
-        "detailDiv":detailDiv
+        divASustituir: divASustituir,
+        prefix: prefix,
+        onOk: onOk,
+        onCancel: onCancel,
+        detailDiv: detailDiv
     }).open();
 }
 
 function NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, detailDiv, partialView) {
     new popup(urlController, {
-        "divASustituir":divASustituir,
-        "prefix":prefix,
-        "onOk":onOk,
-        "onCancel":onCancel,
-        "isEmbeded":isEmbeded,
-        "detailDiv":detailDiv,
-        "partialView":partialView
+        divASustituir: divASustituir,
+        prefix: prefix,
+        onOk: onOk,
+        onCancel: onCancel,
+        isEmbeded: isEmbeded,
+        detailDiv: detailDiv,
+        partialView: partialView
     }).newPopup();
 }
 
 function NewDetail(urlController, divASustituir, prefix, detailDiv, isEmbeded, partialView) {
     new popup(urlController, {
-        "divASustituir":divASustituir,
-        "prefix":prefix,
-        "isEmbeded":isEmbeded,
-        "detailDiv":detailDiv,
-        "partialView":partialView
-    }).newPopup();
-    toggleButtonsDisplay(prefix, true);
-    $('#' + prefix + sfTicks).val(new Date().getTime());
+        divASustituir: divASustituir,
+        prefix: prefix,
+        isEmbeded: isEmbeded,
+        detailDiv: detailDiv,
+        partialView: partialView
+    }).newDetail();
 }
 
 //function OpenDetail(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, reloadOnChangeFunction) {
@@ -206,177 +389,76 @@ function NewDetail(urlController, divASustituir, prefix, detailDiv, isEmbeded, p
 
 function OpenPopupList(urlController, divASustituir, select, onOk, onCancel, detailDiv) {
     new popup(urlController, {
-        "onOk":onOk,
-        "onCancel":onCancel,
-        "divASustituir":divASustituir,
-        "prefix":prefixSelected,
-        "detailDiv":detailDiv
+        onOk: onOk,
+        onCancel: onCancel,
+        divASustituir: divASustituir,
+        prefix: prefixSelected,
+        detailDiv: detailDiv
         }).openList(select);
 }
 
-function NewPopupList(urlController, divASustituir, select, onOk, onCancel, runtimeType, isEmbeded, detailDiv) {
-
-    $('#' + select + sfTicks).val(new Date().getTime());
-    
-    if (!empty(detailDiv))
-        $("#" + detailDiv).hide();
-    
-    NewListOption(select, runtimeType, isEmbeded, detailDiv);
-
-    var selected = $('#' + select + " > option:selected");
-    if (selected.length == 0)
-        return;
-        
-    var nameSelected = selected[0].id;
-    var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
-    $('#' + prefixSelected + sfEntity).after("<input type='hidden' id='" + prefixSelected + sfIsNew + "' name='" + prefixSelected + sfIsNew + "' value='' />\n");
-    OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefixSelected, detailDiv);
+function NewPopupList(urlController, divASustituir, select, onOk, onCancel, runtimeType, isEmbeded, detailDiv) { 
+    new popup(urlController, {
+        onOk: onOk,
+        onCancel: onCancel,
+        divASustituir: divASustituir,
+        detailDiv: detailDiv,
+        isEmbeded: isEmbeded
+        }).newList(select, runtimeType);              
 }
 
 function OpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView) {
-    var containedEntity = $('#' + prefix + sfEntity).html();
-    if (!empty(containedEntity)) { //Already have the containedEntity loaded => show it
-        window[prefix + sfEntityTemp] = containedEntity;
-        ShowPopup(prefix, prefix + sfEntity, "modalBackground", "panelPopup", detailDiv);
-        $('#' + prefix + sfBtnOk).unbind('click').click(onOk);
-        $('#' + prefix + sfBtnCancel).unbind('click').click(onCancel);
-        return;
-    }
-
-    var runtimeType = $('#' + prefix + sfRuntimeType).val();
-    if (empty(runtimeType)) {
-        window.alert("Error: RuntimeType could not be solved");
-        return;
-    }
-    
-    var idQueryParam = "";
-    var idField = $('#' + prefix + sfId);
-    if (idField.length > 0)
-        idQueryParam = qp("sfId", idField.val());
-    else {  //Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
-        var pathInfo = GetPathIdsAndTypes(prefix);
-        if (pathInfo.length > 0)
-            idQueryParam += "&" + pathInfo;
-    }
-
-    var reactiveParam = "";
-    if ($('#' + sfReactive).length > 0) { //If reactive => send also tabId and Id & Runtime of the main entity
-        reactiveParam = qp(sfReactive, true);
-        reactiveParam += qp(sfTabId, $('#' + sfTabId).val());
-        reactiveParam += qp(sfRuntimeType, $('#' + sfRuntimeType).val());
-        reactiveParam += qp(sfId, $('#' + sfId).val());
-    }
-    
-    var viewQueryParam = "";
-    if (!empty(partialView))
-        viewQueryParam = qp("sfUrl", partialView);
-
-    TypedOpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView, runtimeType, idQueryParam, reactiveParam, viewQueryParam);
+    new popup(urlController, {
+        onOk: onOk,
+        onCancel: onCancel,
+        divASustituir: divASustituir,
+        prefix: prefix,
+        detailDiv: detailDiv,
+        partialView: partialView
+        }).openCommon();  
 }
 
 function TypedOpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView, runtimeType, idQueryParam, reactiveParam, viewQueryParam) {
-    $.ajax({
-        type: "POST",
-        url: urlController,
-        data: "sfRuntimeType=" + runtimeType + qp("sfOnOk",onOk) + qp("sfOnCancel",onCancel) + qp(sfPrefix, prefix) + idQueryParam + reactiveParam + viewQueryParam,
-        async: false,
-        dataType: "html",
-        success:
-                   function(msg) {
-                       window[prefix + sfEntityTemp] = containedEntity;
-                       if (!empty(detailDiv)) 
-                            $('#' + detailDiv).html(msg);
-                       else
-                            $('#' + prefix + sfEntity).html(msg);
-                       ShowPopup(prefix, prefix + sfEntity, "modalBackground", "panelPopup", detailDiv);
-                       $('#' + prefix + sfBtnOk).click(onOk);
-                       $('#' + prefix + sfBtnCancel).click(onCancel);
-                   },
-        error:
-                   function(XMLHttpRequest, textStatus, errorThrown) {
-                        ShowError(XMLHttpRequest, textStatus, errorThrown);
-                   }
-    });
+    new popup(urlController, {
+        onOk: onOk,
+        onCancel: onCancel,
+        divASustituir: divASustituir,
+        prefix: prefix,
+        detailDiv: detailDiv,
+        partialView: partialView
+        }).typed(runtimeType, idQueryParam, reactiveParam, viewQueryParam);
 }
 
-function ChooseImplementation(divASustituir, prefix, onOk, onCancel) {
+function ChooseImplementation(divASustituir, prefix, onOk, onCancel) {    
     ShowPopup(prefix, prefix + sfImplementations, "modalBackground", "panelPopup", null);
     $('#' + prefix + sfBtnOk).unbind('click').click(onOk);
     $('#' + prefix + sfBtnCancel).unbind('click').click(onCancel);
 }
 
 function ShowPopup(prefix, globalKey, modalBackgroundKey, panelPopupKey, detailDiv) {
-    if (!empty(detailDiv))
-        $("#" + detailDiv).show();
-    else {
-        //$("#" + prefix + sfEntity).show();
-        $("#" + globalKey).show();
-        $('#' + prefix + modalBackgroundKey).width(document.documentElement.clientWidth).height(document.documentElement.clientHeight).hide();
-
-        //Read offsetWidth and offsetHeight after display=block or otherwise it's 0
-        var popup = $('#' + prefix + panelPopupKey)[0];
-        var parentDiv = $("#" + prefix + sfEntity).parent();
-        var popupWidth = popup.offsetWidth;
-        var bodyWidth = document.body.clientWidth;
-        var left = Math.max((bodyWidth - popupWidth) / 2, 10) + "px";
-        var popupHeight = popup.offsetHeight;
-        var bodyHeight = document.documentElement.clientHeight;
-        var top = Math.max((bodyHeight - popupHeight) / 2, 10) + "px";
-       
-        $('#' + globalKey).hide();
-        popup.style.left = left;
-        popup.style.top = top;
-        popup.style.minWidth = popupWidth + "px";
-        popup.style.maxWidth = "95%";
-        
-        var maxPercentageWidth = 0.95;
-        popup.style.maxWidth = (maxPercentageWidth*100)+"%";
-        popup.style.minWidth = ((popupWidth>(maxPercentageWidth*100)) ? (maxPercentageWidth*100) : popupWidth) + "px"; 
-
-        if ($('#' + prefix + panelPopupKey + " :file").length > 0)
-            popup.style.minWidth = "500px";
-        
-        $('#' + globalKey).show('fast');
-        $('#' + prefix + modalBackgroundKey)[0].style.left=0;
-        $('#' + prefix + modalBackgroundKey).css('filter','alpha(opacity=40)').fadeIn('slow');
-    }
+    new popup(null, {
+        prefix: prefix,
+        detailDiv: detailDiv
+        }).show(globalKey, modalBackgroundKey, panelPopupKey);
 }
 
 function OnPopupOK(urlController, prefix, reloadOnChangeFunction) {
-    var correct = ValidatePartial(urlController, prefix, "", true, "*");
-
-    window[prefix + sfEntityTemp] = "";
-    $('#' + prefix + sfEntity).hide();
-
-    toggleButtonsDisplay(prefix, true);
-
-    if (!empty(reloadOnChangeFunction)) {
-        $('#' + prefix + sfTicks).val(new Date().getTime());
-        reloadOnChangeFunction();
-    }
+    new popup(urlController, {
+        prefix: prefix
+        }).onPopupOk(reloadOnChangeFunction);
 }
 
 function OnListPopupOK(urlController, prefix, btnOkId, reloadOnChangeFunction) {
-    var itemPrefix = btnOkId.substr(0, btnOkId.indexOf(sfBtnOk));
-    var correct = ValidatePartial(urlController, itemPrefix, "", true, "*");
-
-    window[itemPrefix + sfEntityTemp] = "";
-    $('#' + itemPrefix + sfEntity).hide();
-
-    toggleButtonsDisplayList(prefix, true);//prefix=itemPrefix.substr(0, itemPrefix.lastIndexOf("_"))
-    
-    if (!empty(reloadOnChangeFunction)) {
-        $('#' + prefix + sfTicks).val(new Date().getTime());
-        reloadOnChangeFunction();
-    }
+    new popup(urlController, {
+        prefix: prefix
+        }).onListPopupOk(btnOkId,reloadOnChangeFunction);
 }
 
 function ReloadEntity(urlController, prefix, parentDiv) {
-    var formChildren = $("form");
     $.ajax({
         type: "POST",
         url: urlController,
-        data: formChildren.serialize() + qp(sfPrefix,prefix),
+        data: $("form").serialize() + qp(sfPrefix,prefix),
         async: false,
         dataType: "html",
         success:
@@ -394,11 +476,14 @@ function ReloadEntity(urlController, prefix, parentDiv) {
 }
 
 function OnImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, selectedType) {
-    if (empty(selectedType))
-        return;
-    $('#' + prefix + sfRuntimeType).val(selectedType);
-    $('#' + prefix + sfImplementations).hide();
-    NewPopup(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded);
+    new popup(urlController,
+        {
+        onOk: onOk,
+        onCancel: onCancel,
+        isEmbeded: isEmbeded,
+        divASustituir: divASustituir,
+        prefix: prefix,
+        }).onImplementationsOk(selectedType);
 }
 
 function NewListOption(prefix, selectedType, isEmbeded, detailDiv) {
@@ -428,64 +513,27 @@ function NewListOption(prefix, selectedType, isEmbeded, detailDiv) {
 }
 
 function OnListImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, detailDiv, selectedType) {
-    if (empty(selectedType))
-        return;
-    $('#' + prefix + sfImplementations).hide();
-    NewPopupList(urlController, divASustituir, prefix, onOk, onCancel, selectedType, isEmbeded, detailDiv);
+    new popup(urlController,
+        {
+        onOk: onOk,
+        onCancel: onCancel,
+        isEmbeded: isEmbeded,
+        divASustituir: divASustituir,
+        detailDiv: detailDiv,
+        prefix: prefix
+        }).onListImplementationsOk(selectedType);       
 }
 
 function OnImplementationsCancel(prefix) {
-    $('#' + prefix + sfImplementations).hide();
+    new popup(null, {prefix: prefix}).onImplementationsCancel();
 }
 
 function OnPopupCancel(prefix) {
-    var oldValue = window[prefix + sfEntityTemp];
-    $('#' + prefix + sfEntity).html(oldValue);
-    
-    var id = $('#' + prefix + sfId);
-    if (id.length > 0 && id.val() != null && id.val() > 0)
-        toggleButtonsDisplay(prefix, true);
-    else {
-        if (!empty(oldValue)) {
-            toggleButtonsDisplay(prefix, true);
-        }
-        else {
-            toggleButtonsDisplay(prefix, false);
-            $('#' + prefix + sfRuntimeType).val("");
-            $('#' + prefix + sfIsNew).remove();
-        }
-    }
-
-    window[prefix + sfEntityTemp] = "";
-    $('#' + prefix + sfEntity).hide();
+    new popup(null, {prefix: prefix}).onPopupCancel();
 }
 
 function OnListPopupCancel(btnCancelId) {
-    var itemPrefix = btnCancelId.substr(0, btnCancelId.indexOf(sfBtnCancel));
-    var prefix = itemPrefix.substr(0, itemPrefix.lastIndexOf("_"));
-    var oldValue = window[itemPrefix + sfEntityTemp];
-    $('#' + itemPrefix + sfEntity).html(oldValue);
-
-    var id = $('#' + itemPrefix + sfId);
-    if (id.length > 0 && id.val() != null && id.val() > 0) {
-        toggleButtonsDisplayList(prefix, true);
-    }
-    else {
-        if (!empty(oldValue)) {
-            toggleButtonsDisplayList(prefix, true);
-        }
-        else {
-            toggleButtonsDisplayList(prefix, false);
-            $('#' + itemPrefix + sfId).remove();
-            $('#' + itemPrefix + sfRuntimeType).remove();
-            $('#' + itemPrefix + sfToStr).remove();
-            $('#' + itemPrefix + sfEntity).remove();
-            $('#' + itemPrefix + sfIsNew).remove();
-        }
-    }
-
-    window[itemPrefix + sfEntityTemp] = "";
-    $('#' + itemPrefix + sfEntity).hide();
+    new popup(null).OnListPopupCancel(btnCancelId);
 }
 
 function RemoveListContainedEntity(select) {
@@ -509,9 +557,7 @@ function RemoveListContainedEntity(select) {
 }
 
 function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
-    $('#' + prefix + sfToStr).val("");
-    $('#' + prefix + sfToStr).html("");
-    $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
+    $('#' + prefix + sfToStr).val("").html("").removeClass(sfInputErrorClass);
     $('#' + prefix + sfRuntimeType).val("");
     $('#' + prefix + sfIsNew).remove();
     window[prefix + sfEntityTemp] = "";
@@ -527,10 +573,8 @@ function RemoveContainedEntity(prefix, reloadOnChangeFunction) {
 }
 
 function RemoveFileLineEntity(prefix, reloadOnChangeFunction) {
-    $('#' + prefix + sfToStr).val("");
-    $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
-    $('#' + prefix + sfLink).val("");
-    $('#' + prefix + sfLink).removeClass(sfInputErrorClass);
+    $('#' + prefix + sfToStr).val("").removeClass(sfInputErrorClass);
+    $('#' + prefix + sfLink).val("").removeClass(sfInputErrorClass);
     $('#' + prefix + sfRuntimeType).val("");
     $('#' + prefix + sfIsNew).remove();
     window[prefix + sfEntityTemp] = "";
@@ -568,9 +612,7 @@ function UploadFile(urlController, prefix) {
 }
 
 function RemoveDetailContainedEntity(prefix, detailDiv, reloadOnChangeFunction) {
-    $('#' + prefix + sfToStr).val("");
-    $('#' + prefix + sfToStr).html("");
-    $('#' + prefix + sfToStr).removeClass(sfInputErrorClass);
+    $('#' + prefix + sfToStr).val("").html("").removeClass(sfInputErrorClass);
     $('#' + prefix + sfRuntimeType).val("");
     $('#' + prefix + sfIsNew).remove();
     window[prefix + sfEntityTemp] = "";
@@ -615,22 +657,11 @@ function EntityComboOnChange(prefix) {
 }
 
 function OnPopupComboOk(urlController, prefix) {
-    ValidatePartial(urlController, prefix, "", true, "");
-
-    //Clean panelPopup
-    window[prefix + sfEntityTemp] = "";
-    $('#' + prefix + sfEntity).hide();
-
-    var runtimeType = $('#' + prefix + sfRuntimeType);
-    if (runtimeType.val() == "")
-        runtimeType.val($('#' + prefix + sfStaticType).val());
-
-    toggleButtonsDisplay(prefix, true);
+	new pop(urlController, {prefix: prefix}).onPopupComboOk();
 }
 
 function OnPopupComboCancel(prefix) {
-    window[prefix + sfEntityTemp] = "";
-    $('#' + prefix + sfEntity).hide();
+	new pop(null, {prefix: prefix}).onPopupComboCancel();
 }
 
 function toggleButtonsDisplay(prefix, hasEntity) {

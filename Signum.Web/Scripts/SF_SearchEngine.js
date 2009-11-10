@@ -60,6 +60,7 @@ function OnSearchCreateCancel(prefix) {
 }
 
 function OnSearchOk(prefix, divASustituir, reloadOnChangeFunction) {
+    log("En OnSearchOk");
 	var entitySelected = $("input:radio[name=" + prefix + "rowSelection]:checked").val();
 	if (entitySelected == undefined) return;
 

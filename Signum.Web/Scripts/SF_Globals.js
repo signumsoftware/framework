@@ -90,7 +90,10 @@ function initAroundDivs() {
 $(function() { initAroundDivs();});
 
 function singleQuote(myfunction) {
-    return myfunction.toString().replace(/"/g, "'");
+    if (myfunction != null)
+        return myfunction.toString().replace(/"/g, "'");
+    else
+        return '';
 }
 
 //Performs input validation

@@ -31,6 +31,7 @@ namespace Signum.Web
 
             List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)identifiable);
 
+            FindO
             return new WidgetNode{
                 Content = NotesToString(helper, notes, prefix),
                 Count = notes.Count.ToString(),
