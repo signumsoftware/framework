@@ -529,7 +529,7 @@ namespace Signum.Engine.Maps
         Index IColumn.Index { get { return Index.None; } }
         SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
         bool IColumn.PrimaryKey { get { return true; } }
-        public bool Identity { get; set; }
+        bool IColumn.Identity { get { return true; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }

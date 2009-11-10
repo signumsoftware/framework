@@ -23,6 +23,11 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
+        public IEnumerable<EntityField> NormalFields
+        {
+            get { return Fields.Values.Where(ef => !(ef.Field is FieldPrimaryKey)); }
+        }
+
         public SqlPreCommand Save(IdentifiableEntity ident, Forbidden forbidden)
         {   
             var collectionFields = Fields.Values.Select(f=>f.Field).OfType<FieldMList>();
@@ -45,8 +50,8 @@ namespace Signum.Engine.Maps
             ident.PreSaving(ref dirty); 
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            
-            foreach (var v in Fields.Values)
+
+            foreach (var v in Identity ? NormalFields : Fields.Values)
                 v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
             
             return SqlBuilder.Insert(Name, parameters);
@@ -59,8 +64,8 @@ namespace Signum.Engine.Maps
                 ent.Ticks = Transaction.StartTime.Ticks;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            foreach (var v in Fields.Values)
-             v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
+            foreach (var v in Identity ? NormalFields : Fields.Values)
+                v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
 
             ident.IsNew = false; 
 
@@ -88,7 +93,7 @@ namespace Signum.Engine.Maps
                 return null;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            foreach (var v in Fields.Values)
+            foreach (var v in NormalFields)
                 v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
 
             return SqlBuilder.UpdateId(Name, parameters, ident.Id, oldToStr);
@@ -104,14 +109,14 @@ namespace Signum.Engine.Maps
                 entity.Ticks = Transaction.StartTime.Ticks;
 
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                foreach (var v in Fields.Values)
+                foreach (var v in NormalFields)
                     v.Field.CreateParameter(parameters, v.Getter(entity), forbidden);
                 return SqlBuilder.UpdateSetIdEntity(Name, parameters, entity.Id, oldTicks);
             }
             else
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                foreach (var v in Fields.Values)
+                foreach (var v in NormalFields)
                     v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
                 return SqlBuilder.UpdateSetId(Name, parameters, ident.Id);
             }
@@ -152,8 +157,7 @@ namespace Signum.Engine.Maps
     {
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
         {
-            if (!Identity)
-                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, false, (int?)value));
+            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, false, (int?)value));
         }
     }
 

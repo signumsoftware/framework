@@ -90,6 +90,36 @@ namespace Signum.Engine
                 return tr.Commit(ident);
             }
         }
+
+        public static Lite RetrieveLite(Type type, Type runtimeType, int id)
+        {
+            using (new EntityCache())
+            using (Transaction tr = new Transaction())
+            {
+                Retriever rec = new Retriever();
+                Table table = Schema.Current.Table(runtimeType);
+                Lite lite = rec.GetLite(table, type, id);
+
+                rec.ProcessAll();
+
+                return tr.Commit(lite);
+            }
+        }
+
+        public static Lite RetrieveLite(Type type, int id)
+        {
+            return RetrieveLite(type, type, id); 
+        }
+
+        public static Lite<T> RetrieveLite<T>(Type runtimeType, int id) where T : class, IIdentifiable
+        {
+            return (Lite<T>)RetrieveLite(typeof(T), runtimeType, id);
+        }
+
+        public static Lite<T> RetrieveLite<T>(int id) where T : class, IIdentifiable
+        {
+            return (Lite<T>)RetrieveLite(typeof(T), typeof(T), id);
+        }
         #endregion
 
         #region Exists

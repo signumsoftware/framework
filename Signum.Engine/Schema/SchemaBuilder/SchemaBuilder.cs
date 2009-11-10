@@ -133,7 +133,7 @@ namespace Signum.Engine.Maps
             switch (kof)
             {
                 case KindOfField.PrimaryKey:
-                    return GenerateFieldPrimaryKey(type, fi, table.Identity, name);
+                    return GenerateFieldPrimaryKey(type, fi, name);
                 case KindOfField.Value:
                     return GenerateFieldValue(type, fi, fieldType, name);
                 case KindOfField.Reference:
@@ -195,12 +195,9 @@ namespace Signum.Engine.Maps
             return Index.Multiple;
         }
 
-        private static Field GenerateFieldPrimaryKey(Type type, FieldInfo fi, bool identity, NameSequence name)
+        private static Field GenerateFieldPrimaryKey(Type type, FieldInfo fi, NameSequence name)
         {
-            return new FieldPrimaryKey(fi.FieldType)
-            {
-                Identity = identity
-            };
+            return new FieldPrimaryKey(fi.FieldType);
         }
 
         protected virtual Field GenerateFieldValue(Type type, FieldInfo fi, Type fieldType, NameSequence name)
