@@ -382,8 +382,8 @@ function AddFilter(urlController, prefix) {
 	var tableFilters = $("#" + prefix + "tblFilters");
 	if (tableFilters.length == 0) return;
 
-	$("#filters-list .explanation").hide();
-	$("#filters-list table").show('fast');
+	$("#" + prefix + "filters-list .explanation").hide();
+	$("#" + prefix + "filters-list table").show('fast');
 
 	var filterType = selectedColumn.val();
 	var optionId = selectedColumn[0].id;
@@ -412,8 +412,8 @@ function DeleteFilter(index, prefix) {
 
 	if ($("#" + prefix + "trFilter_" + index + " select[disabled]").length == 0) tr.remove();
 	if ($("#" + prefix + "tblFilters tbody tr").length == 0) {
-		$("#filters-list .explanation").show();
-		$("#filters-list table").hide('fast');
+		$("#" + prefix + "filters-list .explanation").show();
+		$("#" + prefix + "filters-list table").hide('fast');
 	}
 }
 
