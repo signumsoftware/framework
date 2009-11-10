@@ -21,10 +21,8 @@ namespace Signum.Engine
              Save(()=>GraphExplorer.FromRoots(idents));
         }
 
-        public static void Save<T>(T ident) where T : IdentifiableEntity
+        public static void Save(IdentifiableEntity ident) 
         {
-            //Generate a graph from the root visiting all the modifiables
-
             Save(()=>GraphExplorer.FromRoot(ident));
         }
 

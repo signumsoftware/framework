@@ -21,29 +21,35 @@ namespace Signum.Engine
     {
         #region Save
         public static void SaveList<T>(this IEnumerable<T> entities)
-            where T : IIdentifiable
-        {
-            SaveParams(entities.Cast<IdentifiableEntity>().ToArray());
-        }
-
-        public static void SaveParams(params IdentifiableEntity[] entities)
+            where T : class, IIdentifiable
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
-                Saver.SaveAll(entities);
+                Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
+
+                tr.Commit();
+            }
+        }
+
+        public static void SaveParams(params IIdentifiable[] entities)
+        {
+            using (new EntityCache())
+            using (Transaction tr = new Transaction())
+            {
+                Saver.SaveAll(entities.Cast<IdentifiableEntity>().ToArray());
 
                 tr.Commit();
             }
         }
 
         public static T Save<T>(this T obj)
-            where T : IdentifiableEntity
+            where T : class, IIdentifiable
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
             {
-                Saver.Save(obj);
+                Saver.Save((IdentifiableEntity)(IIdentifiable)obj);
 
                 return tr.Commit(obj);
             }
