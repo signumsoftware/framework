@@ -30,16 +30,16 @@ namespace Signum.Windows
             set { SetValue(MainControlProperty, value); }
         }
 
-        public static readonly DependencyProperty ViewButtonsProperty =
-           DependencyProperty.Register("ViewButtons", typeof(ViewButtons), typeof(ButtonBar), new UIPropertyMetadata(ViewButtons.Ok));
-        public ViewButtons ViewButtons
+        public static readonly DependencyProperty OkVisibleProperty =
+            DependencyProperty.Register("OkVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
+        public bool OkVisible
         {
-            get { return (ViewButtons)GetValue(ViewButtonsProperty); }
-            set { SetValue(ViewButtonsProperty, value); }
+            get { return (bool)GetValue(OkVisibleProperty); }
+            set { SetValue(OkVisibleProperty, value); }
         }
 
         public static readonly DependencyProperty SaveVisibleProperty =
-            DependencyProperty.Register("SaveVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(true));
+            DependencyProperty.Register("SaveVisible", typeof(bool), typeof(ButtonBar), new UIPropertyMetadata(false));
         public bool SaveVisible
         {
             get { return (bool)GetValue(SaveVisibleProperty); }
@@ -87,20 +87,12 @@ namespace Signum.Windows
             get { return btReload; }
         }
 
+        public ViewButtons ViewButtons { get; set; }
+
         public ButtonBar()
         {
             InitializeComponent();
-            this.Loaded += ButtonBar_Loaded;
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ToolBar_DataContextChanged);
-        }
-
-        void ButtonBar_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.Loaded -= ButtonBar_Loaded;
-
-            btSave.Visibility = (ViewButtons == ViewButtons.Save && SaveVisible).ToVisibility();
-            btOk.Visibility = (ViewButtons == ViewButtons.Ok && SaveVisible).ToVisibility();
-            btReload.Visibility = (ReloadVisible).ToVisibility();
         }
 
         void ToolBar_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

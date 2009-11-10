@@ -339,9 +339,9 @@ namespace Signum.Windows
                     MainControl = ctrl
                 };
 
-                nw.ButtonBar.ViewButtons = viewOptions.Buttons;
-                if (viewOptions.Buttons == ViewButtons.Save && !ShowSave(entity.GetType(), viewOptions.Admin))
-                    nw.ButtonBar.SaveVisible = false;
+                nw.ButtonBar.ViewButtons = viewOptions.Buttons; 
+                nw.ButtonBar.SaveVisible = viewOptions.Buttons == ViewButtons.Save && ShowSave(entity.GetType(), viewOptions.Admin);
+                nw.ButtonBar.OkVisible = viewOptions.Buttons == ViewButtons.Ok;
 
                 win = nw;
             }
