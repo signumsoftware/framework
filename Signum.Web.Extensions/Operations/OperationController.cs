@@ -76,7 +76,7 @@ namespace Signum.Web.Operations
                 if (sfId.HasValue)
                 {
                     Lite lite = Lite.Create(type, sfId.Value);
-                    entity = OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                    entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
                     throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
@@ -94,7 +94,7 @@ namespace Signum.Web.Operations
                     return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
                 }
 
-                entity = OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+                entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
 
                 //TODO Anto: Reactiva?            
                 //if (Navigator.ExtractIsReactive(Request.Form))

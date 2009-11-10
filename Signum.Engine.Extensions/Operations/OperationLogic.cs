@@ -74,19 +74,19 @@ namespace Signum.Engine.Operations
         public static event ErrorOperationHandler ErrorOperation;
         public static event AllowOperationHandler AllowOperation; 
 
-        internal static void OnBeginOperation(IOperation operation, IdentifiableEntity entity)
+        internal static void OnBeginOperation(IOperation operation, IIdentifiable entity)
         {
             if (BeginOperation != null)
                 BeginOperation(operation, entity);
         }
 
-        internal static void OnEndOperation(IOperation operation, IdentifiableEntity entity)
+        internal static void OnEndOperation(IOperation operation, IIdentifiable entity)
         {
             if (EndOperation != null)
                 EndOperation(operation, entity);
         }
 
-        internal static void OnErrorOperation(IOperation operation, IdentifiableEntity entity, Exception ex)
+        internal static void OnErrorOperation(IOperation operation, IIdentifiable entity, Exception ex)
         {
             if (ErrorOperation != null)
                 ErrorOperation(operation, entity, ex);
@@ -191,7 +191,7 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Construct
-        public static IdentifiableEntity ServiceConstruct(Type type, Enum operationKey, params object[] args)
+        public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {
             return Find<IConstructorOperation>(type, operationKey).Construct(args);
         }
@@ -199,19 +199,19 @@ namespace Signum.Engine.Operations
         public static T Construct<T>(Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            return (T)(IIdentifiable)Find<IConstructorOperation>(typeof(T), operationKey).Construct(args);
+            return (T)Find<IConstructorOperation>(typeof(T), operationKey).Construct(args);
         }
         #endregion
 
         #region ConstructFrom
-        public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
+        public static IIdentifiable ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertLite(false).Construct(entity, args);
+            return Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertLite(false).Construct(entity, args);
         }
 
-        public static IdentifiableEntity ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
+        public static IIdentifiable ServiceConstructFromLite(Lite lite, Enum operationKey, params object[] args)
         {
-            return (IdentifiableEntity)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
+            return Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
         }
 
 
@@ -321,7 +321,7 @@ namespace Signum.Engine.Operations
         }
     }
 
-    public delegate void OperationHandler(IOperation operation, IdentifiableEntity entity);
-    public delegate void ErrorOperationHandler(IOperation operation, IdentifiableEntity entity, Exception ex);
+    public delegate void OperationHandler(IOperation operation, IIdentifiable entity);
+    public delegate void ErrorOperationHandler(IOperation operation, IIdentifiable entity, Exception ex);
     public delegate bool AllowOperationHandler(Enum operationKey);
 }

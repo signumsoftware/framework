@@ -38,7 +38,7 @@ namespace Signum.Windows.Processes
             }
         }
 
-        static IdentifiableEntity ProcessOperation_Plan(EntityOperationEventArgs args)
+        static IIdentifiable ProcessOperation_Plan(EntityOperationEventArgs args)
         {
             DateTime plan = DateTime.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, args.SenderButton.FindCurrentWindow()))
@@ -47,8 +47,6 @@ namespace Signum.Windows.Processes
             }
             return null; 
         }
-
-
 
         static BitmapFrame Image(string name)
         {

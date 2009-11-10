@@ -56,7 +56,7 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void OperationLogic_BeginOperation(IOperation operation, IdentifiableEntity entity)
+        static void OperationLogic_BeginOperation(IOperation operation, IIdentifiable entity)
         {
             if (!GetAllowed(RoleDN.Current, operation.Key))
                 throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(operation.Key));

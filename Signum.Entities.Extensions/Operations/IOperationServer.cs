@@ -22,23 +22,24 @@ namespace Signum.Services
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args);
+        IIdentifiable ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args);
-
-
-        [OperationContract, NetDataContract]
-        IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args);
+        IIdentifiable ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args);
+        IIdentifiable Construct(Type type, Enum operationKey, params object[] args);
+
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromLite(Lite lite, Enum operationKey, params object[] args);
+        IIdentifiable ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args);
+        IIdentifiable ConstructFromLite(Lite lite, Enum operationKey, params object[] args);
+
+
+        [OperationContract, NetDataContract]
+        IIdentifiable ConstructFromMany(List<Lite> lites, Type type, Enum operationKey, params object[] args);
     }
 }

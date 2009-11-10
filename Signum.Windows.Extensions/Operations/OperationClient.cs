@@ -130,7 +130,7 @@ namespace Signum.Windows.Operations
             return EnumExtensions.NiceToString(key); 
         }
 
-        private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, Func<EntityOperationEventArgs, IdentifiableEntity> handler)
+        private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, Func<EntityOperationEventArgs, IIdentifiable> handler)
         {
             if (!operationInfo.CanExecute)
                 throw new ApplicationException("Action {0} is disabled".Formato(operationInfo.Key));
@@ -147,7 +147,7 @@ namespace Signum.Windows.Operations
                     SenderButton = sender
                 };
 
-                IdentifiableEntity newIdent = handler(oea);
+                IIdentifiable newIdent = handler(oea);
                 if (newIdent != null)
                     entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
             }
@@ -158,14 +158,14 @@ namespace Signum.Windows.Operations
                      if (entityControl.LooseChangesIfAny())
                      {
                          Lite<IdentifiableEntity> lite = ident.ToLite();
-                         IdentifiableEntity newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lite, operationInfo.Key, null);
+                         IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lite, operationInfo.Key, null);
                          if (operationInfo.Returns)
                              entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                      }
                  }
                  else
                  {
-                     IdentifiableEntity newIdent = Server.Service<IOperationServer>().ExecuteOperation(ident, operationInfo.Key, null);
+                     IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperation(ident, operationInfo.Key, null);
                      if (operationInfo.Returns)
                          entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                  }
@@ -177,14 +177,14 @@ namespace Signum.Windows.Operations
                     if (entityControl.LooseChangesIfAny())
                     {
                         Lite lite = Lite.Create(ident.GetType(), ident);
-                        IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFromLite(lite, operationInfo.Key, null);
+                        IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFromLite(lite, operationInfo.Key, null);
                         if (operationInfo.Returns)
                             Navigator.View(newIdent, ViewButtons.Save);
                     }
                 }
                 else
                 {
-                    IdentifiableEntity newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
+                    IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
                     if (operationInfo.Returns)
                         Navigator.View(newIdent, ViewButtons.Save);
                 }

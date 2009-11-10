@@ -11,9 +11,9 @@ namespace Signum.Entities.Operations
     public class LogOperationDN : IdentifiableEntity
     {
         [ImplementedByAll]
-        Lite<IdentifiableEntity> target;
+        Lite<IIdentifiable> target;
         [NotNullValidator, LocDescription]
-        public Lite<IdentifiableEntity> Target
+        public Lite<IIdentifiable> Target
         {
             get { return target; }
             set { Set(ref target, value, () => Target); }

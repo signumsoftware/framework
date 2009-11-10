@@ -79,9 +79,9 @@ namespace Signum.Engine.Operations
 
                     OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
 
-                    ((IdentifiableEntity)entity).Save(); //Nothing happens if already saved
+                    entity.Save(); //Nothing happens if already saved
 
-                    log.Target = ((IdentifiableEntity)entity).ToLite(); //in case AllowsNew == true
+                    log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
                     log.End = DateTime.Now;
                     log.Save();
 
@@ -100,7 +100,7 @@ namespace Signum.Engine.Operations
                         {
                             Operation = EnumLogic<OperationDN>.ToEntity(Key),
                             Start = DateTime.Now,
-                            Target = ((IdentifiableEntity)entity).ToLite(),
+                            Target = entity.ToLite<IIdentifiable>(),
                             Exception = ex.Message,
                             User = UserDN.Current
                         }.Save();

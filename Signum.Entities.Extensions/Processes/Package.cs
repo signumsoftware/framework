@@ -49,12 +49,21 @@ namespace Signum.Entities.Processes
         }
 
         [ImplementedByAll]
-        Lite<IdentifiableEntity> target;
+        Lite<IIdentifiable> target;
         [LocDescription]
-        public Lite<IdentifiableEntity> Target
+        public Lite<IIdentifiable> Target
         {
             get { return target; }
             set { Set(ref target, value, () => Target); }
+        }
+
+        [ImplementedByAll]
+        Lite<IIdentifiable> result;
+        [LocDescription]
+        public Lite<IIdentifiable> Result //ConstructFrom only!
+        {
+            get { return result; }
+            set { Set(ref result, value, () => Result); }
         }
 
         DateTime? finishTime;

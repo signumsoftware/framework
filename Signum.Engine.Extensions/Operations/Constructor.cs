@@ -13,7 +13,7 @@ namespace Signum.Engine.Operations
 {
     public interface IConstructorOperation : IOperation
     {
-        IdentifiableEntity Construct(params object[] parameters);
+        IIdentifiable Construct(params object[] parameters);
     }
 
     public class BasicConstructor<T> : IConstructorOperation
@@ -31,7 +31,7 @@ namespace Signum.Engine.Operations
             this.Key = key; 
         }
 
-        IdentifiableEntity IConstructorOperation.Construct(params object[] args)
+        IIdentifiable IConstructorOperation.Construct(params object[] args)
         {
              if (!OperationLogic.OnAllowOperation(Key))
                 throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key));
@@ -50,13 +50,13 @@ namespace Signum.Engine.Operations
 
                      OperationLogic.OnBeginOperation(this, null);
 
-                     IdentifiableEntity entity = (IdentifiableEntity)(IIdentifiable)OnConstruct(args);
+                     T entity = OnConstruct(args);
 
                      OperationLogic.OnEndOperation(this, entity);
 
                      if (!entity.IsNew)
                      {
-                         log.Target = ((IdentifiableEntity)entity).ToLite();
+                         log.Target = entity.ToLite<IIdentifiable>();
                          log.End = DateTime.Now;
                          log.Save();
                      }

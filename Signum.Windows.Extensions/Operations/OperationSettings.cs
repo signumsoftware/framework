@@ -19,14 +19,14 @@ namespace Signum.Windows.Operations
     //Execute & ConstructorFrom
     public class EntityOperationSettings : OperationSettings
     {
-        public Func<EntityOperationEventArgs, IdentifiableEntity> Click { get; set; }
-        public Func<IdentifiableEntity, bool> IsVisible { get;  set; }
+        public Func<EntityOperationEventArgs, IIdentifiable> Click { get; set; }
+        public Func<IIdentifiable, bool> IsVisible { get; set; }
         public bool VisibleOnOk { get; set; }
     }
 
     public class EntityOperationEventArgs : EventArgs
     {
-        public IdentifiableEntity Entity { get; internal set; }
+        public IIdentifiable Entity { get; internal set; }
         public FrameworkElement EntityControl { get; internal set; }
         public FrameworkElement SenderButton { get; internal set; }
         public OperationInfo OperationInfo { get; internal set; } 

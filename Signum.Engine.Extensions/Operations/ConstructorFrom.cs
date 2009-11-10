@@ -76,13 +76,13 @@ namespace Signum.Engine.Operations
 
                     OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
 
-                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstruct((F)entity, args);
+                    T result = OnConstruct((F)entity, args);
 
                     OperationLogic.OnEndOperation(this, result);
 
                     if (!result.IsNew)
                     {
-                        log.Target = result.ToLite();
+                        log.Target = result.ToLite<IIdentifiable>();
                         log.End = DateTime.Now;
                         log.Save();
                     }

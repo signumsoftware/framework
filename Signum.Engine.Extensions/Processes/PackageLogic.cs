@@ -64,31 +64,31 @@ namespace Signum.Engine.Processes
 
     }
 
-    public class PackageAlgorithm: IProcessAlgorithm
+    public abstract class PackageAlgorithm<T>: IProcessAlgorithm
+        where T:class, IIdentifiable
     {
-        Enum operationKey;
+        public Enum OperationKey { get; private set; }
 
-        Func<List<Lite>> getLazies;
+        Func<List<Lite<T>>> getLazies;
 
         public PackageAlgorithm(Enum operationKey)
         {
-            this.operationKey = operationKey;
+            this.OperationKey = operationKey;
         }
 
-        public PackageAlgorithm(Enum operationKey, Func<List<Lite>> getLazies)
+        public PackageAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLazies)
         {
-            this.operationKey = operationKey;
+            this.OperationKey = operationKey;
             this.getLazies = getLazies;
         }
 
         public virtual IProcessDataDN CreateData(object[] args)
         {
-            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(operationKey) };
+            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
             package.Save();
 
-
-            List<Lite> lites = 
-                args != null && args.Length > 0? (List<Lite>)args[0]: 
+            List<Lite<T>> lites = 
+                args != null && args.Length > 0? (List<Lite<T>>)args[0]: 
                 getLazies != null? getLazies(): null;
 
             if (lites == null)
@@ -99,7 +99,7 @@ namespace Signum.Engine.Processes
             lites.Select(lite => new PackageLineDN
             {
                 Package = package.ToLite(),
-                Target = lite.ToLite<IdentifiableEntity>()
+                Target = lite.ToLite<IIdentifiable>()
             }).SaveList();
 
             return package;
@@ -126,7 +126,7 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        OperationLogic.ServiceExecuteLite(pl.Target, operationKey);
+                        ExecuteLine(pl);
                         pl.FinishTime = DateTime.Now;
                         pl.Save();
                         tr.Commit();
@@ -154,6 +154,48 @@ namespace Signum.Engine.Processes
             }
 
             return FinalState.Finished;
+        }
+
+        public abstract void ExecuteLine(PackageLineDN pl);
+    }
+
+    public class PackageExecuteAlgorithm<T> : PackageAlgorithm<T> where T:class, IIdentifiable
+    {
+        public PackageExecuteAlgorithm(Enum operationKey)
+            : base(operationKey)
+        {
+        }
+
+        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLazies):base(operationKey, getLazies)
+        {
+        }
+
+        public override void ExecuteLine(PackageLineDN pl)
+        {
+            OperationLogic.ExecuteLite<T>(pl.Target.ToLite<T>(), OperationKey);
+        }
+    }
+
+    public class PackageConstructFromAlgorithm<F, T> : PackageAlgorithm<F>
+        where T : class, IIdentifiable
+        where F : class, IIdentifiable
+    {
+        public PackageConstructFromAlgorithm(Enum operationKey)
+            : base(operationKey)
+        {
+        }
+
+        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLazies):base(operationKey, getLazies)
+        {
+        }
+
+        public override void ExecuteLine(PackageLineDN pl)
+        {
+            var result = OperationLogic.ConstructFromLite<T>(pl.Target.ToLite<F>(), OperationKey);
+            if (result.IsNew)
+                result.Save();
+
+            pl.Result = result.ToLite<IIdentifiable>();
         }
     }
 }

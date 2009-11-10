@@ -54,13 +54,13 @@ namespace Signum.Engine.Operations
 
                     OperationLogic.OnBeginOperation(this, null);
 
-                    IdentifiableEntity result = (IdentifiableEntity)(IIdentifiable)OnConstructor(lites.Select(l => l.ToLite<F>()).ToList(), args);
+                    T result = OnConstructor(lites.Select(l => l.ToLite<F>()).ToList(), args);
 
                     OperationLogic.OnEndOperation(this, result);
 
                     if (!result.IsNew)
                     {
-                        log.Target = result.ToLite();
+                        log.Target = result.ToLite<IIdentifiable>();
                         log.End = DateTime.Now;
                         log.Save();
                     }

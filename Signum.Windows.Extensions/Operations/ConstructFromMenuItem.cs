@@ -76,7 +76,7 @@ namespace Signum.Windows.Operations
                         QueryName = queryName
                     });
 
-               IdentifiableEntity entity = Server.Service<IOperationServer>().ConstructFromMany(lites, entityType, operationInfo.Key);
+                IIdentifiable entity = Server.Service<IOperationServer>().ConstructFromMany(lites, entityType, operationInfo.Key);
 
                if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
                    Navigator.View(entity); 
