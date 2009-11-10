@@ -5,6 +5,25 @@
 	}
 }
 
+function ValidatePartialAndCallJavascript(urlValidateController, urlJavascriptController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, idQueryParam, typeQueryParam) {
+    var panelPopupKey = prefix + "panelPopup";
+    if (TypedValidatePartial(urlValidateController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, 'panelPopup', idQueryParam, typeQueryParam)) {
+        $.ajax({
+            type: "POST",
+            url: urlJavascriptController,
+            data: $('#' + panelPopupKey + " *").serialize() + "&sfPrefix=" + prefix,
+            async: false,
+            dataType: "html",
+            success: function(msg) {
+                $('#' + panelPopupKey).append("<script type=\"text/javascript\">" + msg + "</script>");
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                ShowError(XMLHttpRequest, textStatus, errorThrown);
+            }
+        });
+	}
+}
+
 function NotifyError(s,t) {
     NotifyInfo(s,t);
 }
@@ -166,46 +185,53 @@ function SFparams(prefix) {
 function ValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, panelPopupKey) {
     var returnValue = false;
     if (empty(panelPopupKey)) panelPopupKey = "panelPopup";
-    var formChildren;
-    var idQueryParam = ""; var typeNameParam = ""; //var reactiveEntity = "";
-    if ($('#' + sfReactive).length > 0) {
-        formChildren = $("form");
-//        if ($('#' + sfReactive).length > 0)
-//            reactiveEntity = qp(sfReactive, true);
-    }
-    else {
+    
+    var idQueryParam = ""; var typeNameParam = "";
+    if ($('#' + sfReactive).length == 0) {
         formChildren = $('#' + prefix + panelPopupKey + " *, #" + sfTabId);
         if (formChildren.filter('#' + prefix + sfId).length == 0 && $('#' + prefix + sfId).length > 0)
             idQueryParam = qp(prefix + sfId, $('#' + prefix + sfId).val());
         if (formChildren.filter('#' + prefix + sfRuntimeType).length == 0 && $('#' + prefix + sfRuntimeType).length > 0)
             typeNameParam = qp(prefix + sfRuntimeType, $('#' + prefix + sfRuntimeType).val());    
-    }    
-	$.ajax({
-		type: "POST",
-		url: urlController,
-		async: false,
-		data: formChildren.serialize() + qp(sfPrefix,prefix) + qp(sfPrefixToIgnore,prefixToIgnore) + idQueryParam + typeNameParam, //+ reactiveEntity,
-		success: function (result) {
-			eval('var result=' + result);
-			var toStr = result[sfToStr];
-			var link = $("#" + prefix + sfLink);
-			if (link.length > 0) link.html(toStr); //EntityLine
-			else {
-				var tost = $("#" + prefix + sfToStr);
-				if (tost.length > 0) tost.html(toStr); //EntityList
-				else {
-					var combo = $("#" + prefix + sfCombo);
-					if (combo.length > 0) $('#' + prefix + sfCombo + " option:selected").html(toStr);
-				}
-			}
-			var modelState = result["ModelState"];
-			returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
-		}
-	});
-	return returnValue;
+    }
+    return TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, panelPopupKey, idQueryParam, typeNameParam);
+}
+
+function TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, panelPopupKey, idQueryParam, typeNameParam) {
+    var returnValue = false;
+    var formChildren;
+    if ($('#' + sfReactive).length > 0) {
+        formChildren = $("form");
+    }
+    else {
+        formChildren = $('#' + prefix + panelPopupKey + " *, #" + sfTabId);
+    }
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        async: false,
+        data: formChildren.serialize() + qp(sfPrefix, prefix) + qp(sfPrefixToIgnore, prefixToIgnore) + idQueryParam + typeNameParam, 
+        success: function(result) {
+            eval('var result=' + result);
+            var toStr = result[sfToStr];
+            var link = $("#" + prefix + sfLink);
+            if (link.length > 0) link.html(toStr); //EntityLine
+            else {
+                var tost = $("#" + prefix + sfToStr);
+                if (tost.length > 0) tost.html(toStr); //EntityList
+                else {
+                    var combo = $("#" + prefix + sfCombo);
+                    if (combo.length > 0) $('#' + prefix + sfCombo + " option:selected").html(toStr);
+                }
+            }
+            var modelState = result["ModelState"];
+            returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            ShowError(XMLHttpRequest, textStatus, errorThrown);
+        }
+    });
+    return returnValue;
 }
 
 function ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText) {

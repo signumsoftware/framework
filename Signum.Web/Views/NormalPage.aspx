@@ -20,7 +20,7 @@
      <table>
         <tr>
             <td>
-                <%= Html.GetWidgetsForViewName(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), "") %>
+                <%--<%= Html.GetWidgetsListForViewName(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), "") %>--%>
             </td>
             <td>
 <h2>
