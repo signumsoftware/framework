@@ -1,4 +1,4 @@
-﻿var debug=false;
+﻿var debug=true;
 function log(s){
         if (debug)
             if (typeof console != "undefined" && typeof console.debug != "undefined") {
@@ -163,15 +163,15 @@ popup.prototype = {
 	        async: false,
 	        dataType: "html",
 	        success: function(msg) {
-	            console.log("Estableciendo el contenido del popup en el div con id " + me.options.prefix + "divASustituir");
+	            log("Estableciendo el contenido del popup en el div con id " + me.options.prefix + "divASustituir");
 	            $('#' + me.options.prefix + "divASustituir").html(msg);
 	            if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
 	                return;
 	            me.options.prefix = newPrefix;
 	            me.show(oldPrefix + "divASustituir", "modalBackground", "panelPopup");
-	            console.log("Mostrando");
+	            log("Mostrando");
 				$(me.pf(sfBtnOk)).click(me.options.onOk);
-					            console.log("Añadiendo evento ok a " + me.pf(sfBtnOk) + " para llamar a " + me.options.onOk);
+				log("Añadiendo evento ok a " + me.pf(sfBtnOk) + " para llamar a " + me.options.onOk);
 				$(me.pf(sfBtnCancel)).click(me.options.onCancel);	            
 	        },
 	        error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -197,8 +197,8 @@ popup.prototype = {
 			$(me.pf(modalBackgroundKey)).width(document.documentElement.clientWidth).height(document.documentElement.clientHeight).hide();
 			
 			//Read offsetWidth and offsetHeight after display=block or otherwise it's 0
-			console.log(me.pf(panelPopupKey));
-			console.log($(me.pf(panelPopupKey)).length);
+			log(me.pf(panelPopupKey));
+			log($(me.pf(panelPopupKey)).length);
 			var popup2 = $(me.pf(panelPopupKey))[0];
 			var parentDiv = $(me.pf(sfEntity)).parent();
 			var popupWidth = popup2.offsetWidth;
