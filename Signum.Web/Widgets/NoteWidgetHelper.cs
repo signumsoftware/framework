@@ -30,47 +30,36 @@ namespace Signum.Web
                 return null;
 
             List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)identifiable);
-            
+
             return new WidgetNode{
                 Content = NotesToString(helper, notes, prefix),
                 Count = notes.Count.ToString(),
                 Label = "Notes",
-               // Href = Navigator.FindRoute(typeof(NoteDN)),
+                Href = "javascript:Find('Signum.aspx/PartialFind', 'NotaDN', false, function(){OnSearchOk('widgetNote', 'divASustituir');}, function(){OnSearchCancel('widgetNote', 'divASustituir');} , 'divASustituir', 'widgetNote');",
                 Id = "Notes",
                 Show = true
             };
         }
 
-        private static string GetServerClickAjax(string prefix)
-        {
-           // if (OnClick.HasText() || OnServerClickPost.HasText())
-            //    return null;
-
-            return
-                @"new popup('Signum.aspx/PartialFind').typed('NotaDN', '','','');";
-        }
-        //function OpenPopup(urlController, divASustituir, prefix, onOk, onCancel, detailDiv, partialView) {
-
-
         private static string NotesToString(HtmlHelper helper, List<Lite<INoteDN>> notes, string prefix)
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("<div class='widgetDiv notesDiv'>");
+            sb.AppendLine("<div class='widget notes'>");
             
             string jscript=
-                  @"new popup('Signum.aspx/PartialView').typed('NotaDN', '{0}','','');".Formato("sfId=");
-            
-            sb.Append("<div><a onclick=\"{0}\"><i>Crear una nota nueva...</i></a></div>"
+                  @"new popup('Signum.aspx/PopupView').typedDirect('NotaDN')";
+
+            sb.Append("<div><a class='create' onclick=\"{0}\">Crear una nota nueva...</a></div>"
                 .Formato(jscript));
             
             if (notes.Count > 0) sb.Append("<hr />");
             foreach (Lite<INoteDN> note in notes)
             {
-                string jscript2 =
-                    @"new popup('Signum.aspx/PartialView').typed('NotaDN', '{0}','','');".Formato("sfId=" + note.Id);
+                string jscript2 = Navigator.ViewRoute(typeof(NoteDN), note.Id);
+                    //@"new popup('Signum.aspx/PopupView').typed('NotaDN', '{0}','','');".Formato("sfId=" + note.Id);
 
-                sb.Append("<div><a onclick=\"{0}\">{1}</a></div>"
+                sb.Append("<div><a class='navigate' onclick=\"{0}\">{1}</a></div>"
               .Formato(jscript2, note.ToStr.Etc(30)
               ));
             }

@@ -52,7 +52,7 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("<div class='widgetDiv alertsDiv'>");
+            sb.AppendLine("<div class='widget alerts'>");
             sb.Append("<div><i>Crear una alerta nueva...</i></div>");
             foreach (Lite<IAlertDN> alert in alerts)
             {

@@ -46,7 +46,7 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("<div class='widgetDiv quickLinksDiv'>");
+            sb.AppendLine("<div class='widget quickLinks'>");
             foreach (QuickLinkItem link in links)
             {
                 sb.AppendLine(link.ToString(helper, prefix));
