@@ -529,12 +529,16 @@ namespace Signum.Engine.Maps
         Index IColumn.Index { get { return Index.None; } }
         SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
         bool IColumn.PrimaryKey { get { return true; } }
-        bool IColumn.Identity { get { return true; } }
+        bool IColumn.Identity { get { return table.Identity; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
 
-        public FieldPrimaryKey(Type fieldType) : base(fieldType) { }
+        Table table; 
+        public FieldPrimaryKey(Type fieldType, Table table) : base(fieldType) 
+        {
+            this.table = table; 
+        }
 
         public override string ToString()
         {

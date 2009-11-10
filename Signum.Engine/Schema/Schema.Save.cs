@@ -23,11 +23,6 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
-        public IEnumerable<EntityField> NormalFields
-        {
-            get { return Fields.Values.Where(ef => !(ef.Field is FieldPrimaryKey)); }
-        }
-
         public SqlPreCommand Save(IdentifiableEntity ident, Forbidden forbidden)
         {   
             var collectionFields = Fields.Values.Select(f=>f.Field).OfType<FieldMList>();
@@ -51,8 +46,8 @@ namespace Signum.Engine.Maps
 
             List<SqlParameter> parameters = new List<SqlParameter>();
 
-            foreach (var v in Identity ? NormalFields : Fields.Values)
-                v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
+            foreach (var v in Fields.Values)
+                v.Field.CreateParameter(parameters, v.Getter(ident), SqlCommandType.Insert, Forbidden.None);
             
             return SqlBuilder.Insert(Name, parameters);
         }
@@ -64,8 +59,8 @@ namespace Signum.Engine.Maps
                 ent.Ticks = Transaction.StartTime.Ticks;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            foreach (var v in Identity ? NormalFields : Fields.Values)
-                v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
+            foreach (var v in Fields.Values)
+                v.Field.CreateParameter(parameters, v.Getter(ident), SqlCommandType.Insert, forbidden);
 
             ident.IsNew = false; 
 
@@ -93,8 +88,8 @@ namespace Signum.Engine.Maps
                 return null;
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            foreach (var v in NormalFields)
-                v.Field.CreateParameter(parameters, v.Getter(ident), Forbidden.None);
+            foreach (var v in Fields.Values)
+                v.Field.CreateParameter(parameters, v.Getter(ident), SqlCommandType.Update, Forbidden.None);
 
             return SqlBuilder.UpdateId(Name, parameters, ident.Id, oldToStr);
         }
@@ -109,15 +104,15 @@ namespace Signum.Engine.Maps
                 entity.Ticks = Transaction.StartTime.Ticks;
 
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                foreach (var v in NormalFields)
-                    v.Field.CreateParameter(parameters, v.Getter(entity), forbidden);
+                foreach (var v in Fields.Values)
+                    v.Field.CreateParameter(parameters, v.Getter(entity), SqlCommandType.Update, forbidden);
                 return SqlBuilder.UpdateSetIdEntity(Name, parameters, entity.Id, oldTicks);
             }
             else
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                foreach (var v in NormalFields)
-                    v.Field.CreateParameter(parameters, v.Getter(ident), forbidden);
+                foreach (var v in Fields.Values)
+                    v.Field.CreateParameter(parameters, v.Getter(ident), SqlCommandType.Update, forbidden);
                 return SqlBuilder.UpdateSetId(Name, parameters, ident.Id);
             }
         }
@@ -141,29 +136,37 @@ namespace Signum.Engine.Maps
             var inserts =  ((IEnumerable)collection).Cast<object>()
                 .Where(o => (o as IdentifiableEntity).TryCS(e => !forbidden.Contains(e)) ?? true)
                 .Select(o => SqlBuilder.RelationalInsertScope(Name, BackReference.Name,
-                    new List<SqlParameter>().Do(lp => Field.CreateParameter(lp, o, forbidden))))
+                    new List<SqlParameter>().Do(lp => Field.CreateParameter(lp, o, SqlCommandType.Insert, forbidden))))
                 .Combine(Spacing.Simple);
 
             return SqlPreCommand.Combine(Spacing.Double, clean, inserts); 
         }
     }
 
+
+    public enum SqlCommandType
+    {
+        Insert,
+        Update
+    }
+
     public abstract partial class Field
     {
-        protected internal virtual void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden) { }
+        protected internal virtual void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden) { }
     }
 
     public partial class FieldPrimaryKey
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
-            parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, false, (int?)value));
+            if (!table.Identity && type == SqlCommandType.Insert)
+                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, false, (int?)value));
         }
     }
 
     public partial class FieldValue 
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
             parameters.Add(SqlParameterBuilder.CreateParameter(Name, SqlDbType, Nullable, value)); 
         }
@@ -212,7 +215,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldReference
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
             parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Name, Nullable, this.GetIdForLite(value, forbidden)));
         }
@@ -220,9 +223,9 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEnum
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
-            base.CreateParameter(parameters, EnumProxy.FromEnum((Enum)value), forbidden);
+            base.CreateParameter(parameters, EnumProxy.FromEnum((Enum)value), type, forbidden);
         }
     }
 
@@ -232,7 +235,7 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
             if (value != null)
             {
@@ -240,14 +243,14 @@ namespace Signum.Engine.Maps
                 if (forbidden.Count == 0)
                     ec.Modified = false;
                 foreach (var v in EmbeddedFields.Values)
-                    v.Field.CreateParameter(parameters, v.Getter(value), forbidden);
+                    v.Field.CreateParameter(parameters, v.Getter(value), type, forbidden);
             }
         }      
     }
 
     public partial class FieldImplementedBy
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
             Type valType = value == null ? null :
                 value is Lite ? ((Lite)value).RuntimeType :
@@ -271,12 +274,12 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, Forbidden forbidden)
+        protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
             if (value != null)
             {   
                 parameters.Add(SqlParameterBuilder.CreateReferenceParameter(Column.Name, Column.Nullable, this.GetIdForLite(value, forbidden)));
-                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(ColumnTypes.Name,ColumnTypes.Nullable, this.GetTypeForLite(value, forbidden).TryCS(t => Schema.Current.IDsForType[t])));
+                parameters.Add(SqlParameterBuilder.CreateReferenceParameter(ColumnTypes.Name, ColumnTypes.Nullable, this.GetTypeForLite(value, forbidden).TryCS(t => Schema.Current.IDsForType[t])));
             }
         }
     }

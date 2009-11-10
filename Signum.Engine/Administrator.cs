@@ -246,7 +246,6 @@ deallocate cur");
         {
             Table table = Schema.Current.Table<T>();
             table.Identity = false;
-            FieldPrimaryKey fpk = (FieldPrimaryKey)table.Fields["id"].Field;
             SqlBuilder.SetIdentityInsert(table.Name, true).ExecuteNonQuery();
 
             return new Disposable(() =>
