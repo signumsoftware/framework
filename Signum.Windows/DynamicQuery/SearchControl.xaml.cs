@@ -64,7 +64,7 @@ namespace Signum.Windows
         {
             get { return (bool)GetValue(ShowFilterButtonProperty); }
             set { SetValue(ShowFilterButtonProperty, value); }
-        } 
+        }
 
         public static readonly DependencyProperty ShowHeaderProperty =
             DependencyProperty.Register("ShowHeader", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
@@ -160,7 +160,7 @@ namespace Signum.Windows
 
         private void UpdateVisibility()
         {
-            btCreate.Visibility = Create  && EntityType != null ? Visibility.Visible : Visibility.Collapsed;
+            btCreate.Visibility = Create && EntityType != null ? Visibility.Visible : Visibility.Collapsed;
             UpdateViewSelection();
         }
 
@@ -171,7 +171,7 @@ namespace Signum.Windows
         public SearchControl()
         {
             this.InitializeComponent();
-            
+
 
             FilterOptions = new FreezableCollection<FilterOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
@@ -254,7 +254,7 @@ namespace Signum.Windows
                 SelectedItems = null;
         }
 
-        List<Column> columns = new List<Column>(); 
+        List<Column> columns = new List<Column>();
         List<Column> visibleColumns = new List<Column>();
 
         private void GenerateListViewColumns(QueryDescription view)
@@ -278,7 +278,7 @@ namespace Signum.Windows
                         CellTemplate = dt,
                     });
 
-                visibleColumns.Add(c); 
+                visibleColumns.Add(c);
             }
         }
 
@@ -439,7 +439,7 @@ namespace Signum.Windows
             }
 
 
-            int columHeaderIndex =  gvResults.Columns.IndexOf(headerClicked.Column);
+            int columHeaderIndex = gvResults.Columns.IndexOf(headerClicked.Column);
             int colIndex = columns.IndexOf(visibleColumns[columHeaderIndex]);
 
             btFind.IsEnabled = false;
@@ -485,7 +485,7 @@ namespace Signum.Windows
                     _startPoint = null;
                     GridViewColumnHeader header = (GridViewColumnHeader)sender;
                     FilterOption filter = CreateFilter(header);
-              
+
                     if (DragDrop.DoDragDrop(header, filter, DragDropEffects.Copy) == DragDropEffects.Copy)
                     {
 
@@ -555,11 +555,17 @@ namespace Signum.Windows
             this.Loaded -= SearchControlMenuItem_Loaded;
             if (this.Parent != null)
             {
-                SearchControl = this.Parents().OfType<SearchControl>().First();
+                // TODO: olmo el error cansino de los buscadore al iniciar
+                var result = this.Parents().OfType<SearchControl>().FirstOrDefault();
+                if (result != null)
+                {
+                    SearchControl = result;
 
-                SearchControl.QueryResultChanged += new RoutedEventHandler(searchControl_QueryResultChanged);
+                    SearchControl.QueryResultChanged += new RoutedEventHandler(searchControl_QueryResultChanged);
 
-                Initialize();
+                    Initialize();
+                }
+
             }
         }
 
