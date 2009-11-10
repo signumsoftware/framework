@@ -14,8 +14,8 @@ var popup = function(_url, _options, _visualOptions){
       me.options = $.extend({
 		            divASustituir: "divASustituir",
 		            prefix: "",
-		            onOk: me.onPopupOk,
-		            onCancel: me.onPopupCancel,
+		            onOk: null,
+		            onCancel: null,
 		            detailsDiv: "",
 		            partialView: "",
 					isEmbeded: false
@@ -105,7 +105,7 @@ popup.prototype = {
 			return;
 		
 		var nameSelected = selected[0].id;
-		var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
+		me.options.prefix = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
 		me.openCommon();
 	},
 	
@@ -178,6 +178,33 @@ popup.prototype = {
 	            ShowError(XMLHttpRequest, textStatus, errorThrown);
 	        }
 	    });
+    },
+    
+    newListOption: function (prefix,selectedType) {
+        me.options.prefix = prefix;
+        var lastElement = $('#' + me.options.prefix + " > option:last");
+        var lastIndex = -1;
+        if (lastElement.length > 0) {
+            var nameSelected = lastElement[0].id;
+            lastIndex = nameSelected.substring(me.options.prefix.length + 1, nameSelected.indexOf(sfToStr));
+        }
+        var newIndex = "_" + (parseInt(lastIndex) + 1);
+        var staticType = $(me.pf(sfStaticType));
+        staticType.after(
+            "<input type='hidden' id='" + me.options.prefix + newIndex + sfRuntimeType + "' name='" + me.options.prefix + newIndex + sfRuntimeType + "' value='" + selectedType + "' />\n" +
+            "<script type=\"text/javascript\">var " + me.options.prefix + newIndex + sfEntityTemp + " = '';</script>\n");
+        var sfEntityDiv = "<div id='" + me.options.prefix + newIndex + sfEntity + "' name='" + me.options.prefix + newIndex + sfEntity + "' style='display:none'></div>\n";
+        if (empty(me.options.detailDiv))
+            staticType.after(sfEntityDiv);
+        else
+            $("#" + me.options.detailDiv).append(sfEntityDiv);
+        if (me.options.isEmbeded == "False")
+            staticType.after("<input type='hidden' id='" + me.options.prefix + newIndex + sfId + "' name='" + me.options.prefix + newIndex + sfId + "' value='' />\n");
+
+        var select = $('#' + me.options.prefix);
+        select.append("\n<option id='" + me.options.prefix + newIndex + sfToStr + "' name='" + me.options.prefix + newIndex + sfToStr + "' value='' class='valueLine'>&nbsp;</option>");
+        $('#' + me.options.prefix + " > option").attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
+        $('#' + me.options.prefix + " > option:last").attr('selected', true);
     },
 	
 	chooseImplementation: function(){
@@ -392,7 +419,6 @@ function OpenPopupList(urlController, divASustituir, select, onOk, onCancel, det
         onOk: onOk,
         onCancel: onCancel,
         divASustituir: divASustituir,
-        prefix: prefixSelected,
         detailDiv: detailDiv
         }).openList(select);
 }
@@ -485,7 +511,7 @@ function OnImplementationsOk(urlController, divASustituir, prefix, onOk, onCance
         prefix: prefix,
         }).onImplementationsOk(selectedType);
 }
-
+/*
 function NewListOption(prefix, selectedType, isEmbeded, detailDiv) {
     var lastElement = $('#' + prefix + " > option:last");
     var lastIndex = -1;
@@ -510,7 +536,7 @@ function NewListOption(prefix, selectedType, isEmbeded, detailDiv) {
     select.append("\n<option id='" + prefix + newIndex + sfToStr + "' name='" + prefix + newIndex + sfToStr + "' value='' class='valueLine'>&nbsp;</option>");
     $('#' + prefix + " > option").attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
     $('#' + prefix + " > option:last").attr('selected', true);
-}
+}*/
 
 function OnListImplementationsOk(urlController, divASustituir, prefix, onOk, onCancel, isEmbeded, detailDiv, selectedType) {
     new popup(urlController,
