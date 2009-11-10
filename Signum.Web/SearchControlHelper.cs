@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Web.Properties;
+using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -282,6 +283,11 @@ namespace Signum.Web
                         id = id.RemoveLeft(prefix.Length); //We call GlobalName with it in EntityLine
                 }
 
+                if (value != null && (columnType == typeof(IIdentifiable) || Reflector.ExtractLite(columnType) == typeof(IIdentifiable) 
+                    || columnType == typeof(IdentifiableEntity) || Reflector.ExtractLite(columnType) == typeof(IdentifiableEntity)))
+                    columnType = Reflector.ExtractLite(value.GetType()) ?? value.GetType();
+                if (value != null && typeof(Lite).IsAssignableFrom(value.GetType()))
+                    value = Database.Retrieve((Lite)value);
                 Type t = typeof(TypeContext<>);
                 var tcreator = t.MakeGenericType(new Type[] {columnType});
                 TypeContext tc = (TypeContext)Activator.CreateInstance(tcreator, new object[]{value, id});

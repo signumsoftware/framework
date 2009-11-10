@@ -5,6 +5,8 @@ using System.Text;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Entities.Reflection;
+using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -61,9 +63,12 @@ namespace Signum.Web
                 for (int i = 0; i < filterOptions.Count; i++)
                 {
                     FilterOptions fo = filterOptions[i];
-                    string value;
-                    if (typeof(Lite).IsAssignableFrom(fo.Value.GetType()))
-                        value = ((Lite)fo.Value).Id.ToString();
+                    string value = "";
+                    if (fo.Value != null && typeof(Lite).IsAssignableFrom(fo.Value.GetType()))
+                    {
+                        Lite lite = (Lite)fo.Value;
+                        value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType);
+                    }
                     else
                         value = fo.Value.ToString();
                     sb.Append("&cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(i, fo.ColumnName, fo.Operation.ToString(), value));
@@ -89,14 +94,19 @@ namespace Signum.Web
 
         public Filter ToFilter()
         {
-            return new Filter
+            Filter f = new Filter
             {
                 Name = Column.Name,
                 Type = Column.Type,
                 Operation = Operation,
-                Value = Value 
             };
+            if (!typeof(Lite).IsAssignableFrom(Value.GetType()) || Value == null)
+                f.Value = Value;
+            else
+                f.Value = Lite.Create(Reflector.ExtractLite(Column.Type), Database.Retrieve((Lite)Value));
+            return f;
         }
+
     }
 
     public enum FilterMode

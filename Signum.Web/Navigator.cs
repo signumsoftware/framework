@@ -740,9 +740,15 @@ namespace Signum.Web
 
                 if (typeof(Lite).IsAssignableFrom(type))
                 {
+                    string[] vals = ((string)value).Split(';');
                     int intValue;
-                    if (value!=null && int.TryParse(value.ToString(), out intValue))
-                        value = Lite.Create(Reflector.ExtractLite(type), intValue);
+                    if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
+                    {
+                        Type liteType = Navigator.NameToType[vals[1]];
+                        if (typeof(Lite).IsAssignableFrom(liteType))
+                            liteType = Reflector.ExtractLite(liteType);
+                        value = Lite.Create(liteType, intValue);
+                    }
                     else
                         value = null;
                 }
@@ -793,9 +799,15 @@ namespace Signum.Web
                 }
                 if (typeof(Lite).IsAssignableFrom(type))
                 {
+                    string[] vals = ((string)value).Split(';');
                     int intValue;
-                    if (value != null && int.TryParse(value.ToString(), out intValue))
-                        value = Lite.Create(Reflector.ExtractLite(type), intValue);
+                    if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
+                    {
+                        Type liteType = Navigator.NameToType[vals[1]];
+                        if (typeof(Lite).IsAssignableFrom(liteType))
+                            liteType = Reflector.ExtractLite(liteType);
+                        value = Lite.Create(liteType, intValue);
+                    }
                     else
                         value = null;
                 }

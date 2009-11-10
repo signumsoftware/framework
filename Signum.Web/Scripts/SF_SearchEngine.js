@@ -264,16 +264,9 @@ function ConstructFromExecute(urlController, typeName, id, operationKey, isLite,
         dataType: "html",
         success: function(msg) {
         if (msg.indexOf("ModelState") > 0) {
-        if (prefix != "") { //PopupWindow
-        eval('var result=' + msg);
-					var modelState = result["ModelState"];
-					ShowErrorMessages(prefix, modelState, true, "*");
-        }
-        else{
-        eval('var result=' + msg);
-					var modelState = result["ModelState"];
-					ShowErrorMessages(prefix, modelState, true, "*");
-        }
+            eval('var result=' + msg);
+			var modelState = result["ModelState"];
+			ShowErrorMessages(prefix, modelState, true, "*");
         }
         else
         {
@@ -462,9 +455,9 @@ function SerializeFilter(index, prefix) {
 	if (valBool.length > 0) value = valBool[0].checked;
 
 	var id = $("#" + prefix + "value_" + index + sfId); //If it's a Lite, the value is the Id
-	if (id.length > 0) value = id.val();
+	if (id.length > 0)
+	    value = id.val() + ";" + $("#" + prefix + "value_" + index + sfRuntimeType).val();
 
-	var typeName = $("#" + prefix + "type_" + index);
 	return qp("cn" + index, columnName) + qp("sel" + index, selector.val()) + qp("val" + index, value);
 }
 
