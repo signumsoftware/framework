@@ -655,7 +655,7 @@ function RemoveDetailContainedEntity(prefix, detailDiv, reloadOnChangeFunction) 
     }
 }
 
-var autocompleteOnSelected = function(extendedControlName, newIdAndType, newValue, hasEntity) {
+function AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, hasEntity) {
     var prefix = extendedControlName.substr(0, extendedControlName.indexOf(sfToStr));
     var _index = newIdAndType.indexOf("_");
     $('#' + prefix + sfId).val(newIdAndType.substr(0, _index));
