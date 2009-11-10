@@ -1,4 +1,4 @@
-﻿var debug=true;
+﻿var debug=false;
 function log(s){
         if (debug)
             if (typeof console != "undefined" && typeof console.debug != "undefined") {
