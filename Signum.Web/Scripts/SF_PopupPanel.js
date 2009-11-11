@@ -181,30 +181,29 @@ popup.prototype = {
     },
     
     newListOption: function (prefix,selectedType) {
-        me.options.prefix = prefix;
-        var lastElement = $('#' + me.options.prefix + " > option:last");
+        var lastElement = $('#' + prefix + " > option:last");
         var lastIndex = -1;
         if (lastElement.length > 0) {
             var nameSelected = lastElement[0].id;
-            lastIndex = nameSelected.substring(me.options.prefix.length + 1, nameSelected.indexOf(sfToStr));
+            lastIndex = nameSelected.substring(prefix.length + 1, nameSelected.indexOf(sfToStr));
         }
         var newIndex = "_" + (parseInt(lastIndex) + 1);
-        var staticType = $(me.pf(sfStaticType));
+        var staticType = $("#" + prefix + sfStaticType);
         staticType.after(
-            "<input type='hidden' id='" + me.options.prefix + newIndex + sfRuntimeType + "' name='" + me.options.prefix + newIndex + sfRuntimeType + "' value='" + selectedType + "' />\n" +
-            "<script type=\"text/javascript\">var " + me.options.prefix + newIndex + sfEntityTemp + " = '';</script>\n");
-        var sfEntityDiv = "<div id='" + me.options.prefix + newIndex + sfEntity + "' name='" + me.options.prefix + newIndex + sfEntity + "' style='display:none'></div>\n";
+            "<input type='hidden' id='" + prefix + newIndex + sfRuntimeType + "' name='" + prefix + newIndex + sfRuntimeType + "' value='" + selectedType + "' />\n" +
+            "<script type=\"text/javascript\">var " + prefix + newIndex + sfEntityTemp + " = '';</script>\n");
+        var sfEntityDiv = "<div id='" + prefix + newIndex + sfEntity + "' name='" + prefix + newIndex + sfEntity + "' style='display:none'></div>\n";
         if (empty(me.options.detailDiv))
             staticType.after(sfEntityDiv);
         else
             $("#" + me.options.detailDiv).append(sfEntityDiv);
         if (me.options.isEmbeded == "False")
-            staticType.after("<input type='hidden' id='" + me.options.prefix + newIndex + sfId + "' name='" + me.options.prefix + newIndex + sfId + "' value='' />\n");
+            staticType.after("<input type='hidden' id='" + prefix + newIndex + sfId + "' name='" + prefix + newIndex + sfId + "' value='' />\n");
 
-        var select = $('#' + me.options.prefix);
-        select.append("\n<option id='" + me.options.prefix + newIndex + sfToStr + "' name='" + me.options.prefix + newIndex + sfToStr + "' value='' class='valueLine'>&nbsp;</option>");
-        $('#' + me.options.prefix + " > option").attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
-        $('#' + me.options.prefix + " > option:last").attr('selected', true);
+        var select = $('#' + prefix);
+        select.append("\n<option id='" + prefix + newIndex + sfToStr + "' name='" + prefix + newIndex + sfToStr + "' value='' class='valueLine'>&nbsp;</option>");
+        $('#' + prefix + " > option").attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
+        $('#' + prefix + " > option:last").attr('selected', true);
     },
 	
 	chooseImplementation: function(){
@@ -559,7 +558,7 @@ function OnPopupCancel(prefix) {
 }
 
 function OnListPopupCancel(btnCancelId) {
-    new popup(null).OnListPopupCancel(btnCancelId);
+    new popup(null).onListPopupCancel(btnCancelId);
 }
 
 function RemoveListContainedEntity(select) {
