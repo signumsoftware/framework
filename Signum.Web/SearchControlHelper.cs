@@ -121,7 +121,20 @@ namespace Signum.Web
            // Type searchEntityType = Navigator.NameToType[entityTypeName];
 
             StringBuilder sb = new StringBuilder();
-            Type columnType = GetType(filterTypeName);
+ 
+            Type columnType;
+            if (value != null && value.GetType() != typeof(string)) //No string so ValueTypes are not shown as text
+                columnType = Reflector.ExtractLite(value.GetType()) ?? value.GetType();
+            else
+            {
+                columnType = GetType(filterTypeName);
+                if (columnType != null && value != null)
+                    value = Convert.ChangeType(value, columnType);
+            }
+
+            if (value != null && typeof(Lite).IsAssignableFrom(value.GetType()))
+                value = Database.Retrieve((Lite)value);
+
             //Client doesn't know about Lites, check it ourselves
             if (typeof(IdentifiableEntity).IsAssignableFrom(columnType))
                 columnType = Reflector.GenerateLite(columnType);
@@ -251,7 +264,7 @@ namespace Signum.Web
             if (Navigator.NameToType.ContainsKey(typeName))
                 return Navigator.NameToType[typeName];
 
-            return Type.GetType("System." + typeName, true);
+            return Type.GetType("System." + typeName, false);
         }
 
         private static HtmlHelper CreateHtmlHelper(Controller c)
