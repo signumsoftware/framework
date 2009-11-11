@@ -140,6 +140,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void AnySqlNonPredicate()
+        {
+            var withFriends = Database.Query<ArtistDN>().Where(b => b.Friends.Any()).Select(a => a.Name).ToList();
+        }
+
+        [TestMethod]
         public void All()
         {
             Assert.IsFalse(Database.Query<ArtistDN>().All(a => a.Sex == Sex.Male));

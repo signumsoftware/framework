@@ -697,7 +697,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
-                    <Border CornerRadius="3" BorderThickness="1" BorderBrush="#FFA2ABAB" Margin="0,0,0,10">
+                    <Border CornerRadius="3" BorderThickness="1" BorderBrush="#FFA2ABAB" Margin="0,0,0,0">
                         <StackPanel>
                             <Border BorderBrush="#FFA2ABAB" BorderThickness="0,0,0,1" CornerRadius="2,2,0,0">
                                 <Border.Background>
