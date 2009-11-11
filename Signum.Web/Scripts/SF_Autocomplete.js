@@ -119,7 +119,7 @@ function AutocompleteOnOk(newValue, newIdAndType, ddlName, extendedControlName, 
 	$('#' + entityIdFieldName).val(id);
 	$('#' + ddlName).hide();
 	//TODO: Borrar campo _sfEntity
-	autocompleteOnSelected(extendedControlName, newIdAndType, newValue, true);
+	AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, true);
 	if (AutoKeyDowned != null && AutoKeyDowned != undefined && AutoKeyDowned != "") AutoKeyDowned();
 }
 

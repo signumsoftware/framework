@@ -272,7 +272,7 @@ popup.prototype = {
 	endPopupOk: function(itemPrefix, reloadOnChangeFunction){
 		var correct = ValidatePartial(me.url, itemPrefix, "", true, "*");
 		window[itemPrefix + sfEntityTemp] = "";
-		$(me.pf(sfEntity)).hide();
+		$('#' + itemPrefix + sfEntity).hide();
 		toggleButtonsDisplay(me.options.prefix, true);
 		log("Valor de reloadOnChangeFunction " + reloadOnChangeFunction);
 		if (!empty(reloadOnChangeFunction)) {
