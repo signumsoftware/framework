@@ -49,11 +49,18 @@ namespace Signum.Web
             if (OnServerClickAjax.HasText())
                 controllerUrl = OnServerClickAjax;
 
-            return "javascript:AlertClickServerAjax('{0}','{1}','{2}');".Formato(
-                controllerUrl,
-                FindOptions.ToString(true, true, ""),
-                prefix
-                );
+            return "javascript:TypedOpenPopupCommon('{0}',{1},{2},'{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}');".Formato(
+                "Signum.aspx/PartialView",
+                "javascript:UpdateAlertCount();",
+                "function(){{$('#{0}externalPopupDiv').parent().html('');}}".Formato(prefix),                
+                "divASustituir",
+                "",
+                "",
+                "",
+                "AlertaDN",
+                "",//QueryParams
+                "",
+                "");
         }
     }
 }

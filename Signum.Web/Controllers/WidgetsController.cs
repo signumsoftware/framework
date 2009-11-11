@@ -13,10 +13,54 @@ namespace Signum.Web.Controllers
     [HandleError]
     public class WidgetsController : Controller
     {
+
+        #region Notes
         public PartialViewResult CreateNote(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
             IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
             return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix, sfUrl);
         }
+
+        public string RefreshNotes(string sfRuntimeTypeRelated, int? sfIdRelated)
+        {
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+
+            ViewDataDictionary vdd = new ViewDataDictionary();
+            vdd.Add("WidgetNode",NoteWidgetHelper.RetrieveNode(
+                NoteWidgetHelper.RetrieveNotes(entity), entity));
+            HtmlHelper helper = SignumController.CreateHtmlHelper(this);
+            return RenderPartialExtenders.RenderPartialToString(helper, "Views/Shared/WidgetView", vdd);
+        }
+        #endregion
+
+        #region Alerts
+        public PartialViewResult CreateAlert(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
+        {
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+            return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix, sfUrl);
+        }
+
+        public string RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)
+        {
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+
+            ViewDataDictionary vdd = new ViewDataDictionary();
+            vdd.Add("WidgetNode", AlertWidgetHelper.RetrieveNode(
+                AlertWidgetHelper.RetrieveAlerts(entity), entity));
+            HtmlHelper helper = SignumController.CreateHtmlHelper(this);
+            return RenderPartialExtenders.RenderPartialToString(helper, "Views/Shared/WidgetView", vdd);
+        }
+        #endregion
+
+        /*  public string RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)
+        {
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+
+            ViewDataDictionary vdd = new ViewDataDictionary();
+            vdd.Add("WidgetNode", AlertWidgetHelper.RetrieveNode(
+                AlertWidgetHelper.RetrieveAlerts(entity)));
+            HtmlHelper helper = SignumController.CreateHtmlHelper(this);
+            return RenderPartialExtenders.RenderPartialToString(helper, "Shared/WidgetView", vdd);
+        }*/
     }
 }

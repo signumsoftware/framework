@@ -17,6 +17,7 @@ namespace Signum.Web
     {
         public static Func<IdentifiableEntity, IAlertDN> CreateAlert { get; set; }
         public static Func<IdentifiableEntity, List<Lite<IAlertDN>>> RetrieveAlerts { get; set; }
+        public static Func<List<Lite<IAlertDN>>, IIdentifiable, WidgetNode> RetrieveNode { get; set; }
         //public static Action<IdentifiableEntity, AlertsWidget> WarnedAlerts { get; set; }
         //public static Action<IdentifiableEntity, AlertsWidget> CheckedAlerts { get; set; }
         //public static Action<IdentifiableEntity, AlertsWidget> FutureAlerts { get; set; }
@@ -34,33 +35,8 @@ namespace Signum.Web
                 return null;
 
             List<Lite<IAlertDN>> alerts = RetrieveAlerts((IdentifiableEntity)identifiable);
-            CountAlerts count = CountAlerts((IdentifiableEntity)identifiable);
+            return RetrieveNode(alerts, identifiable);
 
-            int total = count.FutureAlerts + count.WarnedAlerts + count.CheckedAlerts;
-            return new WidgetNode
-            {
-                Content = AlertsToString(helper, alerts, prefix),
-                Count = total != 0 ? count.WarnedAlerts + " / " + total : "0",
-                Label = "Alertas",
-                Href = "javascript:alert('Voy');",
-                Id = "Alertas",
-                Show = true
-            };
-        }
-
-        private static string AlertsToString(HtmlHelper helper, List<Lite<IAlertDN>> alerts, string prefix)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.AppendLine("<div class='widget alerts'>");
-            sb.Append("<div><i>Crear una alerta nueva...</i></div>");
-            foreach (Lite<IAlertDN> alert in alerts)
-            {
-                //sb.AppendLine(new NoteItem{ note.ToString(helper, prefix));
-            }
-            sb.AppendLine("</div>");
-
-            return sb.ToString();
         }
     }
 }

@@ -68,7 +68,12 @@ function ShowError(XMLHttpRequest, textStatus, errorThrown) {
         error = textStatus;
     }
     NotifyError(lang['error'], 2000);    
-    window.alert("Error: " + error);
+    error=error.replace(/á/, '&atilde;');
+    error=error.replace(/é/, '&etilde;');
+    error=error.replace("&#237;", "í");
+    error=error.replace("&#243;", "ó");
+    error=error.replace(/ú/, '&utilde;');
+    alert("Error: " + error);
 }
 
 // establece clase "focused" al div alrededor del campo con foco
