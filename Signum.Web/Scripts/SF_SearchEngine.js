@@ -19,38 +19,70 @@
 
 function SearchCreate(urlController, prefix, onOk, onCancel) {
 	var typeName = $('#' + prefix + sfEntityTypeName).val();
-	var newPrefix = prefix + "New";
-	$.ajax({
-	    type: "POST",
-	    url: urlController,
-	    data: "sfRuntimeType=" + typeName + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + qp(sfPrefix, newPrefix),
-	    async: false,
-	    dataType: "html",
-	    success: function(msg) {
-	        $('#' + prefix + "divASustituir").html(msg);
-	        if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
-	            return;
-	        ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
-	        $('#' + newPrefix + sfBtnOk).click(onOk).after("\n" +
+	TypedSearchCreate(urlController, prefix, onOk, onCancel, typeName);
+}
+
+function TypedSearchCreate(urlController, prefix, onOk, onCancel, typeName) {
+    var newPrefix = prefix + "New";
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: "sfRuntimeType=" + typeName + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + qp(sfPrefix, newPrefix),
+        async: false,
+        dataType: "html",
+        success: function(msg) {
+            $('#' + prefix + "divASustituir").html(msg);
+            if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
+                return;
+            ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+            $('#' + newPrefix + sfBtnOk).click(onOk).after("\n" +
 			 "<input type='hidden' id='" + newPrefix + sfRuntimeType + "' name='" + newPrefix + sfRuntimeType + "' value='" + typeName + "' />\n" +
 			 "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
 			 "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n");
-	        $('#' + newPrefix + sfBtnCancel).click(onCancel);
-	    },
-	    error: function(XMLHttpRequest, textStatus, errorThrown) {
-	        ShowError(XMLHttpRequest, textStatus, errorThrown);
-	    }
-	});
+            $('#' + newPrefix + sfBtnCancel).click(onCancel);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            ShowError(XMLHttpRequest, textStatus, errorThrown);
+        }
+    });
+}
+
+function RelatedEntityCreate(urlController, prefix, onOk, onCancel, typeName) {
+    var newPrefix = prefix + "New";
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: "sfRuntimeType=" + typeName + qp("sfIdRelated", $('#'+sfId).val()) + qp("sfRuntimeTypeRelated", $('#'+sfRuntimeType).val()) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + qp(sfPrefix, newPrefix),
+        async: false,
+        dataType: "html",
+        success: function(msg) {
+            $('#' + prefix + "divASustituir").html(msg);
+            if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
+                return;
+            ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+            $('#' + newPrefix + sfBtnOk).click(onOk).after("\n" +
+			 "<input type='hidden' id='" + newPrefix + sfRuntimeType + "' name='" + newPrefix + sfRuntimeType + "' value='" + typeName + "' />\n" +
+			 "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
+			 "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n");
+            $('#' + newPrefix + sfBtnCancel).click(onCancel);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            ShowError(XMLHttpRequest, textStatus, errorThrown);
+        }
+    });
 }
 
 function OnSearchCreateOK(urlController, prefix) {
 	var typeName = $('#' + prefix + sfEntityTypeName).val();
-	var newPrefix = prefix + "New";
-	if (TrySavePartial(urlController, newPrefix, "", true, "", typeName, "panelPopup")) {
-		OnSearchCreateCancel(prefix);
-	}
+	TypedOnSearchCreateOK(urlController, prefix, typeName);
 }
 
+function TypedOnSearchCreateOK(urlController, prefix, typeName) {
+    var newPrefix = prefix + "New";
+    if (TrySavePartial(urlController, newPrefix, "", true, "", typeName, "panelPopup")) {
+        OnSearchCreateCancel(prefix);
+    }
+}
 function OnSearchCreateCancel(prefix) {
 	$('#' + prefix + "divASustituir").html("");
 	var newPrefix = prefix + "New";

@@ -55,7 +55,7 @@ namespace Signum.Web
             return "javascript:TypedOpenPopupCommon('{0}',{1},{2},'{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}');".Formato(
                 "Signum.aspx/PartialView",
                 "javascript:UpdateNoteCount();",
-                "",                
+                "function(){{$('#{0}externalPopupDiv').parent().html('');}}".Formato(prefix),                
                 "divASustituir",
                 "",
                 "",

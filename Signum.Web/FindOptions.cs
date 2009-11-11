@@ -67,7 +67,7 @@ namespace Signum.Web
                     if (fo.Value != null && typeof(Lite).IsAssignableFrom(fo.Value.GetType()))
                     {
                         Lite lite = (Lite)fo.Value;
-                        value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType);
+                        value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType.Name);
                     }
                     else
                         value = fo.Value.ToString();
