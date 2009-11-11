@@ -97,9 +97,16 @@ namespace Signum.Windows.Operations
                 Content = GetText(operationInfo.Key, os),
                 Image = GetImage(operationInfo.Key, os), 
                 Background = GetBackground(operationInfo.Key, os),
-                IsEnabled = operationInfo.CanExecute,
-                Tag = operationInfo
+                Tag = operationInfo,
+                ToolTip = operationInfo.CanExecute,
             };
+
+            if (operationInfo.CanExecute != null)
+            {
+                button.ToolTip = operationInfo.CanExecute;
+                button.IsEnabled = false;
+                ToolTipService.SetShowOnDisabled(button, true);
+            }
 
             button.Click += (sender, args) => ButtonClick((ToolBarButton)sender, operationInfo, entityControl, os.TryCC(o => o.Click));
 
@@ -132,8 +139,8 @@ namespace Signum.Windows.Operations
 
         private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, Func<EntityOperationEventArgs, IIdentifiable> handler)
         {
-            if (!operationInfo.CanExecute)
-                throw new ApplicationException("Action {0} is disabled".Formato(operationInfo.Key));
+            if (operationInfo.CanExecute != null)
+                throw new ApplicationException("Action {0} is disabled: {1}".Formato(operationInfo.Key, operationInfo.CanExecute));
 
             IdentifiableEntity ident = (IdentifiableEntity)entityControl.DataContext;
 

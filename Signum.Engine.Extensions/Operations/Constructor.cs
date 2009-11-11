@@ -67,7 +67,7 @@ namespace Signum.Engine.Operations
              catch (Exception ex)
              {
                  OperationLogic.OnErrorOperation(this, null, ex);
-                 throw ex;
+                 throw;
              }
         }
 

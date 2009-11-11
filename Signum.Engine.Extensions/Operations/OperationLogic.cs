@@ -32,7 +32,7 @@ namespace Signum.Engine.Operations
     {
         bool Lite { get; }
         bool AllowsNew { get; }
-        bool CanExecute(IIdentifiable entity); 
+        string CanExecute(IIdentifiable entity); 
     }
 
     public static class OperationLogic
@@ -109,7 +109,7 @@ namespace Signum.Engine.Operations
             operations.GetOrCreate(operation.Type)[operation.Key] = operation;
         }
 
-        static OperationInfo ToOperationInfo(IOperation operation, bool canExecute)
+        static OperationInfo ToOperationInfo(IOperation operation, string canExecute)
         {
             return new OperationInfo
             {
@@ -126,7 +126,7 @@ namespace Signum.Engine.Operations
             return (from k in EnumLogic<OperationDN>.Keys
                     let o = TryFind(entityType, k) as IConstructorOperation
                     where o != null && OnAllowOperation(k)
-                    select ToOperationInfo(o, true)).ToList();
+                    select ToOperationInfo(o, null)).ToList();
         }
 
         public static List<OperationInfo> ServiceGetQueryOperationInfos(Type entityType)
@@ -134,7 +134,7 @@ namespace Signum.Engine.Operations
             return (from k in EnumLogic<OperationDN>.Keys
                     let cfm = TryFind(entityType, k) as IConstructorFromManyOperation
                     where cfm != null && OnAllowOperation(k)
-                    select ToOperationInfo(cfm, true)).ToList();
+                    select ToOperationInfo(cfm, null)).ToList();
         }
 
         public static List<OperationInfo> ServiceGetEntityOperationInfos(IdentifiableEntity entity)

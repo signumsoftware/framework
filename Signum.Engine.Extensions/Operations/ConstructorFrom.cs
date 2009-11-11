@@ -38,9 +38,9 @@ namespace Signum.Engine.Operations
             this.Lite = true;
         }
 
-        bool IEntityOperation.CanExecute(IIdentifiable entity)
+        string IEntityOperation.CanExecute(IIdentifiable entity)
         {
-            return OnCanConstruct(entity) == null;
+            return OnCanConstruct(entity);
         }
 
         string OnCanConstruct(IIdentifiable entity)
@@ -93,7 +93,7 @@ namespace Signum.Engine.Operations
             catch (Exception e)
             {
                 OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, e);
-                throw e;
+                throw;
             }
         }
 

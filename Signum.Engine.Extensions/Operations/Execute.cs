@@ -37,9 +37,9 @@ namespace Signum.Engine.Operations
             this.Returns = true;
         }
 
-        bool IEntityOperation.CanExecute(IIdentifiable entity)
+        string IEntityOperation.CanExecute(IIdentifiable entity)
         {
-            return OnCanExecute((T)entity) == null;
+            return OnCanExecute((T)entity);
         }
 
         protected virtual string OnCanExecute(T entity)
@@ -112,7 +112,7 @@ namespace Signum.Engine.Operations
                 { 
                 }
 
-                throw ex;
+                throw;
             }
         }
 
