@@ -25,7 +25,7 @@
         colVisibility.Add(i, queryResult.Columns[i].Visible);
     }
  %>
-<table id="<%=Html.GlobalName("tblResults")%>" name="<%=Html.GlobalName("tblResults")%>" class="tblResults">
+<table id="<%=Html.GlobalName("tblResults")%>" class="tblResults">
     <thead>
         <tr>
             <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
@@ -60,7 +60,7 @@
                        if (allowMultiple.HasValue)
                        {
                 %>
-                <td id="<%=Html.GlobalName("tdRowSelection")%>" name="<%=Html.GlobalName("tdRowSelection")%>">
+                <td id="<%=Html.GlobalName("tdRowSelection")%>">
                     <%
                         if (entityField != null)
                         {
@@ -79,7 +79,7 @@
                  %>
                  </td>
                  <%} %>
-                <td id="<%=Html.GlobalName("tdResults")%>" name="<%=Html.GlobalName("tdResults")%>">
+                <td id="<%=Html.GlobalName("tdResults")%>">
                 <% if (entityField != null) { %>
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Navigate">Ver</a>
                 <% } %>
@@ -92,7 +92,7 @@
                     if (colVisibility[col])
                     {
                         %>
-                        <td id="<%=Html.GlobalName("td_" + col.ToString())%>" name="<%=Html.GlobalName("td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Data[row][col]);%></td>
+                        <td id="<%=Html.GlobalName("td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Data[row][col]);%></td>
                         <%
                     }
                 }
