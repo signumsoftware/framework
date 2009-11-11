@@ -260,7 +260,6 @@ popup.prototype = {
 	
 	onPopupOk: function(reloadOnChangeFunction){
 	    log("En onPopupOk");
-		var correct = ValidatePartial(me.url, me.options.prefix, "", true, "*");
 		me.endPopupOk(me.options.prefix, reloadOnChangeFunction);
 	},
 	
