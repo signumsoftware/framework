@@ -283,9 +283,11 @@ namespace Signum.Web
                         id = id.RemoveLeft(prefix.Length); //We call GlobalName with it in EntityLine
                 }
 
-                if (value != null && (columnType == typeof(IIdentifiable) || Reflector.ExtractLite(columnType) == typeof(IIdentifiable) 
+                if (value != null && (columnType == typeof(IIdentifiable) || Reflector.ExtractLite(columnType) == typeof(IIdentifiable)
                     || columnType == typeof(IdentifiableEntity) || Reflector.ExtractLite(columnType) == typeof(IdentifiableEntity)))
                     columnType = Reflector.ExtractLite(value.GetType()) ?? value.GetType();
+                else
+                    columnType = Reflector.ExtractLite(columnType) ?? columnType;
                 if (value != null && typeof(Lite).IsAssignableFrom(value.GetType()))
                     value = Database.Retrieve((Lite)value);
                 Type t = typeof(TypeContext<>);
