@@ -22,7 +22,7 @@ using System.Text;
 
 namespace Signum.Web.Files
 {
-    [HandleError]
+    [HandleException]
     public class FileController : Controller
     {
         public ActionResult Upload()

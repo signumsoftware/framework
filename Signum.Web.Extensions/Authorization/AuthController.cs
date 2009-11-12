@@ -23,7 +23,7 @@ using Signum.Entities.Operations;
 namespace Signum.Web.Authorization
 {
 
-    [HandleError]
+    [HandleException]
     public class AuthController : Controller
     {
         public static event Action<UserDN> OnUserLogged;
