@@ -5,7 +5,7 @@
     xmlns:seeb="clr-namespace:Signum.Entities.Extensions.Basics;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="seeb:DateSpanDN" MinWidth="300">
         
-    <StackPanel >
+    <StackPanel Orientation="Horizontal" >
         <m:ValueLine m:Common.Route="Years"/>
         <m:ValueLine m:Common.Route="Months"/>
         <m:ValueLine m:Common.Route="Days"/>
