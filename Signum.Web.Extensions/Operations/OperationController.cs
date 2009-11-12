@@ -18,7 +18,7 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
-    [HandleError]
+    [HandleException]
     public class OperationController : Controller
     {
         public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
