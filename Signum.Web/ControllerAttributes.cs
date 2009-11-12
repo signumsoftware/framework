@@ -14,21 +14,13 @@ namespace Signum.Web
     /// Obtenido de RequireSslAttribute ChangeSet 23011 ASP.NET  15/07/2009
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    public sealed class RequireSslAttribute : FilterAttribute, IAuthorizationFilter
+    public sealed class RequireSslAttribute : FilterAttribute, IActionFilter
     {
-        public bool Redirect
-        {
-            get;
-            set;
-        }
+        public bool Redirect { get; set; }
 
-        public bool Www
-        {
-            get;
-            set;
-        }
+        public bool Www { get; set; }
 
-        public void OnAuthorization(AuthorizationContext filterContext)
+        public void OnActionExecuting(ActionExecutingContext filterContext)
         {
             if (filterContext == null)
             {
@@ -62,13 +54,14 @@ namespace Signum.Web
                 }
             }
         }
+        public void OnActionExecuted(ActionExecutedContext filterContext){}
     }
 
     /// <summary>
     /// Obtenido de RequireSslAttribute ChangeSet 23011 ASP.NET  15/07/2009
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    public sealed class RedirectToUrl : FilterAttribute, IAuthorizationFilter
+    public sealed class RedirectToUrl : FilterAttribute, IActionFilter
     {
         public string Url
         {
@@ -80,7 +73,7 @@ namespace Signum.Web
         {
             this.Url = url;
         }
-        public void OnAuthorization(AuthorizationContext filterContext)
+        public void OnActionExecuting(ActionExecutingContext filterContext)
         {
             if (filterContext == null)
             {
@@ -88,6 +81,7 @@ namespace Signum.Web
             }
             filterContext.Result = new RedirectResult(Url);
         }
+        public void OnActionExecuted(ActionExecutedContext filterContext){}
     }
 
     /// <summary>
@@ -125,6 +119,8 @@ namespace Signum.Web
     [AspNetHostingPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     public class HandleExceptionAttribute : HandleErrorAttribute
     {
+        public static Action<HandleErrorInfo> LogException;
+
         public override void OnException(ExceptionContext filterContext)
         {
             //TODO:Añadir logging
@@ -158,8 +154,11 @@ namespace Signum.Web
             string actionName = (string)filterContext.RouteData.Values["action"];
             HandleErrorInfo model = new HandleErrorInfo(filterContext.Exception, controllerName, actionName);
 
+            if (LogException != null) LogException(model);
+
             if (filterContext.HttpContext.Request.IsAjaxRequest())
             {
+                //we do not want to use a master page, just render a control with the error string
                 filterContext.Result = new PartialViewResult
                 {
                     ViewName = Navigator.Manager.AjaxErrorPageUrl,

@@ -10,7 +10,7 @@ using Signum.Web;
 
 namespace Signum.Web.Controllers
 {
-    [HandleError]
+    [HandleException]
     public class WidgetsController : Controller
     {
 

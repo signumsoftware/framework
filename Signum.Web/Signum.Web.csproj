@@ -83,6 +83,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="ControllerAttributes.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="Controllers\WidgetsController.cs" />
     <Compile Include="EntityLineDetailHelper.cs" />
