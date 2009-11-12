@@ -18,7 +18,7 @@ using System.Collections.Specialized;
 
 namespace Signum.Web.Controllers
 {
-    [HandleError]
+    [HandleException]
     public class SignumController : Controller
     {
         static SignumController()

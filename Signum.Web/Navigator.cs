@@ -411,7 +411,9 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings;
         public Dictionary<object, QuerySettings> QuerySettings;
         public DynamicQueryManager Queries { get; set; }
-        
+
+        public string AjaxErrorPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.AjaxError.ascx";
+        public string ErrorPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.Error.aspx";
         public string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
         public string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";
         public string OKCancelPopulUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.OKCancelPopup.ascx";

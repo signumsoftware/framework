@@ -5,6 +5,8 @@ using System.Text;
 using System.Web.Mvc;
 using System.Net;
 using System.Web;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace Signum.Web
 {
@@ -33,7 +35,7 @@ namespace Signum.Web
                 throw new ArgumentNullException("filterContext");
             }
 
-            if (!filterContext.HttpContext.Request.IsSecureConnection && !AppSettings.ReadBoolean(AppSettingsKeys.Development,false) )
+            if (!filterContext.HttpContext.Request.IsSecureConnection && !AppSettings.ReadBoolean(AppSettingsKeys.Development, false))
             {
                 // request is not SSL-protected, so throw or redirect
                 if (Redirect)
@@ -42,10 +44,10 @@ namespace Signum.Web
                     UriBuilder builder = new UriBuilder()
                     {
                         Scheme = "https",
-                        Host =  (Www && !filterContext.HttpContext.Request.Url.Host.StartsWith("www")
-                    && !filterContext.HttpContext.Request.Url.Host.StartsWith("localhost")) ? 
-                    
-                    "www." + filterContext.HttpContext.Request.Url.Host :                        
+                        Host = (Www && !filterContext.HttpContext.Request.Url.Host.StartsWith("www")
+                    && !filterContext.HttpContext.Request.Url.Host.StartsWith("localhost")) ?
+
+                    "www." + filterContext.HttpContext.Request.Url.Host :
                         filterContext.HttpContext.Request.Url.Host,
                         // use the RawUrl since it works with URL Rewriting
                         Path = filterContext.HttpContext.Request.RawUrl
@@ -74,7 +76,8 @@ namespace Signum.Web
             set;
         }
 
-        public RedirectToUrl(string url) {
+        public RedirectToUrl(string url)
+        {
             this.Url = url;
         }
         public void OnAuthorization(AuthorizationContext filterContext)
@@ -83,7 +86,7 @@ namespace Signum.Web
             {
                 throw new ArgumentNullException("filterContext");
             }
-               filterContext.Result = new RedirectResult(Url);
+            filterContext.Result = new RedirectResult(Url);
         }
     }
 
@@ -112,5 +115,71 @@ namespace Signum.Web
         }
 
         #endregion
+    }
+
+
+    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
+        Justification = "This attribute is AllowMultiple = true and users might want to override behavior.")]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
+    [AspNetHostingPermission(System.Security.Permissions.SecurityAction.LinkDemand, Level = AspNetHostingPermissionLevel.Minimal)]
+    [AspNetHostingPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
+    public class HandleExceptionAttribute : HandleErrorAttribute
+    {
+        public override void OnException(ExceptionContext filterContext)
+        {
+            //TODO:Añadir logging
+            if (filterContext == null)
+            {
+                throw new ArgumentNullException("filterContext");
+            }
+
+            // If custom errors are disabled, we need to let the normal ASP.NET exception handler
+            // execute so that the user can see useful debugging information.
+            /*if (filterContext.ExceptionHandled || !filterContext.HttpContext.IsCustomErrorEnabled)
+            {
+                return;
+            }*/
+
+            Exception exception = filterContext.Exception;
+
+            // If this is not an HTTP 500 (for example, if somebody throws an HTTP 404 from an action method),
+            // ignore it.
+            if (new HttpException(null, exception).GetHttpCode() != 500)
+            {
+                return;
+            }
+
+            if (!ExceptionType.IsInstanceOfType(exception))
+            {
+                return;
+            }
+
+            string controllerName = (string)filterContext.RouteData.Values["controller"];
+            string actionName = (string)filterContext.RouteData.Values["action"];
+            HandleErrorInfo model = new HandleErrorInfo(filterContext.Exception, controllerName, actionName);
+
+            if (filterContext.HttpContext.Request.IsAjaxRequest())
+            {
+                filterContext.Result = new PartialViewResult
+                {
+                    ViewName = Navigator.Manager.AjaxErrorPageUrl,
+                    ViewData = new ViewDataDictionary<HandleErrorInfo>(model),
+                    TempData = filterContext.Controller.TempData
+                };
+            }
+            else
+            {
+                filterContext.Result = new ViewResult
+                {
+                    ViewName = Navigator.Manager.ErrorPageUrl,
+                    ViewData = new ViewDataDictionary<HandleErrorInfo>(model),
+                    TempData = filterContext.Controller.TempData
+                };
+                ((ViewResult)filterContext.Result).ViewData[ViewDataKeys.PageTitle] = model.Exception.Message;
+            }
+            filterContext.ExceptionHandled = true;
+            filterContext.HttpContext.Response.Clear();
+            filterContext.HttpContext.Response.StatusCode = 500;
+        }
     }
 }

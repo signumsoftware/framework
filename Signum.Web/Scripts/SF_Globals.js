@@ -50,30 +50,40 @@ function qp(name, value) {
 }
 
 function empty(myString) {
-    if (myString == undefined || myString == "") return true;
-    return false;
+    return (myString == undefined || myString == "");
 }
 
+/*
+    s : string to replace
+    tr: dictionary of translations
+*/
+function replaceAll(s,tr){
+    var v=s;
+    for (var t in tr){
+        v=v.split(t).join(tr[t]);
+        //v=v.replace(new RegExp(t,'g'),tr[t]); //alternativa
+    }
+    return v;
+}
 function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     var error;
     if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
-        var startError = XMLHttpRequest.responseText.indexOf("<title>");
+        /*var startError = XMLHttpRequest.responseText.indexOf("<title>");
         var endError = XMLHttpRequest.responseText.indexOf("</title>");
         if ((startError != -1) && (endError != -1))
             error = XMLHttpRequest.responseText.substring(startError + 7, endError);
-        else
+        else*/
             error = XMLHttpRequest.responseText;
     }
     else {
         error = textStatus;
     }
-    NotifyError(lang['error'], 2000);    
-    error=error.replace(/á/, '&atilde;');
-    error=error.replace(/é/, '&etilde;');
-    error=error.replace("&#237;", "í");
-    error=error.replace("&#243;", "ó");
-    error=error.replace(/ú/, '&utilde;');
+    NotifyError(lang['error'], 2000);
+   /* error = replaceAll(error,
+        {'&#237;' : 'í',
+        '&#243;' : 'ó' });*/
     alert("Error: " + error);
+   
 }
 
 // establece clase "focused" al div alrededor del campo con foco
