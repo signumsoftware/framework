@@ -156,5 +156,14 @@ namespace Signum.Test.LinqProvider
                         where a.Dead ? a.Name.Contains("Michael") : a.Name.Contains("Billy")
                         select a).ToArray();
         }
+
+        [TestMethod]
+        public void WhereInnerQueryable()
+        {
+            var females = Database.Query<ArtistDN>().Where(a=>a.Sex == Sex.Female);
+            string f = females.ToString();
+
+            var female = Database.Query<ArtistDN>().Single(a=>females.Contains(a));
+        }
     }
 }

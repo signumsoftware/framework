@@ -717,30 +717,26 @@ namespace Signum.Engine.Linq
             return c != null && TableType(c.Value) != null;
         }
 
-        private Type TableType(object value)
+        public Type TableType(object value)
         {
-            return value.TryCC(v => v.GetType()
-                .Map(t => t.IsInstantiationOf(typeof(Query<>)) ? t.GetGenericArguments()[0] : null));
+            if (value == null)
+                return null;
+
+            Type type = value.GetType();
+            if (!typeof(IQueryable).IsAssignableFrom(type))
+                return null;
+
+            if(!type.IsInstantiationOf(typeof(Query<>)))
+                throw new InvalidOperationException("{0} belongs to another kind ok Linq Provider");
+
+            IQueryable query = (IQueryable)value;
+
+            ConstantExpression ce = query.Expression as ConstantExpression;
+            if (ce == null || ce.Value != query)
+                throw new InvalidOperationException("ConstantExpression with a complex IQueryable unexpected at this stage");
+
+            return query.ElementType;
         }
-
-        //private void FillFie(FieldInitExpression fie)
-        //{
-        //    if (fie == null)
-        //        throw new ArgumentException("fie");
-
-        //    if (fie.Bindings != null)
-        //        throw new ApplicationException(Resources.FieldInitExpressionBindingsShouldBeEmpty); 
-
-        //    Table table = ConnectionScope.Current.Schema.Table(fie.Type);
-
-        //    string tableAlias = this.GetNextAlias();
-
-        //    fie.Bindings = table.CreateBinding(tableAlias);
-
-        //    TableExpression tableExpression = new TableExpression(fie.Type, tableAlias, table.Name);
-
-        //    requests.GetOrCreate(fie.CurrentAlias).Add(new TableCondition { FieldInit = fie, Table = tableExpression });
-        //}
 
         private ProjectionExpression GetTableProjection(Type type)
         {
@@ -784,10 +780,9 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            Type type = TableType(c.Value);
-            
-            if (type != null)
-                return GetTableProjection(type);
+            Type tableType = TableType(c.Value);
+            if(tableType != null)
+                return GetTableProjection(tableType);
 
             if (c.Value == null)
                 return c; 

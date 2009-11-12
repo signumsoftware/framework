@@ -18,25 +18,27 @@ namespace Signum.Engine
     {
         public static void SaveAll(IdentifiableEntity[] idents)
         {
-             Save(()=>GraphExplorer.FromRoots(idents));
+             Save(()=>GraphExplorer.FromRoots(idents), idents);
         }
 
         public static void Save(IdentifiableEntity ident) 
         {
-            Save(()=>GraphExplorer.FromRoot(ident));
+            Save(() => GraphExplorer.FromRoot(ident), new[] { ident });
         }
 
         static readonly IdentifiableEntity[] None = new IdentifiableEntity[0];
 
-        static void Save(Func<DirectedGraph<Modifiable>> createGraph)
+        static void Save(Func<DirectedGraph<Modifiable>> createGraph, IdentifiableEntity[] roots)
         {
             DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
 
             Schema schema = ConnectionScope.Current.Schema;
             modifiables = GraphExplorer.ModifyGraph(modifiables, (Modifiable m, ref bool graphModified) =>
                 {
-                    if (m is IdentifiableEntity)
-                        schema.OnSaving((IdentifiableEntity)m, ref graphModified);
+                    IdentifiableEntity ident = m as IdentifiableEntity;
+
+                    if (ident != null)
+                        schema.OnSaving(ident, roots.Contains(ident), ref graphModified);
                 }, createGraph);
 
             string error = GraphExplorer.Integrity(modifiables);
@@ -78,7 +80,7 @@ namespace Signum.Engine
             SaveGroup(postSavings, schema, null);
 
             foreach (var node in identifiables)
-                schema.OnSaved(node);
+                schema.OnSaved(node, roots.Contains(node));
 
             EntityCache.Add(identifiables);
         }

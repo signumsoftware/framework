@@ -124,15 +124,15 @@ namespace Signum.Engine.Linq
         public S GetIdentifiable<S>(int? id) where S : IdentifiableEntity
         {
             if (id == null) return null; 
-            return (S)Retriever.GetIdentifiable(ConnectionScope.Current.Schema.Table(typeof(S)), id.Value);
+            return (S)Retriever.GetIdentifiable(ConnectionScope.Current.Schema.Table(typeof(S)), id.Value, true);
         }
 
         public S GetImplementedBy<S>(Type[] types, params int?[] ids)
             where S :  IIdentifiable
         {
             int pos = ids.IndexOf(id => id.HasValue);
-            if (pos == -1) return default(S); 
-            return (S)(object)Retriever.GetIdentifiable(ConnectionScope.Current.Schema.Table(types[pos]), ids[pos].Value);
+            if (pos == -1) return default(S);
+            return (S)(object)Retriever.GetIdentifiable(ConnectionScope.Current.Schema.Table(types[pos]), ids[pos].Value, true);
         }
 
         public S GetImplementedByAll<S>(int? id, int? idType)
@@ -140,7 +140,7 @@ namespace Signum.Engine.Linq
         {
             if (id == null) return default(S); 
             Table table = Schema.Current.TablesForID[idType.Value];
-            return (S)(object)Retriever.GetIdentifiable(table, id.Value);
+            return (S)(object)Retriever.GetIdentifiable(table, id.Value, true);
         }
 
         public Lite<S> GetLiteIdentifiable<S>( int? id, int? idType, string str) where S : class, IIdentifiable

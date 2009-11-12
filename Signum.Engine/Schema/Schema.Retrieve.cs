@@ -93,7 +93,7 @@ namespace Signum.Engine.Maps
             if (IsLite)
                 return retriever.GetLite(ReferenceTable, Reflector.ExtractLite(FieldType), id.Value);
             else
-                return retriever.GetIdentifiable(ReferenceTable, id.Value); 
+                return retriever.GetIdentifiable(ReferenceTable, id.Value, false); 
         }
     }
 
@@ -157,7 +157,7 @@ namespace Signum.Engine.Maps
              if(IsLite)
                 return retriever.GetLite(col.ReferenceTable, Reflector.ExtractLite(FieldType), id.Value);
             else
-                return retriever.GetIdentifiable(col.ReferenceTable, id.Value); 
+                return retriever.GetIdentifiable(col.ReferenceTable, id.Value, false); 
         }
     }
 
@@ -177,7 +177,7 @@ namespace Signum.Engine.Maps
             if (IsLite)
                 return retriever.GetLite(Schema.Current.TablesForID[idTipo.Value], Reflector.ExtractLite(FieldType), id.Value);
             else
-                return retriever.GetIdentifiable(Schema.Current.TablesForID[idTipo.Value], id.Value); 
+                return retriever.GetIdentifiable(Schema.Current.TablesForID[idTipo.Value], id.Value, false); 
         }
     }
 

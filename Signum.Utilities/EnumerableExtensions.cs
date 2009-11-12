@@ -626,6 +626,14 @@ namespace Signum.Utilities
                 hashset.Add(item);
             }
         }
+
+        public static bool TryContains<T>(this HashSet<T> hashset, T element)
+        {
+            if (hashset == null)
+                return false;
+
+            return hashset.Contains(element);
+        }
         #endregion
 
         public static IEnumerable<R> JoinStrict<K, O, N, R>(

@@ -118,7 +118,7 @@ namespace Signum.Utilities.ExpressionTrees
                     builder.Append(c.Value);
                     builder.Append("\"");
                 }
-                else if (c.Value.ToString() == c.Value.GetType().ToString())
+                else if (c.Value.ToString() == c.Value.GetType().ToString() || typeof(IQueryable).IsAssignableFrom(c.Type))
                 {
                     builder.Append("value(");
                     builder.Append(c.Value);

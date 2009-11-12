@@ -89,7 +89,7 @@ namespace Signum.Engine
             {
                 Retriever rec = new Retriever();
                 Table table = Schema.Current.Table(type);
-                IdentifiableEntity ident = rec.GetIdentifiable(table, id);
+                IdentifiableEntity ident = rec.GetIdentifiable(table, id, false);
 
                 rec.ProcessAll();
 
@@ -191,7 +191,7 @@ namespace Signum.Engine
                 Retriever rec = new Retriever();
                 Table table = Schema.Current.Table(type);
 
-                List<IdentifiableEntity> ident = ids.Select(id => rec.GetIdentifiable(table, id)).ToList();
+                List<IdentifiableEntity> ident = ids.Select(id => rec.GetIdentifiable(table, id, true)).ToList();
 
                 rec.ProcessAll();
 
@@ -229,7 +229,7 @@ namespace Signum.Engine
             {
                 Retriever rec = new Retriever();
 
-                List<T> ident = lites.Select(l => (T)(IIdentifiable)rec.GetIdentifiable(l)).ToList();
+                List<T> ident = lites.Select(l => (T)(IIdentifiable)rec.GetIdentifiable(l, true)).ToList();
 
                 rec.ProcessAll();
 
@@ -244,7 +244,7 @@ namespace Signum.Engine
             {
                 Retriever rec = new Retriever();
 
-                List<IdentifiableEntity> ident = lites.Select(l => rec.GetIdentifiable(l)).ToList();
+                List<IdentifiableEntity> ident = lites.Select(l => rec.GetIdentifiable(l, true)).ToList();
 
                 rec.ProcessAll(); 
 

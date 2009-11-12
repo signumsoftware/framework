@@ -24,17 +24,12 @@ namespace Signum.Engine.DynamicQuery
         string GetErrors();
     }
 
-    public class DynamicQuery<T> : IDynamicQuery
+    public class AutoDynamicQuery<T>: DynamicQuery<T>
     {
         IQueryable<T> query;
-        Func<List<Filter>, int?, IEnumerable<T>> execute;
-
-        List<Column> columns; 
-        List<MemberEntry<T>> members;
-
         Dictionary<string, Meta> metas;
 
-        public DynamicQuery(IQueryable<T> query)
+        public AutoDynamicQuery(IQueryable<T> query)
         {
             if (query == null)
                 throw new ArgumentNullException("query"); 
@@ -42,26 +37,65 @@ namespace Signum.Engine.DynamicQuery
             this.query = query;
 
             metas = DynamicQuery.QueryMetadata(query); 
-            Initialize();
+            
+            members = MemberEntryFactory.GenerateList<T>();
+
+            columns = members.Cast<IMemberEntry>().Select(e =>
+                    new Column(e.MemberInfo, metas[e.MemberInfo.Name])).ToList();
         }
 
-        public DynamicQuery(Func<List<Filter>, int?, IEnumerable<T>> execute)
+        public override QueryResult ExecuteQuery(List<Filter> filters, int? limit)
+        {
+            IQueryable<T> result = query.WhereFilters(filters);
+
+            if (limit != null)
+                result = result.Take(limit.Value);
+
+            return ToQueryResult(result);
+        }
+
+        public override int ExecuteQueryCount(List<Filter> filters)
+        {
+            return query.WhereFilters(filters).Count();
+        }
+    }
+
+    public class ManualDynamicQuery<T>: DynamicQuery<T>
+    {
+        Func<List<Filter>, int?, IEnumerable<T>> execute;
+
+        public ManualDynamicQuery(Func<List<Filter>, int?, IEnumerable<T>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
 
             this.execute = execute;
+         
+            this.members = MemberEntryFactory.GenerateList<T>();
 
-            Initialize();
+            this.columns = members.Cast<IMemberEntry>().Select(e =>
+                    new Column(e.MemberInfo, null)).ToList();
         }
 
-        void Initialize()
+        public override QueryResult ExecuteQuery(List<Filter> filters, int? limit)
         {
-            members = MemberEntryFactory.GenerateList<T>();
-
-            columns = members.Cast<IMemberEntry>().Select(e =>
-                    new Column(e.MemberInfo, metas.TryGetC(e.MemberInfo.Name))).ToList();
+            return ToQueryResult(execute(filters, limit));
         }
+
+        public override int ExecuteQueryCount(List<Filter> filters)
+        {
+            return execute(filters, null).Count();
+        }
+    }
+
+    public abstract class DynamicQuery<T> : IDynamicQuery
+    {
+        protected List<Column> columns; 
+        protected List<MemberEntry<T>> members;
+
+        public abstract QueryResult ExecuteQuery(List<Filter> filters, int? limit);
+
+        public abstract int ExecuteQueryCount(List<Filter> filters); 
 
         public string GetErrors()
         {
@@ -72,31 +106,8 @@ namespace Signum.Engine.DynamicQuery
         {
             return new QueryDescription { Columns = columns.Where(DynamicQuery.ColumnIsAllowed).ToList() };
         }
-
-        public QueryResult ExecuteQuery(List<Filter> filters, int? limit)
-        {
-            if (execute != null)
-                return ToQueryResult(execute(filters, limit));
-            else
-            {
-                IQueryable<T> result = query.WhereFilters(filters); 
-
-                if (limit != null)
-                    result = result.Take(limit.Value);
-
-                return ToQueryResult(result);
-            }
-        }
-
-        public int ExecuteQueryCount(List<Filter> filters)
-        {
-            if (execute != null)
-                return execute(filters, null).Count();
-            else
-                return query.WhereFilters(filters).Count();
-        }
-
-        QueryResult ToQueryResult(IEnumerable<T> result)
+       
+        protected QueryResult ToQueryResult(IEnumerable<T> result)
         {
             bool[] allowed = columns.Select(c=>DynamicQuery.ColumnIsAllowed(c)).ToArray();
 
@@ -133,12 +144,12 @@ namespace Signum.Engine.DynamicQuery
 
         public static DynamicQuery<T> ToDynamic<T>(this IQueryable<T> query)
         {
-            return new DynamicQuery<T>(query); 
+            return new AutoDynamicQuery<T>(query); 
         }
 
         public static DynamicQuery<T> Manual<T>(Func<List<Filter>, int?, IEnumerable<T>> execute)
         {
-            return new DynamicQuery<T>(execute); 
+            return new ManualDynamicQuery<T>(execute); 
         }
 
         static MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));

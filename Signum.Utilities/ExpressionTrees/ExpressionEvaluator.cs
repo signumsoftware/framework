@@ -59,11 +59,27 @@ namespace Signum.Utilities.ExpressionTrees
                     return exp;
                 }
 
-                return Expression.Constant(Eval(exp), exp.Type);
+                return Visit(Expression.Constant(Eval(exp), exp.Type));
             }
             return base.Visit(exp);
         }
-    }
 
-  
+        /// <summary>
+        /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
+        /// </summary>
+        protected override Expression VisitConstant(ConstantExpression c)
+        {
+            if (typeof(IQueryable).IsAssignableFrom(c.Type))
+            {
+                var query = (IQueryable)c.Value;
+
+                if (query.Expression == c)
+                    return c;
+
+                return Visit(query.Expression);
+            }
+
+            return c;
+        }
+    }
 }

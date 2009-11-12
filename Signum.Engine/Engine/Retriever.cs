@@ -25,6 +25,8 @@ namespace Signum.Engine
 
         internal List<Modifiable> PostRetrieving = new List<Modifiable>();
 
+        internal HashSet<IdentifiableEntity> roots = new HashSet<IdentifiableEntity>(); 
+
         #region Processing
         public void ProcessAll()
         {
@@ -33,12 +35,13 @@ namespace Signum.Engine
                 action();
 
             PostRetrieving.ForEach(a => a.PostRetrieving());
-            Schema.Current.OnRetrieved(PostRetrieving.OfType<IdentifiableEntity>()); 
+            foreach (var ident in PostRetrieving.OfType<IdentifiableEntity>())
+                Schema.Current.OnRetrieved(ident, roots.Contains(ident)); 
             PostRetrieving.Clear();
         }
 
         //Heurística para saber que es mejor hacer antes
-        private Action BestAction()
+        Action BestAction()
         {
             Table bestIdentifiable = reqIdentifiables.WithMax(k => k.Value.Count).Key;
             RelationalTable bestList = reqList.WithMax(k => k.Value.Count).Key;
@@ -169,30 +172,31 @@ namespace Signum.Engine
         #endregion
 
         #region Schema Interface
-        public IdentifiableEntity GetIdentifiable(Lite lite)
+        public IdentifiableEntity GetIdentifiable(Lite lite, bool isRoot)
         {
-            return GetIdentifiable(Schema.Current.Table(lite.RuntimeType), lite.Id);
+            return GetIdentifiable(Schema.Current.Table(lite.RuntimeType), lite.Id, isRoot);
         }
 
-        public IdentifiableEntity GetIdentifiable(Table table, int id)
+
+        internal IdentifiableEntity GetIdentifiable(Table table, int id, bool isRoot)
         {
-            Schema.Current.OnRetrieving(table.Type, id); 
-
             IdentifiableEntity result = EntityCache.Get(table.Type, id);
-
             if (result != null) 
                 return result;
-      
+
             return reqIdentifiables.GetOrCreate(table)
                 .GetOrCreate(id, () =>
                 {
                     var ie = (IdentifiableEntity)table.Constructor();
                     ie.id = id;
+                    Schema.Current.OnRetrieving(table.Type, id, isRoot);
+                    if (isRoot)
+                        roots.Add(ie); 
                     return ie; 
                 });
         }
 
-        public Lite GetLite(Table table, Type liteType, int id)
+        internal Lite GetLite(Table table, Type liteType, int id)
         {
             IdentifiableEntity ident = EntityCache.Get(table.Type, id);
 
@@ -207,7 +211,7 @@ namespace Signum.Engine
             return req;
         }
 
-        public IList GetList(RelationalTable table, int id)
+        internal IList GetList(RelationalTable table, int id)
         {
             return reqList.GetOrCreate(table).GetOrCreate(id, table.Constructor);
         } 

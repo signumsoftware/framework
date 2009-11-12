@@ -38,7 +38,10 @@ namespace Signum.Utilities.ExpressionTrees
 	}
 
 	/// <summary>
-	/// Implementation of ExpressionVisiter that does the replacement
+    /// Implementation of ExpressionVisitor that does the replacement
+    /// * MethodExpanderAttribute
+    /// * MemberXXXExpression static field
+    /// * ExpressionExtensions.Expand method
 	/// </summary>
 	public class ExpressionExpander : ExpressionVisitor
 	{

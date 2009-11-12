@@ -14,9 +14,16 @@ namespace Signum.Engine.Linq
     {
         internal static Expression Clean(Expression expression)
         {
-            Expression expand = ExpressionExpander.ExpandUntyped(expression);
-            Expression partialEval = ExpressionEvaluator.PartialEval(expand);
-            Expression simplified = OverloadingSimplifier.Simplify(partialEval);
+            Expression preClean = null;
+            Expression postClean = expression;
+            do
+            {
+                preClean = postClean;
+                Expression expand = ExpressionExpander.ExpandUntyped(preClean);
+                postClean = ExpressionEvaluator.PartialEval(expand);
+            } while (preClean != postClean);
+
+            Expression simplified = OverloadingSimplifier.Simplify(postClean);
             return simplified;
         }
 

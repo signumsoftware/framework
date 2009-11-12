@@ -82,7 +82,11 @@ namespace Signum.Utilities.Reflection
             if (property == null)
                 throw new ArgumentNullException("property");
 
-            MemberExpression ex = property.Body as MemberExpression;
+            Expression body = property.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            MemberExpression ex = body as MemberExpression;
             if (ex == null)
                 throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
 

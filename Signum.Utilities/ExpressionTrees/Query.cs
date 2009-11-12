@@ -73,12 +73,26 @@ namespace Signum.Utilities.ExpressionTrees
 
         public override string ToString()
         {
-            return this.GetType().TypeName().CleanIdentifiers();
+            ConstantExpression ce = expression as ConstantExpression;
+            if (ce != null && ce.Value == this)
+                return this.GetType().TypeName().CleanIdentifiers();
+            else
+                return expression.NiceToString();
         }
 
         public string QueryText
         {
-            get { return provider.GetQueryText(expression); }
+            get
+            {
+                try
+                {
+                    return provider.GetQueryText(expression);
+                }
+                catch (Exception)
+                {
+                    return "Unavailabe";
+                }
+            }
         }
     }
 }

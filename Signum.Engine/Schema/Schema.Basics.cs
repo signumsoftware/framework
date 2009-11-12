@@ -63,51 +63,44 @@ namespace Signum.Engine.Maps
             return (EntityEvents<T>)entityEvents.GetOrCreate(typeof(T), () => new EntityEvents<T>());
         }
 
-        internal void OnSaving(IdentifiableEntity entity, ref bool graphModified)
+        internal void OnSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified)
         {
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnSaving(entity, ref graphModified);
+                ee.OnSaving(entity, isRoot, ref graphModified);
 
-            entityEventsGlobal.OnSaving(entity, ref graphModified); 
+            entityEventsGlobal.OnSaving(entity, isRoot, ref graphModified); 
         }
 
-        internal void OnSaved(IdentifiableEntity entity)
+        internal void OnSaved(IdentifiableEntity entity, bool isRoot)
         {
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnSaved(entity);
+                ee.OnSaved(entity, isRoot);
 
-            entityEventsGlobal.OnSaved(entity); 
+            entityEventsGlobal.OnSaved(entity, isRoot); 
         }
 
-        internal void OnRetrieving(Type type, int id)
+        internal void OnRetrieving(Type type, int id, bool isRoot)
         {
             IEntityEvents ee = entityEvents.TryGetC(type);
 
             if (ee != null)
-                ee.OnRetrieving(type, id);
+                ee.OnRetrieving(type, id, isRoot);
 
-            entityEventsGlobal.OnRetrieving(type, id); 
+            entityEventsGlobal.OnRetrieving(type, id, isRoot); 
         }
 
-        void OnRetrieved(IdentifiableEntity entity)
+        internal void OnRetrieved(IdentifiableEntity entity, bool isRoot)
         {
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnRetrieved(entity);
+                ee.OnRetrieved(entity, isRoot);
 
-            entityEventsGlobal.OnRetrieved(entity); 
-        }
-
-
-        internal void OnRetrieved(IEnumerable<IdentifiableEntity> collection)
-        {
-            foreach (var ei in collection)
-                OnRetrieved(ei);
+            entityEventsGlobal.OnRetrieved(entity, isRoot); 
         }
 
         internal void OnDeleting(Type type, List<int> ids)
@@ -318,10 +311,10 @@ namespace Signum.Engine.Maps
 
     internal interface IEntityEvents
     {
-        void OnSaving(IdentifiableEntity entity, ref bool graphModified);
-        void OnSaved(IdentifiableEntity entity);
-        void OnRetrieving(Type type, int id);
-        void OnRetrieved(IdentifiableEntity entity);
+        void OnSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified);
+        void OnSaved(IdentifiableEntity entity, bool isRoot);
+        void OnRetrieving(Type type, int id, bool isRoot);
+        void OnRetrieved(IdentifiableEntity entity, bool isRoot);
         void OnDeleting(Type type, int id);
         void OnDeleted(Type type, int id);
     }
@@ -332,7 +325,7 @@ namespace Signum.Engine.Maps
         public event SavingEntityEventHandler<T> Saving;
         public event EntityEventHandler<T> Saved;
 
-        public event TypeIdEventHandler Retrieving;
+        public event TypeIdRootEventHandler Retrieving;
         public event EntityEventHandler<T> Retrieved;
 
         public event TypeIdEventHandler Deleting;
@@ -349,28 +342,28 @@ namespace Signum.Engine.Maps
             return query; 
         }
 
-        void IEntityEvents.OnSaving(IdentifiableEntity entity, ref bool graphModified)
+        void IEntityEvents.OnSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified)
         {
             if (Saving != null)
-                Saving((T)entity, ref graphModified);
+                Saving((T)entity, isRoot, ref graphModified);
         }
 
-        void IEntityEvents.OnSaved(IdentifiableEntity entity)
+        void IEntityEvents.OnSaved(IdentifiableEntity entity, bool isRoot)
         {
             if (Saved != null)
-                Saved((T)entity);
+                Saved((T)entity, isRoot);
         }
 
-        void IEntityEvents.OnRetrieving(Type type, int id)
+        void IEntityEvents.OnRetrieving(Type type, int id, bool isRoot)
         {
             if (Retrieving != null)
-                Retrieving(type, id);
+                Retrieving(type, id, isRoot);
         }
 
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
+        void IEntityEvents.OnRetrieved(IdentifiableEntity entity, bool isRoot)
         {
             if (Retrieved != null)
-                Retrieved((T)entity);
+                Retrieved((T)entity, isRoot);
         }
 
         void IEntityEvents.OnDeleting(Type type, int id)
@@ -386,8 +379,9 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public delegate void SavingEntityEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void EntityEventHandler<T>(T ident) where T : IdentifiableEntity;
+    public delegate void SavingEntityEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
+    public delegate void EntityEventHandler<T>(T ident, bool isRoot) where T : IdentifiableEntity;
+    public delegate void TypeIdRootEventHandler(Type type, int id, bool isRoot);
     public delegate void TypeIdEventHandler(Type type, int id);
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
