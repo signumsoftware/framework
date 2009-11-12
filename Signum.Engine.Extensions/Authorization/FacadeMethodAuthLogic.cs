@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void Schema_Saved(RuleFacadeMethodDN rule)
+        static void Schema_Saved(RuleFacadeMethodDN rule, bool isRoot)
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }

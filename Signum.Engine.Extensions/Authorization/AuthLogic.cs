@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
                 }
         }
 
-        static void Schema_Saving(RoleDN role, ref bool graphModified)
+        static void Schema_Saving(RoleDN role, bool isRoot, ref bool graphModified)
         {
             if (!role.IsNew && role.Roles != null && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
             {
@@ -107,7 +107,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Saved(RoleDN role)
+        static void Schema_Saved(RoleDN role, bool isRoot)
         {
             Transaction.RealCommit += () => _roles = null;
 

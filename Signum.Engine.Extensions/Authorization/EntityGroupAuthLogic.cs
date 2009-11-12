@@ -15,7 +15,8 @@ using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.ExpressionTrees; 
+using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Linq; 
 
 namespace Signum.Engine.Authorization
 {
@@ -111,33 +112,39 @@ namespace Signum.Engine.Authorization
 
         [ThreadStatic]
         static bool queriesDisabled;
-        public static IDisposable DisableAutoFilterQueries()
+        public static IDisposable DisableQueries()
         {
             queriesDisabled = true;
             return new Disposable(() => queriesDisabled = false);
         }
 
+        [ThreadStatic]
+        static bool retrieveDisabled;
+        public static IDisposable DisableRetrieve()
+        {
+            retrieveDisabled = true;
+            return new Disposable(() => retrieveDisabled = false);
+        }
+
+
         static IQueryable<T> EntityGroupAuthLogic_FilterQuery<T>(IQueryable<T> query)
             where T:IdentifiableEntity
         {
             if (!queriesDisabled)
-                return WhereGroupsAllowed<T>(query);
+                return WhereAllowed<T>(query);
             return query; 
         }
 
-        static IQueryable sender_FilterQuery(IQueryable arg)
-        {
-            throw new NotImplementedException();
-        }
-
-        static void EntityGroupAuthLogic_Retrieved<T>(T ident)
+        static void EntityGroupAuthLogic_Retrieved<T>(T ident, bool isRoot)
             where T:IdentifiableEntity
         {
-            if (!GroupsAllowed(ident))
-                throw new UnauthorizedAccessException("Not authorized to retrieve the {0} with Id {1}".Formato(typeof(T).NiceName(), ident.Id));
+            if (!retrieveDisabled && isRoot)
+                ident.AssertAllowed();
         }
 
-        static void Schema_Saved(RuleEntityGroupDN rule)
+        
+
+        static void Schema_Saved(RuleEntityGroupDN rule, bool isRoot)
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }
@@ -158,42 +165,93 @@ namespace Signum.Engine.Authorization
                   role.Roles.Select(r => GetAllowed(r, entityGroupKey)).MaxAllowedPair();
         }
 
-        static bool GroupsAllowed(IdentifiableEntity entity)
+        public static void AssertAllowed(this IIdentifiable ident)
+        {
+            if (!ident.IsAllowed())
+                throw new UnauthorizedAccessException("Not authorized to retrieve the {0} with Id {1}".Formato(ident.GetType().NiceName(), ident.Id));
+        }
+
+        public static bool IsAllowed(this IIdentifiable ident)
         {
             if(!AuthLogic.IsEnabled)
                 return true;
 
             RoleDN role = RoleDN.Current;
 
-            return EntityGroupLogic.GroupsFor(entity.GetType()).All(eg=>
+            return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
-                    AllowedPair pair = GetAllowed(role, eg); 
-                    return entity.IsInGroup(eg)? pair.InGroup: pair.OutGroup;
+                    AllowedPair pair = GetAllowed(role, eg);
+                    return ident.IsInGroup(eg) ? pair.InGroup : pair.OutGroup;
                 });
         }
 
-        public static IQueryable<T> WhereGroupsAllowed<T>(this IQueryable<T> query)
+        public static IQueryable<T> WhereAllowed<T>(this IQueryable<T> query)
             where T : IdentifiableEntity
         {
             if (!AuthLogic.IsEnabled)
                 return query;
 
             RoleDN role = RoleDN.Current;
-            foreach (Enum eg in EntityGroupLogic.GroupsFor(typeof(T)))
+
+            var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
+                         select new
+                         {
+                             Group = eg,
+                             Allowed = GetAllowed(role, eg),
+                             Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
+                             Queryable = EntityGroupLogic.GetInGroupQueryable<T>(eg)
+                         }).Where(p => !p.Allowed.InGroup || !p.Allowed.OutGroup).ToList();
+
+            if (pairs.Count == 0)
+                return query;
+
+            if (pairs.Any(p => !p.Allowed.InGroup && !p.Allowed.OutGroup))
+                return query.Where(p => false);
+
+            var pair = pairs.FirstOrDefault(p => p.Allowed.InGroup && !p.Allowed.OutGroup && p.Queryable != null);
+            if (pair != null)
             {
-                var pair = GetAllowed(role, eg);
-                if (!pair.InGroup && !pair.OutGroup)
-                    query = query.Where(p => false);
-                else
-                {
-                    if (!pair.InGroup)
-                        query = query.Where(e=>!e.IsInGroup(eg));
-                    else if (!pair.OutGroup)
-                        query = query.Where(e=>e.IsInGroup(eg));
-                }
+                pairs.Remove(pair);
+                query = pair.Queryable;
             }
 
-            return query;
+            if (pairs.Count > 0)
+            {
+
+                ParameterExpression e = Expression.Parameter(typeof(T), "e");
+                Expression body = pairs.Select(p =>
+                                !p.Allowed.InGroup ? Expression.Not(Expression.Invoke(p.Expression, e)) :
+                                                     (Expression)Expression.Invoke(p.Expression, e)).Aggregate((a, b) => Expression.And(a, b));
+
+                body = ExpressionEvaluator.PartialEval(body); //Avoid recursive Expansions of Database.Query<T>()
+
+                query = query.Where(Expression.Lambda<Func<T, bool>>(body, e));
+
+            }
+
+            return new Query<T>(DbQueryProvider.Single, QueryReplacer.Replace(query.Expression));
+        }
+
+        class QueryReplacer : ExpressionVisitor
+        {
+            public static Expression Replace(Expression exp)
+            {
+                return new QueryReplacer().Visit(exp);
+            }
+
+            MethodInfo mi = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>()).GetGenericMethodDefinition();
+            
+            protected override Expression VisitMethodCall(MethodCallExpression m)
+            {
+                if (m.Method.IsGenericMethod && m.Method.GetGenericMethodDefinition() == mi)
+                {
+                    Type type = typeof(Query<>).MakeGenericType(m.Method.GetGenericArguments());
+                    IQueryable query = (IQueryable)Activator.CreateInstance(type, DbQueryProvider.Single);
+                    return Expression.Constant(query);
+                }
+
+                return base.VisitMethodCall(m);
+            }
         }
 
         public static List<EntityGroupRule> GetEntityGroupRules(Lite<RoleDN> roleLite)
@@ -254,6 +312,34 @@ namespace Signum.Engine.Authorization
                 }
 
                 return newRules;
+            }
+        }
+
+        public static DynamicQuery<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
+        {
+            return new AutoDynamicQueryNoFilter<T>(query);
+        }
+
+        internal class AutoDynamicQueryNoFilter<T> : AutoDynamicQuery<T>
+        {
+            public AutoDynamicQueryNoFilter(IQueryable<T> query)
+                : base(query)
+            { }
+
+            public override QueryResult ExecuteQuery(List<Filter> filters, int? limit)
+            {
+                using (EntityGroupAuthLogic.DisableQueries())
+                {
+                    return base.ExecuteQuery(filters, limit);
+                }
+            }
+
+            public override int ExecuteQueryCount(List<Filter> filters)
+            {
+                using (EntityGroupAuthLogic.DisableQueries())
+                {
+                    return base.ExecuteQueryCount(filters);
+                }
             }
         }
     }

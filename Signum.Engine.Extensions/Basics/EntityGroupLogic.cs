@@ -10,6 +10,7 @@ using Signum.Engine.Maps;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics
 {
@@ -24,12 +25,14 @@ namespace Signum.Engine.Basics
         class EntityGroupPair<T> : IEntityGroupPair
             where T : IdentifiableEntity
         {
-            public EntityGroupPair(Expression<Func<T, bool>> inGroupExpression)
+            public EntityGroupPair(Func<T, bool> func, Expression<Func<T, bool>> expression, IQueryable<T> queryable)
             {
-                Expression = inGroupExpression;
-                Func = inGroupExpression.Compile();
+                Expression = expression;
+                Func = func;
+                Queryable = queryable;
             }
 
+            public readonly IQueryable<T> Queryable; 
             public readonly Expression<Func<T, bool>> Expression;
             public readonly Func<T, bool> Func;
 
@@ -68,15 +71,23 @@ namespace Signum.Engine.Basics
         public static void Register<T>(Enum entityGroupKey, Expression<Func<T, bool>> isInGroup)
             where T : IdentifiableEntity
         {
-            pairs.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupPair<T>(isInGroup);
+            pairs.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupPair<T>(isInGroup.Compile(), isInGroup, null);
+        }
+
+        public static void Register<T>(Enum entityGroupKey, IQueryable<T> inGroupElements)
+            where T : IdentifiableEntity
+        {
+            Expression<Func<T, bool>> exp = e => inGroupElements.Contains(e);
+
+            pairs.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupPair<T>(exp.Compile(), exp, inGroupElements);
         }
 
         [MethodExpander(typeof(IsInGroupExpander))]
-        public static bool IsInGroup(this IdentifiableEntity entity, Enum entityGroupKey)
+        public static bool IsInGroup(this IIdentifiable entity, Enum entityGroupKey)
         {
             IEntityGroupPair pair = GetEntityGroupPair(entityGroupKey, entity.GetType());
 
-            return pair.IsInGroup(entity);
+            return pair.IsInGroup((IdentifiableEntity)entity);
         }
 
         class IsInGroupExpander : IMethodExpander
@@ -118,6 +129,13 @@ namespace Signum.Engine.Basics
         public static LambdaExpression GetInGroupExpression(Type type, Enum entityGroupKey)
         {
             return GetEntityGroupPair(entityGroupKey, type).UntypedExpression;
+        }
+
+        public static IQueryable<T> GetInGroupQueryable<T>(Enum entityGroupKey)
+            where T : IdentifiableEntity
+        {
+            var queryable = ((EntityGroupPair<T>)GetEntityGroupPair(entityGroupKey, typeof(T))).Queryable;
+            return queryable;
         }
     }
 }

@@ -76,7 +76,7 @@ namespace Signum.Engine.Scheduler
             ReloadPlan();
         }
 
-        static void Schema_Saved(ScheduledTaskDN task)
+        static void Schema_Saved(ScheduledTaskDN task, bool isRoot)
         {
             if (!isSafeSave)
             {

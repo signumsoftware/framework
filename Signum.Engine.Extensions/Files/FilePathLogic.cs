@@ -75,7 +75,7 @@ namespace Signum.Engine.Files
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
-        static void FilePath_Saving(FilePathDN fp, ref bool graphModified)
+        static void FilePath_Saving(FilePathDN fp, bool isRoot, ref bool graphModified)
         {
             if (fp.IsNew)
             {
@@ -131,7 +131,7 @@ namespace Signum.Engine.Files
             return true;
         }
 
-        static void FilePath_Retrieved(FilePathDN fp)
+        static void FilePath_Retrieved(FilePathDN fp, bool isRoot)
         {
             //fp.BinaryFile = System.IO.File.ReadAllBytes(fp.FullPhysicalPath); -> It's a late binding with the binaryfile
         }

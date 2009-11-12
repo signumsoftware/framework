@@ -43,7 +43,7 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void RuleType_Saved(RuleTypeDN rule)
+        static void RuleType_Saved(RuleTypeDN rule, bool isRoot)
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }
@@ -53,7 +53,7 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static void Schema_Saving(IdentifiableEntity ident, ref bool graphModified)
+        static void Schema_Saving(IdentifiableEntity ident, bool isRoot, ref bool graphModified)
         {
             if (AuthLogic.IsEnabled)
             {
@@ -63,7 +63,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Retrieving(Type type, int id)
+        static void Schema_Retrieving(Type type, int id, bool isRoot)
         {
             if (AuthLogic.IsEnabled)
             {

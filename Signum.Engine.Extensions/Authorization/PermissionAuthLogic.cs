@@ -57,7 +57,7 @@ namespace Signum.Engine.Authorization
             _runtimeRules = NewCache();
         }
 
-        static void Schema_Saved(RulePermissionDN rule)
+        static void Schema_Saved(RulePermissionDN rule, bool isRoot)
         {
             Transaction.RealCommit += () => _runtimeRules = null;
         }
