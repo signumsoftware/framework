@@ -181,7 +181,7 @@ namespace Signum.Engine.Authorization
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
                     AllowedPair pair = GetAllowed(role, eg);
-                    return ident.IsInGroup(eg) ? pair.InGroup : pair.OutGroup;
+                    return ((IdentifiableEntity)ident).IsInGroup(eg) ? pair.InGroup : pair.OutGroup;
                 });
         }
 
