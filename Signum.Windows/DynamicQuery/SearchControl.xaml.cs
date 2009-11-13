@@ -175,6 +175,14 @@ namespace Signum.Windows
 
             FilterOptions = new FreezableCollection<FilterOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(SearchControl_DataContextChanged);
+
+        }
+
+        void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (queryResult != null)
+                Search();
         }
 
         int entityIndex;
@@ -239,8 +247,21 @@ namespace Signum.Windows
             }
 
             if (SearchOnLoad)
-                Search();
+            {
+                if (IsVisible)
+                    Search();
+                else
+                    IsVisibleChanged += SearchControl_IsVisibleChanged;
+            }
+        }
 
+        void SearchControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (((bool)e.NewValue) == true)
+            {
+                IsVisibleChanged -= SearchControl_IsVisibleChanged;
+                Search(); 
+            }
         }
 
         private void UpdateViewSelection()
