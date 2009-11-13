@@ -16,16 +16,16 @@ namespace Signum.Engine.Basics
 {
     public static class EntityGroupLogic
     {
-        interface IEntityGroupPair
+        interface IEntityGroupInfo
         {
             bool IsInGroup(IdentifiableEntity entity);
             LambdaExpression UntypedExpression { get; }
         }
 
-        class EntityGroupPair<T> : IEntityGroupPair
+        class EntityGroupInfo<T> : IEntityGroupInfo
             where T : IdentifiableEntity
         {
-            public EntityGroupPair(Func<T, bool> func, Expression<Func<T, bool>> expression, IQueryable<T> queryable)
+            public EntityGroupInfo(Func<T, bool> func, Expression<Func<T, bool>> expression, IQueryable<T> queryable)
             {
                 Expression = expression;
                 Func = func;
@@ -47,17 +47,17 @@ namespace Signum.Engine.Basics
             }
         }
 
-        static Dictionary<Type, Dictionary<Enum, IEntityGroupPair>> pairs = new Dictionary<Type, Dictionary<Enum, IEntityGroupPair>>();
+        static Dictionary<Type, Dictionary<Enum, IEntityGroupInfo>> infos = new Dictionary<Type, Dictionary<Enum, IEntityGroupInfo>>();
 
         public static HashSet<Enum> groups;
         public static HashSet<Enum> Groups
         {
-            get { return groups ?? (groups = pairs.SelectMany(a => a.Value.Keys).ToHashSet()); }
+            get { return groups ?? (groups = infos.SelectMany(a => a.Value.Keys).ToHashSet()); }
         }
 
         public static IEnumerable<Type> Types
         {
-            get { return pairs.Keys; }
+            get { return infos.Keys; }
         }
 
         public static void Start(SchemaBuilder sb)
@@ -71,7 +71,7 @@ namespace Signum.Engine.Basics
         public static void Register<T>(Enum entityGroupKey, Expression<Func<T, bool>> isInGroup)
             where T : IdentifiableEntity
         {
-            pairs.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupPair<T>(isInGroup.Compile(), isInGroup, null);
+            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup.Compile(), isInGroup, null);
         }
 
         public static void Register<T>(Enum entityGroupKey, IQueryable<T> inGroupElements)
@@ -79,20 +79,20 @@ namespace Signum.Engine.Basics
         {
             Expression<Func<T, bool>> exp = e => inGroupElements.Contains(e);
 
-            pairs.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupPair<T>(exp.Compile(), exp, inGroupElements);
+            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(exp.Compile(), exp, inGroupElements);
         }
 
         [MethodExpander(typeof(IsInGroupExpander))]
-        public static bool IsInGroup(this IIdentifiable entity, Enum entityGroupKey)
+        public static bool IsInGroup(this IdentifiableEntity entity, Enum entityGroupKey)
         {
-            IEntityGroupPair pair = GetEntityGroupPair(entityGroupKey, entity.GetType());
+            IEntityGroupInfo info = GetEntityGroupInfo(entityGroupKey, entity.GetType());
 
-            return pair.IsInGroup((IdentifiableEntity)entity);
+            return info.IsInGroup((IdentifiableEntity)entity);
         }
 
         class IsInGroupExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments)
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 Expression entity = arguments[0];
                 Enum eg = (Enum)ExpressionEvaluator.Eval(arguments[1]);
@@ -101,9 +101,29 @@ namespace Signum.Engine.Basics
             }
         }
 
+        [MethodExpander(typeof(WhereInGroupExpander))]
+        public static IQueryable<T> WhereInGroup<T>(this IQueryable<T> query, Enum entityGroupKey)
+            where T : IdentifiableEntity
+        {
+            EntityGroupInfo<T> info = (EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T));
+
+            return query.Where(info.Expression);
+        }
+
+        class WhereInGroupExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                ConstantExpression ce = arguments[1] as ConstantExpression;
+                IEntityGroupInfo info = GetEntityGroupInfo((Enum)ce.Value, typeArguments[0]);
+
+                return Expression.Call(arguments[0], "Where", typeArguments, info.UntypedExpression);
+            }
+        }
+
         public static IEnumerable<Enum> GroupsFor(Type type)
         {
-            var dic = pairs.TryGetC(type);
+            var dic = infos.TryGetC(type);
             if (dic != null)
                 return dic.Keys;
             return NoGroups;
@@ -111,30 +131,30 @@ namespace Signum.Engine.Basics
 
         static readonly Enum[] NoGroups = new Enum[0];
 
-        static IEntityGroupPair GetEntityGroupPair(Enum entityGroupKey, Type type)
+        static IEntityGroupInfo GetEntityGroupInfo(Enum entityGroupKey, Type type)
         {
-            IEntityGroupPair pair = pairs
+            IEntityGroupInfo info = infos
                .GetOrThrow(type, "There's no expression registered for type {{0}} on group {0}".Formato(entityGroupKey))
                .GetOrThrow(entityGroupKey, "There's no EntityGroup registered with key {0}");
-            return pair;
+            return info;
         }
 
         public static Expression<Func<T, bool>> GetInGroupExpression<T>(Enum entityGroupKey)
             where T : IdentifiableEntity
         {
-            var expression = ((EntityGroupPair<T>)GetEntityGroupPair(entityGroupKey, typeof(T))).Expression;
+            var expression = ((EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T))).Expression;
             return expression;
         }
 
         public static LambdaExpression GetInGroupExpression(Type type, Enum entityGroupKey)
         {
-            return GetEntityGroupPair(entityGroupKey, type).UntypedExpression;
+            return GetEntityGroupInfo(entityGroupKey, type).UntypedExpression;
         }
 
         public static IQueryable<T> GetInGroupQueryable<T>(Enum entityGroupKey)
             where T : IdentifiableEntity
         {
-            var queryable = ((EntityGroupPair<T>)GetEntityGroupPair(entityGroupKey, typeof(T))).Queryable;
+            var queryable = ((EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T))).Queryable;
             return queryable;
         }
     }

@@ -209,7 +209,7 @@ namespace Signum.Engine.Authorization
                 return query.Where(p => false);
 
             var pair = pairs.FirstOrDefault(p => p.Allowed.InGroup && !p.Allowed.OutGroup && p.Queryable != null);
-            if (pair != null)
+            if (pair != null && query.IsBase())
             {
                 pairs.Remove(pair);
                 query = pair.Queryable;
@@ -217,7 +217,6 @@ namespace Signum.Engine.Authorization
 
             if (pairs.Count > 0)
             {
-
                 ParameterExpression e = Expression.Parameter(typeof(T), "e");
                 Expression body = pairs.Select(p =>
                                 !p.Allowed.InGroup ? Expression.Not(Expression.Invoke(p.Expression, e)) :
@@ -251,6 +250,24 @@ namespace Signum.Engine.Authorization
                 }
 
                 return base.VisitMethodCall(m);
+            }
+        }
+
+        class WhereAllowedExpander : IMethodExpander
+        {
+            static MethodInfo mi = ReflectionTools.GetMethodInfo(() => CallWhereAllowed<TypeDN>(null)).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
+            {
+                return (Expression)mi.MakeGenericMethod(typeArguments[0]).Invoke(null, new object[] { arguments[0] });
+            }
+
+            static Expression CallWhereAllowed<T>(Expression expression)
+                where T : IdentifiableEntity
+            {
+                IQueryable<T> query = new Query<T>(DbQueryProvider.Single, expression);
+                IQueryable<T> result = WhereAllowed(query);
+                return result.Expression;
             }
         }
 
