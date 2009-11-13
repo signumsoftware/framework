@@ -23,7 +23,7 @@ namespace Signum.Windows
     public static class Converters
     {
         public static readonly IValueConverter Identity =
-        ConverterFactory.New((object v) => v, (object v) => v);
+            ConverterFactory.New((object v) => v, (object v) => v);
 
         public static readonly IValueConverter ToLite =
            ConverterFactory.New((IIdentifiable ei) => ei.TryCC(e => Lite.Create(e.GetType(), (IdentifiableEntity)e)));
@@ -63,10 +63,16 @@ namespace Signum.Windows
             ConverterFactory.New((bool b) => b ? Visibility.Visible : Visibility.Collapsed);
 
         public static readonly IValueConverter NotBoolToVisibility =
-    ConverterFactory.New((bool b) => b ? Visibility.Collapsed : Visibility.Visible);
+            ConverterFactory.New((bool b) => b ? Visibility.Collapsed : Visibility.Visible);
 
         public static readonly IValueConverter NullToVisibility =
-      ConverterFactory.New((object o) => o!=null ? Visibility.Visible : Visibility.Collapsed);
+            ConverterFactory.New((object o) => o != null ? Visibility.Visible : Visibility.Collapsed);
+
+        public static readonly IValueConverter IsNull =
+            ConverterFactory.New((object o) => o == null);
+
+        public static readonly IValueConverter IsNotNull =
+            ConverterFactory.New((object o) => o != null);
 
         public static readonly IValueConverter BoolToSelectionMode =
             ConverterFactory.New((bool b) => b ? SelectionMode.Extended : SelectionMode.Single);
@@ -74,7 +80,7 @@ namespace Signum.Windows
         public static readonly IValueConverter Not = ConverterFactory.New((bool b) => !b, (bool b) => !b);
 
         public static readonly IValueConverter TypeContextName =
-            ConverterFactory.New((FrameworkElement b) =>b.TryCC(fe => Common.GetTypeContext(fe)).TryCC(c => c.Type).TryCC(t => t.NiceName()) ?? "??");
+            ConverterFactory.New((FrameworkElement b) => b.TryCC(fe => Common.GetTypeContext(fe)).TryCC(c => c.Type).TryCC(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter TypeName =
             ConverterFactory.New((Type type) => type.TryCC(t => t.NiceName()) ?? "??");
@@ -92,7 +98,7 @@ namespace Signum.Windows
             });
 
         public static readonly IValueConverter ToStringConverter = ConverterFactory.New(
-            (object d) => d.TryCC(a=>a.ToString()));
+            (object d) => d.TryCC(a => a.ToString()));
 
         static readonly ColorConverter cc = new ColorConverter();
         public static readonly IValueConverter ColorConverter = ConverterFactory.New(
@@ -123,5 +129,5 @@ namespace Signum.Windows
                 (1 - coef) * a.ScB + coef * b.ScB);
         }
     }
-  
+
 }

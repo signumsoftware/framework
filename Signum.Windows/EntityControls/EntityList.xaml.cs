@@ -166,7 +166,13 @@ namespace Signum.Windows
             object entity = OnViewing(this.listBox.SelectedItem);
 
             if (entity != null)
-                this.EnsureEntities()[this.listBox.SelectedIndex] = entity;
+            {
+                IList list = this.EnsureEntities();
+                int index = this.listBox.SelectedIndex;
+                list.RemoveAt(index);
+                list.Insert(index, entity);
+                listBox.SelectedIndex = index;
+            }
         }
 
         private void btDown_Click(object sender, RoutedEventArgs e)
