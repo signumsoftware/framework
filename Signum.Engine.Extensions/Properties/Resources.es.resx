@@ -138,4 +138,7 @@
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
     <value>Imposible ejecutar {0} desde el estado {1}</value>
   </data>
+  <data name="Operation0IsNotAuthorized" xml:space="preserve">
+    <value>La operación {0} no está autorizada</value>
+  </data>
 </root>

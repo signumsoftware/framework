@@ -138,4 +138,13 @@
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
     <value>Impossible to execute {0} from state {1}</value>
   </data>
+  <data name="Operation0IsNotAuthorized" xml:space="preserve">
+    <value>Operation {0} is not Authorized</value>
+  </data>
+  <data name="TheEntity0IsNew" xml:space="preserve">
+    <value>The Entity {0} is New</value>
+  </data>
+  <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
+    <value>Operation {0} does not have Delete initialized</value>
+  </data>
 </root>

@@ -65,6 +65,21 @@ namespace Signum.Web.Operations
                 return Navigator.View(this, entity);
         }
 
+        public ActionResult DeleteExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        {
+            Type type = Navigator.ResolveType(sfRuntimeType);
+
+            if (sfId.HasValue)
+            {
+                Lite lite = Lite.Create(type, sfId.Value);
+                OperationLogic.ServiceDelete(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey), null);
+            }
+            else
+                throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+
+            return Content("");
+        }
+
         public ActionResult ConstructFromExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);

@@ -100,6 +100,12 @@ namespace Signum.Services
               () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
         }
 
+        public IIdentifiable Delete(Lite lite, Enum operationKey, params object[] args)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), "Delete {0}".Formato(operationKey),
+              () => OperationLogic.ServiceDelete(lite, operationKey, args));
+        }
+
         public IIdentifiable Construct(Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), "Construct {0}".Formato(operationKey),

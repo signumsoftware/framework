@@ -61,6 +61,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure of deleting from the system the entity {0} ({1}:{2})?.
+        /// </summary>
+        internal static string AreYouSureOfDeletingTheEntity012 {
+            get {
+                return ResourceManager.GetString("AreYouSureOfDeletingTheEntity012", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Argument {filePathID} was not passed to the controller.
         /// </summary>
         internal static string ArgumentFilePathIDWasNotPassedToTheController {

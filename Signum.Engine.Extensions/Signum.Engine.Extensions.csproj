@@ -74,6 +74,7 @@
     <Compile Include="Operations\Constructor.cs" />
     <Compile Include="Operations\ConstructorFrom.cs" />
     <Compile Include="Operations\ConstructorFromMany.cs" />
+    <Compile Include="Operations\Delete.cs" />
     <Compile Include="Operations\Execute.cs" />
     <Compile Include="Operations\Graph.cs" />
     <Compile Include="Operations\OperationLogic.cs" />

@@ -33,6 +33,7 @@ namespace Signum.Entities.Operations
     public enum OperationType
     {
         Execute, 
+        Delete,
         Constructor, 
         ConstructorFrom,
         ConstructorFromMany

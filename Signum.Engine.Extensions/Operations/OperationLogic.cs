@@ -190,6 +190,29 @@ namespace Signum.Engine.Operations
         }
         #endregion
 
+        #region Delete
+        public static IdentifiableEntity ServiceDelete(Lite lite, Enum operationKey, params object[] args)
+        {
+            IdentifiableEntity entity = Database.RetrieveAndForget(lite);
+            Find<IDeleteOperation>(lite.RuntimeType, operationKey).Delete(entity, args);
+            return entity;
+        }
+
+        public static void Delete<T>(this Lite<T> lite, Enum operationKey, params object[] args)
+            where T : class, IIdentifiable
+        {
+            T entity = lite.RetrieveAndForget();
+            Find<IDeleteOperation>(lite.RuntimeType, operationKey).Delete(entity, args);
+        }
+
+        public static void DeleteBase<T>(this Lite<T> lite, Type baseType, Enum operationKey, params object[] args)
+            where T : class, IIdentifiable
+        {
+            T entity = lite.RetrieveAndForget();
+            Find<IDeleteOperation>(baseType, operationKey).Delete(entity, args);
+        }
+        #endregion
+
         #region Construct
         public static IIdentifiable ServiceConstruct(Type type, Enum operationKey, params object[] args)
         {

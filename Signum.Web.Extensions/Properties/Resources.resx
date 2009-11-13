@@ -198,4 +198,7 @@
   <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
     <value>Invalid Operation Type {{0}} in the construction of the operation {{1}}</value>
   </data>
+  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
+    <value>Are you sure of deleting from the system the entity {0} ({1}:{2})?</value>
+  </data>
 </root>

@@ -95,7 +95,7 @@ namespace Signum.Windows.Operations
             ToolBarButton button = new ToolBarButton
             {
                 Content = GetText(operationInfo.Key, os),
-                Image = GetImage(operationInfo.Key, os), 
+                Image = GetImage(operationInfo.Key, os),
                 Background = GetBackground(operationInfo.Key, os),
                 Tag = operationInfo,
                 ToolTip = operationInfo.CanExecute,
@@ -113,10 +113,13 @@ namespace Signum.Windows.Operations
             return button;
         }
 
-        protected internal virtual Brush GetBackground(Enum p, OperationSettings os)
+        protected internal virtual Brush GetBackground(Enum key, OperationSettings os)
         {
             if (os != null && os.Color != null)
                 return new SolidColorBrush(os.Color.Value);
+
+            //if (oi.OperationType == OperationType.Delete) TODO Olmo: Pasar OperationInfo
+            //    return new SolidColorBrush(Colors.Red);
 
             return null; 
         }
@@ -134,7 +137,7 @@ namespace Signum.Windows.Operations
             if (os != null && os.Text != null)
                 return os.Text;
 
-            return EnumExtensions.NiceToString(key); 
+            return EnumExtensions.NiceToString(key);
         }
 
         private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, Func<EntityOperationEventArgs, IIdentifiable> handler)
@@ -194,6 +197,14 @@ namespace Signum.Windows.Operations
                     IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
                     if (operationInfo.Returns)
                         Navigator.View(newIdent, ViewButtons.Save);
+                }
+            }
+            else if (operationInfo.OperationType == OperationType.Delete)
+            {
+                if (MessageBox.Show("Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    Lite lite = Lite.Create(ident.GetType(), ident);
+                    Server.Service<IOperationServer>().Delete(lite, operationInfo.Key, null);
                 }
             }
         }

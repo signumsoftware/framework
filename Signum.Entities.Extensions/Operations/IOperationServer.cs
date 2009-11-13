@@ -29,6 +29,10 @@ namespace Signum.Services
 
 
         [OperationContract, NetDataContract]
+        IIdentifiable Delete(Lite lite, Enum operationKey, params object[] args);
+
+
+        [OperationContract, NetDataContract]
         IIdentifiable Construct(Type type, Enum operationKey, params object[] args);
 
 
