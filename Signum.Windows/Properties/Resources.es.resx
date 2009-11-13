@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="RoutePropertyCanNotBeAppliedWithNullTypeContext" xml:space="preserve">
-    <value>La propiedad Route no puede ser applicada con un TypeContext nulo</value>
+    <value>La propiedad Route no puede ser aplicada con un TypeContext nulo</value>
   </data>
   <data name="FinderOf0" xml:space="preserve">
     <value>Buscador de {0}</value>
   </data>
   <data name="ContextItsOnlyPossibleWithIdentifiableEntities" xml:space="preserve">
-    <value>Context is solo posible con IdentifiableEntities</value>
+    <value>Context sólo es posible con IdentifiableEntities</value>
   </data>
   <data name="PleaseSelectAType" xml:space="preserve">
     <value>Por favor seleccione uno de los siguientes tipos:</value>
@@ -157,7 +157,7 @@
     <value>No se admite un valor nulo</value>
   </data>
   <data name="NoFilterSelected" xml:space="preserve">
-    <value>Has de seleccionar un filtro</value>
+    <value>Ha de seleccionar un filtro</value>
   </data>
   <data name="Column0NotFoundOnQuery1" xml:space="preserve">
     <value>No se ha encontrado la columna {0} en la consulta {1}</value>
@@ -265,7 +265,7 @@
     <value>Notas</value>
   </data>
   <data name="NewNote" xml:space="preserve">
-    <value>Nueva Nota</value>
+    <value>Nueva nota</value>
   </data>
   <data name="Type0IsNotAColection" xml:space="preserve">
     <value>El tipo {0} no es una colección</value>
@@ -295,10 +295,10 @@
     <value>Formato inválido</value>
   </data>
   <data name="InvalidDateFormat" xml:space="preserve">
-    <value>Formato de fecha incorrecta</value>
+    <value>Formato de fecha incorrecto</value>
   </data>
   <data name="Limitation" xml:space="preserve">
-    <value> Límite:</value>
+    <value>Límite:</value>
   </data>
   <data name="Results" xml:space="preserve">
     <value>Resultados.</value>
@@ -313,10 +313,10 @@
     <value>Alerta</value>
   </data>
   <data name="NewAlert" xml:space="preserve">
-    <value>Nueva Alerta</value>
+    <value>Nueva alerta</value>
   </data>
   <data name="RelatedEntity" xml:space="preserve">
-    <value>Entidad Asociada</value>
+    <value>Entidad asociada</value>
   </data>
   <data name="Alerts" xml:space="preserve">
     <value>Alertas</value>
@@ -325,7 +325,7 @@
     <value>Atendidas</value>
   </data>
   <data name="WarnedAlerts" xml:space="preserve">
-    <value>No Atendidas</value>
+    <value>No atendidas</value>
   </data>
   <data name="FutureAlerts" xml:space="preserve">
     <value>Futuras</value>
