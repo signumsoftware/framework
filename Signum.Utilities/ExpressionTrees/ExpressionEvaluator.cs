@@ -73,7 +73,7 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 var query = (IQueryable)c.Value;
 
-                if (query.Expression == c)
+                if (query.IsBase())
                     return c;
 
                 return Visit(query.Expression);

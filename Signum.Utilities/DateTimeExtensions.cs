@@ -84,7 +84,7 @@ namespace Signum.Utilities
         {
             static readonly Expression<Func<DateTime, DateTime, DateTime, bool>> func = (date, minDate, maxDate) => minDate <= date && date < maxDate;
 
-            public Expression Expand(Expression instance, Expression[] arguments)
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }
@@ -94,7 +94,7 @@ namespace Signum.Utilities
         {
             Expression<Func<DateTime, DateTime, DateTime?, bool>> func = (date, minDate, maxDate) => minDate <= date && (maxDate == null || date < maxDate);
 
-            public Expression Expand(Expression instance, Expression[] arguments)
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }
@@ -106,7 +106,7 @@ namespace Signum.Utilities
                 (minDate == null || minDate <= date) &&
                 (maxDate == null || date < maxDate);
 
-            public Expression Expand(Expression instance, Expression[] arguments)
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 return Expression.Invoke(func, arguments[0], arguments[1], arguments[2]);
             }

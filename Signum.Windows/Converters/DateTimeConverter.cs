@@ -14,6 +14,8 @@ namespace Signum.Windows
         public static readonly DateTimeConverter DateAndTime = new DateTimeConverter(CultureInfo.CurrentCulture.DateTimeFormat.ShortDateTimePattern());
         public static readonly DateTimeConverter Date = new DateTimeConverter("d");
 
+        public bool Strict { get; set; }
+
         public string Format { get; set; }
         public DateTimeConverter(string format)
         {
@@ -33,7 +35,12 @@ namespace Signum.Windows
         {
             string str = (string)value;
             if (!string.IsNullOrEmpty(str))
-                return DateTime.ParseExact(str, Format, culture);
+            {
+                if (Strict)
+                    return DateTime.ParseExact(str, Format, culture);
+                else
+                    return DateTime.Parse(str, culture);
+            }
             else
                 return null;
         }

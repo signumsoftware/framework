@@ -103,5 +103,11 @@ namespace Signum.Utilities.ExpressionTrees
             }
             return (LambdaExpression)e;
         }
+
+        public static bool IsBase(this IQueryable query)
+        {
+            ConstantExpression ce = query.Expression as ConstantExpression;
+            return ce != null && ce.Value == query; 
+        }
     }
 }

@@ -346,7 +346,7 @@ namespace Signum.Entities
 
         class RefersToExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments)
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 Expression lite = arguments[0];
                 return Expression.Equal(Expression.MakeMemberAccess(lite, lite.Type.GetProperty("EntityOrNull", BindingFlags.Instance| BindingFlags.Public)), arguments[1]);
@@ -374,7 +374,7 @@ namespace Signum.Entities
 
         class IsExpander : IMethodExpander
         {
-            public Expression Expand(Expression instance, Expression[] arguments)
+            public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 return Expression.Equal(arguments[0], arguments[1]);
             }

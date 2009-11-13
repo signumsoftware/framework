@@ -14,7 +14,7 @@ namespace Signum.Utilities.ExpressionTrees
 	/// </summary>
 	public interface IMethodExpander
 	{
-        Expression Expand(Expression instance, Expression[] arguments);
+        Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments);
 	}
 
 	/// <summary>
@@ -87,7 +87,7 @@ namespace Signum.Utilities.ExpressionTrees
                 IMethodExpander exp = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
 				if (exp == null) 
                     throw new InvalidOperationException("Expansion failed! '{0}' does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
-                return Visit(exp.Expand(Visit(m.Object), m.Arguments.Select(p => Visit(p)).ToArray()));
+                return Visit(exp.Expand(Visit(m.Object), m.Arguments.Select(p => Visit(p)).ToArray(), m.Method.IsGenericMethod ? m.Method.GetGenericArguments() : null));
 			}
 
 			if (m.Method.DeclaringType == typeof(ExpressionExtensions))

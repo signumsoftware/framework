@@ -726,13 +726,12 @@ namespace Signum.Engine.Linq
             if (!typeof(IQueryable).IsAssignableFrom(type))
                 return null;
 
-            if(!type.IsInstantiationOf(typeof(Query<>)))
-                throw new InvalidOperationException("{0} belongs to another kind ok Linq Provider");
-
             IQueryable query = (IQueryable)value;
 
-            ConstantExpression ce = query.Expression as ConstantExpression;
-            if (ce == null || ce.Value != query)
+            if (!type.IsInstantiationOf(typeof(Query<>)))
+                throw new InvalidOperationException("{0} belongs to another kind ok Linq Provider");
+
+            if (!query.IsBase())
                 throw new InvalidOperationException("ConstantExpression with a complex IQueryable unexpected at this stage");
 
             return query.ElementType;
