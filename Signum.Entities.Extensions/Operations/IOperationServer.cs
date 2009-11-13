@@ -22,7 +22,7 @@ namespace Signum.Services
 
 
         [OperationContract, NetDataContract]
-        IIdentifiable ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args);
+        IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args);
 
         [OperationContract, NetDataContract]
         IIdentifiable ExecuteOperationLite(Lite lite, Enum operationKey, params object[] args);

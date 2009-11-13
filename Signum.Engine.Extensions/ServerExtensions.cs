@@ -88,7 +88,7 @@ namespace Signum.Services
                 () => OperationLogic.ServiceGetConstructorOperationInfos(entityType));
         }
 
-        public IIdentifiable ExecuteOperation(IdentifiableEntity entity, Enum operationKey, params object[] args)
+        public IIdentifiable ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), "ExecuteOperation {0}".Formato(operationKey),
                () => OperationLogic.ServiceExecute(entity, operationKey, args));

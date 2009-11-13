@@ -142,6 +142,7 @@
       <DependentUpon>ConstructorSelectorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Operations\ConstructFromMenuItem.cs" />
+    <Compile Include="Operations\OperationServer.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="Operations\LogOperation.xaml.cs">
       <DependentUpon>LogOperation.xaml</DependentUpon>
