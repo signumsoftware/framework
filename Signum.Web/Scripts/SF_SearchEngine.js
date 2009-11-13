@@ -270,9 +270,6 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 				}
 			}
 			NotifyInfo(lang['operationExecuted'], 2000);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			alert('hola');
 		}
 	});
 }
