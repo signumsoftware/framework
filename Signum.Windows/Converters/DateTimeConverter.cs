@@ -50,8 +50,19 @@ namespace Signum.Windows
             string str = (string)value;
 
             DateTime result;
-            if (str.HasText() && !DateTime.TryParseExact(str, Format, cultureInfo, DateTimeStyles.None, out result))
-                return new ValidationResult(false, Properties.Resources.InvalidDateFormat);
+            if (str.HasText())
+            {
+                if (Strict)
+                {
+                    if (!DateTime.TryParseExact(str, Format, cultureInfo, DateTimeStyles.None, out result))
+                        return new ValidationResult(false, Properties.Resources.InvalidDateFormat);
+                }
+                else
+                {
+                     if (!DateTime.TryParse(str, cultureInfo, DateTimeStyles.None, out result))
+                         return new ValidationResult(false, Properties.Resources.InvalidDateFormat);
+                }
+            }
             return new ValidationResult(true, null);
         }
     }

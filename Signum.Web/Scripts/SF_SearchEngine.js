@@ -476,20 +476,22 @@ function Search(urlController, prefix, callBack) {
 	var top = $("#" + prefix + sfTop).val();
 	var allowMultiple = $("#" + prefix + sfAllowMultiple).val();
 	var serializedFilters = SerializeFilters(prefix);
+	var async = concurrentSearch[prefix + "btnSearch"];
+	if (async) concurrentSearch[prefix + "btnSearch"]=false;
 	$.ajax({
-		type: "POST",
-		url: urlController,
-		data: "sfQueryUrlName=" + $("#" + prefix + "sfQueryUrlName").val() + qp("sfTop", top) + qp("sfAllowMultiple", allowMultiple) + qp(sfPrefix, prefix) + serializedFilters,
-		async: false,
-		dataType: "html",
-		success: function (msg) {
-			$("#" + prefix + "divResults").html(msg);
-			if (callBack != undefined) callBack();
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
-			if (callBack != undefined) callBack();
-		}
+	    type: "POST",
+	    url: urlController,
+	    data: "sfQueryUrlName=" + $("#" + prefix + "sfQueryUrlName").val() + qp("sfTop", top) + qp("sfAllowMultiple", allowMultiple) + qp(sfPrefix, prefix) + serializedFilters,
+	    async: async,
+	    dataType: "html",
+	    success: function(msg) {
+	        $("#" + prefix + "divResults").html(msg);
+	        if (callBack != undefined) callBack();
+	    },
+	    error: function(XMLHttpRequest, textStatus, errorThrown) {
+	        ShowError(XMLHttpRequest, textStatus, errorThrown);
+	        if (callBack != undefined) callBack();
+	    }
 	});
 }
 
@@ -527,6 +529,8 @@ function toggleVisibility(elementId) {
 	$('#' + elementId).toggle();
 }
 
+var concurrentSearch = new Array();
 function SearchOnLoad(btnSearchId) {
+    concurrentSearch[btnSearchId] = true;
 	$("#" + btnSearchId).click();
 }
