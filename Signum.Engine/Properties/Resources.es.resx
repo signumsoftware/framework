@@ -471,4 +471,10 @@ WRITETEXT</value>
   <data name="Fields0AreSetAtTheSameTime" xml:space="preserve">
     <value>Los campos {0} están establecidos al mismo tiempo</value>
   </data>
+  <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
+    <value>Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'</value>
+  </data>
+  <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
+    <value>Hay '{0}' que refieren a esta entidad</value>
+  </data>
 </root>

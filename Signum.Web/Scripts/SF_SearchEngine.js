@@ -277,6 +277,33 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 	});
 }
 
+function DeleteExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel, confirmMsg) {
+    if (!confirm(confirmMsg))
+        return;
+    NotifyInfo(lang['executingOperation']);
+    var formChildren = "";
+    if (isLite == false || isLite == "false" || isLite == "False") {
+        if (prefix != "") //PopupWindow
+            formChildren = $('#' + prefix + "panelPopup *, #" + sfReactive + ", #" + sfTabId).serialize();
+        else //NormalWindow
+            formChildren = $("form").serialize();
+    }
+    if (formChildren.length > 0) formChildren = "&" + formChildren;
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: "isLite=" + isLite + qp("sfRuntimeType", typeName) + qp("sfId", id) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, prefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + formChildren,
+        async: false,
+        dataType: "html",
+        success: function(msg) {
+            NotifyInfo(lang['operationExecuted'], 2000);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            ShowError(XMLHttpRequest, textStatus, errorThrown);
+        }
+    });
+}
+
 function ConstructFromExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
     NotifyInfo(lang['executingOperation']);
     var formChildren = "";

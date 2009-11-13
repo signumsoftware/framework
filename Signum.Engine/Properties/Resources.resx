@@ -466,4 +466,10 @@ WRITETEXT</value>
   <data name="ImpossibleToIncludeInTheSchema" xml:space="preserve">
     <value>Impossible to include in the Schema:</value>
   </data>
+  <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
+    <value>There are records in '{0}' pointing to this table by column '{1}'</value>
+  </data>
+  <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
+    <value>There are '{0}' that refer this entity</value>
+  </data>
 </root>

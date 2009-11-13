@@ -7,11 +7,14 @@ using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
 using Signum.Engine.Properties;
+using Signum.Engine.Maps;
+using Signum.Entities;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Exceptions
 {
     [Serializable]
-    public class UniqueKeyException : Exception
+    public class UniqueKeyException : ApplicationException
     {
         public string TableName { get; private set; }
         public string[] Fields { get; private set; }
@@ -47,10 +50,11 @@ namespace Signum.Engine.Exceptions
 
   
     [Serializable]
-    public class ForeignKeyException : Exception
+    public class ForeignKeyException : ApplicationException
     {
         public string TableName { get; private set; }
         public string Field { get; private set; }
+        public Type RelatedType { get; private set; }
 
         static Regex indexRegex = new Regex(@"""FK_(?<table>[^_]+)_(?<field>[^_""]+)"""); 
 
@@ -63,17 +67,23 @@ namespace Signum.Engine.Exceptions
             {
                 TableName = m.Groups["table"].Value;
                 Field = m.Groups["field"].Value;
+                RelatedType = Schema.Current.Tables
+                    .Where(kvp => kvp.Value.Name == TableName)
+                    .Select(p => p.Key)
+                    .SingleOrDefault();
             }
         }
 
-       public override string Message
+        public override string Message
         {
             get
             {
                 if (TableName == null)
                     return InnerException.Message;
 
-                return "There are records in '{0}' pointing to this table by column '{1}'".Formato(TableName, Field);
+                return (RelatedType == null) ?
+                    Resources.ThereAreRecordsIn0PointingToThisTableByColumn1.Formato(TableName, Field) :
+                    Resources.ThereAre0ThatReferThisEntity.Formato(RelatedType.NicePluralName());
             }
         }
     }
