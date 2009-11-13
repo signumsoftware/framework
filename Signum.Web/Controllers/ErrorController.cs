@@ -27,6 +27,9 @@ namespace Signum.Web.Controllers
             ViewData["url"] = url;
 
             if (LogException != null) {
+                //  Check if error is accessing to a static file
+                // since IIS will get the request and serve it
+                if (url.EndsWith(".js") || url.EndsWith(".css")) return;
                 HandleErrorInfo hei = new HandleErrorInfo(
                     new Exception("Error 404 accessing url '" + url + "'"),
                     (string)this.RouteData.Values["controller"],
