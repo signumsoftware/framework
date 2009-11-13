@@ -172,11 +172,9 @@ namespace Signum.Windows
         {
             this.InitializeComponent();
 
-
             FilterOptions = new FreezableCollection<FilterOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(SearchControl_DataContextChanged);
-
         }
 
         void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
