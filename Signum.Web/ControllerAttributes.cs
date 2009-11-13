@@ -181,4 +181,7 @@ namespace Signum.Web
             filterContext.HttpContext.Response.StatusCode = 500;
         }
     }
+
+   // [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
+   // public class HandleUnknownActionAttribute : Han 
 }
