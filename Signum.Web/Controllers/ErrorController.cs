@@ -29,7 +29,7 @@ namespace Signum.Web.Controllers
             if (LogException != null) {
                 //  Check if error is accessing to a static file
                 // since IIS will get the request and serve it
-                if (url.EndsWith(".js") || url.EndsWith(".css")) return;
+                if (url.EndsWith(".js") || url.EndsWith(".css")) return View();
                 HandleErrorInfo hei = new HandleErrorInfo(
                     new Exception("Error 404 accessing url '" + url + "'"),
                     (string)this.RouteData.Values["controller"],
