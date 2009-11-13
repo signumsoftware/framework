@@ -44,7 +44,10 @@ var lang = {
     "operationExecuted" : "Operación ejecutada"
 }; 
     
-
+$().ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {         
+    ShowError(XMLHttpRequest, ajaxOptions, thrownError);
+ });
+ 
 function qp(name, value) {
     return "&" + name + "=" + value;
 }
