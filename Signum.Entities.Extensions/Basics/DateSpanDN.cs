@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Extensions.Basics
 {
@@ -10,7 +11,7 @@ namespace Signum.Entities.Extensions.Basics
     public class DateSpanDN : EmbeddedEntity
     {
         int years;
-        [LocDescription ]
+        [LocDescription]
         public int Years
         {
             get { return years; }
@@ -35,21 +36,32 @@ namespace Signum.Entities.Extensions.Basics
 
         public bool EsNulo()
         {
-            return years == 0 && months == 0 && days == 0;        
+            return years == 0 && months == 0 && days == 0;
         }
 
-        public DateTime Add(DateTime date)
+        //static Expression<Func<DateSpanDN, DateTime>> MethodExpression =
+        //     (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
+        //public DateTime Add(DateTime date)
+        //{
+        //    return date.AddYears(years).AddMonths(months).AddDays(days);
+        //}
+
+
+        static Expression<Func<DateSpanDN,DateTime, DateTime>> AddExpression =
+             (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
+        static Func<DateSpanDN,DateTime, DateTime> AddFunc = AddExpression.Compile();
+        public  DateTime Add( DateTime date)
         {
-            return date.AddYears(years).AddMonths(months).AddDays(days);
+            return AddFunc(this, date);
         }
 
         public DateSpan ToDateSpan()
         {
-            return new DateSpan(years, months, days); 
+            return new DateSpan(years, months, days);
         }
         public override string ToString()
         {
             return ToDateSpan().ToString();
-        }   
+        }
     }
 }
