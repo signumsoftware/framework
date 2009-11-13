@@ -46,7 +46,10 @@ namespace Signum.Engine.Linq
         public Expression CreateParameter(string name, Expression value)
         {
             bool nullable = value.Type.IsClass || value.Type.IsNullable();
-            SqlDbType sqlDbType = SchemaBuilderSettings.TypeValues.TryGetS(value.Type.UnNullify()) ?? SqlDbType.Variant;
+            Type clrType = value.Type.UnNullify();
+            if (clrType.IsEnum)
+                clrType = typeof(int);
+            SqlDbType sqlDbType = SchemaBuilderSettings.TypeValues.TryGetS(clrType) ?? SqlDbType.Variant;
 
             Expression valExpression = value.Type.IsNullable() ? 
                 Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :

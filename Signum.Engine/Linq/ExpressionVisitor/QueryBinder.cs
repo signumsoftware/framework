@@ -1256,6 +1256,12 @@ namespace Signum.Engine.Linq
             {
                 return new[] { new ColumnAssignment((ColumnExpression)colExpression, expression) };
             }
+            else if(colExpression.NodeType == ExpressionType.Convert && colExpression.Type.IsEnum && ((UnaryExpression)colExpression).Operand is ColumnExpression )
+            {
+                ColumnExpression col2 = (ColumnExpression) ((UnaryExpression)colExpression).Operand;
+
+                return new[] { new ColumnAssignment(col2, expression) };
+            }
             else if (colExpression is LiteReferenceExpression && expression is LiteReferenceExpression)
             {
                 return Assign(((LiteReferenceExpression)colExpression).Reference, ((LiteReferenceExpression)expression).Reference); 
