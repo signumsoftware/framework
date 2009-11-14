@@ -57,12 +57,12 @@ namespace Signum.Windows.Operations
             {
                 MenuItem b = (MenuItem)e.OriginalSource;
                 OperationInfo operationInfo = (OperationInfo)b.Tag;
-                Type entityType = SearchControl.EntityType; 
+                Type entityType = SearchControl.EntityType;
                 object queryName = SearchControl.QueryName;
 
-                var lites = SearchControl.SelectedItems.TryCC(a=>a.Cast<Lite>().ToList()); 
+                var lites = SearchControl.SelectedItems.TryCC(a => a.Cast<Lite>().ToList());
 
-                if(lites == null && lites.Count == 0)
+                if (lites == null && lites.Count == 0)
                     throw new ApplicationException("Select some rows first");
 
                 ConstructorFromManySettings settings = (ConstructorFromManySettings)OperationClient.Manager.Settings.TryGetC(operationInfo.Key);
@@ -78,8 +78,8 @@ namespace Signum.Windows.Operations
 
                 IIdentifiable entity = Server.Service<IOperationServer>().ConstructFromMany(lites, entityType, operationInfo.Key);
 
-               if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
-                   Navigator.View(entity); 
+                if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
+                    Navigator.View(entity);
             }
         }
     }

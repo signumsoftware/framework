@@ -43,7 +43,7 @@ namespace Signum.Windows.Processes
             DateTime plan = DateTime.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, args.SenderButton.FindCurrentWindow()))
             {
-                return Server.Service<IOperationServer>().ExecuteOperationLite(args.Entity.ToLite(), args.OperationInfo.Key, plan); 
+                return  ((ProcessExecutionDN)args.Entity).ToLite().ExecuteLite(ProcessOperation.Plan, plan); 
             }
             return null; 
         }
