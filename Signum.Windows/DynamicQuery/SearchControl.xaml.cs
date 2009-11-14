@@ -179,7 +179,7 @@ namespace Signum.Windows
 
         void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (queryResult != null)
+            if (queryResult != null && e.NewValue != null)
                 Search();
         }
 
