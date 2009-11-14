@@ -1262,9 +1262,13 @@ namespace Signum.Engine.Linq
 
                 return new[] { new ColumnAssignment(col2, expression) };
             }
-            else if (colExpression is LiteReferenceExpression && expression is LiteReferenceExpression)
+            else if (colExpression is LiteReferenceExpression)
             {
-                return Assign(((LiteReferenceExpression)colExpression).Reference, ((LiteReferenceExpression)expression).Reference); 
+                Expression reference = ((LiteReferenceExpression)colExpression).Reference;
+                if (expression is LiteReferenceExpression)
+                    return Assign(reference, ((LiteReferenceExpression)expression).Reference);
+                else if (expression.IsNull())
+                    return Assign(reference, Expression.Constant(null, reference.Type)); 
             }
             else if (colExpression is FieldInitExpression)
             {
