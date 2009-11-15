@@ -43,6 +43,7 @@ namespace Signum.Engine.Processes
                           Entity = p.ToLite(),
                           p.Id,
                           Operation = p.Operation.ToLite(),
+                          p.Name ,
                           Lines = (int?)Database.Query<PackageLineDN>().Count(pl => pl.Package == p.ToLite())
                       }).ToDynamic();
 

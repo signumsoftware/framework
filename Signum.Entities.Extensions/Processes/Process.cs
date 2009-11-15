@@ -38,7 +38,7 @@ namespace Signum.Entities.Processes
         }
 
         IProcessDataDN processData;
-        [LocDescription]
+       [LocDescription]
         public IProcessDataDN ProcessData
         {
             get { return processData; }

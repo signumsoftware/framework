@@ -6,10 +6,10 @@
     xmlns:d="clr-namespace:Signum.Entities.Processes;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="d:ProcessExecutionDN"
     MinWidth="300">
-    <StackPanel m:Common.IsReadOnly="True">
+    <StackPanel m:Common.IsReadOnly="True"   >
         <m:ValueLine m:Common.Route="State" />
         <m:EntityCombo m:Common.Route="Process" />
-        <m:EntityLine m:Common.Route="ProcessData" />
+        <m:EntityLine m:Common.Route="ProcessData"  />
         <m:ValueLine m:Common.Route="CreationDate" />
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="PlannedDate" />
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="CancelationDate" />

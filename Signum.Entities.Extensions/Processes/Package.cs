@@ -10,6 +10,15 @@ namespace Signum.Entities.Processes
     [Serializable, LocDescription]
     public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
+        [ SqlDbType(Size = 200)]
+        string name;
+        [StringLengthValidator(AllowNulls = true , Max = 200)]
+        public string Name
+        {
+            get { return name; }
+            set { Set(ref name, value, () => Name); }
+        }
+
         OperationDN operation;
         public OperationDN Operation
         {
@@ -33,7 +42,7 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "Package ({0} lines{1})".Formato(numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
+            return "Package {3} {2} ({0} lines{1})".Formato(numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors),Name,Operation  );
         }
     }
 
