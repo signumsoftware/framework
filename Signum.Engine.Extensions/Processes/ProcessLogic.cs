@@ -57,7 +57,7 @@ namespace Signum.Engine.Processes
 
                 OperationLogic.AssertIsStarted(sb);
                 AuthLogic.AssertIsStarted(sb); 
-                new ExecutingProcessGraph().Register();
+                new ProcessExecutionGraph().Register();
 
                 sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_InitializingApplication);
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saved += ProcessExecution_Saved;
@@ -290,9 +290,9 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public class ExecutingProcessGraph : Graph<ProcessExecutionDN, ProcessState>
+        public class ProcessExecutionGraph : Graph<ProcessExecutionDN, ProcessState>
         {
-            public ExecutingProcessGraph()
+            public ProcessExecutionGraph()
             {
                 this.GetState = e => e.State;
                 this.Operations = new List<IGraphOperation>()
@@ -401,6 +401,18 @@ namespace Signum.Engine.Processes
         {
             return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, processData);
         }
+
+        public static void ExecuteTest(this ProcessExecutionDN pe)
+        {
+            var ep = new ExecutingProcess
+            {
+                Algorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(pe.Process.Key)],
+                Data = pe.ProcessData,
+                Execution = pe,
+            };
+
+            ep.Execute();
+        }
     }
 
     public interface IProcessAlgorithm
@@ -445,7 +457,6 @@ namespace Signum.Engine.Processes
 
             try
             {
-
                 FinalState state = Algorithm.Execute(this);
 
                 if (state == FinalState.Finished)

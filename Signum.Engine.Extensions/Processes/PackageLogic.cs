@@ -62,7 +62,6 @@ namespace Signum.Engine.Processes
                      .ChangeColumn(a => a.Target, c => c.Filterable = false);
             }
         }
-
     }
 
     public abstract class PackageAlgorithm<T>: IProcessAlgorithm
