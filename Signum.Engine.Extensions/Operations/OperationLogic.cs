@@ -288,6 +288,7 @@ namespace Signum.Engine.Operations
             if (!(result is T))
                 throw new ApplicationException("Operation {0} is a {1} not a {2}, use '{3}' instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
+                    result is IDeleteOperation ? "Delete" :
                     result is IConstructorOperation ? "Construct" :
                     result is IConstructorFromOperation ? "ConstructFrom" :
                     result is IConstructorFromManyOperation ? "ConstructFromMany" : null));
