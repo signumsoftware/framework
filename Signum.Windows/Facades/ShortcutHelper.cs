@@ -37,6 +37,7 @@ namespace Signum.Windows
 
             var commonWords = (from str in labelList
                                from word in str.Replace("_", "").Split(' ').Distinct()
+                               where word.Length > 0
                                group word by word into g
                                where g.Count() > 1
                                select g.Key).ToDictionary(a => a, a => new string('*', a.Length));

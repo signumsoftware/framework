@@ -8,6 +8,7 @@ using Signum.Entities.Properties;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
@@ -346,10 +347,16 @@ namespace Signum.Entities
 
         class RefersToExpander : IMethodExpander
         {
+            static MethodInfo miToLazy = ReflectionTools.GetMethodInfo((TypeDN type) => type.ToLite()).GetGenericMethodDefinition();
+
+
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
                 Expression lite = arguments[0];
-                return Expression.Equal(Expression.MakeMemberAccess(lite, lite.Type.GetProperty("EntityOrNull", BindingFlags.Instance| BindingFlags.Public)), arguments[1]);
+                Expression entity = arguments[1];
+
+               return Expression.Equal(lite, Expression.Call(null, miToLazy.MakeGenericMethod(typeArguments[0]), entity));
+                
             }
         }
 
