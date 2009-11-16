@@ -211,7 +211,6 @@ namespace Signum.Engine.Authorization
             QueryAuthLogic.Start(sb, queryManagers);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
-            EntityGroupAuthLogic.Start(sb);
         }
     }
 }

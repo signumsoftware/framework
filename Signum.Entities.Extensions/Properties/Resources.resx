@@ -498,4 +498,7 @@
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
     <value>File Types</value>
   </data>
+  <data name="ProcessOperation_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
 </root>

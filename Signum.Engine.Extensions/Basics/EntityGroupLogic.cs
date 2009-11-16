@@ -112,12 +112,19 @@ namespace Signum.Engine.Basics
 
         class WhereInGroupExpander : IMethodExpander
         {
+            static MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null, i => i == 0)).GetGenericMethodDefinition();
+
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
-                ConstantExpression ce = arguments[1] as ConstantExpression;
-                IEntityGroupInfo info = GetEntityGroupInfo((Enum)ce.Value, typeArguments[0]);
+                Expression group = arguments[1];
+                if (group.NodeType == ExpressionType.Convert)
+                    group = ((UnaryExpression)group).Operand;
+ 
+                Type type = typeArguments[0];
 
-                return Expression.Call(arguments[0], "Where", typeArguments, info.UntypedExpression);
+                IEntityGroupInfo info = GetEntityGroupInfo((Enum)((ConstantExpression)group).Value, type);
+
+                return Expression.Call(null, miWhere.MakeGenericMethod(type), arguments[0], info.UntypedExpression);
             }
         }
 

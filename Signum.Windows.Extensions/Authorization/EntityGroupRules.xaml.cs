@@ -28,7 +28,7 @@ namespace Signum.Windows.Authorization
         }
 
         public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(QueryRules), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(EntityGroupRules), new UIPropertyMetadata(null));
 
         public EntityGroupRules()
         {

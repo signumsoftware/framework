@@ -27,6 +27,7 @@ namespace Signum.Web.Authorization
     public class AuthController : Controller
     {
         public static event Action<UserDN> OnUserLogged;
+        public const string SessionUserKey = "user";
 
         public AuthController()
             : this(null, null)
@@ -87,7 +88,7 @@ namespace Signum.Web.Authorization
                     {
                         usr.PasswordHash = Security.EncodePassword(newPassword);
                         Database.Save(usr);
-                        Session["user"] = usr;
+                        Session[SessionUserKey] = usr;
                     }
                 }
                 catch (Exception ex)
@@ -321,7 +322,7 @@ namespace Signum.Web.Authorization
 
         private void AddUserSession(string username, bool? rememberMe, UserDN usuario)
         {
-            System.Web.HttpContext.Current.Session.Add("user", usuario);
+            System.Web.HttpContext.Current.Session.Add(SessionUserKey, usuario);
             Thread.CurrentPrincipal = usuario;
 
             FormsAuth.SetAuthCookie(username, rememberMe ?? false);

@@ -320,6 +320,28 @@ namespace Signum.Engine.Processes
                              }.Save();
                          }
                     },
+                    new Goto(ProcessOperation.Save, ProcessState.Created)
+                    {
+                         FromStates = new []{ProcessState.Created },
+                         AllowsNew = true,
+                         Lite = false,
+                         Execute = (pe, args)=>
+                         {
+                            
+                             pe.Save(); 
+                         }
+                    },
+                    //new Goto(ProcessOperation.Save, ProcessState.Planned)
+                    //{
+                    //     FromStates = new []{ProcessState.Planned},
+                    //     AllowsNew = true,
+                    //     Lite = false,
+                    //     Execute = (pe, args)=>
+                    //     {
+                              //pe.State=ProcessState.Planned ;
+                    //         pe.Save(); 
+                    //     }
+                    //},
                     new Goto(ProcessOperation.Plan, ProcessState.Planned)
                     {
                          FromStates = new []{ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended},

@@ -20,7 +20,7 @@ using Signum.Utilities;
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer,
-        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, IEntityGroupAuthServer 
+        IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer 
     {
         protected UserDN currentUser;
 
@@ -248,22 +248,6 @@ namespace Signum.Services
         {
             Execute(MethodInfo.GetCurrentMethod(),
                () => OperationAuthLogic.SetAllowedRule(rules, role));
-        }
-
-        #endregion
-
-        #region IEntityGroupAuthServer Members
-
-        public List<EntityGroupRule> GetEntityGroupAllowedRules(Lite<RoleDN> role)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => EntityGroupAuthLogic.GetEntityGroupRules(role));
-        }
-
-        public void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lite<RoleDN> role)
-        {
-            Execute(MethodInfo.GetCurrentMethod(),
-               () => EntityGroupAuthLogic.SetEntityGroupRules(rules, role));
         }
 
         #endregion

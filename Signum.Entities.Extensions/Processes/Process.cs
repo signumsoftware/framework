@@ -227,6 +227,8 @@ namespace Signum.Entities.Processes
         [LocDescription]
         Plan,
         [LocDescription]
+        Save,
+        [LocDescription]
         Cancel,
         [LocDescription]
         Execute,

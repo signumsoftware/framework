@@ -101,5 +101,23 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lite<RoleDN> role);
+
+        //   #region IEntityGroupAuthServer Members
+
+        //   public List<EntityGroupRule> GetEntityGroupAllowedRules(Lite<RoleDN> role)
+        //   {
+        //       return Return(MethodInfo.GetCurrentMethod(),
+        //        () => EntityGroupAuthLogic.GetEntityGroupRules(role));
+        //   }
+
+        //   public void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lite<RoleDN> role)
+        //   {
+        //       Execute(MethodInfo.GetCurrentMethod(),
+        //          () => EntityGroupAuthLogic.SetEntityGroupRules(rules, role));
+        //   }
+
+        //   #endregion
     }
+
+
 }

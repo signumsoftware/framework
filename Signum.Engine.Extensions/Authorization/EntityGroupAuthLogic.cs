@@ -38,15 +38,15 @@ namespace Signum.Engine.Authorization
             public static AllowedPair Max(AllowedPair ap1, AllowedPair ap2)
             {
                 return new AllowedPair(
-                    ap1.InGroup || ap1.InGroup,
-                    ap2.InGroup || ap2.InGroup);
+                    ap1.InGroup || ap2.InGroup,
+                    ap1.OutGroup || ap2.OutGroup);
             }
 
             public static AllowedPair Min(AllowedPair ap1, AllowedPair ap2)
             {
                 return new AllowedPair(
-                    ap1.InGroup && ap1.InGroup,
-                    ap2.InGroup && ap2.InGroup);
+                    ap1.InGroup && ap2.InGroup,
+                    ap1.OutGroup && ap2.OutGroup);
             }
 
             public bool IsTrue()
@@ -221,8 +221,6 @@ namespace Signum.Engine.Authorization
                 Expression body = pairs.Select(p =>
                                 !p.Allowed.InGroup ? Expression.Not(Expression.Invoke(p.Expression, e)) :
                                                      (Expression)Expression.Invoke(p.Expression, e)).Aggregate((a, b) => Expression.And(a, b));
-
-                body = ExpressionEvaluator.PartialEval(body); //Avoid recursive Expansions of Database.Query<T>()
 
                 query = query.Where(Expression.Lambda<Func<T, bool>>(body, e));
 
