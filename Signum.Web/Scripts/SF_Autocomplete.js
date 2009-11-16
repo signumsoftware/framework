@@ -65,9 +65,6 @@ function Autocomplete(ddlName, extendedControlName, entityTypeName, implementati
 			ddl.width(txtbox.width());
 
 			ddl[0].style.display = "block";
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
 	});
 }

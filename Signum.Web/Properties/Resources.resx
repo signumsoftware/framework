@@ -195,4 +195,10 @@
   <data name="QuickLinkIsNotInitialized" xml:space="preserve">
     <value>QuickLink doesn't have its FindOptions initialized</value>
   </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
 </root>

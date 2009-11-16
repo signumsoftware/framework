@@ -23,8 +23,8 @@ namespace Signum.Web
     public class EntityRepeater : EntityBase
     {
         public Type EntitiesType { get; set; }
-        public string RemoveElementLinkText = "Remove";
-        public string AddElementLinkText = "New";
+        public string RemoveElementLinkText = Resources.Remove;
+        public string AddElementLinkText = Resources.New;
         public int? maxElements = null;
 
         public EntityRepeater() 
@@ -78,7 +78,7 @@ namespace Signum.Web
                     helper.Href(TypeContext.Compose(idValueField, "btnCreate"),
                               settings.AddElementLinkText,
                               creatingUrl,
-                              "Nuevo",
+                              settings.AddElementLinkText,
                               "lineButton create",
                               new Dictionary<string, object>()));
             }

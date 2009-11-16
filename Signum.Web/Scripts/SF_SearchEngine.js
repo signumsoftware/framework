@@ -10,9 +10,6 @@
 			ShowPopup(prefix, divASustituir, "modalBackgroundS", "panelPopupS");
 			$('#' + prefix + sfBtnOkS).click(onOk);
 			$('#' + prefix + sfBtnCancelS).click(onCancel);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
 	});
 }
@@ -40,9 +37,6 @@ function TypedSearchCreate(urlController, prefix, onOk, onCancel, typeName) {
 			 "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
 			 "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n");
             $('#' + newPrefix + sfBtnCancel).click(onCancel);
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
     });
 }
@@ -65,9 +59,6 @@ function RelatedEntityCreate(urlController, prefix, onOk, onCancel, typeName) {
 			 "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
 			 "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n");
             $('#' + newPrefix + sfBtnCancel).click(onCancel);
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
     });
 }
@@ -176,9 +167,6 @@ function CallServer(urlController, prefix) {
 		dataType: "html",
 		success: function (msg) {
 			window.alert(msg);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
 	});
 }
@@ -195,9 +183,6 @@ function CloseChooser(urlController, onOk, onCancel, prefix) {
 		success: function (msg) {
 			container.html(msg);
 			ShowPopup(prefix, container[0].id, "modalBackground", "panelPopup");
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
 	});
 }
@@ -221,9 +206,6 @@ function QuickLinkClickServerAjax(urlController,findOptionsRaw,prefix) {
                 ShowPopup(newPrefix, prefix + "divASustituir", "modalBackgroundS", "panelPopupS");
                 $('#' + newPrefix + sfBtnCancelS).click(function() { $('#' + prefix + "divASustituir").html("") });
             }
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
     });
 }
@@ -294,9 +276,6 @@ function DeleteExecute(urlController, typeName, id, operationKey, isLite, prefix
         dataType: "html",
         success: function(msg) {
             NotifyInfo(lang['operationExecuted'], 2000);
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
     });
 }
@@ -332,10 +311,6 @@ function ConstructFromExecute(urlController, typeName, id, operationKey, isLite,
             $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
             }
             NotifyInfo(lang['operationExecuted'], 2000);
-        }        
-        ,
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
     });
 }
@@ -355,9 +330,6 @@ function ConstructFromManyExecute(urlController, typeName, operationKey, prefix,
 	        ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
 	        $('#' + newPrefix + sfBtnOk).click(onOk);
 	        $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
-	    },
-	    error: function(XMLHttpRequest, textStatus, errorThrown) {
-	        ShowError(XMLHttpRequest, textStatus, errorThrown);
 	    }
 	});
 }
@@ -408,9 +380,6 @@ function QuickFilter(idTD, prefix) {
             $("#filters-list .explanation").hide();
             $("#filters-list table").show('fast');
             $("#" + prefix + "tblFilters tbody").append(msg);
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
     });
 }
@@ -448,9 +417,6 @@ function AddFilter(urlController, prefix) {
 		dataType: "html",
 		success: function (msg) {
 			$("#" + prefix + "tblFilters tbody").append(msg);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
 	});
 }
@@ -489,7 +455,6 @@ function Search(urlController, prefix, callBack) {
 	        if (callBack != undefined) callBack();
 	    },
 	    error: function(XMLHttpRequest, textStatus, errorThrown) {
-	        ShowError(XMLHttpRequest, textStatus, errorThrown);
 	        if (callBack != undefined) callBack();
 	    }
 	});

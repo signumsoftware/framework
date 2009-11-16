@@ -16,9 +16,6 @@ function ValidatePartialAndCallJavascript(urlValidateController, urlJavascriptCo
             dataType: "html",
             success: function(msg) {
                 $('#' + panelPopupKey).append("<script type=\"text/javascript\">" + msg + "</script>");
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) {
-                ShowError(XMLHttpRequest, textStatus, errorThrown);
             }
         });
 	}
@@ -62,9 +59,6 @@ function TrySave(urlController, prefixToIgnore, showInlineError, fixedInlineErro
 				returnValue = true;
 			}
 			NotifyInfo(lang['saved'], 2000);
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
 	});
 	return returnValue;
@@ -88,9 +82,6 @@ function Validate(urlController, prefixToIgnore, showInlineError, fixedInlineErr
 			else {
 				returnValue = true;
 			}
-		},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
 		}
 	});
 	return returnValue;
@@ -124,10 +115,7 @@ function TrySavePartial(urlController, prefix, prefixToIgnore, showInlineError, 
 			}
 			var modelState = result["ModelState"];
 			returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
-			},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-			ShowError(XMLHttpRequest, textStatus, errorThrown);
-		}
+			}
 	});
 	return returnValue;
 }
@@ -226,9 +214,6 @@ function TypedValidatePartial(urlController, prefix, prefixToIgnore, showInlineE
             }
             var modelState = result["ModelState"];
             returnValue = ShowErrorMessages(prefix, modelState, showInlineError, fixedInlineErrorText);
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            ShowError(XMLHttpRequest, textStatus, errorThrown);
         }
     });
     return returnValue;

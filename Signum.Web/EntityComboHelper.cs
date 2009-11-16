@@ -28,6 +28,8 @@ namespace Signum.Web
             get { return preload; }
             set { preload=value; }
         }
+        public List<Lite> Data { get; set; }
+
         public EntityCombo()
         {
             Create = false;
@@ -88,15 +90,29 @@ namespace Signum.Web
                     items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
                     if (settings.Preload)
                     {
-                        items.AddRange(
-                            Database.RetrieveAllLite(Reflector.ExtractLite(type) ?? type)
-                                .Select(lite => new SelectListItem()
-                                {
-                                    Text = lite.ToString(),
-                                    Value = lite.Id.ToString(),
-                                    Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
-                                })
-                            );
+                        if (settings.Data != null)
+                        {
+                            items.AddRange(
+                                settings.Data.Select(lite => new SelectListItem()
+                                    {
+                                        Text = lite.ToString(),
+                                        Value = lite.Id.ToString(),
+                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
+                                    })
+                                );
+                        }
+                        else
+                        {
+                            items.AddRange(
+                                Database.RetrieveAllLite(Reflector.ExtractLite(type) ?? type)
+                                    .Select(lite => new SelectListItem()
+                                    {
+                                        Text = lite.ToString(),
+                                        Value = lite.Id.ToString(),
+                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
+                                    })
+                                );
+                        }
                     }
 
                     settings.ComboHtmlProperties.Add("class","valueLine");

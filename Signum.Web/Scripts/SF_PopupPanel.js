@@ -681,11 +681,11 @@ function EntityComboOnChange(prefix) {
 }
 
 function OnPopupComboOk(urlController, prefix) {
-	new pop(urlController, {prefix: prefix}).onPopupComboOk();
+	new popup(urlController, {prefix: prefix}).onPopupComboOk();
 }
 
 function OnPopupComboCancel(prefix) {
-	new pop(null, {prefix: prefix}).onPopupComboCancel();
+	new popup(null, {prefix: prefix}).onPopupComboCancel();
 }
 
 function toggleButtonsDisplay(prefix, hasEntity) {
