@@ -71,11 +71,11 @@ function replaceAll(s,tr){
 function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     var error;
     if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
-        /*var startError = XMLHttpRequest.responseText.indexOf("<title>");
+        var startError = XMLHttpRequest.responseText.indexOf("<title>");
         var endError = XMLHttpRequest.responseText.indexOf("</title>");
         if ((startError != -1) && (endError != -1))
             error = XMLHttpRequest.responseText.substring(startError + 7, endError);
-        else*/
+        else
             error = XMLHttpRequest.responseText;
     }
     else {
