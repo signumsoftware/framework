@@ -189,14 +189,14 @@ namespace Signum.Windows.Operations
                         Lite lite = Lite.Create(ident.GetType(), ident);
                         IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFromLite(lite, operationInfo.Key, null);
                         if (operationInfo.Returns)
-                            SmartNavigation(newIdent);
+                            Navigator.View(newIdent, ViewButtons.Save); 
                     }
                 }
                 else
                 {
                     IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
                     if (operationInfo.Returns)
-                        SmartNavigation(newIdent);
+                        Navigator.View(newIdent, ViewButtons.Save); 
                 }
             }
             else if (operationInfo.OperationType == OperationType.Delete)
@@ -207,14 +207,6 @@ namespace Signum.Windows.Operations
                     Server.Service<IOperationServer>().Delete(lite, operationInfo.Key, null);
                 }
             }
-        }
-
-        static internal void SmartNavigation(IIdentifiable ident)
-        {
-            if (ident.IsNew)
-                Navigator.View(ident, ViewButtons.Ok);
-            else
-                Navigator.View(ident, ViewButtons.Save); 
         }
 
         internal object ConstructorManager_GeneralConstructor(Type type, Window win)

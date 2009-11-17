@@ -87,8 +87,11 @@ namespace Signum.Engine.Processes
             PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
             package.Save();
 
+            if (args != null && args.Length > 0)
+                package.Name = (string)args[0];
+
             List<Lite<T>> lites = 
-                args != null && args.Length > 0? (List<Lite<T>>)args[0]: 
+                args != null && args.Length > 1? (List<Lite<T>>)args[1]: 
                 getLazies != null? getLazies(): null;
 
             if (lites == null)

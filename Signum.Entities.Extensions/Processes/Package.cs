@@ -42,7 +42,7 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            return "Package {3} {2} ({0} lines{1})".Formato(numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors),Name,Operation  );
+            return "{0} {1} ({2} lines{3})".Formato(Operation, Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
         }
     }
 
