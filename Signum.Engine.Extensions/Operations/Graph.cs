@@ -174,7 +174,7 @@ namespace Signum.Engine.Operations
 
         protected static bool Registered = false;
 
-        public void Register()
+        public virtual void Register()
         {
             if (Registered)
                 throw new ApplicationException("A {0} have already been registered".Formato(typeof(Graph<E, S>).TypeName()));

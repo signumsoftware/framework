@@ -102,7 +102,7 @@ namespace Signum.Engine.Operations
         #endregion
 
 
-        public static void Register(IOperation operation)
+        public static void Register(this IOperation operation)
         {
             operation.AssertIsValid(); 
 
