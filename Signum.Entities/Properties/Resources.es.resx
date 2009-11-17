@@ -231,4 +231,7 @@
   <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
     <value>{{0}} tiene algunos elementos repetidos: {0}</value>
   </data>
+  <data name="AttemptToModify0WhenTheEntityIsNotNew" xml:space="preserve">
+    <value>Se ha intentado modificar {0} cuando la entidad no es nueva</value>
+  </data>
 </root>

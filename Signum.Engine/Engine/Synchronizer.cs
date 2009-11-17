@@ -149,10 +149,10 @@ namespace Signum.Engine
 
                 List<string> sms = newOnly.OrderBy(n => sd.Distance(old, n)).ToList();
             retry:
-                Console.WriteLine("'{0}' has been renamed in {1}?".Formato(old, replacementsKey));
+                Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(old, replacementsKey));
                 sms.Select((s, i) => "- {0}: {1} ".Formato(i, s)).ToConsole();
                 Console.WriteLine();
-                Console.WriteLine("- n: None");
+                Console.WriteLine(Properties.Resources.NNone);
 
                 string answer = Console.ReadLine().ToLower();
                 int option = 0;

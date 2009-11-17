@@ -240,4 +240,7 @@
   <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
     <value>{{0}} has some repeated elements: {0}</value>
   </data>
+  <data name="AttemptToModify0WhenTheEntityIsNotNew" xml:space="preserve">
+    <value>Attempt to modify {0} when the entity is not new</value>
+  </data>
 </root>

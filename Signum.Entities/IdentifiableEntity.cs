@@ -61,7 +61,7 @@ namespace Signum.Entities
             if (!IsNew)
             {
                 PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
-                throw new ApplicationException("Attempt to modify {0} when the entity is not new".Formato(pi.Name));
+                throw new ApplicationException(Resources.AttemptToModify0WhenTheEntityIsNotNew.Formato(pi.Name));
             }
 
             return base.Set<T>(ref variable, value, property);

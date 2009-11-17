@@ -157,17 +157,17 @@ namespace Signum.Engine.Maps
                     }
                     catch (Exception ex)
                     {
-                        return new SqlPreCommandSimple("Exception on {0}: {1}".Formato(e.Method, ex.Message));
+                        return new SqlPreCommandSimple(Resources.ExceptionOn01.Formato(e.Method, ex.Message));
                     }
                 })
                 .Combine(Spacing.Triple);
 
 
             return SqlPreCommand.Combine(Spacing.Double,
-                new SqlPreCommandSimple("--- START OF SYNC SCRIPT GENERATED ON {0}".Formato(DateTime.Now)),
+                new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
                 new SqlPreCommandSimple("use {0}".Formato(schemaName)),
                 command,
-                new SqlPreCommandSimple("--- END OF SYNC SCRIPT")); 
+                new SqlPreCommandSimple(Resources.EndOfSyncScript)); 
         }
 
         public event Func<SqlPreCommand> Generating;

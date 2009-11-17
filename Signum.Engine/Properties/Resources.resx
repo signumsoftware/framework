@@ -472,4 +472,19 @@ WRITETEXT</value>
   <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
     <value>There are '{0}' that refer this entity</value>
   </data>
+  <data name="_0HasBeenRenamedIn1" xml:space="preserve">
+    <value>'{0}' has been renamed in {1}?</value>
+  </data>
+  <data name="NNone" xml:space="preserve">
+    <value>- n: None</value>
+  </data>
+  <data name="ExceptionOn01" xml:space="preserve">
+    <value>Exception on {0}: {1}</value>
+  </data>
+  <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
+    <value>--- START OF SYNC SCRIPT GENERATED ON {0}</value>
+  </data>
+  <data name="EndOfSyncScript" xml:space="preserve">
+    <value>--- END OF SYNC SCRIPT</value>
+  </data>
 </root>
