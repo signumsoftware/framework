@@ -306,6 +306,8 @@ function ConstructFromExecute(urlController, typeName, id, operationKey, isLite,
         else
         {
             $('#' + prefix + "divASustituir").html(msg);
+            if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
+                return;
             ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
             $('#' + newPrefix + sfBtnOk).click(onOk);
             $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
