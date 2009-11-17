@@ -100,8 +100,8 @@ namespace Signum.Web.Operations
             {
                 entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form);
 
-                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, "");
-                //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", "");
+                //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, ""); Con prefijo falla para Alta Poliza desde presupuesto
+                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", "");
 
                 if (changesLog.Errors != null && changesLog.Errors.Count > 0)
                 {
