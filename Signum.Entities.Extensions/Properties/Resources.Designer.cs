@@ -178,6 +178,33 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Days.
+        /// </summary>
+        internal static string DateSpanDN_Days {
+            get {
+                return ResourceManager.GetString("DateSpanDN_Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Months.
+        /// </summary>
+        internal static string DateSpanDN_Months {
+            get {
+                return ResourceManager.GetString("DateSpanDN_Months", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Years.
+        /// </summary>
+        internal static string DateSpanDN_Years {
+            get {
+                return ResourceManager.GetString("DateSpanDN_Years", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  (Deleted).
         /// </summary>
         internal static string Deleted {

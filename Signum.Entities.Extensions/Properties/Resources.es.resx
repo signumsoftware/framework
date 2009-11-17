@@ -127,7 +127,7 @@
     <value>Ejecutar</value>
   </data>
   <data name="ProcessOperation_FromProcess" xml:space="preserve">
-    <value>Nueva Ejecución</value>
+    <value>Nueva ejecución</value>
   </data>
   <data name="ProcessOperation_Plan" xml:space="preserve">
     <value>Planificar</value>
@@ -160,10 +160,10 @@
     <value>Suspendiéndose</value>
   </data>
   <data name="ProcessQueries_ErrorExecutions" xml:space="preserve">
-    <value>Erroneas</value>
+    <value>Erróneas</value>
   </data>
   <data name="ProcessQueries_CurrentExecutions" xml:space="preserve">
-    <value>Actualmente en Ejecución</value>
+    <value>Actualmente en ejecución</value>
   </data>
   <data name="CalendarDN" xml:space="preserve">
     <value>Calendario</value>
@@ -175,7 +175,7 @@
     <value>Nombre</value>
   </data>
   <data name="CompositeReportDN" xml:space="preserve">
-    <value>Informe Compuesto</value>
+    <value>Informe compuesto</value>
   </data>
   <data name="CompositeReportDN_ExcelReports" xml:space="preserve">
     <value>Informes</value>
@@ -190,7 +190,7 @@
     <value>Nombre</value>
   </data>
   <data name="ExcelReportDN" xml:space="preserve">
-    <value>Informe Excel</value>
+    <value>Informe excel</value>
   </data>
   <data name="ExcelReportDN_Deleted" xml:space="preserve">
     <value>Eliminado</value>
@@ -238,7 +238,7 @@
     <value>Operación</value>
   </data>
   <data name="PackageLineDN" xml:space="preserve">
-    <value>Linea Paquete</value>
+    <value>Línea paquete</value>
   </data>
   <data name="PackageLineDN_Exception" xml:space="preserve">
     <value>Excepción</value>
@@ -256,28 +256,28 @@
     <value>Proceso</value>
   </data>
   <data name="ProcessExecutionDN" xml:space="preserve">
-    <value>Ejecución Proceso</value>
+    <value>Ejecución proceso</value>
   </data>
   <data name="ProcessExecutionDN_CancelationDate" xml:space="preserve">
-    <value>F. Cancelación</value>
+    <value>F. cancelación</value>
   </data>
   <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
-    <value>F. Creación</value>
+    <value>F. creación</value>
   </data>
   <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
-    <value>F. Error</value>
+    <value>F. error</value>
   </data>
   <data name="ProcessExecutionDN_Exception" xml:space="preserve">
     <value>Excepción</value>
   </data>
   <data name="ProcessExecutionDN_ExecutionEnd" xml:space="preserve">
-    <value>F. Fin Ejecución</value>
+    <value>F. fin ejecución</value>
   </data>
   <data name="ProcessExecutionDN_ExecutionStart" xml:space="preserve">
-    <value>F. Inicio Ejecución</value>
+    <value>F. inicio ejecución</value>
   </data>
   <data name="ProcessExecutionDN_PlannedDate" xml:space="preserve">
-    <value>F. Planificada</value>
+    <value>F. planificada</value>
   </data>
   <data name="ProcessExecutionDN_Process" xml:space="preserve">
     <value>Proceso</value>
@@ -289,13 +289,13 @@
     <value>Progreso</value>
   </data>
   <data name="ProcessExecutionDN_QueuedDate" xml:space="preserve">
-    <value>F. Ejec. Solicitada</value>
+    <value>F. ejec. solicitada</value>
   </data>
   <data name="ProcessExecutionDN_State" xml:space="preserve">
     <value>Estado</value>
   </data>
   <data name="ProcessExecutionDN_SuspendDate" xml:space="preserve">
-    <value>F. Suspensión</value>
+    <value>F. suspensión</value>
   </data>
   <data name="RoleDN" xml:space="preserve">
     <value>Rol</value>
@@ -307,10 +307,10 @@
     <value>Roles</value>
   </data>
   <data name="ScheduledTaskDN" xml:space="preserve">
-    <value>Tarea Programada</value>
+    <value>Tarea programada</value>
   </data>
   <data name="ScheduledTaskDN_NextDate" xml:space="preserve">
-    <value>Proxima Fecha</value>
+    <value>Proxima fecha</value>
   </data>
   <data name="ScheduledTaskDN_Rule" xml:space="preserve">
     <value>Regla</value>
@@ -319,7 +319,7 @@
     <value>Suspendido</value>
   </data>
   <data name="ScheduledTaskDN_Task" xml:space="preserve">
-    <value>Tarea Programada</value>
+    <value>Tarea programada</value>
   </data>
   <data name="ScheduleRuleDailyDN" xml:space="preserve">
     <value>Diariamente</value>
@@ -331,7 +331,7 @@
     <value>Minuto</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
-    <value>Dias de la Semana</value>
+    <value>Días de la semana</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_AndHoliday" xml:space="preserve">
     <value>y festivos</value>
@@ -412,7 +412,7 @@
     <value>a las </value>
   </data>
   <data name="ScheduleRuleDailyDN_Everydayat" xml:space="preserve">
-    <value>Todos los dias a las </value>
+    <value>Todos los días a las </value>
   </data>
   <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
     <value>Festivos debe ser verdadero o falso cuando hay un calendario</value>
@@ -421,10 +421,10 @@
     <value>Festivos debe ser nulo si no hay calendario</value>
   </data>
   <data name="CustomTaskDN" xml:space="preserve">
-    <value>Tarea Personalizada</value>
+    <value>Tarea personalizada</value>
   </data>
   <data name="CustomTaskExecutionDN" xml:space="preserve">
-    <value>Ejecución Tarea Personalizada</value>
+    <value>Ejecución tarea personalizada</value>
   </data>
   <data name="CustomTaskExecutionDN_CustomTask" xml:space="preserve">
     <value>Tarea</value>
@@ -442,13 +442,13 @@
     <value>A partir de</value>
   </data>
   <data name="CustomTaskOperation_Execute" xml:space="preserve">
-    <value>Nueva Ejecución</value>
+    <value>Nueva ejecución</value>
   </data>
   <data name="FilePathDN_FileName" xml:space="preserve">
-    <value>Nombre de Archivo</value>
+    <value>Nombre de archivo</value>
   </data>
   <data name="FilePathDN_FileType" xml:space="preserve">
-    <value>Tipo de Archivo</value>
+    <value>Tipo de archivo</value>
   </data>
   <data name="FilePathDN_Repository" xml:space="preserve">
     <value>Repositorio</value>
@@ -457,7 +457,7 @@
     <value>Sufijo</value>
   </data>
   <data name="FileRepositoryDN" xml:space="preserve">
-    <value>Repositorio de Archivos</value>
+    <value>Repositorio de archivos</value>
   </data>
   <data name="FileRepositoryDN_Active" xml:space="preserve">
     <value>Activo</value>
@@ -466,10 +466,10 @@
     <value>Nombre</value>
   </data>
   <data name="FileRepositoryDN_PhysicalPrefix" xml:space="preserve">
-    <value>Prefijo Físico</value>
+    <value>Prefijo físico</value>
   </data>
   <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
-    <value>Prefijo Web</value>
+    <value>Prefijo web</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
     <value>Create</value>
@@ -493,9 +493,18 @@
     <value>Completadas</value>
   </data>
   <data name="LogOperationQueries_InProcess" xml:space="preserve">
-    <value>En Proceso</value>
+    <value>En proceso</value>
   </data>
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
-    <value>Tipos de Archivo</value>
+    <value>Tipos de archivo</value>
+  </data>
+  <data name="DateSpanDN_Days" xml:space="preserve">
+    <value>Días</value>
+  </data>
+  <data name="DateSpanDN_Months" xml:space="preserve">
+    <value>Meses</value>
+  </data>
+  <data name="DateSpanDN_Years" xml:space="preserve">
+    <value>Años</value>
   </data>
 </root>
