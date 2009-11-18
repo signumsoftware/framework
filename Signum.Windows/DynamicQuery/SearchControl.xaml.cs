@@ -18,6 +18,8 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Windows.Media;
 using Signum.Services;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace Signum.Windows
 {
@@ -174,13 +176,9 @@ namespace Signum.Windows
 
             FilterOptions = new FreezableCollection<FilterOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
-            this.DataContextChanged += new DependencyPropertyChangedEventHandler(SearchControl_DataContextChanged);
-        }
-
-        void SearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (queryResult != null && e.NewValue != null)
-                Search();
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Tick +=new EventHandler(timer_Tick);
         }
 
         int entityIndex;
@@ -225,6 +223,7 @@ namespace Signum.Windows
             {
                 fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
                     .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, QueryName));
+                fo.ValueChanged += new EventHandler(fo_ValueChanged);
                 fo.RefreshRealValue();
             }
 
@@ -252,6 +251,22 @@ namespace Signum.Windows
                     IsVisibleChanged += SearchControl_IsVisibleChanged;
             }
         }
+
+        DispatcherTimer timer; 
+        void fo_ValueChanged(object sender, EventArgs e)
+        {
+            timer.Start(); 
+        }
+
+        void timer_Tick(object sender, EventArgs e)
+        {
+            if (queryResult != null)
+            {
+                Search();
+            }
+
+            timer.Stop(); 
+        } 
 
         void SearchControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

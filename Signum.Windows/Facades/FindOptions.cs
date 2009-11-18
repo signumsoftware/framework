@@ -94,9 +94,13 @@ namespace Signum.Windows
             set { SetValue(RealValueProperty, value); }
         }
 
+        public event EventHandler ValueChanged;
+
         public void RefreshRealValue()
         {
             RealValue = Column != null ? Server.Convert(Value, Column.Type) : Value;
+            if (ValueChanged != null)
+                ValueChanged(this, EventArgs.Empty); 
         }
 
         public Filter ToFilter()
