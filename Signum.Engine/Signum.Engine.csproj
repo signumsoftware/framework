@@ -81,6 +81,7 @@
     <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />
     <Compile Include="Linq\ExpressionVisitor\ConditionsRewriter.cs" />
+    <Compile Include="Linq\ExpressionVisitor\QueryFilterer.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryRebinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\OverloadingSimplifier.cs" />
     <Compile Include="Linq\ExpressionVisitor\ProjectionCleaner.cs" />

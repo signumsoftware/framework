@@ -16,6 +16,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine;
 using System.Data;
+using Signum.Entities;
 
 namespace Signum.Engine.Linq
 {
@@ -43,14 +44,60 @@ namespace Signum.Engine.Linq
             return tr.Execute(null);
         }
      
-        private ITranslateResult Translate(Expression expression)
+        ITranslateResult Translate(Expression expression)
         {
-            Expression cleaned = DbQueryUtils.Clean(expression);
-            ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(cleaned);
-            ProjectionExpression optimized = (ProjectionExpression)DbQueryUtils.Optimize(binded);
+            Expression cleaned = Clean(expression);
+            Expression filtered = QueryFilterer.Filter(cleaned);
+            ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered);
+            ProjectionExpression optimized = (ProjectionExpression)Optimize(binded);
 
             ITranslateResult result = TranslatorBuilder.Build((ProjectionExpression)optimized, ImmutableStack<string>.Empty);
             return result; 
+        }
+
+        public static Expression Clean(Expression expression)
+        {
+            Expression expand = ExpressionExpander.Expand(expression, Clean);
+            Expression eval =  ExpressionEvaluator.PartialEval(expand);
+            Expression simplified = OverloadingSimplifier.Simplify(eval);
+
+            return simplified;
+        }
+
+        internal static Expression Optimize(Expression binded)
+        {
+            Expression rewrited = AggregateRewriter.Rewrite(binded);
+            Expression rebinded = QueryRebinder.Rebind(rewrited);
+            Expression projCleaned = ProjectionCleaner.Clean(rebinded);
+            Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
+            Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
+            Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
+            Expression ordered = OrderByAsserter.Assert(subqueryCleaned);
+            return ordered;
+        }
+
+        internal int Delete<T>(IQueryable<T> query)
+            where T : IdentifiableEntity
+        {
+            Expression cleaned = Clean(query.Expression);
+            Expression filtered = QueryFilterer.Filter(cleaned);
+            CommandExpression delete = new QueryBinder().BindDelete(filtered);
+            CommandExpression deleteOptimized = (CommandExpression)Optimize(delete);
+            CommandResult cr = TranslatorBuilder.BuildCommandResult(deleteOptimized);
+
+            return cr.Execute();
+        }
+
+        internal int Update<T>(IQueryable<T> query, Expression<Func<T, T>> set)
+            where T : IdentifiableEntity
+        {
+            Expression cleaned = Clean(query.Expression);
+            Expression filtered = QueryFilterer.Filter(cleaned);
+            CommandExpression update = new QueryBinder().BindUpdate(filtered, set);
+            CommandExpression updateOptimized = (CommandExpression)Optimize(update);
+            CommandResult cr = TranslatorBuilder.BuildCommandResult(updateOptimized);
+
+            return cr.Execute();
         }
     }
 }

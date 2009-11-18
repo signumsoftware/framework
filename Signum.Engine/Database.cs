@@ -89,7 +89,7 @@ namespace Signum.Engine
             {
                 Retriever rec = new Retriever();
                 Table table = Schema.Current.Table(type);
-                IdentifiableEntity ident = rec.GetIdentifiable(table, id, false);
+                IdentifiableEntity ident = rec.GetIdentifiable(table, id, true);
 
                 rec.ProcessAll();
 
@@ -292,12 +292,7 @@ namespace Signum.Engine
         public static IQueryable<T> Query<T>()
             where T : IdentifiableEntity
         {
-            IQueryable<T> result = new Query<T>(DbQueryProvider.Single);
-
-            if (ConnectionScope.Current != null)
-                result = Schema.Current.OnFilterQuery(result);
-
-            return result;
+            return new Query<T>(DbQueryProvider.Single);
         }
 
         public static IQueryable<T> View<T>()
@@ -309,16 +304,22 @@ namespace Signum.Engine
 
         public static int MaxParameters { get { return SqlBuilder.MaxParametersInSQL; } }
 
-        public static int UnsafeDelete<T>(Expression<Func<T, bool>> predicate)
+        public static int UnsafeDelete<T>(this IQueryable<T> query)
               where T : IdentifiableEntity
         {
-            return DbQueryUtils.Delete<T>(predicate);
+            if (query == null)
+                throw new ArgumentNullException("query");
+
+            return DbQueryProvider.Single.Delete<T>(query);
         }
 
-        public static int UnsafeUpdate<T>(Expression<Func<T, T>> update, Expression<Func<T, bool>> predicate)
+        public static int UnsafeUpdate<T>(this IQueryable<T> query, Expression<Func<T, T>> update)
             where T : IdentifiableEntity
         {
-            return DbQueryUtils.Update<T>(update, predicate);
+            if (query == null)
+                throw new ArgumentNullException("query");
+
+            return DbQueryProvider.Single.Update<T>(query, update);
         }
     }
 }

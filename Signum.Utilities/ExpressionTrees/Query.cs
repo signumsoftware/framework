@@ -45,17 +45,17 @@ namespace Signum.Utilities.ExpressionTrees
             this.expression = expression;
         }
 
-        Expression IQueryable.Expression
+        public Expression Expression
         {
             get { return this.expression; }
         }
 
-        Type IQueryable.ElementType
+        public Type ElementType
         {
             get { return typeof(T); }
         }
 
-        IQueryProvider IQueryable.Provider
+        public IQueryProvider Provider
         {
             get { return this.provider; }
         }

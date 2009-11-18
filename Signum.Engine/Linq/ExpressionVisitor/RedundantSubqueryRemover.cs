@@ -25,7 +25,6 @@ namespace Signum.Engine.Linq
             var select = (SelectExpression)base.VisitSelect(original);
 
             SelectExpression fromSelect = select.From as SelectExpression;
-            
             if (fromSelect != null)
             {
                 SelectRoles selectRole = select.SelectRoles;
@@ -68,6 +67,39 @@ namespace Signum.Engine.Linq
             }
 
             return select; 
+        }
+
+
+        protected override Expression VisitDelete(DeleteExpression original)
+        {
+            var delete = (DeleteExpression)base.VisitDelete(original);
+
+            SelectExpression select = delete.Source as SelectExpression;
+            if (select != null && select.SelectRoles == 0)
+            {
+                var result =  (DeleteExpression)SubqueryRemover.Remove(delete, new[] { select });
+                TableExpression table = result.Source as TableExpression;
+                if (table != null && table.Name == result.Table.Name)
+                    return new DeleteExpression(result.Table, result.Source, null); //remove where cos SQL is Oks language
+            }
+
+            return delete;
+        }
+
+        protected override Expression VisitUpdate(UpdateExpression original)
+        {
+            var update = (UpdateExpression)base.VisitUpdate(original);
+
+            SelectExpression select = update.Source as SelectExpression;
+            if (select != null && select.SelectRoles == 0)
+            {
+                var result = (UpdateExpression)SubqueryRemover.Remove(update, new[] { select });
+                TableExpression table = result.Source as TableExpression;
+                if (table != null && table.Name == result.Table.Name)
+                    return new UpdateExpression(result.Table, result.Source, null, result.Assigments); //remove where cos SQL is Oks language
+            }
+
+            return update;
         }
     }   
 }

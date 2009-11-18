@@ -8,9 +8,10 @@ using System.Linq.Expressions;
 
 namespace Signum.Utilities.ExpressionTrees
 {
-    [DebuggerStepThrough]
+    
     public static class ExpressionHelper
     {
+        [DebuggerStepThrough]
         public static ReadOnlyCollection<T> NewIfChange<T>( this ReadOnlyCollection<T> collection, Func<T,T> newValue)
             where T:class
         {
@@ -38,6 +39,7 @@ namespace Signum.Utilities.ExpressionTrees
             return collection;
         }
 
+        [DebuggerStepThrough]
         public static List<T> NewIfChange<T>(this List<T> collection, Func<T, T> newValue)
           where T : class
         {
@@ -61,6 +63,7 @@ namespace Signum.Utilities.ExpressionTrees
             return alternate ?? collection; 
         }
 
+        [DebuggerStepThrough]
         public static Expression TryConvert(this Expression expression, Type type)
         {
             if (!type.IsAssignableFrom(expression.Type))
@@ -68,6 +71,7 @@ namespace Signum.Utilities.ExpressionTrees
             return expression;
         }
 
+        [DebuggerStepThrough]
         public static Expression Nullify(this Expression expression)
         {
             if (!expression.Type.IsByRef)
@@ -104,6 +108,7 @@ namespace Signum.Utilities.ExpressionTrees
             return (LambdaExpression)e;
         }
 
+        [DebuggerStepThrough]
         public static bool IsBase(this IQueryable query)
         {
             ConstantExpression ce = query.Expression as ConstantExpression;

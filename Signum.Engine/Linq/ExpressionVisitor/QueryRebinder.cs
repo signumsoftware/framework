@@ -72,6 +72,32 @@ namespace Signum.Engine.Linq
             return join;
         }
 
+        protected override Expression VisitDelete(DeleteExpression delete)
+        {
+            Visit(delete.Where);
+
+            var source = Visit(delete.Source);
+
+            var where = Visit(delete.Where);
+            if (source != delete.Source || where != delete.Where)
+                return new DeleteExpression(delete.Table, (SourceExpression)source, where);
+            return delete;
+        }
+
+        protected override Expression VisitUpdate(UpdateExpression update)
+        {
+            Visit(update.Where);
+            VisitColumnAssigments(update.Assigments);
+
+            var source = Visit(update.Source);
+
+            var where = Visit(update.Where);
+            var assigments = VisitColumnAssigments(update.Assigments);
+            if (source != update.Source || where != update.Where || assigments != update.Assigments)
+                return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
+            return update;
+        }
+
         protected override Expression VisitSelect(SelectExpression select)
         {
             Dictionary<ColumnExpression, ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (ColumnExpression)null);

@@ -18,13 +18,13 @@ namespace Signum.Engine.Linq
 
         private SubqueryRemover() { }
 
-        public static Expression Remove(SelectExpression outerSelect, IEnumerable<SelectExpression> selectsToRemove)
+        public static Expression Remove(Expression expression, IEnumerable<SelectExpression> selectsToRemove)
         {
             return new SubqueryRemover
             {
                 map = selectsToRemove.ToDictionary(d => d.Alias, d => d.Columns.ToDictionary(d2 => d2.Name, d2 => d2.Expression)),
                 selectsToRemove = new HashSet<SelectExpression>(selectsToRemove)
-            }.Visit(outerSelect);
+            }.Visit(expression);
         }
 
         protected override Expression VisitSelect(SelectExpression select)

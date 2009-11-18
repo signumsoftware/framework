@@ -67,7 +67,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        public static CommandResult BuildCommandResult<T>(CommandExpression command)
+        public static CommandResult BuildCommandResult(CommandExpression command)
         {
             Expression<Func<SqlParameter[]>> createParams;
             string sql = QueryFormatter.Format(command, out createParams);

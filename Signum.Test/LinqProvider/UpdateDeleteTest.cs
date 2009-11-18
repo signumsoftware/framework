@@ -23,6 +23,7 @@ namespace Signum.Test.LinqProvider
             Starter.StartAndLoad();
         }
 
+
         [TestInitialize]
         public void Initialize()
         {
@@ -34,7 +35,7 @@ namespace Signum.Test.LinqProvider
         {
             Starter.Dirty();
 
-            int count = Database.UnsafeDelete<AlbumDN>(null);
+            int count = Database.Query<AlbumDN>().UnsafeDelete();
         }
 
         [TestMethod]
@@ -42,7 +43,7 @@ namespace Signum.Test.LinqProvider
         {
             Starter.Dirty();
 
-            int count = Database.UnsafeDelete<AlbumDN>(a => a.Year == 1990);
+            int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeDelete();
         }
 
         [TestMethod]
@@ -50,7 +51,7 @@ namespace Signum.Test.LinqProvider
         {
             Starter.Dirty();
 
-            int count = Database.UnsafeDelete<AlbumDN>(a => ((ArtistDN)a.Author).Dead);
+            int count = Database.Query<AlbumDN>().Where(a => ((ArtistDN)a.Author).Dead).UnsafeDelete();
         }
 
 
@@ -59,7 +60,7 @@ namespace Signum.Test.LinqProvider
         {
             Starter.Dirty();
 
-            int count = Database.UnsafeUpdate<AlbumDN>(a => new AlbumDN { Year = a.Year * 2 }, null);
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Year = a.Year * 2 });
         }
 
         [TestMethod]
@@ -67,7 +68,7 @@ namespace Signum.Test.LinqProvider
         {
             Starter.Dirty();
 
-            int count = Database.UnsafeUpdate<AlbumDN>(a => new AlbumDN { Year = 1990 }, a => a.Year < 1990);
+            int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeUpdate(a => new AlbumDN { Year = 1990 });
         }
 
         [TestMethod]
@@ -77,7 +78,7 @@ namespace Signum.Test.LinqProvider
 
             LabelDN label = Database.Query<LabelDN>().First();
 
-            int count = Database.UnsafeUpdate<AlbumDN>(a => new AlbumDN { Label = label }, null);
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
         }
 
         [TestMethod, ExpectedException(typeof(InvalidOperationException), "The entity is New")]
@@ -87,7 +88,7 @@ namespace Signum.Test.LinqProvider
 
             LabelDN label = new LabelDN();
 
-            int count = Database.UnsafeUpdate<AlbumDN>(a => new AlbumDN { Label = label }, null);
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
         }
 
         [TestMethod]
@@ -97,7 +98,7 @@ namespace Signum.Test.LinqProvider
 
             ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
 
-            int count = Database.UnsafeUpdate<AlbumDN>(a => new AlbumDN { Author = michael }, null);
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = michael });
         }
     }
 }

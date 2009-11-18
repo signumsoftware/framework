@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
             if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
                 throw new InvalidOperationException("expression Type is not IQueryable");
 
-            Expression expand = ExpressionExpander.ExpandUntyped(expression);
+            Expression expand = ExpressionExpander.Expand(expression);
             Expression partialEval = MetaEvaluator.PartialEval(expand);
             Expression simplified = OverloadingSimplifier.Simplify(partialEval);
 

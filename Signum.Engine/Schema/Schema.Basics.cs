@@ -16,6 +16,7 @@ using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Utilities.DataStructures;
 using System.Diagnostics;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine.Maps
 {

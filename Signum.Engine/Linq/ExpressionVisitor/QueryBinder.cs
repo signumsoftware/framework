@@ -189,19 +189,6 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        private Expression MapAndVisitExpand(LambdaExpression lambda, ref CommandProjectionExpression p)
-        {
-            map.Add(lambda.Parameters[0], p.Projector);
-
-            Expression result = Visit(lambda.Body);
-
-            p = ApplyExpansions(p);
-
-            map.Remove(lambda.Parameters[0]);
-
-            return result;
-        }
-
         private ProjectionExpression ApplyExpansions(ProjectionExpression projection)
         {
             if (!requests.ContainsKey(projection.Token))
@@ -226,25 +213,6 @@ namespace Signum.Engine.Linq
             return new ProjectionExpression(
                     new SelectExpression(newAlias, false, null, pc.Columns, source, null, null, null),
                     pc.Projector, null, projection.Token);
-        }
-
-        private CommandProjectionExpression ApplyExpansions(CommandProjectionExpression projection)
-        {
-            if (!requests.ContainsKey(projection.Token))
-                return projection; 
-
-            HashSet<TableCondition> allProjections = requests.Extract(projection.Token);
-
-            JoinExpression source = (JoinExpression)allProjections.Aggregate(projection.Source, (e, p) =>
-            {
-                var externalID = DbExpressionNominator.FullNominate(p.FieldInit.ExternalId, false);
-
-                Expression equal = SmartEqualizer.EqualNullable(externalID, p.FieldInit.GetFieldBinding(FieldInitExpression.IdField));
-                Expression condition = p.FieldInit.OtherCondition == null ? equal : Expression.And(p.FieldInit.OtherCondition, equal);
-                return new JoinExpression(JoinType.SingleRowLeftOuterJoin, e, p.Table, condition);
-            });
-
-            return new CommandProjectionExpression(source, projection.Projector, projection.Token);
         }
 
         private ProjectionExpression VisitCastProjection(Expression source)
@@ -1180,46 +1148,44 @@ namespace Signum.Engine.Linq
             return b;
         }
 
-        internal CommandExpression BindDelete<T>(LambdaExpression cleanPredicate)
-            where T : IdentifiableEntity
+        internal CommandExpression BindDelete(Expression source)
         {
-            CommandProjectionExpression pr = GetTableCommandProjection<T>();
+            ProjectionExpression pr = VisitCastProjection(source);
+            FieldInitExpression fie = (FieldInitExpression)pr.Projector;
+            Expression id = fie.Table.CreateBinding(null, fie.Table.Name, FieldInitExpression.IdField, null);
 
-            Expression where = cleanPredicate == null ? null : DbExpressionNominator.FullNominate(MapAndVisitExpand(cleanPredicate, ref pr), true);
-            DeleteExpression delete = new DeleteExpression(((FieldInitExpression)pr.Projector).Table, pr.Source, where);
+            DeleteExpression delete = new DeleteExpression(fie.Table, pr.Source, SmartEqualizer.EqualNullable(id, fie.ExternalId));
 
-            Table table = Schema.Current.Table<T>();
-            CommandExpression[] relationalDeletes = table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
+            CommandExpression[] relationalDeletes = fie.Table.Fields.Values.Select(ef => ef.Field).OfType<FieldMList>().Select(f =>
             {
-                string alias = GetNextTableAlias();
-                return new DeleteExpression(f.RelationalTable,
-                 new JoinExpression(JoinType.InnerJoin,
-                    new TableExpression(alias, f.RelationalTable.Name),
-                    pr.Source, Expression.Equal(f.RelationalTable.BackColumnExpression(alias), pr.Projector.ExternalId)), where);
+                Expression backId = f.RelationalTable.BackColumnExpression(f.RelationalTable.Name);
+                return new DeleteExpression(f.RelationalTable, pr.Source,
+                    SmartEqualizer.EqualNullable(backId, fie.ExternalId));
             }).Cast<CommandExpression>().ToArray();
 
             return new CommandAggregateExpression(relationalDeletes.And(delete).And(new SelectRowCountExpression()));
         }
 
-        internal CommandExpression BindUpdate<T>(LambdaExpression cleanSet, LambdaExpression cleanPredicate)
-               where T : IdentifiableEntity
+        internal CommandExpression BindUpdate(Expression source, LambdaExpression set)
         {
-            CommandProjectionExpression pr = GetTableCommandProjection<T>();
-            Expression where = cleanPredicate == null ? null : DbExpressionNominator.FullNominate(MapAndVisitExpand(cleanPredicate, ref pr), true);
+            ProjectionExpression pr = VisitCastProjection(source);
+            FieldInitExpression fie = (FieldInitExpression)pr.Projector;
+            Expression id = fie.Table.CreateBinding(null, fie.Table.Name, FieldInitExpression.IdField, null);
 
-            MemberInitExpression mie = (MemberInitExpression)cleanSet.Body;
-            ParameterExpression param = cleanSet.Parameters[0];
+            MemberInitExpression mie = (MemberInitExpression)set.Body;
+            ParameterExpression param = set.Parameters[0];
 
             map.Add(param, pr.Projector);
             List<ColumnAssignment> assigments = mie.Bindings.SelectMany(m => ColumnAssigments(param, m)).ToList();
 
             pr = ApplyExpansions(pr);
+            fie = (FieldInitExpression)pr.Projector;
             map.Remove(param);
 
             return new CommandAggregateExpression(
                 new CommandExpression[]
                 { 
-                    new UpdateExpression(((FieldInitExpression)pr.Projector).Table, pr.Source, where, assigments),
+                    new UpdateExpression(fie.Table, pr.Source, SmartEqualizer.EqualNullable(id, fie.ExternalId), assigments),
                     new SelectRowCountExpression()
                 });
         }
@@ -1230,7 +1196,7 @@ namespace Signum.Engine.Linq
             {
                 MemberAssignment ma = (MemberAssignment)m;
                 Expression colExpression = Visit(Expression.MakeMemberAccess(obj, ma.Member));
-                Expression expression = Visit(DbQueryUtils.Clean(ma.Expression));
+                Expression expression = Visit(DbQueryProvider.Clean(ma.Expression));
                 return Assign(colExpression, expression);
             }
             else if (m is MemberMemberBinding)
@@ -1355,27 +1321,6 @@ namespace Signum.Engine.Linq
             }
 
             throw new NotImplementedException("{0} can not be assigned from {1}".Formato(colExpression.Type.Name, expression.Type.Name)); 
-        }
-
-        private CommandProjectionExpression GetTableCommandProjection<T>()
-            where T : IdentifiableEntity
-        {
-            string tableAlias = this.GetNextTableAlias();
-            Type resultType = typeof(IEnumerable<>).MakeGenericType(typeof(T));
-
-            ProjectionToken token = new ProjectionToken();
-
-            Table table = ConnectionScope.Current.Schema.Table(typeof(T));
-            TableExpression tableExpression = new TableExpression(tableAlias, table.Name);
-
-            Expression id = table.CreateBinding(token, tableAlias, FieldInitExpression.IdField, this);
-
-            FieldInitExpression fie = new FieldInitExpression(typeof(T), tableAlias, id, null, token)
-            {
-                Bindings = { new FieldBinding(FieldInitExpression.IdField, id) }
-            };
-
-            return new CommandProjectionExpression(tableExpression, fie, token);
         }
     }
 }

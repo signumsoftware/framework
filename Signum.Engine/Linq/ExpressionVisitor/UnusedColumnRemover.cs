@@ -101,7 +101,25 @@ namespace Signum.Engine.Linq
                 return new JoinExpression(join.JoinType, left, right, condition);
             }
             return join;
+        }
 
+        protected override Expression VisitDelete(DeleteExpression delete)
+        {
+            var where = Visit(delete.Where);
+            var source = Visit(delete.Source);
+            if (source != delete.Source || where != delete.Where)
+                return new DeleteExpression(delete.Table, (SourceExpression)source, where);
+            return delete;
+        }
+
+        protected override Expression VisitUpdate(UpdateExpression update)
+        {
+            var where = Visit(update.Where);
+            var assigments = VisitColumnAssigments(update.Assigments);
+            var source = Visit(update.Source);
+            if (source != update.Source || where != update.Where || assigments != update.Assigments)
+                return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
+            return update;
         }
     }
 }

@@ -27,7 +27,6 @@ namespace Signum.Engine.Linq
         Column,
         Select,
         Projection,
-        CommandProjection,
         Join,
         Aggregate,
         AggregateSubquery,
@@ -763,27 +762,6 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "SOURCE\r\n{0}\r\nPROJECTION\r\n{1}".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4)); 
-        }
-    }
-
-    internal class CommandProjectionExpression : DbExpression
-    {
-        public readonly ProjectionToken Token; 
-        public readonly SourceExpression Source;
-        public readonly FieldInitExpression Projector;
-
-        internal CommandProjectionExpression(SourceExpression source, FieldInitExpression projector, ProjectionToken token)
-            : base(DbExpressionType.CommandProjection,
-            typeof(IEnumerable<>).MakeGenericType(projector.Type))
-        {
-            this.Token = token;
-            this.Source = source;
-            this.Projector = projector;
-        }
-
-        public override string ToString()
-        {
-            return "SOURCE\r\n{0}\r\nPROJECTION\r\n{1}".Formato(Source.ToString().Indent(4), Projector.NiceToString().Indent(4));
         }
     }
 

@@ -337,33 +337,5 @@ namespace Signum.Engine.Linq
             expression = mce.GetArgument("source");
             return true;
         }
-
-
-        internal static Expression BackExpression(Expression entity, LambdaExpression route)
-        {
-            Type type = route.Parameters[0].Type; 
-            Type queryType = typeof(Query<>).MakeGenericType(type);
-
-            Expression source = ((IQueryable)Activator.CreateInstance(queryType, DbQueryProvider.Single)).Expression;
-
-            MethodInfo mWhere = miWhereQ.MakeGenericMethod(type);
-            LambdaExpression condition = Expression.Lambda(Expression.Equal(route.Body, entity), route.Parameters[0]);
-            return Expression.Call(mWhere, source, condition);
-        }
-
-        internal static Expression BackManyExpression(Expression constantExpression, LambdaExpression route)
-        {
-            Type type = route.Parameters[0].Type;
-            Type queryType = typeof(Query<>).MakeGenericType(type);
-
-            Expression source = ((IQueryable)Activator.CreateInstance(queryType, DbQueryProvider.Single)).Expression;
-
-
-            MethodInfo mWhere = miWhereQ.MakeGenericMethod(type);
-            MethodInfo mContains = miContainsE.MakeGenericMethod(ReflectionTools.CollectionType(route.Body.Type));
-            LambdaExpression condition = Expression.Lambda(Expression.Call(mContains, route.Body, constantExpression), route.Parameters[0]);
-            return Expression.Call(mWhere, source, condition);
-            
-        }
     }
 }

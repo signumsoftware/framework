@@ -35,8 +35,6 @@ namespace Signum.Engine.Linq
                     return this.VisitJoin((JoinExpression)exp);
                 case DbExpressionType.Projection:
                     return this.VisitProjection((ProjectionExpression)exp);
-                case DbExpressionType.CommandProjection:
-                    return this.VisitCommandProjection((CommandProjectionExpression)exp);
                 case DbExpressionType.Aggregate:
                     return this.VisitAggregate((AggregateExpression)exp);
                 case DbExpressionType.AggregateSubquery:
@@ -87,16 +85,6 @@ namespace Signum.Engine.Linq
             }
         }
 
-        protected virtual Expression VisitCommandProjection(CommandProjectionExpression cpe)
-        {
-            var source = (SourceExpression)Visit(cpe.Source);
-            var projector = (FieldInitExpression)Visit(cpe.Projector);
-            var token = VisitProjectionToken(cpe.Token);
-            if (projector != cpe.Projector || source != cpe.Source || token != cpe.Token)
-                return new CommandProjectionExpression(source, projector, token);
-            return cpe; 
-        }
-
         protected virtual Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
             var commands = VisitCommands(cea.Commands);
@@ -115,7 +103,7 @@ namespace Signum.Engine.Linq
             var source = Visit(delete.Source);
             var where = Visit(delete.Where);
             if (source != delete.Source || where != delete.Where)
-                return new DeleteExpression(delete.Table, delete.Source, delete.Where);
+                return new DeleteExpression(delete.Table, (SourceExpression)source, where);
             return delete;
         }
 
@@ -125,7 +113,7 @@ namespace Signum.Engine.Linq
             var where = Visit(update.Where);
             var assigments = VisitColumnAssigments(update.Assigments);
             if(source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, update.Source, update.Where, update.Assigments);
+                return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
             return update;
         }
 

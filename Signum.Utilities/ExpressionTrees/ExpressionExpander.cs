@@ -45,49 +45,40 @@ namespace Signum.Utilities.ExpressionTrees
 	/// </summary>
 	public class ExpressionExpander : ExpressionVisitor
 	{
-        public static Expression ExpandUntyped(Expression expr)
+        Func<Expression, Expression> onExpand; 
+
+        public static Expression Expand(Expression expr, Func<Expression, Expression> onExpand)
         {
-            return new ExpressionExpander().Visit(expr);
+            return new ExpressionExpander() { onExpand = onExpand }.Visit(expr);
         }
 
-        Dictionary<ParameterExpression, Expression> replacements = new Dictionary<ParameterExpression, Expression>();
-
-        protected override Expression VisitParameter(ParameterExpression p)
-		{
-			if ((replacements != null) && (replacements.ContainsKey(p)))
-				return Visit(replacements[p]);
-			else
-				return base.VisitParameter(p);
-		}
+        public static Expression Expand(Expression expr)
+        {
+            ExpressionExpander ee = new ExpressionExpander();
+            ee.onExpand = ee.Visit;
+            return ee.Visit(expr);
+        }
 
         protected override Expression VisitInvocation(InvocationExpression iv)
         {
-            LambdaExpression lambda = iv.Expression as LambdaExpression;
-            if (lambda != null)
-            {
-                for (int i = 0, n = lambda.Parameters.Count; i < n; i++)
-                    replacements[lambda.Parameters[i]] = iv.Arguments[i];
-
-                Expression result = this.Visit(lambda.Body);
-
-                for (int i = 0, n = lambda.Parameters.Count; i < n; i++)
-                    replacements.Remove(lambda.Parameters[i]);
-
-                return result; 
-            }
-            return base.VisitInvocation(iv);
+            return onExpand(ExpressionReplacer.Replace(iv)); 
         }
-
 
 		protected override Expression VisitMethodCall(MethodCallExpression m)
 		{
             MethodExpanderAttribute attribute = m.Method.SingleAttribute<MethodExpanderAttribute>();
 			if (attribute != null)
 			{
-                IMethodExpander exp = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
-				if (exp == null) 
+                IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
+				if (expander == null) 
                     throw new InvalidOperationException("Expansion failed! '{0}' does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
-                return Visit(exp.Expand(Visit(m.Object), m.Arguments.Select(p => Visit(p)).ToArray(), m.Method.IsGenericMethod ? m.Method.GetGenericArguments() : null));
+
+                Expression exp = expander.Expand(
+                    Visit(m.Object), 
+                    m.Arguments.Select(p => Visit(p)).ToArray(), 
+                    m.Method.IsGenericMethod ? m.Method.GetGenericArguments() : null);
+
+                return Visit(exp);
 			}
 
 			if (m.Method.DeclaringType == typeof(ExpressionExtensions))
@@ -119,8 +110,8 @@ namespace Signum.Utilities.ExpressionTrees
                 return base.VisitMemberAccess(m);
 
             if(m.Expression == null)
-                return lambda.Body;
-            else 
+                return Visit(lambda.Body);
+            else
                 return Visit(Expression.Invoke(lambda, Visit(m.Expression)));
         }
 
