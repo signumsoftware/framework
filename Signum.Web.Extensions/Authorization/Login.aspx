@@ -8,6 +8,9 @@
 </asp:Content>
 
 <asp:Content ID="loginContent" ContentPlaceHolderID="MainContent" runat="server">
+    <script type="text/javascript">
+        $(function(){$("#username").focus();});
+    </script>
     <h2>
         Login</h2>
     <p>
