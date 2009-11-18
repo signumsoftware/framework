@@ -210,7 +210,7 @@ function QuickLinkClickServerAjax(urlController,findOptionsRaw,prefix) {
     });
 }
 
-function OperationExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
+function OperationExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel, multiStep) {
     NotifyInfo(lang['executingOperation']);
 	var formChildren = "";
 	if (isLite == false || isLite == "false" || isLite == "False") {
@@ -220,38 +220,63 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 		    formChildren = $("form").serialize();
 	}
 	if (formChildren.length > 0) formChildren = "&" + formChildren;
+	var newPrefix = multiStep ? prefix + "New" : prefix;
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "isLite=" + isLite + qp("sfRuntimeType", typeName) + qp("sfId", id) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, prefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + formChildren,
+		data: "isLite=" + isLite + qp("sfRuntimeType", typeName) + qp("sfId", id) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + formChildren,
 		async: false,
 		dataType: "html",
 		success: function (msg) {
-			if (prefix != "") { //PopupWindow
-				if (msg.indexOf("ModelState") > 0) {
-					eval('var result=' + msg);
-					var modelState = result["ModelState"];
-					ShowErrorMessages(prefix, modelState, true, "*");
+		    if (msg.indexOf("ModelState") > 0) {
+		        eval('var result=' + msg);
+				var modelState = result["ModelState"];
+				ShowErrorMessages(prefix, modelState, true, "*");
+		    }
+		    else{
+		        if (multiStep){
+		            $('#' + prefix + "divASustituir").html(msg);
+                    if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
+                        return;
+                    ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+                    //$('#' + newPrefix + sfBtnOk).click(onOk);
+                    $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
+		        }
+		        else{
+		            if (prefix != "") { //PopupWindow
+		                $('#' + prefix + "externalPopupDiv").html(msg);
+		            }
+		            else{
+		                $("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+				    }
 				}
-				else {
-					$('#' + prefix + "externalPopupDiv").html(msg);
-				}
-			}
-			else { //NormalWindow
-				if (msg.indexOf("ModelState") > 0) {
-					eval('var result=' + msg);
-					var modelState = result["ModelState"];
-					ShowErrorMessages(prefix, modelState, true, "*");
-				}
-				else {
-					//var newForm = new RegExp("<form[\w\W]*</form>");
-					//$('form').html(newForm.exec(msg));
-					$("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
-					NotifyInfo(lang['operationExecuted'], 2000);
-					return;
-				}
-			}
-			NotifyInfo(lang['operationExecuted'], 2000);
+		    }
+		    NotifyInfo(lang['operationExecuted'], 2000);
+			
+//			if (prefix != "") { //PopupWindow
+//				if (msg.indexOf("ModelState") > 0) {
+//					eval('var result=' + msg);
+//					var modelState = result["ModelState"];
+//					ShowErrorMessages(prefix, modelState, true, "*");
+//				}
+//				else {
+//					$('#' + prefix + "externalPopupDiv").html(msg);
+//				}
+//			}
+//			else { //NormalWindow
+//				if (msg.indexOf("ModelState") > 0) {
+//					eval('var result=' + msg);
+//					var modelState = result["ModelState"];
+//					ShowErrorMessages(prefix, modelState, true, "*");
+//				}
+//				else {
+//					//var newForm = new RegExp("<form[\w\W]*</form>");
+//					//$('form').html(newForm.exec(msg));
+//					$("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+//					NotifyInfo(lang['operationExecuted'], 2000);
+//					return;
+//				}
+//			}
 		}
 	});
 }
@@ -280,7 +305,7 @@ function DeleteExecute(urlController, typeName, id, operationKey, isLite, prefix
     });
 }
 
-function ConstructFromExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel) {
+function ConstructFromExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel, multiStep) {
     NotifyInfo(lang['executingOperation']);
     var formChildren = "";
 	if (isLite == false || isLite == "false" || isLite == "False") {
@@ -309,7 +334,7 @@ function ConstructFromExecute(urlController, typeName, id, operationKey, isLite,
             if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
                 return;
             ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
-            $('#' + newPrefix + sfBtnOk).click(onOk);
+            //$('#' + newPrefix + sfBtnOk).click(onOk);
             $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
             }
             NotifyInfo(lang['operationExecuted'], 2000);

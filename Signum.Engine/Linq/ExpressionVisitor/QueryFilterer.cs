@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
             {
                 IQueryable query = (IQueryable)c.Value;
 
-                if (query.IsBase())
+                if (query.IsBase() && typeof(IdentifiableEntity).IsAssignableFrom(query.ElementType))
                 {
                     IQueryable newQuery = (IQueryable)miFilter.MakeGenericMethod(c.Type.GetGenericArguments()[0]).Invoke(null, new object[] { query });
 
