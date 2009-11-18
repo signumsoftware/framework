@@ -63,6 +63,19 @@ namespace Signum.Web.Authorization
                     settings.Add(UserOperation.Disable, new EntityOperationSettings { IsVisible = creada });
                     settings.Add(UserOperation.Enable, new EntityOperationSettings { IsVisible = creada });
                 }
+
+                AuthenticationRequiredAttribute.Authenticate = context =>
+                {
+                    if (UserDN.Current == null)
+                    {
+                        //use the current url for the redirect
+                        string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
+                        //send them off to the login page
+                        string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
+                        string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth.aspx/Login" + redirectUrl;
+                        context.HttpContext.Response.Redirect(loginUrl, true);
+                    }
+                };
             }
         }
 
