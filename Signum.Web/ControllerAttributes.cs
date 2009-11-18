@@ -8,6 +8,7 @@ using System.Web;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Web.Security;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
@@ -112,27 +113,31 @@ namespace Signum.Web
         #endregion
     }
 
-
     /// <summary>
     /// Checks the User's authentication using FormsAuthentication
     /// and redirects to the Login Url for the application on fail
     /// </summary>
-    public class RequiresAuthenticationAttribute : ActionFilterAttribute
+    public class AuthenticationRequiredAttribute : AuthorizeAttribute
     {
-        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        public static Action<AuthorizationContext> Authenticate = context =>
         {
-            //redirect if not authenticated
-            if (!filterContext.HttpContext.User.Identity.IsAuthenticated)
+            //if (!((string)HttpContext.Current.Session[SessionUserKey]).HasText())
+            //System.Threading.Thread.CurrentPrincipal.Identity.IsAuthenticated
+            if (!context.HttpContext.User.Identity.IsAuthenticated)
             {
                 //use the current url for the redirect
-                string redirectOnSuccess = filterContext.HttpContext.Request.Url.AbsolutePath;
-
+                string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
                 //send them off to the login page
                 string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
-                string loginUrl = filterContext.HttpContext.Request.ApplicationPath + "/Auth.aspx/Login" + redirectUrl;
-                filterContext.HttpContext.Response.Redirect(loginUrl, true);
+                string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth.aspx/Login" + redirectUrl;
+                context.HttpContext.Response.Redirect(loginUrl, true);
             }
-            base.OnActionExecuting(filterContext);
+        };
+
+        public override void OnAuthorization(AuthorizationContext filterContext)
+        {
+            if (Authenticate != null)
+                Authenticate(filterContext);     
         }
     }
 

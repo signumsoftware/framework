@@ -18,15 +18,9 @@ using System.Collections.Specialized;
 
 namespace Signum.Web.Controllers
 {
-    [HandleException]
+    [HandleException, AuthenticationRequired]
     public class SignumController : Controller
     {
-        public static event Action<ActionExecutingContext> CheckLogin;
-        protected override void OnActionExecuting(ActionExecutingContext filterContext)
-        {
-            if (CheckLogin != null) CheckLogin(filterContext);
-            base.OnActionExecuting(filterContext);
-        }
 
         static SignumController()
         {
