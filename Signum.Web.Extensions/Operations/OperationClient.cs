@@ -150,7 +150,7 @@ namespace Signum.Web.Operations
                 if (os != null && os.OnServerClickAjax.HasText())
                     controllerUrl = os.OnServerClickAjax;
 
-                return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7});".Formato(
+                return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}');".Formato(
                     controllerUrl,
                     ident.GetType().Name,
                     ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
@@ -158,7 +158,8 @@ namespace Signum.Web.Operations
                     oi.Lite,
                     httpContext.Request.Params["prefix"] ?? "",
                     ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"","'") : "''",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''"
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''",
+                    ((EntityOperationSettings)os).TryCS(s =>s.MultiStep) ?? false
                     );
             }
             else if (oi.OperationType == OperationType.ConstructorFrom)
@@ -167,7 +168,7 @@ namespace Signum.Web.Operations
                 if (os != null && os.OnServerClickAjax.HasText())
                     controllerUrl = os.OnServerClickAjax;
 
-                return "javascript:ConstructFromExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7});".Formato(
+                return "javascript:ConstructFromExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}');".Formato(
                     controllerUrl,
                     ident.GetType().Name,
                     ident.IdOrNull.HasValue ? ident.Id.ToString() : "",
@@ -175,7 +176,8 @@ namespace Signum.Web.Operations
                     oi.Lite,
                     httpContext.Request.Params["prefix"] ?? "",
                     ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'") : "''",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'") : "''"
+                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'") : "''",
+                    ((EntityOperationSettings)os).TryCS(s => s.MultiStep) ?? false
                     );
             }
             else if (oi.OperationType == OperationType.Delete)
