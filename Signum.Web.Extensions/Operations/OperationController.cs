@@ -18,16 +18,9 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
-    [HandleException]
+    [HandleException, AuthenticationRequired]
     public class OperationController : Controller
     {
-        public static event Action<ActionExecutingContext> CheckLogin;
-        protected override void OnActionExecuting(ActionExecutingContext filterContext)
-        {
-            if (CheckLogin != null) CheckLogin(filterContext);
-            base.OnActionExecuting(filterContext);
-        }
-
         public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
