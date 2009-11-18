@@ -13,6 +13,12 @@ namespace Signum.Web.Controllers
     [HandleException]
     public class WidgetsController : Controller
     {
+        public static event Action<ActionExecutingContext> CheckLogin;
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            if (CheckLogin != null) CheckLogin(filterContext);
+            base.OnActionExecuting(filterContext);
+        }
 
         #region Notes
         public PartialViewResult CreateNote(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)

@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Web.Security;
 
 namespace Signum.Web
 {
@@ -111,6 +112,29 @@ namespace Signum.Web
         #endregion
     }
 
+
+    /// <summary>
+    /// Checks the User's authentication using FormsAuthentication
+    /// and redirects to the Login Url for the application on fail
+    /// </summary>
+    public class RequiresAuthenticationAttribute : ActionFilterAttribute
+    {
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            //redirect if not authenticated
+            if (!filterContext.HttpContext.User.Identity.IsAuthenticated)
+            {
+                //use the current url for the redirect
+                string redirectOnSuccess = filterContext.HttpContext.Request.Url.AbsolutePath;
+
+                //send them off to the login page
+                string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
+                string loginUrl = filterContext.HttpContext.Request.ApplicationPath + "/Auth.aspx/Login" + redirectUrl;
+                filterContext.HttpContext.Response.Redirect(loginUrl, true);
+            }
+            base.OnActionExecuting(filterContext);
+        }
+    }
 
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
         Justification = "This attribute is AllowMultiple = true and users might want to override behavior.")]

@@ -21,6 +21,13 @@ namespace Signum.Web.Controllers
     [HandleException]
     public class SignumController : Controller
     {
+        public static event Action<ActionExecutingContext> CheckLogin;
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            if (CheckLogin != null) CheckLogin(filterContext);
+            base.OnActionExecuting(filterContext);
+        }
+
         static SignumController()
         {
             ModelBinders.Binders.AddOrReplace(typeof(FindOptions), new FindOptionsModelBinder());
