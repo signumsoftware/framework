@@ -185,6 +185,7 @@ namespace Signum.Engine.Authorization
                 });
         }
 
+        [MethodExpander(typeof(WhereAllowedExpander))]
         public static IQueryable<T> WhereAllowed<T>(this IQueryable<T> query)
             where T : IdentifiableEntity
         {
@@ -212,7 +213,7 @@ namespace Signum.Engine.Authorization
             if (pair != null && query.IsBase())
             {
                 pairs.Remove(pair);
-                query = pair.Queryable;
+                query = new Query<T>(DbQueryProvider.Single, DbQueryProvider.Clean(pair.Queryable.Expression));
             }
 
             if (pairs.Count > 0)
@@ -222,33 +223,13 @@ namespace Signum.Engine.Authorization
                                 !p.Allowed.InGroup ? Expression.Not(Expression.Invoke(p.Expression, e)) :
                                                      (Expression)Expression.Invoke(p.Expression, e)).Aggregate((a, b) => Expression.And(a, b));
 
-                query = query.Where(Expression.Lambda<Func<T, bool>>(body, e));
+                Expression cleanBody = DbQueryProvider.Clean(body);
+
+                query = query.Where(Expression.Lambda<Func<T, bool>>(cleanBody, e));
 
             }
 
-            return new Query<T>(DbQueryProvider.Single, QueryReplacer.Replace(query.Expression));
-        }
-
-        class QueryReplacer : ExpressionVisitor
-        {
-            public static Expression Replace(Expression exp)
-            {
-                return new QueryReplacer().Visit(exp);
-            }
-
-            MethodInfo mi = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>()).GetGenericMethodDefinition();
-            
-            protected override Expression VisitMethodCall(MethodCallExpression m)
-            {
-                if (m.Method.IsGenericMethod && m.Method.GetGenericMethodDefinition() == mi)
-                {
-                    Type type = typeof(Query<>).MakeGenericType(m.Method.GetGenericArguments());
-                    IQueryable query = (IQueryable)Activator.CreateInstance(type, DbQueryProvider.Single);
-                    return Expression.Constant(query);
-                }
-
-                return base.VisitMethodCall(m);
-            }
+            return query;
         }
 
         class WhereAllowedExpander : IMethodExpander

@@ -21,7 +21,6 @@ namespace Signum.Test.Extensions
     public class EntityGroupsTest
     {
         static Connection connection;
-
         [TestInitialize]
         public void Initialize()
         {
@@ -178,6 +177,26 @@ namespace Signum.Test.Extensions
                 {
                     Assert2.Throws<UnauthorizedAccessException>(() => Database.Query<SubResourceDN>().Single(r => r.Name == "Key"));
                 }
+            }
+        }
+
+        [TestMethod]
+        public void EntityGroupUpdate()
+        {
+            using (AuthLogic.UnsafeUser("bart"))
+            {
+                Assert.AreEqual(1, Database.Query<ResourceDN>().UnsafeUpdate(r => new ResourceDN { Name = r.Name + r.Name }));
+                Assert.AreEqual(2, Database.Query<SubResourceDN>().UnsafeUpdate(r => new SubResourceDN { Name = r.Name + r.Name }));
+            }
+        }
+
+        [TestMethod]
+        public void EntityGroupDelete()
+        {
+            using (AuthLogic.UnsafeUser("bart"))
+            {
+                Assert.AreEqual(1, Database.Query<ResourceDN>().UnsafeDelete());
+                Assert.AreEqual(2, Database.Query<SubResourceDN>().UnsafeDelete());
             }
         }
 
