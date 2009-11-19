@@ -170,7 +170,7 @@ namespace Signum.Web.Operations
                 if (os != null && os.OnServerClickAjax.HasText())
                     controllerUrl = os.OnServerClickAjax;
 
-                if (((EntityOperationSettings)os).Post)
+                if (os != null && ((EntityOperationSettings)os).Post)
                     return "javascript:ConstructFromExecutePost('{0}','{1}','{2}','{3}','{4}');".Formato(
                         controllerUrl,
                         ident.GetType().Name,
