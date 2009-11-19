@@ -49,7 +49,7 @@ namespace Signum.Entities.Files
             get { return binaryFile; }
             set 
             {
-                if (Set(ref binaryFile, value, () => BinaryFile))
+                if (Set(ref binaryFile, value, () => BinaryFile) && binaryFile != null)
                     fileLength = binaryFile.Length;
             }
         }
@@ -59,6 +59,12 @@ namespace Signum.Entities.Files
         {
             get { return fileLength; }
             private set { Set(ref fileLength, value, () => FileLength); }
+        }
+
+        [LocDescription]
+        public string FileLengthString
+        {
+            get { return ((long)FileLength).ToComputerSize(true);}
         }
 
         [NotNullable, SqlDbType(Size = 260)]
@@ -99,6 +105,7 @@ namespace Signum.Entities.Files
         }
 
         static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => fp.Repository.PhysicalPrefix + '\\' + fp.Sufix;
+        [LocDescription]
         public string FullPhysicalPath
         {
             get { return Repository == null ? null : Repository.PhysicalPrefix + '\\' + Sufix; }
@@ -108,6 +115,7 @@ namespace Signum.Entities.Files
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ? 
                 fp.Repository.WebPrefix + "/" + fp.Sufix.Replace("\\", "/").Replace(" ", "") :
                 null;
+        [LocDescription]
         public string FullWebPath
         {
             get
@@ -121,6 +129,11 @@ namespace Signum.Entities.Files
         public Uri WebPath
         {
             get { return FullWebPath.HasText() ? new Uri(FullWebPath) : null; }
+        }
+
+        public override string ToString()
+        {
+            return "{0} - {1}".Formato(FileName, ((long)FileLength).ToComputerSize(true));
         }
     }
 

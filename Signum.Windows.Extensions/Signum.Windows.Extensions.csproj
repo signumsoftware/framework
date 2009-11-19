@@ -134,10 +134,15 @@
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Files\FilePath.xaml.cs">
+      <DependentUpon>FilePath.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Files\FilePathClient.cs" />
     <Compile Include="Files\FileRepository.xaml.cs">
       <DependentUpon>FileRepository.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ExtensionsImageLoader.cs" />
+    <Compile Include="Files\ImageFileExtension.cs" />
     <Compile Include="Operations\ConstructorSelectorWindow.xaml.cs">
       <DependentUpon>ConstructorSelectorWindow.xaml</DependentUpon>
     </Compile>
@@ -316,6 +321,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Files\FilePath.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Files\FileRepository.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -469,6 +478,27 @@
   <ItemGroup>
     <Resource Include="Images\bcerrar-on.png" />
     <Resource Include="Images\bminimizar-on.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\document_view.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\documentMusic.png" />
+    <Resource Include="Images\email2.png" />
+    <Resource Include="Images\film.png" />
+    <Resource Include="Images\html.png" />
+    <Resource Include="Images\pdf.png" />
+    <Resource Include="Images\photoshop.png" />
+    <Resource Include="Images\pics2.png" />
+    <Resource Include="Images\rar.png" />
+    <Resource Include="Images\rtf.png" />
+    <Resource Include="Images\text.png" />
+    <Resource Include="Images\textCodeCsharp.png" />
+    <Resource Include="Images\word.png" />
+    <Resource Include="Images\zip.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\unknown.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

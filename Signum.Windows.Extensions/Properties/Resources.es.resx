@@ -153,6 +153,9 @@
   <data name="Name" xml:space="preserve">
     <value>Nombre</value>
   </data>
+  <data name="Open" xml:space="preserve">
+    <value>Abrir</value>
+  </data>
   <data name="QueryName" xml:space="preserve">
     <value>Nombre Vista</value>
   </data>

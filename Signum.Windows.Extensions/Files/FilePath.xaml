@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="Signum.Windows.Extensions.Files.FilePath"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.Files;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="d:FilePathDN"
+    MinWidth="300">
+    <StackPanel>
+        <m:ValueLine m:Common.Route="FileName" />
+        <m:ValueLine m:Common.Route="FileLengthString" m:Common.IsReadOnly="True"/>
+        <m:EntityCombo m:Common.Route="FileType" m:Common.IsReadOnly="True"/>
+        <Grid x:Name="grFWP">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label  x:Name="lblFullWP" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
+		                    Width="{Binding Path=(m:Common.LabelWidth), ElementName=grFWP, Mode=OneWay}"
+		                    Visibility="{Binding ElementName=grFWP, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
+            <TextBlock Margin="1" Grid.Column="1">
+                <Hyperlink x:Name="hypFullWebPath" Click="hypFullWebPath_Click">
+                    <TextBlock  Text="{Binding FullWebPath}" m:Common.IsReadOnly="True"/>
+                </Hyperlink>
+            </TextBlock>
+        </Grid>
+        <Border>
+            <m:DataBorder>
+                <StackPanel>
+                    <Grid x:Name="grFPP">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label  x:Name="lblFullFP" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
+		                    Width="{Binding Path=(m:Common.LabelWidth), ElementName=grFPP, Mode=OneWay}"
+		                    Visibility="{Binding ElementName=grFPP, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
+                        <TextBlock Margin="1" Grid.Column="1">
+                            <Hyperlink x:Name="hypFullPhysicalPath" Click="hypFullPhysicalPath_Click">
+                                <TextBlock  Text="{Binding FullPhysicalPath}" m:Common.IsReadOnly="True"/>
+                            </Hyperlink>
+                        </TextBlock>
+                    </Grid>
+                    <m:EntityLine m:Common.Route="Repository" m:Common.IsReadOnly="True"/>
+                </StackPanel>
+            </m:DataBorder>
+        </Border>
+    </StackPanel>
+</UserControl>

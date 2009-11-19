@@ -27,9 +27,7 @@ namespace Signum.Engine.Files
 
                 EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
-
                 sb.Schema.EntityEvents<FilePathDN>().Saving += FilePath_Saving;
-                sb.Schema.EntityEvents<FilePathDN>().Retrieved += FilePath_Retrieved;
                 sb.Schema.EntityEvents<FilePathDN>().Deleting += FilePath_Deleting;
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
@@ -79,11 +77,11 @@ namespace Signum.Engine.Files
         {
             if (fp.IsNew)
             {
-                //asignar el typedn a partir del enum
+                //set typedn from enum
                 if (fp.FileType == null)
                     fp.FileType = EnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
 
-                //asignar el enum a partir del typedn
+                //set enum from typedn
                 if (fp.FileTypeEnum == null)
                     fp.SetFileTypeEnum(EnumLogic<FileTypeDN>.ToEnum(fp.FileType));
 
@@ -113,6 +111,9 @@ namespace Signum.Engine.Files
         {
             try
             {
+                string path = Path.GetDirectoryName(fp.FullPhysicalPath);
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
             }
             catch (IOException ex)
@@ -131,18 +132,13 @@ namespace Signum.Engine.Files
             return true;
         }
 
-        static void FilePath_Retrieved(FilePathDN fp, bool isRoot)
-        {
-            //fp.BinaryFile = System.IO.File.ReadAllBytes(fp.FullPhysicalPath); -> It's a late binding with the binaryfile
-        }
-
         public static void Register(Enum fileTypeKey, FileTypeAlgorithm algorithm)
         {
             fileTypes.Add(fileTypeKey, algorithm);
         }
 
         public static byte[] GetByteArray(FilePathDN fp)
-        { 
+        {
             return File.ReadAllBytes(fp.FullPhysicalPath);
         }
     }
@@ -175,6 +171,7 @@ namespace Signum.Engine.Files
         public static readonly Func<FilePathDN, FileRepositoryDN> DefaultGetRepository = (FilePathDN fp) =>
             Database.Query<FileRepositoryDN>().Where(r => r.Active && r.FileTypes.Contains(fp.FileType)).FirstOrDefault();
 
-        public static readonly Func<FilePathDN, string> DefaultCalculateSufix = (FilePathDN fp) => fp.FileName;
+        public static readonly Func<FilePathDN, string> DefaultCalculateSufix = (FilePathDN fp) =>
+            Path.Combine(DateTime.Now.ToString("yyyy-MM-dd"), fp.FileName);
     }
 }

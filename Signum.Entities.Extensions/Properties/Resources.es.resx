@@ -507,4 +507,13 @@
   <data name="DateSpanDN_Years" xml:space="preserve">
     <value>Años</value>
   </data>
+  <data name="FilePathDN_FullPhysicalPath" xml:space="preserve">
+    <value>Ruta Física</value>
+  </data>
+  <data name="FilePathDN_FullWebPath" xml:space="preserve">
+    <value>URL</value>
+  </data>
+  <data name="FilePathDN_FileLengthString" xml:space="preserve">
+    <value>Tamaño</value>
+  </data>
 </root>

@@ -445,7 +445,7 @@
     <value>Starting On</value>
   </data>
   <data name="FilePathDN_FileName" xml:space="preserve">
-    <value>FileName</value>
+    <value>File Name</value>
   </data>
   <data name="FilePathDN_FileType" xml:space="preserve">
     <value>FileType</value>
@@ -457,7 +457,7 @@
     <value>Sufix</value>
   </data>
   <data name="FileRepositoryDN" xml:space="preserve">
-    <value>FileRepository</value>
+    <value>File Repository</value>
   </data>
   <data name="FileRepositoryDN_Active" xml:space="preserve">
     <value>Active</value>
@@ -466,10 +466,10 @@
     <value>Name</value>
   </data>
   <data name="FileRepositoryDN_PhysicalPrefix" xml:space="preserve">
-    <value>PhysicalPrefix</value>
+    <value>Physical Prefix</value>
   </data>
   <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
-    <value>WebPrefix</value>
+    <value>Web Prefix</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
     <value>Create</value>
@@ -504,10 +504,19 @@
   <data name="DateSpanDN_Days" xml:space="preserve">
     <value>Days</value>
   </data>
+  <data name="FilePathDN_FullPhysicalPath" xml:space="preserve">
+    <value>Physical Path</value>
+  </data>
   <data name="DateSpanDN_Months" xml:space="preserve">
     <value>Months</value>
   </data>
+  <data name="FilePathDN_FullWebPath" xml:space="preserve">
+    <value>URL</value>
+  </data>
   <data name="DateSpanDN_Years" xml:space="preserve">
     <value>Years</value>
+    </data>
+  <data name="FilePathDN_FileLengthString" xml:space="preserve">
+    <value>File Length</value>
   </data>
 </root>
