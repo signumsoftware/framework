@@ -37,7 +37,13 @@ namespace Signum.Utilities
                                 case 2: return "Windows 2003 Server";
                             }
                             break;
-                        case 6: return "Windows Vista";
+                        case 6:
+                            switch (os.Version.Minor)
+                            {
+                                case 0: return "Windows Vista / 2008 Server";
+                                case 1: return "Windows 7";
+                            }
+                            break;
                     }
                     break;
             }

@@ -630,6 +630,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <SolidColorBrush x:Key="LightBlue" Color="#FFC9E4FF"/>
 
     <Style x:Key="EntityGroupBox" TargetType="{x:Type GroupBox}">
         <Setter Property="BorderBrush" Value="#D5DFE5"/>
@@ -644,10 +645,10 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <Border x:Name="Header" Padding="1" Grid.Row="0">
+                                <Border x:Name="Header" Padding="1" Grid.Row="0" Background="{DynamicResource LightBlue}" CornerRadius="2,2,0,0">
                                     <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" ContentSource="Header" RecognizesAccessKey="True"/>
                                 </Border>
-                                <Border Grid.RowSpan="2" Grid.Row="1" Background="#44C9E4FF">
+                                <Border Grid.RowSpan="2" Grid.Row="1">
                                     <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Margin="{TemplateBinding Padding}"  />
                                 </Border>
                             </Grid>
@@ -657,7 +658,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <SolidColorBrush x:Key="LightBlue" Color="#FFC9E4FF"/>
     
     <Style x:Key="{x:Type TextBox}" TargetType="{x:Type TextBox}"
                BasedOn="{StaticResource {x:Type TextBox}}">

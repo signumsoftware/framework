@@ -1,4 +1,4 @@
-using System; 
+using System;
 using System.Windows.Markup;
 using Signum.Utilities;
 
@@ -12,9 +12,18 @@ namespace Signum.Windows
         [ConstructorArgument("path")]
         public string Path { get; set; }
 
-        public string AssemblyName { get; set; }
+        string assemblyName;
+        public string AssemblyName
+        {
+            get { return assemblyName; }
+            set
+            {
+                assemblyName = value;
+                Location = Location.ReferencedAssembly;
+            }
+        }
 
-        public PackUriExtension() 
+        public PackUriExtension()
         {
             Location = Location.LocalAssembly;
         }

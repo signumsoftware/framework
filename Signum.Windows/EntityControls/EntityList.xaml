@@ -45,7 +45,7 @@
 		</ResourceDictionary>
 	</m:EntityListBase.Resources>
 
-	<Grid>
+	<Grid MinHeight="16">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>
 			<ColumnDefinition Width="Auto"/>
@@ -63,7 +63,7 @@
             ItemContainerStyle="{StaticResource AllBlueListBoxItem}"
 			HorizontalContentAlignment="Stretch"/>
 		</Border>
-		<StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="22" Grid.Column="1">
+		<StackPanel Orientation="Vertical" HorizontalAlignment="Left" Grid.Column="1">
 			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{DynamicResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
 			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{DynamicResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
 			<Button Focusable="False" x:Name="btView" Style="{DynamicResource RoundButton}" Click="btView_Click" Content="{DynamicResource View}" ToolTip="{m:Loc View}"/>

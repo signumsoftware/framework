@@ -12,7 +12,7 @@ namespace Signum.Windows
 {
     public static class ImageLoader
     {
-        internal static BitmapFrame GetImageSortName(string name)
+        public static BitmapFrame GetImageSortName(string name)
         {
             return LoadIcon(PackUriHelper.Reference("Images/" + name, typeof(Navigator))); 
         }

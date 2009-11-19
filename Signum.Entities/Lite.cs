@@ -275,7 +275,6 @@ namespace Signum.Entities
             if (entity == null)
                 return null;
 
-
             if (entity.IsNew)
                 throw new ApplicationException(Resources.ToLiteLightNotAllowedForNewEntities);
 

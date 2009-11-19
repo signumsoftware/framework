@@ -266,6 +266,7 @@
       <DependentUpon>TextArea.xaml</DependentUpon>
     </Compile>
     <Compile Include="EntityControls\LineBase.cs" />
+    <Compile Include="MarkupExtensions\EqualsExtension.cs" />
     <Compile Include="ThemeManager.cs" />
     <Compile Include="ValueLineBox.xaml.cs">
       <DependentUpon>ValueLineBox.xaml</DependentUpon>
@@ -429,6 +430,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\excelPersonalizado.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\forbidden.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

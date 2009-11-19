@@ -217,7 +217,7 @@ namespace Signum.Utilities
                 dictionary.Add(item.First, item.Second);
         }
 
-        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other)
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
         {
             foreach (var item in other)
             {
