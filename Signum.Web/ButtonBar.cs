@@ -31,6 +31,13 @@ namespace Signum.Web
             set { divCssClass = value; } 
         }
 
+        private bool enabled = true;
+        public bool Enabled
+        {
+            get { return enabled; }
+            set { enabled = value; }
+        }
+
         Dictionary<string, object> htmlProps = new Dictionary<string, object>(0);
         public Dictionary<string, object> HtmlProps
         {
@@ -42,41 +49,44 @@ namespace Signum.Web
             string onclick = "";
             string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
 
-            //Add prefix to onclick
-            if (!string.IsNullOrEmpty(OnClick))
+            if (enabled)
             {
-                if (!string.IsNullOrEmpty(OnServerClickAjax) || !string.IsNullOrEmpty(OnServerClickPost))
-                    throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(Id));
+                //Add prefix to onclick
+                if (!string.IsNullOrEmpty(OnClick))
+                {
+                    if (!string.IsNullOrEmpty(OnServerClickAjax) || !string.IsNullOrEmpty(OnServerClickPost))
+                        throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(Id));
 
-                int lastEnd = OnClick.LastIndexOf(")");
-                int lastStart = OnClick.LastIndexOf("(");
-                if (lastStart == lastEnd - 1)
-                    onclick = OnClick.Insert(lastEnd, strPrefix);
-                else
-                    onclick = OnClick.Insert(lastEnd, ", " + strPrefix);
+                    int lastEnd = OnClick.LastIndexOf(")");
+                    int lastStart = OnClick.LastIndexOf("(");
+                    if (lastStart == lastEnd - 1)
+                        onclick = OnClick.Insert(lastEnd, strPrefix);
+                    else
+                        onclick = OnClick.Insert(lastEnd, ", " + strPrefix);
+                }
+
+                //Constructo OnServerClick
+                if (!string.IsNullOrEmpty(OnServerClickAjax))
+                {
+                    if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickPost))
+                        throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(Id));
+                    onclick = OnServerClickAjax;
+                }
+
+                //Constructo OnServerClick
+                if (!string.IsNullOrEmpty(OnServerClickPost))
+                {
+                    if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickAjax))
+                        throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(Id));
+                    onclick = "PostServer('{0}');".Formato(OnServerClickPost);
+                }
+
+                //Add cursor pointer to the htmlProps
+                if (!HtmlProps.ContainsKey("style"))
+                    HtmlProps.Add("style", "cursor: pointer");
+                else if (HtmlProps["style"].ToString().IndexOf("cursor") == -1)
+                    HtmlProps["style"] = "cursor:pointer; " + HtmlProps["style"].ToString();
             }
-
-            //Constructo OnServerClick
-            if (!string.IsNullOrEmpty(OnServerClickAjax))
-            {
-                if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickPost))
-                    throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(Id));
-                onclick = OnServerClickAjax;
-            }
-
-            //Constructo OnServerClick
-            if (!string.IsNullOrEmpty(OnServerClickPost))
-            {
-                if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickAjax))
-                    throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(Id));
-                onclick = "PostServer('{0}');".Formato(OnServerClickPost);
-            }
-
-            //Add cursor pointer to the htmlProps
-            if (!HtmlProps.ContainsKey("style"))
-                HtmlProps.Add("style", "cursor: pointer");
-            else if (HtmlProps["style"].ToString().IndexOf("cursor") == -1)
-                HtmlProps["style"] = "cursor:pointer; " + HtmlProps["style"].ToString();
 
             HtmlProps.Add("title", AltText);
 
@@ -88,7 +98,10 @@ namespace Signum.Web
             }
             else
             {
-                HtmlProps.Add("onclick", onclick);
+                if (enabled)
+                    HtmlProps.Add("onclick", onclick);
+                else
+                    DivCssClass = DivCssClass + " disabled"; 
                 return helper.Div(Id, AltText, DivCssClass, HtmlProps);
             }
         }
