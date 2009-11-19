@@ -214,7 +214,6 @@ popup.prototype = {
 	},
 	
 	show: function(globalKey, modalBackgroundKey, panelPopupKey){
-	    log("En show");
 		if (!empty(me.options.detailDiv)) 
 			$("#" + me.options.detailDiv).show();
 		else {

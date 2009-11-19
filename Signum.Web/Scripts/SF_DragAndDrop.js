@@ -10,10 +10,15 @@ function carga() {
 	else navegador = 1;
 }
 var _id;
+var $id;
+var width, height;
 function comienzoMovimiento(event, id) {
 	elMovimiento = document.getElementById(id);
 	$('#' + id).css("cursor", "move");
 	_id = id;
+	$id = $('#' + _id);
+	width=$id.width();
+	height=$id.height();
 	// Obtengo la posicion del cursor
 	if (navegador == 0) {
 		cursorComienzoX = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
@@ -58,9 +63,10 @@ function enMovimiento(event) {
 		xActual = event.clientX + window.scrollX;
 		yActual = event.clientY + window.scrollY;
 	}
-
-	elMovimiento.style.left = (elComienzoX + xActual - cursorComienzoX) + "px";
-	elMovimiento.style.top = (elComienzoY + yActual - cursorComienzoY) + "px";
+    var l = Math.min(Math.max(elComienzoX + xActual - cursorComienzoX,0), document.documentElement.clientWidth-width);
+	var t = Math.min(Math.max(elComienzoY + yActual - cursorComienzoY,0), document.documentElement.clientHeight-height);
+	elMovimiento.style.left = l + "px";
+	elMovimiento.style.top = t + "px";
 
 	evitaEventos(event);
 }
@@ -74,5 +80,5 @@ function finMovimiento(event) {
 		document.removeEventListener("mousemove", enMovimiento, true);
 		document.removeEventListener("mouseup", finMovimiento, true);
 	}
-	$('#' + _id).css("cursor", "auto");
+	$id.css("cursor", "auto");
 }

@@ -1,12 +1,23 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="Signum.Entities.Reflection" %>
 <%
     string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
     string prefix = (string)ViewData[ViewDataKeys.PopupPrefix];
-    string popupTitle = (Model is TypeContext) ? ((TypeContext)Model).UntypedValue.ToString() : Model.ToString();
-    if (!popupTitle.HasText())
-        popupTitle = " ";
+    string popupTitle = "";
+    string typeNiceName = "";
+    if(Model is TypeContext)
+    {
+        TypeContext tc = (TypeContext)Model;
+        popupTitle = tc.UntypedValue.ToString();
+        typeNiceName = tc.UntypedValue.GetType().NiceName();
+    }
+    else
+    { 
+        popupTitle = Model.ToString();
+        typeNiceName = Model.GetType().NiceName();
+    }
 %>
 <div id="<%=Html.GlobalPrefixedName("externalPopupDiv" + sufix)%>">
 <div id="<%=Html.GlobalPrefixedName("modalBackground" + sufix)%>" class="transparent popupBackground"></div>
@@ -18,7 +29,7 @@
         <div class="closebox" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>');" class="dragHandle">
-        <span id="windowTitle"><%= popupTitle %></span>
+        <span class="popupEntityName"><%= typeNiceName%></span><span class="popupTitle"><%= popupTitle %></span>
     </div>
     <div class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
