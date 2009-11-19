@@ -52,12 +52,12 @@ namespace Signum.Web.Authorization
                     Func<IdentifiableEntity, bool> creada = (IdentifiableEntity entity) => !entity.IsNew;
                     settings.Add(UserOperation.SaveNew, new EntityOperationSettings
                     {
-                        OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth.aspx/RegisterUserValidate", "Auth.aspx/RegisterUserPost"),
+                        OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth/RegisterUserValidate", "Auth.aspx/RegisterUserPost"),
                         IsVisible = (IdentifiableEntity entity) => entity.IsNew,
                     });
                     settings.Add(UserOperation.Save, new EntityOperationSettings 
                     {
-                        OnServerClickAjax = "Auth.aspx/UserExecOperation",
+                        OnServerClickAjax = "Auth/UserExecOperation",
                         IsVisible = creada 
                     });
                     settings.Add(UserOperation.Disable, new EntityOperationSettings { IsVisible = creada });
@@ -72,7 +72,7 @@ namespace Signum.Web.Authorization
                         string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
                         //send them off to the login page
                         string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
-                        string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth.aspx/Login" + redirectUrl;
+                        string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth/Login" + redirectUrl;
                         context.HttpContext.Response.Redirect(loginUrl, true);
                     }
                 };

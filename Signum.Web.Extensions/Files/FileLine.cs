@@ -176,7 +176,7 @@ namespace Signum.Web.Files
             sb.AppendLine("<div id='div{0}Old' style='display:{1}'>".Formato(idValueField, hasEntity ? "block" : "none"));
             if (settings.View)
             {
-                string viewingUrl = "javascript:DownloadFile('File.aspx/Download','{0}');".Formato(idValueField); // "javascript:OpenPopup(" + popupOpeningParameters + ");";
+                string viewingUrl = "javascript:DownloadFile('File/Download','{0}');".Formato(idValueField); // "javascript:OpenPopup(" + popupOpeningParameters + ");";
                 sb.AppendLine(
                         helper.Href(TypeContext.Compose(idValueField, EntityBaseKeys.ToStrLink),
                             value.TryCC(f => f.FileName) ?? "",

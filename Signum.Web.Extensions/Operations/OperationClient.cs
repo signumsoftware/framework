@@ -148,7 +148,7 @@ namespace Signum.Web.Operations
 
             if (oi.OperationType == OperationType.Execute)
             {
-                string controllerUrl = "Operation.aspx/OperationExecute";
+                string controllerUrl = "Operation/OperationExecute";
                 if (os != null && os.OnServerClickAjax.HasText())
                     controllerUrl = os.OnServerClickAjax;
 
@@ -166,9 +166,18 @@ namespace Signum.Web.Operations
             }
             else if (oi.OperationType == OperationType.ConstructorFrom)
             {
-                string controllerUrl = "Operation.aspx/ConstructFromExecute";
+                string controllerUrl = "Operation/ConstructFromExecute";
                 if (os != null && os.OnServerClickAjax.HasText())
                     controllerUrl = os.OnServerClickAjax;
+
+                if (((EntityOperationSettings)os).Post)
+                    return "javascript:ConstructFromExecutePost('{0}','{1}','{2}','{3}','{4}');".Formato(
+                        controllerUrl,
+                        ident.GetType().Name,
+                        ident.IdOrNull.HasValue ? ident.Id.ToString() : "",
+                        EnumDN.UniqueKey(oi.Key),
+                        oi.Lite
+                        );
 
                 return "javascript:ConstructFromExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}');".Formato(
                     controllerUrl,
@@ -184,7 +193,7 @@ namespace Signum.Web.Operations
             }
             else if (oi.OperationType == OperationType.Delete)
             {
-                string controllerUrl = "Operation.aspx/DeleteExecute";
+                string controllerUrl = "Operation/DeleteExecute";
                 if (os != null && os.OnServerClickAjax.HasText())
                     controllerUrl = os.OnServerClickAjax;
 
@@ -208,7 +217,7 @@ namespace Signum.Web.Operations
             if (os != null && (os.OnClick.HasText() || os.OnServerClickPost.HasText()))
                 return null;
 
-            string controllerUrl = "Operation.aspx/ConstructFromManyExecute";
+            string controllerUrl = "Operation/ConstructFromManyExecute";
             if (os != null && os.OnServerClickAjax.HasText())
                 controllerUrl = os.OnServerClickAjax;
 

@@ -110,16 +110,9 @@ namespace Signum.Web.Operations
                 }
 
                 entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
-
-                //TODO Anto: Reactiva?            
-                //if (Navigator.ExtractIsReactive(Request.Form))
-                //{
-                //    string tabID = Navigator.ExtractTabID(Request.Form);
-                //    Session[tabID] = entity;
-                //}
             }
 
-            if (prefix.HasText())
+            if (prefix.HasText() && Request.IsAjaxRequest())
                 return Navigator.PopupView(this, entity, prefix);
             else //NormalWindow
                 return Navigator.View(this, entity);
