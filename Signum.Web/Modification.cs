@@ -555,7 +555,7 @@ namespace Signum.Web
             if (lite == null)
             {
                 if (EntityModification == null)
-                    return Lite.Create(CleanType, EntityId.Value, RuntimeType);
+                    return Database.RetrieveLite(CleanType, RuntimeType, EntityId.Value);
                 else
                     return Lite.Create(CleanType,
                         (IdentifiableEntity)EntityModification.ApplyChanges(
@@ -581,7 +581,7 @@ namespace Signum.Web
                 else
                 {
                     if (EntityModification == null)
-                        return Lite.Create(CleanType, EntityId.Value, RuntimeType);
+                        return Database.RetrieveLite(CleanType, RuntimeType, EntityId.Value);
                     else
                         return Lite.Create(CleanType,
                             (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(RuntimeType, EntityId.Value), onFinish));
@@ -687,7 +687,7 @@ namespace Signum.Web
             IList list = (IList)Activator.CreateInstance(StaticType, modifications.Count);
             foreach (var item in modifications)
             {
-                if (item.Second.HasValue && old.Count > item.Second.Value)
+                if (item.Second.HasValue && old != null && old.Count > item.Second.Value)
                     list.Add(item.First.ApplyChanges(controller, old[item.Second.Value], onFinish));
                 else
                     list.Add(item.First.ApplyChanges(controller, null, onFinish));

@@ -220,7 +220,7 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 		    formChildren = $("form").serialize();
 	}
 	if (formChildren.length > 0) formChildren = "&" + formChildren;
-	var newPrefix = multiStep ? prefix + "New" : prefix;
+	var newPrefix = (multiStep == false || multiStep == "false" || multiStep == "False") ? prefix : (prefix + "New");
 	$.ajax({
 		type: "POST",
 		url: urlController,
@@ -234,21 +234,21 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 				ShowErrorMessages(prefix, modelState, true, "*");
 		    }
 		    else{
-		        if (multiStep){
-		            $('#' + prefix + "divASustituir").html(msg);
-                    if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
-                        return;
-                    ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
-                    //$('#' + newPrefix + sfBtnOk).click(onOk);
-                    $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
-		        }
-		        else{
+		        if (multiStep == false || multiStep == "false" || multiStep == "False") {
 		            if (prefix != "") { //PopupWindow
 		                $('#' + prefix + "externalPopupDiv").html(msg);
 		            }
 		            else{
 		                $("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
 				    }
+		        }
+		        else{
+		            $('#' + prefix + "divASustituir").html(msg);
+		            if (msg.indexOf("<script") == 0)//A script to be run is returned instead of a Popup to open
+		                return;
+		            ShowPopup(newPrefix, prefix + "divASustituir", "modalBackground", "panelPopup");
+		            //$('#' + newPrefix + sfBtnOk).click(onOk);
+		            $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);		        
 				}
 		    }
 		    NotifyInfo(lang['operationExecuted'], 2000);
