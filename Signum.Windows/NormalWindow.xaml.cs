@@ -18,8 +18,8 @@ using System.Windows.Input;
 
 namespace Signum.Windows
 {
-	public partial class NormalWindow
-	{
+    public partial class NormalWindow
+    {
         public static readonly DependencyProperty MainControlProperty =
             DependencyProperty.Register("MainControl", typeof(Control), typeof(NormalWindow));
         public Control MainControl
@@ -33,24 +33,32 @@ namespace Signum.Windows
             get { return this.buttonBar; }
         }
 
-		public NormalWindow()
-		{
-			this.InitializeComponent();
+        public NormalWindow()
+        {
+            this.InitializeComponent();
 
-            this.DataContextChanged+=new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(NormalWindow_DataContextChanged);
 
             Common.AddChangeDataContextHandler(this, ChangeDataContext_DataContextChanged);
 
             RefreshEnabled();
-  
+
             this.Loaded += new RoutedEventHandler(NormalWindow_Loaded);
-		}
+        }
 
         void ChangeDataContext_DataContextChanged(object sender, ChangeDataContextEventArgs e)
         {
-            DataContext = null; 
+            if (e.NewDataContext == null)
+                throw new ArgumentNullException("DataContext");
+
+            Type type = Common.GetTypeContext(MainControl).Type;
+            Type entityType = e.NewDataContext.GetType();
+            if (type != null && !type.IsAssignableFrom(entityType))
+                throw new InvalidCastException("The DataContext is a {0} but TypeContext is {1}".Formato(entityType.Name, type.Name));
+
+            DataContext = null;
             DataContext = e.NewDataContext;
-            e.Handled = true; 
+            e.Handled = true;
         }
 
         void NormalWindow_Loaded(object sender, RoutedEventArgs e)
@@ -60,14 +68,14 @@ namespace Signum.Windows
 
         void NormalWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-             RefreshEnabled();
+            RefreshEnabled();
         }
 
         protected override void OnPreviewKeyDown(System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.S && (e.KeyboardDevice.Modifiers & ModifierKeys.Control) != 0 && buttonBar.SaveVisible)
             {
-                Save(); 
+                Save();
             }
         }
 
@@ -124,7 +132,7 @@ namespace Signum.Windows
 
         void RefreshEnabled()
         {
-            buttonBar.ReloadButton.IsEnabled = (DataContext as IdentifiableEntity).TryCS(ei => !ei.IsNew) ?? false; 
+            buttonBar.ReloadButton.IsEnabled = (DataContext as IdentifiableEntity).TryCS(ei => !ei.IsNew) ?? false;
         }
 
         private void Reload_Click(object sender, RoutedEventArgs e)
@@ -141,5 +149,5 @@ namespace Signum.Windows
         {
             this.SizeToContent = SizeToContent.WidthAndHeight;
         }
-	}
+    }
 }
