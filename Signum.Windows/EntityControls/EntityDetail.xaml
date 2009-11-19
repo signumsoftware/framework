@@ -16,14 +16,14 @@
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto"/>
-			<ColumnDefinition/>
+			<ColumnDefinition Width="*"/>
 			<ColumnDefinition Width="Auto"/>
 		</Grid.ColumnDefinitions>
 		<Label Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
 		Target="{Binding ElementName=combo, Mode=OneWay}"  Width="{Binding Path=(m:Common.LabelWidth), ElementName=me, Mode=OneWay}"
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
-        <ContentPresenter Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" x:Name="contentPresenter"
-             VerticalAlignment="Top" HorizontalAlignment="Left" Content="{Binding EntityControl, ElementName=me, Mode=Default}" />
+        <ContentControl Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" x:Name="contentPresenter"
+                        DataContextChanged="contentPresenter_DataContextChanged" Content="{Binding EntityControl, ElementName=me, Mode=Default}" />
 		<StackPanel Orientation="{Binding Orientation, ElementName=me, Mode=Default}" Grid.Column="2" x:Name="buttons">
 			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
 			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>

@@ -33,9 +33,19 @@ namespace Signum.Windows
             return async.BeginInvoke(null, null);
         }
 
-        public static void InvokeAction(this Dispatcher dispatcher, Action action)
+        public static void Invoke(this Dispatcher dispatcher, Action action)
         {
-            dispatcher.Invoke(action, new object[0]);
+            dispatcher.Invoke(action);
+        }
+
+        public static T Invoke<T>(this Dispatcher dispatcher, Func<T> func)
+        {
+            return (T)dispatcher.Invoke(func);
+        }
+
+        public static DispatcherOperation BeginInvoke(this Dispatcher dispatcher, Action action)
+        {
+            return dispatcher.BeginInvoke(action);
         }
     }
 }

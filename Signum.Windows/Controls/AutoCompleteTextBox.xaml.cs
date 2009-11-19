@@ -1,244 +1,280 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Timers;
 using System.Collections;
+using System.Windows.Controls.Primitives;
+using System.ComponentModel;
 using System.Windows.Threading;
-using System.Reflection;
-using Signum.Utilities;
+using System.Diagnostics;
+using System.Threading;
+using System.Windows.Media;
 
 namespace Signum.Windows
 {
-    /// <summary>
-    /// Interaction logic for AutoCompleteTextBox.xaml
-    /// </summary>    
-    public partial class AutoCompleteTextBox : Grid
+    //http://www.lazarciuc.ro/ioan/2008/06/01/auto-complete-for-textboxes-in-wpf/
+    public partial class AutoCompleteTextBox : UserControl
     {
-
-        public static readonly RoutedEvent SelectedItemChangedEvent = EventManager.RegisterRoutedEvent(
-            "SelectedItemChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(AutoCompleteTextBox));
-        public event RoutedEventHandler SelectedItemChanged
+        public static readonly RoutedEvent ClosedEvent =
+            EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Bubble, typeof(ClosedEventHandler), typeof(AutoCompleteTextBox));
+        public event RoutedEventHandler Closed
         {
-            add { AddHandler(SelectedItemChangedEvent, value); }
-            remove { RemoveHandler(SelectedItemChangedEvent, value); }
+            add { AddHandler(ClosedEvent, value); }
+            remove { RemoveHandler(ClosedEvent, value); }
         }
 
+        public event Func<string, IEnumerable> AutoCompleting;
 
-        public static readonly RoutedEvent RealLostFocusEvent = EventManager.RegisterRoutedEvent(
-            "RealLostFocus", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(AutoCompleteTextBox));
-        public event RoutedEventHandler RealLostFocus
-        {
-            add { AddHandler(RealLostFocusEvent, value); }
-            remove { RemoveHandler(RealLostFocusEvent, value); }
-        }
-
-
-        bool insertText;
-        Timer timer;
-        bool abort = false;
-
-        public string Text
-        {
-            get { return textBox.Text; }
-            set
-            {
-                insertText = true;
-                textBox.Text = value;
-            }
-        }
+        public static readonly DependencyProperty SelectedItemProperty =
+            DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutoCompleteTextBox), new UIPropertyMetadata(null));
         public object SelectedItem
         {
-            get { return listBox.SelectedItem; }
+            get { return (object)GetValue(SelectedItemProperty); }
+            set { SetValue(SelectedItemProperty, value); }
         }
 
-        public int Threshold { get; set; }
-        public int Delay { get; set; }
+        public static readonly DependencyProperty MinTypedCharactersProperty =
+            DependencyProperty.Register("MinTypedCharacters", typeof(int), typeof(AutoCompleteTextBox), new UIPropertyMetadata(2));
+        public int MinTypedCharacters
+        {
+            get { return (int)GetValue(MinTypedCharactersProperty); }
+            set { SetValue(MinTypedCharactersProperty, value); }
+        }
 
-        public event Func<string, IEnumerable> AutoCompleting; 
+        DispatcherTimer delayTimer = new DispatcherTimer(DispatcherPriority.Normal);
 
+        public TimeSpan Delay
+        {
+            get { return delayTimer.Interval; }
+            set { delayTimer.Interval = value; }
+        }
+        
         public AutoCompleteTextBox()
         {
             InitializeComponent();
-            AsserTimer();
-            lostFocusTimer.Elapsed += new ElapsedEventHandler(lostFocusTimer_Elapsed);
-            Delay = 300;
+            delayTimer.Interval = TimeSpan.FromMilliseconds(300);
+            itemsSelected = false;
+            delayTimer.Tick += new EventHandler(delayTimer_Tick);
         }
 
-        private void AsserTimer()
+        void delayTimer_Tick(object sender, EventArgs e)
         {
-            if (Delay == 0)
-                timer = null;
+            delayTimer.Stop();
+
+            if (AutoCompleting == null) 
+                throw new NullReferenceException("SeachMethod cannot be null.");
+
+            IEnumerable res = AutoCompleting(txtBox.Text);
+
+
+            lstBox.ItemsSource = res;
+            if (lstBox.Items.Count > 0)
+            {
+                lstBox.SelectedIndex = -1;
+                pop.IsOpen = true;
+            }
             else
             {
-                if (timer == null)
-                    timer = new Timer();
-                timer.Interval = Delay;
-                timer.AutoReset = false;
-                timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+                pop.IsOpen = false;
+            }
+        }
+
+        void MoveDown()
+        {
+            if (lstBox.SelectedIndex < lstBox.Items.Count - 1)
+            {
+                lstBox.SelectedIndex++;
+            }
+        }
+
+        void MoveUp()
+        {
+            if (lstBox.SelectedIndex > 0)
+            {
+                lstBox.SelectedIndex--;
             }
         }
     
-        private void TextChanged(IEnumerable values)
+        void txtBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            listBox.ItemsSource = values;
-            popup.IsOpen = listBox.HasItems;
-        }
-
-        public void SelectAll()
-        {
-            textBox.SelectAll(); 
-        }
-
-        private void textBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            // text was not typed, do nothing and consume the flag
-            if (insertText == true)
-                insertText = false;
-            // if the delay time is set, delay handling of text changed
-            else if (textBox.Text.Length >= Threshold)
+            if (e.Key == Key.Up)
             {
-                if (Delay == 0)
-                    AutoComplete();
+                MoveUp();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Down)
+            {
+                MoveDown();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Tab)
+            {
+                if (lstBox.SelectedItem != null)
+                    Commit(CloseReason.Tab);
                 else
-                {
-                    AsserTimer();
-                    abort = false;
-                    timer.Start();
-                }
+                    Close(CloseReason.TabExit);
+
+                 txtBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                if(lstBox.SelectedItem != null)
+                    Commit(CloseReason.Enter);
+                
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                Close(CloseReason.Esc);
+                e.Handled = true;
+            }
+           
+        }
+
+        void txtBox_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (IsTextChangingKey(e.Key))
+            {
+                Suggest();
             }
         }
 
-        void timer_Elapsed(object sender, ElapsedEventArgs e)
+
+        bool IsTextChangingKey(Key key)
         {
-            timer.Stop();
-            Dispatcher.Invoke(new Action(AutoComplete)); 
-        }
-
-        private void AutoComplete()
-        {
-            string text = textBox.Text;
-
-            new Action(delegate
+            if (key == Key.Back || key == Key.Delete)
+                return true;
+            else
             {
-                IEnumerable result = AutoCompleting(text);
-                Dispatcher.BeginInvoke(new Action(delegate
-                {
-                    if (!abort)
-                    {
-                        listBox.ItemsSource = result;
-                        popup.IsOpen = listBox.HasItems && textBox.IsFocused;
-                    }
-                }));
+                KeyConverter conv = new KeyConverter();
+                string keyString = (string)conv.ConvertTo(key, typeof(string));
 
-            }).BeginInvoke(null, null);
-        }
-
-        public new bool Focus()
-        {
-            return textBox.Focus();
-        }
-
-        private void textBox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {   
-            if (e.Key == Key.Down)
-            {
-                abort = true;
-                if (listBox.HasItems)
-                {
-                    listBox.SelectedIndex = 0;
-                    ListBoxItem lbi =  (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromIndex(0);
-                    lbi.Focus();
-                }
-                e.Handled = true; 
-            }
-            if (e.Key == Key.Tab)
-            {
-                switch (listBox.Items.Count) {
-                    case 0: textBox.Text = string.Empty;
-                            //e.Handled = true;
-                            break;
-
-                    case 1: listBox.SelectedItem = listBox.Items[0];
-                            SelectItem();
-                            break;
-
-                    default:
-                            foreach (object o in listBox.ItemsSource)
-                            {
-                                if (string.Equals(o.ToString(), textBox.Text, StringComparison.InvariantCultureIgnoreCase))
-                                {
-                                    listBox.SelectedItem = o;
-                                    SelectItem();
-                                    break;
-                                }
-                            }
-                            break;
-                }
+                return keyString.Length == 1;
             }
         }
 
-        private void listbox_KeyDown(object sender, KeyEventArgs e)
+        public void Close(CloseReason reason)
         {
-            if (e.Key == Key.Enter || e.Key == Key.Tab)
+            pop.IsOpen = false;
+            RaiseEvent(new CloseEventArgs(reason));
+        }
+
+
+        void Commit(CloseReason reason)
+        {
+            pop.IsOpen = false;
+            if (lstBox.SelectedItem != null)
             {
-                SelectItem();
-                e.Handled = true; 
+                txtBox.Text = lstBox.SelectedItem.ToString();
+
+                Close(reason); 
+
+                itemsSelected = true;
             }
-            if (e.Key == Key.Escape)
+        }
+
+        private void txtBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (itemsSelected)
+                itemsSelected = false;
+            else Suggest();
+        }
+
+        private void txtBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!pop.IsKeyboardFocusWithin)
+                Close(CloseReason.LostFocus);
+        }
+
+        private void Suggest()
+        {
+            if (txtBox.Text.Length < MinTypedCharacters)
             {
-                popup.IsOpen = false;
-                textBox.Focus(); 
-                e.Handled = true; 
+                pop.IsOpen = false;
+                lstBox.ItemsSource = null;
+                return;
             }
-            if (e.Key == Key.Up || e.Key == Key.Down)
-                e.Handled = true; 
+
+            delayTimer.Start(); 
         }
 
-        private void listBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private bool itemsSelected;
+        private void lstBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SelectItem();
-        }
-
-        private void SelectItem()
-        {
-            popup.IsOpen = false;
-            RaiseEvent(new RoutedEventArgs(SelectedItemChangedEvent, this)); 
-        }
-
-        internal void Close()
-        {
-            popup.IsOpen = false; 
-        }
-
-        Timer lostFocusTimer = new Timer(100) { AutoReset = false };
-
-        private void textBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            lostFocusTimer.Start();  
-        }
-        private void listBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            lostFocusTimer.Start();
-        }
-        void lostFocusTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            Dispatcher.BeginInvoke(new Action(delegate
+            if (pop.IsKeyboardFocusWithin)
             {
-                if (!textBox.IsFocused && Common.FindChildrenBreadthFirst(listBox, dep => (dep is UIElement) && ((UIElement)dep).IsFocused) == null)
-                    RaiseEvent(new RoutedEventArgs(RealLostFocusEvent, this));
-            })); 
+                Commit(CloseReason.ClickList);
+            }
+        }
+
+        public void SelectAndFocus()
+        {
+            txtBox.SelectAll();
+            txtBox.Focus();
+            Mouse.Capture(this, CaptureMode.SubTree); 
+        }
+
+        public string Text
+        {
+            get { return txtBox.Text; }
+            set { txtBox.Text = value; }
+        }
+
+        private void userControl_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //Console.WriteLine("Down");
+            if (!txtBox.IsMouseOver && !pop.IsMouseOver)
+            {
+                ReleaseMouseCapture();
+                Close(CloseReason.ClickOut);
+            }
+        }
+
+        //private void me_GotMouseCapture(object sender, MouseEventArgs e)
+        //{
+        //    Console.WriteLine("Got");
+        //}
+
+        //private void me_LostMouseCapture(object sender, MouseEventArgs e)
+        //{
+        //    Console.WriteLine("Lost");
+        //}
+    }
+
+    public enum CloseReason
+    {
+        ClickList,
+        Enter,
+        Tab,
+        TabExit,
+        Esc,
+        LostFocus,
+        ClickOut
+    }
+
+    public class CloseEventArgs : RoutedEventArgs
+    {
+        public CloseReason Reason { get; private set; }
+        public bool IsCommit
+        {
+            get
+            {
+                return
+                    Reason == CloseReason.Enter ||
+                    Reason == CloseReason.Tab ||
+                    Reason == CloseReason.ClickList;
+            }
+        }
+
+        public CloseEventArgs(CloseReason reason)
+            : base(AutoCompleteTextBox.ClosedEvent)
+        {
+            Reason = reason;
         }
     }
+
+    public delegate void ClosedEventHandler(object sender, CloseEventArgs e);
 }

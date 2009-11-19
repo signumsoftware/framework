@@ -45,9 +45,7 @@
                 <m:AutoCompleteTextBox 
                     x:Name="autoCompleteTextBox"
                     AutoCompleting="autoCompleteTextBox_AutoCompleting" 
-                    KeyDown="autoCompleteTextBox_KeyDown"
-                    RealLostFocus="autoCompleteTextBox_RealLostFocus"
-                    SelectedItemChanged="autoCompleteTextBox_SelectedItemChanged"
+                    Closed="autoCompleteTextBox_Closed"
                     Visibility="Hidden"/>
             </Grid>
             <!--HorizontalContentAlignment="Center"

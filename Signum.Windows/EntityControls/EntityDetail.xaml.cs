@@ -38,8 +38,8 @@ namespace Signum.Windows
 
         private void OnEntityControlChanged(DependencyPropertyChangedEventArgs e)
         {
-            base.RemoveLogicalChild(e.OldValue);
-            base.AddLogicalChild(e.NewValue);
+            //base.RemoveLogicalChild(e.OldValue);
+            //base.AddLogicalChild(e.NewValue);
         }
 
         public object EntityControl
@@ -76,6 +76,11 @@ namespace Signum.Windows
                 contentPresenter.DataContext = Server.Retrieve(lite);
             else
                 contentPresenter.DataContext = newValue;
+        }
+
+        private void contentPresenter_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+
         }
     }
 }

@@ -87,19 +87,33 @@ namespace Signum.Windows
 
         private void autoCompleteTextBox_SelectedItemChanged(object sender, RoutedEventArgs e)
         {
-            SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
+        
             autoCompleteTextBox.Visibility = Visibility.Hidden;
             cc.Focus();
         }
 
+        private void autoCompleteTextBox_Closed(object sender, CloseEventArgs e)
+        {
+            if (e.IsCommit)
+            {
+                SetEntityUserInteraction(Server.Convert(autoCompleteTextBox.SelectedItem, Type));
+                autoCompleteTextBox.Visibility = Visibility.Hidden;
+                cc.Focus();
+            }
+            else
+            {
+                if (e.Reason != CloseReason.LostFocus || HideAutoCompleteOnLostFocus)
+                    autoCompleteTextBox.Visibility = Visibility.Hidden;
+            }
+        }
+
         public void ActivateAutoComplete()
         {
-            if (AutoComplete)
+            if (AutoComplete && autoCompleteTextBox.Visibility != Visibility.Visible)
             {
                 autoCompleteTextBox.Visibility = Visibility.Visible;
                 autoCompleteTextBox.Text = Entity.TryCC(a => a.ToString());
-                autoCompleteTextBox.SelectAll();
-                autoCompleteTextBox.Focus();
+                autoCompleteTextBox.SelectAndFocus();
             }
         }
 
@@ -117,7 +131,6 @@ namespace Signum.Windows
         {
             doubleClicked = true; 
             ActivateAutoComplete();
- 
         }
 
         private void cc_GotFocus(object sender, RoutedEventArgs e)
@@ -129,28 +142,27 @@ namespace Signum.Windows
             }
         }
 
-        private void autoCompleteTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                autoCompleteTextBox.Visibility = Visibility.Hidden;
-                autoCompleteTextBox.Close();
-                e.Handled = true; 
-            }
-        }
+        //private void autoCompleteTextBox_KeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.Key == Key.Escape)
+        //    {
+        //        autoCompleteTextBox.Visibility = Visibility.Hidden;
+        //        autoCompleteTextBox.Close();
+        //        e.Handled = true; 
+        //    }
+        //}
 
         private void cc_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (doubleClicked)
+            {
                 doubleClicked = false;
-            else if (!cc.IsFocused)
-                cc.Focus();
+                return;
+            }
+
+            if (!cc.Focus())
+                ActivateAutoComplete();
         }
 
-        private void autoCompleteTextBox_RealLostFocus(object sender, RoutedEventArgs e)
-        {
-            if (HideAutoCompleteOnLostFocus)
-                autoCompleteTextBox.Visibility = Visibility.Hidden;
-        }
     }
 }
