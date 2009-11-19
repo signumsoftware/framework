@@ -66,7 +66,8 @@ namespace Signum.Web.Operations
                         ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
                         OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
                         OnServerClickAjax = GetServerClickAjax(httpContext, oi, dic[oi.Key].OperationSettings, ident),
-                        OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
+                        OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost),
+                        Enabled = dic[oi.Key].OperationInfo.CanExecute == null,
                     };
                     Dictionary<string, object> settings = dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps);
                     if (settings != null) 
@@ -110,7 +111,8 @@ namespace Signum.Web.Operations
                         ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
                         OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
                         OnServerClickAjax = GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationSettings, queryName, entityType),
-                        OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost)
+                        OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost),
+                        Enabled = dic[oi.Key].OperationInfo.CanExecute == null,
                     };
                     Dictionary<string, object> settings = dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps);
                     if (settings != null)
