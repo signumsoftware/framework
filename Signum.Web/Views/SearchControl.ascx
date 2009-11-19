@@ -26,9 +26,9 @@
     <% if (findOptions.FilterMode != FilterMode.AlwaysHidden){%>
         <input class="OperationDiv" type="hidden" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
     <%} %>
-        <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="$('#{0}').toggleClass('loading');$('#{0}').val('Buscando...');Search('Signum.aspx/Search','{1}',function(){{$('#{0}').val('Buscar');$('#{0}').toggleClass('loading');}});".Formato(Html.GlobalName("btnSearch"),ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
+        <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="$('#{0}').toggleClass('loading');$('#{0}').val('Buscando...');Search('Signum/Search','{1}',function(){{$('#{0}').val('Buscar');$('#{0}').toggleClass('loading');}});".Formato(Html.GlobalName("btnSearch"),ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
     <%if ((bool)ViewData[ViewDataKeys.Create]){ %>
-        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato(popupPrefix.HasText() ? "Signum.aspx/PopupView" : "Signum.aspx/Create", popupPrefix ?? "", "Signum.aspx/TrySavePartial")%>" />
+        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato(popupPrefix.HasText() ? "Signum/PopupView" : "Signum.aspx/Create", popupPrefix ?? "", "Signum.aspx/TrySavePartial")%>" />
     <%} %>
     <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], popupPrefix)%> 
 </div>

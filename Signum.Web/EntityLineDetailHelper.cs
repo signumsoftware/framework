@@ -93,7 +93,7 @@ namespace Signum.Web
 
             string reloadOnChangeFunction = "''";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
             string popupOpeningParameters = "'{0}','{1}','{2}','{3}'".Formato("Signum/PartialView", divASustituir, idValueField, settings.DetailDiv);
 
@@ -189,7 +189,7 @@ namespace Signum.Web
 
             if (settings.Implementations != null || (settings.Find && (isIdentifiable || isLite)))
             {
-                string popupFindingParameters = "'{0}','{1}','false',function(){{OnDetailSearchOk('{4}','{2}','{3}',{5},'{6}'{7});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}','{6}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLite(type) ?? type), idValueField, divASustituir, "Signum.aspx/PartialView", reloadOnChangeFunction, settings.DetailDiv, (settings.Url.HasText() ? ",'" + settings.Url + "'" : ""));
+                string popupFindingParameters = "'{0}','{1}','false',function(){{OnDetailSearchOk('{4}','{2}','{3}',{5},'{6}'{7});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}','{6}'".Formato("Signum/PartialFind", Navigator.TypesToURLNames.TryGetC(Reflector.ExtractLite(type) ?? type), idValueField, divASustituir, "Signum/PartialView", reloadOnChangeFunction, settings.DetailDiv, (settings.Url.HasText() ? ",'" + settings.Url + "'" : ""));
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +

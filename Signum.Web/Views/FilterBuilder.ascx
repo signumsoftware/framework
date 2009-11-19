@@ -49,7 +49,7 @@
                    } 
                 %>
                </select> 
-               <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum.aspx/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
+               <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
                <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "Eliminar Filtros", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
            </div>
     <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>

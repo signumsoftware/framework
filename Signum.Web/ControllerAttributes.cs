@@ -129,7 +129,7 @@ namespace Signum.Web
                 string redirectOnSuccess = context.HttpContext.Request.Url.AbsolutePath;
                 //send them off to the login page
                 string redirectUrl = string.Format("?ReturnUrl={0}", redirectOnSuccess);
-                string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth.aspx/Login" + redirectUrl;
+                string loginUrl = context.HttpContext.Request.ApplicationPath + "/Auth/Login" + redirectUrl;
                 context.HttpContext.Response.Redirect(loginUrl, true);
             }
         };

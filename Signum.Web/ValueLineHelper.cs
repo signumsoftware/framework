@@ -126,7 +126,7 @@ namespace Signum.Web
 
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
             {
@@ -155,7 +155,7 @@ namespace Signum.Web
 
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
            
             if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
             {
@@ -184,7 +184,7 @@ namespace Signum.Web
 
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
             settings.ValueHtmlProps.Add("autocomplete", "off");
             if (settings.ValueHtmlProps.ContainsKey("onblur"))
@@ -203,7 +203,7 @@ namespace Signum.Web
 
             string reloadOnChangeFunction = "";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
             if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
             {

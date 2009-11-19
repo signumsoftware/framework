@@ -78,7 +78,7 @@ namespace Signum.Web
             
             string reloadOnChangeFunction = "''";
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum.aspx/ReloadEntity", helper.ParentPrefix());
+                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
             string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}',{4});}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial", reloadOnChangeFunction);
 

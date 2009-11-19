@@ -342,6 +342,18 @@ function ConstructFromExecute(urlController, typeName, id, operationKey, isLite,
     });
 }
 
+function ConstructFromExecutePost(urlController, typeName, id, operationKey, isLite) {
+    NotifyInfo(lang['executingOperation']);
+    if (Validate("Signum/Validate", "my", true, "*")) {
+        $("form").append("<input type='hidden' id='sfRuntimeType' name='sfRuntimeType' value='" + typeName + "'/>")
+            .append("<input type='hidden' id='sfId' name='sfId' value='" + id + "'/>")
+            .append("<input type='hidden' id='isLite' name='isLite' value='" + isLite + "'/>")
+            .append("<input type='hidden' id='sfOperationFullKey' name='sfOperationFullKey' value='" + operationKey + "'/>");
+        document.forms[0].action = urlController;
+        document.forms[0].submit();
+    }
+}
+
 function ConstructFromManyExecute(urlController, typeName, operationKey, prefix, onOk, onCancel) {
     var ids = GetSelectedElements(prefix);
 	if (ids == "") return;
@@ -399,7 +411,7 @@ function QuickFilter(idTD, prefix) {
     }
     $.ajax({
         type: "POST",
-        url: "Signum.aspx/QuickFilter",
+        url: "Signum/QuickFilter",
         data: "sfQueryUrlName=" + $("#" + prefix + "sfQueryUrlName").val() + qp("sfColIndex", parseInt(idTD.substring(idTD.indexOf("_")+1, idTD.length))-1) + params + qp(sfPrefix, prefix) + qp("index", GetNewFilterRowIndex(prefix)),
         async: false,
         dataType: "html",

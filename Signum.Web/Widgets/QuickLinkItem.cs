@@ -45,7 +45,7 @@ namespace Signum.Web
         //    if (OnClick.HasText() || OnServerClickPost.HasText())
         //        return null;
 
-        //    string controllerUrl = "Signum.aspx/PartialFind";
+        //    string controllerUrl = "Signum/PartialFind";
         //    if (OnServerClickAjax.HasText())
         //        controllerUrl = OnServerClickAjax;
 
@@ -61,7 +61,7 @@ namespace Signum.Web
             if (OnClick.HasText() || OnServerClickAjax.HasText())
                 return null;
 
-            string controllerUrl = "Signum.aspx/Find";
+            string controllerUrl = "Signum/Find";
             if (OnServerClickPost.HasText())
                 controllerUrl = OnServerClickPost;
 
