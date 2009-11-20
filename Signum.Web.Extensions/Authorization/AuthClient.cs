@@ -52,7 +52,7 @@ namespace Signum.Web.Authorization
                     Func<IdentifiableEntity, bool> creada = (IdentifiableEntity entity) => !entity.IsNew;
                     settings.Add(UserOperation.SaveNew, new EntityOperationSettings
                     {
-                        OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth/RegisterUserValidate", "Auth.aspx/RegisterUserPost"),
+                        OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth/RegisterUserValidate", "Auth/RegisterUserPost"),
                         IsVisible = (IdentifiableEntity entity) => entity.IsNew,
                     });
                     settings.Add(UserOperation.Save, new EntityOperationSettings 

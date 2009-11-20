@@ -21,6 +21,7 @@ namespace Signum.Web.Operations
     [HandleException, AuthenticationRequired]
     public class OperationController : Controller
     {
+        #region main controllers
         public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
@@ -137,5 +138,6 @@ namespace Signum.Web.Operations
 
             return Navigator.PopupView(this, entity, prefix);
         }
+        #endregion
     }
 }
