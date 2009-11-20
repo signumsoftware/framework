@@ -5,13 +5,21 @@
 	}
 }
 
+function ValidatePartialAndPostServer(urlValidateController, urlPostController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, idQueryParam, typeQueryParam) {
+    var panelPopupKey = prefix + "panelPopup";
+    if (TypedValidatePartial(urlValidateController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, 'panelPopup', idQueryParam, typeQueryParam)) {
+        $('form').append("<input type='hidden' id='sfPrefix' name='sfPrefix' value='" + prefix + "' />")
+                 .attr('action',urlPostController).submit();
+    }
+}
+
 function ValidatePartialAndCallJavascript(urlValidateController, urlJavascriptController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, idQueryParam, typeQueryParam) {
     var panelPopupKey = prefix + "panelPopup";
     if (TypedValidatePartial(urlValidateController, prefix, prefixToIgnore, showInlineError, fixedInlineErrorText, 'panelPopup', idQueryParam, typeQueryParam)) {
         $.ajax({
             type: "POST",
             url: urlJavascriptController,
-            data: $('#' + panelPopupKey + " *").serialize() + "&sfPrefix=" + prefix,
+            data: $('#' + panelPopupKey + " *").serialize() + "&sfPrefix=" + prefix + idQueryParam + typeQueryParam,
             async: false,
             dataType: "html",
             success: function(msg) {

@@ -56,6 +56,10 @@ function empty(myString) {
     return (myString == undefined || myString == "");
 }
 
+function isFalse(value) {
+    return value == false || value == "false" || value == "False";
+}
+
 /*
     s : string to replace
     tr: dictionary of translations

@@ -197,7 +197,7 @@ popup.prototype = {
             staticType.after(sfEntityDiv);
         else
             $("#" + me.options.detailDiv).append(sfEntityDiv);
-        if (me.options.isEmbeded == "False")
+        if (isFalse(me.options.isEmbeded))
             staticType.after("<input type='hidden' id='" + prefix + newIndex + sfId + "' name='" + prefix + newIndex + sfId + "' value='' />\n");
 
         var select = $('#' + prefix);
@@ -259,19 +259,23 @@ popup.prototype = {
 	
 	onPopupOk: function(reloadOnChangeFunction){
 	    log("En onPopupOk");
-		me.endPopupOk(me.options.prefix, reloadOnChangeFunction);
+		var correct = ValidatePartial(me.url, me.options.prefix, "", true, "*");
+		window[me.options.prefix + sfEntityTemp] = "";
+		$('#' + me.options.prefix + sfEntity).hide();
+		toggleButtonsDisplay(me.options.prefix, true);
+		log("Valor de reloadOnChangeFunction " + reloadOnChangeFunction);
+		if (!empty(reloadOnChangeFunction)) {
+			me.setTicksVal();
+			reloadOnChangeFunction();
+		}
 	},
 	
 	onListPopupOk: function(btnOkId, reloadOnChangeFunction){
 		var itemPrefix = btnOkId.substr(0, btnOkId.indexOf(sfBtnOk));
-		me.endPopupOk(itemPrefix, reloadOnChangeFunction);
-	},
-	
-	endPopupOk: function(itemPrefix, reloadOnChangeFunction){
 		var correct = ValidatePartial(me.url, itemPrefix, "", true, "*");
 		window[itemPrefix + sfEntityTemp] = "";
 		$('#' + itemPrefix + sfEntity).hide();
-		toggleButtonsDisplay(me.options.prefix, true);
+		toggleButtonsDisplayList(me.options.prefix, true);
 		log("Valor de reloadOnChangeFunction " + reloadOnChangeFunction);
 		if (!empty(reloadOnChangeFunction)) {
 			me.setTicksVal();

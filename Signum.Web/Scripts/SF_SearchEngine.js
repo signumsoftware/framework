@@ -123,24 +123,26 @@ function OnDetailSearchOk(urlController, prefix, divASustituir, reloadOnChangeFu
 }
 
 function OnListSearchOk(prefix, divASustituir) {
-	$("#" + prefix + "tdRowSelection input:checked").each(
-	function () {
-		var entitySelected = this.value;
-		var __index = entitySelected.indexOf("__");
-		var __index2 = entitySelected.indexOf("__", __index + 2);
-		var id = entitySelected.substring(0, __index);
-		var runtimeType = entitySelected.substring(__index + 2, __index2);
-		var toStr = entitySelected.substring(__index2 + 2, entitySelected.length);
+    $("#" + prefix + "tdRowSelection input:checked").each(
+	function() {
+	    var entitySelected = this.value;
+	    var __index = entitySelected.indexOf("__");
+	    var __index2 = entitySelected.indexOf("__", __index + 2);
+	    var id = entitySelected.substring(0, __index);
+	    var runtimeType = entitySelected.substring(__index + 2, __index2);
+	    var toStr = entitySelected.substring(__index2 + 2, entitySelected.length);
 
-		NewListOption(prefix, runtimeType, "False");
+	    //NewListOption(prefix, runtimeType, "False");
+	    new popup(null,{isEmbeded: false}).newListOption(prefix, runtimeType);
 
-		var selected = $('#' + prefix + " > option:selected");
-		var nameSelected = selected[0].id;
-		var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
-		$('#' + prefixSelected + sfId).val(id);
-		$('#' + prefixSelected + sfToStr).html(toStr);
+	    var selected = $('#' + prefix + " > option:selected");
+	    var nameSelected = selected[0].id;
+	    var prefixSelected = nameSelected.substr(0, nameSelected.indexOf(sfToStr));
+	    $('#' + prefixSelected + sfId).val(id);
+	    $('#' + prefixSelected + sfToStr).html(toStr);
 	});
 	$('#' + divASustituir).hide().html("");
+	toggleButtonsDisplayList(prefix, true);
 }
 
 function GetSelectedElements(prefix) {
@@ -213,14 +215,14 @@ function QuickLinkClickServerAjax(urlController,findOptionsRaw,prefix) {
 function OperationExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel, multiStep) {
     NotifyInfo(lang['executingOperation']);
 	var formChildren = "";
-	if (isLite == false || isLite == "false" || isLite == "False") {
+	if (isFalse(isLite)) {
 		if (prefix != "") //PopupWindow
 		    formChildren = $('#' + prefix + "panelPopup *, #" + sfReactive + ", #" + sfTabId).serialize();
 		else //NormalWindow
 		    formChildren = $("form").serialize();
 	}
 	if (formChildren.length > 0) formChildren = "&" + formChildren;
-	var newPrefix = (multiStep == false || multiStep == "false" || multiStep == "False") ? prefix : (prefix + "New");
+	var newPrefix = (isFalse(multiStep)) ? prefix : (prefix + "New");
 	$.ajax({
 		type: "POST",
 		url: urlController,
@@ -234,7 +236,7 @@ function OperationExecute(urlController, typeName, id, operationKey, isLite, pre
 				ShowErrorMessages(prefix, modelState, true, "*");
 		    }
 		    else{
-		        if (multiStep == false || multiStep == "false" || multiStep == "False") {
+		        if (isFalse(multiStep)) {
 		            if (prefix != "") { //PopupWindow
 		                $('#' + prefix + "externalPopupDiv").html(msg);
 		            }
@@ -286,7 +288,7 @@ function DeleteExecute(urlController, typeName, id, operationKey, isLite, prefix
         return;
     NotifyInfo(lang['executingOperation']);
     var formChildren = "";
-    if (isLite == false || isLite == "false" || isLite == "False") {
+    if (isFalse(isLite)) {
         if (prefix != "") //PopupWindow
             formChildren = $('#' + prefix + "panelPopup *, #" + sfReactive + ", #" + sfTabId).serialize();
         else //NormalWindow
@@ -308,7 +310,7 @@ function DeleteExecute(urlController, typeName, id, operationKey, isLite, prefix
 function ConstructFromExecute(urlController, typeName, id, operationKey, isLite, prefix, onOk, onCancel, multiStep) {
     NotifyInfo(lang['executingOperation']);
     var formChildren = "";
-	if (isLite == false || isLite == "false" || isLite == "False") {
+	if (isFalse(isLite)) {
 		if (prefix != "") //PopupWindow
 		    formChildren = $('#' + prefix + "panelPopup *, #" + sfReactive + ", #" + sfTabId).serialize();
 		else //NormalWindow
