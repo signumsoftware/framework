@@ -66,7 +66,7 @@ namespace Signum.Windows
             return Find(new FindOptions(queryName)
             {
                 OnLoadMode = OnLoadMode.Search,
-                Buttons = SearchButtons.Close ,
+                Buttons = SearchButtons.Close,
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption { 
@@ -285,7 +285,7 @@ namespace Signum.Windows
             EntitySettings es = (findOptions.QueryName as Type).TryCC(t => Settings.TryGetC(t));
             if (TaskViewWindow != null)
                 TaskViewWindow(sw, WindowsType.Find, findOptions.QueryName);
-            
+
             sw.Closed += findOptions.Closed;
 
             if (findOptions.Modal)
@@ -321,30 +321,27 @@ namespace Signum.Windows
             EntitySettings es = Settings.GetOrThrow(entity.GetType(), Resources.NoEntitySettingsForType0);
 
             Window win = null;
-            if (es.ViewWindow != null)
+            if (viewOptions.ViewWindow != null)
+            {
+                win = viewOptions.ViewWindow;
+            }
+            else if (viewOptions.View != null)
+            {
+                win = CreateNormalWindow(entity, viewOptions, viewOptions.View);
+            }
+            else if (es.ViewWindow != null)
             {
                 win = es.ViewWindow();
             }
+            else if (es.View != null)
+            {
+                win = CreateNormalWindow(entity, viewOptions, es.View()); ;
+            }
             else
             {
-                if (es.View == null)
-                    throw new ApplicationException(Resources.NoNavigationDestinyForType.Formato(entity.GetType()));
-
-                Control ctrl = es.View();
-                if (viewOptions.TypeContext != null)
-                    Common.SetTypeContext(ctrl, viewOptions.TypeContext);
-
-                NormalWindow nw = new NormalWindow()
-                {
-                    MainControl = ctrl
-                };
-
-                nw.ButtonBar.ViewButtons = viewOptions.Buttons; 
-                nw.ButtonBar.SaveVisible = viewOptions.Buttons == ViewButtons.Save && ShowSave(entity.GetType()) && !viewOptions.ReadOnly;
-                nw.ButtonBar.OkVisible = viewOptions.Buttons == ViewButtons.Ok;
-
-                win = nw;
+                throw new ApplicationException(Resources.NoNavigationDestinyForType.Formato(entity.GetType()));
             }
+
 
             if (viewOptions.ReadOnly)
                 Common.SetIsReadOnly(win, true);
@@ -378,6 +375,26 @@ namespace Signum.Windows
             }
 
             return null;
+        }
+
+        private NormalWindow CreateNormalWindow(object entity, ViewOptions viewOptions, Control ctrl)
+        {
+
+            if (viewOptions.TypeContext != null)
+                Common.SetTypeContext(ctrl, viewOptions.TypeContext);
+
+            return new NormalWindow()
+            {
+                MainControl = ctrl,
+                ButtonBar =
+                {
+                    ViewButtons = viewOptions.Buttons,
+                    SaveVisible = viewOptions.Buttons == ViewButtons.Save && ShowSave(entity.GetType()) && !viewOptions.ReadOnly,
+                    OkVisible = viewOptions.Buttons == ViewButtons.Ok
+                }
+            };
+
+
         }
 
         internal protected virtual bool IsCreable(Type type, bool admin)

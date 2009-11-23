@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Markup;
+using System.Windows.Controls;
+using System.Windows;
 
 namespace Signum.Windows
 {
     public class ViewOptions : MarkupExtension
     {
+
+       
+
         ViewButtons buttons = ViewButtons.Ok;
         public ViewButtons Buttons
         {
@@ -15,8 +20,6 @@ namespace Signum.Windows
             set { buttons = value; }
         }
 
-        public bool ReadOnly { get; set; }
-        
         bool? clone;
         public bool Clone
         {
@@ -31,7 +34,12 @@ namespace Signum.Windows
 
         public EventHandler Closed { get; set; }
 
+
+        public bool ReadOnly { get; set; }
         public TypeContext TypeContext { get; set; }
+
+        public Control View { get; set; }
+        public Window ViewWindow { get; set; }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
