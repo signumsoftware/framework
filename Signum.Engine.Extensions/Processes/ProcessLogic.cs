@@ -404,11 +404,13 @@ namespace Signum.Engine.Processes
 
         public static void ExecuteTest(this ProcessExecutionDN pe)
         {
+            pe.QueuedDate = DateTime.Now;
             var ep = new ExecutingProcess
             {
                 Algorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(pe.Process.Key)],
                 Data = pe.ProcessData,
                 Execution = pe,
+                
             };
 
             ep.Execute();
