@@ -340,13 +340,13 @@ namespace Signum.Windows
                 };
 
                 nw.ButtonBar.ViewButtons = viewOptions.Buttons; 
-                nw.ButtonBar.SaveVisible = viewOptions.Buttons == ViewButtons.Save && ShowSave(entity.GetType(), viewOptions.Admin);
+                nw.ButtonBar.SaveVisible = viewOptions.Buttons == ViewButtons.Save && ShowSave(entity.GetType()) && !viewOptions.ReadOnly;
                 nw.ButtonBar.OkVisible = viewOptions.Buttons == ViewButtons.Ok;
 
                 win = nw;
             }
 
-            if (IsReadOnly(entity.GetType(), viewOptions.Admin))
+            if (viewOptions.ReadOnly)
                 Common.SetIsReadOnly(win, true);
 
             if (TaskViewWindow != null)
@@ -419,11 +419,11 @@ namespace Signum.Windows
             return es.IsViewable(admin);
         }
 
-        internal protected virtual bool ShowSave(Type type, bool admin)
+        internal protected virtual bool ShowSave(Type type)
         {
             EntitySettings es = Settings.TryGetC(type);
-            if (es != null && es.ShowSave != null)
-                return es.ShowSave(admin);
+            if (es != null)
+                return es.ShowSave;
 
             return true;
         }

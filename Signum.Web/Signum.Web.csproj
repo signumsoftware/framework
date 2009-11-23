@@ -154,7 +154,6 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\PopupControl.ascx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NormalPage.aspx">
       <SubType>ASPXCodeBehind</SubType>

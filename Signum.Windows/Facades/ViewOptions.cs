@@ -15,6 +15,8 @@ namespace Signum.Windows
             set { buttons = value; }
         }
 
+        public bool ReadOnly { get; set; }
+        
         bool? clone;
         public bool Clone
         {
@@ -29,10 +31,7 @@ namespace Signum.Windows
 
         public EventHandler Closed { get; set; }
 
-        public bool Admin { get; set; }
-
         public TypeContext TypeContext { get; set; }
-
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {

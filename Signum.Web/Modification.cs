@@ -141,7 +141,7 @@ namespace Signum.Web
             return (Modifiable)currentEntity;
         }
 
-        protected internal static TypeContext GetTCforEmbeddedEntity(NameValueCollection form, Modifiable entity, ref string prefix)
+        public static TypeContext GetTCforEmbeddedEntity(NameValueCollection form, Modifiable entity, ref string prefix)
         {
             if (!prefix.HasText())
                 return null;

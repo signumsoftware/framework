@@ -772,6 +772,47 @@ function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, remo
     });
 }
 
+function NewRepeaterFile(urlController, prefix, fileType, removeLinkText, maxElements) {
+    $('#' + prefix + sfTicks).val(new Date().getTime());
+    if (!empty(maxElements)) {
+        var elements = $("#" + prefix + sfEntitiesContainer + " > div[name$=" + sfRepeaterElement + "]").length;
+        if (elements >= parseInt(maxElements))
+            return;
+    }
+    var lastElement = $("#" + prefix + sfEntitiesContainer + " > div[name$=" + sfRepeaterElement + "]:last");
+    var lastIndex = -1;
+    if (lastElement.length > 0) {
+        var nameSelected = lastElement[0].id;
+        lastIndex = nameSelected.substring(prefix.length + 1, nameSelected.indexOf(sfRepeaterElement));
+    }
+    var newIndex = "_" + (parseInt(lastIndex) + 1);
+    var runtimeType = "FilePathDN";
+    $.ajax({
+        type: "POST",
+        url: urlController,
+        data: { prefix: prefix, fileType: fileType },
+        async: false,
+        dataType: "html",
+        success:
+                   function(msg) {
+                       var newPrefix = prefix + newIndex;
+                       $("#" + prefix + sfEntitiesContainer).append("\n" +
+                        "<div id='" + newPrefix + sfRepeaterElement + "' name='" + newPrefix + sfRepeaterElement + "' class='repeaterElement'>\n" +
+                        "<a id='" + newPrefix + "_btnRemove' title='" + removeLinkText + "' href=\"javascript:RemoveRepeaterEntity('" + newPrefix + sfRepeaterElement + "');\" class='lineButton remove'>" + removeLinkText + "</a>\n" +
+                        "<input type='hidden' id='" + newPrefix + sfRuntimeType + "' name='" + newPrefix + sfRuntimeType + "' value='" + runtimeType + "' />\n" +
+                        "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
+                       //"<input type=\"hidden\" id=\"" + newPrefix + sfIndex + "\" name=\"" + newPrefix + sfIndex + "\" value=\"" + (parseInt(lastIndex)+1) + "\" />\n" +
+                        "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n" +
+                        "<script type=\"text/javascript\">var " + newPrefix + sfEntityTemp + " = '';</script>\n" +
+                        "<div id='" + newPrefix + sfEntity + "' name='" + newPrefix + sfEntity + "'>\n" +
+                        msg + "\n" +
+                        "</div>\n" + //sfEntity
+                        "</div>\n" //sfRepeaterElement                        
+                        );
+                   }
+    });
+}
+
 function RemoveRepeaterEntity(idRepeaterElement, prefix, reloadOnChangeFunction) {
     $("#" + idRepeaterElement).remove();
     
