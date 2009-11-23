@@ -320,6 +320,8 @@ namespace Signum.Windows
 
             EntitySettings es = Settings.GetOrThrow(entity.GetType(), Resources.NoEntitySettingsForType0);
 
+            bool isReadOnly = viewOptions.ReadOnly ?? es.IsReadOnly(false); 
+
             Window win = null;
             if (viewOptions.ViewWindow != null)
             {
@@ -327,7 +329,7 @@ namespace Signum.Windows
             }
             else if (viewOptions.View != null)
             {
-                win = CreateNormalWindow(entity, viewOptions, viewOptions.View);
+                win = CreateNormalWindow(viewOptions.View, entity, viewOptions.TypeContext, isReadOnly, viewOptions.Buttons);
             }
             else if (es.ViewWindow != null)
             {
@@ -335,15 +337,14 @@ namespace Signum.Windows
             }
             else if (es.View != null)
             {
-                win = CreateNormalWindow(entity, viewOptions, es.View()); ;
+                win = CreateNormalWindow(es.View(), entity, viewOptions.TypeContext, isReadOnly, viewOptions.Buttons);
             }
             else
             {
                 throw new ApplicationException(Resources.NoNavigationDestinyForType.Formato(entity.GetType()));
             }
 
-
-            if (viewOptions.ReadOnly)
+            if (isReadOnly)
                 Common.SetIsReadOnly(win, true);
 
             if (TaskViewWindow != null)
@@ -377,24 +378,22 @@ namespace Signum.Windows
             return null;
         }
 
-        private NormalWindow CreateNormalWindow(object entity, ViewOptions viewOptions, Control ctrl)
+        private NormalWindow CreateNormalWindow(Control ctrl, object entity, TypeContext typeContext, bool isReadOnly, ViewButtons buttons)
         {
 
-            if (viewOptions.TypeContext != null)
-                Common.SetTypeContext(ctrl, viewOptions.TypeContext);
+            if (typeContext != null)
+                Common.SetTypeContext(ctrl, typeContext);
 
             return new NormalWindow()
             {
                 MainControl = ctrl,
                 ButtonBar =
                 {
-                    ViewButtons = viewOptions.Buttons,
-                    SaveVisible = viewOptions.Buttons == ViewButtons.Save && ShowSave(entity.GetType()) && !viewOptions.ReadOnly,
-                    OkVisible = viewOptions.Buttons == ViewButtons.Ok
+                    ViewButtons = buttons,
+                    SaveVisible = buttons == ViewButtons.Save && ShowSave(entity.GetType()) && !isReadOnly,
+                    OkVisible = buttons == ViewButtons.Ok
                 }
             };
-
-
         }
 
         internal protected virtual bool IsCreable(Type type, bool admin)

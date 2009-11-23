@@ -10,9 +10,6 @@ namespace Signum.Windows
 {
     public class ViewOptions : MarkupExtension
     {
-
-       
-
         ViewButtons buttons = ViewButtons.Ok;
         public ViewButtons Buttons
         {
@@ -34,8 +31,8 @@ namespace Signum.Windows
 
         public EventHandler Closed { get; set; }
 
+        public bool? ReadOnly { get; set; }
 
-        public bool ReadOnly { get; set; }
         public TypeContext TypeContext { get; set; }
 
         public Control View { get; set; }

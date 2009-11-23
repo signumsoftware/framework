@@ -416,7 +416,7 @@ namespace Signum.Windows
                 return;
 
             if (this.Viewing == null)
-                Navigator.View(entity, new ViewOptions { Buttons = ViewButtons.Save, ReadOnly = Navigator.IsReadOnly(entity.GetType(), true) });
+                Navigator.View(entity, new ViewOptions { Buttons = ViewButtons.Save, ReadOnly = Navigator.IsReadOnly(EntityType, true) });
             else
                 this.Viewing(entity);
         }
