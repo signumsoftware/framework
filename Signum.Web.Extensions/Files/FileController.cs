@@ -19,12 +19,49 @@ using System.IO;
 using Signum.Entities.Files;
 using Signum.Entities.Basics;
 using System.Text;
+using System.Net;
+using Signum.Engine.Files;
+using System.Reflection;
 
 namespace Signum.Web.Files
 {
     [HandleException]
     public class FileController : Controller
     {
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult PartialView(
+            string prefix,
+            string fileType,
+            int? sfId)
+        {
+            Type type = typeof(FilePathDN);
+            string sfUrl = Navigator.Manager.EntitySettings[type].PartialViewName;
+            FilePathDN entity = null;
+            if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
+            {
+                if (sfId.HasValue)
+                    entity = Database.Retrieve<FilePathDN>(sfId.Value);
+                else
+                {
+                    entity = new FilePathDN(EnumLogic<FileTypeDN>.ToEnum(fileType));
+                }
+            }
+            ViewData["IdValueField"] = prefix;
+            ViewData["FileType"] = fileType;
+
+            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
+            {
+                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
+
+                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
+                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[] { } });
+
+                return Navigator.PartialView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
+            }
+            return Navigator.PartialView(this, entity, prefix, sfUrl);
+        }
+
         public ActionResult Upload()
         {
             FilePathDN fp = null;
@@ -38,11 +75,11 @@ namespace Signum.Web.Files
                 int id;
                 if (int.TryParse(idStr, out id))
                     continue; //Only new files will come with content
-                
+
                 HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
                 if (hpf.ContentLength == 0)
-                    continue; 
-                
+                    continue;
+
                 string fileType = (string)Request.Form[TypeContext.Compose(file, FileLineKeys.FileType)];
                 if (!fileType.HasText())
                     throw new ApplicationException(Resources.CouldntCreateFilePathWithUnknownFileTypeForField0.Formato(file));
@@ -93,7 +130,12 @@ namespace Signum.Web.Files
             if (fp == null)
                 throw new ArgumentException(Resources.ArgumentFilePathIDWasNotPassedToTheController);
 
-            return File(fp.BinaryFile, GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
+            byte[] binaryFile;
+
+            binaryFile = fp.WebPath != null ? new WebClient().DownloadData(fp.WebPath)
+                : FilePathLogic.GetByteArray(fp);
+
+            return File(binaryFile, GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
         }
 
         private string GetMimeType(string extension)

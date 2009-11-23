@@ -178,7 +178,7 @@
     <value>Argument {filePathID} was not passed to the controller</value>
   </data>
   <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>FileType property of FileLine settings must be specified for FileLine {{0}}</value>
+    <value>FileType property of FileLine settings must be specified for FileLine {0}</value>
   </data>
   <data name="Source" xml:space="preserve">
     <value>Source</value>

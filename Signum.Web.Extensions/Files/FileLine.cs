@@ -82,17 +82,15 @@ namespace Signum.Web.Files
 
     public static class FileLineHelper
     {
-        internal static string InternalFileLine<S>(this HtmlHelper helper, TypeContext<S> typeContext, FileLine settings)
-            where S : FilePathDN
+        internal static string InternalFileLine<T>(this HtmlHelper helper, string idValueField, T value, FileLine settings)
+            where T : FilePathDN
         {
             if (!settings.Visible)
                 return null;
 
             if (settings.FileType == null)
-                throw new ArgumentException(Resources.FileTypePropertyOfFileLineSettingsMustBeSpecified.Formato(typeContext.Name));
+                throw new ArgumentException(Resources.FileTypePropertyOfFileLineSettingsMustBeSpecified.Formato(idValueField));
 
-            string idValueField = helper.GlobalName(typeContext.Name);
-            FilePathDN value = typeContext.Value;
             Type type = typeof(FilePathDN);
 
             StringBuilder sb = new StringBuilder();
@@ -109,13 +107,13 @@ namespace Signum.Web.Files
                 cleanRuntimeType = value.GetType();
                 if (typeof(Lite).IsAssignableFrom(value.GetType()))
                     throw new ApplicationException("FileLine doesn't support Lazies");
-                    //cleanRuntimeType = (value as Lite).RuntimeType;
+                //cleanRuntimeType = (value as Lite).RuntimeType;
                 runtimeType = cleanRuntimeType.Name;
             }
 
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, FileLineKeys.FileType),
-                EnumDN.UniqueKey((value != null) ? 
-                    value.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(value.FileType) : 
+                EnumDN.UniqueKey((value != null) ?
+                    value.FileTypeEnum ?? EnumLogic<FileTypeDN>.ToEnum(value.FileType) :
                     settings.FileType)));
 
             sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.RuntimeType), runtimeType));
@@ -208,7 +206,7 @@ namespace Signum.Web.Files
             sb.AppendLine("<img src='Images/loading.gif' id='{0}loading' alt='loading' style='display:none'/>".Formato(idValueField));
             sb.AppendLine("<iframe id='frame{0}' name='frame{0}' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>".Formato(idValueField));
             sb.AppendLine("</div>");
-            
+
             if (StyleContext.Current.ShowValidationMessage)
             {
                 sb.Append("&nbsp;");
@@ -219,6 +217,12 @@ namespace Signum.Web.Files
                 sb.AppendLine("<div class='clearall'></div>");
 
             return sb.ToString();
+        }
+
+
+        public static string FileLine<T>(this HtmlHelper helper, T value, string idValueField, string fileType) where T : FilePathDN
+        {
+            return InternalFileLine(helper, idValueField, value, new FileLine() { FileType = EnumLogic<FileTypeDN>.ToEnum(fileType) });
         }
 
         public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
@@ -262,9 +266,9 @@ namespace Signum.Web.Files
         {
             if (fl != null)
                 using (fl)
-                    return helper.InternalFileLine(context, fl);
+                    return helper.InternalFileLine(context.Name, context.Value, fl);
             else
-                return helper.InternalFileLine(context, fl);
+                return helper.InternalFileLine(context.Name, context.Value, fl);
         }
         
     }

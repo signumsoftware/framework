@@ -178,7 +178,7 @@
     <value>No se ha pasado al controlador el parámetro {filePathID}</value>
   </data>
   <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>La propiedad {FileType} del FileLine settings debe ser especificada para el FileLine {{0}}</value>
+    <value>La propiedad FileType del FileLine settings debe ser especificada para el FileLine {0}</value>
   </data>
   <data name="Source" xml:space="preserve">
     <value>Fuente</value>
