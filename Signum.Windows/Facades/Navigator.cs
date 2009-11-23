@@ -320,7 +320,7 @@ namespace Signum.Windows
 
             EntitySettings es = Settings.GetOrThrow(entity.GetType(), Resources.NoEntitySettingsForType0);
 
-            bool isReadOnly = viewOptions.ReadOnly ?? es.IsReadOnly(false); 
+            bool isReadOnly = viewOptions.ReadOnly ?? IsReadOnly(entity.GetType(), false); 
 
             Window win = null;
             if (viewOptions.ViewWindow != null)
