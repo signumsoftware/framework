@@ -847,8 +847,10 @@ namespace Signum.Engine.Linq
                         });
                     }
 
+                    
+
                     if (fi == null)
-                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member, fie.Type));
+                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
 
                     Expression result = fie.GetOrCreateFieldBinding(fie.Token, fi, this);
                     return result;
@@ -859,7 +861,7 @@ namespace Signum.Engine.Linq
                     FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
 
                     if (fi == null)
-                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member, efie.Type));
+                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, efie.Type.TypeName()));
 
                     Expression result = efie.GetBinding(fi);
                     return result;

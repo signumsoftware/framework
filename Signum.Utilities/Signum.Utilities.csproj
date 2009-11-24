@@ -87,7 +87,7 @@
     <Compile Include="DataStructures\Tuple.cs" />
     <Compile Include="DataStructures\PriorityQueue.cs" />
     <Compile Include="DataStructures\RecentsDictionary.cs" />
-    <Compile Include="ExpressionExpander.cs" />
+    <Compile Include="ExpressionExtensions.cs" />
     <Compile Include="ExpressionTrees\ExpressionEvaluator.cs" />
     <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
     <Compile Include="ExpressionTrees\ExpressionNominator.cs" />

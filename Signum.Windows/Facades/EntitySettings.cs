@@ -37,8 +37,10 @@ namespace Signum.Windows
             switch (entityType)
             {
                 case EntityType.Default:
+                    ShowSave = true;
                     break;
                 case EntityType.Admin:
+                    ShowSave = true;
                     IsReadOnly = admin => !admin;
                     IsCreable = admin => admin;
                     IsViewable = admin => admin;
@@ -57,11 +59,12 @@ namespace Signum.Windows
                     ShowSave = false; 
                     break;
                 case EntityType.ServerOnly:
-                    IsReadOnly = admin => true;
                     ShowSave = false; 
+                    IsReadOnly = admin => true;
                     IsCreable = admin => false;
                     break;
                 case EntityType.Content:
+                    ShowSave = false; 
                     IsCreable = admin => false;
                     IsViewable = admin => false;
                     break;

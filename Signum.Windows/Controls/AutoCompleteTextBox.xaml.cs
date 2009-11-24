@@ -112,6 +112,11 @@ namespace Signum.Windows
             {
                 if (lstBox.SelectedItem != null)
                     Commit(CloseReason.Tab);
+                else if (lstBox.Items.Count == 1)
+                {
+                    MoveDown();
+                    Commit(CloseReason.Tab);
+                }
                 else
                     Close(CloseReason.TabExit);
 
@@ -123,6 +128,11 @@ namespace Signum.Windows
             {
                 if(lstBox.SelectedItem != null)
                     Commit(CloseReason.Enter);
+                else if (lstBox.Items.Count == 1)
+                {
+                    MoveDown();
+                    Commit(CloseReason.Enter);
+                }
                 
                 e.Handled = true;
             }
@@ -148,7 +158,11 @@ namespace Signum.Windows
             if (key == Key.Back || key == Key.Delete)
                 return true;
             else
+            
             {
+                if (Key.NumPad0 <= key && key <= Key.NumPad9)
+                    key += ((int)Key.D0 - (int)Key.NumPad0);
+
                 KeyConverter conv = new KeyConverter();
                 string keyString = (string)conv.ConvertTo(key, typeof(string));
 

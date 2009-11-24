@@ -76,6 +76,11 @@ namespace Signum.Entities
 
         public override string ToString()
         {
+            return BaseToString();
+        }
+
+        internal string BaseToString()
+        {
             return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : Resources.New);
         }
 

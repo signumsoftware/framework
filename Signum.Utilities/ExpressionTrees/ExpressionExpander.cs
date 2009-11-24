@@ -81,12 +81,12 @@ namespace Signum.Utilities.ExpressionTrees
                 return Visit(exp);
 			}
 
-			if (m.Method.DeclaringType == typeof(ExpressionExtensions))
-			{
-				LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
+            if (m.Method.DeclaringType == typeof(ExpressionExtensions) && m.Method.Name == "Invoke")
+            {
+                LambdaExpression lambda = (LambdaExpression)(ExpressionEvaluator.Eval(m.Arguments[0]));
 
-                return Visit(Expression.Invoke(lambda, m.Arguments.Skip(1).Select(a=>Visit(a)).ToArray()));
-			}
+                return Visit(Expression.Invoke(lambda, m.Arguments.Skip(1).Select(a => Visit(a)).ToArray()));
+            }
 
             LambdaExpression lambdaExpression = ExtractAndClean(m.Method);
             if(lambdaExpression != null)
