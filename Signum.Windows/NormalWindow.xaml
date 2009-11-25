@@ -15,7 +15,7 @@
         <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" MainControl="{Binding Path=MainControl, ElementName=Window}" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />
         <m:ErrorSummary ValidationTarget="{Binding Path=MainControl, ElementName=Window}" DockPanel.Dock="Bottom"/>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Focusable="False">
-            <ContentControl Content="{Binding Path=MainControl, ElementName=Window}" 
+            <ContentControl Content="{Binding Path=MainControl, ElementName=Window}" Focusable="False"
                         VerticalContentAlignment="Stretch" x:Name="contentControl" 
                         HorizontalContentAlignment="Stretch" MinWidth="40" MinHeight="40" Margin="5,5,5,5"/>
         </ScrollViewer>

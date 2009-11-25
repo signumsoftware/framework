@@ -37,7 +37,7 @@ namespace Signum.Utilities
             if (value is Delegate)
                 return ((Delegate)value).Method.Name.SpacePascal(true);
             if (value is Enum)
-                return EnumExtensions.NiceToString((Enum)value);
+                return ((Enum)value).NiceToString();
             if (value == null)
                 return "[No Name]"; 
             return value.ToString();

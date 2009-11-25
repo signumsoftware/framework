@@ -52,8 +52,10 @@
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
+    <Compile Include="DescriptionAttributes.cs" />
     <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
+    <Compile Include="Pluralizer.cs" />
     <Compile Include="QueryableExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="CSV.cs" />
@@ -98,7 +100,6 @@
     <Compile Include="ExpressionTrees\Query.cs" />
     <Compile Include="ExpressionTrees\QueryProvider.cs" />
     <Compile Include="JsonExtensions.cs" />
-    <Compile Include="LocDescriptionAttribute.cs" />
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="Reflection\MemberEntryFactory.cs" />
     <Compile Include="Serialization.cs" />

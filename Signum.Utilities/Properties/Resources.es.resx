@@ -207,9 +207,6 @@
   <data name="String0IsTooShort" xml:space="preserve">
     <value>La cadena '{0}' es demasiado corta</value>
   </data>
-  <data name="IsNotAnEnum" xml:space="preserve">
-    <value>{0} no es un enum</value>
-  </data>
   <data name="NoElementExistWithKey0" xml:space="preserve">
     <value>No existe ningún elemento con clave: {0}</value>
   </data>
@@ -276,5 +273,8 @@
   <data name="Error0Lacking1" xml:space="preserve">
     <value>Error {0}:
  Faltan: {1}</value>
+  </data>
+  <data name="IsNotAnEnum" xml:space="preserve">
+    <value>{0} no es un Enum</value>
   </data>
 </root>

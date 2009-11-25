@@ -193,19 +193,6 @@ namespace Signum.Entities.Reflection
             return name.FirstUpper();
         }
 
-
-        public static string NiceName(this Type type)
-        {
-            return ReflectionTools.GetDescription(type) ??
-                type.Name.Map(n => n.EndsWith("DN") ? n.RemoveRight(2) : n).SpacePascal();
-        }
-
-        public static string NicePluralName(this Type type)
-        {
-            return Pluralizer.GetPluralDescription(type) ??
-                   Pluralizer.Pluralize(type.NiceName());
-        }
-
         public static bool IsLowPopulation(Type type)
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
@@ -230,11 +217,6 @@ namespace Signum.Entities.Reflection
                     .Where(p => !Attribute.IsDefined(p.MemberInfo, typeof(HiddenPropertyAttribute)))
                     .ToDictionary(p => p.Name, p => new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter)));
             }
-        }
-
-        public static string NiceName(this PropertyInfo pi)
-        {
-            return ReflectionTools.GetDescription(pi) ?? pi.Name.NiceName();
         }
 
         public static Func<IFormattable, string> GetPropertyFormatter(string format, string unitName)

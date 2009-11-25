@@ -31,11 +31,6 @@ namespace Signum.Utilities
             return GetValues<T>().Select(x => x.ToString()).ToList();
         }
 
-        public static string NiceToString(this Enum a)
-        {
-            return ReflectionTools.GetDescription(EnumDescriptionCache.Get(a)) ?? a.ToString().NiceName();
-        }
-
         public static bool IsDefined<T>(T value) where T : struct
         {
             return Enum.IsDefined(typeof(T), value);
@@ -55,30 +50,6 @@ namespace Signum.Utilities
             while ((result & value) == 0 && result != 0)
                 result >>= 1;
             return result;
-        }
-    }
-
-    internal static class EnumDescriptionCache
-    {
-        static Dictionary<Type, Dictionary<Enum, FieldInfo>> dictionary = new Dictionary<Type, Dictionary<Enum, FieldInfo>>();
-
-        public static FieldInfo Get(Enum value)
-        {
-            if (value == null)
-                throw new ArgumentNullException("value");
-
-            return Create(value.GetType())[value];
-        }
-
-        static Dictionary<Enum, FieldInfo> Create(Type type)
-        {
-            if (!type.IsEnum)
-                throw new ApplicationException(Resources.IsNotAnEnum.Formato(type));
-
-            lock (dictionary)
-                return dictionary.GetOrCreate(type, () => type.GetFields().Skip(1).ToDictionary(
-                    fi => (Enum)fi.GetValue(null),
-                    fi => fi));
         }
     }
 }

@@ -26,7 +26,7 @@ namespace Signum.Windows
     public partial class EntityDetail : EntityBase
     {
         public static readonly DependencyProperty OrientationProperty =
-          DependencyProperty.Register("Orientation", typeof(Orientation), typeof(EntityDetail), new UIPropertyMetadata(Orientation.Vertical));
+            DependencyProperty.Register("Orientation", typeof(Orientation), typeof(EntityDetail), new UIPropertyMetadata(Orientation.Vertical));
         public Orientation Orientation
         {
             get { return (Orientation)GetValue(OrientationProperty); }
@@ -34,13 +34,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty EntityControlProperty =
-         DependencyProperty.Register("EntityControl", typeof(object), typeof(EntityDetail), new UIPropertyMetadata((d, e) => ((EntityDetail)d).OnEntityControlChanged(e)));
-
-        private void OnEntityControlChanged(DependencyPropertyChangedEventArgs e)
-        {
-            //base.RemoveLogicalChild(e.OldValue);
-            //base.AddLogicalChild(e.NewValue);
-        }
+            DependencyProperty.Register("EntityControl", typeof(object), typeof(EntityDetail));
 
         public object EntityControl
         {
@@ -51,7 +45,6 @@ namespace Signum.Windows
         static EntityDetail()
         {
             ViewProperty.OverrideMetadata(typeof(EntityDetail), new FrameworkPropertyMetadata(false));
-            FindProperty.OverrideMetadata(typeof(EntityDetail), new FrameworkPropertyMetadata(false));
         }
 
         protected override void UpdateVisibility()
@@ -67,20 +60,16 @@ namespace Signum.Windows
             InitializeComponent();
         }
 
-        protected override void OnEntityChanged(object oldValue, object newValue)
+        public override void OnLoad(object sender, RoutedEventArgs e)
         {
-            base.OnEntityChanged(oldValue, newValue);
+            base.OnLoad(sender, e);
 
-            Lite lite = newValue as Lite;
-            if (lite != null)
-                contentPresenter.DataContext = Server.Retrieve(lite);
-            else
-                contentPresenter.DataContext = newValue;
-        }
-
-        private void contentPresenter_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-
+            contentPresenter.SetBinding(ContentControl.DataContextProperty, new Binding
+            {
+                Path = new PropertyPath(EntityProperty),
+                Source = this,
+                Converter = CleanLite ? Converters.Retrieve : null
+            });
         }
     }
 }

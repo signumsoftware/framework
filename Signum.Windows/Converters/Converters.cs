@@ -26,13 +26,16 @@ namespace Signum.Windows
             ConverterFactory.New((object v) => v, (object v) => v);
 
         public static readonly IValueConverter ToLite =
-           ConverterFactory.New((IIdentifiable ei) => ei.TryCC(e => Lite.Create(e.GetType(), (IdentifiableEntity)e)));
+           ConverterFactory.New((IIdentifiable ei) => ei == null? null : Lite.Create(ei.GetType(), (IdentifiableEntity)ei));
+
+        public static readonly IValueConverter Retrieve =
+                   ConverterFactory.New((Lite lite) => lite == null ? null : Server.Retrieve(lite));
 
         public static readonly IValueConverter NullableEnumConverter =
             ConverterFactory.New((object v) => v == null ? "-" : v, (object v) => (v as string) == "-" ? null : v);
 
         public static readonly IValueConverter EnumDescriptionConverter =
-            ConverterFactory.New((object v) => v is Enum ? EnumExtensions.NiceToString((Enum)v) : (string)v);
+            ConverterFactory.New((object v) => v is Enum ? ((Enum)v).NiceToString() : (string)v);
 
         public static readonly IValueConverter ErrorListToToolTipString =
             ConverterFactory.New((IEnumerable<ValidationError> err) => err.Select(e => e.ErrorContent).FirstOrDefault());

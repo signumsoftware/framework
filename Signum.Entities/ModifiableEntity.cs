@@ -37,11 +37,11 @@ namespace Signum.Entities
             if (EqualityComparer<T>.Default.Equals(variable, value))
                 return false;
 
-            PropertyInfo pi = ReflectionTools.BasePropertyInfo(property); 
+            PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
 
             if (variable is INotifyCollectionChanged)
             {
-                if(AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), pi))
+                if (AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), pi))
                     ((INotifyCollectionChanged)variable).CollectionChanged -= ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
@@ -97,7 +97,11 @@ namespace Signum.Entities
         [HiddenProperty]
         public string ToStringMethod
         {
-            get { return ToString().HasText() ? ToString() : this.GetType().Name; }
+            get
+            {
+                string str = ToString();
+                return str.HasText() ? str : this.GetType().Name;
+            }
         }
 
         public bool SetToStr<T>(ref T variable, T valor, Expression<Func<T>> property)
@@ -130,13 +134,13 @@ namespace Signum.Entities
 
             foreach (Func<object, object> getter in AttributeManager<NotifyChildPropertyAttribute>.FieldsToNotify(GetType()))
             {
-                object obj = getter(this); 
- 
-                if(obj == null)
-                    continue; 
+                object obj = getter(this);
+
+                if (obj == null)
+                    continue;
 
                 var entity = obj as INotifyPropertyChanged;
-                if(entity != null)
+                if (entity != null)
                     entity.PropertyChanged += ChildPropertyChanged;
                 else
                 {
@@ -174,9 +178,9 @@ namespace Signum.Entities
             if (AttributeManager<NotifyChildPropertyAttribute>.FieldsToNotify(GetType()).Any(f => f(this) == sender))
             {
                 if (args.NewItems != null)
-                    foreach (var p in args.NewItems.Cast<INotifyPropertyChanged>())p.PropertyChanged += ChildPropertyChanged;
+                    foreach (var p in args.NewItems.Cast<INotifyPropertyChanged>()) p.PropertyChanged += ChildPropertyChanged;
                 if (args.OldItems != null)
-                    foreach (var p in args.OldItems.Cast<INotifyPropertyChanged>())p.PropertyChanged -= ChildPropertyChanged;
+                    foreach (var p in args.OldItems.Cast<INotifyPropertyChanged>()) p.PropertyChanged -= ChildPropertyChanged;
             }
 
             if (AttributeManager<ValidateChildPropertyAttribute>.FieldsToNotify(GetType()).Any(f => f(this) == sender))
@@ -231,12 +235,12 @@ namespace Signum.Entities
         public override int GetHashCode()
         {
             return GetType().FullName.GetHashCode() ^ temporalId;
-        } 
+        }
         #endregion
-        
+
         #region IDataErrorInfo Members
 
-   
+
         [HiddenProperty]
         public string Error
         {
@@ -315,8 +319,8 @@ namespace Signum.Entities
             PropertyInfo pi2 = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
 
             PropertyValidationEventHandler val = (sender, pi, propertyValue) =>
-                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ? 
-                    error((P)propertyValue) : 
+                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ?
+                    error((P)propertyValue) :
                     null;
 
             entity.PropertyValidation += val;
@@ -330,8 +334,8 @@ namespace Signum.Entities
             PropertyInfo pi2 = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
 
             PropertyValidationEventHandler val = (sender, pi, propertyValue) =>
-                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ? 
-                    validator.Error(propertyValue).TryCC(str=>str.Formato(pi.NiceName())) : 
+                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ?
+                    validator.Error(propertyValue).TryCC(str => str.Formato(pi.NiceName())) :
                     null;
 
             entity.PropertyValidation += val;

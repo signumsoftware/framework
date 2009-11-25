@@ -481,9 +481,7 @@ namespace Signum.Web
 
         protected internal virtual string GetNiceQueryName(object queryName)
         {
-            return (queryName is Type) ? ((Type)queryName).NiceName() :
-                   (queryName is Enum) ? EnumExtensions.NiceToString((Enum)queryName) :
-                   queryName.ToString();
+            return QueryUtils.GetNiceQueryName(queryName); 
         }
 
         protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)

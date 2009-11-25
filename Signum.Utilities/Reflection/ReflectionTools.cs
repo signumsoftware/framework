@@ -368,36 +368,5 @@ namespace Signum.Utilities.Reflection
                 ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .TryCC(ti => ti.GetGenericArguments()[0]);
         }
-
-        public static string GetDescription(MemberInfo memberInfo)
-        {   
-            LocDescriptionAttribute loc = memberInfo.SingleAttribute<LocDescriptionAttribute>(); 
-            if(loc!= null)
-            {
-                if (loc.Auto)
-                {
-                    string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add(memberInfo.Name, "_");
-                    Assembly assembly = (memberInfo.DeclaringType ?? (Type)memberInfo).Assembly;
-                    return assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
-                }
-                else
-                    return loc.Description;
-            }
-
-            DescriptionAttribute desc = memberInfo.SingleAttribute<DescriptionAttribute>();
-            if(desc != null)
-            {
-                return desc.Description;
-            }
-
-            return null;
-        }
-
-        public static ResourceManager GetDefaultResourceManager(this Assembly assembly)
-        {
-            string[] resourceFiles = assembly.GetManifestResourceNames();
-            string name = resourceFiles.Single(a => a.Contains("Resources.resources"));
-            return new ResourceManager(name.Replace(".resources", ""), assembly);
-        }
     }
 }

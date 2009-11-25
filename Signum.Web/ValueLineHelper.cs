@@ -113,7 +113,7 @@ namespace Signum.Web
                         .Cast<Enum>()
                         .Select(v => new SelectListItem()
                             {
-                                Text = EnumExtensions.NiceToString(v),
+                                Text = v.NiceToString(),
                                 Value = v.ToString(),
                                 Selected = object.Equals(value, v),
                             })

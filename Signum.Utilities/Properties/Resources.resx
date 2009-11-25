@@ -183,9 +183,6 @@
   <data name="ThereIsNoAnidableScopeForType0" xml:space="preserve">
     <value>The is no ScopeAnidable fot type {0}</value>
   </data>
-  <data name="IsNotAnEnum" xml:space="preserve">
-    <value>{0} is not an Enum</value>
-  </data>
   <data name="_0Year1Month2Day" xml:space="preserve">
     <value>{0} Year(s), {1} Month(s), {2} Day(s)</value>
   </data>
@@ -288,5 +285,8 @@
   </data>
   <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
     <value>property should be an expression accessing a property</value>
+  </data>
+  <data name="IsNotAnEnum" xml:space="preserve">
+    <value>{0} is not an Enum</value>
   </data>
 </root>

@@ -40,7 +40,7 @@ namespace Signum.Windows
             var values = Enum.GetValues(Type).Cast<Enum>();
             if (nicePairs)
             {
-                var valuePairs = values.Select(a => new Tuple<Enum, string>(a, EnumExtensions.NiceToString(a)));
+                var valuePairs = values.Select(a => new Tuple<Enum, string>(a, a.NiceToString()));
                 if (sort)
                     valuePairs = valuePairs.OrderBy(a => a.Second);
 
