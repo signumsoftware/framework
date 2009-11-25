@@ -220,9 +220,9 @@ namespace Signum.Web.Files
         }
 
 
-        public static string FileLine<T>(this HtmlHelper helper, T value, string idValueField, string fileType) where T : FilePathDN
+        public static string FileLine<T>(this HtmlHelper helper, T value, string idValueField, FileLine settings) where T : FilePathDN
         {
-            return InternalFileLine(helper, idValueField, value, new FileLine() { FileType = EnumLogic<FileTypeDN>.ToEnum(fileType) });
+            return InternalFileLine(helper, idValueField, value, settings );
         }
 
         public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
