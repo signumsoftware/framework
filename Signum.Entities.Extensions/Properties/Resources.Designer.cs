@@ -466,6 +466,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Operation Logs.
+        /// </summary>
+        internal static string LogOperationDN_Plural {
+            get {
+                return ResourceManager.GetString("LogOperationDN_Plural", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Start.
         /// </summary>
         internal static string LogOperationDN_Start {

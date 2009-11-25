@@ -7,7 +7,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Operations
 {
-    [Serializable]
+    [Serializable, PluralLocDescription()]
     public class LogOperationDN : IdentifiableEntity
     {
         [ImplementedByAll]

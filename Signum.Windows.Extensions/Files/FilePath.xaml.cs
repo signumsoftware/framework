@@ -77,7 +77,7 @@ namespace Signum.Windows.Extensions.Files
             get { return (FilePathDN)DataContext; }        
         }
 
-        private byte[] file;
+        private byte[] file = null;
 
         void buttonOpen_Click(object sender, RoutedEventArgs e)
         {

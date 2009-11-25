@@ -137,7 +137,7 @@ namespace Signum.Windows.Operations
             if (os != null && os.Text != null)
                 return os.Text;
 
-            return EnumExtensions.NiceToString(key);
+            return key.NiceToString();
         }
 
         private static void ButtonClick(ToolBarButton sender, OperationInfo operationInfo, Win.FrameworkElement entityControl, Func<EntityOperationEventArgs, IIdentifiable> handler)

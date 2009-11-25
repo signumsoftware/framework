@@ -130,7 +130,7 @@ namespace Signum.Web.Operations
             if (os != null && os.AltText != null)
                 return os.AltText;
 
-            return EnumExtensions.NiceToString(key);
+            return key.NiceToString();
         }
 
         protected internal virtual string GetImage(Enum key, WebMenuItem os)
