@@ -134,7 +134,7 @@ namespace Signum.Windows
             if (LoadData != null)
                 data = LoadData();
             else
-                data = Server.RetriveAllLite(CleanType, safeImplementations);
+                data = Server.RetrieveAllLite(CleanType, safeImplementations);
 
             try
             {

@@ -8,6 +8,7 @@ using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Properties;
 using Signum.Entities;
+using System.Diagnostics;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -32,7 +33,7 @@ namespace Signum.Engine.DynamicQuery
                 string error = value.GetErrors();
 
                 if (error.HasText())
-                    Console.WriteLine("Query {0} -> {1}".Formato(Signum.Entities.DynamicQuery.QueryUtils.GetQueryName(queryName), error));
+                    Debug.WriteLine("Query {0} -> {1}".Formato(Signum.Entities.DynamicQuery.QueryUtils.GetQueryName(queryName), error));
 
                 queries[queryName] = value;
             }

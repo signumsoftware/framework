@@ -109,8 +109,6 @@ namespace Signum.Windows
             set { SetValue(MultiSelectionProperty, value); }
         }
 
-
-
         public static readonly DependencyProperty SearchOnLoadProperty =
           DependencyProperty.Register("SearchOnLoad", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
         public bool SearchOnLoad

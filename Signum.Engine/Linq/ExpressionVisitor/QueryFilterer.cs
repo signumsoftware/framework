@@ -46,7 +46,7 @@ namespace Signum.Engine.Linq
         public static IQueryable Filter<T>(IQueryable query)
             where T:IdentifiableEntity
         {
-            return Schema.Current.EntityEvents<T>().OnFilterQuery((IQueryable<T>)query);
+            return Schema.Current.OnFilterQuery((IQueryable<T>)query);
         }
 
         internal static Expression Filter(Expression expression)

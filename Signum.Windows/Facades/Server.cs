@@ -82,7 +82,7 @@ namespace Signum.Windows
             return (T)(IIdentifiable)Service<IBaseServer>().Retrieve(lite.RuntimeType, lite.Id);
         }
 
-        public static List<T> RetrieveAll<T>()
+        public static List<T> RetrieveAll<T>() where T : IdentifiableEntity
         {
             return Service<IBaseServer>().RetrieveAll(typeof(T)).Cast<T>().ToList<T>();
         }
@@ -92,10 +92,16 @@ namespace Signum.Windows
             return Service<IBaseServer>().RetrieveAll(type);
         }
 
-        public static List<Lite> RetriveAllLite(Type liteType, Type[] types)
+        public static List<Lite> RetrieveAllLite(Type liteType, Type[] types)
         {
             return Service<IBaseServer>().RetrieveAllLite(liteType, types);
         }
+
+        public static List<Lite<T>> RetrieveAllLite<T>(Type[] types) where T : class, IIdentifiable
+        {
+            return Service<IBaseServer>().RetrieveAllLite(typeof(T), types).Cast<Lite<T>>().ToList();
+        }
+
 
         public static List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
         {
