@@ -896,13 +896,13 @@ namespace Signum.Web
             if (form.AllKeys.Contains(ViewDataKeys.Reactive))
             {
                 formValues = Navigator.ToSortedList(form, "", prefixToIgnore); //Apply modifications to the entity and all the path
-                MinMax<int> interval = Modification.FindSubInterval(formValues, "");
+                Interval<int> interval = Modification.FindSubInterval(formValues, "");
                 modification = Modification.Create(entity.GetType(), formValues, interval, "");
             }
             else
             {
                 formValues = Navigator.ToSortedList(form, prefix, prefixToIgnore);
-                MinMax<int> interval = Modification.FindSubInterval(formValues, prefix);
+                Interval<int> interval = Modification.FindSubInterval(formValues, prefix);
                 modification = Modification.Create(entity.GetType(), formValues, interval, prefix);
             }
             return modification;
@@ -962,7 +962,7 @@ namespace Signum.Web
         //{
         //    var formValues = Navigator.ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
 
-        //    MinMax<int> interval = Modification.FindSubInterval(formValues, prefix);
+        //    Interval<int> interval = Modification.FindSubInterval(formValues, prefix);
 
         //    return Modification.Create(obj.GetType(), formValues, interval, prefix);
         //}

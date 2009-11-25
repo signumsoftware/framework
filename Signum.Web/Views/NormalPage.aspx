@@ -31,7 +31,7 @@
      </h2>
      <div class="operations">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
-            <a id="btnSave" class="OperationDiv" href="javascript:TrySave('Signum/TrySave');">Guardar</a>   
+            <div id="btnSave" class="OperationDiv" onclick="javascript:TrySave('Signum/TrySave');">Guardar</div>  
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), "") %>     
      </div>

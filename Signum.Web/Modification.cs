@@ -22,7 +22,7 @@ namespace Signum.Web
 {
     public static class CustomModificationBinders
     {
-        public delegate Modification ModificationBinder(SortedList<string, object> formValues, MinMax<int> interval, string controlID);
+        public delegate Modification ModificationBinder(SortedList<string, object> formValues, Interval<int> interval, string controlID);
 
         public static Dictionary<Type, ModificationBinder> binders = new Dictionary<Type, ModificationBinder>();
         public static Dictionary<Type, ModificationBinder> Binders { get { return binders; } }
@@ -57,12 +57,12 @@ namespace Signum.Web
 
         public abstract void Validate(object entity, Dictionary<string, List<string>> errors, string prefix);
         
-        public static MinMax<int> FindSubInterval(SortedList<string, object> formValues, string prefix)
+        public static Interval<int> FindSubInterval(SortedList<string, object> formValues, string prefix)
         {
-            return FindSubInterval(formValues, new MinMax<int>(0, formValues.Count), 0, prefix);
+            return FindSubInterval(formValues, new Interval<int>(0, formValues.Count), 0, prefix);
         }
 
-        protected static MinMax<int> FindSubInterval(SortedList<string, object> formValues, MinMax<int> interval, int knownPrefixLength, string newPrefix)
+        protected static Interval<int> FindSubInterval(SortedList<string, object> formValues, Interval<int> interval, int knownPrefixLength, string newPrefix)
         {
             if (newPrefix == null)
                 newPrefix = "";
@@ -75,13 +75,13 @@ namespace Signum.Web
 
                 if (!(subControlID.ContinuesWith(newPrefix, knownPrefixLength) &&
                      (subControlID.Length == maxLength || subControlID.ContinuesWith(TypeContext.Separator, maxLength))))
-                    return new MinMax<int>(interval.Min, i);
+                    return new Interval<int>(interval.Min, i);
             }
 
             return interval;
         }
 
-        public static Modification Create(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
+        public static Modification Create(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
         {
             if (controlID == null)
                 controlID = "";
@@ -258,7 +258,37 @@ namespace Signum.Web
         public class PropertyPackModification
         {
             public PropertyPack PropertyPack; 
-            public Modification Modification; 
+            public Modification Modification;
+
+            public void SafeSet(ModifiableEntity entity, object value)
+            {
+                try
+                {
+                    PropertyPack.SetValue(entity, value);
+                }
+                catch (NullReferenceException nullEx)
+                {
+                    if (Modification.BindingError != null && Modification.BindingError.Contains("Binding Error"))
+                    {
+                        Modification.BindingError = Modification.BindingError.Replace("Binding Error", "");
+                        if (Modification.BindingError != null && Modification.BindingError.Contains("\r\n\r\n"))
+                            Modification.BindingError = Modification.BindingError.Replace("\r\n\r\n", "");
+                        Modification.BindingError = Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(value, PropertyPack.PropertyInfo.NiceName()));
+                    }
+                    else if (entity != null && value == null && PropertyPack.PropertyInfo.PropertyType.IsValueType && !Modification.BindingError.HasText())
+                        Modification.BindingError = Modification.BindingError.AddLine(Resources.ValueMustBeSpecifiedFor0.Formato(PropertyPack.PropertyInfo.NiceName()));
+                    else
+                        Modification.BindingError = nullEx.Message;
+                }
+                catch (Exception)
+                {
+                    if (Modification.BindingError != null && Modification.BindingError.Contains("Binding Error"))
+                        Modification.BindingError = Modification.BindingError.Replace("Binding Error", "");
+                    if (Modification.BindingError != null && Modification.BindingError.Contains("\r\n\r\n"))
+                        Modification.BindingError = Modification.BindingError.Replace("\r\n\r\n", "");
+                    Modification.BindingError = Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(value, PropertyPack.PropertyInfo.NiceName()));
+                }
+            }
         }
 
         public Dictionary<string, PropertyPackModification> Properties { get; private set; }
@@ -267,7 +297,7 @@ namespace Signum.Web
             : base(staticType, controlID) 
         { }
 
-        public EntityModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
+        public EntityModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, controlID)
         {
             if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
@@ -291,7 +321,7 @@ namespace Signum.Web
             Fill(formValues, interval);
         }
 
-        private void Fill(SortedList<string, object> formValues, MinMax<int> interval)
+        private void Fill(SortedList<string, object> formValues, Interval<int> interval)
         {
             int propertyStart = ControlID.Length + TypeContext.Separator.Length;
 
@@ -335,11 +365,11 @@ namespace Signum.Web
             
         }
 
-        protected virtual int GeneratePropertyModification(SortedList<string, object> formValues, MinMax<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
+        protected virtual int GeneratePropertyModification(SortedList<string, object> formValues, Interval<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
         {
             PropertyPack pp = propertyValidators.GetOrThrow(propertyName, Resources.NoPropertyWithName0FoundInType1.Formato(propertyName, RuntimeType));
 
-            MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
+            Interval<int> subInterval = FindSubInterval(formValues, new Interval<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
             
             long? propertyIsLastChange = null;
             if (formValues.ContainsKey(TypeContext.Compose(commonSubControlID, TypeContext.Ticks)))
@@ -378,56 +408,31 @@ namespace Signum.Web
             else
                 entity = Change(controller, (ModifiableEntity)obj);
 
-            ApplyChangesOfProperties(controller, entity, onFinish);
-
-            return entity;
-        }
-
-        protected virtual bool ApplyChangesOfProperties(Controller controller, ModifiableEntity entity, ModificationState onFinish)
-        {
             if (Properties != null)
             {
                 foreach (var ppm in Properties.Values)
                 {
-                    object oldValue = (entity != null) ? ppm.PropertyPack.GetValue(entity) : null;
-                    object newValue = ppm.Modification.ApplyChanges(controller, oldValue, onFinish);
-                    try
-                    {
-                        if (ppm.Modification.TicksLastChange != null)
-                        {
-                            PropertyPack pp = ppm.PropertyPack;
-                            onFinish.Actions.Add(ppm.Modification.TicksLastChange.Value,
-                                new Tuple<string, Action>(ppm.Modification.ControlID, () => pp.SetValue(entity, newValue)));
-                        }
-                        else
-                            ppm.PropertyPack.SetValue(entity, newValue);
-                    }
-                    catch (NullReferenceException nullEx)
-                    {
-                        if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("Binding Error"))
-                        {
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("Binding Error", "");
-                            if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("\r\n\r\n"))
-                                ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
-                        }
-                        else if (entity != null && newValue == null && ppm.PropertyPack.PropertyInfo.PropertyType.IsValueType && !ppm.Modification.BindingError.HasText())
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resources.ValueMustBeSpecifiedFor0.Formato(ppm.PropertyPack.PropertyInfo.NiceName()));
-                        else
-                            ppm.Modification.BindingError = nullEx.Message;
-                    }
-                    catch (Exception)
-                    {
-                        if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("Binding Error"))
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("Binding Error", "");
-                        if (ppm.Modification.BindingError != null && ppm.Modification.BindingError.Contains("\r\n\r\n"))
-                            ppm.Modification.BindingError = ppm.Modification.BindingError.Replace("\r\n\r\n", "");
-                        ppm.Modification.BindingError = ppm.Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(newValue, ppm.PropertyPack.PropertyInfo.NiceName()));
-                    }
+                    ApplyChangesProperty(ppm, controller, entity, onFinish);
                 }
-            }
-            return false;
+            }            
+
+            return entity;
         }
+
+        protected virtual void ApplyChangesProperty(PropertyPackModification ppm, Controller controller, ModifiableEntity entity, ModificationState onFinish)
+        {
+            object oldValue = (entity != null) ? ppm.PropertyPack.GetValue(entity) : null;
+            object newValue = ppm.Modification.ApplyChanges(controller, oldValue, onFinish);
+
+            if (ppm.Modification.TicksLastChange != null)
+            {
+                PropertyPack pp = ppm.PropertyPack;
+                onFinish.Actions.Add(ppm.Modification.TicksLastChange.Value,
+                    new Tuple<string, Action>(ppm.Modification.ControlID, () => ppm.SafeSet(entity, newValue)));
+            }
+            else
+                ppm.SafeSet(entity, newValue);
+        }       
 
         protected virtual ModifiableEntity Change(Controller controller, ModifiableEntity entity)
         {
@@ -509,7 +514,7 @@ namespace Signum.Web
             : base(staticType, controlID) 
         { }
 
-        public LiteModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
+        public LiteModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, controlID)
         {
             if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
@@ -610,12 +615,16 @@ namespace Signum.Web
         }
     }
 
-    class MListModification : Modification
+    public class MListModification : Modification
     {
-        List<Tuple<Modification, int?>> modifications;
-        Type staticElementType;
+        public List<Tuple<Modification, int?>> modifications;
+        public Type staticElementType;
 
-        public MListModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
+        public MListModification(Type staticType, string controlID)
+            : base(staticType, controlID) 
+        { }
+
+        public MListModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, controlID)
         {
             if (!Reflector.IsMList(staticType))
@@ -626,7 +635,7 @@ namespace Signum.Web
             Fill(formValues, interval);
         }
 
-        private void Fill(SortedList<string, object> formValues, MinMax<int> interval)
+        private void Fill(SortedList<string, object> formValues, Interval<int> interval)
         {
             SortedList<int, Tuple<Modification, int?>> list = new SortedList<int, Tuple<Modification, int?>>();
 
@@ -665,7 +674,7 @@ namespace Signum.Web
                 string index = subControlID.Substring(propertyStart, propertyEnd - propertyStart);
                 string commonSubControlID = subControlID.Substring(0, propertyEnd);
 
-                MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(i, interval.Max), ControlID.Length, TypeContext.Separator + index);
+                Interval<int> subInterval = FindSubInterval(formValues, new Interval<int>(i, interval.Max), ControlID.Length, TypeContext.Separator + index);
                 Modification mod = Modification.Create(staticElementType, formValues, subInterval, commonSubControlID);
                 
                 string oldIndex = "";

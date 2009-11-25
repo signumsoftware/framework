@@ -343,8 +343,8 @@ namespace Signum.Utilities
             return new MinMax<T>(withMin, withMax);
         }
 
-        public static MinMax<T> MinMaxPair<T>(this IEnumerable<T> collection)
-    where T : IComparable<T>
+        public static Interval<T> MinMaxPair<T>(this IEnumerable<T> collection)
+            where T : struct, IComparable<T>, IEquatable<T>
         {
             bool has = false;
             T min = default(T), max = default(T);
@@ -364,11 +364,11 @@ namespace Signum.Utilities
                 }
             }
 
-            return new MinMax<T>(min, max);
+            return new Interval<T>(min, max);
         }
 
-        public static MinMax<V> MinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
-            where V : IComparable<V>
+        public static Interval<V> MinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+            where V:struct, IComparable<V>, IEquatable<V>
         {
             bool has = false;
             V min = default(V), max = default(V);
@@ -390,7 +390,7 @@ namespace Signum.Utilities
                 }
             }
 
-            return new MinMax<V>(min, max);
+            return new Interval<V>(min, max);
         }
 
 

@@ -606,7 +606,7 @@ function RemoveFileLineEntity(prefix, reloadOnChangeFunction) {
     $('#' + prefix + sfIsNew).remove();
     window[prefix + sfEntityTemp] = "";
 
-    $('#' + prefix + sfEntity).html("");
+    /*$('#' + prefix + sfEntity).html(""); */
     $('#' + prefix + sfId).val("");
 
     $('#div' + prefix + 'Old').hide();
@@ -773,6 +773,8 @@ function NewRepeaterElement(urlController, prefix, runtimeType, isEmbedded, remo
 }
 
 function NewRepeaterFile(urlController, prefix, fileType, removeLinkText, maxElements) {
+    debug = true;
+
     $('#' + prefix + sfTicks).val(new Date().getTime());
     if (!empty(maxElements)) {
         var elements = $("#" + prefix + sfEntitiesContainer + " > div[name$=" + sfRepeaterElement + "]").length;
@@ -784,13 +786,17 @@ function NewRepeaterFile(urlController, prefix, fileType, removeLinkText, maxEle
     if (lastElement.length > 0) {
         var nameSelected = lastElement[0].id;
         lastIndex = nameSelected.substring(prefix.length + 1, nameSelected.indexOf(sfRepeaterElement));
-    }
+    }    
     var newIndex = "_" + (parseInt(lastIndex) + 1);
+    
+    log($("#" + prefix + sfEntitiesContainer).length);
+    log(lastIndex + " | " + newIndex + " | " +lastElement.length);
+    
     var runtimeType = "FilePathDN";
     $.ajax({
         type: "POST",
         url: urlController,
-        data: { prefix: prefix, fileType: fileType },
+        data: { prefix: prefix + newIndex, fileType: fileType },
         async: false,
         dataType: "html",
         success:
@@ -798,11 +804,11 @@ function NewRepeaterFile(urlController, prefix, fileType, removeLinkText, maxEle
                        var newPrefix = prefix + newIndex;
                        $("#" + prefix + sfEntitiesContainer).append("\n" +
                         "<div id='" + newPrefix + sfRepeaterElement + "' name='" + newPrefix + sfRepeaterElement + "' class='repeaterElement'>\n" +
-                        "<a id='" + newPrefix + "_btnRemove' title='" + removeLinkText + "' href=\"javascript:RemoveRepeaterEntity('" + newPrefix + sfRepeaterElement + "');\" class='lineButton remove'>" + removeLinkText + "</a>\n" +
-                        "<input type='hidden' id='" + newPrefix + sfRuntimeType + "' name='" + newPrefix + sfRuntimeType + "' value='" + runtimeType + "' />\n" +
-                        "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
+                       // "<a id='" + newPrefix + "_btnRemove' title='" + removeLinkText + "' href=\"javascript:RemoveRepeaterEntity('" + newPrefix + sfRepeaterElement + "');\" class='lineButton remove'>" + removeLinkText + "</a>\n" +
+                       // "<input type='hidden' id='" + newPrefix + sfRuntimeType + "' name='" + newPrefix + sfRuntimeType + "' value='" + runtimeType + "' />\n" +
+                       // "<input type='hidden' id='" + newPrefix + sfId + "' name='" + newPrefix + sfId + "' value='' />\n" +
                        //"<input type=\"hidden\" id=\"" + newPrefix + sfIndex + "\" name=\"" + newPrefix + sfIndex + "\" value=\"" + (parseInt(lastIndex)+1) + "\" />\n" +
-                        "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n" +
+                       // "<input type='hidden' id='" + newPrefix + sfIsNew + "' name='" + newPrefix + sfIsNew + "' value='' />\n" +
                         "<script type=\"text/javascript\">var " + newPrefix + sfEntityTemp + " = '';</script>\n" +
                         "<div id='" + newPrefix + sfEntity + "' name='" + newPrefix + sfEntity + "'>\n" +
                         msg + "\n" +
