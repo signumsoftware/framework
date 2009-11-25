@@ -36,10 +36,9 @@
       <Code Language="csharp">
         <![CDATA[static Expression<Func<$type$, $returnType$>> $methodName$Expression = 
             $paramName$ => ; 
-        static Func<$type$, $returnType$> $methodName$Func = $methodName$Expression.Compile();
         public static $returnType$ $methodName$(this $type$ $paramName$)
         {
-            return $methodName$Func($paramName$);
+            return $methodName$Expression.Invoke($paramName$);
         }]]>
       </Code>
     </Snippet>
