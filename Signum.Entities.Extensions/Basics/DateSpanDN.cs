@@ -49,10 +49,9 @@ namespace Signum.Entities.Extensions.Basics
 
         static Expression<Func<DateSpanDN,DateTime, DateTime>> AddExpression =
              (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
-        static Func<DateSpanDN,DateTime, DateTime> AddFunc = AddExpression.Compile();
         public  DateTime Add( DateTime date)
         {
-            return AddFunc(this, date);
+            return AddExpression.Invoke(this, date);
         }
 
         public DateSpan ToDateSpan()
