@@ -15,15 +15,15 @@ namespace Signum.Web.Files
 {
     public class FilePathModification : EntityModification
     {
-        public FilePathModification(Type staticType, SortedList<string, object> formValues, MinMax<int> interval, string controlID)
+        public FilePathModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, formValues, interval, controlID)
         {
 
         }
 
-        protected override int GeneratePropertyModification(SortedList<string, object> formValues, MinMax<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
+        protected override int GeneratePropertyModification(SortedList<string, object> formValues, Interval<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
         {
-            MinMax<int> subInterval = FindSubInterval(formValues, new MinMax<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
+            Interval<int> subInterval = FindSubInterval(formValues, new Interval<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
 
             long? propertyIsLastChange = null;
             if (formValues.ContainsKey(TypeContext.Compose(commonSubControlID, TypeContext.Ticks)))

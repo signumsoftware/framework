@@ -14,7 +14,7 @@ namespace Signum.Entities.Files
     [Serializable]
     public class FilePathDN : Entity, IFile
     {
-        private FilePathDN() { }
+        public FilePathDN() { }
 
         public FilePathDN(FileTypeDN fileType)
         {

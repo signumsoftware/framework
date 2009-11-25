@@ -170,7 +170,7 @@ namespace Signum.Web.Files
                     settings.ValueHtmlProps.Add("class", "valueLine");
             }
 
-            bool hasEntity = value != null;
+            bool hasEntity = value != null && value.FileName.HasText();
             sb.AppendLine("<div id='div{0}Old' style='display:{1}'>".Formato(idValueField, hasEntity ? "block" : "none"));
             if (settings.View)
             {

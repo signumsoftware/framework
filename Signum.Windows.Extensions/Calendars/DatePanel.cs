@@ -178,7 +178,7 @@ namespace Signum.Windows.Calendars
             return DayWidth * Math.Max(days, 0);  
         }
 
-        MinMax<DateTime> lastDates; 
+        Interval<DateTime> lastDates; 
 
         private void UpdateAutoMinMax()
         {
@@ -198,7 +198,7 @@ namespace Signum.Windows.Calendars
             }
         }
 
-        public MinMax<DateTime> ElementsMinMax()
+        public Interval<DateTime> ElementsMinMax()
         {
             var dates = InternalChildren.Cast<UIElement>().SelectMany(ui => new[] { GetDate(ui), GetDateMin(ui), GetDateMax(ui) }).NotNull().MinMaxPair();
             return dates;
