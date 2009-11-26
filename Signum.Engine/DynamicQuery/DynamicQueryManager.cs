@@ -74,5 +74,29 @@ namespace Signum.Engine.DynamicQuery
 
             return queries.Keys.Union(Parent.GetQueryNames()).ToList(); 
         }
+
+        public string Errors(object queryName)
+        {
+            try
+            {
+                IDynamicQuery dq = this[queryName];
+
+                string error = dq.GetErrors();
+                if (error.HasText())
+                    return "Error {0}: No ToLite() on {1}".Formato(queryName, error);
+
+                Connection.CommandCount = 0;
+                QueryResult result = dq.ExecuteQuery(new List<Filter>(), 100);
+
+                if (Connection.CommandCount != 1)
+                    return "Error {0}: N + 1 query problem".Formato(queryName);
+
+                return null;
+            }
+            catch (Exception e)
+            {
+                return "Error {0}: {1}".Formato(queryName, e.Message);
+            }
+        }
     }
 }

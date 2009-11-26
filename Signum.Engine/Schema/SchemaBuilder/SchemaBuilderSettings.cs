@@ -126,6 +126,14 @@ namespace Signum.Engine.Maps
             return types.TryGetC(type).TryCC(a => a.TypeAttributes) ?? type.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
         }
 
+        public Attribute[] FieldInfoAttributes<T, R>(Expression<Func<T, R>> lambda)
+        {
+            MemberInfo mi = ReflectionTools.GetMemberInfo(lambda);
+            Type type = ReflectionTools.GetReceiverType(lambda);
+            FieldInfo fi = Reflector.FindFieldInfo(type, mi, true);
+            return FieldInfoAttributes(type, fi);
+        }
+
         public Attribute[] FieldInfoAttributes(Type type, FieldInfo fi)
         {
             var result = type.For(t => t != fi.DeclaringType.BaseType, t => t.BaseType)

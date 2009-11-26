@@ -350,7 +350,7 @@ namespace Signum.Engine.Linq
             if (right == null)
                 throw new ArgumentNullException("right");
 
-            if (condition == null && joinType != JoinType.CrossApply && joinType != JoinType.CrossJoin)
+            if (condition == null && joinType != JoinType.CrossApply && joinType != JoinType.OuterApply && joinType != JoinType.CrossJoin)
                 throw new ArgumentNullException("condition");
 
             if (joinType == JoinType.SingleRowLeftOuterJoin && !(right is TableExpression))

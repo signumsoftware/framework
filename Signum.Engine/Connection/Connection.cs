@@ -101,6 +101,9 @@ namespace Signum.Engine
             get { return false; }
         }
 
+        [ThreadStatic]
+        public static long CommandCount = 0; 
+
         SqlCommand NewCommand(SqlPreCommandSimple preCommand)
         {
             SqlCommand cmd = new SqlCommand();
@@ -134,6 +137,7 @@ namespace Signum.Engine
                 try
                 {
                     object result = cmd.ExecuteScalar();
+                    CommandCount++;
                     return tr.Commit(result);
                 }
                 catch (SqlException ex)
@@ -151,6 +155,7 @@ namespace Signum.Engine
                 try
                 {
                     int result = cmd.ExecuteNonQuery();
+                    CommandCount++;
                     return tr.Commit(result);
                 }
                 catch (SqlException ex)
@@ -171,7 +176,7 @@ namespace Signum.Engine
 
                     DataTable result = new DataTable();
                     da.Fill(result);
-
+                    CommandCount++;
                     return tr.Commit(result);
                 }
                 catch (SqlException ex)
@@ -191,6 +196,7 @@ namespace Signum.Engine
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataSet result = new DataSet();
                     da.Fill(result);
+                    CommandCount++;
                     return tr.Commit(result);
                 }
                 catch (SqlException ex)
