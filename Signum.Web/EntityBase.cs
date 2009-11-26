@@ -96,6 +96,20 @@ namespace Signum.Web
             set { remove = value; }
         }
 
+        string onCreating = "";
+        public string OnCreating
+        {
+            get { return onCreating; }
+            set { onCreating = value; }
+        }
+
+        string onEntityChanged = "";
+        public string OnEntityChanged
+        {
+            get { return onEntityChanged; }
+            set { onEntityChanged = value; }
+        }
+
         string creating = "";
         public string Creating
         {

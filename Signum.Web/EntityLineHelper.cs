@@ -80,7 +80,7 @@ namespace Signum.Web
             if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
                 reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "function(){{ReloadEntity('{0}','{1}');}}".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
-            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}',{4});}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial", reloadOnChangeFunction);
+            string popupOpeningParameters = "'{0}','{1}','{2}',function(){{OnPopupOK('{3}','{2}',{4});{5}}},function(){{OnPopupCancel('{2}');}}".Formato("Signum/PopupView", divASustituir, idValueField, "Signum/ValidatePartial", reloadOnChangeFunction, settings.OnEntityChanged);
 
             bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(type);
             bool isLite = typeof(Lite).IsAssignableFrom(type);
@@ -241,7 +241,7 @@ namespace Signum.Web
                 sb.AppendLine(
                     helper.Button(TypeContext.Compose(idValueField, "btnRemove"),
                               "x",
-                              "RemoveContainedEntity('{0}',{1});".Formato(idValueField, reloadOnChangeFunction),
+                              "RemoveContainedEntity('{0}',{1});{2}".Formato(idValueField, reloadOnChangeFunction, settings.OnEntityChanged),
                               "lineButton remove",
                               (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>()));
 
@@ -249,7 +249,8 @@ namespace Signum.Web
             {
                 Type cleanType = Reflector.ExtractLite(type) ?? type;
                 string searchType = Navigator.TypesToURLNames.TryGetC(cleanType);
-                string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'".Formato("Signum/PartialFind", searchType, idValueField, divASustituir, reloadOnChangeFunction);
+                string popupFindingParameters = "'{0}','{1}','false',function(){{OnSearchOk('{2}','{3}',{4});{5}}},function(){{OnSearchCancel('{2}','{3}');}},'{3}','{2}'"
+                    .Formato("Signum/PartialFind", searchType, idValueField, divASustituir, reloadOnChangeFunction, settings.OnEntityChanged);
                 string findingUrl = (settings.Implementations == null) ?
                     "Find({0});".Formato(popupFindingParameters) :
                     "$('#{0} :button').each(function(){{".Formato(TypeContext.Compose(idValueField, EntityBaseKeys.Implementations)) +

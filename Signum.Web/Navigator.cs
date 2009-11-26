@@ -916,6 +916,7 @@ namespace Signum.Web
 
         protected internal virtual Dictionary<string, List<string>> GenerateErrors(Modifiable entity, Modification modification, string prefix)
         {
+            GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity));
             Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
             modification.Validate(entity, errors, prefix);
 

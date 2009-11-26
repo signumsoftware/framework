@@ -219,8 +219,8 @@ popup.prototype = {
 		else {
 			//$("#" + prefix + sfEntity).show();
 			$("#" + globalKey).show();
-			$(me.pf(modalBackgroundKey)).width(document.documentElement.clientWidth).height(document.documentElement.clientHeight).hide();
-			
+			//$(me.pf(modalBackgroundKey)).width(document.documentElement.clientWidth).height(document.documentElement.clientHeight).hide();
+			$(me.pf(modalBackgroundKey)).width('500%').height('500%');
 			//Read offsetWidth and offsetHeight after display=block or otherwise it's 0
 			log(me.pf(panelPopupKey));
 			log($(me.pf(panelPopupKey)).length);

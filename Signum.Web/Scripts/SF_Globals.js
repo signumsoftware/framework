@@ -175,3 +175,54 @@ String.prototype.format = function(values)
                                     return value != null ? value : match;
                                 });
 };
+
+String.prototype.hasText = function()
+{
+    return (this == null || this == undefined || this == '') ? false : true;
+}
+
+var toggler = new
+function () {
+	this.divName = function (name) {
+		return "div" + name;
+	};
+	this.option = function (elem) {
+		var value = ((elem.type == 'checkbox') ? elem.checked : elem.value === 'true');
+		this.optionValue(this.divName(elem.name), value);
+		if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function () {
+			this.value = "";
+		});
+	};
+	this.optionInverse = function (elem) {
+		var value = ((elem.type == 'checkbox') ? !elem.checked : elem.value === 'false');
+		this.optionValue(this.divName(elem.name), value);
+		if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function () {
+			this.value = "";
+		});
+	};
+	this.numeric = function (id, max) {
+		var name = this.divName(id);
+		var value = $("#" + id).val();
+		if (value == "") {
+			this.optionValue(name, false);
+			return;
+		} else {
+			value = parseInt(value);
+		}
+		this.optionValue(name, (value > max));
+	};
+	this.numericCombo = function (id, max) {
+		var name = this.divName(id);
+		var option = $("#" + combo + " option:selected");
+		if (option.val() == "") {
+			this.optionValue(name, false);
+			return;
+		}
+		var html = option.html();
+		if (html.length == 1 && html <= max.toString()) this.optionValue(name, false);
+		else this.optionValue(name, true);
+	};
+	this.optionValue = function (name, value) {
+		value ? $("#" + name).show() : $("#" + name).hide();
+	};
+}
