@@ -222,7 +222,11 @@ namespace Signum.Web.Files
 
         public static string FileLine<T>(this HtmlHelper helper, T value, string idValueField, FileLine settings) where T : FilePathDN
         {
-            return InternalFileLine(helper, idValueField, value, settings );
+            if (settings != null)
+                using (settings)
+                    return helper.InternalFileLine(idValueField, value, settings);
+            else
+                return helper.InternalFileLine(idValueField, value, settings);
         }
 
         public static void FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)

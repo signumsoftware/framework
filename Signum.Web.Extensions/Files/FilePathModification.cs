@@ -10,6 +10,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Engine;
 using System.Web.Mvc;
 using Signum.Web.Extensions.Properties;
+using Signum.Entities.Files;
 
 namespace Signum.Web.Files
 {
@@ -42,6 +43,14 @@ namespace Signum.Web.Files
                 return subInterval.Max - 1;
 
             return base.GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, index, propertyValidators);
+        }
+
+        public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
+        {
+            FilePathDN filePath = obj as FilePathDN;
+            if (filePath == null || filePath.IdOrNull == null)
+                return null;
+            return base.ApplyChanges(controller, obj, onFinish);            
         }
     }
 }
