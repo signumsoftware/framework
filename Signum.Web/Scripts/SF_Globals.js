@@ -36,6 +36,9 @@ var sfEntityTypeName = "sfEntityTypeName";
 var sfEmbeddedControl = "sfEmbeddedControl";
 var sfTabId = "sfTabId";
 
+var sfIdRelated = "sfIdRelated";
+var sfRuntimeTypeRelated = "sfRuntimeTypeRelated";
+
 var lang = {
     "error" : "Error",
     "saving" : "Guardando...",

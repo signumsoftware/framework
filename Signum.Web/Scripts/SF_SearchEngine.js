@@ -2,7 +2,7 @@
 	$.ajax({
 		type: "POST",
 		url: urlController,
-		data: "sfQueryUrlName=" + queryUrlName + qp("sfAllowMultiple", allowMultiple) + qp(sfPrefix, prefix) + qp("prefixEnd", "S"),
+		data: "sfQueryUrlName=" + queryUrlName + qp(sfAllowMultiple, allowMultiple) + qp(sfPrefix, prefix) + qp("prefixEnd", "S"),
 		async: false,
 		dataType: "html",
 		success: function (msg) {
@@ -46,7 +46,7 @@ function RelatedEntityCreate(urlController, prefix, onOk, onCancel, typeName) {
     $.ajax({
         type: "POST",
         url: urlController,
-        data: "sfRuntimeType=" + typeName + qp("sfIdRelated", $('#'+sfId).val()) + qp("sfRuntimeTypeRelated", $('#'+sfRuntimeType).val()) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + qp(sfPrefix, newPrefix),
+        data: "sfRuntimeType=" + typeName + qp(sfIdRelated, $('#'+sfId).val()) + qp(sfRuntimeTypeRelated, $('#'+sfRuntimeType).val()) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)) + qp(sfPrefix, newPrefix),
         async: false,
         dataType: "html",
         success: function(msg) {
@@ -539,4 +539,9 @@ var concurrentSearch = new Array();
 function SearchOnLoad(btnSearchId) {
     concurrentSearch[btnSearchId] = true;
 	$("#" + btnSearchId).click();
+}
+
+function PostServer(urlController) {
+	document.forms[0].action = urlController;
+	document.forms[0].submit();
 }

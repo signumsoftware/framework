@@ -82,10 +82,10 @@ namespace Signum.Web
                 }
 
                 //Add cursor pointer to the htmlProps
-                if (!HtmlProps.ContainsKey("style"))
+              /*  if (!HtmlProps.ContainsKey("style"))
                     HtmlProps.Add("style", "cursor: pointer");
                 else if (HtmlProps["style"].ToString().IndexOf("cursor") == -1)
-                    HtmlProps["style"] = "cursor:pointer; " + HtmlProps["style"].ToString();
+                    HtmlProps["style"] = "cursor:pointer; " + HtmlProps["style"].ToString();*/
             }
 
             HtmlProps.Add("title", AltText);
