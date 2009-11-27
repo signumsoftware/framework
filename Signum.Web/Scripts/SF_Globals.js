@@ -59,6 +59,8 @@ function empty(myString) {
     return (myString == undefined || myString == "");
 }
 
+String.prototype.hasText = function() { return (this == null || this == undefined || this == '') ? false : true; }
+
 function isFalse(value) {
     return value == false || value == "false" || value == "False";
 }
@@ -179,10 +181,7 @@ String.prototype.format = function(values)
                                 });
 };
 
-String.prototype.hasText = function()
-{
-    return (this == null || this == undefined || this == '') ? false : true;
-}
+
 
 var toggler = new
 function () {

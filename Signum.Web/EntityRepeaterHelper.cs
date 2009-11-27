@@ -161,6 +161,9 @@ namespace Signum.Web
                     (isIdentifiable)
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
                        : ((Lite)(object)value).TryCS(i => i.Id)));
+
+                if (value != null && ((isIdentifiable && ((IIdentifiable)value).IsNew) || (isLite && ((Lite)(object)value).IdOrNull == null)))
+                    helper.Write(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityBaseKeys.IsNew), ""));
             }
 
             sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));

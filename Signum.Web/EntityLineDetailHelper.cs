@@ -107,6 +107,9 @@ namespace Signum.Web
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("")
                        : ((Lite)(object)value).TryCS(i => i.Id).TrySS(id => id).ToString()) + "\n");
 
+                if (value != null && ((isIdentifiable && ((IIdentifiable)value).IsNew) || (isLite && ((Lite)(object)value).IdOrNull == null)))
+                    helper.Write(helper.Hidden(TypeContext.Compose(idValueField, EntityBaseKeys.IsNew), ""));
+
                 sb.AppendLine(helper.Div(TypeContext.Compose(idValueField, EntityBaseKeys.Entity), "", "", new Dictionary<string, object>()));
               
                 if (settings.Implementations != null) //Interface with several possible implementations

@@ -206,6 +206,8 @@ namespace Signum.Web
                        ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull)
                        : ((Lite)(object)value).TryCS(i => i.IdOrNull)));
 
+                if (value != null && ((isIdentifiable && ((IIdentifiable)value).IsNew) || (isLite && ((Lite)(object)value).IdOrNull == null)))
+                    helper.Write(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityBaseKeys.IsNew), ""));
 
                 if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
                     (isIdentifiable && value != null && ((IIdentifiable)(object)value).IdOrNull == null))

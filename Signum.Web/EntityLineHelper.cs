@@ -93,6 +93,9 @@ namespace Signum.Web
                     TypeContext.Compose(idValueField, TypeContext.Id), 
                     id));
 
+                if (value != null && ((isIdentifiable && ((IIdentifiable)value).IsNew) || (isLite && ((Lite)(object)value).IdOrNull == null)))
+                    helper.Write(helper.Hidden(TypeContext.Compose(idValueField, EntityBaseKeys.IsNew), ""));
+
                 if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
                     (isIdentifiable && value != null && ((IIdentifiable)(object)value).IdOrNull == null))
                 {
