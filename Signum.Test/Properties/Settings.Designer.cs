@@ -26,7 +26,7 @@ namespace Signum.Test.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=localhost;Initial Catalog=SignumTest;User ID=sa;Password=sa")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=192.168.0.7;Initial Catalog=SignumTest;User ID=sa;Password=sa")]
         public string SignumTest {
             get {
                 return ((string)(this["SignumTest"]));

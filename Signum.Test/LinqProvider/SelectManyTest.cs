@@ -61,5 +61,17 @@ namespace Signum.Test.LinqProvider
         {
             var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members.DefaultIfEmpty()).Select(a => new { Artist = a.ToLite() }).ToList();
         }
+
+        [TestMethod]
+        public void SelectManyDefaultIf()
+        {
+            var artistsInBands = (from a1 in Database.Query<ArtistDN>()
+                                  from a in a1.Friends.DefaultIfEmpty()
+                                  select new
+                                  {
+                                      Artist = a1.ToLite(),
+                                      Friend = a
+                                  }).ToList();
+        }
     }
 }

@@ -88,6 +88,9 @@ namespace Signum.Engine.DynamicQuery
                 Connection.CommandCount = 0;
                 QueryResult result = dq.ExecuteQuery(new List<Filter>(), 100);
 
+                if(result.Data.Length == 0)
+                    return "Warning {0}: No results".Formato(queryName);
+
                 if (Connection.CommandCount != 1)
                     return "Error {0}: N + 1 query problem".Formato(queryName);
 
