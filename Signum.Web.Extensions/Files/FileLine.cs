@@ -128,6 +128,9 @@ namespace Signum.Web.Files
                 TypeContext.Compose(idValueField, TypeContext.Id),
                 value.TryCS(i => i.IdOrNull).TryToString("")));
 
+            if (value != null && ((IIdentifiable)value).IsNew)
+                helper.Write(helper.Hidden(TypeContext.Compose(idValueField, EntityBaseKeys.IsNew), ""));
+
             if ((helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
                 (value != null && value.IdOrNull == null))
             {

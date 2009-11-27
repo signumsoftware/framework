@@ -47,10 +47,12 @@ namespace Signum.Web.Files
 
         public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
         {
-            FilePathDN filePath = obj as FilePathDN;
-            if (filePath == null || filePath.IdOrNull == null)
+            //if (filePath == null || filePath.IdOrNull == null)
+            //    return null;
+            FilePathDN filePath = (FilePathDN)base.ApplyChanges(controller, obj, onFinish);
+            if (filePath != null && filePath.IdOrNull == null)
                 return null;
-            return base.ApplyChanges(controller, obj, onFinish);            
+            return filePath;
         }
     }
 }
