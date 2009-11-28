@@ -7,7 +7,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
         [ SqlDbType(Size = 200)]
@@ -46,11 +46,10 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class PackageLineDN : IdentifiableEntity
     {
         Lite<PackageDN> package;
-        [LocDescription]
         public Lite<PackageDN> Package
         {
             get { return package; }
@@ -59,7 +58,6 @@ namespace Signum.Entities.Processes
 
         [ImplementedByAll]
         Lite<IIdentifiable> target;
-        [LocDescription]
         public Lite<IIdentifiable> Target
         {
             get { return target; }
@@ -68,7 +66,6 @@ namespace Signum.Entities.Processes
 
         [ImplementedByAll]
         Lite<IIdentifiable> result;
-        [LocDescription]
         public Lite<IIdentifiable> Result //ConstructFrom only!
         {
             get { return result; }
@@ -76,7 +73,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? finishTime;
-        [LocDescription]
         public DateTime? FinishTime
         {
             get { return finishTime; }
@@ -86,7 +82,6 @@ namespace Signum.Entities.Processes
 
         [SqlDbType(Size = int.MaxValue)]
         string exception;
-        [LocDescription]
         public string Exception
         {
             get { return exception; }

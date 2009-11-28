@@ -7,12 +7,12 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Operations
 {
-    [Serializable, PluralLocDescription()]
+    [Serializable]
     public class LogOperationDN : IdentifiableEntity
     {
         [ImplementedByAll]
         Lite<IIdentifiable> target;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public Lite<IIdentifiable> Target
         {
             get { return target; }
@@ -20,7 +20,7 @@ namespace Signum.Entities.Operations
         }
 
         OperationDN operation;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public OperationDN Operation
         {
             get { return operation; }
@@ -28,7 +28,7 @@ namespace Signum.Entities.Operations
         }
 
         UserDN user;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public UserDN User
         {
             get { return user; }
@@ -36,7 +36,6 @@ namespace Signum.Entities.Operations
         }
 
         DateTime start;
-        [LocDescription]
         public DateTime Start
         {
             get { return start; }
@@ -44,7 +43,6 @@ namespace Signum.Entities.Operations
         }
 
         DateTime? end;
-        [LocDescription]
         public DateTime? End
         {
             get { return end; }
@@ -52,7 +50,6 @@ namespace Signum.Entities.Operations
         }
 
         string exception;
-        [LocDescription]
         public string Exception
         {
             get { return exception; }

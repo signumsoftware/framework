@@ -9,12 +9,12 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Reports
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class CompositeReportDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 200)]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 200)]
         public string Name
         {
             get { return name; }
@@ -22,7 +22,6 @@ namespace Signum.Entities.Reports
         }
         
         MList<Lite<ExcelReportDN>> excelReports;
-        [LocDescription]
         public MList<Lite<ExcelReportDN>> ExcelReports
         {
             get { return excelReports; }

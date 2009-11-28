@@ -9,11 +9,11 @@ using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class ScheduledTaskDN : IdentifiableEntity
     {
         IScheduleRuleDN rule;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public IScheduleRuleDN Rule
         {
             get { return rule; }
@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
         }
 
         ITaskDN task;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public ITaskDN Task
         {
             get { return task; }
@@ -29,7 +29,6 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime? nextDate = DateTime.Now;
-        [LocDescription]
         public DateTime? NextDate
         {
             get { return nextDate; }
@@ -37,7 +36,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool suspended;
-        [LocDescription]
         public bool Suspended
         {
             get { return suspended; }

@@ -7,12 +7,12 @@ using System.Security.Authentication;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class RoleDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
         public string Name
         {
             get { return name; }
@@ -20,7 +20,6 @@ namespace Signum.Entities.Authorization
         }
 
         MList<RoleDN> roles;
-        [LocDescription]
         public MList<RoleDN> Roles
         {
             get { return roles; }

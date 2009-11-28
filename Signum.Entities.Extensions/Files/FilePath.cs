@@ -35,7 +35,7 @@ namespace Signum.Entities.Files
 
         [NotNullable, SqlDbType(Size = 260)]
         string fileName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 260), FileNameValidator, LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 260), FileNameValidator]
         public string FileName
         {
             get { return fileName; }
@@ -61,7 +61,6 @@ namespace Signum.Entities.Files
             private set { Set(ref fileLength, value, () => FileLength); }
         }
 
-        [LocDescription]
         public string FileLengthString
         {
             get { return ((long)FileLength).ToComputerSize(true);}
@@ -69,7 +68,7 @@ namespace Signum.Entities.Files
 
         [NotNullable, SqlDbType(Size = 260)]
         string sufix;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 260), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 260)]
         public string Sufix
         {
             get { return sufix; }
@@ -89,7 +88,6 @@ namespace Signum.Entities.Files
         }
 
         FileTypeDN fileType;
-        [LocDescription]
         public FileTypeDN FileType
         {
             get { return fileType; }
@@ -97,7 +95,6 @@ namespace Signum.Entities.Files
         }
 
         FileRepositoryDN repository;
-        [LocDescription]
         public FileRepositoryDN Repository
         {
             get { return repository; }
@@ -105,7 +102,6 @@ namespace Signum.Entities.Files
         }
 
         static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => fp.Repository.PhysicalPrefix + '\\' + fp.Sufix;
-        [LocDescription]
         public string FullPhysicalPath
         {
             get { return Repository == null ? null : Repository.PhysicalPrefix + '\\' + Sufix; }
@@ -115,7 +111,6 @@ namespace Signum.Entities.Files
             fp.Repository != null && fp.Repository.WebPrefix.HasText() ? 
                 fp.Repository.WebPrefix + "/" + fp.Sufix.Replace("\\", "/").Replace(" ", "") :
                 null;
-        [LocDescription]
         public string FullWebPath
         {
             get

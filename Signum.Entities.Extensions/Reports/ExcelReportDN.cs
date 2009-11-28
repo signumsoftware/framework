@@ -10,12 +10,12 @@ using Signum.Entities.Files;
 
 namespace Signum.Entities.Reports
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class ExcelReportDN : IdentifiableEntity
     {
         [NotNullable]
         string queryName;
-        [StringLengthValidator(Min = 3), LocDescription]
+        [StringLengthValidator(Min = 3)]
         public string QueryName
         {
             get { return queryName; }
@@ -24,7 +24,7 @@ namespace Signum.Entities.Reports
 
         [NotNullable]
         string displayName;
-        [StringLengthValidator(Min = 3), LocDescription]
+        [StringLengthValidator(Min = 3)]
         public string DisplayName
         {
             get { return displayName; }
@@ -32,7 +32,7 @@ namespace Signum.Entities.Reports
         }
 
         EmbeddedFileDN file;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public EmbeddedFileDN File
         {
             get { return file; }
@@ -40,7 +40,6 @@ namespace Signum.Entities.Reports
         }
 
         bool deleted;
-        [LocDescription]
         public bool Deleted
         {
             get { return deleted; }

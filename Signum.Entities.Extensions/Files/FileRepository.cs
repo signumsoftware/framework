@@ -12,12 +12,12 @@ namespace Signum.Entities.Files
     {
     }
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class FileRepositoryDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name
         {
             get { return name; }
@@ -26,7 +26,7 @@ namespace Signum.Entities.Files
 
         [NotNullable, SqlDbType(Size = 500)]
         string physicalPrefix;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 500), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 500)]
         public string PhysicalPrefix
         {
             get { return physicalPrefix; }
@@ -35,7 +35,7 @@ namespace Signum.Entities.Files
 
         [SqlDbType(Size = 500)]
         string webPrefix;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 500), LocDescription]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 500)]
         public string WebPrefix
         {
             get { return webPrefix; }
@@ -43,7 +43,6 @@ namespace Signum.Entities.Files
         }
 
         bool active = true;
-        [LocDescription]
         public bool Active
         {
             get { return active; }
@@ -51,7 +50,6 @@ namespace Signum.Entities.Files
         }
 
         MList<FileTypeDN> fileTypes;
-        [LocDescription]
         public MList<FileTypeDN> FileTypes
         {
             get { return fileTypes; }

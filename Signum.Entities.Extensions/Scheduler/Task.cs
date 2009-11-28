@@ -16,7 +16,6 @@ namespace Signum.Entities.Scheduler
 
     public enum CustomTaskOperation
     {
-        [LocDescription]
         Execute,
     }
 
@@ -25,17 +24,16 @@ namespace Signum.Entities.Scheduler
     {
     }
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class CustomTaskDN : EnumDN, ITaskDN
     {
         
     }
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class CustomTaskExecutionDN : IdentifiableEntity
     {
         CustomTaskDN customTask;
-        [LocDescription]
         public CustomTaskDN CustomTask
         {
             get { return customTask; }
@@ -43,7 +41,6 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime startTime;
-        [LocDescription]
         public DateTime StartTime
         {
             get { return startTime; }
@@ -51,7 +48,6 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime? endTime;
-        [LocDescription]
         public DateTime? EndTime
         {
             get { return endTime; }
@@ -60,7 +56,6 @@ namespace Signum.Entities.Scheduler
 
         [SqlDbType(Size = int.MaxValue)]
         string exception;
-        [LocDescription]
         public string Exception
         {
             get { return exception; }

@@ -8,12 +8,12 @@ using System.Reflection;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class CalendarDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name
         {
             get { return name; }
@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
         }
 
         MList<HolidayDN> holidays;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public MList<HolidayDN> Holidays
         {
             get { return holidays; }

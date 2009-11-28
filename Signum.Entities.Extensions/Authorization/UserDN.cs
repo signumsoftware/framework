@@ -11,12 +11,12 @@ using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class UserDN : Entity, IPrincipal
     {
         [NotNullable, UniqueIndex, SqlDbType(Size = 100)]
         string userName;
-        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100), LocDescription]
+        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
         public string UserName
         {
             get { return userName; }
@@ -25,7 +25,7 @@ namespace Signum.Entities.Authorization
 
         [NotNullable]
         string passwordHash;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public string PasswordHash
         {
             get { return passwordHash; }
@@ -33,7 +33,6 @@ namespace Signum.Entities.Authorization
         }
 
         Lite<IEmployeeDN> employee;
-        [LocDescription]
         public Lite<IEmployeeDN> Employee
         {
             get { return employee; }
@@ -41,7 +40,7 @@ namespace Signum.Entities.Authorization
         }
 
         RoleDN role;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public RoleDN Role
         {
             get { return role; }
@@ -49,7 +48,7 @@ namespace Signum.Entities.Authorization
         }
 
         string email;
-        [EmailValidator, LocDescription]
+        [EmailValidator]
         public string EMail
         {
             get { return email; }
@@ -115,15 +114,10 @@ namespace Signum.Entities.Authorization
 
     public enum UserOperation
     {
-        [LocDescription]
         Create,
-        [LocDescription]
         SaveNew,
-        [LocDescription]
         Save,
-        [LocDescription]
         Enable,
-        [LocDescription]
         Disable,
     }
 

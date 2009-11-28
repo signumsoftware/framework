@@ -15,12 +15,12 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable, LocDescription]
+    [Serializable]
     public class ProcessDN : EnumDN, ITaskDN
     {
     }
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class ProcessExecutionDN : IdentifiableEntity
     {
         private ProcessExecutionDN() { }
@@ -31,14 +31,13 @@ namespace Signum.Entities.Processes
         }
 
         ProcessDN process;
-        [NotNullValidator, LocDescription]
+        [NotNullValidator]
         public ProcessDN Process
         {
             get { return process; }
         }
 
         IProcessDataDN processData;
-       [LocDescription]
         public IProcessDataDN ProcessData
         {
             get { return processData; }
@@ -46,7 +45,6 @@ namespace Signum.Entities.Processes
         }
 
         ProcessState state;
-        [LocDescription]
         public ProcessState State
         {
             get { return state; }
@@ -54,7 +52,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime creationDate = DateTime.Now;
-        [LocDescription]
         public DateTime CreationDate
         {
             get { return creationDate; }
@@ -62,7 +59,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? plannedDate;
-        [LocDescription]
         public DateTime? PlannedDate
         {
             get { return plannedDate; }
@@ -70,7 +66,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? cancelationDate;
-        [LocDescription]
         public DateTime? CancelationDate
         {
             get { return cancelationDate; }
@@ -78,7 +73,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? queuedDate;
-        [LocDescription]
         public DateTime? QueuedDate
         {
             get { return queuedDate; }
@@ -86,7 +80,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? executionStart;
-        [LocDescription]
         public DateTime? ExecutionStart
         {
             get { return executionStart; }
@@ -94,7 +87,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? executionEnd;
-        [LocDescription]
         public DateTime? ExecutionEnd
         {
             get { return executionEnd; }
@@ -102,7 +94,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? suspendDate;
-        [LocDescription]
         public DateTime? SuspendDate
         {
             get { return suspendDate; }
@@ -110,7 +101,6 @@ namespace Signum.Entities.Processes
         }
 
         DateTime? exceptionDate;
-        [LocDescription]
         public DateTime? ExceptionDate
         {
             get { return exceptionDate; }
@@ -119,7 +109,6 @@ namespace Signum.Entities.Processes
 
         [SqlDbType(Size = int.MaxValue)]
         string exception;
-        [LocDescription]
         public string Exception
         {
             get { return exception; }
@@ -127,7 +116,6 @@ namespace Signum.Entities.Processes
         }
 
         decimal? progress;
-        [LocDescription]
         public decimal? Progress
         {
             get { return progress; }
@@ -200,47 +188,30 @@ namespace Signum.Entities.Processes
 
     public enum ProcessState
     {
-        [LocDescription]
         Created,
-        [LocDescription]
         Planned,
-        [LocDescription]
         Canceled,
-        [LocDescription]
         Queued,
-        [LocDescription]
         Executing,
-        [LocDescription]
         Suspending,
-        [LocDescription]
         Suspended,
-        [LocDescription]
         Finished,
-        [LocDescription]
         Error,
     }
 
     public enum ProcessOperation
     {
-        [LocDescription]
         FromProcess,
-        [LocDescription]
         Plan,
-        [LocDescription]
         Save,
-        [LocDescription]
         Cancel,
-        [LocDescription]
         Execute,
-        [LocDescription]
         Suspend,
     }
 
     public enum ProcessQueries
     {
-        [LocDescription]
         CurrentExecutions,
-        [LocDescription]
         ErrorExecutions,
     }
 }

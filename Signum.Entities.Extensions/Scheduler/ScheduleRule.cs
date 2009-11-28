@@ -20,7 +20,7 @@ namespace Signum.Entities.Scheduler
     public abstract class ScheduleRuleDayDN : Entity, IScheduleRuleDN
     {
         int hour;
-        [NumberBetweenValidator(0, 23), Format("00"), LocDescription]
+        [NumberBetweenValidator(0, 23), Format("00")]
         public int Hour
         {
             get { return hour; }
@@ -28,7 +28,7 @@ namespace Signum.Entities.Scheduler
         }
 
         int minute;
-        [NumberBetweenValidator(0, 59), Format("00"), LocDescription]
+        [NumberBetweenValidator(0, 59), Format("00")]
         public int Minute
         {
             get { return minute; }
@@ -36,7 +36,7 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime startingOn = DateTime.Today;
-        [DateOnlyValidator, LocDescription]
+        [DateOnlyValidator]
         public DateTime StartingOn
         {
             get { return startingOn; }
@@ -61,7 +61,7 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class ScheduleRuleDailyDN : ScheduleRuleDayDN
     {
         public override string ToString()
@@ -75,11 +75,10 @@ namespace Signum.Entities.Scheduler
         }
     }
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class ScheduleRuleWeeklyDN : ScheduleRuleDayDN
     {
         DayOfWeek dayOfTheWeek;
-        [LocDescription]
         public DayOfWeek DayOfTheWeek
         {
             get { return dayOfTheWeek; }
@@ -108,11 +107,10 @@ namespace Signum.Entities.Scheduler
     }
 
 
-    [Serializable, LocDescription]
+    [Serializable]
     public class ScheduleRuleWeekDaysDN : ScheduleRuleDayDN
     {
         bool monday;
-        [LocDescription]
         public bool Monday
         {
             get { return monday; }
@@ -120,7 +118,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool tuesday;
-        [LocDescription]
         public bool Tuesday
         {
             get { return tuesday; }
@@ -128,7 +125,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool wednesday;
-        [LocDescription]
         public bool Wednesday
         {
             get { return wednesday; }
@@ -136,7 +132,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool thursday;
-        [LocDescription]
         public bool Thursday
         {
 
@@ -145,7 +140,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool friday;
-        [LocDescription]
         public bool Friday
         {
             get { return friday; }
@@ -153,7 +147,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool saturday;
-        [LocDescription]
         public bool Saturday
         {
             get { return saturday; }
@@ -161,7 +154,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool sunday;
-        [LocDescription]
         public bool Sunday
         {
             get { return sunday; }
@@ -169,7 +161,6 @@ namespace Signum.Entities.Scheduler
         }
 
         CalendarDN calendar;
-        [LocDescription]
         public CalendarDN Calendar
         {
             get { return calendar; }
@@ -181,7 +172,6 @@ namespace Signum.Entities.Scheduler
         }
 
         bool? holiday;
-        [LocDescription]
         public bool? Holiday
         {
             get { return holiday; }
