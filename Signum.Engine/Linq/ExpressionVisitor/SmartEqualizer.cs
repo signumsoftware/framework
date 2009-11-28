@@ -39,7 +39,7 @@ namespace Signum.Engine.Linq
             if (exp1.NodeType == ExpressionType.New && exp2.NodeType == ExpressionType.New)
             {
                 return (exp1 as NewExpression).Arguments.ZipStrict(
-                       (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.TryEntityEquals(o, i)).Aggregate((a, b) => Expression.And(a, b));
+                       (exp2 as NewExpression).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).Aggregate((a, b) => Expression.And(a, b));
             }
 
             return SmartEqualizer.TryEntityEquals(exp1, exp2);
@@ -133,9 +133,7 @@ namespace Signum.Engine.Linq
 
         static Expression FieIbaEquals(FieldInitExpression fie, ImplementedByAllExpression iba)
         {
-            int id = Schema.Current.IDsForType[fie.Type];
-
-            return Expression.And(EqualNullable(fie.ExternalId, iba.Id), EqualNullable(Expression.Constant(id), iba.TypeId));
+            return Expression.And(EqualNullable(fie.ExternalId, iba.Id), EqualNullable(fie.TypeId, iba.TypeId));
         }
 
         static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2)
@@ -150,7 +148,7 @@ namespace Signum.Engine.Linq
         {
             var list = ib.Implementations.Select(i => Expression.And(
                 EqualNullable(iba.Id, i.Field.ExternalId),
-                EqualNullable(iba.TypeId, Expression.Constant(Schema.Current.IDsForType[i.Type])))).ToList();
+                EqualNullable(iba.TypeId, i.Field.TypeId))).ToList();
 
             if (list.Count == 0)
                 return SqlConstantExpression.False;

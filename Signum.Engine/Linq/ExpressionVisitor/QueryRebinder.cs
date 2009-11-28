@@ -12,12 +12,12 @@ using System.Diagnostics;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Linq
-{
+{ 
     internal class QueryRebinder : DbExpressionVisitor
     {
-        ImmutableStack<Dictionary<ColumnExpression, ColumnExpression>> scopes = ImmutableStack<Dictionary<ColumnExpression, ColumnExpression>>.Empty;
+        ImmutableStack<Dictionary<ColumnExpression, Expression>> scopes = ImmutableStack<Dictionary<ColumnExpression, Expression>>.Empty;
 
-        public Dictionary<ColumnExpression, ColumnExpression> CurrentScope { get { return scopes.Peek(); } }
+        public Dictionary<ColumnExpression, Expression> CurrentScope { get { return scopes.Peek(); } }
 
         private QueryRebinder() { }
 
@@ -50,7 +50,7 @@ namespace Signum.Engine.Linq
         {
             var columns = CurrentScope.Keys.Where(ce => ce.Alias == table.Alias).ToList();
 
-            CurrentScope.SetRange(columns, columns);
+            CurrentScope.SetRange(columns, columns.Cast<Expression>());
 
             return table;
         }
@@ -100,10 +100,10 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitSelect(SelectExpression select)
         {
-            Dictionary<ColumnExpression, ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (ColumnExpression)null);
-            Dictionary<ColumnExpression, ColumnExpression> externalAnswers = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value != null).ToDictionary();
+            Dictionary<ColumnExpression, Expression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (Expression)null);
+            Dictionary<ColumnExpression, Expression> externalAnswers = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value != null).ToDictionary();
 
-            var scope = NewScope();
+            var scope = NewScope();//SCOPE START
 
             CurrentScope.AddRange(askedColumns.Where(kvp => kvp.Key.Alias != select.Alias).ToDictionary());
             CurrentScope.AddRange(externalAnswers);
@@ -120,11 +120,13 @@ namespace Signum.Engine.Linq
             Expression where = this.Visit(select.Where);
             ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
             ReadOnlyCollection<Expression> groupBy = this.VisitGroupBy(select.GroupBy);
-            ReadOnlyCollection<ColumnDeclaration> columns = VisitAndExpandColumns(select, askedColumns);
+            ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
+                
+            columns = AnswerAndExpand(columns, select.Alias, askedColumns);
 
             var externals = CurrentScope.Where(kvp => !select.KnownAliases.Contains(kvp.Key.Alias) && kvp.Value == null).ToDictionary();
 
-            scope.Dispose();
+            scope.Dispose(); ////SCOPE END 
 
             CurrentScope.SetRange(externals);
             CurrentScope.SetRange(askedColumns);
@@ -135,32 +137,43 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        private ReadOnlyCollection<ColumnDeclaration> VisitAndExpandColumns(SelectExpression select, Dictionary<ColumnExpression, ColumnExpression> askedColumns)
+        private ReadOnlyCollection<ColumnDeclaration> AnswerAndExpand(ReadOnlyCollection<ColumnDeclaration> columns, string currentAlias, Dictionary<ColumnExpression, Expression> askedColumns)
         {
-            var columns = this.VisitColumnDeclarations(select.Columns);
-
-            List<ColumnDeclaration> columnDeclarations = columns.ToList();
+            List<ColumnDeclaration> result = columns.ToList();
          
             foreach (var col in askedColumns.Keys.ToArray())
             {
-                if (col.Alias == select.Alias)
-                    askedColumns[col] = col;
+                if (col.Alias == currentAlias)
+                {
+                    Expression expr = columns.Single(cd => cd.Name == col.Name).Expression;
+
+                    askedColumns[col] = expr.NodeType == (ExpressionType)DbExpressionType.SqlConstant? expr: col;
+                }
                 else
                 {
-                    ColumnExpression colExp = CurrentScope[col];
-                    ColumnDeclaration cd = columnDeclarations.FirstOrDefault(c => c.Expression.Equals(col));
-                    if (cd == null)
+                    Expression expr = CurrentScope[col];
+                    ColumnExpression colExp = expr as ColumnExpression;
+                    if (colExp != null)
                     {
-                        cd = new ColumnDeclaration(GetUniqueColumnName(columnDeclarations, colExp.Name), colExp);
-                        columnDeclarations.Add(cd); 
-                    }
+                        ColumnDeclaration cd = result.FirstOrDefault(c => c.Expression.Equals(col));
+                        if (cd == null)
+                        {
+                            cd = new ColumnDeclaration(GetUniqueColumnName(result, colExp.Name), colExp);
+                            result.Add(cd);
+                        }
 
-                    askedColumns[col] = new ColumnExpression(col.Type, select.Alias, cd.Name);
+                        askedColumns[col] = new ColumnExpression(col.Type, currentAlias, cd.Name);
+                    }
+                    else
+                    {
+                        askedColumns[col] = expr;
+                    }
                 }
             }
 
-            if (columns.Count != columnDeclarations.Count)
-                columns = columnDeclarations.ToReadOnly();
+
+            if (columns.Count != result.Count)
+                return result.ToReadOnly();
 
             return columns;
         }
@@ -176,13 +189,13 @@ namespace Signum.Engine.Linq
 
         public IDisposable NewScope()
         {
-            scopes = scopes.Push(new Dictionary<ColumnExpression, ColumnExpression>());
+            scopes = scopes.Push(new Dictionary<ColumnExpression, Expression>());
             return new Disposable(() => scopes = scopes.Pop());
         }
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            ColumnExpression result;
+            Expression result;
             if (CurrentScope.TryGetValue(column, out result))
                 return result ?? column;
             else

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -58,7 +58,7 @@
     <Compile Include="DescriptionAttributes.cs" />
     <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
-    <Compile Include="Pluralizer.cs" />
+    <Compile Include="NaturalLanguageTools.cs" />
     <Compile Include="QueryableExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="CSV.cs" />

@@ -35,8 +35,6 @@ namespace Signum.Engine
             set { log = value; }
         }
 
-        public abstract string GetSchemaName();
-
         protected static void Log(SqlPreCommandSimple pcs)
         {
             if (log != null)
@@ -58,6 +56,8 @@ namespace Signum.Engine
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand);
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
+
+        public abstract string SchemaName();
     }
 
 
@@ -89,11 +89,6 @@ namespace Signum.Engine
         {
             get { return connectionString; }
             set { connectionString = value; }
-        }
-
-        public override string GetSchemaName()
-        {
-            return (string)SqlBuilder.GetCurrentSchema().ExecuteScalar();
         }
 
         protected internal override bool IsMock
@@ -215,6 +210,11 @@ namespace Signum.Engine
                 default: return ex; 
             }
         }
+
+        public override string SchemaName()
+        {
+            return new SqlConnection(connectionString).Database;
+        }
     }
 
     public class MockConnection : BaseConnection
@@ -223,11 +223,6 @@ namespace Signum.Engine
             : base(schema)
         {
 
-        }
-
-        public override string GetSchemaName()
-        {
-            return "Mock";
         }
 
         List<SqlPreCommandSimple> executedCommands = new List<SqlPreCommandSimple>();
@@ -263,6 +258,11 @@ namespace Signum.Engine
         {
             executedCommands.Add(preCommand);
             return null;
+        }
+
+        public override string SchemaName()
+        {
+            return "Mock";
         }
     }
 }

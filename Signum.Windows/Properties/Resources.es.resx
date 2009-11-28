@@ -333,4 +333,10 @@
   <data name="ThereIsNo0" xml:space="preserve">
     <value>No hay {0}</value>
   </data>
+  <data name="Newa" xml:space="preserve">
+    <value>Nueva</value>
+  </data>
+  <data name="Newo" xml:space="preserve">
+    <value>Nuevo</value>
+  </data>
 </root>

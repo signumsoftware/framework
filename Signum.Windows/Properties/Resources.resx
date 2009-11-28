@@ -145,7 +145,7 @@
     <value>There is no EntitySetting for {0}</value>
   </data>
   <data name="NoAdminControlFor0" xml:space="preserve">
-    <value>There is no  AdminControl for {0}</value>
+    <value>There is no AdminControl for {0}</value>
   </data>
   <data name="Column" xml:space="preserve">
     <value>Column</value>
@@ -332,5 +332,11 @@
   </data>
   <data name="ThereIsNo0" xml:space="preserve">
     <value>There is no {0}</value>
+  </data>
+  <data name="Newa" xml:space="preserve">
+    <value>Nueva</value>
+  </data>
+  <data name="Newo" xml:space="preserve">
+    <value>Nuevo</value>
   </data>
 </root>

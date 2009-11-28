@@ -28,17 +28,31 @@ namespace Signum.Engine.Linq
             return column;
         }
 
+        bool IsConstant(Expression exp)
+        {
+            return ((DbExpressionType)exp.NodeType) == DbExpressionType.SqlConstant;
+        }
+
         protected override Expression VisitSelect(SelectExpression select)
         {
             // visit column projection first
             HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(select.Alias); // a veces no se usa
 
             ReadOnlyCollection<ColumnDeclaration> columns = select.Columns.NewIfChange(
-                c => !columnsUsed.Contains(c.Name) && !select.Distinct ? null : Visit(c.Expression).Map(ex => ex == c.Expression ? c : new ColumnDeclaration(c.Name, ex)));
+                c =>
+                {
+                    if (select.Distinct ? IsConstant(c.Expression) : !columnsUsed.Contains(c.Name))
+                        return null;
+
+                    var ex = Visit(c.Expression);
+
+                    return ex == c.Expression ? c : new ColumnDeclaration(c.Name, ex);
+                });
 
             ReadOnlyCollection<OrderExpression> orderbys = this.VisitOrderBy(select.OrderBy);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<Expression> groupbys = this.VisitGroupBy(select.GroupBy);
+            ReadOnlyCollection<Expression> groupbys = select.GroupBy.NewIfChange(e => IsConstant(e) ? null : Visit(e));
+
             SourceExpression from = this.VisitSource(select.From);
 
             if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupbys != select.GroupBy)
@@ -120,6 +134,14 @@ namespace Signum.Engine.Linq
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
             return update;
+        }
+
+        protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
+        {
+            var orderBys = rowNumber.OrderBy.NewIfChange(o => IsConstant(o.Expression) ? null : Visit(o.Expression).Map(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
+            if (orderBys != rowNumber.OrderBy)
+                return new RowNumberExpression(orderBys);
+            return rowNumber;
         }
     }
 }

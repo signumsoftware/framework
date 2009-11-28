@@ -269,10 +269,9 @@ namespace Signum.Windows
             if (!IsFindable(findOptions.QueryName))
                 throw new ApplicationException("The query {0} is not allowed".Formato(findOptions.QueryName));
 
-            SearchWindow sw = new SearchWindow(findOptions.OnLoadMode)
+            SearchWindow sw = new SearchWindow(findOptions.Buttons, findOptions.OnLoadMode)
             {
                 QueryName = findOptions.QueryName,
-                Buttons = findOptions.Buttons,
                 MultiSelection = findOptions.AllowMultiple,
                 FilterOptions = new FreezableCollection<FilterOption>(findOptions.FilterOptions),
                 ShowFilters = findOptions.ShowFilters,

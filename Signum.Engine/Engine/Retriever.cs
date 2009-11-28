@@ -214,7 +214,18 @@ namespace Signum.Engine
         internal IList GetList(RelationalTable table, int id)
         {
             return reqList.GetOrCreate(table).GetOrCreate(id, table.Constructor);
-        } 
+        }
+
+        public List<IdentifiableEntity> UnsafeRetrieveAll(Type type)
+        {
+            SqlPreCommandSimple spc = Schema.Current.Table(type).SelectAllIDs().ToSimple();
+
+            DataTable dataTable = Executor.ExecuteDataTable(spc);
+            Table table = Schema.Current.Table(type);
+
+            return dataTable.Rows.Cast<DataRow>().Select(r =>
+                GetIdentifiable(table, (int)r.Cell(SqlBuilder.PrimaryKeyName), true)).ToList();
+        }
         #endregion
     }
 }

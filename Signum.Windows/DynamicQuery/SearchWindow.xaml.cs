@@ -29,15 +29,7 @@ namespace Signum.Windows
             get { return (object)GetValue(QueryNameProperty); }
             set { SetValue(QueryNameProperty, value); }
         }
-
-        public static readonly DependencyProperty ButtonsProperty =
-            DependencyProperty.Register("Buttons", typeof(SearchButtons), typeof(SearchWindow), new FrameworkPropertyMetadata(SearchButtons.OkCancel, (d, e) => ((SearchWindow)d).ButtonsChanged()));
-        public SearchButtons Buttons
-        {
-            get { return (SearchButtons)GetValue(ButtonsProperty); }
-            set { SetValue(ButtonsProperty, value); }
-        }
-
+    
         public static readonly DependencyProperty FilterOptionsProperty =
           DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOption> FilterOptions
@@ -94,17 +86,18 @@ namespace Signum.Windows
             set { SetValue(ShowFooterProperty, value); }
         }
 
-        public static readonly DependencyProperty OnLoadProperty =
-            DependencyProperty.Register("OnLoad", typeof(OnLoadMode), typeof(SearchWindow), new FrameworkPropertyMetadata(OnLoadMode.None ));
-        public OnLoadMode OnLoad
-        {
-            get { return (OnLoadMode)GetValue(OnLoadProperty); }
-            set { SetValue(OnLoadProperty, value); }
-        }
+        public SearchButtons Buttons { get; private set; }
+        public OnLoadMode OnLoad { get; private set; }
 
-        public SearchWindow(OnLoadMode onLoad):this()
+        public SearchWindow(SearchButtons buttons, OnLoadMode onLoad)
         {
-            OnLoad = onLoad;
+            this.InitializeComponent();
+
+            this.OnLoad = onLoad;
+            this.Buttons = buttons;
+            if (buttons == SearchButtons.Close && onLoad == OnLoadMode.SearchAndReturnIfOne)
+                throw new InvalidOperationException("Invalid SearchWindows configuration, Close and SearchAndReturnIfOne don't work together");
+
             switch (onLoad)
             {
                 case OnLoadMode.None:
@@ -119,13 +112,34 @@ namespace Signum.Windows
                         break;
                     }
             }
-           
+
+            ButtonsChanged();
         }
 
         public SearchWindow()
         {
             this.InitializeComponent();
             ButtonsChanged();
+        }
+
+        void ButtonsChanged()
+        {
+            bool okCancel = Buttons == SearchButtons.OkCancel;
+
+            btOk.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
+            btCancel.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
+            
+            btClose.Visibility = !okCancel ? Visibility.Visible : Visibility.Collapsed;
+            searchControl.IsAdmin = !okCancel;
+
+            if (okCancel)
+            {
+                searchControl.DoubleClick += new Action(searchControl_DoubleClick);
+            }
+            else
+            {
+                searchControl.DoubleClick -= new Action(searchControl_DoubleClick);
+            }
         }
 
         void searchControl_QueryResultChanged(object sender, RoutedEventArgs e)
@@ -136,7 +150,6 @@ namespace Signum.Windows
                     OkAndClose();
                 else
                     searchControl.QueryResultChanged -= new RoutedEventHandler(searchControl_QueryResultChanged);
-
             }
         }
 
@@ -179,24 +192,6 @@ namespace Signum.Windows
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             Close();
-        }
-
-        private void ButtonsChanged()
-        {
-            bool okCancel = Buttons == SearchButtons.OkCancel;
-
-            btOk.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
-            btCancel.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
-            btClose.Visibility = !okCancel ? Visibility.Visible : Visibility.Collapsed;
-            if (okCancel)
-            {
-                searchControl.DoubleClick += new Action(searchControl_DoubleClick);
-            }
-            else
-            {
-                searchControl.DoubleClick -= new Action(searchControl_DoubleClick);
-            }
-
         }
 
         void searchControl_DoubleClick()

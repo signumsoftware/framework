@@ -41,7 +41,7 @@ namespace Signum.Engine
 
         static void Schema_Initializing(Schema sender)
         {
-            List<TypeDN> types = Database.RetrieveAll<TypeDN>();
+            List<TypeDN> types = Administrator.UnsafeRetrieveAll<TypeDN>();
 
             var dict = EnumerableExtensions.JoinStrict(
                 types, sender.Tables.Keys, t => t.ClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).Name,

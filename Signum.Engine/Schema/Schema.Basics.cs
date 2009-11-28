@@ -205,10 +205,16 @@ namespace Signum.Engine.Maps
 
         public void Initialize(InitLevel topLevel)
         {
-            if (initLevel.HasValue && initLevel.Value > initLevel)
-                return;
+            for (InitLevel current = initLevel ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
+            {
+                InitializeJust(current); 
+                initLevel = current; 
+            }
+        }
 
-            var handlers = initializing.Where(pair => (initLevel == null || initLevel < pair.Level) && pair.Level <= topLevel).ToList();
+        void InitializeJust(InitLevel currentLevel)
+        {
+            var handlers = initializing.Where(pair => currentLevel == pair.Level).ToList();
 
             if (SilentMode)
             {
@@ -229,8 +235,6 @@ namespace Signum.Engine.Maps
                     Debug.WriteLine("{1:0.00} ms initializing {0} ".Formato(pair.Handler.Method.DeclaringType.TypeName(), sw.Elapsed.TotalMilliseconds));
                 }
             }
-
-            initLevel = topLevel;
         }
         #endregion
 

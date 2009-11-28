@@ -14,37 +14,6 @@ using Signum.Utilities.Properties;
 
 namespace Signum.Utilities
 {
-    [AttributeUsage(AttributeTargets.All)]
-    public class LocDescriptionAttribute : Attribute
-    {
-        public bool Auto { get { return resourceKey == null || resourceSource == null; } }
-
-        Type resourceSource;
-        string resourceKey;
-
-        public LocDescriptionAttribute()
-        {
-        }
-
-        public LocDescriptionAttribute(Type resourceSource, string resourceKey)
-            : base()
-        {
-            this.resourceSource = resourceSource;
-            this.resourceKey = resourceKey;
-        }
-
-        public string Description
-        {
-            get
-            {
-                if (Auto)
-                    throw new ApplicationException("Use ReflectionTools.GetDescription instead");
-
-                return new ResourceManager(resourceSource).GetString(resourceKey);
-            }
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Class)]
     public class PluralDescriptionAttribute : Attribute
     {
@@ -56,35 +25,10 @@ namespace Signum.Utilities
         }
     }
 
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class PluralLocDescriptionAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Assembly)]
+    public class LocalizeDescriptionsAttribute : Attribute
     {
-        public bool Auto { get { return resourceKey == null || resourceSource == null; } }
 
-        Type resourceSource;
-        string resourceKey;
-
-        public PluralLocDescriptionAttribute()
-        {
-        }
-
-        public PluralLocDescriptionAttribute(Type resourceSource, string resourceKey)
-        {
-            this.resourceSource = resourceSource;
-            this.resourceKey = resourceKey;
-        }
-
-        public string PluralDescription
-        {
-            get
-            {
-                if (Auto)
-                    throw new ApplicationException("Use ReflectionTools.GetPluralDescription instead");
-
-                return new ResourceManager(resourceSource).GetString(resourceKey);
-            }
-        }
     }
 
     public static class DescriptionManager
@@ -133,22 +77,36 @@ namespace Signum.Utilities
         public static string NicePluralName(this Type type)
         {
             return DescriptionManager.GetPluralDescription(type) ??
-                   Pluralizer.Pluralize(type.NiceName());
+                   NaturalLanguageTools.Pluralize(type.NiceName());
         }
+
+        public static string GenderizedResource(Type type, string resourceKey)
+        {
+            ResourceManager resource = type.Assembly.GetDefaultResourceManager();
+            Gender gender = GetGender(type);
+
+            return GetGenderAwareResource(resource, resourceKey, gender);
+        }
+
+        public static string GetGenderAwareResource(this ResourceManager resource, string resourceKey, Gender gender)
+        {
+            string compoundKey =
+                (gender == Gender.Masculine ? "_m" :
+                 gender == Gender.Femenine ? "_f" : "_n");
+
+            return resource.GetString(compoundKey) ?? resource.GetString(compoundKey);
+        }
+
 
         public static string GetDescription(MemberInfo memberInfo)
         {
-            LocDescriptionAttribute loc = memberInfo.SingleAttribute<LocDescriptionAttribute>();
-            if (loc != null)
+            Assembly assembly = (memberInfo.DeclaringType ?? (Type)memberInfo).Assembly;
+            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
-                if (loc.Auto)
-                {
-                    string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add(memberInfo.Name, "_");
-                    Assembly assembly = (memberInfo.DeclaringType ?? (Type)memberInfo).Assembly;
-                    return assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
-                }
-                else
-                    return loc.Description;
+                string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add(memberInfo.Name, "_");
+                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                if (result != null)
+                    return result;
             }
 
             DescriptionAttribute desc = memberInfo.SingleAttribute<DescriptionAttribute>();
@@ -162,17 +120,13 @@ namespace Signum.Utilities
 
         public static string GetPluralDescription(Type type)
         {
-            PluralLocDescriptionAttribute loc = type.SingleAttribute<PluralLocDescriptionAttribute>();
-            if (loc != null)
+            Assembly assembly = type.Assembly;
+            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
-                if (loc.Auto)
-                {
-                    string key = type.Name + "_Plural";
-                    Assembly assembly = type.Assembly;
-                    return assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
-                }
-                else
-                    return loc.PluralDescription;
+                string key = type.Name + "_Plural";
+                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                if (result != null)
+                    return result;
             }
 
             PluralDescriptionAttribute desc = type.SingleAttribute<PluralDescriptionAttribute>();
@@ -182,6 +136,34 @@ namespace Signum.Utilities
             }
 
             return null;
+        }
+
+        public static Gender GetGender(Type type)
+        {
+            Assembly assembly = type.Assembly;
+            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
+            {
+                string key = type.Name + "_Gender";
+                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                if (result != null)
+                {
+                    if (result.Equals("m", StringComparison.InvariantCultureIgnoreCase) ||
+                        result.Equals("male", StringComparison.InvariantCultureIgnoreCase) ||
+                        result.Equals("masculine", StringComparison.InvariantCultureIgnoreCase))
+                        return Gender.Masculine;
+
+                    if (result.Equals("f", StringComparison.InvariantCultureIgnoreCase) ||
+                        result.Equals("female", StringComparison.InvariantCultureIgnoreCase) ||
+                        result.Equals("femenine", StringComparison.InvariantCultureIgnoreCase))
+                        return Gender.Femenine;
+
+                    if (result.Equals("n", StringComparison.InvariantCultureIgnoreCase) ||
+                        result.Equals("neuter", StringComparison.InvariantCultureIgnoreCase))
+                        return Gender.Neuter;
+                }
+            }
+
+            return NaturalLanguageTools.GetGender(type.NiceName());
         }     
 
         public static ResourceManager GetDefaultResourceManager(this Assembly assembly)

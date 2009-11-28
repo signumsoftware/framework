@@ -36,7 +36,7 @@
 			<RowDefinition Height="25"/>
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<Grid Background="{DynamicResource BlueBackground}">
+		<Grid Background="{DynamicResource LightBlueBackground}">
 			<StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
 				<Image Stretch="None" Source="{Binding Icon, ElementName=me, Mode=Default}" />
 				<Label Content="{Binding LabelText, ElementName=me, Mode=Default}" VerticalAlignment="Center" />

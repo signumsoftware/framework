@@ -117,12 +117,28 @@ namespace Signum.Windows
             set { SetValue(SearchOnLoadProperty, value); }
         }
 
+        public static readonly DependencyProperty IsAdminProperty =
+            DependencyProperty.Register("IsAdmin", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool IsAdmin
+        {
+            get { return (bool)GetValue(IsAdminProperty); }
+            set { SetValue(IsAdminProperty, value); }
+        }
+
         public static readonly DependencyProperty ViewProperty =
            DependencyProperty.Register("View", typeof(bool), typeof(SearchControl), new FrameworkPropertyMetadata(true, (d, e) => ((SearchControl)d).UpdateVisibility()));
         public bool View
         {
             get { return (bool)GetValue(ViewProperty); }
             set { SetValue(ViewProperty, value); }
+        }
+
+        public static readonly DependencyProperty ViewReadOnlyProperty =
+            DependencyProperty.Register("ViewReadOnly", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+        public bool ViewReadOnly
+        {
+            get { return (bool)GetValue(ViewReadOnlyProperty); }
+            set { SetValue(ViewReadOnlyProperty, value); }
         }
 
         public static readonly DependencyProperty CreateProperty =
@@ -211,10 +227,13 @@ namespace Signum.Windows
                 SetValue(EntityTypeKey, Reflector.ExtractLite(entity.Type));
 
                 if (this.NotSet(ViewProperty) && View)
-                    View = Navigator.IsViewable(EntityType, true);
+                    View = Navigator.IsViewable(EntityType, IsAdmin);
 
                 if (this.NotSet(CreateProperty) && Create)
-                    Create = Navigator.IsCreable(EntityType, true);
+                    Create = Navigator.IsCreable(EntityType, IsAdmin);
+
+                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly)
+                    ViewReadOnly = Navigator.IsReadOnly(EntityType, IsAdmin);
             }
 
             foreach (var fo in FilterOptions)
@@ -414,7 +433,9 @@ namespace Signum.Windows
                 return;
 
             if (this.Viewing == null)
-                Navigator.View(entity, new ViewOptions { Buttons = ViewButtons.Save, ReadOnly = Navigator.IsReadOnly(EntityType, true) });
+            {
+                Navigator.View(entity, new ViewOptions { Buttons = ViewButtons.Save, ReadOnly = ViewReadOnly });
+            }
             else
                 this.Viewing(entity);
         }

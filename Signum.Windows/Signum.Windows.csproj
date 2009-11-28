@@ -123,6 +123,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="EntityTitle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\WatermarkTextBox.generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -269,6 +273,9 @@
       <DependentUpon>TextArea.xaml</DependentUpon>
     </Compile>
     <Compile Include="EntityControls\LineBase.cs" />
+    <Compile Include="EntityTitle.xaml.cs">
+      <DependentUpon>EntityTitle.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MarkupExtensions\EqualsExtension.cs" />
     <Compile Include="ThemeManager.cs" />
     <Compile Include="ValueLineBox.xaml.cs">

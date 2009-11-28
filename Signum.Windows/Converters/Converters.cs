@@ -88,7 +88,7 @@ namespace Signum.Windows
         public static readonly IValueConverter TypeContextName =
             ConverterFactory.New((FrameworkElement b) => b.TryCC(fe => Common.GetTypeContext(fe)).TryCC(c => c.Type).TryCC(t => t.NiceName()) ?? "??");
 
-        public static readonly IValueConverter TypeName =
+        public static readonly IValueConverter NiceName =
             ConverterFactory.New((Type type) => type.TryCC(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter TypeImage =

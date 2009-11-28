@@ -19,7 +19,7 @@
                         <ToggleButton Checked="ToggleButton_Checked" Padding="3">
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="{Binding Converter={x:Static m:Converters.TypeImage}}" Height="16" Width="16"/>
-                                <TextBlock Text="{Binding Converter={x:Static m:Converters.TypeName}}" FontSize="12" Margin="10,0"/>
+                                <TextBlock Text="{Binding Converter={x:Static m:Converters.NiceName}}" FontSize="12" Margin="10,0"/>
                             </StackPanel>
                         </ToggleButton>
                     </DataTemplate>

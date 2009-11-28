@@ -324,6 +324,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nueva.
+        /// </summary>
+        internal static string Newa {
+            get {
+                return ResourceManager.GetString("Newa", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Alert.
         /// </summary>
         internal static string NewAlert {
@@ -351,7 +360,16 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There is no  AdminControl for {0}.
+        ///   Looks up a localized string similar to Nuevo.
+        /// </summary>
+        internal static string Newo {
+            get {
+                return ResourceManager.GetString("Newo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no AdminControl for {0}.
         /// </summary>
         internal static string NoAdminControlFor0 {
             get {

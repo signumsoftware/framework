@@ -96,8 +96,11 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(ProjectionToken token, string tableAlias, QueryBinder binder)
         {
-            var result = new FieldInitExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType, null,
-                new ColumnExpression(this.ReferenceType(), tableAlias, Name), null, token);
+            Type cleanType = IsLite ? Reflector.ExtractLite(FieldType) : FieldType;
+
+            var result = new FieldInitExpression(cleanType, null,
+                new ColumnExpression(this.ReferenceType(), tableAlias, Name),
+                QueryBinder.TypeSqlConstant(cleanType), null, token);
 
             if(this.IsLite)
                 return binder.MakeLite(this.FieldType, result, null);
@@ -141,8 +144,9 @@ namespace Signum.Engine.Maps
             var implementations = (from kvp in ImplementationColumns
                                    select new ImplementationColumnExpression(kvp.Key,
                                             new FieldInitExpression(kvp.Key, null,
-                                                new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name)
-                                             , null, token))).ToReadOnly();
+                                                new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name),
+                                                QueryBinder.TypeSqlConstant(kvp.Key),
+                                                null, token))).ToReadOnly();
 
             var result = new ImplementedByExpression(IsLite ? Reflector.ExtractLite(FieldType) : FieldType, implementations);
 

@@ -124,16 +124,16 @@
     <value>mayor o igual que</value>
   </data>
   <data name="FilterOperation_Contains" xml:space="preserve">
-    <value>Contiene</value>
+    <value>contiene</value>
   </data>
   <data name="FilterOperation_EndsWith" xml:space="preserve">
-    <value>Acaba por</value>
+    <value>acaba por</value>
   </data>
   <data name="FilterOperation_Like" xml:space="preserve">
-    <value>Like</value>
+    <value>like</value>
   </data>
   <data name="FilterOperation_StartsWith" xml:space="preserve">
-    <value>Empieza por</value>
+    <value>empieza por</value>
   </data>
   <data name="NewEntitiesAreNotAllowed" xml:space="preserve">
     <value>No se puede establecer una entidad nueva</value>
@@ -193,7 +193,7 @@
     <value>{0} no hereda de IdentifiableEntity</value>
   </data>
   <data name="FilterOperation_DistinctTo" xml:space="preserve">
-    <value>Distinto de</value>
+    <value>distinto de</value>
   </data>
   <data name="FilterOperation_EqualTo" xml:space="preserve">
     <value>igual a</value>
@@ -233,5 +233,23 @@
   </data>
   <data name="AttemptToModify0WhenTheEntityIsNotNew" xml:space="preserve">
     <value>Se ha intentado modificar {0} cuando la entidad no es nueva</value>
+  </data>
+  <data name="ComparisonType_DistinctTo" xml:space="preserve">
+    <value>distinto a</value>
+  </data>
+  <data name="ComparisonType_EqualTo" xml:space="preserve">
+    <value>igual a</value>
+  </data>
+  <data name="ComparisonType_GreaterThan" xml:space="preserve">
+    <value>mayor que</value>
+  </data>
+  <data name="ComparisonType_GreaterThanOrEqual" xml:space="preserve">
+    <value>mayor o igual que</value>
+  </data>
+  <data name="ComparisonType_LessThan" xml:space="preserve">
+    <value>menor que</value>
+  </data>
+  <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
+    <value>menor o igual que</value>
   </data>
 </root>

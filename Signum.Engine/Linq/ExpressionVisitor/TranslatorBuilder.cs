@@ -195,7 +195,7 @@ namespace Signum.Engine.Linq
             {
                 var id = Visit(NullifyColumn(lite.Id));
                 var toStr = Visit(lite.ToStr);
-                var typeId = Visit(lite.TypeId);
+                var typeId = Visit(NullifyColumn(lite.TypeId));
 
                 Type liteType = Reflector.ExtractLite(lite.Type);
 
@@ -208,6 +208,11 @@ namespace Signum.Engine.Linq
                 }
                 else
                     return Expression.Call(row, miGetLiteIdentifiable.MakeGenericMethod(liteType), id, typeId, toStr);
+            }
+
+            protected override Expression VisitSqlConstant(SqlConstantExpression sce)
+            {
+                return Expression.Constant(sce.Value, sce.Type);
             }
         }
     }

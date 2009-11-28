@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Globalization;
+using System.Resources;
 
 namespace Signum.Utilities
 {
-    public static class Pluralizer
+    public static class NaturalLanguageTools
     {
         public static Dictionary<string, IPluralizer> Pluralizers = new Dictionary<string, IPluralizer>
         {
@@ -15,7 +16,21 @@ namespace Signum.Utilities
             {"en", new EnglishPluralizer()},
         };
 
-        internal static string Pluralize(string singularName)
+        public static Dictionary<string, IGenderDetector> GenderDetectors = new Dictionary<string, IGenderDetector>
+        {
+            {"es", new SpanishGenderDetector()},
+        };
+
+        public static Gender GetGender(string name)
+        {
+            IGenderDetector pluralizer = GenderDetectors.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+            if (pluralizer != null)
+                return pluralizer.GetGender(name);
+
+            return Gender.Neuter;
+        }
+
+        public static string Pluralize(string singularName)
         {
             IPluralizer pluralizer = Pluralizers.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
             if (pluralizer != null)
@@ -57,7 +72,6 @@ namespace Signum.Utilities
         {
             if (string.IsNullOrEmpty(singularName))
                 return singularName;
-
 
             int index = singularName.IndexOf(' ');
 
@@ -111,5 +125,67 @@ namespace Signum.Utilities
             else
                 return singularName + "es";
         }
+    }
+
+    public interface IGenderDetector
+    {
+        Gender GetGender(string name);
+    }
+
+    public class SpanishGenderDetector : IGenderDetector
+    {
+        //http://roble.pntic.mec.es/acid0002/index_archivos/Gramatica/genero_sustantivos.htm
+        Dictionary<string, Gender> terminationIsFemenine = new Dictionary<string, Gender>()
+        {
+            {"umbre", Gender.Femenine },
+           
+            {"ión", Gender.Femenine },
+            {"dad", Gender.Femenine },
+            {"tad", Gender.Femenine },
+            
+            {"ie", Gender.Femenine },
+            {"is", Gender.Femenine }, 
+
+            {"pa", Gender.Masculine},
+            {"ta", Gender.Masculine},
+            {"ma", Gender.Masculine},
+
+            {"a", Gender.Femenine},
+            {"n", Gender.Masculine},
+            {"o", Gender.Masculine},
+            {"r", Gender.Masculine},
+            {"s", Gender.Masculine},
+            {"e", Gender.Masculine},
+            {"l", Gender.Masculine},
+
+            {"", Gender.Masculine},
+        };
+
+
+        public Gender GetGender(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return Gender.Neuter;
+
+            int index = name.IndexOf(' ');
+
+            if (index != -1)
+                return GetGender(name.Substring(0, index));
+
+            foreach (var kvp in terminationIsFemenine)
+            {
+                if (name.EndsWith(kvp.Key))
+                    return kvp.Value;
+            }
+
+            return Gender.Masculine;
+        }
+    }
+
+    public enum Gender
+    {
+        Neuter,    //_n 
+        Masculine, //_m
+        Femenine,  //_f
     }
 }

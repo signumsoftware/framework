@@ -460,17 +460,11 @@ namespace Signum.Entities
  
     public enum ComparisonType
     {
-        [LocDescription(typeof(Resources), "FilterOperation_EqualTo")]
         EqualTo,
-        [LocDescription(typeof(Resources), "FilterOperation_DistinctTo")]
         DistinctTo,
-        [LocDescription(typeof(Resources), "FilterOperation_GreaterThan")]
         GreaterThan,
-        [LocDescription(typeof(Resources), "FilterOperation_GreaterThanOrEqual")]
         GreaterThanOrEqual,
-        [LocDescription(typeof(Resources), "FilterOperation_LessThan")]
         LessThan,
-        [LocDescription(typeof(Resources), "FilterOperation_LessThanOrEqual")]
         LessThanOrEqual,
     }
 

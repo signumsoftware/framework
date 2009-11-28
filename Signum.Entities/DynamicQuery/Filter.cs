@@ -35,25 +35,15 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public enum FilterOperation
     {
-        [LocDescription]
         EqualTo,
-        [LocDescription]
         DistinctTo,
-        [LocDescription]
         GreaterThan,
-        [LocDescription]
         GreaterThanOrEqual,
-        [LocDescription]
         LessThan,
-        [LocDescription]
         LessThanOrEqual,
-        [LocDescription]
         Contains,
-        [LocDescription]
         StartsWith,
-        [LocDescription]
         EndsWith,
-        [LocDescription]
         Like,
     }
 

@@ -45,16 +45,8 @@ namespace Signum.Engine
         public static List<T> TryRetrieveAll<T>(Replacements replacements)
             where T : IdentifiableEntity
         {
-            Table table = Schema.Current.Table<T>();
-
-            using (Synchronizer.RenameTable(table, replacements))
-            {
-                if (ExistTable(table.Name))
-                    return Database.RetrieveAll<T>();
-                return new List<T>();
-            }
+            return TryRetrieveAll(typeof(T), replacements).Cast<T>().ToList();
         }
-
 
         public static List<IdentifiableEntity> TryRetrieveAll(Type type, Replacements replacements)
         {
@@ -63,8 +55,31 @@ namespace Signum.Engine
             using (Synchronizer.RenameTable(table, replacements))
             {
                 if (ExistTable(table.Name))
-                    return Database.RetrieveAll(type);
+                {
+                    return UnsafeRetrieveAll(type);
+                }
                 return new List<IdentifiableEntity>();
+            }
+        }
+
+        public static List<T> UnsafeRetrieveAll<T>()
+          where T : IdentifiableEntity
+        {
+            return UnsafeRetrieveAll(typeof(T)).Cast<T>().ToList();
+        }
+
+        private static List<IdentifiableEntity> UnsafeRetrieveAll(Type type)
+        {
+            using (new EntityCache())
+            using (Transaction tr = new Transaction())
+            {
+                Retriever rec = new Retriever();
+
+                List<IdentifiableEntity> ident = rec.UnsafeRetrieveAll(type);
+
+                rec.ProcessAll();
+
+                return tr.Commit(ident);
             }
         }
 
@@ -189,7 +204,7 @@ deallocate cur");
 
         public static SqlPreCommand TotalSynchronizeScript()
         {
-            return Schema.Current.SynchronizationScript(ConnectionScope.Current.GetSchemaName()); 
+            return Schema.Current.SynchronizationScript(Transaction.CurrentConnection.Database); 
         }
 
         public static SqlPreCommand SynchronizeSchemaScript(Replacements replacements)

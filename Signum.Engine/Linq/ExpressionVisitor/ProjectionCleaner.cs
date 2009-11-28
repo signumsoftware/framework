@@ -31,13 +31,8 @@ namespace Signum.Engine.Linq
         protected override Expression VisitFieldInit(FieldInitExpression fieldInit)
         {
             Expression newID = Visit(fieldInit.ExternalId);
-            if (newID != fieldInit.ExternalId)
-            {
-                return new FieldInitExpression(fieldInit.Type, fieldInit.TableAlias, newID, null, null); // eliminamos los bindings
-            }
 
-            fieldInit.Bindings = null;
-            return fieldInit;
+            return new FieldInitExpression(fieldInit.Type, fieldInit.TableAlias, newID, null, null, null); // eliminamos los bindings
         }
 
         protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)

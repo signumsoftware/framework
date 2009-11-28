@@ -204,12 +204,13 @@ namespace Signum.Engine.Linq
             var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
           
             var id = Visit(fie.ExternalId);
+            var typeId = Visit(fie.TypeId);
             var other = Visit(fie.OtherCondition);
 
             var token = VisitProjectionToken(fie.Token);
 
-            if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token)
-                return new FieldInitExpression(fie.Type, fie.TableAlias, id, other, token) { Bindings = bindings};
+            if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token || fie.TypeId != typeId)
+                return new FieldInitExpression(fie.Type, fie.TableAlias, id, typeId, other, token) { Bindings = bindings };
 
             return fie;
         }

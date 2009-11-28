@@ -35,12 +35,12 @@ namespace Signum.Utilities
                 ((EventInfo)m).EventHandlerType;
         }
 
-        public static bool HasAttribute<T>(this MemberInfo mi) where T : Attribute
+        public static bool HasAttribute<T>(this ICustomAttributeProvider mi) where T : Attribute
         {
             return mi.IsDefined(typeof(T), false);
         }
 
-        public static T SingleAttribute<T>(this MemberInfo mi) where T : Attribute
+        public static T SingleAttribute<T>(this ICustomAttributeProvider mi) where T : Attribute
         {
             return mi.GetCustomAttributes(typeof(T), false).Cast<T>().SingleOrDefault();
         }

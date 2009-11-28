@@ -23,9 +23,7 @@ namespace Signum.Test
         MyPrueba2,
         [System.ComponentModel.Description("Prueba!")]
         Prueba3,
-        [LocDescription]
         Prueba4,
-        [LocDescription(typeof(Resources), "Prueba5")]
         Prueba5
     }
 

@@ -181,7 +181,7 @@
     <value>equal to</value>
   </data>
   <data name="FilterOperation_DistinctTo" xml:space="preserve">
-    <value>Distinct to</value>
+    <value>distinct to</value>
   </data>
   <data name="FilterOperation_GreaterThan" xml:space="preserve">
     <value>greater than</value>
@@ -196,16 +196,16 @@
     <value>less than or equal</value>
   </data>
   <data name="FilterOperation_Contains" xml:space="preserve">
-    <value>Contains</value>
+    <value>contains</value>
   </data>
   <data name="FilterOperation_EndsWith" xml:space="preserve">
-    <value>Ends with</value>
+    <value>ends with</value>
   </data>
   <data name="FilterOperation_Like" xml:space="preserve">
-    <value>Like</value>
+    <value>like</value>
   </data>
   <data name="FilterOperation_StartsWith" xml:space="preserve">
-    <value>Starts with</value>
+    <value>starts with</value>
   </data>
   <data name="Type0NotSupported" xml:space="preserve">
     <value>Type {0} is not supported</value>
@@ -242,5 +242,23 @@
   </data>
   <data name="AttemptToModify0WhenTheEntityIsNotNew" xml:space="preserve">
     <value>Attempt to modify {0} when the entity is not new</value>
+  </data>
+  <data name="ComparisonType_DistinctTo" xml:space="preserve">
+    <value>distinct to</value>
+  </data>
+  <data name="ComparisonType_EqualTo" xml:space="preserve">
+    <value>equal to</value>
+  </data>
+  <data name="ComparisonType_GreaterThan" xml:space="preserve">
+    <value>greater than</value>
+  </data>
+  <data name="ComparisonType_GreaterThanOrEqual" xml:space="preserve">
+    <value>greater than or equal</value>
+  </data>
+  <data name="ComparisonType_LessThan" xml:space="preserve">
+    <value>less than</value>
+  </data>
+  <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
+    <value>less than or equal</value>
   </data>
 </root>
