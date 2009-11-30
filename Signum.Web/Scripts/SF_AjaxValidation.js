@@ -30,14 +30,16 @@ function ValidatePartialAndCallJavascript(urlValidateController, urlJavascriptCo
 }
 
 function NotifyError(s,t) {
-    NotifyInfo(s,t);
+    NotifyInfo(s,t, "error");
 }
-function NotifyInfo(s,t){
+function NotifyInfo(s,t,cssClass){
     $("#loading-area-text").html(s);
     //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
     $("#loading-area").css({marginLeft: - parseInt($("#loading-area").outerWidth() / 2) + "px"});      
-    $("#loading-area").show();
+       
     if (t!=undefined){   
+        if (!cssClass.hasText()) cssClass="ok";
+        $("#loading-area .message-area-text-container").addClass(cssClass);
         //$("#loading-area").animate({backgroundColor: "#BFFF9F"}, 350);
         var timer = setTimeout(function(){     
             $("#loading-area").fadeOut("slow");

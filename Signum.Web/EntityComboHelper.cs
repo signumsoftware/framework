@@ -79,8 +79,8 @@ namespace Signum.Web
                 sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(idValueField, TypeContext.Id), 
                     (isIdentifiable) 
-                       ? ((IIdentifiable)(object)value).IdOrNull
-                       : ((Lite)(object)value).IdOrNull));
+                       ? ((IIdentifiable)(object)value).TryCS(v=>v.IdOrNull)
+                       : ((Lite)(object)value).TryCS(v => v.IdOrNull)));
 
                 sb.AppendLine(helper.Div(TypeContext.Compose(idValueField, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
