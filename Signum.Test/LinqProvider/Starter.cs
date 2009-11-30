@@ -10,6 +10,7 @@ using System.IO;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Entities.Basics;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Test.LinqProvider
 {
@@ -20,7 +21,7 @@ namespace Signum.Test.LinqProvider
         {
             if(!started)
             {
-                Start(Settings.Default.SignumTest); 
+                Start(Settings.Default.SignumTest, Queries.Common); 
 
                 Administrator.TotalGeneration();
 
@@ -37,17 +38,98 @@ namespace Signum.Test.LinqProvider
             started = false;
         }
 
-        public static void Start(string connectionString)
+        public static void Start(string connectionString, DynamicQueryManager dqm)
         {
             SchemaBuilder sb = new SchemaBuilder();
-            TypeLogic.Start(sb); 
+            TypeLogic.Start(sb);
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
             sb.Include<AlertDN>();
             sb.Include<PersonalAwardDN>();
-            ConnectionScope.Default = new Connection(connectionString, sb.Schema); 
-        }
 
+            ConnectionScope.Default = new Connection(connectionString, sb.Schema);
+
+            dqm[typeof(AlbumDN)] = (from a in Database.Query<AlbumDN>()
+                                    select new
+                                    {
+                                        Entity = a.ToLite(),
+                                        a.Id,
+                                        Author = a.Author.ToLite(),
+                                        Label = a.Label.ToLite(),
+                                        a.Name,
+                                        a.Year
+                                    }).ToDynamic();
+
+            dqm[typeof(AmericanMusicAwardDN)] = (from a in Database.Query<AmericanMusicAwardDN>()
+                                                 select new
+                                                 {
+                                                     Entity = a.ToLite(),
+                                                     a.Id,
+                                                     a.Year,
+                                                     a.Category,
+                                                     a.Result,
+                                                 }).ToDynamic();
+
+            dqm[typeof(ArtistDN)] = (from a in Database.Query<ArtistDN>()
+                                     select new
+                                     {
+                                         Entity = a.ToLite(),
+                                         a.Id,
+                                         a.Name,
+                                         a.IsMale,
+                                         a.Sex,
+                                         a.Dead,
+                                         LastAward = a.LastAward.ToLite(),
+                                     }).ToDynamic();
+
+            dqm[typeof(AwardDN)] = (from a in Database.Query<AwardDN>()
+                                    select new
+                                    {
+                                        Entity = a.ToLite(),
+                                        a.Id,
+                                        a.Year,
+                                        a.Category,
+                                        a.Result
+                                    }).ToDynamic();
+
+            dqm[typeof(BandDN)] = (from a in Database.Query<BandDN>()
+                                   select new
+                                   {
+                                       Entity = a.ToLite(),
+                                       a.Id,
+                                       a.Name,
+                                       LastAward = a.LastAward.ToLite(),
+                                   }).ToDynamic();
+
+            dqm[typeof(GrammyAwardDN)] = (from a in Database.Query<GrammyAwardDN>()
+                                          select new
+                                          {
+                                              Entity = a.ToLite(),
+                                              a.Id,
+                                              a.Year,
+                                              a.Category,
+                                              a.Result
+                                          }).ToDynamic();
+
+            dqm[typeof(LabelDN)] = (from a in Database.Query<LabelDN>()
+                                    select new
+                                    {
+                                        Entity = a.ToLite(),
+                                        a.Id,
+                                        a.Name,
+                                    }).ToDynamic();
+
+            dqm[typeof(PersonalAwardDN)] = (from a in Database.Query<PersonalAwardDN>()
+                                            select new
+                                            {
+                                                Entity = a.ToLite(),
+                                                a.Id,
+                                                a.Year,
+                                                a.Category,
+                                                a.Result
+                                            }).ToDynamic();
+        }
+        
         public static void Load()
         {
             BandDN smashingPumpkins = new BandDN
@@ -217,6 +299,24 @@ namespace Signum.Test.LinqProvider
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 Label = emi
             }.Save();
+        }
+    }
+
+    public static class Queries
+    {
+        public static DynamicQueryManager Common = new DynamicQueryManager(null);
+        public static DynamicQueryManager Windows;
+        public static DynamicQueryManager Web;
+
+        static Queries()
+        {
+            Windows = new DynamicQueryManager(Common);
+            Web = new DynamicQueryManager(Common);
+        }
+
+        public static void Initialize()
+        {
+
         }
     }
 }
