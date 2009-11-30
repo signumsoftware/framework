@@ -14,6 +14,6 @@ namespace $custommessage$.Services
     public interface IServer$custommessage$ : IBaseServer, IQueryServer //ILoginServer, 
     {
         [OperationContract, NetDataContract]
-        List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lazy);
+        List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lite);
     }
 }

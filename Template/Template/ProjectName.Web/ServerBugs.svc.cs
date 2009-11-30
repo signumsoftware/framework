@@ -52,22 +52,22 @@ namespace $custommessage$.Web
              () => { Database.Save(entidad); return entidad; });
         }
 
-        public List<Lazy> RetrieveAllLazy(Type lazyType, Type[] types)
+        public List<Lazy> RetrieveAllLazy(Type liteType, Type[] types)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-               () => DynamicQueryUtils.RetriveAllLazy(lazyType, types));
+               () => DynamicQueryUtils.RetriveAllLazy(liteType, types));
         }
 
-        public List<Lazy> FindLazyLike(Type lazyType, Type[] types, string subString, int count)
+        public List<Lazy> FindLazyLike(Type liteType, Type[] types, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => DynamicQueryUtils.FindLazyLike(lazyType, types, subString, count));
+                () => DynamicQueryUtils.FindLazyLike(liteType, types, subString, count));
         }
 
-        public Type[] FindImplementations(Type lazyType, MemberInfo[] members)
+        public Type[] FindImplementations(Type liteType, MemberInfo[] members)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-          () => Schema.Current.FindImplementations(lazyType, members));
+          () => Schema.Current.FindImplementations(liteType, members));
         }
 
         public List<IdentifiableEntity> RetrieveAll(Type type)
@@ -101,11 +101,11 @@ namespace $custommessage$.Web
             () => Queries.DynamicQueryManager.GetQueryNames());
         }
 
-        public List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lazy)
+        public List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(),
             () => (from n in Database.Query<NoteDN>()
-                   where n.Entity == lazy
+                   where n.Entity == lite
                    select n.ToLazy<INoteDN>()).ToList());
         }
 
