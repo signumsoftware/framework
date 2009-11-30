@@ -9,7 +9,7 @@ namespace Signum.Utilities.DataStructures
 {
     public class ImmutableStack<T>:IEnumerable<T>
     {
-        class ImmutableFullStack : ImmutableStack<T>
+        private class ImmutableFullStack : ImmutableStack<T>
         {
             readonly T head;
             readonly ImmutableStack<T> tail;

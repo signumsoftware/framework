@@ -6,7 +6,7 @@ using Signum.Entities;
 using System.Windows;
 using System.Linq.Expressions;
 
-namespace Signum.Test.LinqProvider
+namespace Signum.Test
 {
 
     [Serializable]

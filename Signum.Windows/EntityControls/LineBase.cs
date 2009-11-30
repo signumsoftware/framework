@@ -9,10 +9,8 @@ using Signum.Utilities;
 
 namespace Signum.Windows
 {
-    public class LineBase : UserControl, IPreLoad
+    public class LineBase : UserControl
     {
-        public event EventHandler PreLoad;
-
         public static readonly DependencyProperty LabelTextProperty =
             DependencyProperty.Register("LabelText", typeof(string), typeof(LineBase), new UIPropertyMetadata("Property"));
         public string LabelText
@@ -53,9 +51,6 @@ namespace Signum.Windows
         {
             this.Loaded -= OnLoad;
 
-            if (PreLoad != null)
-                PreLoad(this, EventArgs.Empty); 
-
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 
@@ -64,10 +59,5 @@ namespace Signum.Windows
                 throw new ApplicationException(Properties.Resources.TypePropertyItsNotDeterminedForControl0.Formato(LabelText));
             }
         }
-    }
-
-    public interface IPreLoad
-    {
-        event EventHandler PreLoad; 
     }
 }

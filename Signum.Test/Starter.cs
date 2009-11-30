@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 
-namespace Signum.Test.LinqProvider
+namespace Signum.Test
 {
     public static class Starter
     {

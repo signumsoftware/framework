@@ -96,21 +96,22 @@ namespace Signum.Windows
         }
 
         [ThreadStatic]
-        static bool delayRoutes = false;
+        static ImmutableStack<List<Action>> delayedScopes; 
 
         public static IDisposable DelayRoutes()
         {
-            if (delayRoutes)
-                return null;
+            if (delayedScopes == null)
+                delayedScopes = ImmutableStack<List<Action>>.Empty;
 
-            delayRoutes = true;
+            delayedScopes = delayedScopes.Push(new List<Action>());
 
             return new Disposable(() =>
             {
-                delayRoutes = false;
+                delayedScopes = delayedScopes.Pop();
+                if (delayedScopes == ImmutableStack<List<Action>>.Empty)
+                    delayedScopes = null;
             });
         }
-
 
         public static readonly DependencyProperty DelayedRoutesProperty =
             DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
@@ -156,14 +157,11 @@ namespace Signum.Windows
 
             string route = (string)e.NewValue;
 
-            if (!delayRoutes)
+            if (delayedScopes == null)
                 InititializeRoute(fe, route);
             else
             {
-                if (fe is IPreLoad)
-                    ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route);
-                else
-                    fe.Loaded += (s, e2) => InititializeRoute(fe, route);
+                delayedScopes.Peek().Add(() => InititializeRoute(fe, route));
             }
         }
 

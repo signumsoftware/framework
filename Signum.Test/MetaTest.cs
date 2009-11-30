@@ -21,7 +21,7 @@ namespace Signum.Test
         [TestMethod]
         public void NoMetadata()
         {
-            Assert.IsNull(DynamicQuery.QueryMetadata(Database.Query<NoteDN>().Select(a => a.Entity)));
+            Assert.IsNull(DynamicQuery.QueryMetadata(Database.Query<NoteDN>().Select(a => a.Target)));
         }
 
         [TestMethod]
@@ -36,8 +36,8 @@ namespace Signum.Test
         [TestMethod]
         public void AnonymousType()
         {
-            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteDN>().Select(a => new { a.Entity, a.Error, a.ToStr.Length, Sum = a.ToStr + a.ToStr }));
-            Assert.IsInstanceOfType(dic["Entity"], typeof(CleanMeta));
+            var dic = DynamicQuery.QueryMetadata(Database.Query<NoteDN>().Select(a => new { a.Target, a.Error, a.ToStr.Length, Sum = a.ToStr + a.ToStr }));
+            Assert.IsInstanceOfType(dic["Target"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Error"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Length"], typeof(DirtyMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
@@ -61,24 +61,24 @@ namespace Signum.Test
         public void ComplexJoin()
         {
             var dic = DynamicQuery.QueryMetadata(
-                    from a in Database.Query<ProductDN>()
-                    join b in Database.Query<ProductLineDN>() on a equals b.Product
-                    select new { a.Name, b.Num, Sum = a.Name.Length + b.Num });
+                    from l in Database.Query<LabelDN>()
+                    join a in Database.Query<AlbumDN>() on l equals a.Label
+                    select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name});
 
+            Assert.IsInstanceOfType(dic["Label"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Num"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
 
-            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.Member.Name).Order().ToString(","), "Name,Num"); 
+            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.Member.Name).Order().ToString(","), "Name,Name"); 
         }
 
         [TestMethod]
         public void ComplexJoinGroup()
         {
             var dic = DynamicQuery.QueryMetadata(
-                    from a in Database.Query<ProductDN>()
-                    join b in Database.Query<ProductLineDN>() on a equals b.Product into g
-                    select new { a.Name, Num = g.Count()});
+                      from l in Database.Query<LabelDN>()
+                      join a in Database.Query<AlbumDN>() on l equals a.Label into g
+                      select new { l.Name, Num = g.Count() });
 
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Num"], typeof(DirtyMeta));
@@ -90,8 +90,8 @@ namespace Signum.Test
         public void ComplexGroup()
         {
             var dic = DynamicQuery.QueryMetadata(
-                    from pl in Database.Query<ProductLineDN>()
-                    group pl by pl.Product into g
+                    from a in Database.Query<AlbumDN>()
+                    group a by a.Label into g
                     select new { g.Key, Num = g.Count() });
 
             Assert.IsInstanceOfType(dic["Key"], typeof(CleanMeta));
@@ -104,81 +104,16 @@ namespace Signum.Test
         public void SelectMany()
         {
             var dic = DynamicQuery.QueryMetadata(
-                    from p in Database.Query<ProductDN>()
-                    from t in p.Taxes
-                    select new { p.Name, t.TaxName, t.Val}
+                    from a in Database.Query<AlbumDN>()
+                    from s in a.Songs
+                    select new { a.Name, Song = s.Name}
                     );
 
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["TaxName"], typeof(CleanMeta));
-            Assert.IsInstanceOfType(dic["Val"], typeof(CleanMeta));
+            Assert.IsInstanceOfType(dic["Song"], typeof(CleanMeta));
 
-            Assert.IsNotNull(((CleanMeta)dic["TaxName"]).Parent);
-            Assert.IsNotNull(((CleanMeta)dic["TaxName"]).Parent.Parent);
-
-            Assert.IsNotNull(((CleanMeta)dic["Val"]).Parent);
-            Assert.IsNotNull(((CleanMeta)dic["Val"]).Parent.Parent);
-        }
-    }
-
-    [Serializable]
-    public class ProductDN : Entity
-    {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
-        }
-
-        MList<TaxDN> taxes;
-        public MList<TaxDN> Taxes
-        {
-            get { return taxes; }
-            set { Set(ref taxes, value, () => Taxes); }
-        }
-
-        public override string ToString()
-        {
-            return name;
-        }
-    }
-
-    [Serializable]
-    public class ProductLineDN : Entity
-    {
-        ProductDN product;
-        public ProductDN Product
-        {
-            get { return product; }
-            set { Set(ref product, value, () => Product); }
-        }
-
-        int num;
-        public int Num
-        {
-            get { return num; }
-            set { Set(ref num, value, () => Num); }
-        }
-    }
-
-    [Serializable]
-    public class TaxDN : EmbeddedEntity
-    {
-        int val;
-        public int Val
-        {
-            get { return val; }
-            set { Set(ref val, value, () => Val); }
-        }
-
-        string taxName;
-        public string TaxName
-        {
-            get { return taxName; }
-            set { Set(ref taxName, value, () => TaxName); }
+            Assert.IsNotNull(((CleanMeta)dic["Song"]).Parent);
+            Assert.IsNotNull(((CleanMeta)dic["Song"]).Parent.Parent);
         }
     }
 }
