@@ -15,12 +15,13 @@ using Signum.Utilities.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using Signum.Entities.Reflection;
+using Signum.Windows.Extensions.Properties;
 
 namespace Signum.Windows.Operations
 {
     public static class OperationClient
     {
-        public static OperationManager Manager{get;private set;}
+        public static OperationManager Manager { get; private set; }
 
         public static void Start(OperationManager operationManager)
         {
@@ -121,7 +122,7 @@ namespace Signum.Windows.Operations
             //if (oi.OperationType == OperationType.Delete) TODO Olmo: Pasar OperationInfo
             //    return new SolidColorBrush(Colors.Red);
 
-            return null; 
+            return null;
         }
 
         protected internal virtual ImageSource GetImage(Enum key, OperationSettings os)
@@ -129,7 +130,7 @@ namespace Signum.Windows.Operations
             if (os != null && os.Icon != null)
                 return os.Icon;
 
-            return null; 
+            return null;
         }
 
         protected internal virtual string GetText(Enum key, OperationSettings os)
@@ -161,24 +162,24 @@ namespace Signum.Windows.Operations
                 if (newIdent != null)
                     entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
             }
-            else if(operationInfo.OperationType == OperationType.Execute)
+            else if (operationInfo.OperationType == OperationType.Execute)
             {
-                 if (operationInfo.Lite.Value)
-                 {
-                     if (entityControl.LooseChangesIfAny())
-                     {
-                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                         IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lite, operationInfo.Key, null);
-                         if (operationInfo.Returns)
-                             entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
-                     }
-                 }
-                 else
-                 {
-                     IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperation(ident, operationInfo.Key, null);
-                     if (operationInfo.Returns)
-                         entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
-                 }
+                if (operationInfo.Lite.Value)
+                {
+                    if (entityControl.LooseChangesIfAny())
+                    {
+                        Lite<IdentifiableEntity> lite = ident.ToLite();
+                        IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lite, operationInfo.Key, null);
+                        if (operationInfo.Returns)
+                            entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                    }
+                }
+                else
+                {
+                    IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperation(ident, operationInfo.Key, null);
+                    if (operationInfo.Returns)
+                        entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                }
             }
             else if (operationInfo.OperationType == OperationType.ConstructorFrom)
             {
@@ -189,14 +190,14 @@ namespace Signum.Windows.Operations
                         Lite lite = Lite.Create(ident.GetType(), ident);
                         IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFromLite(lite, operationInfo.Key, null);
                         if (operationInfo.Returns)
-                            Navigator.View(newIdent, ViewButtons.Save); 
+                            Navigator.View(newIdent, ViewButtons.Save);
                     }
                 }
                 else
                 {
                     IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
                     if (operationInfo.Returns)
-                        Navigator.View(newIdent, ViewButtons.Save); 
+                        Navigator.View(newIdent, ViewButtons.Save);
                 }
             }
             else if (operationInfo.OperationType == OperationType.Delete)
@@ -212,7 +213,7 @@ namespace Signum.Windows.Operations
         internal object ConstructorManager_GeneralConstructor(Type type, Window win)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                return null; 
+                return null;
 
             var list = Server.Service<IOperationServer>().GetConstructorOperationInfos(type);
 
@@ -232,12 +233,9 @@ namespace Signum.Windows.Operations
             }
             else
             {
-                ConstructorSelectorWindow sel = new ConstructorSelectorWindow();
-                sel.ConstructorKeys = dic.Keys.ToArray();
-                if (sel.ShowDialog() != true)
+                if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), k => OperationClient.GetImage(k), k => OperationClient.GetText(k),
+                    out selected, Resources.ConstructorSelector, Resources.PleaseSelectAConstructor, win))
                     return null;
-
-                selected = sel.SelectedKey;
             }
 
             var pair = dic[selected];

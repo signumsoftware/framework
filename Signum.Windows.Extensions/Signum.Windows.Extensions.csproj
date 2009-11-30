@@ -146,9 +146,6 @@
     </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
-    <Compile Include="Operations\ConstructorSelectorWindow.xaml.cs">
-      <DependentUpon>ConstructorSelectorWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Operations\ConstructFromMenuItem.cs" />
     <Compile Include="Operations\OperationServer.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
@@ -331,10 +328,6 @@
     <Page Include="Files\FileRepository.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Operations\ConstructorSelectorWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Operations\LogOperation.xaml">
       <SubType>Designer</SubType>

@@ -174,4 +174,10 @@
   <data name="Years" xml:space="preserve">
     <value>Years</value>
   </data>
+  <data name="ConstructorSelector" xml:space="preserve">
+    <value>Constructor Selector</value>
+  </data>
+  <data name="PleaseSelectAConstructor" xml:space="preserve">
+    <value>Please Select a Constructor</value>
+  </data>
 </root>

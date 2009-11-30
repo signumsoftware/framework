@@ -70,6 +70,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Constructor Selector.
+        /// </summary>
+        public static string ConstructorSelector {
+            get {
+                return ResourceManager.GetString("ConstructorSelector", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Custom Report.
         /// </summary>
         public static string CustomReport {
@@ -174,6 +183,15 @@ namespace Signum.Windows.Extensions.Properties {
         public static string Open {
             get {
                 return ResourceManager.GetString("Open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please Select a Constructor.
+        /// </summary>
+        public static string PleaseSelectAConstructor {
+            get {
+                return ResourceManager.GetString("PleaseSelectAConstructor", resourceCulture);
             }
         }
         
