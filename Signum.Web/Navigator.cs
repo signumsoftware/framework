@@ -492,6 +492,8 @@ namespace Signum.Web
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
             controller.ViewData[ViewDataKeys.EntityTypeNiceName] = obj.GetType().NiceName();
+            controller.ViewData[ViewDataKeys.Id] = entity.IdOrNull != null ? entity.Id.ToString() : "";
+
             if (controller.ViewData.Keys.Count(s => s==ViewDataKeys.PageTitle)==0)
                 controller.ViewData[ViewDataKeys.PageTitle] = entity.ToStr;
             if (changeTicks != null)

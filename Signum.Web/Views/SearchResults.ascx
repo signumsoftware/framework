@@ -81,7 +81,7 @@
                  <%} %>
                 <td id="<%=Html.GlobalName("tdResults")%>">
                 <% if (entityField != null) { %>
-                    <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Navigate">Ver</a>
+                    <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Ver">Ver</a>
                 <% } %>
                 </td>
                 <%
@@ -92,7 +92,7 @@
                     if (colVisibility[col])
                     {
                         %>
-                        <td id="<%=Html.GlobalName("td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Data[row][col]);%></td>
+                        <td><%formatters[col](Html, queryResult.Data[row][col]);%></td>
                         <%
                     }
                 }

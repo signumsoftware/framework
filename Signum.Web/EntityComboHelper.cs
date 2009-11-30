@@ -79,8 +79,8 @@ namespace Signum.Web
                 sb.AppendLine(helper.Hidden(
                     TypeContext.Compose(idValueField, TypeContext.Id), 
                     (isIdentifiable) 
-                       ? ((IIdentifiable)(object)value).TryCS(i => i.Id).TrySS(id => id)
-                       : ((Lite)(object)value).TryCS(i => i.Id).TrySS(id => id)));
+                       ? ((IIdentifiable)(object)value).IdOrNull
+                       : ((Lite)(object)value).IdOrNull));
 
                 sb.AppendLine(helper.Div(TypeContext.Compose(idValueField, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
@@ -97,7 +97,7 @@ namespace Signum.Web
                                     {
                                         Text = lite.ToString(),
                                         Value = lite.Id.ToString(),
-                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
+                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).IdOrNull)
                                     })
                                 );
                         }
@@ -109,7 +109,7 @@ namespace Signum.Web
                                     {
                                         Text = lite.ToString(),
                                         Value = lite.Id.ToString(),
-                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.Id))
+                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).IdOrNull)
                                     })
                                 );
                         }

@@ -45,6 +45,7 @@ namespace Signum.Web
         public const string ChangeTicks = "sfChangeTicks";
         public const string Reactive = "sfReactive";
         public const string TabId = "sfTabId";
+        public const string Id = "sfId";
 
         public static string GlobalName(this HtmlHelper helper, string localName)
         {
