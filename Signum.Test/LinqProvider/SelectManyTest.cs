@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Engine;
 using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Test.LinqProvider
 {
@@ -20,6 +21,12 @@ namespace Signum.Test.LinqProvider
             Starter.StartAndLoad();
         }
 
+        [TestInitialize]
+        public void Initialize()
+        {
+            Connection.CurrentLog = new DebugTextWriter();
+        }
+
         [TestMethod]
         public void SelectMany()
         {
@@ -29,7 +36,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectMany2()
         {
-            var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members, (b, a) => new { Artist = a.ToLite() }).ToList();
+            var artistsInBands = Database.Query<BandDN>().SelectMany(b => b.Members, (b, a) => new { Artist = a.ToLite(), Band = b.ToLite() }).ToList();
         }
 
         [TestMethod]
@@ -63,14 +70,40 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectManyDefaultIf()
+        public void SelectManyOverload()
+        {
+            var artistsInBands = (from a1 in Database.Query<ArtistDN>()
+                                  from a in a1.Friends
+                                  select new
+                                  {
+                                      Artist = a1.ToLite(),
+                                      Friend = a,
+                                  }).ToList();
+        }
+
+
+        [TestMethod]
+        public void SelectManyDefaultIfEmptyTwo()
         {
             var artistsInBands = (from a1 in Database.Query<ArtistDN>()
                                   from a in a1.Friends.DefaultIfEmpty()
                                   select new
                                   {
                                       Artist = a1.ToLite(),
-                                      Friend = a
+                                      Friend = a,
+                                  }).ToList();
+        }
+
+        [TestMethod]
+        public void SelectManyDefaultIfEmptyNotNull()
+        {
+            var artistsInBands = (from a1 in Database.Query<ArtistDN>()
+                                  from a in a1.Friends.DefaultIfEmpty()
+                                  select new
+                                  {
+                                      Artist = a1.ToLite(),
+                                      Friend = a,
+                                      HasFriend = a != null
                                   }).ToList();
         }
     }

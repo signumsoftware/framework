@@ -19,12 +19,6 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class OverloadingSimplifier : ExpressionVisitor
     {
-        static MethodInfo miSelectMany3Q = ReflectionTools.GetMethodInfo(() => Queryable.SelectMany((IQueryable<string>)null, s => s, (s, c) => s)).GetGenericMethodDefinition();
-        static MethodInfo miSelectMany3E = ReflectionTools.GetMethodInfo(() => Enumerable.SelectMany((IEnumerable<string>)null, s => s, (s, c) => s)).GetGenericMethodDefinition();
-
-        static MethodInfo miSelectMany2Q = ReflectionTools.GetMethodInfo(() => Queryable.SelectMany((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
-        static MethodInfo miSelectMany2E = ReflectionTools.GetMethodInfo(() => Enumerable.SelectMany((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
-
         static MethodInfo miSelectQ = ReflectionTools.GetMethodInfo(() => Queryable.Select((IQueryable<string>)null, s => s)).GetGenericMethodDefinition();
         static MethodInfo miSelectE = ReflectionTools.GetMethodInfo(() => Enumerable.Select((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
 
@@ -91,52 +85,8 @@ namespace Signum.Engine.Linq
                 Type[] paramTypes = m.Method.GetGenericArguments();
                 MethodInfo mi = m.Method.GetGenericMethodDefinition();
 
-                //IE<R> SelectMany<S, R>(this IE<S> source, Func<S, IE<R>> selector)
-                //    Base
-
-                //IE<R> SelectMany<S, TCollection, R>(this IE<S> source, Func<S, IE<TCollection>> collectionSelector, Func<S, TCollection, R> resultSelector)	
-                //    SelectMany(col, a=>a.B, (a,b)=>f(a,b))   --> SelectMany(col, a=>a.B.Select(b=>f(a,b))
-
-                if (ReflectionTools.MethodEqual(mi, miSelectMany3E) || ReflectionTools.MethodEqual(mi, miSelectMany3Q))
-                {
-                    var source = Visit(m.GetArgument("source"));
-                    var collectionSelector = (LambdaExpression)Visit(m.GetArgument("collectionSelector").StripQuotes());
-                    var resultSelector = (LambdaExpression)Visit(m.GetArgument("resultSelector").StripQuotes());
-
-                    var collectionSelectorBody = collectionSelector.Body;
-                    bool hasDefaultIfEmpty = ExtractDefaultIfEmpty(ref collectionSelectorBody); 
-
-
-                    MethodInfo miSM = (decType == typeof(Queryable) ? miSelectMany2Q: miSelectMany2E)
-                        .MakeGenericMethod(paramTypes[0], paramTypes[2]);
-
-                    MethodInfo miS = (collectionSelector.Type.IsAssignableFrom(typeof(IQueryable<>).MakeGenericType(paramTypes[1])) ? miSelectQ: miSelectE)
-                        .MakeGenericMethod(paramTypes[1], paramTypes[2]);
-
-                    var selectLambda = Expression.Lambda(
-                        Replacer.Replace(resultSelector.Body, resultSelector.Parameters[0], collectionSelector.Parameters[0]),
-                        resultSelector.Parameters[1]);
-
-
-                    var selectExpression = Expression.Call(miS, collectionSelectorBody, selectLambda);
-
-                    if (hasDefaultIfEmpty)
-                    {
-                        var method = (typeof(Queryable).IsAssignableFrom(selectExpression.Type) ? miDefaultIfEmptyQ : miDefaultIfEmptyE)
-                            .MakeGenericMethod(paramTypes[2]);
-
-                        selectExpression = Expression.Call(method, selectExpression);
-                    }
-
-
-                    var selectManyLambda = Expression.Lambda(selectExpression, collectionSelector.Parameters[0]);
-
-                    return Expression.Call(miSM, source,selectManyLambda); 
-                }
-
                 //IE<IGrouping<K, S>> GroupBy<S, K>(this IE<S> source, Func<S, K> keySelector);
                 //    GroupBy(col, a=>func(a)) -> GroupBy(col, a=>func(a), a=>a) 
-
 
                 if (ReflectionTools.MethodEqual(mi, miGroupBySE) || ReflectionTools.MethodEqual(mi, miGroupBySQ))
                 {

@@ -75,7 +75,10 @@ namespace Signum.Engine.Linq
                     case "Select":
                         return this.BindSelect(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes());
                     case "SelectMany":
-                        return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes());
+                        if (m.Arguments.Count == 2)
+                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes(), null);
+                        else
+                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("collectionSelector").StripQuotes(), m.TryGetArgument("resultSelector").StripQuotes());
                     case "Join":
                         return this.BindJoin(
                             m.Type, m.GetArgument("outer"), m.GetArgument("inner"),
@@ -504,7 +507,7 @@ namespace Signum.Engine.Linq
                 pc.Projector, null, pc.Token);
         }
 
-        protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector)
+        protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector, LambdaExpression resultSelector)
         {
             ProjectionExpression oldProjection;
             ProjectionExpression projection = oldProjection = this.VisitCastProjection(source);
@@ -514,9 +517,25 @@ namespace Signum.Engine.Linq
 
             ProjectionExpression collectionProjection = AsProjection(collectionExpression);
 
+            ProjectedColumns pc;
             string alias = this.GetNextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(collectionProjection.Projector, alias,
-                projection.Source.KnownAliases.Concat(collectionProjection.Source.KnownAliases).ToArray(), new[] { projection.Token, collectionProjection.Token });
+            if (resultSelector == null)
+            {
+                pc = ColumnProjector.ProjectColumns(collectionProjection.Projector, alias,
+                    projection.Source.KnownAliases.Concat(collectionProjection.Source.KnownAliases).ToArray(), new[] { projection.Token, collectionProjection.Token });
+            }
+            else
+            {
+                map.SetRange(resultSelector.Parameters, new[] { projection.Projector, collectionProjection.Projector });
+                Expression resultProjector = Visit(resultSelector.Body);
+                map.RemoveRange(resultSelector.Parameters);
+
+                projection = ApplyExpansions(projection);
+                collectionProjection = ApplyExpansions(collectionProjection);
+
+                pc = ColumnProjector.ProjectColumns(resultProjector, alias,
+                    projection.Source.KnownAliases.Concat(collectionProjection.Source.KnownAliases).ToArray(), new[] { projection.Token, collectionProjection.Token });
+            }
 
             JoinType joinType = IsTable(collectionSelector.Body) ? JoinType.CrossJoin :
                                 outer ? JoinType.OuterApply:

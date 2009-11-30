@@ -75,6 +75,15 @@ namespace Signum.Test.LinqProvider
 
 
         [TestMethod]
+        public void LeftOuterJoinEntityNotNull()
+        {
+            var songsAlbum = (from a in Database.Query<ArtistDN>().DefaultIfEmpty()
+                              join b in Database.Query<AlbumDN>() on a equals b.Author
+                              select new { Artist = a.Name, Album = b.Name, HasArtist = a != null }).ToList();
+        }
+
+
+        [TestMethod]
         public void RightOuterJoinEntity()
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>()
@@ -83,11 +92,27 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void RightOuterJoinEntityNotNull()
+        {
+            var songsAlbum = (from a in Database.Query<ArtistDN>()
+                              join b in Database.Query<AlbumDN>().DefaultIfEmpty() on a equals b.Author
+                              select new { Artist = a.Name, Album = b.Name, HasArtist = b != null }).ToList();
+        }
+
+        [TestMethod]
         public void FullOuterJoinEntity()
         {
             var songsAlbum = (from a in Database.Query<ArtistDN>().DefaultIfEmpty()
                               join b in Database.Query<AlbumDN>().DefaultIfEmpty() on a equals b.Author
                               select new { Artist = a.Name, Album = b.Name }).ToList();
+        }
+
+        [TestMethod]
+        public void FullOuterJoinEntityNotNull()
+        {
+            var songsAlbum = (from a in Database.Query<ArtistDN>().DefaultIfEmpty()
+                              join b in Database.Query<AlbumDN>().DefaultIfEmpty() on a equals b.Author
+                              select new { Artist = a.Name, Album = b.Name, HasArtist = a != null, HasAlbum = b != null }).ToList();
         }
 
         [TestMethod]
