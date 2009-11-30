@@ -102,7 +102,10 @@ namespace Signum.Engine.Linq
                     case "Select":
                         return this.BindSelect(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes());
                     case "SelectMany":
-                        return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes());
+                        if (m.Arguments.Count == 2)
+                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("selector").StripQuotes(), null);
+                        else
+                            return this.BindSelectMany(m.Type, m.GetArgument("source"), m.GetArgument("collectionSelector").StripQuotes(), m.TryGetArgument("resultSelector").StripQuotes());
                     case "Join":
                         return this.BindJoin(
                             m.Type, m.GetArgument("outer"), m.GetArgument("inner"),
@@ -276,10 +279,16 @@ namespace Signum.Engine.Linq
             return new MetaProjectorExpression(resultType, projector); 
         }
 
-        protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector)
+        protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector, LambdaExpression resultSelector)
         {
             MetaProjectorExpression mp = AsProjection(Visit(source));
-            return AsProjection(MapAndVisit(collectionSelector, mp));
+            MetaProjectorExpression collectionProjector = AsProjection(MapAndVisit(collectionSelector, mp));
+
+            if (resultSelector == null)
+                return collectionProjector; 
+
+            Expression resultProjection = MapAndVisit(resultSelector, mp, collectionProjector);
+            return new MetaProjectorExpression(resultType, resultProjection); 
         }
 
         protected virtual Expression BindJoin(Type resultType, Expression outerSource, Expression innerSource, LambdaExpression outerKey, LambdaExpression innerKey, LambdaExpression resultSelector)
