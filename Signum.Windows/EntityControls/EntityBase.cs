@@ -69,6 +69,14 @@ namespace Signum.Windows
             set { SetValue(ViewProperty, value); }
         }
 
+        public static readonly DependencyProperty ViewReadOnlyProperty =
+            DependencyProperty.Register("ViewReadOnly", typeof(bool), typeof(EntityBase), new UIPropertyMetadata(false));
+        public bool ViewReadOnly
+        {
+            get { return (bool)GetValue(ViewReadOnlyProperty); }
+            set { SetValue(ViewReadOnlyProperty, value); }
+        }
+
         public static readonly DependencyProperty FindProperty =
             DependencyProperty.Register("Find", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(true, (d, e) => ((EntityBase)d).UpdateVisibility()));
         public bool Find
@@ -324,10 +332,27 @@ namespace Signum.Windows
             if (!CanView(entity))
                 return null;
 
-            if (Viewing == null)
-                return Navigator.View(entity, typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? Common.GetTypeContext(this) : null);
-            else
+            if (Viewing != null)
                 return Viewing(entity);
+
+            TypeContext context = typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? Common.GetTypeContext(this) : null;
+
+            Lite lite = entity as Lite;
+
+            ViewButtons buttons = lite != null && (lite.UntypedEntityOrNull == null || !lite.UntypedEntityOrNull.IsNew) ?
+                ViewButtons.Save : ViewButtons.Ok;
+
+            ViewOptions viewOptions = new ViewOptions
+                        {
+                            Buttons = buttons,
+                            TypeContext = context,
+                            ReadOnly = ViewReadOnly
+                        };
+
+            if (buttons == ViewButtons.Ok && this.NotSet(ViewReadOnlyProperty) ? Common.GetIsReadOnly(this) : ViewReadOnly)
+                viewOptions.ReadOnly = true; 
+
+            return Navigator.View(entity, viewOptions);
         }
 
         protected bool OnRemoving(object entity)

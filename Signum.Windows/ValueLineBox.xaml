@@ -14,6 +14,11 @@
         </Grid.RowDefinitions>
         <TextBlock x:Name="tb" Grid.Row="0" Margin="10,10,10,0" FontWeight="bold"/>
         <m:ValueLine x:Name="valueLine" Grid.Row="1" />
-        <m:ImageButton x:Name="btAccept" Margin="6" Image="Images\ok.png" Content="{m:Loc Ok}"  Width="70" IsDefault="True" HorizontalAlignment="Right" Grid.Row="2" Click="btAccept_Click"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
+            <m:ImageButton x:Name="btAccept" Margin="6" Image="Images\ok.png" Content="{m:Loc Ok}"  
+                       Width="75" IsDefault="True" HorizontalAlignment="Right"  Click="btAccept_Click"/>
+            <m:ImageButton x:Name="btCancel" Margin="6" Image="Images\cancel.png" Content="{m:Loc Cancel}"
+                       Width="75" HorizontalAlignment="Right" Click="btCancel_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

@@ -107,6 +107,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="SelectorWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DynamicQuery\CountSearchControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -211,10 +215,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TypeSelectorWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="EntityControls\ValueLine.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -259,6 +259,9 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
+    <Compile Include="SelectorWindow.xaml.cs">
+      <DependentUpon>SelectorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DynamicQuery\CountSearchControl.xaml.cs">
       <DependentUpon>CountSearchControl.xaml</DependentUpon>
     </Compile>
@@ -380,9 +383,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Facades\Server.cs" />
-    <Compile Include="TypeSelectorWindow.xaml.cs">
-      <DependentUpon>TypeSelectorWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="EntityControls\ValueLine.xaml.cs">
       <DependentUpon>ValueLine.xaml</DependentUpon>
     </Compile>

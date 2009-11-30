@@ -35,6 +35,14 @@ namespace Signum.Windows
             set { SetValue(LoadDataTriggerProperty, value); }
         }
 
+        public static readonly DependencyProperty SortElementsProperty =
+            DependencyProperty.Register("SortElements", typeof(bool), typeof(EntityCombo), new UIPropertyMetadata(true));
+        public bool SortElements
+        {
+            get { return (bool)GetValue(SortElementsProperty); }
+            set { SetValue(SortElementsProperty, value); }
+        }
+
         public event Func<IEnumerable<Lite>> LoadData;
 
         static EntityCombo()
@@ -130,19 +138,24 @@ namespace Signum.Windows
 
         public void LoadNow()
         {
-            IEnumerable data;
+            IEnumerable<Lite> data;
             if (LoadData != null)
                 data = LoadData();
             else
+            {
                 data = Server.RetrieveAllLite(CleanType, safeImplementations);
+            }
+
+            if (SortElements)
+                data = data.OrderBy(a => a.ToStr).ToList();
 
             try
             {
                 changing = true;
                 combo.Items.Clear();
-                foreach (object o in data)
+                foreach (Lite lite in data)
                 {
-                    combo.Items.Add(o);
+                    combo.Items.Add(lite);
                 }
 
                 var selectedItem = !CleanLite ? Server.Convert(Entity, Reflector.GenerateLite(Type)) : Entity;

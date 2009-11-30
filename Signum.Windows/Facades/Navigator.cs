@@ -79,16 +79,7 @@ namespace Signum.Windows
 
         public static object View(object entity)
         {
-            return View(entity, (TypeContext)null);
-        }
-
-        public static object View(object entity, TypeContext typeContext)
-        {
-            Lite lite = entity as Lite;
-
-            ViewButtons vb = lite != null && (lite.UntypedEntityOrNull == null || !lite.UntypedEntityOrNull.IsNew) ? ViewButtons.Save : ViewButtons.Ok;
-
-            return Manager.View(entity, new ViewOptions { Buttons = vb, TypeContext = typeContext });
+            return View(entity, new ViewOptions ());
         }
 
         public static object View(object entity, ViewButtons buttons)
@@ -480,12 +471,11 @@ namespace Signum.Windows
             if (implementations.Length == 1)
                 return implementations[0];
 
-            TypeSelectorWindow win = new TypeSelectorWindow { Owner = parent };
-            win.Types = implementations;
-            if (win.ShowDialog() != true)
-                return null;
-
-            return win.SelectedType;
+            Type sel;
+            if (SelectorWindow.ShowDialog(implementations, t => Navigator.Manager.GetEntityIcon(t, true), 
+                t => t.NiceName(), out sel, Properties.Resources.TypeSelector, Properties.Resources.PleaseSelectAType, parent))
+                return sel;
+            return null;
         }
 
         public EntitySettings GetEntitySettings(Type type)
