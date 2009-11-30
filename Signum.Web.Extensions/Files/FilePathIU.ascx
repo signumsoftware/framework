@@ -3,6 +3,7 @@
 <%@ Import Namespace="Signum.Web.Files" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Entities.Files" %>
+<%@ Import Namespace="Signum.Engine.Basics" %>
 
 <%
     string fileType = "", idValueField = "";
@@ -16,9 +17,8 @@
         idValueField = ViewData["IdValueField"].ToString();
     }
 
-    Response.Write(fileType + " - " + idValueField);
-    /*using (var a = Html.TypeContext<FilePathDN>())
+    using (var a = Html.TypeContext<FilePathDN>())
     {
-        Response.Write(Html.FileLine(idValueField, a.Value, fileType));
-    }*/
+        Response.Write(Html.FileLine(a.Value, idValueField, new FileLine{FileType = EnumLogic<FileTypeDN>.ToEnum(fileType), Remove=false, LabelVisible=false }));
+    }
 %>
