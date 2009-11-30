@@ -97,8 +97,6 @@ namespace Signum.Engine.Linq
                         return this.BindGroupBy(m.Type, m.GetArgument("source"),
                             m.GetArgument("keySelector").StripQuotes(),
                             m.GetArgument("elementSelector").StripQuotes());
-                    case "DefaultIfEmpty":
-                        return Expression.Call(m.Method, Visit(m.GetArgument("source")));
                     case "Any":
                         return this.BindAnyAll(m.Type, m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m.Method, m == root); 
                     case "All":
@@ -509,11 +507,16 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector, LambdaExpression resultSelector)
         {
-            ProjectionExpression oldProjection;
-            ProjectionExpression projection = oldProjection = this.VisitCastProjection(source);
+            ProjectionExpression projection = this.VisitCastProjection(source);
 
-            Expression collectionExpression = MapAndVisitExpand(collectionSelector, ref projection);
-            bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionExpression);
+            map.Add(collectionSelector.Parameters[0], projection.Projector);
+
+            Expression collectionBody = collectionSelector.Body;
+            bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionBody);
+            Expression collectionExpression = Visit(collectionBody);
+            projection = ApplyExpansions(projection);
+
+            map.Remove(collectionSelector.Parameters[0]);
 
             ProjectionExpression collectionProjection = AsProjection(collectionExpression);
 
@@ -538,7 +541,7 @@ namespace Signum.Engine.Linq
             }
 
             JoinType joinType = IsTable(collectionSelector.Body) ? JoinType.CrossJoin :
-                                outer ? JoinType.OuterApply:
+                                outer ? JoinType.OuterApply :
                                 JoinType.CrossApply;
 
             JoinExpression join = new JoinExpression(joinType, projection.Source, collectionProjection.Source, null);
