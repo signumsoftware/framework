@@ -59,7 +59,7 @@
       <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
       <Name>Signum.Engine.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>
     </ProjectReference>
@@ -67,15 +67,15 @@
       <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Test\Signum.Test.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Test\Signum.Test.csproj">
       <Project>{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}</Project>
       <Name>Signum.Test</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>

@@ -97,9 +97,6 @@
     <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
     <Compile Include="Files\DatabaseSetup.cs" />
     <Compile Include="Files\FileLine.cs" />
-    <EmbeddedResource Include="Files\FilePathIU.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </EmbeddedResource>
     <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Files\FileController.cs" />
     <Compile Include="Files\FilePathModification.cs" />
@@ -129,7 +126,7 @@
       <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
       <Name>Signum.Engine.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>
     </ProjectReference>
@@ -137,15 +134,15 @@
       <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Web\Signum.Web.csproj">
+    <ProjectReference Include="..\..\Framework\Signum.Web\Signum.Web.csproj">
       <Project>{61898D02-521F-49AB-928B-F80615D55CA3}</Project>
       <Name>Signum.Web</Name>
     </ProjectReference>
