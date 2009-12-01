@@ -88,7 +88,7 @@ namespace Signum.Windows
             return Server.SaveList(value);
         }
 
-        private void widgetPanel_ExpandedCollapsed(object sender, RoutedEventArgs e)
+        private void WidgetPanel_ExpandedCollapsed(object sender, RoutedEventArgs e)
         {
             this.SizeToContent = SizeToContent.WidthAndHeight;
         }

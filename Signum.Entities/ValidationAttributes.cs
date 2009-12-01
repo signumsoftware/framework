@@ -404,7 +404,7 @@ namespace Signum.Entities
                 (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0))
                 return null;
 
-            return ErrorMessage ?? Resources.TheNumberOfElementsOf0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString());
+            return ErrorMessage ?? Resources.TheNumberOfElementsOf0HasToBe01.Formato(ComparisonType.NiceToString(), number.ToString());
         }
     }
 

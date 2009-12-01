@@ -32,17 +32,15 @@ function ValidatePartialAndCallJavascript(urlValidateController, urlJavascriptCo
 function NotifyError(s,t) {
     NotifyInfo(s,t, "error");
 }
+
 function NotifyInfo(s,t,cssClass){
     $("#loading-area-text").html(s);
-    //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
-    $("#loading-area").css({marginLeft: - parseInt($("#loading-area").outerWidth() / 2) + "px"});      
-       
+    $("#loading-area").css({marginLeft: - parseInt($("#loading-area").outerWidth() / 2) + "px"}).show();      
     if (t!=undefined){   
-        if (!cssClass.hasText()) cssClass="ok";
-        $("#loading-area .message-area-text-container").addClass(cssClass);
-        //$("#loading-area").animate({backgroundColor: "#BFFF9F"}, 350);
+        $("#loading-area .message-area-text-container").addClass(empty(cssClass) ? "ok" : cssClass );
         var timer = setTimeout(function(){     
             $("#loading-area").fadeOut("slow");
+            $("#loading-area .message-area-text-container").removeClass(empty(cssClass) ? "ok" : cssClass );
             clearTimeout(timer);
             timer = null;
         }, t);

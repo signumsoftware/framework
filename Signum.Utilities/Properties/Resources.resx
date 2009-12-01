@@ -289,4 +289,7 @@
   <data name="IsNotAnEnum" xml:space="preserve">
     <value>{0} is not an Enum</value>
   </data>
+  <data name="ThereAreSomeRepeated01" xml:space="preserve">
+    <value>There are some repeated {0}: {1}</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Collections.Specialized;
+using Signum.Utilities.Properties;
 
 namespace Signum.Utilities
 {
@@ -107,6 +108,44 @@ namespace Signum.Utilities
              var result = new Dictionary<K,V>();
              foreach (var kvp in collection)
                  result.Add(kvp.Key, kvp.Value);
+            return result;
+        }
+
+        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string keyName)
+        {
+            Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>();
+            HashSet<TKey> repetitions = new HashSet<TKey>(); 
+            foreach (var item in source)
+            {
+                var key = keySelector(item); 
+                if(result.ContainsKey(key))
+                    repetitions.Add(key);
+                else
+                    result.Add(key, item);
+            }
+
+            if (repetitions.Count > 0)
+                throw new ArgumentException(Resources.ThereAreSomeRepeated01.Formato(keyName, repetitions.ToString(", ")));
+
+            return result;
+        }
+
+        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string keyName)
+        {
+            Dictionary<TKey, TElement> result = new Dictionary<TKey, TElement>();
+            HashSet<TKey> repetitions = new HashSet<TKey>();
+            foreach (var item in source)
+            {
+                var key = keySelector(item);
+                if (result.ContainsKey(key))
+                    repetitions.Add(key);
+                else
+                    result.Add(key, elementSelector(item));
+            }
+
+            if (repetitions.Count > 0)
+                throw new ArgumentException(Resources.ThereAreSomeRepeated01.Formato(keyName, repetitions.ToString(", ")));
+
             return result;
         }
 

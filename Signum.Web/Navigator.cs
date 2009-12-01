@@ -459,7 +459,7 @@ namespace Signum.Web
                         QuerySettings[o].UrlName = GetQueryName(o);
                 }
 
-                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key);
+                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, "UrlQueryNames");
             }
         }
 

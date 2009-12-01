@@ -457,11 +457,11 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The number of elements of {{0}} has to be {0} than {1}.
+        ///   Looks up a localized string similar to The number of elements of {{0}} has to be {0} {1}.
         /// </summary>
-        internal static string TheNumberOfElementsOf0HasToBe0Than1 {
+        internal static string TheNumberOfElementsOf0HasToBe01 {
             get {
-                return ResourceManager.GetString("TheNumberOfElementsOf0HasToBe0Than1", resourceCulture);
+                return ResourceManager.GetString("TheNumberOfElementsOf0HasToBe01", resourceCulture);
             }
         }
         

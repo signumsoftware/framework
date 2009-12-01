@@ -31,7 +31,7 @@
             <m:ToolBarButton x:Name="btSave" Image="Images\save.png" Background="Blue" Content="{m:Loc Save}" Visibility="{Binding SaveVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" MinWidth="50" Click="Save_Click"/>
             <m:ToolBarButton x:Name="btReload" Image="Images\reload.png" Background="RoyalBlue" Content="{m:Loc Reload}" Visibility="{Binding ReloadVisible, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" MinWidth="50" Click="Reload_Click"/>
         </StackPanel>
-        <m:WidgetPanel x:Name="widgetPanel" DockPanel.Dock="Left" m:Common.Route="/" ExpandedCollapsed="widgetPanel_ExpandedCollapsed" />
+        <m:WidgetPanel x:Name="WidgetPanel" DockPanel.Dock="Left" m:Common.Route="/" ExpandedCollapsed="WidgetPanel_ExpandedCollapsed" />
 		<m:ErrorSummary ValidationTarget="{Binding Path=MainControl, ElementName=Window}" DockPanel.Dock="Bottom"/>
 		<Grid Margin="5">
 			<Grid.ColumnDefinitions>

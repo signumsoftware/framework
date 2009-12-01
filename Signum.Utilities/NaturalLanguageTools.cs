@@ -91,8 +91,8 @@ namespace Signum.Utilities
         //http://es.wikipedia.org/wiki/Formaci%C3%B3n_del_plural_en_espa%C3%B1ol
         Dictionary<string, string> exceptions = new Dictionary<string, string>
         {
-            {"x", ""}, // tórax -> tórax
-            {"s", ""}, // church -> churches 
+            {"x", "x"}, // tórax -> tórax
+            {"s", "ses"}, // país -> países
             {"z", "ces"},  //vez -> veces
             {"g", "gues"}, //zigzag -> zigzagues
             {"c", "ques"}, //frac -> fraques

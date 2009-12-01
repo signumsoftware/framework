@@ -177,8 +177,8 @@
   <data name="_0HasToBe0Than1" xml:space="preserve">
     <value>{{0}} ha de ser {0} {1}</value>
   </data>
-  <data name="TheNumberOfElementsOf0HasToBe0Than1" xml:space="preserve">
-    <value>El número de elementos en {{0}} ha de ser {0} que {1}</value>
+  <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
+    <value>El número de elementos en {{0}} ha de ser {0} {1}</value>
   </data>
   <data name="_0HasHoursMinutesAndSeconds" xml:space="preserve">
     <value>{0} tiene horas minutos y segundos</value>
