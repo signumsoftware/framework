@@ -1,9 +1,35 @@
-﻿<UserControl x:Class="Signum.Windows.EntityTitle"
+﻿<UserControl
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid>
-        <Label x:Name="newLabel"/>
-        <Label x:Name="typeLabel"/>
-        <Label x:Name="idLabel"/>
-    </Grid>
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"  x:Class="Signum.Windows.EntityTitle"
+    mc:Ignorable="d" d:DesignWidth="216" d:DesignHeight="24.96">
+	<Border BorderThickness="0,0,0,1" >
+		<Border.BorderBrush>
+			<LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+				<GradientStop Color="#000046AD" Offset="1"/>
+				<GradientStop Color="#000046AD"/>
+				<GradientStop Color="#FF0046AD" Offset="0.51"/>
+			</LinearGradientBrush>
+		</Border.BorderBrush>
+		<Border.Background>
+			<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+				<GradientStop Color="#FFD9ECFF" Offset="0.015"/>
+				<GradientStop Color="#FFEAF3F6" Offset="0.205"/>
+				<GradientStop Color="White" Offset="1"/>
+			</LinearGradientBrush>
+		</Border.Background>
+		<Border BorderThickness="0,0,0,1" Padding="2" >
+			<Border.BorderBrush>
+				<LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+					<GradientStop Color="#00569AFF" Offset="1"/>
+					<GradientStop Color="#00569AFF"/>
+					<GradientStop Color="#FF65A3FE" Offset="0.51"/>
+				</LinearGradientBrush>
+			</Border.BorderBrush>
+            <StackPanel TextBlock.FontSize="12"  TextBlock.Foreground="{DynamicResource BlueBorder}" HorizontalAlignment="Center" Orientation="Horizontal">
+			    <TextBox x:Name="textBox"  TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Background="Transparent" BorderThickness="0"/>
+                <TextBlock Text=": "/>
+                <TextBox Text="{Binding ToStringMethod, Mode=OneWay}" IsReadOnly="True" Background="Transparent" BorderThickness="0" />
+            </StackPanel>
+		</Border>
+	</Border>
 </UserControl>

@@ -11,7 +11,7 @@ namespace Signum.Windows
 {
     public class DateTimeConverter : ValidationRule, IValueConverter
     {
-        public static readonly DateTimeConverter DateAndTime = new DateTimeConverter(CultureInfo.CurrentCulture.DateTimeFormat.ShortDateTimePattern());
+        public static readonly DateTimeConverter DateAndTime = new DateTimeConverter("g");
         public static readonly DateTimeConverter Date = new DateTimeConverter("d");
 
         public bool Strict { get; set; }

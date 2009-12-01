@@ -39,7 +39,7 @@ namespace Signum.Entities.Basics
         public string Text
         {
             get { return text; }
-            set { Set(ref text, value, () => Text); }
+            set { SetToStr(ref text, value, () => Text); }
         }
 
         DateTime? checkDate;
@@ -51,7 +51,7 @@ namespace Signum.Entities.Basics
 
         public override string ToString()
         {
-            return text.Etc(200).TryCC(t => t.Split('\r', '\n').FirstOrDefault());
+            return text.EtcLines(200);
         }
     }
 }

@@ -156,7 +156,6 @@ namespace Signum.Utilities
             return str;
         }
 
-
         public static string Etc(this string str, int max, string etcString)
         {
             if (str.HasText() && (str.Length > max))
@@ -167,6 +166,18 @@ namespace Signum.Utilities
         public static string Etc(this string str, int max)
         {
             return str.Etc(max, "(...)");
+        }
+
+        public static string EtcLines(this string str, int max)
+        {
+            if(!str.HasText())
+                return str;
+
+            int pos = str.IndexOfAny(new []{'\n','\r'});
+            if(pos != -1 && pos < max)
+                max = pos;
+
+            return str.Etc(max);
         }
 
         public static bool ContinuesWith(this string str, string subString, int pos)

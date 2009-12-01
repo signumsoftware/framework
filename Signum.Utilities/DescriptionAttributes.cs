@@ -80,17 +80,9 @@ namespace Signum.Utilities
                    NaturalLanguageTools.Pluralize(type.NiceName());
         }
 
-        public static string GenderizedResource(Type type, string resourceKey)
-        {
-            ResourceManager resource = type.Assembly.GetDefaultResourceManager();
-            Gender gender = GetGender(type);
-
-            return GetGenderAwareResource(resource, resourceKey, gender);
-        }
-
         public static string GetGenderAwareResource(this ResourceManager resource, string resourceKey, Gender gender)
         {
-            string compoundKey =
+            string compoundKey = resourceKey + 
                 (gender == Gender.Masculine ? "_m" :
                  gender == Gender.Femenine ? "_f" : "_n");
 
@@ -138,7 +130,7 @@ namespace Signum.Utilities
             return null;
         }
 
-        public static Gender GetGender(Type type)
+        public static Gender GetGender(this Type type)
         {
             Assembly assembly = type.Assembly;
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())

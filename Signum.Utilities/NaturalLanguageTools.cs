@@ -23,9 +23,9 @@ namespace Signum.Utilities
 
         public static Gender GetGender(string name)
         {
-            IGenderDetector pluralizer = GenderDetectors.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
-            if (pluralizer != null)
-                return pluralizer.GetGender(name);
+            IGenderDetector detector = GenderDetectors.TryGetC(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+            if (detector != null)
+                return detector.GetGender(name);
 
             return Gender.Neuter;
         }

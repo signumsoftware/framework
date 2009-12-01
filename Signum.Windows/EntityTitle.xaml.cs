@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -22,6 +24,33 @@ namespace Signum.Windows
         public EntityTitle()
         {
             InitializeComponent();
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(EntityTitle_DataContextChanged);
+        }
+
+        void EntityTitle_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            textBox.Text = GetTitle(e.NewValue as ModifiableEntity);
+        }
+
+        string GetTitle(ModifiableEntity mod)
+        {
+            if (mod == null)
+                return "";
+
+            
+            string niceName = mod.GetType().NiceName();
+
+            IdentifiableEntity ident = mod as IdentifiableEntity;
+            if (ident == null)
+                return niceName;
+
+            if (ident.IsNew)
+            {
+                Gender gender = ident.GetType().GetGender();
+                return Properties.Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + niceName; 
+
+            }
+            return niceName + " " + ident.Id;
         }
     }
 }

@@ -149,16 +149,6 @@ namespace Signum.Utilities
         {
             return a > b ? a : b;
         }
-
-        public static string ShortDateTimePattern(this DateTimeFormatInfo dtfi)
-        {
-            return dtfi.ShortDatePattern + " " + dtfi.ShortTimePattern;
-        }
-
-        public static string ToShortDateTimeString(this DateTime dt)
-        {
-            return dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDateTimePattern());
-        }
     }
 
     public struct DateSpan

@@ -38,11 +38,9 @@ namespace Signum.Entities.Patterns
             return base.Set<T>(ref variable, value, property);
         }
 
-        [HiddenProperty]
-        public override string ToStr
+        protected internal override void PreSaving(ref bool graphModified)
         {
-            get { return toStr; }
-            protected set { UnsafeSet(ref toStr, value, ()=>ToStr); }
+            UnsafeSet(ref toStr, ToString(), () => ToStr);
         }
     }
 }
