@@ -7,6 +7,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Utilities;
 using System.Reflection;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Basics
 {
@@ -49,7 +50,7 @@ namespace Signum.Engine.Basics
         static SqlPreCommand SynchronizeQueries(Replacements replacements)
         {
             var should = QueryManagers.SelectMany(a => a.GetQueryNames()).Distinct()
-                .Select(o => new QueryDN { Name = o.ToString() }).ToList();
+                .Select(o => new QueryDN { Name = QueryUtils.GetQueryName(o) }).ToList();
 
             var current = Administrator.TryRetrieveAll<QueryDN>(replacements);
 
