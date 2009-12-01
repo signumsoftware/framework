@@ -58,7 +58,7 @@ namespace Signum.Entities.Files
         public int FileLength
         {
             get { return fileLength; }
-            private set { Set(ref fileLength, value, () => FileLength); }
+            private set { SetToStr(ref fileLength, value, () => FileLength); }
         }
 
         public string FileLengthString

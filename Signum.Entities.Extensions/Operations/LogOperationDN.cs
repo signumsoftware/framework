@@ -24,7 +24,7 @@ namespace Signum.Entities.Operations
         public OperationDN Operation
         {
             get { return operation; }
-            set { Set(ref operation, value, () => Operation); }
+            set { SetToStr(ref operation, value, () => Operation); }
         }
 
         UserDN user;
@@ -32,14 +32,14 @@ namespace Signum.Entities.Operations
         public UserDN User
         {
             get { return user; }
-            set { Set(ref user, value, () => User); }
+            set { SetToStr(ref user, value, () => User); }
         }
 
         DateTime start;
         public DateTime Start
         {
             get { return start; }
-            set { Set(ref start, value, () => Start); }
+            set { SetToStr(ref start, value, () => Start); }
         }
 
         DateTime? end;
@@ -54,6 +54,11 @@ namespace Signum.Entities.Operations
         {
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
+        }
+
+        public override string ToString()
+        {
+            return "{0} {1} {2:d}".Formato(operation, user, start);
         }
     }
 }

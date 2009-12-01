@@ -18,21 +18,21 @@ namespace Signum.Entities.Files
     public class EmbeddedFileDN : EmbeddedEntity, IFile
     {
         [NotNullable]
-        byte[] binaryFile;
-        [NotNullValidator]
-        public byte[] BinaryFile
-        {
-            get { return binaryFile; }
-            set { Set(ref binaryFile, value, () => BinaryFile); }
-        }
-
-        [NotNullable]
         string fileName;
         [StringLengthValidator(Min = 3)]
         public string FileName
         {
             get { return fileName; }
-            set { Set(ref fileName, value, () => FileName); }
+            set { SetToStr(ref fileName, value, () => FileName); }
+        }
+
+        [NotNullable]
+        byte[] binaryFile;
+        [NotNullValidator]
+        public byte[] BinaryFile
+        {
+            get { return binaryFile; }
+            set { SetToStr(ref binaryFile, value, () => BinaryFile); }
         }
 
         public Uri WebPath
@@ -47,7 +47,5 @@ namespace Signum.Entities.Files
         {
             return "{0} {1}".Formato(fileName, BinaryFile.TryCC(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
-
-
     }
 }

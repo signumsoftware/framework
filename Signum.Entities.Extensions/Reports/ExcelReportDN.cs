@@ -43,7 +43,7 @@ namespace Signum.Entities.Reports
         public bool Deleted
         {
             get { return deleted; }
-            set { Set(ref deleted, value, () => Deleted); }
+            set { SetToStr(ref deleted, value, () => Deleted); }
         }
 
         public override string ToString()

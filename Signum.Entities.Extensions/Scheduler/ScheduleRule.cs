@@ -82,7 +82,7 @@ namespace Signum.Entities.Scheduler
         public DayOfWeek DayOfTheWeek
         {
             get { return dayOfTheWeek; }
-            set { Set(ref dayOfTheWeek, value, () => DayOfTheWeek); }
+            set { SetToStr(ref dayOfTheWeek, value, () => DayOfTheWeek); }
         }
 
         public override string ToString()

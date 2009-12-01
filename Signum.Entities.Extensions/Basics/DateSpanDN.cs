@@ -14,24 +14,24 @@ namespace Signum.Entities.Extensions.Basics
         public int Years
         {
             get { return years; }
-            set { Set(ref years, value, () => Years); }
+            set { SetToStr(ref years, value, () => Years); }
         }
 
         int months;
         public int Months
         {
             get { return months; }
-            set { Set(ref months, value, () => Months); }
+            set { SetToStr(ref months, value, () => Months); }
         }
 
         int days;
         public int Days
         {
             get { return days; }
-            set { Set(ref days, value, () => Days); }
+            set { SetToStr(ref days, value, () => Days); }
         }
 
-        public bool EsNulo()
+        public bool IsZero()
         {
             return years == 0 && months == 0 && days == 0;
         }
@@ -55,6 +55,7 @@ namespace Signum.Entities.Extensions.Basics
         {
             return new DateSpan(years, months, days);
         }
+
         public override string ToString()
         {
             return ToDateSpan().ToString();

@@ -17,7 +17,7 @@ namespace Signum.Entities.Scheduler
         public IScheduleRuleDN Rule
         {
             get { return rule; }
-            set { Set(ref rule, value, () => Rule); }
+            set { SetToStr(ref rule, value, () => Rule); }
         }
 
         ITaskDN task;
@@ -25,7 +25,7 @@ namespace Signum.Entities.Scheduler
         public ITaskDN Task
         {
             get { return task; }
-            set { Set(ref task, value, () => Task); }
+            set { SetToStr(ref task, value, () => Task); }
         }
 
         DateTime? nextDate = DateTime.Now;

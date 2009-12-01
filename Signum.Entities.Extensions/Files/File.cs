@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using System.IO;
+using Signum.Utilities;
 
 namespace Signum.Entities.Files
 {
@@ -37,7 +38,7 @@ namespace Signum.Entities.Files
 
         public override string ToString()
         {
-            return fileName;
+            return "{0} {1}".Formato(fileName, BinaryFile.TryCC(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
         public Uri WebPath

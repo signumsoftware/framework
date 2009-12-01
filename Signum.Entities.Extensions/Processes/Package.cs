@@ -16,28 +16,28 @@ namespace Signum.Entities.Processes
         public string Name
         {
             get { return name; }
-            set { Set(ref name, value, () => Name); }
+            set { SetToStr(ref name, value, () => Name); }
         }
 
         OperationDN operation;
         public OperationDN Operation
         {
             get { return operation; }
-            set { Set(ref operation, value, () => Operation); }
+            set { SetToStr(ref operation, value, () => Operation); }
         }
 
         int numLines;
         public int NumLines
         {
             get { return numLines; }
-            set { Set(ref numLines, value, () => NumLines); }
+            set { SetToStr(ref numLines, value, () => NumLines); }
         }
 
         int numErrors;
         public int NumErrors
         {
             get { return numErrors; }
-            set { Set(ref numErrors, value, () => NumErrors); }
+            set { SetToStr(ref numErrors, value, () => NumErrors); }
         }
 
         public override string ToString()
