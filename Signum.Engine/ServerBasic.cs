@@ -16,37 +16,31 @@ namespace Signum.Services
 {
     public abstract class ServerBasic : IBaseServer, IQueryServer, INotesServer, IAlertsServer
     {
-        protected T Return<T>(MethodBase mi, string description, Func<T> function)
-        {
-            T t = default(T);
-            Action a = () => t = function();
-            Execute(mi, description, a);
-            return t;
-        }
-
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
-            T t = default(T);
-            Action a = () => t = function();
-            Execute(mi, mi.Name, a);
-            return t;
+            return Return(mi, mi.Name, function);
         }
-
-        protected void Execute(MethodBase mi, Action action)
-        {
-            Execute(mi, mi.Name, action);
-        }
-
-        protected virtual void Execute(MethodBase mi, string description, Action action)
+        
+        protected virtual T Return<T>(MethodBase mi, string description, Func<T> function)
         {
             try
             {
-                action();
+                return function();
             }
             catch (Exception e)
             {
                 throw new FaultException(e.Message);
             }
+        }
+
+        protected void Execute(MethodBase mi, Action action)
+        {
+            Return(mi, mi.Name, () => { action(); return true; });
+        }
+
+        protected void Execute(MethodBase mi, string description, Action action)
+        {
+            Return(mi, description, () => { action(); return true; });
         }
 
         protected abstract DynamicQueryManager GetQueryManager();

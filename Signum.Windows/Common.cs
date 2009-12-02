@@ -325,7 +325,7 @@ namespace Signum.Windows
                     Type type = contextList.Last().Type;
 
                     if (Navigator.Manager.ServerTypes.ContainsKey(type))
-                        eb.Implementations = Server.Service<IBaseServer>().FindImplementations(type, list.Cast<MemberInfo>().ToArray());
+                        eb.Implementations = Server.Return((IBaseServer s)=>s.FindImplementations(type, list.Cast<MemberInfo>().ToArray())); 
                 }
             }
         }

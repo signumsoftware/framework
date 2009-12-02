@@ -218,7 +218,7 @@ namespace Signum.Windows
 
             settings = Navigator.GetQuerySettings(QueryName);
 
-            QueryDescription view = Server.Service<IQueryServer>().GetQueryDescription(QueryName);
+            QueryDescription view = Server.Return((IQueryServer s)=>s.GetQueryDescription(QueryName)); 
 
             Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
             if (entity != null)
@@ -358,7 +358,7 @@ namespace Signum.Windows
             int? limit = tbLimite.Text.ToInt();
 
             Async.Do(this.FindCurrentWindow(),
-                () => queryResult = Server.Service<IQueryServer>().GetQueryResult(vn, lf, limit),
+                () => queryResult = Server.Return((IQueryServer s)=>s.GetQueryResult(vn, lf, limit)),
                 () =>
                 {
                     if (queryResult != null)

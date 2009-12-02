@@ -79,7 +79,7 @@ namespace Signum.Windows
 
         public static object View(object entity)
         {
-            return View(entity, new ViewOptions ());
+            return Manager.View(entity, new ViewOptions());
         }
 
         public static object View(object entity, ViewButtons buttons)
@@ -241,12 +241,12 @@ namespace Signum.Windows
             if (Settings == null)
                 Settings = new Dictionary<Type, EntitySettings>();
 
-            var dic = Server.Service<IQueryServer>().GetQueryNames().ToDictionary(a => a, a => new QuerySettings());
+            var dic = Server.Return((IQueryServer s) => s.GetQueryNames()).ToDictionary(a => a, a => new QuerySettings()); 
             if (QuerySetting != null)
                 dic.SetRange(QuerySetting);
             QuerySetting = dic;
 
-            ServerTypes = Server.Service<IBaseServer>().ServerTypes();
+            ServerTypes = Server.Return((IBaseServer s)=>s.ServerTypes()); 
 
         }
 

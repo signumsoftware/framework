@@ -95,7 +95,7 @@ namespace Signum.Windows
 
             settings = Navigator.GetQuerySettings(QueryName);
 
-            QueryDescription view = Server.Service<IQueryServer>().GetQueryDescription(QueryName);
+            QueryDescription view = Server.Return((IQueryServer s) => s.GetQueryDescription(QueryName));
 
             Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
 
@@ -124,7 +124,7 @@ namespace Signum.Windows
             Async.Do(this.FindCurrentWindow(),
                 () =>
 
-                    queryCount = Server.Service<IQueryServer>().GetQueryCount(vn, lf),
+                    queryCount = Server.Return((IQueryServer s)=>s.GetQueryCount(vn, lf)),
                 () =>
                 {
                     ItemsCount = queryCount;
