@@ -43,12 +43,12 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Service<ITypeAuthServer>().GetTypesAccessRules(Role);
+            listView.ItemsSource = Server.Return((ITypeAuthServer s)=>s.GetTypesAccessRules(Role)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Service<ITypeAuthServer>().SetTypesAccessRules((List<TypeAccessRule>)listView.ItemsSource, Role);
+            Server.Execute((ITypeAuthServer s) => s.SetTypesAccessRules((List<TypeAccessRule>)listView.ItemsSource, Role)); 
             Load(); 
         }
 

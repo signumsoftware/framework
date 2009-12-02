@@ -24,7 +24,7 @@ namespace Signum.Services
     {
         protected UserDN currentUser;
 
-        protected override void Execute(MethodBase mi, string description, Action action)
+        protected override T Return<T>(MethodBase mi, string description, Func<T> function)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace Signum.Services
                 {
                     FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
 
-                    action();
+                    return function();
                 }
             }
             catch (Exception e)
@@ -227,10 +227,10 @@ namespace Signum.Services
             () => PermissionAuthLogic.SetAllowedRule(rules, role));
         }
 
-        public bool IsAuthorizedFor(Enum permissionKey)
+        public bool IsAuthorized(Enum permissionKey)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-           () => PermissionAuthLogic.IsAuthorizedFor(permissionKey));
+           () => PermissionAuthLogic.IsAuthorized(permissionKey));
         }
 
         #endregion

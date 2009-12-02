@@ -24,7 +24,7 @@ namespace Signum.Windows.Reports
                 }
                 if (excelReport)
                 {
-                    QueryNames = Server.Service<IQueryServer>().GetQueryNames().ToDictionary(a => a.ToString());
+                    QueryNames = Server.Return((IQueryServer s)=>s.GetQueryNames().ToDictionary(a => a.ToString())); 
 
                     SearchControl.GetCustomMenuItems += (qn, type) => qn == typeof(ExcelReportDN) ? null : new ExcelReportPivotTableMenuItem();
 

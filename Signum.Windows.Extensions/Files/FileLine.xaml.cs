@@ -283,7 +283,7 @@ namespace Signum.Windows.Files
             }
             else
             {
-                return Server.Service<IFileServer>().GetBinaryFile(f);
+                return Server.Return((IFileServer s)=>s.GetBinaryFile(f)); 
             }
         }
 

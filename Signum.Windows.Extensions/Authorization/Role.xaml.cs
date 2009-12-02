@@ -37,7 +37,7 @@ namespace Signum.Windows.Authorization
         {
             List<QuickLink> links = new List<QuickLink>();
 
-            if (!Server.Implements<IPermissionAuthServer>() || Server.Service<IPermissionAuthServer>().IsAuthorizedFor(BasicPermissions.AdminRules))
+            if (!Server.Implements<IPermissionAuthServer>() || BasicPermissions.AdminRules.IsAuthorized())
             {
                 if (Server.Implements<IQueryAuthServer>())
                     links.Add(new QuickLink("Query Rules") { Action = () => new QueryRules { Role = Lite }.Show() });

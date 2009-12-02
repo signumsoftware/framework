@@ -43,12 +43,12 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Service<IFacadeMethodAuthServer>().GetFacadeMethodAllowedRules(Role);
+            listView.ItemsSource = Server.Return((IFacadeMethodAuthServer s)=>s.GetFacadeMethodAllowedRules(Role)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Service<IFacadeMethodAuthServer>().SetFacadeMethodAllowedRules((List<AllowedRule>)listView.ItemsSource, Role);
+            Server.Execute((IFacadeMethodAuthServer s) => s.SetFacadeMethodAllowedRules((List<AllowedRule>)listView.ItemsSource, Role)); 
             Load(); 
         }
 

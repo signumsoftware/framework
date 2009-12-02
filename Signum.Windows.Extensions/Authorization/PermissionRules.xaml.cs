@@ -43,12 +43,12 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Service<IPermissionAuthServer>().GetPermissionAllowedRules(Role);
+            listView.ItemsSource = Server.Return((IPermissionAuthServer s)=>s.GetPermissionAllowedRules(Role)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Service<IPermissionAuthServer>().SetPermissionAllowedRules((List<AllowedRule>)listView.ItemsSource, Role);
+            Server.Execute((IPermissionAuthServer s) => s.SetPermissionAllowedRules((List<AllowedRule>)listView.ItemsSource, Role)); 
             Load(); 
         }  
 

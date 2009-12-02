@@ -73,7 +73,7 @@ namespace Signum.Engine.Authorization
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
-        public static bool IsAuthorizedFor(Enum permissionKey)
+        public static bool IsAuthorized(this Enum permissionKey)
         {
             return GetAllowed(RoleDN.Current, EnumDN.UniqueKey(permissionKey));
         }

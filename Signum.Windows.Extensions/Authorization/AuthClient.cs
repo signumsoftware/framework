@@ -29,14 +29,14 @@ namespace Signum.Windows.Authorization
 
                 if (property)
                 {
-                    propertyRules = Server.Service<IPropertyAuthServer>().AuthorizedProperties();
+                    propertyRules = Server.Return((IPropertyAuthServer s)=>s.AuthorizedProperties()); 
                     Common.RouteTask += Common_RouteTask;
                     Common.PseudoRouteTask += Common_RouteTask;
                 }
 
                 if (types)
                 {
-                    typeRules = Server.Service<ITypeAuthServer>().AuthorizedTypes();
+                    typeRules = Server.Return((ITypeAuthServer s)=>s.AuthorizedTypes()); 
                     Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type) == TypeAccess.Create;
                     Navigator.Manager.GlobalIsReadOnly += type => GetTypeAccess(type) < TypeAccess.Modify;
                     Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type) >= TypeAccess.Read;
@@ -46,7 +46,7 @@ namespace Signum.Windows.Authorization
 
                 if (queries)
                 {
-                    authorizedQueries = Server.Service<IQueryAuthServer>().AuthorizedQueries();
+                    authorizedQueries = Server.Return((IQueryAuthServer s)=>s.AuthorizedQueries()); 
                     Navigator.Manager.GlobalIsFindable += qn => GetQueryAceess(qn);
 
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);

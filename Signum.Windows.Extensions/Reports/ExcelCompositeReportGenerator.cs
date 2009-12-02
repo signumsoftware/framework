@@ -53,7 +53,7 @@ namespace Signum.Windows.Reports
                     File.WriteAllBytes(filename, er.File.BinaryFile);
 
                     // pedimos la consulta y traemos los datos
-                    QueryResult queryResult = Server.Service<IQueryServer>().GetQueryResult(ReportClient.QueryNames[er.QueryName], null, null);
+                    QueryResult queryResult = Server.Return((IQueryServer s)=>s.GetQueryResult(ReportClient.QueryNames[er.QueryName], null, null)); 
                     ExcelReportPivotTablesGenerator.GenerarInforme(filename, queryResult);
                     filename = "";
 

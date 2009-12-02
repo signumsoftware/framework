@@ -32,7 +32,7 @@ namespace Signum.Windows.Reports
 
             this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
 
-            List<Lite<ExcelReportDN>> reports = Server.Service<IExcelReportServer>().GetExcelReports(SearchControl.QueryName.ToString());
+            List<Lite<ExcelReportDN>> reports = Server.Return((IExcelReportServer s)=>s.GetExcelReports(SearchControl.QueryName.ToString())); 
             
             if (reports.Count > 0)
             {

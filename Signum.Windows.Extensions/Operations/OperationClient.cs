@@ -36,7 +36,7 @@ namespace Signum.Windows.Operations
                 if (type == null)
                     return null;
 
-                var list = Server.Service<IOperationServer>().GetQueryOperationInfos(type).Where(oi =>
+                var list = Server.Return((IOperationServer o)=>o.GetQueryOperationInfos(type)).Where(oi =>
                 {
                     ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
                     return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
@@ -76,7 +76,7 @@ namespace Signum.Windows.Operations
             if (ident == null)
                 return null;
 
-            var list = Server.Service<IOperationServer>().GetEntityOperationInfos(ident);
+            var list = Server.Return((IOperationServer s)=>s.GetEntityOperationInfos(ident)); 
 
             var result = list.Select(oi => GenerateButton(oi, ident, entityControl, viewButtons)).NotNull().ToList();
 
@@ -169,14 +169,14 @@ namespace Signum.Windows.Operations
                     if (entityControl.LooseChangesIfAny())
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperationLite(lite, operationInfo.Key, null);
+                        IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ExecuteOperationLite(lite, operationInfo.Key, null)); 
                         if (operationInfo.Returns)
                             entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                     }
                 }
                 else
                 {
-                    IIdentifiable newIdent = Server.Service<IOperationServer>().ExecuteOperation(ident, operationInfo.Key, null);
+                    IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ExecuteOperation(ident, operationInfo.Key, null)); 
                     if (operationInfo.Returns)
                         entityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                 }
@@ -188,14 +188,14 @@ namespace Signum.Windows.Operations
                     if (entityControl.LooseChangesIfAny())
                     {
                         Lite lite = Lite.Create(ident.GetType(), ident);
-                        IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFromLite(lite, operationInfo.Key, null);
+                        IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ConstructFromLite(lite, operationInfo.Key, null)); 
                         if (operationInfo.Returns)
                             Navigator.View(newIdent, ViewButtons.Save);
                     }
                 }
                 else
                 {
-                    IIdentifiable newIdent = Server.Service<IOperationServer>().ConstructFrom(ident, operationInfo.Key, null);
+                    IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ConstructFrom(ident, operationInfo.Key, null)); 
                     if (operationInfo.Returns)
                         Navigator.View(newIdent, ViewButtons.Save);
                 }
@@ -205,7 +205,7 @@ namespace Signum.Windows.Operations
                 if (MessageBox.Show("Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     Lite lite = Lite.Create(ident.GetType(), ident);
-                    Server.Service<IOperationServer>().Delete(lite, operationInfo.Key, null);
+                    Server.Return((IOperationServer s)=>s.Delete(lite, operationInfo.Key, null)); 
                 }
             }
         }
@@ -215,7 +215,7 @@ namespace Signum.Windows.Operations
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
                 return null;
 
-            var list = Server.Service<IOperationServer>().GetConstructorOperationInfos(type);
+            var list = Server.Return((IOperationServer s)=>s.GetConstructorOperationInfos(type)); 
 
             var dic = (from oi in list
                        let os = (ConstructorSettings)Settings.TryGetC(oi.Key)
@@ -243,7 +243,7 @@ namespace Signum.Windows.Operations
             if (pair.OperationSettings != null && pair.OperationSettings.Constructor != null)
                 return pair.OperationSettings.Constructor(pair.OperationInfo, win);
             else
-                return Server.Service<IOperationServer>().Construct(type, selected);
+                return Server.Return((IOperationServer s)=>s.Construct(type, selected)); 
         }
     }
 }
