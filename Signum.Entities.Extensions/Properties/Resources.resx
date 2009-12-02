@@ -331,7 +331,7 @@
     <value>Minute</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
-    <value>Dias de la Semana</value>
+    <value>Días de la semana</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_AndHoliday" xml:space="preserve">
     <value>and holidays</value>

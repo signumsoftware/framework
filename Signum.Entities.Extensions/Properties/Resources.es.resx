@@ -388,7 +388,7 @@
     <value>Semanalmente</value>
   </data>
   <data name="ScheduleRuleWeeklyDN_DayOfTheWeek" xml:space="preserve">
-    <value>Dia Semana</value>
+    <value>Dia semana</value>
   </data>
   <data name="UserDN" xml:space="preserve">
     <value>Usuario</value>
