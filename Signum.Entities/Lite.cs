@@ -43,13 +43,13 @@ namespace Signum.Entities
         public override IdentifiableEntity UntypedEntityOrNull
         {
             get { return (IdentifiableEntity)(object)EntityOrNull; }
-            internal set { EntityOrNull = (T)(object)value; }
+            protected set { EntityOrNull = (T)(object)value; }
         }
 
         public T EntityOrNull
         {
             get { return entityOrNull; }
-            internal set { entityOrNull = value; }
+            protected set { entityOrNull = value; }
         }
     }
 
@@ -113,7 +113,7 @@ namespace Signum.Entities
         public abstract IdentifiableEntity UntypedEntityOrNull
         {
             get;
-            internal set;
+            protected set;
         }
 
         public void SetEntity(IdentifiableEntity ei)
@@ -125,6 +125,8 @@ namespace Signum.Entities
                 throw new ApplicationException(Resources.EntitiesDoNotMatch);
 
             this.UntypedEntityOrNull = ei;
+            if (ei != null)
+                this.ToStr = ei.ToString();
         }
 
         public void ClearEntity()

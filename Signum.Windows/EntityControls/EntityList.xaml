@@ -3,9 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
     x:Class="Signum.Windows.EntityList"
-    x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+    x:Name="me" 
 	Style="{DynamicResource toolTip}"
-	>
+	MinHeight="32">
 	<m:EntityListBase.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -45,12 +45,12 @@
 		</ResourceDictionary>
 	</m:EntityListBase.Resources>
 
-	<Grid MinHeight="16">
+	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition/>
 			<ColumnDefinition Width="Auto"/>
 		</Grid.ColumnDefinitions>
-		<Border BorderBrush="{DynamicResource BlueBorder}" BorderThickness="1,1,1,1" CornerRadius="2,2,2,2" Padding="0,0,0,0">
+		<Border BorderBrush="{DynamicResource BlueBorder}" BorderThickness="1,1,1,1" CornerRadius="2,2,2,2" Padding="0,0,0,0" SnapsToDevicePixels="True">
 			<ListBox 
 			x:Name="listBox"
 			IsSynchronizedWithCurrentItem="True" 

@@ -59,7 +59,10 @@ namespace Signum.Engine
         #region Retrieve
         public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
-            return lite.EntityOrNull ?? (lite.EntityOrNull = (T)(object)Retrieve(lite.RuntimeType, lite.Id));
+            if (lite.EntityOrNull == null)
+                lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
+
+            return lite.EntityOrNull;
         }
 
         public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
@@ -69,7 +72,10 @@ namespace Signum.Engine
 
         public static IdentifiableEntity Retrieve(Lite lite)
         {
-            return lite.UntypedEntityOrNull ?? (lite.UntypedEntityOrNull = Retrieve(lite.RuntimeType, lite.Id));
+            if (lite.UntypedEntityOrNull == null)
+                lite.SetEntity(Retrieve(lite.RuntimeType, lite.Id));
+
+            return lite.UntypedEntityOrNull;
         }
 
         public static IdentifiableEntity RetrieveAndForget(Lite lite)

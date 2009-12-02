@@ -107,6 +107,11 @@ namespace Signum.Windows
 
             return new Disposable(() =>
             {
+                var list = delayedScopes.Peek();
+
+                foreach (var action in list)
+                    action(); 
+
                 delayedScopes = delayedScopes.Pop();
                 if (delayedScopes == ImmutableStack<List<Action>>.Empty)
                     delayedScopes = null;
@@ -313,14 +318,11 @@ namespace Signum.Windows
             EntityBase eb = fe as EntityBase;
             if (eb != null && eb.NotSet(EntityBase.ImplementationsProperty))
             {
-                var contextList = context.FollowC(a => (a as TypeSubContext).TryCC(t => t.Parent)).ToList();
+                var contextList = eb.GetEntityTypeContext().FollowC(a => (a as TypeSubContext).TryCC(t => t.Parent)).ToList();
 
                 if (contextList.Count > 1 && Navigator.Manager.ServerTypes != null)
                 {
                     var list = contextList.OfType<TypeSubContext>().Select(a => a.PropertyInfo).Reverse().ToList();
-                    
-                    if (eb is EntityList)
-                        list.Add(list.Last().PropertyType.GetProperty("Item"));
 
                     Type type = contextList.Last().Type;
 

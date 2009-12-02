@@ -327,6 +327,11 @@ namespace Signum.Windows
                 return Server.Convert(value, Type);
         }
 
+        public virtual TypeContext GetEntityTypeContext()
+        {
+            return Common.GetTypeContext(this);
+        }
+
         protected object OnViewing(object entity)
         {
             if (!CanView(entity))
@@ -334,8 +339,6 @@ namespace Signum.Windows
 
             if (Viewing != null)
                 return Viewing(entity);
-
-            TypeContext context = typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? Common.GetTypeContext(this) : null;
 
             Lite lite = entity as Lite;
 
@@ -345,7 +348,7 @@ namespace Signum.Windows
             ViewOptions viewOptions = new ViewOptions
                         {
                             Buttons = buttons,
-                            TypeContext = context,
+                            TypeContext = typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? GetEntityTypeContext() : null,
                             ReadOnly = ViewReadOnly
                         };
 

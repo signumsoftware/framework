@@ -14,11 +14,11 @@ using System.Collections;
 
 namespace Signum.Windows
 {
-	/// <summary>
-	/// Interaction logic for Repeater.xaml
-	/// </summary>
-	public partial class EntityRepeater : EntityListBase
-	{
+    /// <summary>
+    /// Interaction logic for Repeater.xaml
+    /// </summary>
+    public partial class EntityRepeater : EntityListBase
+    {
         public static readonly DependencyProperty IconProperty =
             DependencyProperty.Register("Icon", typeof(ImageSource), typeof(EntityRepeater), new UIPropertyMetadata(null));
         public ImageSource Icon
@@ -28,13 +28,13 @@ namespace Signum.Windows
         }
 
         public EntityRepeater()
-		{
-			this.InitializeComponent();
-		}
+        {
+            this.InitializeComponent();
+        }
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            Common.SetCurrentWindow((DependencyObject)sender, this.FindCurrentWindow()); 
+            Common.SetCurrentWindow((DependencyObject)sender, this.FindCurrentWindow());
         }
 
         protected override void btCreate_Click(object sender, RoutedEventArgs e)
@@ -44,10 +44,20 @@ namespace Signum.Windows
             if (value != null)
             {
                 IList list = EnsureEntities();
-
                 list.Add(value);
-
                 SetEntityUserInteraction(value);
+            }
+        }
+
+        protected override void btFind_Click(object sender, RoutedEventArgs e)
+        {
+            object entity = OnFinding(false);
+
+            if (entity != null)
+            {
+                IList list = EnsureEntities();
+                list.Add(entity);
+                SetEntityUserInteraction(entity);
             }
         }
 
@@ -57,14 +67,26 @@ namespace Signum.Windows
 
             if (value != null)
             {
-                IList list = EnsureEntities();
-
-                list.Remove(value);
-
-                SetEntityUserInteraction(null);
+                if (OnRemoving(value))
+                {
+                    IList list = EnsureEntities();
+                    list.Remove(value);
+                    SetEntityUserInteraction(null);
+                }
             }
         }
-	}
+
+        protected override void UpdateVisibility()
+        {
+            btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
+            btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        protected override bool CanRemove()
+        {
+            return Remove && !Common.GetIsReadOnly(this);
+        }
+    }
 
     [StyleTypedPropertyAttribute(Property = "ItemContainerStyle", StyleTargetType = typeof(ContentControl))]
     public class RepeaterItemsControl : ItemsControl

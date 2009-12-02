@@ -46,6 +46,15 @@ namespace Signum.Windows
             return Create && !Common.GetIsReadOnly(this);
         }
 
+        public override TypeContext GetEntityTypeContext()
+        {
+            TypeContext tc = base.GetEntityTypeContext();
+            if (tc == null)
+                return null;
+
+            return new TypeSubContext(tc.Type.GetProperty("Item"), tc);
+        }
+
 
         public IList EnsureEntities()
         {

@@ -41,8 +41,12 @@
 				<Image Stretch="None" Source="{Binding Icon, ElementName=me, Mode=Default}" />
 				<Label Content="{Binding LabelText, ElementName=me, Mode=Default}" VerticalAlignment="Center" />
 			</StackPanel>
-			<Button x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" ToolTip="{m:Loc Create}"   
-				Content="{StaticResource Create}" HorizontalAlignment="Right" Margin="0,1.5"/>
+            <StackPanel HorizontalAlignment="Right" Margin="0,1.5" Orientation="Horizontal">
+                <Button x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" ToolTip="{m:Loc Create}"   
+                        Content="{StaticResource Create}"/>
+                <Button x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" ToolTip="{m:Loc Find}"   
+                        Content="{StaticResource Find}"/>
+            </StackPanel>
 		</Grid>
 		<m:RepeaterItemsControl Grid.Row="1"  x:Name="itemsControl"
 			ItemsSource="{Binding Entities, ElementName=me, Mode=Default}" 

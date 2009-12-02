@@ -301,8 +301,11 @@ namespace Signum.Windows
             {
                 liteType = Reflector.ExtractLite(entity.GetType());
 
-                entity = viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveAndForget((Lite)entity) :
-                                                                   Server.Retrieve((Lite)entity);
+                Lite lite = (Lite)entity;
+
+                entity = lite.UntypedEntityOrNull ??
+                         (viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveAndForget(lite) :
+                                                                   Server.Retrieve(lite));
             }
 
             if (!IsViewable(entity.GetType(), true))
