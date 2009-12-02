@@ -79,5 +79,10 @@ namespace Signum.Entities
 
             return (Enum)Enum.ToObject(enumType, ident.id);
         }
+
+        public static bool IsEnumProxy(this Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(EnumProxy<>);
+        }
     }
 }

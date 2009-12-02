@@ -4,11 +4,20 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using System.Threading;
+using System.Globalization;
 
 namespace Signum.Utilities
 {
     public static class Sync
     {
+        public static IDisposable ChangeCulture(string cultureName)
+        {
+            Thread t = Thread.CurrentThread;
+            CultureInfo old = t.CurrentCulture;
+            t.CurrentCulture = new CultureInfo(cultureName);
+            return new Disposable(() => t.CurrentCulture = old);
+        }
+
         public static T Initialize<T>(ref T variable, Func<T> initialize) where T : class
         {
             T value = variable;

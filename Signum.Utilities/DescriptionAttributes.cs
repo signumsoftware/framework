@@ -25,6 +25,17 @@ namespace Signum.Utilities
         }
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public class GenderAttribute : Attribute
+    {
+        public Gender Gender { get; private set; }
+
+        public GenderAttribute(Gender gender)
+        {
+            this.Gender = gender;
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Assembly)]
     public class LocalizeDescriptionsAttribute : Attribute
     {
@@ -154,6 +165,10 @@ namespace Signum.Utilities
                         return Gender.Neuter;
                 }
             }
+
+            var ga = type.SingleAttribute<GenderAttribute>();
+            if (ga != null)
+                return ga.Gender;
 
             return NaturalLanguageTools.GetGender(type.NiceName());
         }     

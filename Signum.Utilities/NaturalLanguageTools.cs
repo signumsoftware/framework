@@ -92,7 +92,7 @@ namespace Signum.Utilities
         Dictionary<string, string> exceptions = new Dictionary<string, string>
         {
             {"x", "x"}, // tórax -> tórax
-            {"s", "ses"}, // país -> países
+            {"s", "s"}, // suponemos que el nombre ya está pluralizado
             {"z", "ces"},  //vez -> veces
             {"g", "gues"}, //zigzag -> zigzagues
             {"c", "ques"}, //frac -> fraques
@@ -147,7 +147,7 @@ namespace Signum.Utilities
             {"is", Gender.Femenine }, 
 
             {"pa", Gender.Masculine},
-            {"ta", Gender.Masculine},
+            //{"ta", Gender.Masculine}, Cuenta, Nota, Alerta... son femeninos
             {"ma", Gender.Masculine},
 
             {"a", Gender.Femenine},
