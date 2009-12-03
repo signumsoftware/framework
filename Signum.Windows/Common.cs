@@ -51,7 +51,7 @@ namespace Signum.Windows
           DependencyProperty.RegisterAttached("IsReadOnly", typeof(bool), typeof(Common), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));
         public static bool GetIsReadOnly(DependencyObject obj)
         {
-            return (bool)obj.GetValue(IsReadOnlyProperty); 
+            return (bool)obj.GetValue(IsReadOnlyProperty);
         }
         public static void SetIsReadOnly(DependencyObject obj, bool value)
         {
@@ -70,9 +70,8 @@ namespace Signum.Windows
             obj.SetValue(TypeContextProperty, value);
         }
 
-
         public static readonly DependencyProperty CollapseIfNullProperty =
-            DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
+                   DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false, (d, e) => CollapseIfNullChanged((FrameworkElement)d)));
         public static bool GetCollapseIfNull(DependencyObject obj)
         {
             return (bool)obj.GetValue(CollapseIfNullProperty);
@@ -81,6 +80,13 @@ namespace Signum.Windows
         public static void SetCollapseIfNull(DependencyObject obj, bool value)
         {
             obj.SetValue(CollapseIfNullProperty, value);
+        }
+
+        static object CollapseIfNullChanged(FrameworkElement frameworkElement)
+        {
+            if (GetRoute(frameworkElement) != null)
+                throw new InvalidOperationException("CollapseIfNull has to be set before Route");
+            return null;
         }
 
 
@@ -96,27 +102,21 @@ namespace Signum.Windows
         }
 
         [ThreadStatic]
-        static ImmutableStack<List<Action>> delayedScopes; 
+        static bool delayRoutes = false;
 
         public static IDisposable DelayRoutes()
         {
-            if (delayedScopes == null)
-                delayedScopes = ImmutableStack<List<Action>>.Empty;
+            if (delayRoutes)
+                return null;
 
-            delayedScopes = delayedScopes.Push(new List<Action>());
+            delayRoutes = true;
 
             return new Disposable(() =>
             {
-                var list = delayedScopes.Peek();
-
-                foreach (var action in list)
-                    action(); 
-
-                delayedScopes = delayedScopes.Pop();
-                if (delayedScopes == ImmutableStack<List<Action>>.Empty)
-                    delayedScopes = null;
+                delayRoutes = false;
             });
         }
+
 
         public static readonly DependencyProperty DelayedRoutesProperty =
             DependencyProperty.RegisterAttached("DelayedRoutes", typeof(bool), typeof(Common), new UIPropertyMetadata(false, DelayedRoutesChanged));
@@ -141,7 +141,7 @@ namespace Signum.Windows
             if (del != null)
                 fe.Initialized += (s, e2) => del.Dispose();
         }
-       
+
         static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -162,11 +162,14 @@ namespace Signum.Windows
 
             string route = (string)e.NewValue;
 
-            if (delayedScopes == null)
+            if (!delayRoutes)
                 InititializeRoute(fe, route);
             else
             {
-                delayedScopes.Peek().Add(() => InititializeRoute(fe, route));
+                if (fe is IPreLoad)
+                    ((IPreLoad)fe).PreLoad += (s, e2) => InititializeRoute(fe, route);
+                else
+                    fe.Loaded += (s, e2) => InititializeRoute(fe, route);
             }
         }
 
@@ -179,7 +182,7 @@ namespace Signum.Windows
 
             bool pseudoRoute = route.StartsWith("$");
             if (pseudoRoute)
-                route = route.Substring(1); 
+                route = route.Substring(1);
 
             string[] steps = route.Replace("/", ".Item.").Split('.').Where(s => s.Length > 0).ToArray();
 
@@ -227,11 +230,11 @@ namespace Signum.Windows
 
             PseudoRouteTask += TaskSetLabelText;
         }
-  
+
         public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
         {
             DependencyProperty valueProperty =
-                fe is LineBase ? ((LineBase)fe).CommonRouteValue() : 
+                fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
                 //fe is LineBase ? ValueLine.ValueProperty :
                 //fe is EntityLine ? EntityLine.EntityProperty :
                 //fe is EntityList ? EntityList.EntitiesProperty :
@@ -257,7 +260,7 @@ namespace Signum.Windows
         public static void TaskSetTypeProperty(FrameworkElement fe, string route, TypeContext context)
         {
             DependencyProperty typeProperty =
-                fe is LineBase ? ((LineBase)fe).CommonRouteType() : 
+                fe is LineBase ? ((LineBase)fe).CommonRouteType() :
                 null;
 
             if (typeProperty != null && fe.NotSet(typeProperty))
@@ -269,8 +272,8 @@ namespace Signum.Windows
         public static void TaskSetLabelText(FrameworkElement fe, string route, TypeContext context)
         {
             DependencyProperty labelText =
-               fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() : 
-               fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty:
+               fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
+               fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
                null;
 
             if (labelText != null && fe.NotSet(labelText))
@@ -282,7 +285,7 @@ namespace Signum.Windows
         static void TaskSetUnitText(FrameworkElement fe, string route, TypeContext context)
         {
             ValueLine vl = fe as ValueLine;
-            TypeSubContext tsc = context as TypeSubContext; 
+            TypeSubContext tsc = context as TypeSubContext;
             if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && tsc != null)
             {
                 UnitAttribute ua = tsc.PropertyInfo.SingleAttribute<UnitAttribute>();
@@ -297,7 +300,7 @@ namespace Signum.Windows
             TypeSubContext tsc = context as TypeSubContext;
             if (vl != null && vl.NotSet(ValueLine.FormatProperty) && tsc != null)
             {
-                string format = Reflector.FormatString(tsc.PropertyInfo); 
+                string format = Reflector.FormatString(tsc.PropertyInfo);
                 if (format != null)
                     vl.Format = format;
             }
@@ -307,7 +310,7 @@ namespace Signum.Windows
         {
             bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
 
-            if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty)  && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is TextArea))
+            if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty) && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is TextArea))
             {
                 Common.SetIsReadOnly(fe, isReadOnly);
             }
@@ -327,7 +330,7 @@ namespace Signum.Windows
                     Type type = contextList.Last().Type;
 
                     if (Navigator.Manager.ServerTypes.ContainsKey(type))
-                        eb.Implementations = Server.Return((IBaseServer s)=>s.FindImplementations(type, list.Cast<MemberInfo>().ToArray())); 
+                        eb.Implementations = Server.Return((IBaseServer s) => s.FindImplementations(type, list.Cast<MemberInfo>().ToArray()));
                 }
             }
         }
@@ -365,7 +368,7 @@ namespace Signum.Windows
         public static bool AssertErrors(this FrameworkElement element)
         {
             IAsserErrorsHandler aeh = element as IAsserErrorsHandler;
-            if(aeh != null)
+            if (aeh != null)
                 return aeh.AssertErrors();
 
             return AssertErrors((Modifiable)element.DataContext);
@@ -373,7 +376,7 @@ namespace Signum.Windows
 
         public static bool AssertErrors(Modifiable mod)
         {
-            var graph = GraphExplorer.PreSaving(()=>GraphExplorer.FromRoot(mod));
+            var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
             string error = GraphExplorer.Integrity(graph);
 
             if (error.HasText())
@@ -386,9 +389,9 @@ namespace Signum.Windows
 
         public static bool LooseChangesIfAny(this FrameworkElement element)
         {
-            return !element.HasChanges() || 
+            return !element.HasChanges() ||
                 MessageBox.Show(
-                Properties.Resources.ThereAreChangesContinue, 
+                Properties.Resources.ThereAreChangesContinue,
                 Properties.Resources.ThereAreChanges,
                 MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) == MessageBoxResult.OK;
         }
@@ -403,7 +406,7 @@ namespace Signum.Windows
         {
             obj.SetValue(CurrentWindowProperty, value);
         }
-  
+
 
         public static Window FindCurrentWindow(this FrameworkElement fe)
         {
@@ -420,7 +423,7 @@ namespace Signum.Windows
 
         public static IEnumerable<DependencyObject> Parents(this DependencyObject child)
         {
-            return child.FollowC(VisualTreeHelper.GetParent); 
+            return child.FollowC(VisualTreeHelper.GetParent);
         }
 
 
@@ -464,7 +467,7 @@ namespace Signum.Windows
         public object NewDataContext { get; set; }
 
         public ChangeDataContextEventArgs(object newDataContext)
-            :base(Common.ChangeDataContextEvent)
+            : base(Common.ChangeDataContextEvent)
         {
             this.NewDataContext = newDataContext;
         }
