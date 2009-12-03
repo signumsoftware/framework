@@ -5,8 +5,8 @@
     xmlns:dq="clr-namespace:Signum.Entities.Reports;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="dq:CompositeReportDN" MinWidth="300">
     <StackPanel>
-        <m:ImageButton x:Name="btGenerar" Margin="6,4,6,4"    Content="Generar" IsDefault="true" Click="btGenerar_Click"/>
-        <m:ValueLine  m:Common.Route="Nombre" LabelText="_Nombre" />
-        <m:EntityList m:Common.Route="ExcelReports" LabelText="_ExcelReports" />
+        <m:ImageButton x:Name="btGenerar" Margin="6,4,6,4" Content="Generar" IsDefault="true" Click="btGenerar_Click"/>
+        <m:ValueLine m:Common.Route="Name" LabelText="_Nombre" />
+        <m:EntityList m:Common.Route="ExcelReports" LabelText="_Excel Reports" />
     </StackPanel>
 </UserControl>

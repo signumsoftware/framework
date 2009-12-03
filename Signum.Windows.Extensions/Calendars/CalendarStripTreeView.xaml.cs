@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Navigation;
 using System.Collections;
+using System.Linq;
 
 namespace Signum.Windows.Calendars
 {
@@ -41,7 +42,7 @@ namespace Signum.Windows.Calendars
         {
             get
             {
-                return _swLeft ?? (_swLeft = (ScrollViewer)Common.FindChildrenBreadthFirst(treeLeft, o => o is ScrollViewer));
+                return _swLeft ?? (_swLeft = (ScrollViewer)Common.FindChildrenBreadthFirst(treeLeft, o => o is ScrollViewer).First());
             }
         }
 
@@ -50,7 +51,7 @@ namespace Signum.Windows.Calendars
         {
             get
             {
-                return _swRight ?? (_swRight = (ScrollViewer)Common.FindChildrenBreadthFirst(treeRight, o => o is ScrollViewer));
+                return _swRight ?? (_swRight = (ScrollViewer)Common.FindChildrenBreadthFirst(treeRight, o => o is ScrollViewer).First());
             }
         }
 
