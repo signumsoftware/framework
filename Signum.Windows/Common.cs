@@ -437,7 +437,7 @@ namespace Signum.Windows
             return val == Visibility.Visible;
         }
 
-        public static DependencyObject FindChildrenBreadthFirst(DependencyObject parent, Predicate<DependencyObject> predicate)
+        public static IEnumerable<DependencyObject> FindChildrenBreadthFirst(DependencyObject parent, Predicate<DependencyObject> predicate)
         {
             //http://en.wikipedia.org/wiki/Breadth-first_search
             Queue<DependencyObject> st = new Queue<DependencyObject>();
@@ -448,15 +448,17 @@ namespace Signum.Windows
                 DependencyObject dp = st.Dequeue();
 
                 if (predicate(dp))
-                    return dp;
-
-                int count = VisualTreeHelper.GetChildrenCount(dp);
-                for (int i = 0; i < count; i++)
+                    yield return dp;
+                else
                 {
-                    st.Enqueue(VisualTreeHelper.GetChild(dp, i));
+                    int count = VisualTreeHelper.GetChildrenCount(dp);
+                    for (int i = 0; i < count; i++)
+                    {
+                        st.Enqueue(VisualTreeHelper.GetChild(dp, i));
+                    }
                 }
             }
-            return null;
+            yield break;
         }
     }
 
