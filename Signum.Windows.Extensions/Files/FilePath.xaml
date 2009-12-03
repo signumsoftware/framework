@@ -5,7 +5,7 @@
     xmlns:d="clr-namespace:Signum.Entities.Files;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="d:FilePathDN"
     MinWidth="300">
-    <StackPanel>
+    <StackPanel m:Common.LabelWidth="115">
         <m:ValueLine m:Common.Route="FileName" />
         <m:ValueLine m:Common.Route="FileLengthString" m:Common.IsReadOnly="True"/>
         <m:EntityCombo m:Common.Route="FileType" m:Common.IsReadOnly="True"/>
