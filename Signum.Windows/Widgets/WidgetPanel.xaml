@@ -12,18 +12,18 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <UserControl.Background>
-        <LinearGradientBrush EndPoint="0.5,0" StartPoint="0.5,1">
-            <GradientStop Color="#FFFFFFFF" Offset="0"/>
-            <GradientStop Color="#FFD8EBFF" Offset="1"/>
+        <LinearGradientBrush>
+            <GradientStop Color="#dae9ff" Offset="0"/>
+            <GradientStop Color="#d2e1f6" Offset="1"/>
         </LinearGradientBrush>
     </UserControl.Background>
     <Expander x:Name="expander" ExpandDirection="Right" Style="{DynamicResource LineExpander}" Expanded="expander_Expanded" Collapsed="expander_Collapsed"> 
         <Grid>
         	<Rectangle HorizontalAlignment="Right" Width="50">
         		<Rectangle.Fill>
-        			<LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
-        				<GradientStop Color="#00FFFFFF" Offset="0"/>
-        				<GradientStop Color="#FFFFFFFF" Offset="1"/>
+        			<LinearGradientBrush>
+		             <GradientStop Color="#dae9ff" Offset="0"/>
+		            <GradientStop Color="#d2e1f6" Offset="1"/>
         			</LinearGradientBrush>
         		</Rectangle.Fill>
         	</Rectangle>
