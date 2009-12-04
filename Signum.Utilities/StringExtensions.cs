@@ -7,11 +7,14 @@ using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
 using Signum.Utilities.Properties;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace Signum.Utilities
 {
     public static class StringExtensions
     {
+        static Expression<Func<string, bool>> HasTextExpression = str => str != null && str != "";
+
         public static bool HasText(this string str)
         {
             return !string.IsNullOrEmpty(str);
