@@ -99,9 +99,8 @@ namespace Signum.Windows.Reports
 
         private void MenuItemAdmin_Clicked(object sender, RoutedEventArgs e)
         {
-            Navigator.Find(new FindOptions(typeof(ExcelReportDN))
+            Navigator.Explore(new ExploreOptions(typeof(ExcelReportDN))
             {
-                OnLoadMode = OnLoadMode.Search,
                 ShowFilters = false,
                 ShowFilterButton = false,
                 FilterOptions = new List<FilterOption>
@@ -114,12 +113,8 @@ namespace Signum.Windows.Reports
                         Frozen = true
                     }
                 },
-                Buttons = SearchButtons.Close,
-                Modal = true
+                Closed = (_, __) => Initialize() //Refrescar lista de informes tras salir del administrador
             });
-
-            //Refrescar lista de informes tras salir del administrador
-            Initialize();
 
             e.Handled = true;
         }

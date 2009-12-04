@@ -190,14 +190,14 @@ namespace Signum.Windows.Operations
                         Lite lite = Lite.Create(ident.GetType(), ident);
                         IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ConstructFromLite(lite, operationInfo.Key, null)); 
                         if (operationInfo.Returns)
-                            Navigator.View(newIdent, ViewButtons.Save);
+                            Navigator.Navigate(newIdent);
                     }
                 }
                 else
                 {
                     IIdentifiable newIdent = Server.Return((IOperationServer s)=>s.ConstructFrom(ident, operationInfo.Key, null)); 
                     if (operationInfo.Returns)
-                        Navigator.View(newIdent, ViewButtons.Save);
+                        Navigator.Navigate(newIdent);
                 }
             }
             else if (operationInfo.OperationType == OperationType.Delete)

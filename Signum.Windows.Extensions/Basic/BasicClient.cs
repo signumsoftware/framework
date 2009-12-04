@@ -24,7 +24,7 @@ namespace Signum.Windows.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.Add(typeof(DateSpanDN), new EntitySettings() {View = () => new DateSpan() });
+                Navigator.Manager.Settings.Add(typeof(DateSpanDN), new EntitySettings() { ViewEmbedded = (e, tc) => new DateSpan(tc) });
             }
         }
     }

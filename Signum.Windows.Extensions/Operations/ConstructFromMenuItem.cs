@@ -79,7 +79,7 @@ namespace Signum.Windows.Operations
                 IIdentifiable entity = Server.Return((IOperationServer s)=>s.ConstructFromMany(lites, entityType, operationInfo.Key)); 
 
                 if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
-                    Navigator.View(entity, ViewButtons.Save); 
+                    Navigator.Navigate(entity); 
             }
         }
     }

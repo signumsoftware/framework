@@ -23,8 +23,8 @@ namespace Signum.Windows.Extensions.Files
             {
                 Navigator.Manager.Settings.AddRange(new Dictionary<Type, EntitySettings>() 
                 {
-                    { typeof(FileRepositoryDN), new EntitySettings() { View = () => new FileRepository() }},
-                    { typeof(FilePathDN), new EntitySettings() {View = () => new FilePath() }},
+                    { typeof(FileRepositoryDN), new EntitySettings() { View = e => new FileRepository() }},
+                    { typeof(FilePathDN), new EntitySettings() {View = e => new FilePath() }},
                 });
             }
         }

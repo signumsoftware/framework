@@ -11,6 +11,7 @@ using System.Collections;
 using Signum.Windows;
 using System.Windows.Controls;
 using Signum.Entities.Basics;
+using Signum.Entities;
 
 namespace Signum.Windows.Authorization
 {
@@ -24,8 +25,8 @@ namespace Signum.Windows.Authorization
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin) { View = () => new User() });
-                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings { View = () => new Role() });
+                Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin) { View = e => new User() });
+                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings { View = e => new Role() });
 
                 if (property)
                 {
@@ -51,6 +52,67 @@ namespace Signum.Windows.Authorization
 
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
                 }
+
+                LinksWidget.EntityLinks<RoleDN>((r, c) =>
+                {
+                    bool authorized = !Server.Implements<IPermissionAuthServer>() || BasicPermissions.AdminRules.IsAuthorized();
+                    return new QuickLink[]
+                    {
+                         new QuickLinkAction("Query Rules", () => new QueryRules { Role = r.ToLite() }.Show())
+                         { 
+                             IsVisible = authorized && Server.Implements<IQueryAuthServer>()
+                         },
+                         new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite() }.Show())
+                         { 
+                             IsVisible = authorized && Server.Implements<IFacadeMethodAuthServer>()
+                         },
+                         new QuickLinkAction("Type Rules", () => new TypeRules { Role = r.ToLite() }.Show())
+                         { 
+                             IsVisible = authorized && Server.Implements<ITypeAuthServer>()
+                         },
+                         new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r.ToLite() }.Show())
+                         {
+                             IsVisible = authorized && Server.Implements<IPermissionAuthServer>()
+                         },
+                         new QuickLinkAction("Operation Rules", () => new OperationRules { Role = r.ToLite() }.Show())
+                         {
+                             IsVisible = authorized && Server.Implements<IOperationAuthServer>(),
+                         },
+                         new QuickLinkAction("Entity Groups", () => new EntityGroupRules { Role = r.ToLite() }.Show())
+                         {
+                             IsVisible = authorized && Server.Implements<IEntityGroupAuthServer>(),
+                         }
+                     };
+                }); 
+
+
+                //public List<QuickLink> QuickLinks()
+                //{
+                //    List<QuickLink> links = new List<QuickLink>();
+
+                //    if (!Server.Implements<IPermissionAuthServer>() || BasicPermissions.AdminRules.IsAuthorized())
+                //    {
+                //        if (Server.Implements<IQueryAuthServer>())
+                //            links.Add(new QuickLinkAction("Query Rules", () => new QueryRules { Role = Lite }.Show()));
+
+                //        if (Server.Implements<IFacadeMethodAuthServer>())
+                //            links.Add(new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = Lite }.Show()));
+
+                //        if (Server.Implements<ITypeAuthServer>())
+                //            links.Add(new QuickLinkAction("Type Rules", () => new TypeRules { Role = Lite }.Show()));
+
+                //        if (Server.Implements<IPermissionAuthServer>())
+                //            links.Add(new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = Lite }.Show()));
+
+                //        if (Server.Implements<IOperationAuthServer>())
+                //            links.Add(new QuickLinkAction("Operation Rules", () => new OperationRules { Role = Lite }.Show()));
+
+                //        if (Server.Implements<IEntityGroupAuthServer>())
+                //            links.Add(new QuickLinkAction("Entity Groups", () => new EntityGroupRules { Role = Lite }.Show()));
+                //    }
+
+                //    return links;
+                //}
             }
         }
 
@@ -84,7 +146,7 @@ namespace Signum.Windows.Authorization
 
                 object queryName =
                     tag is Type ? null : //maybe a type but only if in FindOptions
-                    tag is FindOptions ? ((FindOptions)tag).QueryName :
+                    tag is FindOptionsBase ? ((FindOptionsBase)tag).QueryName :
                     tag;
 
                 if (queryName != null && Navigator.Manager.QuerySetting.ContainsKey(queryName))

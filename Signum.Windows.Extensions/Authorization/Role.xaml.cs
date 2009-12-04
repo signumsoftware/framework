@@ -20,45 +20,11 @@ namespace Signum.Windows.Authorization
     /// <summary>
     /// Interaction logic for Usuario.xaml
     /// </summary>
-    public partial class Role : UserControl, IHaveQuickLinks
+    public partial class Role : UserControl
     {
         public Role()
         {
             InitializeComponent();
-        }
-
-        Lite<RoleDN> Lite
-        {
-            get { return ((RoleDN)DataContext).ToLite(); }
-        }
-
-
-        public List<QuickLink> QuickLinks()
-        {
-            List<QuickLink> links = new List<QuickLink>();
-
-            if (!Server.Implements<IPermissionAuthServer>() || BasicPermissions.AdminRules.IsAuthorized())
-            {
-                if (Server.Implements<IQueryAuthServer>())
-                    links.Add(new QuickLink("Query Rules") { Action = () => new QueryRules { Role = Lite }.Show() });
-
-                if (Server.Implements<IFacadeMethodAuthServer>())
-                    links.Add(new QuickLink("Facade Method Rules") { Action = () => new FacadeMethodRules { Role = Lite }.Show() });
-
-                if (Server.Implements<ITypeAuthServer>())
-                    links.Add(new QuickLink("Type Rules") { Action = () => new TypeRules { Role = Lite }.Show() });
-
-                if (Server.Implements<IPermissionAuthServer>())
-                    links.Add(new QuickLink("Permission Rules") { Action = () => new PermissionRules { Role = Lite }.Show() });
-
-                if (Server.Implements<IOperationAuthServer>())
-                    links.Add(new QuickLink("Operation Rules") { Action = () => new OperationRules { Role = Lite }.Show() });
-
-                if (Server.Implements<IEntityGroupAuthServer>())
-                    links.Add(new QuickLink("Entity Groups") { Action = () => new EntityGroupRules { Role = Lite }.Show() });
-            }
-
-            return links;
         }
     }
 }
