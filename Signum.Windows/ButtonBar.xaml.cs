@@ -125,4 +125,10 @@ namespace Signum.Windows
     {
         List<FrameworkElement> GetToolBarElements(object dataContext, ViewButtons buttons);
     }
+
+    public enum ViewButtons
+    {
+        Ok,
+        Save
+    }
 }

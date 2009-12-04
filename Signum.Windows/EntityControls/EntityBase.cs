@@ -77,6 +77,14 @@ namespace Signum.Windows
             set { SetValue(ViewReadOnlyProperty, value); }
         }
 
+        public static readonly DependencyProperty ViewButtonsProperty =
+            DependencyProperty.Register("ViewButtons", typeof(ViewButtons), typeof(EntityBase), new UIPropertyMetadata(ViewButtons.Ok));
+        public ViewButtons ViewButtons
+        {
+            get { return (ViewButtons)GetValue(ViewButtonsProperty); }
+            set { SetValue(ViewButtonsProperty, value); }
+        }
+
         public static readonly DependencyProperty FindProperty =
             DependencyProperty.Register("Find", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(true, (d, e) => ((EntityBase)d).UpdateVisibility()));
         public bool Find
@@ -189,6 +197,9 @@ namespace Signum.Windows
             if (this.NotSet(EntityBase.ViewOnCreateProperty) && ViewOnCreate && !View)
                 ViewOnCreate = false;
 
+            if (this.NotSet(EntityBase.ViewButtonsProperty) && CleanLite)
+                ViewButtons = ViewButtons.Save;
+
             UpdateVisibility();
         }
 
@@ -243,7 +254,7 @@ namespace Signum.Windows
 
         protected virtual void btFind_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnFinding(false);
+            object entity = OnFinding();
 
             if (entity != null)
                 SetEntityUserInteraction(entity);
@@ -301,7 +312,7 @@ namespace Signum.Windows
             return value;
         }
 
-        protected object OnFinding(bool allowMultiple)
+        protected object OnFinding()
         {
             if (!CanFind())
                 return null;
@@ -313,7 +324,7 @@ namespace Signum.Windows
                 if (type == null)
                     return null;
 
-                value = Navigator.Find(new FindOptions(type) { AllowMultiple = allowMultiple });
+                value = Navigator.Find(type);
             }
             else
                 value = Finding();
@@ -321,10 +332,7 @@ namespace Signum.Windows
             if (value == null)
                 return null;
 
-            if (value is object[])
-                return ((object[])value).Select(o => Server.Convert(o, Type)).ToArray();
-            else
-                return Server.Convert(value, Type);
+            return Server.Convert(value, Type);
         }
 
         public virtual TypeContext GetEntityTypeContext()
@@ -340,22 +348,29 @@ namespace Signum.Windows
             if (Viewing != null)
                 return Viewing(entity);
 
-            Lite lite = entity as Lite;
+            if (ViewButtons == ViewButtons.Ok)
+            {
+                var options = new ViewOptions
+                { 
+                    TypeContext =  typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? GetEntityTypeContext() : null, 
+                };
 
-            ViewButtons buttons = lite != null && (lite.UntypedEntityOrNull == null || !lite.UntypedEntityOrNull.IsNew) ?
-                ViewButtons.Save : ViewButtons.Ok;
+                if(this.NotSet(ViewReadOnlyProperty) ? Common.GetIsReadOnly(this) : ViewReadOnly)
+                    options.ReadOnly = true;
 
-            ViewOptions viewOptions = new ViewOptions
-                        {
-                            Buttons = buttons,
-                            TypeContext = typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? GetEntityTypeContext() : null,
-                            ReadOnly = ViewReadOnly
-                        };
+                return Navigator.ViewUntyped(entity, options);
+            }
+            else
+            {
+                var options = new NavigateOptions();
 
-            if (buttons == ViewButtons.Ok && this.NotSet(ViewReadOnlyProperty) ? Common.GetIsReadOnly(this) : ViewReadOnly)
-                viewOptions.ReadOnly = true; 
+                if(ViewReadOnly)
+                    options.ReadOnly = true;
 
-            return Navigator.View(entity, viewOptions);
+                Navigator.NavigateUntyped(entity, options);
+
+                return null;
+            }
         }
 
         protected bool OnRemoving(object entity)

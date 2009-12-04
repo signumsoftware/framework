@@ -44,6 +44,14 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+        public static readonly DependencyProperty MaxItemsCountProperty =
+            DependencyProperty.Register("MaxItemsCount", typeof(int?), typeof(SearchControl), new UIPropertyMetadata(200));
+        public int? MaxItemsCount
+        {
+            get { return (int?)GetValue(MaxItemsCountProperty); }
+            set { SetValue(MaxItemsCountProperty, value); }
+        }
+
         public static readonly DependencyProperty ItemsCountProperty =
             DependencyProperty.Register("ItemsCount", typeof(int), typeof(SearchControl), new UIPropertyMetadata(0));
         public int ItemsCount
@@ -85,19 +93,18 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty SelectedItemProperty =
-          DependencyProperty.Register("SelectedItem", typeof(object), typeof(SearchControl), new UIPropertyMetadata(null));
-        public object SelectedItem
+          DependencyProperty.Register("SelectedItem", typeof(Lite), typeof(SearchControl), new UIPropertyMetadata(null));
+        public Lite SelectedItem
         {
-            get { return (object)GetValue(SelectedItemProperty); }
+            get { return (Lite)GetValue(SelectedItemProperty); }
             set { SetValue(SelectedItemProperty, value); }
         }
 
-
         public static readonly DependencyProperty SelectedItemsProperty =
-          DependencyProperty.Register("SelectedItems", typeof(object[]), typeof(SearchControl), new UIPropertyMetadata(null));
-        public object[] SelectedItems
+          DependencyProperty.Register("SelectedItems", typeof(Lite[]), typeof(SearchControl), new UIPropertyMetadata(null));
+        public Lite[] SelectedItems
         {
-            get { return (object[])GetValue(SelectedItemsProperty); }
+            get { return (Lite[])GetValue(SelectedItemsProperty); }
             set { SetValue(SelectedItemsProperty, value); }
         }
 
@@ -298,9 +305,9 @@ namespace Signum.Windows
         {
             btView.Visibility = lvResult.SelectedItem != null && View ? Visibility.Visible : Visibility.Collapsed;
 
-            SelectedItem = ((object[])lvResult.SelectedItem).TryCC(a => a[entityIndex]);
+            SelectedItem = ((object[])lvResult.SelectedItem).TryCC(a => (Lite)a[entityIndex]);
             if (MultiSelection)
-                SelectedItems = lvResult.SelectedItems.Cast<object[]>().Select(a => a[entityIndex]).ToArray();
+                SelectedItems = lvResult.SelectedItems.Cast<object[]>().Select(a => (Lite)a[entityIndex]).ToArray();
             else
                 SelectedItems = null;
         }
@@ -355,7 +362,7 @@ namespace Signum.Windows
             var lf = CurrentFilters();
             tbResultados.Visibility = Visibility.Hidden;
 
-            int? limit = tbLimite.Text.ToInt();
+            int? limit = MaxItemsCount;
 
             Async.Do(this.FindCurrentWindow(),
                 () => queryResult = Server.Return((IQueryServer s)=>s.GetQueryResult(vn, lf, limit)),
@@ -434,7 +441,7 @@ namespace Signum.Windows
 
             if (this.Viewing == null)
             {
-                Navigator.View(entity, new ViewOptions { Buttons = ViewButtons.Save, ReadOnly = ViewReadOnly });
+                Navigator.NavigateUntyped(entity, new NavigateOptions { ReadOnly = ViewReadOnly });
             }
             else
                 this.Viewing(entity);

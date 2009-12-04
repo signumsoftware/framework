@@ -73,6 +73,24 @@ namespace Signum.Test.LinqProvider
             Assert.IsNull(artists.FirstOrDefault(a => a.Dead && !a.Dead));
             Assert.IsNotNull(artists.FirstOrDefault(a => a.Dead)); //michael
             Assert.IsNotNull(artists.FirstOrDefault(a => a.Sex == Sex.Male));
+
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrMany());
+            Assert.IsNotNull(artists.Where(a => a.Dead).SingleOrMany()); //michael
+            Assert.IsNull(artists.Where(a => a.Sex == Sex.Male).SingleOrMany());
+        }
+
+        [TestMethod]
+        public void SingleFirstLastError()
+        {
+            var artists = Database.Query<ArtistDN>();
+
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).Single("X"), "X");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).Single("X"), "X");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleOrDefault("X"), "X");
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).First("X"),"X");
+
+
+            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrMany("X"), "X");
         }
 
 

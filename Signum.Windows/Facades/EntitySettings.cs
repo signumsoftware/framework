@@ -15,8 +15,8 @@ namespace Signum.Windows
 {
     public class EntitySettings
     {
-        public Func<Control> View { get; set; }
-        public Func<Window> ViewWindow { get; set; }
+        public Func<IdentifiableEntity, Control> View { get; set; }
+        public Func<EmbeddedEntity, TypeContext, Control> ViewEmbedded { get; set; }
 
         public Func<bool, bool> IsCreable { get; set; }
         public Func<bool, bool> IsReadOnly { get; set; }
@@ -70,6 +70,27 @@ namespace Signum.Windows
                     break;
                 default:
                     break;
+            }
+        }
+
+        public Control CreateView(ModifiableEntity entity, TypeContext typeContext)
+        {
+            if (entity is EmbeddedEntity)
+            {
+                if (ViewEmbedded == null)
+                    throw new InvalidOperationException("View not defined in EntitySettings");
+
+                if (typeContext == null)
+                    throw new ArgumentException("An EmbeddedEntity needs TypeContext");
+
+                return ViewEmbedded((EmbeddedEntity)entity, typeContext);
+            }
+            else //entity could be null
+            {
+                if (View == null)
+                    throw new InvalidOperationException("View not defined in EntitySettings");
+
+                return View((IdentifiableEntity)entity);
             }
         }
     }

@@ -21,6 +21,7 @@ namespace Signum.Engine.DynamicQuery
         QueryDescription GetDescription();
         QueryResult ExecuteQuery(List<Filter> filters, int? limit);
         int ExecuteQueryCount(List<Filter> filters);
+        Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType);
         string GetErrors();
     }
 
@@ -58,6 +59,11 @@ namespace Signum.Engine.DynamicQuery
         {
             return query.WhereFilters(filters).Count();
         }
+
+        public override Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType)
+        {
+            return query.WhereFilters(filters).SelectEntity().Unique(uniqueType); 
+        }
     }
 
     public class ManualDynamicQuery<T>: DynamicQuery<T>
@@ -86,6 +92,11 @@ namespace Signum.Engine.DynamicQuery
         {
             return execute(filters, null).Count();
         }
+
+        public override Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType)
+        {
+            return execute(filters, 1).SelectEntity().Unique(uniqueType);
+        }
     }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
@@ -94,8 +105,8 @@ namespace Signum.Engine.DynamicQuery
         protected List<MemberEntry<T>> members;
 
         public abstract QueryResult ExecuteQuery(List<Filter> filters, int? limit);
-
-        public abstract int ExecuteQueryCount(List<Filter> filters); 
+        public abstract int ExecuteQueryCount(List<Filter> filters);
+        public abstract Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType);
 
         public string GetErrors()
         {
@@ -232,6 +243,53 @@ namespace Signum.Engine.DynamicQuery
             if (where != null)
                 return sequence.Where(where.Compile());
             return sequence;
+        }
+
+        public static IQueryable<Lite> SelectEntity<T>(this IQueryable<T> query)
+        {
+            Expression<Func<T, Lite>> select = GetSelectEntityExpression<T>();
+
+            return query.Select(select);
+        }
+
+        public static IEnumerable<Lite> SelectEntity<T>(this IEnumerable<T> query)
+        {
+            Func<T, Lite> select = GetSelectEntityExpression<T>().Compile();
+
+            return query.Select(select);
+        }
+
+        public static T Unique<T>(this IQueryable<T> query, UniqueType uniqueType)
+        {
+            switch (uniqueType)
+            {
+                case UniqueType.First: return query.First();
+                case UniqueType.FirstOrDefault: return query.FirstOrDefault();
+                case UniqueType.Single: return query.Single();
+                case UniqueType.SingleOrDefault: return query.SingleOrDefault();
+                case UniqueType.SingleOrMany: return query.SingleOrMany();
+                default: throw new InvalidOperationException();
+            }
+        }
+
+        public static T Unique<T>(this IEnumerable<T> collection, UniqueType uniqueType)
+        {
+            switch (uniqueType)
+            {
+                case UniqueType.First: return collection.First();
+                case UniqueType.FirstOrDefault: return collection.FirstOrDefault();
+                case UniqueType.Single: return collection.Single();
+                case UniqueType.SingleOrDefault: return collection.SingleOrDefault();
+                case UniqueType.SingleOrMany: return collection.SingleOrMany();
+                default: throw new InvalidOperationException();
+            }
+        }
+
+        private static Expression<Func<T, Lite>> GetSelectEntityExpression<T>()
+        {
+            ParameterExpression e = Expression.Parameter(typeof(T), "e");
+
+            return Expression.Lambda<Func<T, Lite>>(Expression.Convert(Expression.Property(e, Column.Entity), typeof(Lite)), e);
         }
 
         public static IQueryable<T> TryTake<T>(this IQueryable<T> query, int? num)

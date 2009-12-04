@@ -24,7 +24,7 @@
             <ItemsControl x:Name="lvQuickLinks">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Tag="{Binding Path=Action}" Content="{Binding Path=Label}" Style="{DynamicResource LinkButtonStyle}"  HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="Hand" Margin="0,2,0,2"/>
+                        <Button Tag="{Binding}" Content="{Binding Path=Label}" Style="{DynamicResource LinkButtonStyle}"  HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="Hand" Margin="0,2,0,2"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ServiceModel;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities;
 
 namespace Signum.Services
 {
@@ -20,6 +21,9 @@ namespace Signum.Services
         int GetQueryCount(object queryName, List<Filter> filters);
 
         [OperationContract, NetDataContract]
-        List<object> GetQueryNames();
+        Lite GetUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType);
+
+        [OperationContract, NetDataContract]
+        List<object> GetQueryNames();      
     }
 }

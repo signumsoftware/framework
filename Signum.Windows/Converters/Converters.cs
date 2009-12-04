@@ -80,6 +80,9 @@ namespace Signum.Windows
         public static readonly IValueConverter IsNotNull =
             ConverterFactory.New((object o) => o != null);
 
+        public static readonly IValueConverter ToInt =
+            ConverterFactory.New((int? val) => val.TryToString(), (string str) => str.ToInt());
+
         public static readonly IValueConverter BoolToSelectionMode =
             ConverterFactory.New((bool b) => b ? SelectionMode.Extended : SelectionMode.Single);
 

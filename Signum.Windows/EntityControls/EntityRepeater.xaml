@@ -14,7 +14,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ContentControl}">
                             <Border BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1">
-                                <Grid Loaded="Grid_Loaded">
+                                <Grid Loaded="Grid_Loaded" m:Common.Route="/">
                                     <ContentPresenter 
 						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
 						                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 

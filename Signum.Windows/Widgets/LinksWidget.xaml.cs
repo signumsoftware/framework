@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Utilities;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -20,7 +22,6 @@ namespace Signum.Windows
     /// </summary>
     public partial class LinksWidget : UserControl, IWidget
     {
-        public static event Func<object, Control, QuickLink> GetLinks; 
         public Control Control { get; set; }
         public event Action ForceShow;
 
@@ -36,11 +37,17 @@ namespace Signum.Windows
         {
             List<QuickLink> links = new List<QuickLink>();
 
-            if(Control is IHaveQuickLinks)
-                links.AddRange(((IHaveQuickLinks)Control).QuickLinks());
+            IdentifiableEntity ident = e.NewValue as IdentifiableEntity;
+            if (ident != null)
+            {
+                links.AddRange(globalLinks.SelectMany(a => a(ident, Control)));
 
-            if (GetLinks != null)
-                links.AddRange(GetLinks.GetInvocationList().Cast<Func<object, Control, QuickLink>>().Select(a => a(DataContext, Control)).NotNull());
+                List<Delegate> list = entityLinks.TryGetC(ident.GetType());
+                if (list != null)
+                    links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, Control)));
+            }
+     
+            links = links.Where(l => l.IsVisible).ToList();
 
             lvQuickLinks.ItemsSource = links;
 
@@ -54,12 +61,26 @@ namespace Signum.Windows
             }
         }
 
+        static Dictionary<Type, List<Delegate>> entityLinks = new Dictionary<Type, List<Delegate>>();
+        static List<Func<IdentifiableEntity, Control, QuickLink[]>> globalLinks = new List<Func<IdentifiableEntity, Control, QuickLink[]>>();
+
+        public static void EntityLinks<T>(Func<T, Control, QuickLink[]> getQuickLinks)
+            where T:IdentifiableEntity
+        {
+            entityLinks.GetOrCreate(typeof(T)).Add(getQuickLinks);
+        }
+
+        public static void GlobalLinks(Func<IdentifiableEntity, Control, QuickLink[]> getQuickLinks)
+        {
+            globalLinks.Add(getQuickLinks);
+        }
+
         private void QuickLink_MouseDown(object sender, RoutedEventArgs e)
         {
             if (e.OriginalSource is Button) //Not to capture the mouseDown of the scrollbar buttons
             {
                 Button b = (Button)e.OriginalSource;
-                ((Action)b.Tag).Invoke();
+                ((QuickLink)b.Tag).Execute();
             }
         }
 
@@ -69,32 +90,119 @@ namespace Signum.Windows
         }
     }
 
-    /// <summary>
-    /// Controls must implement this interface to have the left navigation panel
-    /// </summary>
-    public interface IHaveQuickLinks
-    {
-        List<QuickLink> QuickLinks();
-    }
+    ///// <summary>
+    ///// Controls must implement this interface to have the left navigation panel
+    ///// </summary>
+    //public interface IHaveQuickLinks
+    //{
+    //    List<QuickLink> QuickLinks();
+    //}
 
     /// <summary>
     /// Represents an item of the left navigation panel
     /// </summary>
-    public class QuickLink
+    public abstract class QuickLink
     {
-        public QuickLink(string label)
-        {
-            this.Label = label;
-        }
+        protected QuickLink() { }
 
-        /// <summary>
-        /// Display name of the item
-        /// </summary>
         public string Label { get; set; }
 
-        /// <summary>
-        /// Action to be executed on the mouseDoubleClick of the item
-        /// </summary>
-        public Action Action { get; set; }
+        public virtual bool IsVisible { get; set;}
+
+        public string ToolTip { get; set; }
+
+        public ImageSource Icon { get; set; }
+
+        public abstract void Execute();
+    }
+
+    public class QuickLinkAction : QuickLink
+    {
+        Action action; 
+        public QuickLinkAction(string label, Action action)
+        {
+            this.Label = label;
+            this.action = action; 
+        }
+
+        public override void Execute()
+        {
+            action();
+        }
+    }
+
+    public class QuickLinkExplore : QuickLink
+    {
+        public ExploreOptions Options {get; set;} 
+
+        public QuickLinkExplore(object queryName, string columnName, object value):
+            this(new ExploreOptions(queryName)
+            { 
+                FilterOptions = new List<FilterOption>
+                {
+                    new FilterOption(columnName, value),
+                }
+            })
+        {  
+        }
+
+        public QuickLinkExplore(ExploreOptions options)
+        {
+            Options = options;
+            Label = QueryUtils.GetNiceQueryName(Options.QueryName);
+            Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
+            IsVisible = Navigator.IsFindable(Options.QueryName);
+        }
+
+        public override void Execute()
+        {
+ 	       Navigator.Explore(Options); 
+        }
+    }
+
+    public class QuickLinkNavigate<T> : QuickLink
+        where T:IdentifiableEntity
+    {
+        public NavigateOptions NavigateOptions {get; set;}
+
+        public FindUniqueOptions FindUniqueOptions { get; set; }
+
+        public QuickLinkNavigate(string columnName, object value)
+            : this(typeof(T), columnName, value, UniqueType.Single)
+        {
+        }
+
+        public QuickLinkNavigate(object queryName, string columnName, object value, UniqueType unique): 
+            this(new FindUniqueOptions(queryName)
+            {
+                 UniqueType = unique,
+                 FilterOptions = new List<FilterOption>()
+                 {
+                     new FilterOption(columnName, value)
+                 }
+            })
+        {
+        }
+
+        public QuickLinkNavigate(FindUniqueOptions options)
+        {
+            FindUniqueOptions = options;
+            Label = typeof(T).NiceName();
+            Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
+            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsViewable(typeof(T), false);
+        }
+
+        public override void Execute()
+        {
+            Lite<T> lite = Navigator.FindUnique<T>(FindUniqueOptions);
+
+            if (lite == null)
+                return;
+
+            if (NavigateOptions != null)
+                Navigator.Navigate(lite, NavigateOptions);
+            else
+                Navigator.Navigate(lite);
+        }
     }
 }

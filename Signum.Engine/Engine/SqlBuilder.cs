@@ -326,5 +326,10 @@ END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlSc
             return new SqlPreCommandSimple("SET IDENTITY_INSERT {0} {1}".Formato(
                 table.SqlScape(), value?"ON": "OFF"));
         }
+
+        internal static SqlPreCommandSimple StrinkDatabase()
+        {
+            return new SqlPreCommandSimple("DBCC SHRINKDATABASE");
+        }
     }
 }

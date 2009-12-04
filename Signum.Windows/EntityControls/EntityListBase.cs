@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Collections;
 using Signum.Utilities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -26,6 +27,8 @@ namespace Signum.Windows
             set { SetValue(EntitiesTypeProperty, value); }
         }
 
+        public new event Func<object> Finding;
+        
         protected internal override DependencyProperty CommonRouteValue()
         {
             return EntitiesProperty;
@@ -44,6 +47,32 @@ namespace Signum.Windows
         protected override bool CanCreate()
         {
             return Create && !Common.GetIsReadOnly(this);
+        }
+
+        protected new object OnFinding()
+        {
+            if (!CanFind())
+                return null;
+
+            object value;
+            if (Finding == null)
+            {
+                Type type = Implementations == null ? CleanType : Navigator.SelectType(this.FindCurrentWindow(), Implementations);
+                if (type == null)
+                    return null;
+
+                value = Navigator.FindMany(type);
+            }
+            else
+                value = Finding();
+
+            if (value == null)
+                return null;
+
+            if (value is IEnumerable)
+                return ((IEnumerable)value).Cast<object>().Select(o => Server.Convert(o, Type)).ToArray();
+            else
+                return Server.Convert(value, Type);
         }
 
         public override TypeContext GetEntityTypeContext()

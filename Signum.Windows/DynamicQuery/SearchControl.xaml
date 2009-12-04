@@ -141,7 +141,7 @@
         		    <TextBlock Text="{Binding Items.Count, ElementName=lvResult, Mode=Default}" TextWrapping="Wrap" FontWeight="Bold" />
         	    </InlineUIContainer><Run Text=" "/><Run Text="{m:Loc Results}"/></TextBlock>
             <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center"><Run Text="{m:Loc Limitation}"/></TextBlock>
-            <TextBox x:Name="tbLimite" Text="200" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding MaxItemsCount, ElementName=me, Converter={x:Static m:Converters.ToInt}}" VerticalAlignment="Center"/>
         </StackPanel>
     </Grid>
 </UserControl>

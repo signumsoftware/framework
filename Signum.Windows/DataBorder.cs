@@ -54,15 +54,15 @@ namespace Signum.Windows
                 else
                 {
                     EntitySettings setting = Navigator.GetEntitySettings(newValue.GetType());
-                    if (setting == null ||setting.View == null)
+                    if (setting == null || setting.View == null)
                         Child = new TextBox
                         {
                             Text = "No EntitySettings.View for {0}".Formato(newValue.GetType()),
                             Foreground = Brushes.Red,
                             FontWeight = FontWeights.Bold
-                        }; 
+                        };
                     else
-                        Child = setting.View(); 
+                        Child = setting.CreateView((ModifiableEntity)newValue, Common.GetTypeContext(this)); 
                 }
             }
             if (Child != null)

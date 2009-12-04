@@ -38,12 +38,20 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
-        public static readonly DependencyProperty ResultProperty =
-            DependencyProperty.Register("Result", typeof(object), typeof(SearchWindow), new UIPropertyMetadata(null));
-        public object Result
+        public static readonly DependencyProperty SelectedItemProperty =
+          DependencyProperty.Register("SelectedItem", typeof(Lite), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public Lite SelectedItem
         {
-            get { return (object)GetValue(ResultProperty); }
-            set { SetValue(ResultProperty, value); }
+            get { return (Lite)GetValue(SelectedItemProperty); }
+            set { SetValue(SelectedItemProperty, value); }
+        }
+
+        public static readonly DependencyProperty SelectedItemsProperty =
+          DependencyProperty.Register("SelectedItems", typeof(Lite[]), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public Lite[] SelectedItems
+        {
+            get { return (Lite[])GetValue(SelectedItemsProperty); }
+            set { SetValue(SelectedItemsProperty, value); }
         }
 
         public static readonly DependencyProperty MultiSelectionProperty =
@@ -86,32 +94,16 @@ namespace Signum.Windows
             set { SetValue(ShowFooterProperty, value); }
         }
 
-        public SearchButtons Buttons { get; private set; }
-        public OnLoadMode OnLoad { get; private set; }
+        public SearchMode Mode { get; private set; }
+        public bool SearchOnLoad { get; private set; }
 
-        public SearchWindow(SearchButtons buttons, OnLoadMode onLoad)
+        public SearchWindow(SearchMode mode, bool seachOnLoad)
         {
             this.InitializeComponent();
 
-            this.OnLoad = onLoad;
-            this.Buttons = buttons;
-            if (buttons == SearchButtons.Close && onLoad == OnLoadMode.SearchAndReturnIfOne)
-                throw new InvalidOperationException("Invalid SearchWindows configuration, Close and SearchAndReturnIfOne don't work together");
-
-            switch (onLoad)
-            {
-                case OnLoadMode.None:
-                    break;
-                case OnLoadMode.Search:
-                    searchControl.SearchOnLoad = true;
-                    break;
-                case OnLoadMode.SearchAndReturnIfOne:
-                    {
-                        searchControl.QueryResultChanged += new RoutedEventHandler(searchControl_QueryResultChanged);
-                        searchControl.SearchOnLoad = true;
-                        break;
-                    }
-            }
+            searchControl.SearchOnLoad = seachOnLoad;
+            this.SearchOnLoad = seachOnLoad;
+            this.Mode = mode;
 
             ButtonsChanged();
         }
@@ -124,32 +116,21 @@ namespace Signum.Windows
 
         void ButtonsChanged()
         {
-            bool okCancel = Buttons == SearchButtons.OkCancel;
+            bool ok = Mode == SearchMode.Find;
 
-            btOk.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
-            btCancel.Visibility = okCancel ? Visibility.Visible : Visibility.Collapsed;
+            btOk.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
+            btCancel.Visibility = ok ? Visibility.Visible : Visibility.Collapsed;
             
-            btClose.Visibility = !okCancel ? Visibility.Visible : Visibility.Collapsed;
-            searchControl.IsAdmin = !okCancel;
+            btClose.Visibility = !ok ? Visibility.Visible : Visibility.Collapsed;
+            searchControl.IsAdmin = !ok;
 
-            if (okCancel)
+            if (ok)
             {
                 searchControl.DoubleClick += new Action(searchControl_DoubleClick);
             }
             else
             {
                 searchControl.DoubleClick -= new Action(searchControl_DoubleClick);
-            }
-        }
-
-        void searchControl_QueryResultChanged(object sender, RoutedEventArgs e)
-        {
-            if (this.OnLoad == OnLoadMode.SearchAndReturnIfOne && searchControl.QueryResult != null)
-            {
-                if (searchControl.QueryResult.Data.Length <= 1)
-                    OkAndClose();
-                else
-                    searchControl.QueryResultChanged -= new RoutedEventHandler(searchControl_QueryResultChanged);
             }
         }
 
@@ -177,9 +158,9 @@ namespace Signum.Windows
         private void OkAndClose()
         {
             if (MultiSelection)
-                Result = searchControl.SelectedItems;
+                SelectedItems = searchControl.SelectedItems;
             else
-                Result = searchControl.SelectedItem;
+                SelectedItem = searchControl.SelectedItem;
 
             DialogResult = true;
         }
@@ -198,5 +179,11 @@ namespace Signum.Windows
         {
             OkAndClose();
         }
+    }
+
+    public enum SearchMode
+    {
+        Find,
+        Explore
     }
 }

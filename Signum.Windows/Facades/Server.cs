@@ -98,7 +98,8 @@ namespace Signum.Windows
 
         public static bool Implements<T>()
         {
-            return getServer() is T;
+            Connect();
+            return current is T;
         }
 
         public static void SetNewServerCallback(Func<IBaseServer> server)

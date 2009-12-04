@@ -51,13 +51,25 @@ namespace Signum.Windows
 
         protected override void btFind_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnFinding(false);
+            object value = OnFinding();
 
-            if (entity != null)
+            if (value != null)
             {
                 IList list = EnsureEntities();
-                list.Add(entity);
-                SetEntityUserInteraction(entity);
+
+                if (value is object[])
+                {
+                    foreach (var entity in (object[])value)
+                    {
+                        list.Add(entity);
+                        SetEntityUserInteraction(entity);
+                    }
+                }
+                else
+                {
+                    list.Add(value);
+                    SetEntityUserInteraction(value);
+                }
             }
         }
 

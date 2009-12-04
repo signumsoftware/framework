@@ -30,7 +30,6 @@ namespace Signum.Windows
         {
             ShortcutHelper.SetMenuItemShortcuts(menuItem);
         }
-      
 
         public static void TaskCollapseSubMenuParent(MenuItem menuItem)
         {
@@ -47,8 +46,8 @@ namespace Signum.Windows
                 if (o == null)
                     return;
 
-                if (o is FindOptions)
-                    menuItem.Header = QueryUtils.GetNiceQueryName(((FindOptions)o).QueryName);
+                if (o is FindOptionsBase)
+                    menuItem.Header = QueryUtils.GetNiceQueryName(((FindOptionsBase)o).QueryName);
                 else if (o is AdminOptions)
                     menuItem.Header = ((AdminOptions)o).Type.NicePluralName();
                 else if (o is Type)
@@ -70,7 +69,7 @@ namespace Signum.Windows
                     return;
 
                 ImageSource source = 
-                    o is FindOptions ? Navigator.Manager.GetFindIcon(((FindOptions)o).QueryName, false) :
+                    o is FindOptionsBase ? Navigator.Manager.GetFindIcon(((FindOptionsBase)o).QueryName, false) :
                     o is AdminOptions ? Navigator.Manager.GetAdminIcon(((AdminOptions)o).Type, false) : null;
 
                 menuItem.Icon = new Image { Source = source, Stretch = Stretch.None }; 
@@ -97,8 +96,8 @@ namespace Signum.Windows
             if (o == null)
                 return;
 
-            if (o is FindOptions)
-                Navigator.Find(((FindOptions)o).Do(fo => { fo.Buttons = SearchButtons.Close; }));
+            if (o is ExploreOptions)
+                Navigator.Explore((ExploreOptions)o);
             else if (o is AdminOptions)
                 Navigator.Admin(((AdminOptions)o));
         }

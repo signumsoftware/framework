@@ -17,11 +17,19 @@ namespace Signum.Windows
     [TypeConverter(typeof(TypeContextConverter))]
     public class TypeContext
     {
-        public Type Type{get; internal set;}
+        public readonly Type Type;
 
-        public TypeContext(Type type)
+        protected TypeContext(Type type)
         {
             this.Type = type;
+        }
+
+        public static TypeContext Root(Type type)
+        {
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                throw new InvalidOperationException("Root TypeContect has to be an IdentifiableEntity"); 
+
+            return new TypeContext(type); 
         }
 
         public override string ToString()
@@ -32,9 +40,9 @@ namespace Signum.Windows
 
     public class TypeSubContext : TypeContext
     {
-        public TypeContext Parent { get; internal set; }
+        public readonly TypeContext Parent;
 
-        public PropertyInfo PropertyInfo{get; internal set;}
+        public readonly PropertyInfo PropertyInfo;
 
         public TypeSubContext(PropertyInfo propertyInfo, TypeContext parent)
             : base(propertyInfo.PropertyType)
@@ -61,17 +69,17 @@ namespace Signum.Windows
             try
             {
                 if (context == null)
-                    return new TypeContext(typeof(ModifiableEntity)); //HACK: Improve Design-Time support
+                    return TypeContext.Root(typeof(IdentifiableEntity)); //HACK: Improve Design-Time support
 
                 IXamlTypeResolver resolver = (IXamlTypeResolver)context.GetService(typeof(IXamlTypeResolver));
 
                 if (resolver == null)
-                    return new TypeContext(typeof(ModifiableEntity)); //HACK: Improve Design-Time support
+                    return TypeContext.Root(typeof(IdentifiableEntity)); //HACK: Improve Design-Time support
 
                 if(value ==  null)
-                    throw new Exception("value is null"); 
+                    throw new Exception("value is null");
 
-                return new TypeContext(resolver.Resolve((string)value));
+                return TypeContext.Root(resolver.Resolve((string)value));
             }
             catch (Exception e)
             {

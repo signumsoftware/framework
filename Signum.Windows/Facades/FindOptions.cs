@@ -9,36 +9,14 @@ using Signum.Utilities;
 
 namespace Signum.Windows
 {
-    public class FindOptions : MarkupExtension
+    public abstract class FindOptionsBase : MarkupExtension
     {
-        public FindOptions()
+        public FindOptionsBase()
         {
             this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
         }
-
-        public FindOptions(object queryName):this()
-        {
-            this.QueryName = queryName;
-        }
-
-        public override object ProvideValue(IServiceProvider serviceProvider)
-        {
-            return this;
-        }
-
-        private SearchButtons buttons = SearchButtons.OkCancel;
-        public SearchButtons Buttons
-        {
-            get { return this.buttons; }
-            set { this.buttons = value; }
-        }
-
-        private bool? modal;
-        public bool Modal
-        {
-            get { return modal ?? this.Buttons == SearchButtons.OkCancel; }
-            set { this.modal = new bool?(value); }
-        }
+    
+        public object QueryName { get; set; }
 
         List<FilterOption> filterOptions = new List<FilterOption>();
         public List<FilterOption> FilterOptions
@@ -47,19 +25,91 @@ namespace Signum.Windows
             set { this.filterOptions = value; }
         }
 
-        public bool AllowMultiple { get; set; }
-
-        public object QueryName { get; set; }
-
-        public OnLoadMode OnLoadMode { get; set; }
+        public bool SearchOnLoad { get; set; }
 
         public bool ShowFilters { get; set; }
         public bool ShowFilterButton { get; set; }
         public bool ShowHeader { get; set; }
         public bool ShowFooter { get; set; }
 
+        internal abstract SearchMode GetSearchMode();
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return this;
+        }
+    }
+
+    public class FindManyOptions : FindOptionsBase
+    {
+        public FindManyOptions() { }
+        public FindManyOptions(object queryName)
+        {
+            this.QueryName = queryName;
+        }
+
+        internal override SearchMode GetSearchMode()
+        {
+            return SearchMode.Find;
+        }
+    }
+
+    public class FindOptions : FindOptionsBase
+    {
+        public FindOptions() { }
+        public FindOptions(object queryName) 
+        {
+            this.QueryName = queryName;
+        }
+
+        public bool ReturnIfOne { get; set; }
+
+        internal override SearchMode GetSearchMode()
+        {
+            return SearchMode.Find;
+        }
+    }
+
+    public class ExploreOptions : FindOptionsBase
+    {
+        public ExploreOptions () { }
+        public ExploreOptions(object queryName) 
+        {
+            this.QueryName = queryName;
+        }
+
         public EventHandler Closed { get; set; }
 
+        public bool NavigateIfOne { get; set; }
+
+        internal override SearchMode GetSearchMode()
+        {
+            return SearchMode.Explore;
+        }
+    }
+
+    public class FindUniqueOptions
+    {
+        public FindUniqueOptions() 
+        {
+            UniqueType = UniqueType.Single;
+        }
+
+        public FindUniqueOptions(object queryName)
+        {
+            UniqueType = UniqueType.Single;
+        }
+
+        public object QueryName { get; set; }
+
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
+        {
+            get { return filterOptions; }
+            set { this.filterOptions = value; }
+        }
+
+        public UniqueType UniqueType { get; set; }
     }
 
     public class FilterOption : Freezable
@@ -130,18 +180,4 @@ namespace Signum.Windows
             return Activator.CreateInstance(type);
         }
     }
-
-    public enum SearchButtons
-    {
-        OkCancel,
-        Close
-    }
-
-    public enum OnLoadMode
-    {
-        None,
-        Search,
-        SearchAndReturnIfOne,
-    }
-
 }

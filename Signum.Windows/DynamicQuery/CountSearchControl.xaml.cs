@@ -149,7 +149,7 @@ namespace Signum.Windows
                 LinkClick(this, EventArgs.Empty);
             else
             {
-                Navigator.Find(new FindOptions
+                Navigator.Explore(new ExploreOptions
                 {
                     FilterOptions = FilterOptions.ToList(),
                     QueryName = QueryName

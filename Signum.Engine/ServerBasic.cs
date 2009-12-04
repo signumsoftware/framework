@@ -124,7 +124,13 @@ namespace Signum.Services
         public int GetQueryCount(object queryName, List<Filter> filters)
         {
             return Return(MethodInfo.GetCurrentMethod(), "GetQueryCount {0}".Formato(queryName),
-          () => GetQueryManager().ExecuteQueryCount(queryName, filters));
+                () => GetQueryManager().ExecuteQueryCount(queryName, filters));
+        }
+
+        public Lite GetUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), "GetQueryEntity {0}".Formato(queryName),
+                () => GetQueryManager().ExecuteUniqueEntity(queryName, filters, uniqueType));
         }
 
         public List<object> GetQueryNames()

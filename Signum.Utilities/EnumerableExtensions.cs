@@ -134,25 +134,43 @@ namespace Signum.Utilities
             }
         }
 
-        //public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T> action)
-        //{
-        //    foreach (var item in collection)
-        //    {
-        //        action(item);
-        //        yield return item; 
-        //    }
-        //}
+        public static T SingleOrMany<T>(this IEnumerable<T> collection, string errorZero)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
 
-        //public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T, int> action)
-        //{
-        //    int i = 0;
-        //    foreach (var item in collection)
-        //    {
-        //        action(item, i);
-        //        yield return item;
-        //        i++;
-        //    }
-        //}
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException(errorZero);
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
+        }
+
+        public static T SingleOrMany<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("The collection has no elements");
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
+        }
 
         public static string ToString<T>(this IEnumerable<T> collection, string separator)
         {

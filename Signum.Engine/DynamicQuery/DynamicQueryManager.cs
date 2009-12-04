@@ -56,10 +56,14 @@ namespace Signum.Engine.DynamicQuery
             return this[queryName].ExecuteQuery(filter, limit);
         }
 
-
         public int ExecuteQueryCount(object queryName, List<Filter> filters)
         {
             return this[queryName].ExecuteQueryCount(filters);
+        }
+
+        internal Lite ExecuteUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType)
+        {
+            return this[queryName].ExecuteUniqueEntity(filters, uniqueType);
         }
 
         public QueryDescription QueryDescription(object queryName)
@@ -101,5 +105,7 @@ namespace Signum.Engine.DynamicQuery
                 return "Error {0}: {1}".Formato(queryName, e.Message);
             }
         }
+
+
     }
 }

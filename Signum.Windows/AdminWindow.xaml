@@ -38,13 +38,11 @@
 				<ColumnDefinition MinWidth="200" />
 				<ColumnDefinition MinWidth="200" />
 			</Grid.ColumnDefinitions>
-            <m:EntityList x:Name="entityList" Remove="False" Find="False" View="False" ViewOnCreate="False" m:Common.Route="" Margin="5,0,5,5"/>
-			<m:DataBorder Margin="5,0,5,5" Grid.Column="1"  BorderBrush="Gray"   BorderThickness="1" m:Common.Route="/" Padding="5">
+            <m:EntityList x:Name="entityList" Remove="False" Find="False" View="False" ViewOnCreate="False" Margin="5,0,5,5"/>
+			<m:DataBorder Margin="5,0,5,5" Grid.Column="1"  BorderBrush="Gray"   BorderThickness="1" DataContext="{Binding Entity, ElementName=entityList}" Padding="5">
 				<ContentControl Content="{Binding Path=MainControl, ElementName=Window}" x:Name="contentControl"/>
 			</m:DataBorder>
 			<GridSplitter Grid.Column="1"  HorizontalAlignment="Left"  x:Name="gridSplitter1" Width="6" Margin="-3,0,0,0" />
 		</Grid>
-
 	</DockPanel>
-
 </m:AdminBase>

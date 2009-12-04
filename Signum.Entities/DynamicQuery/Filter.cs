@@ -56,4 +56,13 @@ namespace Signum.Entities.DynamicQuery
         Boolean, 
         Enum,
     }
+
+    public enum UniqueType
+    {
+        First,
+        FirstOrDefault,
+        Single,
+        SingleOrDefault,
+        SingleOrMany, 
+    }
 }

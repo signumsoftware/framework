@@ -27,7 +27,7 @@ namespace Signum.Windows
         public AutoControl(Type type)
             : this()
         {
-            Common.SetTypeContext(this, new TypeContext(type));
+            Common.SetTypeContext(this, TypeContext.Root(type));
         }
 
         public AutoControl()

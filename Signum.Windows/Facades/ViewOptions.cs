@@ -8,47 +8,39 @@ using System.Windows;
 
 namespace Signum.Windows
 {
-    public class ViewOptions : MarkupExtension
+    public abstract class ViewOptionsBase
     {
-        ViewButtons buttons = ViewButtons.Ok;
-        public ViewButtons Buttons
-        {
-            get { return buttons; }
-            set { buttons = value; }
-        }
-
-        bool? clone;
-        public bool Clone
-        {
-            get { return clone ?? Buttons == ViewButtons.Ok; }
-            set { clone = value; }
-        }
-
-        public bool Modal
-        {
-            get { return  Buttons == ViewButtons.Ok; }
-        }
-
-        public EventHandler Closed { get; set; }
+        public bool Clone {get; set;}
 
         public bool? ReadOnly { get; set; }
 
+        public Control View { get; set; }
+
+        internal abstract ViewButtons GetViewButtons();
+    }
+
+    public class ViewOptions: ViewOptionsBase
+    {
+        public ViewOptions()
+        {
+            Clone = true;
+        }
+
         public TypeContext TypeContext { get; set; }
 
-        public Control View { get; set; }
-        public Window ViewWindow { get; set; }
-
-        public override object ProvideValue(IServiceProvider serviceProvider)
+        internal override ViewButtons GetViewButtons()
         {
-            return this;
+            return ViewButtons.Ok;
         }
     }
 
-    public enum ViewButtons
+    public class NavigateOptions: ViewOptionsBase
     {
-        Ok,
-        Save,
+        public EventHandler Closed { get; set; }
+
+        internal override ViewButtons GetViewButtons()
+        {
+            return ViewButtons.Save;
+        }
     }
-
-
 }

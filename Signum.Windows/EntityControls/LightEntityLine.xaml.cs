@@ -57,11 +57,10 @@ namespace Signum.Windows
             InitializeComponent();
             UpdateVisibility();
         }
-       
+
         private void btView_Click(object sender, RoutedEventArgs e)
         {
-            Navigator.View(this.Entity, ViewButtons.Save);
+            Navigator.NavigateUntyped(this.Entity);
         }
-
     }
 }

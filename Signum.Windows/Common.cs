@@ -189,7 +189,7 @@ namespace Signum.Windows
             foreach (var step in steps)
             {
                 if (Reflector.IsIdentifiableEntity(context.Type))
-                    context = new TypeContext(context.Type); //Reset
+                    context = TypeContext.Root(context.Type); //Reset
 
                 if (!validIdentifier.IsMatch(step))
                     throw new ApplicationException("'{0}' is not a valid identifier".Formato(step));

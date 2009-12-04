@@ -51,46 +51,182 @@ namespace Signum.Windows
             );
         }
 
-        public static object Find(FindOptions findOptions)
+        public static void Explore(object queryName)
         {
-            return Manager.Find(findOptions);
+            Manager.Explore(new ExploreOptions(queryName));
         }
 
-        public static object Find(object queryName)
+        public static void Explore(ExploreOptions options)
         {
-            return Find(new FindOptions(queryName));
+            Manager.Explore(options);
         }
 
-        public static object Find(object queryName, string columnName, object value)
+        internal static Lite<T> FindUnique<T>(string columnName, object value, UniqueType uniqueType)
+            where T:class, IIdentifiable
         {
-            return Find(new FindOptions(queryName)
+            return (Lite<T>)Manager.FindUnique(new FindUniqueOptions(typeof(T))
             {
-                OnLoadMode = OnLoadMode.Search,
-                Buttons = SearchButtons.Close,
-                FilterOptions = new List<FilterOption>
+                UniqueType = uniqueType,
+                FilterOptions = new List<FilterOption>()
                 {
-                    new FilterOption { 
-                        ColumnName = columnName, 
-                        Operation = FilterOperation.EqualTo, 
-                        Value = value }
-                },
+                    new FilterOption(columnName, value)
+                }
             });
         }
 
-        public static object View(object entity)
+        internal static Lite<T> FindUnique<T>(FindUniqueOptions options)
+            where T : class, IIdentifiable
+        {
+            return (Lite<T>)Manager.FindUnique(options);
+        }
+
+        internal static Lite FindUnique(FindUniqueOptions options)
+        {
+            return Manager.FindUnique(options);
+        }
+
+
+
+        public static Lite<T> Find<T>()
+            where T : IdentifiableEntity
+        {
+            return (Lite<T>)Manager.Find(new FindOptions(typeof(T)));
+        }
+
+        public static Lite<T> Find<T>(object queryName)
+            where T : IdentifiableEntity
+        {
+            return (Lite<T>)Manager.Find(new FindOptions(queryName));
+        }
+
+        public static Lite<T> Find<T>(FindOptions options)
+            where T : IdentifiableEntity
+        {
+            return (Lite<T>)Manager.Find(options);
+        }
+
+        public static Lite Find(object queryName)
+        {
+            return Manager.Find(new FindOptions(queryName));
+        }
+
+        public static Lite Find(FindOptions options)
+        {
+            return Manager.Find(options);
+        }
+
+
+
+        public static Lite[] FindMany(object queryName)
+        {
+            return Manager.FindMany(new FindManyOptions(queryName));
+        }
+
+        public static Lite[] FindMany(FindManyOptions options)
+        {
+            return Manager.FindMany(options);
+        }
+
+        public static Lite<T>[] FindMany<T>()
+         where T : IdentifiableEntity
+        {
+            Lite[] result = Manager.FindMany(new FindManyOptions(typeof(T)));
+            if (result == null)
+                return null;
+
+            return result.Cast<Lite<T>>().ToArray();
+        }
+
+        public static Lite<T>[] FindMany<T>(object queryName)
+            where T : IdentifiableEntity
+        {
+            Lite[] result = Manager.FindMany(new FindManyOptions(queryName));
+            if (result == null)
+                return null;
+
+            return result.Cast<Lite<T>>().ToArray();
+        }
+
+        public static Lite<T>[] FindMany<T>(FindManyOptions options)
+            where T : IdentifiableEntity
+        {
+            Lite[] result = Manager.FindMany(options);
+            if (result == null)
+                return null;
+
+            return result.Cast<Lite<T>>().ToArray();
+        }
+
+
+        public static void NavigateUntyped(object entity)
+        {
+            Manager.Navigate(entity, new NavigateOptions());
+        }
+
+        public static void NavigateUntyped(object entity, NavigateOptions options)
+        {
+            Manager.Navigate(entity, options);
+        }
+
+        public static void Navigate<T>(Lite<T> entity)
+            where T : class, IIdentifiable
+        {
+            Manager.Navigate(entity, new NavigateOptions());
+        }
+
+        public static void Navigate<T>(Lite<T> entity, NavigateOptions options)
+            where T : class, IIdentifiable
+        {
+            Manager.Navigate(entity, options);
+        }
+
+        public static void Navigate<T>(T entity)
+            where T : IIdentifiable
+        {
+            Manager.Navigate(entity, new NavigateOptions());
+        }
+
+        public static void Navigate<T>(T entity, NavigateOptions options)
+            where T : IIdentifiable
+        {
+            Manager.Navigate(entity, options);
+        }
+
+
+        public static object ViewUntyped(object entity)
         {
             return Manager.View(entity, new ViewOptions());
         }
 
-        public static object View(object entity, ViewButtons buttons)
+        public static object ViewUntyped(object entity, ViewOptions options)    
         {
-            return Manager.View(entity, new ViewOptions { Buttons = buttons });
+            return Manager.View(entity, options);
         }
 
-        public static object View(object entity, ViewOptions viewOptions)
+        public static Lite<T> View<T>(Lite<T> entity) 
+            where T: class, IIdentifiable
         {
-            return Manager.View(entity, viewOptions);
+            return (Lite<T>)Manager.View(entity, new ViewOptions());
         }
+
+        public static Lite<T> View<T>(Lite<T> entity, ViewOptions options) 
+            where T: class, IIdentifiable
+        {
+            return (Lite<T>)Manager.View(entity, options);
+        }
+
+        public static T View<T>(T entity)
+            where T : ModifiableEntity
+        {
+            return (T)Manager.View(entity, new ViewOptions());
+        }
+
+        public static T View<T>(T entity, ViewOptions options)
+           where T : ModifiableEntity
+        {
+            return (T)Manager.View(entity, options);
+        }
+
 
         public static void Admin(AdminOptions adminOptions)
         {
@@ -156,7 +292,6 @@ namespace Signum.Windows
         }
     }
 
-
     public class NavigationManager
     {
         public Dictionary<Type, EntitySettings> Settings { get; set; }
@@ -200,7 +335,6 @@ namespace Signum.Windows
             ShortcutHelper.SetLabelShortcuts(windows);
         }
 
-
         public ImageSource GetEntityIcon(Type type, bool useDefault)
         {
             EntitySettings es = Settings.TryGetC(type);
@@ -209,7 +343,6 @@ namespace Signum.Windows
 
             return useDefault ? DefaultEntityIcon : null;
         }
-
 
         public ImageSource GetFindIcon(object queryName, bool useDefault)
         {
@@ -255,138 +388,181 @@ namespace Signum.Windows
             return Resources.FinderOf0.Formato(QueryUtils.GetNiceQueryName(queryName));
         }
 
-        public virtual object Find(FindOptions findOptions)
+        public virtual Lite Find(FindOptions options)
         {
-            if (!IsFindable(findOptions.QueryName))
-                throw new ApplicationException("The query {0} is not allowed".Formato(findOptions.QueryName));
+            AssertFindable(options.QueryName);
 
-            SearchWindow sw = new SearchWindow(findOptions.Buttons, findOptions.OnLoadMode)
+            if (options.ReturnIfOne)
             {
-                QueryName = findOptions.QueryName,
-                MultiSelection = findOptions.AllowMultiple,
-                FilterOptions = new FreezableCollection<FilterOption>(findOptions.FilterOptions),
-                ShowFilters = findOptions.ShowFilters,
-                ShowFilterButton = findOptions.ShowFilterButton,
-                ShowFooter = findOptions.ShowFooter,
-                ShowHeader = findOptions.ShowHeader,
-                Title = SearchTitle(findOptions.QueryName)
+                Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                {
+                    FilterOptions = options.FilterOptions,
+                    UniqueType = UniqueType.SingleOrMany
+                });
+
+                if (lite != null)
+                {
+                    return lite;
+                }
+            }
+
+            SearchWindow sw = CreateSearchWindow(options);
+
+            sw.MultiSelection = false;
+
+            if (sw.ShowDialog() == true)
+            {
+                return sw.SelectedItem;
+            }
+            return null;
+        }
+
+        public virtual Lite[] FindMany(FindManyOptions options)
+        {
+            AssertFindable(options.QueryName);
+
+            SearchWindow sw = CreateSearchWindow(options);
+            if (sw.ShowDialog() == true)
+            {
+                return sw.SelectedItems;
+            }
+            return null;
+        }
+
+        public virtual void Explore(ExploreOptions options)
+        {
+            AssertFindable(options.QueryName);
+
+            if (options.NavigateIfOne)
+            {
+                Lite lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                {
+                    FilterOptions = options.FilterOptions,
+                    UniqueType = UniqueType.SingleOrMany
+                });
+
+                if (lite != null)
+                {
+                    Navigate(lite, new NavigateOptions());
+                    return;
+                }
+            }
+
+            SearchWindow sw = CreateSearchWindow(options);
+
+            if (options.Closed != null)
+                sw.Closed += options.Closed;
+
+            sw.Show();
+        }
+
+        private SearchWindow CreateSearchWindow(FindOptionsBase options)
+        {
+            SearchWindow sw = new SearchWindow(options.GetSearchMode(), options.SearchOnLoad)
+            {
+                QueryName = options.QueryName,
+                FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions),
+                ShowFilters = options.ShowFilters,
+                ShowFilterButton = options.ShowFilterButton,
+                ShowFooter = options.ShowFooter,
+                ShowHeader = options.ShowHeader,
+                Title = SearchTitle(options.QueryName)
             };
 
-            EntitySettings es = (findOptions.QueryName as Type).TryCC(t => Settings.TryGetC(t));
             if (TaskViewWindow != null)
-                TaskViewWindow(sw, WindowsType.Find, findOptions.QueryName);
+                TaskViewWindow(sw, WindowsType.Find, options.QueryName);
 
-            sw.Closed += findOptions.Closed;
-
-            if (findOptions.Modal)
-            {
-                if (sw.ShowDialog() == true)
-                {
-                    return sw.Result;
-                }
-                return null;
-            }
-            sw.Show();
-            return null;
+            return sw;
         }
 
-
-        public virtual object View(object entity, ViewOptions viewOptions)
+        public virtual void Navigate(object entityOrLite, NavigateOptions options)
         {
-            if (entity == null)
+            if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            Type liteType = null;
-            if (entity is Lite)
+            ModifiableEntity entity = entityOrLite as ModifiableEntity;
+            if (entity == null)
             {
-                liteType = Reflector.ExtractLite(entity.GetType());
-
-                Lite lite = (Lite)entity;
-
-                entity = lite.UntypedEntityOrNull ??
-                         (viewOptions.Buttons == ViewButtons.Save ? Server.RetrieveAndForget(lite) :
-                                                                   Server.Retrieve(lite));
+                Lite lite = (Lite)entityOrLite;
+                entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
             }
 
-            if (!IsViewable(entity.GetType(), true))
-                throw new ApplicationException("Viewing {0} is not allowed".Formato(entity.GetType()));
+            AssertViewable(entity.GetType(), true);
+            EntitySettings es = Settings[entity.GetType()];
 
-            EntitySettings es = Settings.GetOrThrow(entity.GetType(), Resources.NoEntitySettingsForType0);
+            if (entity is EmbeddedEntity)
+                throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
 
-            bool isReadOnly = viewOptions.ReadOnly ?? IsReadOnly(entity.GetType(), false); 
+            Control ctrl = options.View ?? es.CreateView(entity, null);
 
-            Window win = null;
-            if (viewOptions.ViewWindow != null)
-            {
-                win = viewOptions.ViewWindow;
-            }
-            else if (viewOptions.View != null)
-            {
-                win = CreateNormalWindow(viewOptions.View, entity, viewOptions.TypeContext, isReadOnly, viewOptions.Buttons);
-            }
-            else if (es.ViewWindow != null)
-            {
-                win = es.ViewWindow();
-            }
-            else if (es.View != null)
-            {
-                win = CreateNormalWindow(es.View(), entity, viewOptions.TypeContext, isReadOnly, viewOptions.Buttons);
-            }
-            else
-            {
-                throw new ApplicationException(Resources.NoNavigationDestinyForType.Formato(entity.GetType()));
-            }
+            Window win = CreateViewWindow((ModifiableEntity)entity, options, es, ctrl);
 
-            if (isReadOnly)
-                Common.SetIsReadOnly(win, true);
+            if (options.Closed != null)
+                win.Closed += options.Closed;
 
-            if (TaskViewWindow != null)
-                TaskViewWindow(win, WindowsType.View, entity.GetType());
-
-            if (viewOptions.Clone && entity is ICloneable)
-                win.DataContext = ((ICloneable)entity).Clone();
-            else
-                win.DataContext = entity;
-
-            win.Closed += viewOptions.Closed;
-
-            if (viewOptions.Modal)
-            {
-                bool? ok = win.ShowDialog();
-                if (ok != true)
-                    return null;
-
-                object result = win.DataContext;
-                if (liteType != null)
-                {
-                    return Lite.Create(liteType, (IdentifiableEntity)result);
-                }
-                return result;
-            }
-            else
-            {
-                win.Show();
-            }
-
-            return null;
+            win.Show();
         }
 
-        private NormalWindow CreateNormalWindow(Control ctrl, object entity, TypeContext typeContext, bool isReadOnly, ViewButtons buttons)
+        public virtual object View(object entityOrLite, ViewOptions options)
         {
+            if (entityOrLite == null)
+                throw new ArgumentNullException("entity");
 
-            if (typeContext != null)
-                Common.SetTypeContext(ctrl, typeContext);
+            ModifiableEntity entity = entityOrLite as ModifiableEntity;
+            Type liteType = null;
+            if (entity == null)
+            {
+                liteType = Reflector.ExtractLite(entityOrLite.GetType());
+                entity = Server.Retrieve((Lite)entityOrLite);
+            }
 
-            return new NormalWindow()
+            AssertViewable(entity.GetType(), false);
+            EntitySettings es = Settings[entity.GetType()];
+
+            Control ctrl = options.View ?? es.CreateView(entity, options.TypeContext);
+
+            Window win = CreateViewWindow((ModifiableEntity)entity, options, es, ctrl);
+
+            bool? ok = win.ShowDialog();
+            if (ok != true)
+                return null;
+
+            object result = win.DataContext;
+            if (liteType != null)
+            {
+                return Lite.Create(liteType, (IdentifiableEntity)result);
+            }
+            return result;
+
+        }
+
+        protected virtual Window CreateViewWindow(ModifiableEntity entity, ViewOptionsBase options, EntitySettings es, Control ctrl)
+        {
+            Type entityType = entity.GetType();
+
+            ViewButtons buttons = options.GetViewButtons();
+
+            bool isReadOnly = options.ReadOnly ?? IsReadOnly(entityType, false);
+
+            NormalWindow win = new NormalWindow()
             {
                 MainControl = ctrl,
                 ButtonBar =
                 {
                     ViewButtons = buttons,
-                    SaveVisible = buttons == ViewButtons.Save && ShowSave(entity.GetType()) && !isReadOnly,
+                    SaveVisible = buttons == ViewButtons.Save && ShowSave(entityType) && !isReadOnly,
                     OkVisible = buttons == ViewButtons.Ok
-                }
+                },
+                DataContext = options.Clone ?((ICloneable)entity).Clone(): entity,
             };
+
+            if (isReadOnly)
+                Common.SetIsReadOnly(win, true);
+
+            if (TaskViewWindow != null)
+                TaskViewWindow(win, WindowsType.View, entityType);
+
+            return win;
         }
 
         internal protected virtual bool IsCreable(Type type, bool admin)
@@ -428,6 +604,19 @@ namespace Signum.Windows
             return es.IsViewable(admin);
         }
 
+        internal protected virtual void AssertViewable(Type type, bool admin)
+        {
+            if (GlobalIsViewable != null && !GlobalIsViewable(type))
+                throw new UnauthorizedAccessException("Entities of type {0} not allowed".Formato(type.NiceName())); 
+
+            EntitySettings es = Settings.TryGetC(type);
+            if (es == null)
+                throw new InvalidOperationException(Resources.NoEntitySettingsForType0.Formato(type.NiceName()));
+
+            if (es.IsViewable != null && !es.IsViewable(admin))
+                throw new InvalidOperationException("Entities of type {0} are not visible from a {0} page".Formato(admin ? "admin" : "normal"));
+        }
+
         internal protected virtual bool ShowSave(Type type)
         {
             EntitySettings es = Settings.TryGetC(type);
@@ -449,6 +638,17 @@ namespace Signum.Windows
             return true;
         }
 
+        internal protected virtual void AssertFindable(object queryName)
+        {
+            if (GlobalIsFindable != null && !GlobalIsFindable(queryName))
+                throw new UnauthorizedAccessException("The query {0} is not allowed".Formato(queryName));
+
+            QuerySettings es = QuerySetting.TryGetC(queryName);
+            if (es == null)
+                throw new InvalidOperationException("The query {0} is not registered in the DynamicQueryManager".Formato(queryName));
+        }
+
+
         public virtual void Admin(AdminOptions adminOptions)
         {
             Type type = adminOptions.Type;
@@ -457,7 +657,7 @@ namespace Signum.Windows
 
             AdminWindow nw = new AdminWindow(type)
             {
-                MainControl = es.View.ThrowIfNullC(Resources.NoAdminControlFor0.Formato(type))(),
+                MainControl = es.CreateView(null, null),
             };
 
             if (TaskViewWindow != null)
@@ -503,6 +703,13 @@ namespace Signum.Windows
 
             if (!loadedModules.Contains(name))
                 throw new ApplicationException("Call {0} first".Formato(name));
+        }
+
+        public virtual Lite FindUnique(FindUniqueOptions options)
+        {
+            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+
+            return Server.Return((IQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, options.UniqueType));
         }
     }
 }

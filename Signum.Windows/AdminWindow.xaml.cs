@@ -37,7 +37,7 @@ namespace Signum.Windows
 
             this.type = adminType;
 
-            Common.SetTypeContext(this, new TypeContext(typeof(List<>).MakeGenericType(adminType)));
+            entityList.EntitiesType = typeof(List<>).MakeGenericType(adminType);
 
             this.InitializeComponent();
 

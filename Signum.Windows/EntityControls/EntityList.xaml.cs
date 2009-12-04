@@ -126,11 +126,11 @@ namespace Signum.Windows
 
         protected override void btFind_Click(object sender, RoutedEventArgs e)
         {
-            IList list = EnsureEntities();
-
-            object value = OnFinding(true);
+            object value = OnFinding();
             if (value == null)
                 return;
+
+            IList list = EnsureEntities();
 
             if (Move)
             {
