@@ -33,7 +33,7 @@ namespace Signum.Windows.Reports
 
             if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
             {
-                ExcelReportGenerator.GenerarInforme(sfd.FileName, SearchControl.QueryResult);
+                ExcelReportGenerator.GenerateReport(sfd.FileName, SearchControl.QueryResult);
             }
         }
 

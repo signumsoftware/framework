@@ -13,7 +13,7 @@ namespace Signum.Windows.Reports
     {
         static DataType Integer = (DataType)923; 
 
-        static Dictionary<TypeCode, DataType> ConversorTipos = new Dictionary<TypeCode, DataType> 
+        static Dictionary<TypeCode, DataType> TypesConverter = new Dictionary<TypeCode, DataType> 
         {
             {TypeCode.Boolean, DataType.String},
             {TypeCode.Byte,DataType.String},
@@ -35,7 +35,7 @@ namespace Signum.Windows.Reports
             {TypeCode.UInt64,Integer}
         };
 
-        static Dictionary<DataType, string> EstiloDeTipo = new Dictionary<DataType, string> 
+        static Dictionary<DataType, string> TypeStyle = new Dictionary<DataType, string> 
         {
             {DataType.Boolean,styleText},
             {DataType.String,styleText},
@@ -44,7 +44,7 @@ namespace Signum.Windows.Reports
             {Integer,styleInteger}
         };
 
-        public static void GenerarInforme(string filename, QueryResult vista)
+        public static void GenerateReport(string filename, QueryResult view)
         {
             Workbook book = new Workbook
             {
@@ -67,11 +67,11 @@ namespace Signum.Windows.Reports
 
             book.Styles = GenerateStyles();
 
-            book.Worksheets.Add(GenerateWorksheetSheet(vista));
+            book.Worksheets.Add(GenerateWorksheetSheet(view));
 
             book.Save(filename);
 
-            //Abrir el documento recién creado
+            //Open the generated document
             System.Diagnostics.Process.Start(filename);
         }
 
@@ -92,14 +92,14 @@ namespace Signum.Windows.Reports
                 new Style(Default) 
                 {
                     Name = "Normal",
-                    Font = new Font { FontName = "Calibri", Size = 11F, Color = "#000000" },
+                    Font = new Font { FontName = "Arial", Size = 11F, Color = "#000000" },
                     Interior = new Interior(),
                     Alignment = new Alignment { Vertical = VerticalAlignment.Bottom },
                     Borders = new BorderCollection()
                 },
                 new Style(styleTitulo) 
                 {
-                    Font = new Font { Bold = true, Italic = true, FontName = "Calibri", Size = 11F, Color = "#000000" },
+                    Font = new Font { Bold = true, Italic = true, FontName = "Arial", Size = 11F, Color = "#000000" },
                     Interior = new Interior 
                     {
                         Color = "#C5D9F1",
@@ -132,7 +132,7 @@ namespace Signum.Windows.Reports
                 },
                 new Style(styleText) 
                 {
-                    Font = new Font { FontName = "Calibri", Size = 11F },
+                    Font = new Font { FontName = "Arial", Size = 11F },
                     NumberFormat = "@"
                 },
                 new Style(styleDateTime) 
@@ -194,11 +194,11 @@ namespace Signum.Windows.Reports
                                     fila.Zip(vista.Columns).Where(p=>p.Second.Visible).Select((par, i) =>
                                     {
                                         TypeCode tc = par.Second.Type.UnNullify().Map(a=>a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
-                                        DataType dt = ConversorTipos[tc];
+                                        DataType dt = TypesConverter[tc];
                                    
                                         return new Cell
                                         {
-                                            StyleID = EstiloDeTipo[dt],
+                                            StyleID = TypeStyle[dt],
                                             Data = par.First.TryCC(o=>new CellData((dt!=Integer) ? dt : DataType.Number,
                                                       (dt == DataType.DateTime) ? ((DateTime)o).ToStringExcel() :
                                                       (dt==DataType.Number) ? Convert.ToDecimal(o).ToStringExcel() : 
