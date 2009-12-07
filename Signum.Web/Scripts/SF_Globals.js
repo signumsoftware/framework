@@ -59,8 +59,6 @@ function empty(myString) {
     return (myString == undefined || myString == "");
 }
 
-String.prototype.hasText = function() { return (this == null || this == undefined || this == '') ? false : true; }
-
 function isFalse(value) {
     return value == false || value == "false" || value == "False";
 }
@@ -77,31 +75,28 @@ function replaceAll(s,tr){
     }
     return v;
 }
+
 function ShowError(XMLHttpRequest, textStatus, errorThrown) {
-    var error;
-    if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
-        var startError = XMLHttpRequest.responseText.indexOf("<title>");
-        var endError = XMLHttpRequest.responseText.indexOf("</title>");
+    var error, r = XMLHttpRequest.responseText; 
+    if (!empty(r)) {
+        var startError = r.indexOf("<title>");
+        var endError = r.indexOf("</title>");
         if ((startError != -1) && (endError != -1))
-            error = XMLHttpRequest.responseText.substring(startError + 7, endError);
+            error = r.substring(startError + 7, endError);
         else
-            error = XMLHttpRequest.responseText;
+            error = r;
     }
     else {
         error = textStatus;
     }
     NotifyError(lang['error'], 2000);
-   /* error = replaceAll(error,
-        {'&#237;' : 'í',
-        '&#243;' : 'ó' });*/
     alert("Error: " + error);
-   
 }
 
 // establece clase "focused" al div alrededor del campo con foco
 function initAroundDivs() {
     $('.valueLine,.rbValueLine').each(function() {
-        if (this.id != undefined && this.id != null && this.id != "") {
+        if (!empty(this.id)) {
             var elementID = $("#" + this.id);
             var around = elementID.parents('div[class=around]');
             if (around.length > 0) {
@@ -116,11 +111,8 @@ function initAroundDivs() {
 
 $(function() { initAroundDivs();});
 
-function singleQuote(myfunction) {
-    if (myfunction != null)
-        return myfunction.toString().replace(/"/g, "'");
-    else
-        return '';
+function singleQuote(s) {
+    return s != null ? s.toString().replace(/"/g, "'") : '';
 }
 
 //Performs input validation
