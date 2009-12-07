@@ -67,16 +67,16 @@ namespace Signum.Windows.Operations
 
                 ConstructorFromManySettings settings = (ConstructorFromManySettings)OperationClient.Manager.Settings.TryGetC(operationInfo.Key);
 
+                IIdentifiable entity;
                 if (settings != null && settings.Constructor != null)
-                    settings.Constructor(new ConstructorFromManyEventArgs
+                    entity = settings.Constructor(new ConstructorFromManyEventArgs
                     {
                         Entities = lites,
                         Window = b.FindCurrentWindow(),
                         OperationInfo = operationInfo,
                         QueryName = queryName
                     });
-
-                IIdentifiable entity = Server.Return((IOperationServer s)=>s.ConstructFromMany(lites, entityType, operationInfo.Key)); 
+                else entity = Server.Return((IOperationServer s)=>s.ConstructFromMany(lites, entityType, operationInfo.Key)); 
 
                 if (operationInfo.Returns && Navigator.IsViewable(entity.GetType(), false))
                     Navigator.Navigate(entity); 
