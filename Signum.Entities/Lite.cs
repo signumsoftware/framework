@@ -51,6 +51,16 @@ namespace Signum.Entities
             get { return entityOrNull; }
             protected set { entityOrNull = value; }
         }
+
+        public T Entity 
+        {
+            get
+            {
+                if (entityOrNull == null)
+                    throw new ApplicationException("The Lite is not loaded, use Database.Retrieve or consider rewriting your query");
+                return entityOrNull;
+            }
+        }
     }
 
     [Serializable]
@@ -334,7 +344,7 @@ namespace Signum.Entities
             if (lite == null && entity == null)
                 return true;
 
-            if (entity == null || entity == null)
+            if (lite == null || entity == null)
                 return false;
 
             if (lite.RuntimeType != entity.GetType())
@@ -343,7 +353,7 @@ namespace Signum.Entities
             if (lite.IdOrNull != null)
                 return lite.Id == entity.IdOrNull;
             else
-                return object.ReferenceEquals(lite.EntityOrNull, entity);
+                return object.ReferenceEquals(lite.Entity, entity);
         }
 
         class RefersToExpander : IMethodExpander

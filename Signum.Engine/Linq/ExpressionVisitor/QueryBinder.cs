@@ -898,7 +898,7 @@ namespace Signum.Engine.Linq
                     {
                         if (pi.Name == "Id")
                             return liteRef.Id;
-                        if (pi.Name == "EntityOrNull")
+                        if (pi.Name == "EntityOrNull" || pi.Name == "Entity")
                             return liteRef.Reference;
                         if (pi.Name == "ToStr")
                             return liteRef.ToStr.ThrowIfNullC("ToStr is no accesible on queries in ImplementedByAll");
