@@ -252,4 +252,7 @@
   <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
     <value>menor o igual que</value>
   </data>
+  <data name="LockeableEntity_Locked" xml:space="preserve">
+    <value>Bloqueado</value>
+  </data>
 </root>

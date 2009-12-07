@@ -34,7 +34,7 @@ namespace Signum.Engine.Linq
     
         public override string GetQueryText(Expression expression)
         {
-            return this.Translate(expression).CommandText;
+            return this.Translate(expression).CleanCommandText();
         }
         
         public override object Execute(Expression expression)

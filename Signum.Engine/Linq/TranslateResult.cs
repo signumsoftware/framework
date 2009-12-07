@@ -15,6 +15,8 @@ namespace Signum.Engine.Linq
         UniqueFunction? Unique { get; }
         bool HasFullObjects { get; }
 
+        string CleanCommandText();
+
         object Execute(IProjectionRow pr); 
     }
 
@@ -57,6 +59,23 @@ namespace Signum.Engine.Linq
                 else
                     return reader;
         }
+
+        #region ITranslateResult Members
+
+
+        public string CleanCommandText()
+        {
+            try
+            {
+                return new SqlPreCommandSimple(CommandText, GetParameters(null).ToList()).PlainSql();
+            }
+            catch
+            {
+                return CommandText;
+            }
+        }
+
+        #endregion
     }
 
     class CommandResult
