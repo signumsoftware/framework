@@ -280,7 +280,7 @@
     <value>Create</value>
   </data>
   <data name="ContextItsOnlyPossibleWithIdentifiableEntities" xml:space="preserve">
-    <value>Context its only possible with IdentifiableEntities</value>
+    <value>Context is only possible with IdentifiableEntities</value>
   </data>
   <data name="PleaseSelectAType" xml:space="preserve">
     <value>Please select one of the following types: </value>
@@ -338,5 +338,8 @@
   </data>
   <data name="SelectAnElement" xml:space="preserve">
     <value>Select an element</value>
+  </data>
+  <data name="RootTypeContextHasToBeAnIdentifiableEntity" xml:space="preserve">
+    <value>Root TypeContext has to be an IdentifiableEntity</value>
   </data>
 </root>

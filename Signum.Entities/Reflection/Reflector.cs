@@ -115,7 +115,7 @@ namespace Signum.Entities.Reflection
             return null;
         }
 
-        internal static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField, bool throws)
+        public static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField)
         {
             Expression e = lambdaToField.Body;
 
@@ -123,7 +123,7 @@ namespace Signum.Entities.Reflection
             if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
-            MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a, throws)).NotNull().Reverse().ToArray();
+            MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a)).NotNull().Reverse().ToArray();
 
             return result;          
         }
@@ -140,14 +140,29 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        static MemberInfo GetMember(Expression e, bool throws)
+        static readonly string[] collectionMethods = new[] { "Single", "SingleOrDefault", "First", "FirstOrDefault" };
+
+        static MemberInfo GetMember(Expression e)
         {
             switch (e.NodeType)
             {
-                case ExpressionType.MemberAccess: return ((MemberExpression)e).Map(me => me.Member.MemberType == MemberTypes.Field ? me.Member :
-                                                                                        me.Member.Name == "EntityOrNull" ? null :
-                                                                                        FindFieldInfo(me.Expression.Type, (PropertyInfo)me.Member, throws));
-                case ExpressionType.Call: return ((MethodCallExpression)e).Method;
+                case ExpressionType.MemberAccess:
+                    {
+                        MemberExpression me = (MemberExpression)e;  
+                        if(typeof(Lite).IsAssignableFrom(me.Member.DeclaringType) && me.Member.Name.StartsWith("Entity"))
+                            return null;
+                        
+                        return me.Member;
+                    }
+                case ExpressionType.Call:
+                    {
+                        MethodCallExpression mce = (MethodCallExpression)e;
+
+                        if (collectionMethods.Contains(mce.Method.Name))
+                            return mce.Object.Type.GetProperty("Item");
+
+                        return mce.Method;
+                    }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
                 default: throw new InvalidCastException(Resources._0NotSupported.Formato(e.NodeType)); 

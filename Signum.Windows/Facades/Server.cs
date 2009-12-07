@@ -35,14 +35,9 @@ namespace Signum.Windows
             {
                 action(server);
             }
-            catch (FaultException)
+            catch (MessageSecurityException e)
             {
-                throw;
-            }
-            catch (CommunicationException e)
-            {
-                HandleCommunicationException(e);
-
+                HandleSessionException(e);
                 current = null;
                 goto retry;
             }
@@ -62,14 +57,9 @@ namespace Signum.Windows
             {
                 return function(server);
             }
-            catch (FaultException)
+            catch (MessageSecurityException e)
             {
-                throw;
-            }
-            catch (CommunicationException e)
-            {
-                HandleCommunicationException(e);
-
+                HandleSessionException(e);
                 current = null;
                 goto retry;
             }
@@ -84,16 +74,9 @@ namespace Signum.Windows
                 throw new InvalidOperationException("A connection with the server is necessary to continue");
         }
 
-        static void HandleCommunicationException(CommunicationException e)
+        static void HandleSessionException(MessageSecurityException e)
         {
-            if (e is MessageSecurityException)
-            {
-                MessageBox.Show("Session expired", "Session Expired", MessageBoxButton.OK, MessageBoxImage.Hand);
-            }
-            else
-            {
-                MessageBox.Show(e.Message, "Communication Problem", MessageBoxButton.OK, MessageBoxImage.Hand);
-            }
+            MessageBox.Show("Session expired", "Session Expired", MessageBoxButton.OK, MessageBoxImage.Hand);
         }
 
         public static bool Implements<T>()

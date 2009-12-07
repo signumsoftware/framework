@@ -306,7 +306,7 @@ namespace Signum.Engine.Maps
         public Field Field<T>(Expression<Func<T, object>> lambdaToField)
             where T : IdentifiableEntity
         {
-            return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField, true), true);
+            return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField), true);
         }
 
         public override string ToString()
@@ -714,11 +714,9 @@ namespace Signum.Engine.Maps
         {
             return "Coleccion\r\n{0}".Formato(RelationalTable.ToString().Indent(2));
         }
-
-        static readonly string[] elementMethods = new[] { "First" , "FirstOrDefault" ,"Single" ,"SingleOrDefault" };
         public Field GetField(MemberInfo value, bool throws)
         {
-            if (value is MethodInfo && elementMethods.Contains(value.Name)  || value is PropertyInfo && value.Name == "Item" )
+            if (value is PropertyInfo && value.Name == "Item" )
                 return RelationalTable.Field;
 
             if (throws)

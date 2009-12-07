@@ -11,6 +11,9 @@ using Signum.Windows.Properties;
 using System.Globalization;
 using System.Windows.Markup;
 using Signum.Utilities.ExpressionTrees;
+using System.Linq.Expressions;
+using Signum.Utilities.Reflection;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
@@ -27,9 +30,21 @@ namespace Signum.Windows
         public static TypeContext Root(Type type)
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new InvalidOperationException("Root TypeContext has to be an IdentifiableEntity"); 
+                throw new InvalidOperationException(Resources.RootTypeContextHasToBeAnIdentifiableEntity); 
 
             return new TypeContext(type); 
+        }
+
+ 
+        public static TypeContext SubContext<T>(Expression<Func<T, object>> lambda)
+        {
+            TypeContext result = Root(typeof(T));
+
+            foreach (var mi in Reflector.GetMemberList(lambda))
+            {
+                result = new TypeSubContext((PropertyInfo)mi, result);
+            }
+            return result; 
         }
 
         public override string ToString()

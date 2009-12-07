@@ -342,4 +342,7 @@
   <data name="SelectAnElement" xml:space="preserve">
     <value>Seleccione un elemento</value>
   </data>
+  <data name="RootTypeContextHasToBeAnIdentifiableEntity" xml:space="preserve">
+    <value>El TypeContext raíz debe ser un IdentifiableEntity</value>
+  </data>
 </root>
