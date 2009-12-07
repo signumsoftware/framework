@@ -27,7 +27,7 @@ namespace Signum.Windows
         public static TypeContext Root(Type type)
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new InvalidOperationException("Root TypeContect has to be an IdentifiableEntity"); 
+                throw new InvalidOperationException("Root TypeContext has to be an IdentifiableEntity"); 
 
             return new TypeContext(type); 
         }
