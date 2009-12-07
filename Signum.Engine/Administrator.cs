@@ -176,6 +176,12 @@ deallocate cur");
         {
             return SqlPreCommand.Combine(Spacing.Double, RemoveAllViewsScript, RemoveAllConstraintsScript, RemoveAllTablesScript);
         }
+
+        public static SqlPreCommand ShrinkDataBase()
+        {
+            return SqlBuilder.ShrinkDatabase(ConnectionScope.Current.SchemaName());
+        }
+
         #endregion
 
         #region MultiColumnIndex

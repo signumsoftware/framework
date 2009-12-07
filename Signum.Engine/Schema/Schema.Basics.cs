@@ -241,6 +241,7 @@ namespace Signum.Engine.Maps
         public Schema()
         {
             Generating += Administrator.RemoveAllScript;
+            Generating += Administrator.ShrinkDataBase;
             Generating += Administrator.CreateTablesScript;
             Generating += Administrator.InsertEnumValuesScript;
            

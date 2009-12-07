@@ -327,9 +327,12 @@ END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlSc
                 table.SqlScape(), value?"ON": "OFF"));
         }
 
-        internal static SqlPreCommandSimple StrinkDatabase()
+        internal static SqlPreCommand ShrinkDatabase(string schemaName)
         {
-            return new SqlPreCommandSimple("DBCC SHRINKDATABASE");
+            return new []{
+                new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)),
+                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
+            }.Combine(Spacing.Simple);
         }
     }
 }

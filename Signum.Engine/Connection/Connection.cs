@@ -97,9 +97,20 @@ namespace Signum.Engine
         }
 
         [ThreadStatic]
-        public static long CommandCount = 0; 
+        public static long CommandCount = 0;
 
-        SqlCommand NewCommand(SqlPreCommandSimple preCommand)
+        SqlConnection EnsureConnection()
+        {
+            if (Transaction.HasTransaction)
+                return null;
+
+            Connection current = ((Connection)ConnectionScope.Current);
+            SqlConnection result = new SqlConnection(current.ConnectionString);
+            result.Open();
+            return result;
+        }
+
+        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection)
         {
             SqlCommand cmd = new SqlCommand();
 
@@ -107,8 +118,14 @@ namespace Signum.Engine
             if (timeout.HasValue)
                 cmd.CommandTimeout = timeout.Value;
 
-            cmd.Connection = Transaction.CurrentConnection;
-            cmd.Transaction = Transaction.CurrentTransaccion;
+            if (overridenConnection != null)
+                cmd.Connection = overridenConnection;
+            else
+            {
+                cmd.Connection = Transaction.CurrentConnection;
+                cmd.Transaction = Transaction.CurrentTransaccion;
+            }
+
             cmd.CommandText = preCommand.Sql;
 
             if (preCommand.Parameters != null)
@@ -126,14 +143,14 @@ namespace Signum.Engine
 
         protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand)
         {
-            using (Transaction tr = new Transaction())
-            using (SqlCommand cmd = NewCommand(preCommand))
+            using (SqlConnection con = EnsureConnection())
+            using (SqlCommand cmd = NewCommand(preCommand, con))
             {
                 try
                 {
                     object result = cmd.ExecuteScalar();
                     CommandCount++;
-                    return tr.Commit(result);
+                    return result;
                 }
                 catch (SqlException ex)
                 {
@@ -144,26 +161,26 @@ namespace Signum.Engine
 
         protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand)
         {
-            using (Transaction tr = new Transaction())
-            using (SqlCommand cmd = NewCommand(preCommand))
+            using (SqlConnection con = EnsureConnection())
+            using (SqlCommand cmd = NewCommand(preCommand, con))
             {
                 try
                 {
                     int result = cmd.ExecuteNonQuery();
                     CommandCount++;
-                    return tr.Commit(result);
+                    return result;
                 }
                 catch (SqlException ex)
                 {
-                    throw HandleException(ex); 
+                    throw HandleException(ex);
                 }
             }
         }
 
         protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand)
         {
-            using (Transaction tr = new Transaction())
-            using (SqlCommand cmd = NewCommand(preCommand))
+            using (SqlConnection con = EnsureConnection())
+            using (SqlCommand cmd = NewCommand(preCommand, con))
             {
                 try
                 {
@@ -172,7 +189,7 @@ namespace Signum.Engine
                     DataTable result = new DataTable();
                     da.Fill(result);
                     CommandCount++;
-                    return tr.Commit(result);
+                    return result;
                 }
                 catch (SqlException ex)
                 {
@@ -183,8 +200,8 @@ namespace Signum.Engine
 
         protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand)
         {
-            using (Transaction tr = new Transaction())
-            using (SqlCommand cmd = NewCommand(preCommand))
+            using (SqlConnection con = EnsureConnection())
+            using (SqlCommand cmd = NewCommand(preCommand, con))
             {
                 try
                 {
@@ -192,7 +209,7 @@ namespace Signum.Engine
                     DataSet result = new DataSet();
                     da.Fill(result);
                     CommandCount++;
-                    return tr.Commit(result);
+                    return result;
                 }
                 catch (SqlException ex)
                 {
@@ -207,7 +224,7 @@ namespace Signum.Engine
             {
                 case 2601: return new UniqueKeyException(ex);
                 case 547: return new ForeignKeyException(ex);
-                default: return ex; 
+                default: return ex;
             }
         }
 
