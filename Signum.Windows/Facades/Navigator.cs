@@ -77,6 +77,9 @@ namespace Signum.Windows
         internal static Lite<T> FindUnique<T>(FindUniqueOptions options)
             where T : class, IIdentifiable
         {
+            if (options.QueryName == null)
+                options.QueryName = typeof(T);
+
             return (Lite<T>)Manager.FindUnique(options);
         }
 
@@ -85,29 +88,19 @@ namespace Signum.Windows
             return Manager.FindUnique(options);
         }
 
-
-
         public static Lite<T> Find<T>()
             where T : IdentifiableEntity
         {
             return (Lite<T>)Manager.Find(new FindOptions(typeof(T)));
         }
 
-        public static Lite<T> Find<T>(object queryName)
-            where T : IdentifiableEntity
-        {
-            return (Lite<T>)Manager.Find(new FindOptions(queryName));
-        }
-
         public static Lite<T> Find<T>(FindOptions options)
             where T : IdentifiableEntity
         {
-            return (Lite<T>)Manager.Find(options);
-        }
+            if (options.QueryName == null)
+                options.QueryName = typeof(T);
 
-        public static Lite Find(object queryName)
-        {
-            return Manager.Find(new FindOptions(queryName));
+            return (Lite<T>)Manager.Find(options);
         }
 
         public static Lite Find(FindOptions options)
@@ -117,10 +110,10 @@ namespace Signum.Windows
 
 
 
-        public static Lite[] FindMany(object queryName)
-        {
-            return Manager.FindMany(new FindManyOptions(queryName));
-        }
+        //public static Lite[] FindMany(object queryName)
+        //{
+        //    return Manager.FindMany(new FindManyOptions(queryName));
+        //}
 
         public static Lite[] FindMany(FindManyOptions options)
         {
@@ -137,15 +130,7 @@ namespace Signum.Windows
             return result.Cast<Lite<T>>().ToArray();
         }
 
-        public static Lite<T>[] FindMany<T>(object queryName)
-            where T : IdentifiableEntity
-        {
-            Lite[] result = Manager.FindMany(new FindManyOptions(queryName));
-            if (result == null)
-                return null;
 
-            return result.Cast<Lite<T>>().ToArray();
-        }
 
         public static Lite<T>[] FindMany<T>(FindManyOptions options)
             where T : IdentifiableEntity

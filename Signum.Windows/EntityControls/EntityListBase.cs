@@ -61,7 +61,7 @@ namespace Signum.Windows
                 if (type == null)
                     return null;
 
-                value = Navigator.FindMany(type);
+                value = Navigator.FindMany(new FindManyOptions { QueryName = type });
             }
             else
                 value = Finding();

@@ -324,7 +324,7 @@ namespace Signum.Windows
                 if (type == null)
                     return null;
 
-                value = Navigator.Find(type);
+                value = Navigator.Find(new FindOptions { QueryName = type });
             }
             else
                 value = Finding();
