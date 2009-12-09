@@ -15,7 +15,6 @@ namespace Signum.Engine
 
         private bool disposed = false;
 
-
         internal static int? Current
         {
             get
@@ -27,6 +26,7 @@ namespace Signum.Engine
             }
         }
 
+        /// <param name="timeout">timeout of a command in seconds</param>
         public CommandTimeoutScope(int timeout)
         {
             if (stack == null)

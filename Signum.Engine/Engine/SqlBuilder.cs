@@ -334,5 +334,15 @@ END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlSc
                 new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
             }.Combine(Spacing.Simple);
         }
+
+        internal static SqlPreCommandSimple SetSnapshotIsolation(string schemaName, bool value)
+        {
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1}".Formato(schemaName, value ? "ON" : "OFF"));
+        }
+
+        internal static SqlPreCommandSimple MakeSnapshotIsolationDefault(string schemaName, bool value)
+        {
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT {1}".Formato(schemaName, value ? "ON" : "OFF"));
+        }
     }
 }

@@ -22,41 +22,94 @@ namespace Signum.Engine
     public class Transaction : IDisposable
     {
         [ThreadStatic]
-        static StackDictionary<BaseConnection, RealTransaction> reals;
+        static Dictionary<BaseConnection, ICoreTransaction> currents;
 
-        bool faked;
-        bool confirmed;
+        bool commited;
+        ICoreTransaction coreTransaction; 
 
-        class RealTransaction
+        interface ICoreTransaction
         {
-            public SqlConnection Connection;
-            public SqlTransaction Transaction;
-            public IsolationLevel? IsolationLevel;
-            public DateTime Time;
-            public bool RolledBack = false;
+            event Action RealCommit;
+            SqlConnection Connection { get; }
+            SqlTransaction Transaction { get; }
+            DateTime Time { get; }
+            bool RolledBack { get; }
+            bool Started { get; }
+            void Rollback();
+            void Commit();
+            ICoreTransaction Finish();
+            void Start();
+        }
+     
+        class FakedTransaction : ICoreTransaction
+        {
+            ICoreTransaction parent;
 
-            public RealTransaction(IsolationLevel? isolationLevel)
+            public FakedTransaction(ICoreTransaction parent)
+            {
+                this.parent = parent;
+            }
+
+            public event Action RealCommit
+            {
+                add { parent.RealCommit += value; }
+                remove { parent.RealCommit -= value; }
+            }
+
+            public SqlConnection Connection{ get { return parent.Connection; } }
+            public SqlTransaction Transaction{ get { return parent.Transaction; } }
+            public DateTime Time{ get { return parent.Time;} }
+            public bool RolledBack { get{ return parent.RolledBack;} }
+            public bool Started { get { return parent.Started; } }
+
+            public void Start() { parent.Start(); }
+
+            public void Rollback()
+            {
+                parent.Rollback(); 
+            }
+
+            public void Commit(){ }
+
+            public ICoreTransaction Finish() { return parent; }
+            
+        }
+
+        class RealTransaction : ICoreTransaction
+        {
+            ICoreTransaction parent; 
+
+            public SqlConnection Connection { get; private set; }
+            public SqlTransaction Transaction { get; private set; }
+            public DateTime Time { get; private set; }
+            public bool RolledBack { get; private set; }
+            public bool Started { get; private set; }
+            public event Action RealCommit;
+
+            IsolationLevel? IsolationLevel;
+
+            public RealTransaction(ICoreTransaction parent, IsolationLevel? isolationLevel)
             {
                 IsolationLevel = isolationLevel;
                 Time = DateTime.Now;
+                this.parent = parent;
             }
 
             public void Start()
             {
-                if (Connection == null)
+                if (!Started)
                 {
                     Connection con = (Connection)ConnectionScope.Current;
                     Connection = new SqlConnection(con.ConnectionString);
                     Connection.Open();
                     Transaction = Connection.BeginTransaction(IsolationLevel ?? con.IsolationLevel);
+                    Started = true;
                 }
             }
 
             public void Commit()
             {
-                if (Connection != null &&
-                    Transaction != null &&
-                    Connection.State == ConnectionState.Open)
+                if (Started)
                 {
                     Transaction.Commit();
                     if (RealCommit != null)
@@ -66,7 +119,7 @@ namespace Signum.Engine
 
             public void Rollback()
             {
-                if (Transaction != null && Transaction.Connection != null && !RolledBack)
+                if (Started && !RolledBack)
                 {
                     Transaction.Rollback();
                     Debug.WriteLine(Resources.TransactionRollbacked);
@@ -74,7 +127,7 @@ namespace Signum.Engine
                 }
             }
 
-            public void Finish()
+            public ICoreTransaction Finish()
             {
                 if (Transaction != null)
                 {
@@ -87,52 +140,224 @@ namespace Signum.Engine
                     Connection.Dispose();
                     Connection = null;
                 }
+
+                return parent;
+            }
+        }
+
+        class NamedTransaction : ICoreTransaction
+        {
+            ICoreTransaction parent;
+            string savePointName;
+            public bool RolledBack { get; private set; }
+            public bool Started { get; private set; }
+
+            public NamedTransaction(ICoreTransaction parent, string savePointName)
+            {
+                this.parent = parent;
+                this.savePointName = savePointName;
             }
 
-            public event Action RealCommit; 
+            public event Action RealCommit
+            {
+                add { parent.RealCommit += value; }
+                remove { parent.RealCommit -= value; }
+            }
+
+            public SqlConnection Connection { get { return parent.Connection; } }
+            public SqlTransaction Transaction { get { return parent.Transaction; } }
+            public DateTime Time { get { return parent.Time; } }
+
+            public void Start()
+            {
+                if (!Started)
+                {
+                    parent.Start();
+                    Transaction.Save(savePointName);
+                    Started = true;
+                }
+            }
+
+            public void Rollback()
+            {
+                if (Started && !RolledBack)
+                {
+                    Transaction.Rollback(savePointName);
+                    Debug.WriteLine(Resources.TransactionRollbacked);
+                    RolledBack = true;
+                }
+            }
+
+            public void Commit() { }
+
+            public ICoreTransaction Finish() { return parent; }
+        }
+
+        class MockRealTransaction : ICoreTransaction
+        {
+            ICoreTransaction parent;
+
+            public SqlConnection Connection { get{return null;} }
+            public SqlTransaction Transaction { get{return null;} }
+            public DateTime Time { get; private set; }
+            public bool RolledBack { get; private set; }
+            public bool Started { get; set; }
+            public event Action RealCommit;
+            
+
+            public MockRealTransaction(ICoreTransaction parent)
+            {
+                Time = DateTime.Now;
+                this.parent = parent;
+            }
+
+            public void Start()
+            {
+                Started = true;
+            }
+
+            public void Commit()
+            {
+                if (Started)
+                {
+                    if (RealCommit != null)
+                        RealCommit();
+                }
+            }
+
+            public void Rollback()
+            {
+                if (Started && !RolledBack)
+                {
+                    Debug.WriteLine(Resources.TransactionRollbacked);
+                    RolledBack = true;
+                }
+            }
+
+            public ICoreTransaction Finish()
+            {
+                return parent;
+            }
+        }
+
+        class MockNamedTransaction : ICoreTransaction
+        {
+            ICoreTransaction parent;
+            string savePointName;
+            public bool RolledBack { get; private set; }
+            public bool Started { get; private set; }
+
+            public MockNamedTransaction(ICoreTransaction parent, string savePointName)
+            {
+                this.parent = parent;
+                this.savePointName = savePointName;
+            }
+
+            public event Action RealCommit
+            {
+                add { parent.RealCommit += value; }
+                remove { parent.RealCommit -= value; }
+            }
+
+            public SqlConnection Connection { get { return parent.Connection; } }
+            public SqlTransaction Transaction { get { return parent.Transaction; } }
+            public DateTime Time { get { return parent.Time; } }
+
+            public void Start()
+            {
+                if (!Started)
+                {
+                    parent.Start();
+                    Started = true;
+                }
+            }
+
+            public void Rollback()
+            {
+                if (Started && !RolledBack)
+                {
+                    RolledBack = true;
+                }
+            }
+
+            public void Commit() { }
+
+            public ICoreTransaction Finish() { return parent; }
         }
 
         public Transaction() : this(false, null) { }
 
         public Transaction(bool forceNew) : this(forceNew, null) { }
 
-        public Transaction(IsolationLevel isolationLevel) : this(false, isolationLevel) { }
-
         public Transaction(bool forceNew, IsolationLevel? isolationLevel)
         {
-            if (reals == null)
-                reals = new StackDictionary<BaseConnection, RealTransaction>();
+            if (currents == null)
+                currents = new Dictionary<BaseConnection, ICoreTransaction>();
 
             BaseConnection bc = ConnectionScope.Current;
 
             if (bc == null)
                 throw new ApplicationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
 
-            if ((reals.Count(bc) == 0 || forceNew) && !bc.IsMock)
-                reals.Push(bc, new RealTransaction(isolationLevel));
+            ICoreTransaction parent = currents.TryGetC(bc);
+            if (parent == null || forceNew)
+            {
+                if (bc.IsMock)
+                    currents[bc] = coreTransaction = new MockRealTransaction(parent);
+                else
+                    currents[bc] = coreTransaction = new RealTransaction(parent, isolationLevel);
+            }
             else
             {
                 AssertTransaction();
-                faked = true;
+                currents[bc] = coreTransaction = new FakedTransaction(parent);
             }
+        }
+
+        public Transaction(string savePointName)
+        {
+            if (currents == null)
+                currents = new Dictionary<BaseConnection, ICoreTransaction>();
+
+            BaseConnection bc = ConnectionScope.Current;
+
+            if (bc == null)
+                throw new ApplicationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
+
+            ICoreTransaction parent = GetCurrent();
+            if (bc.IsMock)
+                currents[bc] = coreTransaction = new MockNamedTransaction(parent, savePointName);
+            else
+                currents[bc] = coreTransaction = new NamedTransaction(parent, savePointName);
+        }
+
+        void AssertTransaction()
+        {
+            if (GetCurrent().RolledBack)
+                throw new InvalidOperationException(Resources.TheTransactionIsRolledBack);
+        }
+
+        static ICoreTransaction GetCurrent()
+        {
+            return currents.GetOrThrow(ConnectionScope.Current, "No Transaction created yet");
         }
 
         public static event Action RealCommit
         {
-            add { reals.Peek(ConnectionScope.Current).RealCommit += value; }
-            remove { reals.Peek(ConnectionScope.Current).RealCommit -= value; }
+            add { GetCurrent().RealCommit += value; }
+            remove { GetCurrent().RealCommit -= value; }
         }
 
         public static bool HasTransaction
         {
-            get { return reals != null && reals.Count(ConnectionScope.Current) > 0; }
+            get { return currents != null && currents.ContainsKey(ConnectionScope.Current); }
         }
 
         public static SqlConnection CurrentConnection
         {
             get
             {
-                RealTransaction tran = reals.Peek(ConnectionScope.Current);
+                ICoreTransaction tran = GetCurrent();
                 tran.Start();
                 return tran.Connection;
             }
@@ -142,7 +367,7 @@ namespace Signum.Engine
         {
             get
             {
-                RealTransaction tran = reals.Peek(ConnectionScope.Current);
+                ICoreTransaction tran = GetCurrent();
                 tran.Start();
                 return tran.Transaction;
             }
@@ -153,7 +378,7 @@ namespace Signum.Engine
         {
             get
             {
-                RealTransaction tran = reals.Peek(ConnectionScope.Current);
+                ICoreTransaction tran = GetCurrent();
                 return tran.Time;
             }
         }
@@ -168,70 +393,22 @@ namespace Signum.Engine
         {
             AssertTransaction();
 
-            if (!faked)
-                reals.Peek(ConnectionScope.Current).Commit();
+            coreTransaction.Commit();
 
-            confirmed = true;
+            commited = true;
         }
 
         public void Dispose()
         {
-            if (!confirmed)
-                reals.Peek(ConnectionScope.Current).Rollback();
+            if (!commited)
+                coreTransaction.Rollback();
 
-            if (!faked)
-                reals.Pop(ConnectionScope.Current).Finish();
-        }
+            ICoreTransaction parent = coreTransaction.Finish();
 
-        void AssertTransaction()
-        {
-            if (reals.Peek(ConnectionScope.Current).RolledBack)
-                throw new InvalidOperationException(Resources.TheTransactionIsRolledBack);
+            if (parent == null)
+                currents.Remove(ConnectionScope.Current);
+            else
+                currents[ConnectionScope.Current] = parent;
         }
     }
-
-    public class StackDictionary<K, V>
-    {
-        Dictionary<K, Stack<V>> dictionary = new Dictionary<K, Stack<V>>();
-
-        public void Push(K key, V value)
-        {
-            dictionary.GetOrCreate(key).Push(value);
-        }
-
-        public V Pop(K key)
-        {
-            Stack<V> stack = GetStack(key);
-
-            var result = stack.Pop();
-
-            if (stack.Count == 0)
-                dictionary.Remove(key);
-
-            return result;
-        }
-
-
-        public V Peek(K key)
-        {
-            return GetStack(key).Peek();
-        }
-
-        public int Count(K key)
-        {
-            Stack<V> stack = dictionary.TryGetC(key);
-
-            return stack.TryCS(s => s.Count) ?? 0;
-        }
-
-        private Stack<V> GetStack(K key)
-        {
-            Stack<V> stack = dictionary.TryGetC(key);
-
-            if (stack == null)
-                throw new InvalidOperationException(Resources.NoStackFoundForThisKey);
-            return stack;
-        }
-    }
-
 }

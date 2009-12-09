@@ -286,5 +286,15 @@ deallocate cur");
                   tr.Commit(); 
               }
         }
+
+        public static void SetSnapshotIsolation(bool value)
+        {
+            Executor.ExecuteNonQuery(SqlBuilder.SetSnapshotIsolation(ConnectionScope.Current.SchemaName(), value));
+        }
+
+        public static void MakeSnapshotIsolationDefault(bool value)
+        {
+            Executor.ExecuteNonQuery(SqlBuilder.MakeSnapshotIsolationDefault(ConnectionScope.Current.SchemaName(), value));
+        }
     }
 }
