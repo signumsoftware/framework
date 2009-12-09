@@ -42,16 +42,29 @@ namespace Signum.Windows
             return uiElement;
         }
 
-        public static T Collapse<T>(this T uiElement) where T : TabControl
+        public static T Collapse<T>(this T uiElement) where T : UIElement
         {
             uiElement.Visibility = Visibility.Collapsed;
             return uiElement;
         }
 
-        public static T Visible<T>(this T uiElement) where T : TabControl
+        public static T Visible<T>(this T uiElement) where T : UIElement
         {
             uiElement.Visibility = Visibility.Collapsed;
             return uiElement;
         }
+
+        public static T ReadOnly<T>(this T uiElement) where T : UIElement
+        {
+            Common.SetIsReadOnly(uiElement, true);
+            return uiElement;
+        }
+
+        public static T Editable<T>(this T uiElement) where T : UIElement
+        {
+            Common.SetIsReadOnly(uiElement, false); 
+            return uiElement;
+        }
+
     }
 }

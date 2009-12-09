@@ -12,7 +12,7 @@ namespace Signum.Windows
     {
         public static void SetLabelShortcuts(Window windows)
         {
-            List<Label> labels = windows.Childs<Label>(l=>l.Content is string).ToList();
+            List<Label> labels = windows.Children<Label>(l=>l.Content is string).ToList();
 
             SetShortcuts(labels, l => (string)l.Content, (l, s) => l.Content = s);
         }

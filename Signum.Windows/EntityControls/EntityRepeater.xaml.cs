@@ -98,6 +98,15 @@ namespace Signum.Windows
         {
             return Remove && !Common.GetIsReadOnly(this);
         }
+
+        private void Grid_Initialized(object sender, EventArgs e)
+        {
+            Grid grid = (Grid)sender;
+            
+            TypeContext tc = Common.GetTypeContext(grid);
+
+            Common.SetTypeContext(grid, new TypeSubContext(tc.Type.GetProperty("Item"), tc));
+        }
     }
 
     [StyleTypedPropertyAttribute(Property = "ItemContainerStyle", StyleTargetType = typeof(ContentControl))]

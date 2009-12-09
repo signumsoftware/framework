@@ -28,18 +28,20 @@ namespace Signum.Windows
         }
 
         Type type; 
-        ObservableCollection<IdentifiableEntity> list; 
+        ObservableCollection<IdentifiableEntity> list;
 
         public AdminWindow(Type adminType)
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(adminType))
-                throw new ArgumentException(Properties.Resources.TypeArgumentMustInherit0.Formato(typeof(IdentifiableEntity).Name)); 
+                throw new ArgumentException(Properties.Resources.TypeArgumentMustInherit0.Formato(typeof(IdentifiableEntity).Name));
 
             this.type = adminType;
 
-            entityList.EntitiesType = typeof(List<>).MakeGenericType(adminType);
-
             this.InitializeComponent();
+
+            Common.SetTypeContext(WidgetPanel, TypeContext.Root(type));
+
+            entityList.EntitiesType = typeof(List<>).MakeGenericType(adminType);
 
             this.Loaded += new RoutedEventHandler(AdminWindow_Loaded);
         }

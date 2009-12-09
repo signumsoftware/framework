@@ -92,11 +92,11 @@ namespace Signum.Windows
 
         public static readonly DependencyProperty RouteProperty =
          DependencyProperty.RegisterAttached("Route", typeof(string), typeof(Common), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(RoutePropertyChanged)));
-        public static string GetRoute(DependencyObject obj)
+        public static string GetRoute(this DependencyObject obj)
         {
             return (string)obj.GetValue(RouteProperty);
         }
-        public static void SetRoute(DependencyObject obj, string value)
+        public static void SetRoute(this DependencyObject obj, string value)
         {
             obj.SetValue(RouteProperty, value);
         }
