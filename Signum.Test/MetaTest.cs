@@ -63,13 +63,13 @@ namespace Signum.Test
             var dic = DynamicQuery.QueryMetadata(
                     from l in Database.Query<LabelDN>()
                     join a in Database.Query<AlbumDN>() on l equals a.Label
-                    select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name});
+                    select new { Label = l.Name, Name = a.Name, Sum = l.Name.Length + a.Name });
 
             Assert.IsInstanceOfType(dic["Label"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
 
-            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.Member.Name).Order().ToString(","), "Name,Name"); 
+            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.Member.Name).Order().ToString(","), "Name,Name");
         }
 
         [TestMethod]
@@ -106,7 +106,7 @@ namespace Signum.Test
             var dic = DynamicQuery.QueryMetadata(
                     from a in Database.Query<AlbumDN>()
                     from s in a.Songs
-                    select new { a.Name, Song = s.Name}
+                    select new { a.Name, Song = s.Name }
                     );
 
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
