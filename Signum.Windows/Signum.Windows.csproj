@@ -262,6 +262,10 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
+    <Compile Include="Fluent\BindExtensions.cs" />
+    <Compile Include="Fluent\ControlExtensions.cs" />
+    <Compile Include="Fluent\EntityExtensions.cs" />
+    <Compile Include="Fluent\WhereExtensions.cs" />
     <Compile Include="SelectorWindow.xaml.cs">
       <DependentUpon>SelectorWindow.xaml</DependentUpon>
     </Compile>

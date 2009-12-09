@@ -359,43 +359,6 @@ namespace Signum.Windows
             ((UIElement)d).RemoveHandler(ChangeDataContextEvent, handler);
         }
 
-        public static bool HasChanges(this FrameworkElement element)
-        {
-            var graph = GraphExplorer.FromRoot((Modifiable)element.DataContext);
-            return graph.Any(a => a.SelfModified);
-        }
-
-        public static bool AssertErrors(this FrameworkElement element)
-        {
-            IAsserErrorsHandler aeh = element as IAsserErrorsHandler;
-            if (aeh != null)
-                return aeh.AssertErrors();
-
-            return AssertErrors((Modifiable)element.DataContext);
-        }
-
-        public static bool AssertErrors(Modifiable mod)
-        {
-            var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
-            string error = GraphExplorer.Integrity(graph);
-
-            if (error.HasText())
-            {
-                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            return true;
-        }
-
-        public static bool LooseChangesIfAny(this FrameworkElement element)
-        {
-            return !element.HasChanges() ||
-                MessageBox.Show(
-                Properties.Resources.ThereAreChangesContinue,
-                Properties.Resources.ThereAreChanges,
-                MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) == MessageBoxResult.OK;
-        }
-
         public static readonly DependencyProperty CurrentWindowProperty =
             DependencyProperty.RegisterAttached("CurrentWindow", typeof(Window), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
         public static Window GetCurrentWindow(DependencyObject obj)
@@ -407,58 +370,10 @@ namespace Signum.Windows
             obj.SetValue(CurrentWindowProperty, value);
         }
 
-
         public static Window FindCurrentWindow(this FrameworkElement fe)
         {
             return fe.FollowC(a => (FrameworkElement)(a.Parent ?? a.TemplatedParent))
-                      .Select(a => GetCurrentWindow(a) ?? a as Window).NotNull().First(Properties.Resources.ParentWindowNotFound);
-        }
-
-
-        public static bool NotSet(this DependencyObject depObj, DependencyProperty prop)
-        {
-            return DependencyPropertyHelper.GetValueSource(depObj, prop).BaseValueSource != BaseValueSource.Local;
-        }
-
-
-        public static IEnumerable<DependencyObject> Parents(this DependencyObject child)
-        {
-            return child.FollowC(VisualTreeHelper.GetParent);
-        }
-
-
-        public static Visibility ToVisibility(this bool val)
-        {
-            return val ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public static bool FromVisibility(this Visibility val)
-        {
-            return val == Visibility.Visible;
-        }
-
-        public static IEnumerable<DependencyObject> FindChildrenBreadthFirst(DependencyObject parent, Predicate<DependencyObject> predicate)
-        {
-            //http://en.wikipedia.org/wiki/Breadth-first_search
-            Queue<DependencyObject> st = new Queue<DependencyObject>();
-            st.Enqueue(parent);
-
-            while (st.Count > 0)
-            {
-                DependencyObject dp = st.Dequeue();
-
-                if (predicate(dp))
-                    yield return dp;
-                else
-                {
-                    int count = VisualTreeHelper.GetChildrenCount(dp);
-                    for (int i = 0; i < count; i++)
-                    {
-                        st.Enqueue(VisualTreeHelper.GetChild(dp, i));
-                    }
-                }
-            }
-            yield break;
+                      .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().First(Properties.Resources.ParentWindowNotFound);
         }
     }
 
@@ -476,9 +391,4 @@ namespace Signum.Windows
     }
 
     public delegate void CommonRouteTask(FrameworkElement fe, string route, TypeContext context);
-
-    public interface IAsserErrorsHandler
-    {
-        bool AssertErrors();
-    }
 }

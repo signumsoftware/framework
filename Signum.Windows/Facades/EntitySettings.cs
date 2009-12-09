@@ -93,6 +93,18 @@ namespace Signum.Windows
                 return View((IdentifiableEntity)entity);
             }
         }
+
+        public void OverrideView(Func<IdentifiableEntity, Control, Control> overrideView)
+        {
+            var view = View;
+            View = e => overrideView(e, view(e));
+        }
+
+        public void OverrideViewEmbedded(Func<EmbeddedEntity, TypeContext, Control, Control> overrideView)
+        {
+            var viewEmbedded = ViewEmbedded;
+            ViewEmbedded = (e, tc) => overrideView(e, tc, viewEmbedded(e, tc));
+        }
     }
 
     public enum WindowsType
