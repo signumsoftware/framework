@@ -133,14 +133,23 @@ namespace Signum.Entities.Reflection
             switch (e.NodeType)
             {
                 case ExpressionType.MemberAccess: return ((MemberExpression)e).Expression;
-                case ExpressionType.Call: return ((MethodCallExpression)e).Arguments.Single(Resources.OnlyOneArgumentAllowed);
+                case ExpressionType.Call:
+                    {
+                        MethodCallExpression mce = (MethodCallExpression)e;
+
+                        if (mce.Method.DeclaringType == typeof(MListExtensions) && mce.Method.Name == "Element")
+                            return mce.Arguments.Single();
+
+                        return ((MethodCallExpression)e).Arguments.Single(Resources.OnlyOneArgumentAllowed);
+
+                    }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Operand;
                 case ExpressionType.Parameter: return null;
                 default: throw new InvalidCastException(Resources._0NotSupported.Formato(e.NodeType));
             }
         }
 
-        static readonly string[] collectionMethods = new[] { "Single", "SingleOrDefault", "First", "FirstOrDefault" };
+        static readonly string[] collectionMethods = new[] { "Element" };
 
         static MemberInfo GetMember(Expression e)
         {
@@ -158,8 +167,8 @@ namespace Signum.Entities.Reflection
                     {
                         MethodCallExpression mce = (MethodCallExpression)e;
 
-                        if (collectionMethods.Contains(mce.Method.Name))
-                            return mce.Object.Type.GetProperty("Item");
+                        if (mce.Method.DeclaringType == typeof(MListExtensions) && mce.Method.Name == "Element")
+                            return mce.Arguments.Single().Type.GetProperty("Item");
 
                         return mce.Method;
                     }

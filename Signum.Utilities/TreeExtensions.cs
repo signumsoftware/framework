@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Signum.Utilities
 {
-    public static class TreeExtensions
+    public static class TreeHelper
     {
-        public static List<Node<T>> ToTreeC<T>(this IEnumerable<T> collection, Func<T, T> getParent)
+        public static List<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T> getParent)
             where T: class 
         {
             Node<T> top = new Node<T>();
@@ -33,7 +33,7 @@ namespace Signum.Utilities
             return top.Childs; 
         }
 
-        public static List<Node<T>> ToTreeS<T>(this IEnumerable<T> collection, Func<T, T?> getParent)
+        public static List<Node<T>> ToTreeS<T>(IEnumerable<T> collection, Func<T, T?> getParent)
             where T : struct
         {
             Node<T> top = new Node<T>();
@@ -59,7 +59,7 @@ namespace Signum.Utilities
             return top.Childs;
         }
 
-        public static IEnumerable<T> BreathFirst<T>(this T root, Func<T, IEnumerable<T>> childs)
+        public static IEnumerable<T> BreathFirst<T>(T root, Func<T, IEnumerable<T>> childs)
         {
             Stack<T> stack = new Stack<T>();
             stack.Push(root);

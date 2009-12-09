@@ -112,7 +112,11 @@ namespace Signum.Utilities.Reflection
             if (field == null)
                 throw new ArgumentNullException("field");
 
-            MemberExpression ex = field.Body as MemberExpression;
+            Expression body = field.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            MemberExpression ex = body as MemberExpression;
             if (ex == null)
                 throw new ArgumentException(Resources.FieldShouldBeAnExpressionAccessingAField);
 
@@ -138,7 +142,11 @@ namespace Signum.Utilities.Reflection
             if (member == null)
                 throw new ArgumentNullException("member");
 
-            MemberExpression ex = member.Body as MemberExpression;
+            Expression body = member.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            MemberExpression ex = body as MemberExpression;
             if (ex == null)
                 throw new ArgumentException(Resources.MemberShouldBeAnExpressionAccessingAMember);
 
@@ -166,7 +174,11 @@ namespace Signum.Utilities.Reflection
             if (method == null)
                 throw new ArgumentNullException("method");
 
-            MethodCallExpression ex = method.Body as MethodCallExpression;
+            Expression body = method.Body;
+            if (body.NodeType == ExpressionType.Convert)
+                body = ((UnaryExpression)body).Operand;
+
+            MethodCallExpression ex = body as MethodCallExpression;
             if (ex == null)
                 throw new ArgumentException(Resources.MethodShouldBeAnExpressionCallingAMethod);
 
