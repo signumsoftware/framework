@@ -42,7 +42,7 @@ namespace Signum.Windows.Calendars
         {
             get
             {
-                return _swLeft ?? (_swLeft = (ScrollViewer)Common.FindChildrenBreadthFirst(treeLeft, o => o is ScrollViewer).First());
+                return _swLeft ?? (_swLeft = treeLeft.Childs<ScrollViewer>().First());
             }
         }
 
@@ -51,7 +51,7 @@ namespace Signum.Windows.Calendars
         {
             get
             {
-                return _swRight ?? (_swRight = (ScrollViewer)Common.FindChildrenBreadthFirst(treeRight, o => o is ScrollViewer).First());
+                return _swRight ?? (_swRight = treeRight.Childs<ScrollViewer>().First());
             }
         }
 

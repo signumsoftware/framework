@@ -62,7 +62,7 @@ namespace Signum.Entities.Authorization
 
         bool IPrincipal.IsInRole(string role)
         {
-            return this.role.BreathFirst(a=>a.Roles).Any(a => a.Name == role); 
+            return TreeHelper.BreathFirst(this.role, a => a.Roles).Any(a => a.Name == role); 
         }
 
 
