@@ -10,7 +10,7 @@ namespace Signum.Entities.Processes
     [Serializable]
     public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
-        [ SqlDbType(Size = 200)]
+        [SqlDbType(Size = 200)]
         string name;
         [StringLengthValidator(AllowNulls = true , Max = 200)]
         public string Name

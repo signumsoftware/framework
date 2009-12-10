@@ -84,14 +84,12 @@ namespace Signum.Engine.Processes
 
         public virtual IProcessDataDN CreateData(object[] args)
         {
-            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
+            PackageDN package = CreatePackage(args);
+
             package.Save();
 
-            if (args != null && args.Length > 0)
-                package.Name = (string)args[0];
-
             List<Lite<T>> lites = 
-                args != null && args.Length > 1? (List<Lite<T>>)args[1]: 
+                args != null && args.Length > 1? (List<Lite<T>>)args.GetArg<List<Lite<T>>>(1): 
                 getLazies != null? getLazies(): null;
 
             if (lites == null)
@@ -105,6 +103,15 @@ namespace Signum.Engine.Processes
                 Target = lite.ToLite<IIdentifiable>()
             }).SaveList();
 
+            return package;
+        }
+
+        protected virtual PackageDN CreatePackage(object[] args)
+        {
+            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
+
+            if (args != null && args.Length > 0)
+                package.Name = args.GetArg<string>(0);
             return package;
         }
 
@@ -129,7 +136,7 @@ namespace Signum.Engine.Processes
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        ExecuteLine(pl);
+                        ExecuteLine(pl, package);
                         pl.FinishTime = DateTime.Now;
                         pl.Save();
                         tr.Commit();
@@ -148,10 +155,10 @@ namespace Signum.Engine.Processes
                     }
                 }
 
-                int percentage = (100 * i) / lines.Count;
+                int percentage = (NotificationSteps * i) / lines.Count;
                 if (percentage != lastPercentage)
                 {
-                    executingProcess.ProgressChanged(percentage);
+                    executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);
                     lastPercentage = percentage;
                 }
             }
@@ -159,7 +166,9 @@ namespace Signum.Engine.Processes
             return FinalState.Finished;
         }
 
-        public abstract void ExecuteLine(PackageLineDN pl);
+        public int NotificationSteps = 100; 
+
+        public abstract void ExecuteLine(PackageLineDN pl, PackageDN package);
     }
 
     public class PackageExecuteAlgorithm<T> : PackageAlgorithm<T> where T:class, IIdentifiable
@@ -173,7 +182,7 @@ namespace Signum.Engine.Processes
         {
         }
 
-        public override void ExecuteLine(PackageLineDN pl)
+        public override void ExecuteLine(PackageLineDN pl, PackageDN package)
         {
             OperationLogic.ExecuteLite<T>(pl.Target.ToLite<T>(), OperationKey);
         }
@@ -192,7 +201,7 @@ namespace Signum.Engine.Processes
         {
         }
 
-        public override void ExecuteLine(PackageLineDN pl)
+        public override void ExecuteLine(PackageLineDN pl, PackageDN package)
         {
             var result = OperationLogic.ConstructFromLite<T>(pl.Target.ToLite<F>(), OperationKey);
             if (result.IsNew)
