@@ -27,8 +27,15 @@ namespace Signum.Windows
             set { SetValue(MainControlProperty, value); }
         }
 
+        public static readonly DependencyProperty ElementsProperty =
+            DependencyProperty.Register("Elements", typeof(ObservableCollection<IdentifiableEntity>), typeof(AdminWindow), new UIPropertyMetadata(null));
+        public ObservableCollection<IdentifiableEntity> Elements
+        {
+            get { return (ObservableCollection<IdentifiableEntity>)GetValue(ElementsProperty); }
+            set { SetValue(ElementsProperty, value); }
+        }
+
         Type type; 
-        ObservableCollection<IdentifiableEntity> list;
 
         public AdminWindow(Type adminType)
         {
@@ -41,7 +48,7 @@ namespace Signum.Windows
 
             Common.SetTypeContext(WidgetPanel, TypeContext.Root(type));
 
-            entityList.EntitiesType = typeof(List<>).MakeGenericType(adminType);
+            entityList.EntitiesType = typeof(MList<>).MakeGenericType(adminType);
 
             this.Loaded += new RoutedEventHandler(AdminWindow_Loaded);
         }
@@ -67,22 +74,22 @@ namespace Signum.Windows
 
         public override List<IdentifiableEntity> GetEntities()
         {
-            return list.ToList();
+            return Elements.ToList();
         }
 
         public override void SetEntities(List<IdentifiableEntity> value)
         {
-            list = new ObservableCollection<IdentifiableEntity>(value);
+            Elements = new ObservableCollection<IdentifiableEntity>(value);
         }
 
         public override void UpdateInterface()
         {
-            this.DataContext = list;
+            this.DataContext = Elements;
         }
 
         public override void RetrieveEntities()
         {
-            list = new ObservableCollection<IdentifiableEntity>(Server.RetrieveAll(type));
+            Elements = new ObservableCollection<IdentifiableEntity>(Server.RetrieveAll(type));
         }
 
         public override List<IdentifiableEntity> SaveEntities(List<IdentifiableEntity> value)

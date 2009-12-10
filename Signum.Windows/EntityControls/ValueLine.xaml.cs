@@ -120,7 +120,7 @@ namespace Signum.Windows
                 BindingOperations.ClearBinding(this, ValueProperty);
                 b = new Binding(binding.Path.Path)
                 {
-                    UpdateSourceTrigger = binding.UpdateSourceTrigger,
+                    UpdateSourceTrigger =  Configurator.GetUpdateSourceTrigger(lineType, type, nullable, binding.UpdateSourceTrigger),
                     Mode = binding.Mode,
                     ValidatesOnExceptions = true,
                     ValidatesOnDataErrors = true,
@@ -305,6 +305,11 @@ namespace Signum.Windows
                 return false;
 
             return true; 
+        }
+
+        public virtual UpdateSourceTrigger GetUpdateSourceTrigger(ValueLineType lineType, Type type, bool nullable, UpdateSourceTrigger original)
+        {
+            return UpdateSourceTrigger.PropertyChanged;
         }
 
         public virtual IValueConverter GetReadOnlyConverter(ValueLineType lineType, Type type, bool nullable)

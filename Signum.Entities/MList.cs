@@ -347,8 +347,8 @@ namespace Signum.Entities
         int IList.Add(object value)
         {
             this.Add((T)value);
-            return 0; 
-        }
+            return this.Count; 
+        } 
 
         bool IList.Contains(object value)
         {
