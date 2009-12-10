@@ -78,7 +78,7 @@ namespace Signum.Windows
             multi.Bindings.Add(new Binding("BindingExceptions") { Source = this });
             multi.Bindings.Add(new Binding("DataContext.Error") { Source = ValidationTarget });
             lb.SetBinding(ItemsControl.ItemsSourceProperty, multi);
-
+            
             this.SetBinding(HasErrorsProperty, new Binding("ItemsSource") {  Source = lb, Converter = Converters.ErrorListToBool });
         }
 

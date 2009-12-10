@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Globalization;
 using System.Windows.Controls;
 using Signum.Utilities;
+using System.Reflection;
 
 namespace Signum.Windows
 {
@@ -24,10 +25,20 @@ namespace Signum.Windows
 
             string[] entityErrors = errors.Lines();
 
-            string[] cleanValidationErrors = validationErrors.Where(e => e.Exception != null ||
-                !entityErrors.Contains(e.ErrorContent.ToString())).Select(e => e.ErrorContent.ToString()).ToArray();
+            string[] cleanValidationErrors = validationErrors.Select(e => CleanErrorMessage(e)).ToArray();
 
-            return cleanValidationErrors.Concat(entityErrors).ToArray();
+            return cleanValidationErrors.Union(entityErrors).ToArray();
+        }
+
+        public static string CleanErrorMessage(ValidationError error)
+        {
+            if (error.Exception == null)
+                return error.ErrorContent.ToString();
+
+            if (error.Exception is TargetInvocationException)
+                return error.Exception.InnerException.Message;
+
+            return error.Exception.Message;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

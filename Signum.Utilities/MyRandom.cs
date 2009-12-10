@@ -100,5 +100,10 @@ namespace Signum.Utilities
         {
             return elements[r.Next(elements.Count)];
         }
+
+        public static decimal NextDecimal(this Random r, decimal min, decimal max)
+        {
+            return r.NextLong((long)(min * 100L), (long)(max * 100L)) / 100m;
+        }
     }
 }

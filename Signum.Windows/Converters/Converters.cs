@@ -38,7 +38,7 @@ namespace Signum.Windows
             ConverterFactory.New((object v) => v is Enum ? ((Enum)v).NiceToString() : (string)v);
 
         public static readonly IValueConverter ErrorListToToolTipString =
-            ConverterFactory.New((IEnumerable<ValidationError> err) => err.Select(e => e.ErrorContent).FirstOrDefault());
+            ConverterFactory.New((IEnumerable<ValidationError> err) => err.Select(e => DoubleListConverter.CleanErrorMessage(e)).FirstOrDefault());
 
         public static readonly IValueConverter ErrorListToErrorCount =
             ConverterFactory.New((string[] str) => str == null ? null :

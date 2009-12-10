@@ -355,6 +355,19 @@ namespace Signum.Utilities
             return "{0:#,###.00} {1}".Formato(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
 
-        
+
+        public static string Combine(this string separator, params object[] elements)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in elements)
+            {
+                if (item != null)
+                {
+                    sb.Append(item.ToString());
+                    sb.Append(separator);
+                }
+            }
+            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+        }
     }
 }
