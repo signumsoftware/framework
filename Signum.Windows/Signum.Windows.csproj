@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{76278145-7CCD-4411-9B8A-078708128571}</ProjectGuid>
     <OutputType>library</OutputType>
@@ -288,6 +288,7 @@
     </Compile>
     <Compile Include="MarkupExtensions\EqualsExtension.cs" />
     <Compile Include="ThemeManager.cs" />
+    <Compile Include="UIAutomation\AutomationElementExtensions.cs" />
     <Compile Include="ValueLineBox.xaml.cs">
       <DependentUpon>ValueLineBox.xaml</DependentUpon>
     </Compile>
