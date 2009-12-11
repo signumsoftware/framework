@@ -17,6 +17,17 @@ using Signum.Utilities;
 
 namespace Signum.Windows
 {
+    [Serializable]
+    public class FakeEntityDN : Entity
+    {
+        MList<IdentifiableEntity> elements;
+        public MList<IdentifiableEntity> Elements
+        {
+            get { return elements; }
+            set { Set(ref elements, value, () => Elements); }
+        }
+    }
+
 	public partial class AdminWindow: AdminBase
 	{
         public static readonly DependencyProperty MainControlProperty =
@@ -27,13 +38,15 @@ namespace Signum.Windows
             set { SetValue(MainControlProperty, value); }
         }
 
-        public static readonly DependencyProperty ElementsProperty =
-            DependencyProperty.Register("Elements", typeof(ObservableCollection<IdentifiableEntity>), typeof(AdminWindow), new UIPropertyMetadata(null));
-        public ObservableCollection<IdentifiableEntity> Elements
-        {
-            get { return (ObservableCollection<IdentifiableEntity>)GetValue(ElementsProperty); }
-            set { SetValue(ElementsProperty, value); }
-        }
+        FakeEntityDN fake = new FakeEntityDN();
+
+        //public static readonly DependencyProperty ElementsProperty =
+        //    DependencyProperty.Register("Elements", typeof(ObservableCollection<IdentifiableEntity>), typeof(AdminWindow), new UIPropertyMetadata(null));
+        //public ObservableCollection<IdentifiableEntity> Elements
+        //{
+        //    get { return (ObservableCollection<IdentifiableEntity>)GetValue(ElementsProperty); }
+        //    set { SetValue(ElementsProperty, value); }
+        //}
 
         Type type; 
 
@@ -49,6 +62,7 @@ namespace Signum.Windows
             Common.SetTypeContext(WidgetPanel, TypeContext.Root(type));
 
             entityList.EntitiesType = typeof(MList<>).MakeGenericType(adminType);
+            this.DataContext = fake; 
 
             this.Loaded += new RoutedEventHandler(AdminWindow_Loaded);
         }
@@ -74,22 +88,22 @@ namespace Signum.Windows
 
         public override List<IdentifiableEntity> GetEntities()
         {
-            return Elements.ToList();
+            return fake.Elements.ToList();
         }
 
         public override void SetEntities(List<IdentifiableEntity> value)
         {
-            Elements = new ObservableCollection<IdentifiableEntity>(value);
+            fake.Elements = new MList<IdentifiableEntity>(value);
         }
 
         public override void UpdateInterface()
         {
-            this.DataContext = Elements;
+           
         }
 
         public override void RetrieveEntities()
         {
-            Elements = new ObservableCollection<IdentifiableEntity>(Server.RetrieveAll(type));
+            fake.Elements = new MList<IdentifiableEntity>(Server.RetrieveAll(type));
         }
 
         public override List<IdentifiableEntity> SaveEntities(List<IdentifiableEntity> value)
