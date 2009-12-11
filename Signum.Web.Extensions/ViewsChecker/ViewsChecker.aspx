@@ -10,14 +10,15 @@
 </asp:Content>
 
 <asp:Content ID="loginContent" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>
-        Views Checker</h2>
+    <h1>Views Checker</h1>
+    
     <% 
         List<ViewError> errors = (List<ViewError>)Model;
         if (errors == null || errors.Count == 0)
-            Response.Write("<b>No se econtraron errores</b>");
+            Response.Write("<h2>No se encontraron errores</h2>");
         else
         {
+            Response.Write("<h2>Hay un total de " + errors.Count + " errores</h2>");
         %>
      <div>
         <table border="solid 1px black" cellpadding="5px" cellspacing="1">

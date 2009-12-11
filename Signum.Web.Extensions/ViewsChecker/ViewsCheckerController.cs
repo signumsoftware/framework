@@ -27,6 +27,10 @@ namespace Signum.Web.ViewsChecker
     {
         public ViewResult ViewsChecker()
         {
+
+            //We ensure Buffer is active
+            Response.Buffer = true;
+
             List<ViewError> errors = new List<ViewError>();
 
             HtmlHelper helper = SignumController.CreateHtmlHelper(this);
@@ -39,6 +43,7 @@ namespace Signum.Web.ViewsChecker
                 string result = "";
                 try
                 {
+                    Response.Clear();
                     result = helper.RenderPartialToString(entry.Value.PartialViewName, new ViewDataDictionary(Constructor.Construct(entry.Key, this)));
                 }
                 catch (Exception ex)
@@ -57,6 +62,8 @@ namespace Signum.Web.ViewsChecker
                     errors.Add(error);
                 }
             }
+            //Clear content written by the renderization of views, just want error content
+            Response.Clear();
 
             return View("~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.ViewsChecker.ViewsChecker.aspx", errors);
         }

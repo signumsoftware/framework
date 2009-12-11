@@ -508,7 +508,7 @@
     <value>Años</value>
   </data>
   <data name="FilePathDN_FullPhysicalPath" xml:space="preserve">
-    <value>Ruta Física</value>
+    <value>Ruta física</value>
   </data>
   <data name="FilePathDN_FullWebPath" xml:space="preserve">
     <value>URL</value>
@@ -517,6 +517,6 @@
     <value>Tamaño</value>
   </data>
   <data name="LogOperationDN_Plural" xml:space="preserve">
-    <value>Logs de Operaciones</value>
+    <value>Logs de operaciones</value>
   </data>
 </root>
