@@ -98,6 +98,7 @@ namespace Signum.Windows
         public FindUniqueOptions(object queryName)
         {
             UniqueType = UniqueType.Single;
+            QueryName = queryName;
         }
 
         public object QueryName { get; set; }
