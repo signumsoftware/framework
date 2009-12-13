@@ -818,6 +818,19 @@ namespace Signum.Engine.Linq
             return map[p];
         }
 
+        protected override MemberAssignment VisitMemberAssignment(MemberAssignment assignment)
+        {
+            Expression e = this.Visit(assignment.Expression);
+            if (e != assignment.Expression)
+            {
+                if (e.Type != assignment.Member.ReturningType())
+                    e = Expression.Convert(e, assignment.Member.ReturningType());
+
+                return Expression.Bind(assignment.Member, e);
+            }
+            return assignment;
+        }
+
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
             Expression ex = base.VisitMemberAccess(m);
