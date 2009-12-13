@@ -692,6 +692,15 @@ namespace Signum.Windows
 
         public virtual Lite FindUnique(FindUniqueOptions options)
         {
+            QueryDescription qd = Server.Return((IQueryServer s) => s.GetQueryDescription(options.QueryName));
+
+            foreach (var fo in options.FilterOptions)
+            {
+                fo.Column = qd.Columns.Where(c => c.Name == fo.ColumnName)
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, options.QueryName));
+                fo.RefreshRealValue();
+            }
+
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
 
             return Server.Return((IQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, options.UniqueType));
