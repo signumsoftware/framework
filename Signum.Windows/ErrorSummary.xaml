@@ -15,13 +15,13 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-        <Grid>
+        <Grid Visibility="{Binding Path=HasErrors, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}">
             <TextBlock  x:Name="tb" Grid.Row="0" Margin="25,2,2,2"
 					FontWeight="{Binding Path=HasErrors, Converter={x:Static m:Converters.BoolToBold}, ElementName=me}"
 					Text="{Binding Path=ItemsSource, Converter={x:Static m:Converters.ErrorListToErrorCount}, ElementName=lb, Mode=Default}" 
                     TextTrimming="CharacterEllipsis"/>
             <Expander x:Name="expander" Grid.Row="0"
-		IsEnabled="{Binding Path=HasErrors, ElementName=me}" 
+		IsEnabled="{Binding Path=HasErrors, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}" 
 		BorderThickness="{Binding Path=HasErrors, Converter={x:Static m:Converters.BoolToInt}, ElementName=me}"
 		BorderBrush="Red">
               <ItemsControl x:Name="lb" 
