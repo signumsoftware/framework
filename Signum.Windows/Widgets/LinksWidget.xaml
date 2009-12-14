@@ -9,25 +9,36 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Expander Style="{DynamicResource GroupBoxExpander}" BorderBrush="#FF878787" Margin="5" x:Name="expQuickLinks" Background="#594E82E3" IsExpanded="True">
+    <Border>
+    <Border.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" MappingMode="RelativeToBoundingBox">
+            <GradientStop Color="#FFd9eaff" Offset="0"/>
+            <GradientStop Color="#FFd2e1f6" Offset="1"/>
+        </LinearGradientBrush>
+    </Border.Background>
+    <Expander Style="{DynamicResource WidgetExpander}" Margin="5" x:Name="expQuickLinks" IsExpanded="True">
         <Expander.Header>
             <Grid HorizontalAlignment="Stretch" MinWidth="100">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Image Source="..\Images\star.png" Stretch="Fill" Margin="-2,-2,-2,-2"/>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" Text="Links" TextWrapping="Wrap"/>
+                <Image Source="..\Images\star.png" Stretch="Fill" Margin="-8,-1.5,-2,-2.5" Width="20" Height="20" />
+                <TextBlock FontFamily="Calibri, Segoe UI" Foreground="#FF1d3132" FontSize="14" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2"
+				Text="Links" TextWrapping="Wrap" Margin="15,0,0,0"/>
+
             </Grid>
         </Expander.Header>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="2,2,2,2">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl x:Name="lvQuickLinks">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Tag="{Binding}" Content="{Binding Path=Label}" Style="{DynamicResource LinkButtonStyle}"  HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="Hand" Margin="0,2,0,2"/>
+					<Button FontFamily="Calibri, Segoe UI" Tag="{Binding}" Content="{Binding Path=Label}" Style="{DynamicResource LinkButtonStyle}" 
+						HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#ff375e5f" Cursor="Hand" Margin="21,0,5,0"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
     </Expander>
+        </Border>
 </UserControl>
