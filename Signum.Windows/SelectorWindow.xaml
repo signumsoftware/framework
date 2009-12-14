@@ -18,7 +18,7 @@
                     <DataTemplate>
                         <ToggleButton Checked="ToggleButton_Checked" Padding="3">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="{Binding Image}" Height="16" Width="16"/>
+                                <Image Source="{Binding Image}"/>
                                 <TextBlock Text="{Binding Text}" FontSize="12" Margin="10,0"/>
                             </StackPanel>
                         </ToggleButton>
