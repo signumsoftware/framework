@@ -38,7 +38,7 @@ namespace Signum.Windows
             dispatcher.Invoke(action);
         }
 
-        public static T Invoke<T>(this Dispatcher dispatcher, Func<T> func)
+        public static T Return<T>(this Dispatcher dispatcher, Func<T> func)
         {
             return (T)dispatcher.Invoke(func);
         }

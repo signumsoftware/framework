@@ -21,7 +21,11 @@ namespace Signum.Windows
         {
             //http://en.wikipedia.org/wiki/Breadth-first_search
             Queue<DependencyObject> st = new Queue<DependencyObject>();
-            st.Enqueue(parent);
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                st.Enqueue(VisualTreeHelper.GetChild(parent, i));
+            }
 
             while (st.Count > 0)
             {
@@ -34,7 +38,7 @@ namespace Signum.Windows
                         continue;
                 }
 
-                int count = VisualTreeHelper.GetChildrenCount(dp);
+                count = VisualTreeHelper.GetChildrenCount(dp);
                 for (int i = 0; i < count; i++)
                 {
                     st.Enqueue(VisualTreeHelper.GetChild(dp, i));
@@ -46,8 +50,8 @@ namespace Signum.Windows
         public static IEnumerable<DependencyObject> BreathFirstLogical(DependencyObject parent, bool recursive, Func<DependencyObject, bool> predicate)
         {
             //http://en.wikipedia.org/wiki/Breadth-first_search
-            Queue<DependencyObject> st = new Queue<DependencyObject>();
-            st.Enqueue(parent);
+            Queue<DependencyObject> st = new Queue<DependencyObject>(
+                LogicalTreeHelper.GetChildren(parent).OfType<DependencyObject>());
 
             while (st.Count > 0)
             {
@@ -72,7 +76,12 @@ namespace Signum.Windows
         public static IEnumerable<DependencyObject> DepthFirstVisual(DependencyObject parent, bool recursive, Func<DependencyObject, bool> predicate)
         {
             Stack<DependencyObject> st = new Stack<DependencyObject>();
-            st.Push(parent);
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = count - 1; i >= 0; i--)
+            {
+                st.Push(VisualTreeHelper.GetChild(parent, i));
+            }
+
             while (st.Count > 0)
             {
                 DependencyObject dp = st.Pop();
@@ -84,17 +93,19 @@ namespace Signum.Windows
                         continue;
                 }
 
-                foreach (DependencyObject d in LogicalTreeHelper.GetChildren(dp).OfType<DependencyObject>().Reverse() )
+                count = VisualTreeHelper.GetChildrenCount(dp);
+                for (int i = count - 1; i >= 0; i--)
                 {
-                    st.Push(d);
-                }        
+                    st.Push(VisualTreeHelper.GetChild(dp, i));
+                }
             }
         }
 
         public static IEnumerable<DependencyObject> DepthFirstLogical(DependencyObject parent, bool recursive, Func<DependencyObject, bool> predicate)
         {
-            Stack<DependencyObject> st = new Stack<DependencyObject>();
-            st.Push(parent);
+            Stack<DependencyObject> st = new Stack<DependencyObject>(
+                LogicalTreeHelper.GetChildren(parent).OfType<DependencyObject>().Reverse());
+
             while (st.Count > 0)
             {
                 DependencyObject dp = st.Pop();
@@ -111,17 +122,6 @@ namespace Signum.Windows
                     st.Push(d);
                 }      
             }
-        }
-
-        public enum WhereFlags
-        {
-            Default = NonRecursive | BreathFirst | LogicalTree,
-            NonRecursive = 0,
-            Recursive = 1,
-            BreathFirst = 0,
-            DepthFirst = 2,
-            LogicalTree = 0,
-            VisualTree = 4
         }
 
         public static T Child<T>(this DependencyObject parent)
@@ -220,5 +220,16 @@ namespace Signum.Windows
                     return BreathFirstLogical(parent, recursive, finalPredicate).Cast<T>();
             }
         }
+    }
+
+    public enum WhereFlags
+    {
+        Default = NonRecursive | BreathFirst | LogicalTree,
+        NonRecursive = 0,
+        Recursive = 1,
+        BreathFirst = 0,
+        DepthFirst = 2,
+        LogicalTree = 0,
+        VisualTree = 4
     }
 }

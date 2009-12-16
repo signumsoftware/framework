@@ -22,6 +22,7 @@ using System.Collections;
 using System.Windows.Controls.Primitives;
 using System.Globalization;
 using Signum.Entities.Basics;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -327,6 +328,7 @@ namespace Signum.Windows
                 bla = bla.PreAnd("-");
             return bla.ToArray();
         }
+
     }
 
     public enum ValueLineType
