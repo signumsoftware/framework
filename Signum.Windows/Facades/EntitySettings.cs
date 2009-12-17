@@ -27,10 +27,10 @@ namespace Signum.Windows
         public DataTemplate DataTemplate { get; set; }
         public ImageSource Icon { get; set; }
 
-        public EntitySettings()
-            : this(EntityType.Default)
-        {
-        }
+        //public EntitySettings()
+        //    : this(EntityType.Default)
+        //{
+        //}
 
         public EntitySettings(EntityType entityType)
         {
