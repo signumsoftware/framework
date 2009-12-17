@@ -592,7 +592,7 @@ namespace Signum.Windows
         internal protected virtual void AssertViewable(Type type, bool admin)
         {
             if (GlobalIsViewable != null && !GlobalIsViewable(type))
-                throw new UnauthorizedAccessException("Entities of type {0} not allowed".Formato(type.NiceName())); 
+                throw new UnauthorizedAccessException("Entities of type {0} are not allowed".Formato(type.NiceName())); 
 
             EntitySettings es = Settings.TryGetC(type);
             if (es == null)
@@ -626,11 +626,11 @@ namespace Signum.Windows
         internal protected virtual void AssertFindable(object queryName)
         {
             if (GlobalIsFindable != null && !GlobalIsFindable(queryName))
-                throw new UnauthorizedAccessException("The query {0} is not allowed".Formato(queryName));
+                throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
 
             QuerySettings es = QuerySetting.TryGetC(queryName);
             if (es == null)
-                throw new InvalidOperationException("The query {0} is not registered in the DynamicQueryManager".Formato(queryName));
+                throw new InvalidOperationException(Properties.Resources.Query0NotRegistered.Formato(queryName));
         }
 
 

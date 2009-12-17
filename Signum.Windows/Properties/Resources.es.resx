@@ -345,4 +345,10 @@
   <data name="RootTypeContextHasToBeAnIdentifiableEntity" xml:space="preserve">
     <value>El TypeContext raíz debe ser un IdentifiableEntity</value>
   </data>
+  <data name="Query0NotAllowed" xml:space="preserve">
+    <value>La query {0} no está permitida</value>
+  </data>
+  <data name="Query0NotRegistered" xml:space="preserve">
+    <value>La query {0} no está registrada en el DynamicQueryManager</value>
+  </data>
 </root>

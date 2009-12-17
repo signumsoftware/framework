@@ -504,6 +504,24 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Query {0} is not allowed.
+        /// </summary>
+        internal static string Query0NotAllowed {
+            get {
+                return ResourceManager.GetString("Query0NotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Query {0} is not registered in the DynamicQueryManager.
+        /// </summary>
+        internal static string Query0NotRegistered {
+            get {
+                return ResourceManager.GetString("Query0NotRegistered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Related Entity.
         /// </summary>
         internal static string RelatedEntity {
