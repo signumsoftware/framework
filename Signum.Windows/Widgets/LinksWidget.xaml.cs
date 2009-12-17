@@ -138,6 +138,8 @@ namespace Signum.Windows
         public QuickLinkExplore(object queryName, string columnName, object value):
             this(new ExploreOptions(queryName)
             { 
+                ShowFilters = false,
+                SearchOnLoad = true,
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption(columnName, value),
