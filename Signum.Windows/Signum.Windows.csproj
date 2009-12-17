@@ -288,7 +288,6 @@
     </Compile>
     <Compile Include="MarkupExtensions\EqualsExtension.cs" />
     <Compile Include="ThemeManager.cs" />
-    <Compile Include="UIAutomation\AutomationElementExtensions.cs" />
     <Compile Include="ValueLineBox.xaml.cs">
       <DependentUpon>ValueLineBox.xaml</DependentUpon>
     </Compile>

@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using Signum.Utilities;
 using System.Windows.Media;
+using System.Collections;
 
 namespace Signum.Windows
 {
@@ -191,6 +192,36 @@ namespace Signum.Windows
         {
             return Children<T>(parent, p => p.GetRoute() == route, flags);
         }
+
+
+        public static IEnumerable Children(this DependencyObject parent, Func<object, bool> predicate, WhereFlags flags)
+        {
+            bool depthFirst = (flags & WhereFlags.DepthFirst) == WhereFlags.DepthFirst;
+            bool recursive = (flags & WhereFlags.Recursive) == WhereFlags.Recursive;
+            bool visualTree = (flags & WhereFlags.VisualTree) == WhereFlags.VisualTree;
+
+            Func<DependencyObject, bool> finalPredicate;
+            if (predicate == null)
+                finalPredicate = (depObj => depObj is object);
+            else
+                finalPredicate = depObj => { object elem = depObj as object; return elem != null && predicate(elem); };
+
+            if (visualTree)
+            {
+                if (depthFirst)
+                    return DepthFirstVisual(parent, recursive, finalPredicate);
+                else
+                    return BreathFirstVisual(parent, recursive, finalPredicate);
+            }
+            else
+            {
+                if (depthFirst)
+                    return DepthFirstLogical(parent, recursive, finalPredicate);
+                else
+                    return BreathFirstLogical(parent, recursive, finalPredicate);
+            }
+        }
+
 
         public static IEnumerable<T> Children<T>(this DependencyObject parent, Func<T, bool> predicate, WhereFlags flags)
             where T: DependencyObject
