@@ -27,10 +27,10 @@ namespace Signum.Windows.Scheduler
 
                 OperationClient.Manager.Settings.Add(CustomTaskOperation.Execute, new EntityOperationSettings { Icon = Image("execute.png") });
 
-                Navigator.Manager.Settings.Add(typeof(ScheduleRuleDailyDN), new EntitySettings { View = e => new ScheduleRuleDaily() });
-                Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeeklyDN), new EntitySettings { View = e => new ScheduleRuleWeekly() });
-                Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeekDaysDN), new EntitySettings { View = e => new ScheduleRuleWeekDays() });
-                Navigator.Manager.Settings.Add(typeof(CalendarDN), new EntitySettings { View = e => new Calendar() });
+                Navigator.Manager.Settings.Add(typeof(ScheduleRuleDailyDN), new EntitySettings (EntityType.Default) { View = e => new ScheduleRuleDaily() });
+                Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeeklyDN), new EntitySettings (EntityType.Default) { View = e => new ScheduleRuleWeekly() });
+                Navigator.Manager.Settings.Add(typeof(ScheduleRuleWeekDaysDN), new EntitySettings (EntityType.Default) { View = e => new ScheduleRuleWeekDays() });
+                Navigator.Manager.Settings.Add(typeof(CalendarDN), new EntitySettings (EntityType.Default) { View = e => new Calendar() });
             }
         }
 

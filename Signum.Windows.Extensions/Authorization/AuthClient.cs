@@ -26,7 +26,7 @@ namespace Signum.Windows.Authorization
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.Manager.Settings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin) { View = e => new User() });
-                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings { View = e => new Role() });
+                Navigator.Manager.Settings.Add(typeof(RoleDN), new EntitySettings (EntityType.Default) { View = e => new Role() });
 
                 if (property)
                 {

@@ -28,11 +28,11 @@ namespace Signum.Windows.Reports
 
                     SearchControl.GetCustomMenuItems += (qn, type) => qn == typeof(ExcelReportDN) ? null : new ExcelReportPivotTableMenuItem();
 
-                    Navigator.Manager.Settings.Add(typeof(ExcelReportDN), new EntitySettings { View = e => new ExcelReport() });
+                    Navigator.Manager.Settings.Add(typeof(ExcelReportDN), new EntitySettings(EntityType.Default) { View = e => new ExcelReport() });
 
                     if (compositeReport)
                     {
-                        Navigator.Manager.Settings.Add(typeof(CompositeReportDN), new EntitySettings { View = e => new CompositeReport() });
+                        Navigator.Manager.Settings.Add(typeof(CompositeReportDN), new EntitySettings(EntityType.Default) { View = e => new CompositeReport() });
                     }
                 }
                 else
