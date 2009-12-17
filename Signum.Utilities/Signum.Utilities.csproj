@@ -58,6 +58,7 @@
     <Compile Include="DescriptionAttributes.cs" />
     <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
+    <Compile Include="FileExtensions.cs" />
     <Compile Include="NaturalLanguageTools.cs" />
     <Compile Include="QueryableExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
