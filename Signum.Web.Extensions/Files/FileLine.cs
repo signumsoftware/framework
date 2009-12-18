@@ -76,7 +76,7 @@ namespace Signum.Web.Files
 
         public static JsRenderer JsDownloading(FileLine fline)
         {
-            return new JsRenderer(() => "FLineOnDownloading({0})".Formato(fline.ToJS()));
+            return new JsRenderer(() => "javascript:FLineOnDownloading({0})".Formato(fline.ToJS()));
         }
 
         protected override string DefaultFinding()

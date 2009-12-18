@@ -90,7 +90,8 @@ namespace Signum.Web.Files
                 tc = new TypeElementContext<FilePathDN>((FilePathDN)Database.Retrieve((Lite)(object)value), typeContext, index);
             else
                 tc = new TypeElementContext<FilePathDN>(value, typeContext, index);
-            sb.AppendLine(helper.InternalFileLine<FilePathDN>(tc, new FileLine(indexedPrefix)));
+            using (FileLine fl = new FileLine(indexedPrefix) { Remove = false })
+                sb.AppendLine(helper.InternalFileLine<FilePathDN>(tc, fl));
             sb.AppendLine("</div>");
 
             sb.AppendLine("</div>");
