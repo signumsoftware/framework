@@ -90,6 +90,7 @@
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="Controllers\WidgetsController.cs" />
     <Compile Include="EntityInfo.cs" />
+    <Compile Include="JSRenderer\JsValidatorOptions.cs" />
     <Compile Include="JSRenderer\JsFindOptions.cs" />
     <Compile Include="JSRenderer\JsViewOptions.cs" />
     <Compile Include="JSRenderer\JsBaseLineOptions.cs" />
