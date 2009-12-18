@@ -110,7 +110,7 @@ namespace Signum.Web
                     sb.Append(helper.Div(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
                 //Note this is added to the sbOptions, not to the result sb
-                sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.ToStr)) +
+                sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'{1}>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.ToStr), (index == 0) ? "selected='selected'" : "") +
                                 ((isIdentifiable)
                                     ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToString())
                                     : ((Lite)(object)value).TryCC(i => i.ToStr)) +
