@@ -51,7 +51,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
+                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(current.GetType(), typeof(S)));
 
             try
             {
@@ -180,22 +180,22 @@ namespace Signum.Windows
         {
             if (obj == null) return null;
 
-            Type sourceType = obj.GetType();
+            Type objType = obj.GetType();
 
-            if (type.IsAssignableFrom(sourceType))
+            if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (typeof(Lite).IsAssignableFrom(sourceType) && type.IsAssignableFrom(((Lite)obj).RuntimeType))
+            if (typeof(Lite).IsAssignableFrom(objType) && type.IsAssignableFrom(((Lite)obj).RuntimeType))
             {
-                return RetrieveAndForget((Lite)obj);
+                Lite lite = (Lite)obj;
+                return lite.UntypedEntityOrNull ?? RetrieveAndForget(lite);
             }
-
             
             if (typeof(Lite).IsAssignableFrom(type))
             {
                 Type liteType = Reflector.ExtractLite(type); 
                 
-                if(typeof(Lite).IsAssignableFrom(sourceType))
+                if(typeof(Lite).IsAssignableFrom(objType))
                 {
                     Lite lite = (Lite)obj;
                     if (liteType.IsAssignableFrom(lite.RuntimeType))
@@ -207,13 +207,13 @@ namespace Signum.Windows
                     }
                 }
 
-                else if(liteType.IsAssignableFrom(sourceType))
+                else if(liteType.IsAssignableFrom(objType))
                 {
                     return Lite.Create(liteType, (IdentifiableEntity)obj);
                 }
             }
 
-            throw new ApplicationException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, sourceType, type));
+            throw new ApplicationException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
         }
 
         public static bool CanConvert(object obj, Type type)
@@ -221,18 +221,18 @@ namespace Signum.Windows
             if (obj == null) 
                 return true;
 
-            Type sourceType = obj.GetType();
+            Type objType = obj.GetType();
 
-            if (sourceType == type)
+            if (objType == type)
                 return true;
 
-            if (typeof(Lite).IsAssignableFrom(sourceType) && ((Lite)obj).RuntimeType == type)
+            if (typeof(Lite).IsAssignableFrom(objType) && ((Lite)obj).RuntimeType == type)
             {
                 return true;
             }
 
             Type liteType;
-            if (typeof(Lite).IsAssignableFrom(type) && (liteType = Reflector.ExtractLite(type)).IsAssignableFrom(sourceType))
+            if (typeof(Lite).IsAssignableFrom(type) && (liteType = Reflector.ExtractLite(type)).IsAssignableFrom(objType))
             {
                 return true;
             }

@@ -35,19 +35,9 @@ namespace Signum.Windows
 
         void LinksWidget_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            List<QuickLink> links = new List<QuickLink>();
-
             IdentifiableEntity ident = e.NewValue as IdentifiableEntity;
-            if (ident != null)
-            {
-                links.AddRange(globalLinks.SelectMany(a => a(ident, Control)));
-
-                List<Delegate> list = entityLinks.TryGetC(ident.GetType());
-                if (list != null)
-                    links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, Control)));
-            }
-     
-            links = links.Where(l => l.IsVisible).ToList();
+            
+            List<QuickLink> links = ident != null ? Links.GetForEntity(ident, Control) : new List<QuickLink>();
 
             lvQuickLinks.ItemsSource = links;
 
@@ -59,20 +49,6 @@ namespace Signum.Windows
                 if (ForceShow != null)
                     ForceShow(); 
             }
-        }
-
-        static Dictionary<Type, List<Delegate>> entityLinks = new Dictionary<Type, List<Delegate>>();
-        static List<Func<IdentifiableEntity, Control, QuickLink[]>> globalLinks = new List<Func<IdentifiableEntity, Control, QuickLink[]>>();
-
-        public static void EntityLinks<T>(Func<T, Control, QuickLink[]> getQuickLinks)
-            where T:IdentifiableEntity
-        {
-            entityLinks.GetOrCreate(typeof(T)).Add(getQuickLinks);
-        }
-
-        public static void GlobalLinks(Func<IdentifiableEntity, Control, QuickLink[]> getQuickLinks)
-        {
-            globalLinks.Add(getQuickLinks);
         }
 
         private void QuickLink_MouseDown(object sender, RoutedEventArgs e)
@@ -88,6 +64,39 @@ namespace Signum.Windows
         {
             WidgetPanel.GetWidgets += (obj, mainControl) => new LinksWidget() { Control = mainControl } ;
         }
+    }
+
+    public static class Links
+    {
+        static Dictionary<Type, List<Delegate>> entityLinks = new Dictionary<Type, List<Delegate>>();
+        static List<Func<IdentifiableEntity, Control, QuickLink[]>> globalLinks = new List<Func<IdentifiableEntity, Control, QuickLink[]>>();
+
+        public static void RegisterEntityLinks<T>(Func<T, Control, QuickLink[]> getQuickLinks)
+            where T : IdentifiableEntity
+        {
+            entityLinks.GetOrCreate(typeof(T)).Add(getQuickLinks);
+        }
+
+        public static void RegisterGlobalLinks(Func<IdentifiableEntity, Control, QuickLink[]> getQuickLinks)
+        {
+            globalLinks.Add(getQuickLinks);
+        }
+
+        public static List<QuickLink> GetForEntity(IdentifiableEntity ident, Control control)
+        {
+            List<QuickLink> links = new List<QuickLink>();
+
+            links.AddRange(globalLinks.SelectMany(a => a(ident, control).NotNull()));
+
+            List<Delegate> list = entityLinks.TryGetC(ident.GetType());
+            if (list != null)
+                links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, control)));
+
+            links = links.Where(l => l.IsVisible).ToList();
+
+            return links;
+        }
+
     }
 
     ///// <summary>
@@ -107,7 +116,7 @@ namespace Signum.Windows
 
         public string Label { get; set; }
 
-        public virtual bool IsVisible { get; set;}
+        public bool IsVisible { get; set;}
 
         public string ToolTip { get; set; }
 
@@ -122,7 +131,8 @@ namespace Signum.Windows
         public QuickLinkAction(string label, Action action)
         {
             this.Label = label;
-            this.action = action; 
+            this.action = action;
+            this.IsVisible = true;
         }
 
         public override void Execute()
