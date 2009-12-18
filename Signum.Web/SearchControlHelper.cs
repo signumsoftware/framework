@@ -310,7 +310,9 @@ namespace Signum.Web
                 bool loadall = helper.ViewData.Keys.Contains(ViewDataKeys.LoadAll);
                 if (loadall)
                     helper.ViewData.Remove(ViewDataKeys.LoadAll);
-                string result = (string)mi.MakeGenericMethod(tc.ContextType).Invoke(null, new object[] { helper, tc, el });
+                string result = "";
+                using (el)
+                    result = (string)mi.MakeGenericMethod(tc.ContextType).Invoke(null, new object[] { helper, tc, el });
                 //string result = (string)EntityLineHelper.InternalEntityLine(helper, id, columnType, value, el);
                 if (loadall)
                     helper.ViewData.Add(ViewDataKeys.LoadAll, true);
