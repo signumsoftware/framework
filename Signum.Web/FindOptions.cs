@@ -50,6 +50,9 @@ namespace Signum.Web
             if (SearchOnLoad)
                 sb.Append("&sfSearchOnLoad=true");
 
+            if (Create == false)
+                sb.Append("&sfCreate=false");
+
             if (writeAllowMultiple)
                 sb.Append("&sfAllowMultiple="+AllowMultiple.ToString());
             

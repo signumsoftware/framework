@@ -56,7 +56,7 @@ namespace Signum.Web
 
         public abstract object ApplyChanges(Controller controller, object obj, ModificationState onFinish);
 
-        public abstract void Validate(object entity, Dictionary<string, List<string>> errors, string prefix);
+        public abstract void Validate(Controller controller, object entity, Dictionary<string, List<string>> errors, string prefix);
         
         public static Interval<int> FindSubInterval(SortedList<string, object> formValues, string prefix)
         {
@@ -244,7 +244,7 @@ namespace Signum.Web
             return Value;
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
+        public override void Validate(Controller controller, object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             if ((!prefix.HasText() || ControlID.StartsWith(prefix)) && BindingError != null)
                 errors.GetOrCreate(ControlID).AddRange(BindingError.Lines());
@@ -494,13 +494,13 @@ namespace Signum.Web
                 return Database.Retrieve(RuntimeType, EntityId.Value);
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
+        public override void Validate(Controller controller, object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             if (entity!=null && Properties != null)
             {
                 foreach (var ppm in Properties.Values)
                 {
-                    ppm.Modification.Validate(ppm.PropertyPack.GetValue(entity), errors, prefix);
+                    ppm.Modification.Validate(controller, ppm.PropertyPack.GetValue(entity), errors, prefix);
 
                     if (!prefix.HasText() || ControlID.StartsWith(prefix))
                     {
@@ -632,10 +632,10 @@ namespace Signum.Web
             }
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
+        public override void Validate(Controller controller, object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             if (EntityModification != null)
-                EntityModification.Validate(((Lite)entity).TryCC(l => l.UntypedEntityOrNull), errors, prefix); 
+                EntityModification.Validate(controller, ((Lite)entity).TryCC(l => l.UntypedEntityOrNull), errors, prefix); 
         }
 
         public override string ToString()
@@ -745,16 +745,19 @@ namespace Signum.Web
             return list;
         }
 
-        public override void Validate(object entity, Dictionary<string, List<string>> errors, string prefix)
+        public override void Validate(Controller controller, object entity, Dictionary<string, List<string>> errors, string prefix)
         {
             IList list = (IList)entity;
             for (int i = 0; i < modifications.Count; i++)
             {
                 Tuple<Modification, int?> item = modifications[i];
                 if (item.Second.HasValue && list.Count > item.Second.Value)
-                    item.First.Validate(list[i], errors, prefix);
+                    item.First.Validate(controller, list[item.Second.Value], errors, prefix);
                 else
-                    item.First.Validate(Constructor.Construct(item.First.StaticType, null), errors, prefix);
+                {
+                    Modifiable mod = (Modifiable)item.First.ApplyChanges(controller, Constructor.Construct(item.First.StaticType, null), null);
+                    item.First.Validate(controller, mod, errors, prefix);
+                }
             }
         }
 

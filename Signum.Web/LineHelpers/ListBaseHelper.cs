@@ -69,6 +69,7 @@ namespace Signum.Web
             
             ViewDataDictionary vdd = new ViewDataDictionary(tc);
             helper.PropagateSFKeys(vdd);
+            vdd[ViewDataKeys.PopupPrefix] = helper.ParentPrefix();
             if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
                 vdd[ViewDataKeys.Reactive] = true;
 
