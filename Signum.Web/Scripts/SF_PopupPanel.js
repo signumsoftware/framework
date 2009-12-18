@@ -509,7 +509,7 @@ function OnImplementationsOk(urlController, divASustituir, prefix, onOk, onCance
         onCancel: onCancel,
         isEmbeded: isEmbeded,
         divASustituir: divASustituir,
-        prefix: prefix,
+        prefix: prefix
         }).onImplementationsOk(selectedType);
 }
 /*
