@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -22,13 +23,13 @@ using System.Text;
 using System.Net;
 using Signum.Engine.Files;
 using System.Reflection;
+#endregion
 
 namespace Signum.Web.Files
 {
     [HandleException]
     public class FileController : Controller
     {
-
         [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult PartialView(
             string prefix,
@@ -52,7 +53,7 @@ namespace Signum.Web.Files
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
             {
-                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
+                this.ViewData[ViewDataKeys.WriteSFInfo] = true;
 
                 Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
                 TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[] { } });
@@ -68,12 +69,15 @@ namespace Signum.Web.Files
             string formFieldId = "";
             foreach (string file in Request.Files)
             {
-                if (((string)Request.Form[TypeContext.Compose(file, TypeContext.StaticType)]) != "FilePathDN")
+                //if (((string)Request.Form[TypeContext.Compose(file, TypeContext.StaticType)]) != "FilePathDN")
+                EntityInfo info = EntityInfo.FromFormValue((string)Request.Form[TypeContext.Compose(file, EntityBaseKeys.Info)]);
+                if (info.StaticType != typeof(FilePathDN))
                     continue;
 
-                string idStr = (string)Request.Form[TypeContext.Compose(file, TypeContext.Id)];
-                int id;
-                if (int.TryParse(idStr, out id))
+                //string idStr = (string)Request.Form[TypeContext.Compose(file, TypeContext.Id)];
+                //int id;
+                //if (int.TryParse(idStr, out id))
+                if(info.IdOrNull.HasValue)
                     continue; //Only new files will come with content
 
                 HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
@@ -103,11 +107,12 @@ namespace Signum.Web.Files
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
                 sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='FilePathDN';".Formato(TypeContext.Compose(formFieldId, TypeContext.RuntimeType)));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id.ToString()));
-                sb.AppendLine("parDoc.getElementById('{0}').removeChild(parDoc.getElementById('{1}'));".Formato(TypeContext.Compose(formFieldId, "sfRepeaterElement"), TypeContext.Compose(formFieldId, EntityBaseKeys.IsNew)));
-                sb.AppendLine("parDoc.getElementById('div{0}New').style.display='none';".Formato(formFieldId));
-                sb.AppendLine("parDoc.getElementById('div{0}Old').style.display='block';".Formato(formFieldId));
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.Info), new EntityInfo<FilePathDN>(typeof(FilePathDN), fp).ToString()));
+                //sb.AppendLine("parDoc.getElementById('{0}').value='FilePathDN';".Formato(TypeContext.Compose(formFieldId, TypeContext.RuntimeType)));
+                //sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id.ToString()));
+                //sb.AppendLine("parDoc.getElementById('{0}').removeChild(parDoc.getElementById('{1}'));".Formato(TypeContext.Compose(formFieldId, "sfRepeaterElement"), TypeContext.Compose(formFieldId, EntityBaseKeys.IsNew)));
+                sb.AppendLine("parDoc.getElementById('{0}DivNew').style.display='none';".Formato(formFieldId));
+                sb.AppendLine("parDoc.getElementById('{0}DivOld').style.display='block';".Formato(formFieldId));
             }
             else
             {

@@ -24,6 +24,7 @@ namespace Signum.Engine.Operations
         Type Type { get; }
         OperationType OperationType { get; }
         bool Returns { get; }
+        Type ReturnType { get; }
 
         void AssertIsValid();
     }
@@ -118,6 +119,7 @@ namespace Signum.Engine.Operations
                 Returns = operation.Returns,
                 OperationType = operation.OperationType,
                 CanExecute = canExecute,
+                ReturnType = operation.ReturnType
             };
         }
 

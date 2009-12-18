@@ -66,7 +66,7 @@ namespace Signum.Web.Operations
                         ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
                         OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
                         OnServerClickAjax = GetServerClickAjax(httpContext, oi, dic[oi.Key].OperationSettings, ident),
-                        OnServerClickPost = dic[oi.Key].OperationSettings.TryCC(os => os.OnServerClickPost),
+                        OnServerClickPost = GetServerClickPost(httpContext, oi, dic[oi.Key].OperationSettings, ident),
                         Enabled = dic[oi.Key].OperationInfo.CanExecute == null,
                     };
                     Dictionary<string, object> settings = dic[oi.Key].OperationSettings.TryCC(os => os.HtmlProps);
@@ -143,71 +143,98 @@ namespace Signum.Web.Operations
 
         protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, OperationInfo oi, WebMenuItem os, IdentifiableEntity ident)
         {
-            if (os != null && (os.OnClick.HasText() || os.OnServerClickPost.HasText()))
+            if (os != null && (os.OnClick.HasText() || os.OnServerClickPost.HasText() || ((EntityOperationSettings)os).Post == true))
                 return null;
 
             if (oi.OperationType == OperationType.Execute)
             {
-                string controllerUrl = "Operation/OperationExecute";
-                if (os != null && os.OnServerClickAjax.HasText())
-                    controllerUrl = os.OnServerClickAjax;
-
-                return "javascript:OperationExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}');".Formato(
-                    controllerUrl,
-                    ident.GetType().Name,
-                    ident.IdOrNull.HasValue ? ident.IdOrNull.Value.ToString() : "",
-                    EnumDN.UniqueKey(oi.Key),
-                    oi.Lite,
-                    httpContext.Request.Params["prefix"] ?? "",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"","'") : "''",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''",
-                    ((EntityOperationSettings)os).TryCS(s =>s.MultiStep) ?? false
-                    );
+                return JsOperationBase.Execute(new JsOperationExecutor(new JsOperationOptions
+                {
+                    OperationKey = EnumDN.UniqueKey(oi.Key),
+                    IsLite = oi.Lite,
+                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
+                    //Type = ident.GetType().Name,
+                    //Id = ident.IdOrNull,
+                    MultiStep = ((EntityOperationSettings)os).TryCS(s => s.MultiStep),
+                    NavigateOnSuccess = ((EntityOperationSettings)os).TryCS(s => s.NavigateOnSuccess)
+                })).ToJS();
             }
             else if (oi.OperationType == OperationType.ConstructorFrom)
             {
-                string controllerUrl = "Operation/ConstructFromExecute";
-                if (os != null && os.OnServerClickAjax.HasText())
-                    controllerUrl = os.OnServerClickAjax;
-
-                if (os != null && ((EntityOperationSettings)os).Post)
-                    return "javascript:ConstructFromExecutePost('{0}','{1}','{2}','{3}','{4}');".Formato(
-                        controllerUrl,
-                        ident.GetType().Name,
-                        ident.IdOrNull.HasValue ? ident.Id.ToString() : "",
-                        EnumDN.UniqueKey(oi.Key),
-                        oi.Lite
-                        );
-
-                return "javascript:ConstructFromExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}');".Formato(
-                    controllerUrl,
-                    ident.GetType().Name,
-                    ident.IdOrNull.HasValue ? ident.Id.ToString() : "",
-                    EnumDN.UniqueKey(oi.Key),
-                    oi.Lite,
-                    httpContext.Request.Params["prefix"] ?? "",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'") : "''",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'") : "''",
-                    ((EntityOperationSettings)os).TryCS(s => s.MultiStep) ?? false
-                    );
+                return JsOperationBase.ConstructFrom(new JsOperationConstructorFrom(new JsOperationOptions
+                {
+                    OperationKey = EnumDN.UniqueKey(oi.Key),
+                    IsLite = oi.Lite,
+                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
+                    ReturnType = oi.ReturnType,
+                    //OperationLogic.ServiceGetConstructorOperationInfos(ident.GetType()).Single(oinfo => oinfo == oi).
+                    //Type = ident.GetType().Name,
+                    //Id = ident.IdOrNull,
+                    MultiStep = ((EntityOperationSettings)os).TryCS(s => s.MultiStep),
+                    NavigateOnSuccess = ((EntityOperationSettings)os).TryCS(s => s.NavigateOnSuccess)
+                })).ToJS();
             }
             else if (oi.OperationType == OperationType.Delete)
             {
-                string controllerUrl = "Operation/DeleteExecute";
-                if (os != null && os.OnServerClickAjax.HasText())
-                    controllerUrl = os.OnServerClickAjax;
+                return JsOperationBase.Delete(new JsOperationDelete(new JsOperationOptions
+                {
+                    OperationKey = EnumDN.UniqueKey(oi.Key),
+                    IsLite = oi.Lite,
+                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
+                    //Type = ident.GetType().Name,
+                    //Id = ident.IdOrNull,
+                    MultiStep = ((EntityOperationSettings)os).TryCS(s => s.MultiStep),
+                    NavigateOnSuccess = ((EntityOperationSettings)os).TryCS(s => s.NavigateOnSuccess),
+                    ConfirmMessage = Resources.AreYouSureOfDeletingTheEntity012.Formato(ident.ToStr, Navigator.TypesToURLNames[ident.GetType()], ident.Id)
+                })).ToJS();
+            }
+            throw new ApplicationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(oi.OperationType.ToString(), EnumDN.UniqueKey(oi.Key)));
+        }
 
-                return "javascript:DeleteExecute('{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}');".Formato(
-                    controllerUrl,
-                    ident.GetType().Name,
-                    ident.Id.ToString(),
-                    EnumDN.UniqueKey(oi.Key),
-                    oi.Lite,
-                    httpContext.Request.Params["prefix"] ?? "",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'") : "''",
-                    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'") : "''",
-                    Resources.AreYouSureOfDeletingTheEntity012.Formato(ident.ToStr,Navigator.TypesToURLNames[ident.GetType()],ident.Id)
-                    );
+        protected internal virtual string GetServerClickPost(HttpContextBase httpContext, OperationInfo oi, WebMenuItem os, IdentifiableEntity ident)
+        {
+            if (os == null || (os.OnClick.HasText() || os.OnServerClickAjax.HasText()))
+                return null;
+
+            if (oi.OperationType == OperationType.Execute)
+            {
+                EntityOperationSettings eos = os as EntityOperationSettings;
+                if (os != null && (eos.Post == null || eos.Post == false))
+                    return null;
+
+                return JsOperationBase.ExecutePost(new JsOperationExecutor(new JsOperationOptions
+                {
+                    OperationKey = EnumDN.UniqueKey(oi.Key),
+                    IsLite = oi.Lite,
+                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    ControllerUrl = os.TryCC(set => set.OnServerClickPost),
+                    //Type = ident.GetType().Name,
+                    //Id = ident.IdOrNull
+                })).ToJS();
+            }
+            else if (oi.OperationType == OperationType.ConstructorFrom)
+            {
+                EntityOperationSettings eos = os as EntityOperationSettings;
+                if (os != null && (eos.Post == null || eos.Post == false))
+                    return null;
+
+                return JsOperationBase.ConstructFromPost(new JsOperationConstructorFrom(new JsOperationOptions
+                {
+                    OperationKey = EnumDN.UniqueKey(oi.Key),
+                    IsLite = oi.Lite,
+                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    ControllerUrl = os.TryCC(set => set.OnServerClickPost),
+                    ReturnType = oi.ReturnType,
+                    //Type = ident.GetType().Name,
+                    //Id = ident.IdOrNull
+                })).ToJS();
+            }
+            else if (oi.OperationType == OperationType.Delete)
+            {
+                return null;
             }
             throw new ApplicationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(oi.OperationType.ToString(), EnumDN.UniqueKey(oi.Key)));
         }
@@ -270,7 +297,7 @@ namespace Signum.Web.Operations
                 controller.ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
                 return new PartialViewResult
                 {
-                    ViewName = Navigator.Manager.OKCancelPopulUrl,
+                    ViewName = Navigator.Manager.ChooserPopupUrl,
                     ViewData = controller.ViewData,
                     TempData = controller.TempData
                 };

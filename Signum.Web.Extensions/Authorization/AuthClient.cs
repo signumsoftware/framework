@@ -36,8 +36,8 @@ namespace Signum.Web.Authorization
                 {
                     Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type) == TypeAccess.Create;
                     Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type) < TypeAccess.Modify;
+                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
                     Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
-                    Navigator.Manager.GlobalIsPopupViewable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
                 }
 
                 if (queries)

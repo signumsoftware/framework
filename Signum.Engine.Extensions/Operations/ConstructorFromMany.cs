@@ -25,6 +25,7 @@ namespace Signum.Engine.Operations
         
         public bool Lite { get { return true; } }
         public bool Returns { get { return true; } }
+        public Type ReturnType { get { return typeof(T); } }
 
         public Func<List<Lite<F>>, object[], T> Constructor { get; set; }
 

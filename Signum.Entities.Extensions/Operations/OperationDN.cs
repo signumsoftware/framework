@@ -16,11 +16,12 @@ namespace Signum.Entities.Operations
     [Serializable]
     public class OperationInfo
     {
-        public Enum Key { get; set; }
-        public OperationType OperationType { get; set; }
-        public string CanExecute { get; set; }
-        public bool? Lite { get; set; }
-        public bool Returns { get; set; }
+        public Enum Key { get; internal set; }
+        public OperationType OperationType { get; internal set; }
+        public string CanExecute { get; internal set; }
+        public bool? Lite { get; internal set; }
+        public bool Returns { get; internal set; }
+        public Type ReturnType { get; internal set; }
 
         public override string ToString()
         {

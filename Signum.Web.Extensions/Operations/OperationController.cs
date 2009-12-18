@@ -21,7 +21,6 @@ namespace Signum.Web.Operations
     [HandleException, AuthenticationRequired]
     public class OperationController : Controller
     {
-        #region main controllers
         public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
@@ -60,7 +59,7 @@ namespace Signum.Web.Operations
                 }
             }
 
-            if (prefix.HasText()) 
+            if (prefix.HasText() && Request.IsAjaxRequest()) 
                 return Navigator.PopupView(this, entity, prefix);
             else //NormalWindow
                 return Navigator.View(this, entity);
@@ -114,7 +113,10 @@ namespace Signum.Web.Operations
             }
 
             if (prefix.HasText() && Request.IsAjaxRequest())
+            {
+                ViewData[ViewDataKeys.WriteSFInfo] = true;
                 return Navigator.PopupView(this, entity, prefix);
+            }
             else //NormalWindow
                 return Navigator.View(this, entity);
         }
@@ -138,6 +140,5 @@ namespace Signum.Web.Operations
 
             return Navigator.PopupView(this, entity, prefix);
         }
-        #endregion
     }
 }

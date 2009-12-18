@@ -18,8 +18,9 @@ namespace Signum.Web.Operations
     public class EntityOperationSettings : WebMenuItem
     {
         public Func<IdentifiableEntity, bool> IsVisible { get; set; }
-        public bool MultiStep { get; set; }
-        public bool Post { get; set; }
+        public bool? MultiStep { get; set; }
+        public bool? NavigateOnSuccess { get; set; }
+        public bool? Post { get; set; }
     }
 
     public class ConstructorFromManySettings : WebMenuItem

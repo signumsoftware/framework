@@ -23,6 +23,8 @@ namespace Signum.Engine.Operations
         public Type Type { get { return typeof(T); } }
         public OperationType OperationType { get { return OperationType.Constructor; } }
         public bool Returns { get { return true; } }
+        public Type ReturnType { get { return typeof(T); } }
+
         public bool Lite { get { return false; } }
         public Func<object[], T> Constructor { get; set; }
 

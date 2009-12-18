@@ -25,6 +25,7 @@ namespace Signum.Engine.Operations
 
         public bool Lite { get; set; }
         public bool Returns { get; set; }
+        public Type ReturnType { get { return typeof(T); } }
 
         public bool AllowsNew { get; set; }
 

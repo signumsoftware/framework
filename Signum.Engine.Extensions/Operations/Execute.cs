@@ -24,6 +24,7 @@ namespace Signum.Engine.Operations
         public OperationType OperationType { get { return OperationType.Execute; } }
         public bool Lite { get; set; }
         public bool Returns { get; set; }
+        public Type ReturnType { get { return null; } }
 
         public bool AllowsNew { get; set; }
 

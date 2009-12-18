@@ -25,6 +25,7 @@ namespace Signum.Engine.Operations
         public OperationType OperationType { get { return OperationType.Delete; } }
         public bool Lite { get { return true; } }
         public bool Returns { get { return false; } }
+        public Type ReturnType { get { return null; } }
 
         public bool AllowsNew { get { return false; } }
 
