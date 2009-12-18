@@ -6,14 +6,15 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 
-<%=  
-"<script type=\"text/javascript\">" + 
-    "$(document).ready(function() {" + 
-        "$('.tblResults td').bind('dblclick', function(e) {" + 
-            "QuickFilter(this.id, '" + Html.GlobalName("") + "');" + 
-        "});" + 
-    "});" + 
-"</script>"
+<%
+//TODO Anto: Habilitar quickfilters: Controlar campos no filtrables _nf_ (con este método se pueden crear)
+//"<script type=\"text/javascript\">" + 
+//    "$(document).ready(function() {" + 
+//        "$('.tblResults td').bind('dblclick', function(e) {" + 
+//            "QuickFilter('" + Html.GlobalName("") + "', this.id);" + 
+//        "});" + 
+//    "});" + 
+//"</script>"
 %>
 
 <%  QueryResult queryResult = (QueryResult)ViewData[ViewDataKeys.Results];
@@ -92,7 +93,7 @@
                     if (colVisibility[col])
                     {
                         %>
-                        <td><%formatters[col](Html, queryResult.Data[row][col]);%></td>
+                        <td id="<%=Html.GlobalName("row"+row+"td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Data[row][col]);%></td>
                         <%
                     }
                 }

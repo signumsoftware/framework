@@ -50,16 +50,5 @@ namespace Signum.Web.Controllers
             return RenderPartialExtenders.RenderPartialToString(helper, "Views/Shared/WidgetView", vdd);
         }
         #endregion
-
-        /*  public string RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)
-        {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
-
-            ViewDataDictionary vdd = new ViewDataDictionary();
-            vdd.Add("WidgetNode", AlertWidgetHelper.RetrieveNode(
-                AlertWidgetHelper.RetrieveAlerts(entity)));
-            HtmlHelper helper = SignumController.CreateHtmlHelper(this);
-            return RenderPartialExtenders.RenderPartialToString(helper, "Shared/WidgetView", vdd);
-        }*/
     }
 }

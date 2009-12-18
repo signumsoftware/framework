@@ -18,7 +18,7 @@ namespace Signum.Web
             if (lite == null)
                 return;
             
-            if (Navigator.IsViewable(lite.RuntimeType, admin))
+            if (Navigator.IsNavigable(lite.RuntimeType, admin))
                 helper.Write(helper.Href("", lite.ToStr, Navigator.ViewRoute(lite.RuntimeType, lite.Id), "Ver", "", null));
             else
                 helper.Write(helper.Span("", lite.ToStr, ""));

@@ -31,10 +31,11 @@
      </h2>
      <div class="operations">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
-            <div id="btnSave" class="OperationDiv" onclick="javascript:TrySave('Signum/TrySave');">Guardar</div>  
+            <div id="btnSave" class="OperationDiv" onclick="javascript:TrySave({});">Guardar</div>  
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), "") %>     
      </div>
+     <div class="clearall"></div>
      <div class="validationSummaryAjax">
         <%= Html.ValidationSummaryAjax() %>     
      </div>    

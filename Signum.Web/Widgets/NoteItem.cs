@@ -50,8 +50,6 @@ namespace Signum.Web
                 controllerUrl = OnServerClickAjax;
 
 
-            //function TypedOpenPopupCommon(urlController, onOk, onCancel, divASustituir, prefix, detailDiv, partialView, runtimeType, idQueryParam, reactiveParam, viewQueryParam) {
-
             return "javascript:TypedOpenPopupCommon('{0}',{1},{2},'{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}');".Formato(
                 "Signum/PartialView",
                 "javascript:UpdateNoteCount();",

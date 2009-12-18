@@ -4,7 +4,7 @@
 <%@ Import Namespace="Signum.Entities.Reflection" %>
 <%
     string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
-    string prefix = (string)ViewData[ViewDataKeys.PopupPrefix];
+    string prefix = Html.GlobalPrefixedName("");
     string popupTitle = "";
     string typeNiceName = "";
     if(Model is TypeContext)

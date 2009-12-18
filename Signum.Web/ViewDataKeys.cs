@@ -13,7 +13,7 @@ namespace Signum.Web
         public const string ResourcesRoute = "sfResourcesRoute";
         public const string SearchResourcesRoute = "sfSearchResourcesRoute";
         public const string PopupPrefix = "sfPrefix";
-        public const string EmbeddedControl = "sfEmbeddedControl";
+        public const string WriteSFInfo = "sfEmbeddedControl";
         public const string PopupSufix = "sfSufix";
         //public const string DivASustituir = "sfDivASustituir";
         public const string LoadAll = "sfLoadAll";
@@ -45,7 +45,6 @@ namespace Signum.Web
         public const string ChangeTicks = "sfChangeTicks";
         public const string Reactive = "sfReactive";
         public const string TabId = "sfTabId";
-        public const string Id = "sfId";
 
         public static string GlobalName(this HtmlHelper helper, string localName)
         {
@@ -80,7 +79,7 @@ namespace Signum.Web
 
         public static bool WriteIdAndRuntime(this HtmlHelper helper)
         {
-            if (helper.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
+            if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
                 return true;
 
             return !helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix) ||

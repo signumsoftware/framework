@@ -13,16 +13,10 @@
     <%} %>
     <div id="<%=Html.GlobalName("divPopupDragHandle")%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup")%>');">
         &nbsp;
-        <%--<% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
-            <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
-        <%} else{ %>
-            <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk)%>" value="OK" />
-        <%} %>   --%> 
     </div>
     
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>
     <div id="<%=Html.GlobalName("divASustituir")%>"></div>
-    <%= Html.ValidationSummaryAjax((string)ViewData[ViewDataKeys.PopupPrefix])%>
 </div>
 </div>
 

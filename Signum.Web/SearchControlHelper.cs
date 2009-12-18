@@ -127,7 +127,7 @@ namespace Signum.Web
                 columnType = Reflector.ExtractLite(value.GetType()) ?? value.GetType();
             else
             {
-                columnType = GetType(filterTypeName);
+                columnType = Navigator.ResolveType(filterTypeName);
                 if (columnType != null && value != null)
                     value = Convert.ChangeType(value, columnType);
             }
@@ -162,7 +162,7 @@ namespace Signum.Web
             sb.Append("</td>");
             
             sb.AppendLine("<td>");
-            sb.AppendLine("<input type='button' id='{0}' name='{0}' value='X' onclick=\"DeleteFilter('{1}','{2}');\" />".Formato(prefix + "btnDelete_" + index, index, prefix));
+            sb.AppendLine("<input type='button' id='{0}' name='{0}' value='X' onclick=\"DeleteFilter('{1}','{2}');\" />".Formato(prefix + "btnDelete_" + index, prefix, index));
             sb.AppendLine("</td>");
             
             sb.AppendLine("</tr>");
@@ -252,20 +252,20 @@ namespace Signum.Web
 
             sb.Append("<td>\n");
             if (!filterOptions.Frozen)
-                sb.Append(helper.Button(helper.GlobalName("btnDelete_" + index), "X", "DeleteFilter('{0}','{1}');".Formato(index, helper.ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>()));
+                sb.Append(helper.Button(helper.GlobalName("btnDelete_" + index), "X", "DeleteFilter('{0}','{1}');".Formato(helper.ViewData[ViewDataKeys.PopupPrefix] ?? "", index), "", new Dictionary<string, object>()));
             sb.Append("</td>\n");
 
             sb.Append("</tr>\n");
             helper.ViewContext.HttpContext.Response.Write(sb.ToString());
         }
 
-        private static Type GetType(string typeName)
-        {
-            if (Navigator.NameToType.ContainsKey(typeName))
-                return Navigator.NameToType[typeName];
+        //private static Type GetType(string typeName)
+        //{
+        //    if (Navigator.NameToType.ContainsKey(typeName))
+        //        return Navigator.NameToType[typeName];
 
-            return Type.GetType("System." + typeName, false);
-        }
+        //    return Type.GetType("System." + typeName, false);
+        //}
 
         private static HtmlHelper CreateHtmlHelper(Controller c)
         {
@@ -285,7 +285,7 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
             if (filterType == FilterType.Lite)
             {
-                EntityLine el = new EntityLine();
+                EntityLine el = new EntityLine(id);
                 Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(columnType) ?? columnType, false);
                 el.Create = false;
 

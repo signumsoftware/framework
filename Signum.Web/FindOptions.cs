@@ -30,12 +30,7 @@ namespace Signum.Web
             set { this.filterOptions = value; }
         }
 
-        private bool allowMultiple = true;
-        public bool AllowMultiple
-        {
-            get { return allowMultiple; }
-            set { allowMultiple = value; }
-        }
+        public bool? AllowMultiple { get; set; }
         
         FilterMode filterMode = FilterMode.Visible;
         public FilterMode FilterMode
@@ -61,20 +56,7 @@ namespace Signum.Web
             if (filterOptions != null && filterOptions.Count > 0)
             {
                 for (int i = 0; i < filterOptions.Count; i++)
-                {
-                    FilterOptions fo = filterOptions[i];
-                    string value = "";
-                    if (fo.Value != null && typeof(Lite).IsAssignableFrom(fo.Value.GetType()))
-                    {
-                        Lite lite = (Lite)fo.Value;
-                        value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType.Name);
-                    }
-                    else
-                        value = fo.Value.ToString();
-                    sb.Append("&cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(i, fo.ColumnName, fo.Operation.ToString(), value));
-                    if (filterOptions[i].Frozen)
-                        sb.Append("&fz{0}=true".Formato(i));
-                }
+                    sb.Append(filterOptions[i].ToString(i));
             }
             string result = sb.ToString();
             if (result.HasText())
@@ -107,6 +89,25 @@ namespace Signum.Web
             return f;
         }
 
+        public string ToString(int filterIndex)
+        {
+            string result = "";
+            
+            string value = "";
+            if (Value != null && typeof(Lite).IsAssignableFrom(Value.GetType()))
+            {
+                Lite lite = (Lite)Value;
+                value = "{0};{1}".Formato(lite.Id.ToString(), lite.RuntimeType.Name);
+            }
+            else
+                value = Value.ToString();
+
+            result = "&cn{0}={1}&sel{0}={2}&val{0}={3}".Formato(filterIndex, ColumnName, Operation.ToString(), value);
+            if (Frozen)
+                result += "&fz{0}=true".Formato(filterIndex);
+
+            return result;
+        }
     }
 
     public enum FilterMode

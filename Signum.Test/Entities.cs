@@ -135,6 +135,13 @@ namespace Signum.Test
             set { Set(ref lastAward, value, () => LastAward); }
         }
 
+        MList<AwardDN> otherAwards;
+        public MList<AwardDN> OtherAwards 
+        {
+            get { return otherAwards; }
+            set { Set(ref otherAwards, value, () => OtherAwards); }
+        }
+
         public override string ToString()
         {
             return name;

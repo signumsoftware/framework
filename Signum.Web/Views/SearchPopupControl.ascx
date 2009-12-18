@@ -17,7 +17,7 @@
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup" + sufix)%>');" class="dragHandle">
-        <%if (Navigator.Manager.ShowSearchOkButton(findOptions.QueryName, false))
+        <%if (Navigator.Manager.ShowSearchOkButton(findOptions.QueryName, false) && findOptions.AllowMultiple != null)
           { %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
             <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk + sufix)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
@@ -25,6 +25,7 @@
             <input type="button" id="<%=Html.GlobalName(ViewDataKeys.BtnOk + sufix)%>" value="OK" />
          <%} %>               
         <%} %>
+        &nbsp; 
         <%--<%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), prefix) %>--%>
     </div>
     

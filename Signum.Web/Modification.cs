@@ -36,14 +36,15 @@ namespace Signum.Web
         public long? TicksLastChange { get; set; }
 
         protected static readonly string[] specialProperties = new[] { 
-            TypeContext.RuntimeType, 
+            //TypeContext.RuntimeType, 
             TypeContext.Id, 
-            TypeContext.StaticType, 
+            //TypeContext.StaticType, 
             TypeContext.Ticks,
+            EntityBaseKeys.Info,
             EntityBaseKeys.ToStr, 
-            EntityBaseKeys.ImplementationsDDL,
-            EntityBaseKeys.IsNew,
-            EntityListKeys.Index,
+            //EntityBaseKeys.IsNew,
+            EntityBaseKeys.Implementations,
+            EntityListBaseKeys.Index,
             EntityComboKeys.Combo,
         }; 
 
@@ -146,37 +147,36 @@ namespace Signum.Web
             if (!prefix.HasText())
                 return null;
 
+            //EntityInfo entityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.Info)]);
+
             string originalPrefix = prefix;
 
             int propertyStart = prefix.LastIndexOf(TypeContext.Separator);
             string propertyName = prefix.Substring(propertyStart + 1);
             prefix = prefix.Left(propertyStart, true);
 
-            string idString = (string)form[TypeContext.Compose(prefix, TypeContext.Id)];
-            int? id = null;
-            if (idString.HasText())
-                id = int.Parse(idString);
+            EntityInfo parentEntityInfo = null;
 
             int index;
-            if (int.TryParse(propertyName, out index)) //If it's a list item, use the list property
+            bool isListItem = int.TryParse(propertyName, out index);
+            if (isListItem) 
             {
                 propertyStart = prefix.LastIndexOf(TypeContext.Separator);
                 propertyName = prefix.Substring(propertyStart + 1);
-                prefix = prefix.Left(propertyStart, true);
+                string prefixWithoutList = prefix.Left(propertyStart, true);
+                parentEntityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefixWithoutList, EntityBaseKeys.Info)]);
             }
+            else
+                parentEntityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.Info)]);
 
-            string typeName = form[TypeContext.Compose(prefix, TypeContext.RuntimeType)];
-            if (!typeName.HasText())
-                typeName = form[TypeContext.Compose(prefix, TypeContext.StaticType)];
-
-            Type type = Navigator.ResolveType(typeName);
+            Type parentType = parentEntityInfo.RuntimeType ?? parentEntityInfo.StaticType;
             
             Modifiable parent;
-            if (id.HasValue)
-                parent = Database.Retrieve(type, id.Value);
+            if (parentEntityInfo.IdOrNull.HasValue)
+                parent = Database.Retrieve(parentType, parentEntityInfo.IdOrNull.Value);
             else
             {
-                object result = Navigator.CreateInstance(type);
+                object result = Navigator.CreateInstance(parentType);
                 if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
                     parent = (ModifiableEntity)result;
                 else
@@ -184,16 +184,27 @@ namespace Signum.Web
             }
 
             PropertyInfo pi = parent.GetType().GetProperty(propertyName);
-            
 
-            if (typeof(IdentifiableEntity).IsAssignableFrom(parent.GetType()))
+            if (isListItem)
             {
-                Type ts = typeof(TypeContext<>).MakeGenericType(new Type[] { parent.GetType() });
-                return (TypeContext)Activator.CreateInstance(ts, new object[] { parent, originalPrefix });
+                Modifiable list = (Modifiable)pi.GetValue(parent, null);
+                Type listTscType = typeof(TypeSubContext<>).MakeGenericType(new Type[] { list.GetType() });
+                TypeContext tsc = (TypeContext)Activator.CreateInstance(listTscType, new object[] { list, GetTCforEmbeddedEntity(form, list, ref prefix), new PropertyInfo[]{pi} });
+
+                Type tesc = typeof(TypeElementContext<>).MakeGenericType(new Type[] { entity.GetType() });
+                return (TypeContext)Activator.CreateInstance(tesc, new object[] { entity, tsc, index });
+                
+                //Type tesc = typeof(TypeElementContext<>).MakeGenericType(new Type[] { entity.GetType() });
+                //return (TypeContext)Activator.CreateInstance(tesc, new object[] { entity, GetTCforEmbeddedEntity(form, parent, ref prefix), index });
+            }
+            else if (typeof(IdentifiableEntity).IsAssignableFrom(parentType))
+            {
+                Type ts = typeof(TypeContext<>).MakeGenericType(new Type[] { parentType });
+                return (TypeContext)Activator.CreateInstance(ts, new object[] { parent, prefix });
             }
             else
             {
-                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { parent.GetType() });
+                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { parentType });
                 return (TypeContext)Activator.CreateInstance(ts, new object[] { parent, GetTCforEmbeddedEntity(form, parent, ref prefix), new PropertyInfo[] { pi } });
             }
         }
@@ -264,6 +275,12 @@ namespace Signum.Web
             {
                 try
                 {
+                    if (PropertyPack.SetValue == null)
+                    {
+                        if (PropertyPack.PropertyInfo.PropertyType != typeof(bool))
+                            throw new ApplicationException("Binding Error");
+                        return; //MVC Helper will send the hidden field even if the checkbox was disabled
+                    }
                     PropertyPack.SetValue(entity, value);
                 }
                 catch (NullReferenceException nullEx)
@@ -300,23 +317,31 @@ namespace Signum.Web
         public EntityModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, controlID)
         {
-            if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
-            {
-                string runtimeTypeName = (string)formValues[TypeContext.Compose(controlID, TypeContext.RuntimeType)];
-                RuntimeType = (runtimeTypeName.HasText()) ? Navigator.ResolveType(runtimeTypeName) : null;
-            }
-            else
-            {
-                AvoidChange = true;
-            }
-            
-            IsNew = formValues.ContainsKey(TypeContext.Compose(controlID, EntityBaseKeys.IsNew));
+            string sfInfo = (string)formValues[TypeContext.Compose(controlID, EntityBaseKeys.Info)];
+            EntityInfo entityInfo = EntityInfo.FromFormValue(sfInfo);
 
-            if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType) && formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.Id)))
-            {
-                string id = (string)formValues[TypeContext.Compose(controlID, TypeContext.Id)];
-                EntityId = id.HasText() ? int.Parse(id) : (int?)null;
-            }
+            RuntimeType = entityInfo.RuntimeType;
+            IsNew = entityInfo.IsNew;
+            EntityId = entityInfo.IdOrNull;
+            TicksLastChange = entityInfo.Ticks;
+
+            //if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
+            //{
+            //    string runtimeTypeName = (string)formValues[TypeContext.Compose(controlID, TypeContext.RuntimeType)];
+            //    RuntimeType = (runtimeTypeName.HasText()) ? Navigator.ResolveType(runtimeTypeName) : null;
+            //}
+            //else
+            //{
+            //    AvoidChange = true;
+            //}
+            
+            //IsNew = formValues.ContainsKey(TypeContext.Compose(controlID, EntityBaseKeys.IsNew));
+
+            //if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType) && formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.Id)))
+            //{
+            //    string id = (string)formValues[TypeContext.Compose(controlID, TypeContext.Id)];
+            //    EntityId = id.HasText() ? int.Parse(id) : (int?)null;
+            //}
 
             Fill(formValues, interval);
         }
@@ -332,17 +357,20 @@ namespace Signum.Web
 
             Properties = new Dictionary<string, PropertyPackModification>();
 
-            if (formValues.ContainsKey(TypeContext.Compose(ControlID, TypeContext.Ticks)))
-            {
-                string changed = (string)formValues.TryGetC(TypeContext.Compose(ControlID, TypeContext.Ticks));
-                if (changed.HasText())
-                {
-                    if (changed == "0")
-                        return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
-                    else
-                        TicksLastChange = long.Parse(changed);
-                }
-            }
+            if (TicksLastChange != null && TicksLastChange == 0)
+                return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+    
+            //if (formValues.ContainsKey(TypeContext.Compose(ControlID, TypeContext.Ticks)))
+            //{
+            //    string changed = (string)formValues.TryGetC(TypeContext.Compose(ControlID, TypeContext.Ticks));
+            //    if (changed.HasText())
+            //    {
+            //        if (changed == "0")
+            //            return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+            //        else
+            //            TicksLastChange = long.Parse(changed);
+            //    }
+            //}
             
             for (int i = interval.Min; i < interval.Max; i++)
             {
@@ -370,29 +398,31 @@ namespace Signum.Web
             PropertyPack pp = propertyValidators.GetOrThrow(propertyName, Resources.NoPropertyWithName0FoundInType1.Formato(propertyName, RuntimeType));
 
             Interval<int> subInterval = FindSubInterval(formValues, new Interval<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
+
+            string propertySFInfo = (string)formValues.TryGetC(TypeContext.Compose(commonSubControlID, EntityBaseKeys.Info));
+            EntityInfo propertyInfo = propertySFInfo.HasText() ? EntityInfo.FromFormValue(propertySFInfo) : null;
             
             long? propertyIsLastChange = null;
-            if (formValues.ContainsKey(TypeContext.Compose(commonSubControlID, TypeContext.Ticks)))
+            if (propertyInfo.TryCS(nfo => nfo.Ticks) != null)
             {
-                string changed = (string)formValues.TryGetC(TypeContext.Compose(commonSubControlID, TypeContext.Ticks));
-                if (changed.HasText()) //It'll be null for EmbeddedControls 
-                {
-                    if (changed == "0")
-                        return subInterval.Max - 1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
-                    else
-                        propertyIsLastChange = long.Parse(changed);
-                }
+                if (TicksLastChange == 0)
+                    return subInterval.Max - 1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+                else
+                    propertyIsLastChange = propertyInfo.Ticks;
             }
 
-            //long? propertyIsLastChange = null;
-            //if (formValues.ContainsKey(subControlID + TypeContext.Separator + TypeContext.Ticks))
+            //if (formValues.ContainsKey(TypeContext.Compose(commonSubControlID, TypeContext.Ticks)))
             //{
-            //    string changed = (string)formValues.TryGetC(subControlID + TypeContext.Separator + TypeContext.Ticks);
-            //    if (changed == "0")
-            //        return subInterval.Max-1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
-            //    else
-            //        propertyIsLastChange = long.Parse(changed); 
+            //    string changed = (string)formValues.TryGetC(TypeContext.Compose(commonSubControlID, TypeContext.Ticks));
+            //    if (changed.HasText()) //It'll be null for EmbeddedControls 
+            //    {
+            //        if (changed == "0")
+            //            return subInterval.Max - 1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+            //        else
+            //            propertyIsLastChange = long.Parse(changed);
+            //    }
             //}
+
             Modification mod = Modification.Create(pp.PropertyInfo.PropertyType, formValues, subInterval, commonSubControlID);
             if (mod.TicksLastChange == null)
                 mod.TicksLastChange = propertyIsLastChange;
@@ -517,19 +547,27 @@ namespace Signum.Web
         public LiteModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, controlID)
         {
-            if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
-            {
-                string runtimeTypeName = (string)formValues[TypeContext.Compose(controlID, TypeContext.RuntimeType)];
-                RuntimeType = (runtimeTypeName.HasText()) ? Navigator.ResolveType(runtimeTypeName) : null;
-            }
+            string sfInfo = (string)formValues[TypeContext.Compose(controlID, EntityBaseKeys.Info)];
+            EntityInfo entityInfo = EntityInfo.FromFormValue(sfInfo);
 
-            if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType) && formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.Id)))
-            {
-                string id = (string)formValues[TypeContext.Compose(controlID, TypeContext.Id)];
-                EntityId = id.HasText() ? int.Parse(id) : (int?)null;
-            }
+            RuntimeType = entityInfo.RuntimeType;
+            IsNew = entityInfo.IsNew;
+            EntityId = entityInfo.IdOrNull;
+            TicksLastChange = entityInfo.Ticks;
 
-            IsNew = formValues.ContainsKey(TypeContext.Compose(controlID, EntityBaseKeys.IsNew));
+            //if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
+            //{
+            //    string runtimeTypeName = (string)formValues[TypeContext.Compose(controlID, TypeContext.RuntimeType)];
+            //    RuntimeType = (runtimeTypeName.HasText()) ? Navigator.ResolveType(runtimeTypeName) : null;
+            //}
+
+            //if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType) && formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.Id)))
+            //{
+            //    string id = (string)formValues[TypeContext.Compose(controlID, TypeContext.Id)];
+            //    EntityId = id.HasText() ? int.Parse(id) : (int?)null;
+            //}
+
+            //IsNew = formValues.ContainsKey(TypeContext.Compose(controlID, EntityBaseKeys.IsNew));
 
             CleanType = Reflector.ExtractLite(staticType);
 
@@ -641,17 +679,20 @@ namespace Signum.Web
 
             int propertyStart = ControlID.Length + TypeContext.Separator.Length;
 
-            if (formValues.ContainsKey(TypeContext.Compose(ControlID, TypeContext.Ticks)))
-            {
-                string changed = (string)formValues.TryGetC(TypeContext.Compose(ControlID, TypeContext.Ticks));
-                if (changed.HasText()) //It'll be null for EmbeddedControls 
-                {
-                    if (changed == "0")
-                        return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
-                    else
-                        TicksLastChange = long.Parse(changed);
-                }
-            }
+            if (TicksLastChange == null && TicksLastChange == 0)
+                return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+
+            //if (formValues.ContainsKey(TypeContext.Compose(ControlID, TypeContext.Ticks)))
+            //{
+            //    string changed = (string)formValues.TryGetC(TypeContext.Compose(ControlID, TypeContext.Ticks));
+            //    if (changed.HasText()) //It'll be null for EmbeddedControls 
+            //    {
+            //        if (changed == "0")
+            //            return; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+            //        else
+            //            TicksLastChange = long.Parse(changed);
+            //    }
+            //}
 
             for (int i = interval.Min; i < interval.Max; i++)
             {
@@ -678,7 +719,7 @@ namespace Signum.Web
                 Modification mod = Modification.Create(staticElementType, formValues, subInterval, commonSubControlID);
                 
                 string oldIndex = "";
-                string indexFormEntry = TypeContext.Compose(commonSubControlID, EntityListKeys.Index);
+                string indexFormEntry = TypeContext.Compose(commonSubControlID, EntityListBaseKeys.Index);
                 if (formValues.ContainsKey(indexFormEntry))
                     oldIndex = formValues[indexFormEntry].ToString();
 
@@ -713,7 +754,7 @@ namespace Signum.Web
                 if (item.Second.HasValue && list.Count > item.Second.Value)
                     item.First.Validate(list[i], errors, prefix);
                 else
-                    item.First.Validate(null, errors, prefix);
+                    item.First.Validate(Constructor.Construct(item.First.StaticType, null), errors, prefix);
             }
         }
 
@@ -722,27 +763,7 @@ namespace Signum.Web
         //    IList list = (IList)entity;
         //    list.Cast<object>().ZipForeachStrict(modifications, (obj, mod) => mod.First.Validate(obj, errors, prefix));
         //}
-        //public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
-        //{
-        //    IList old = (IList)obj;
-        //    IList list = (IList)Activator.CreateInstance(StaticType, modifications.Count);
-        //    foreach (var item in modifications)
-        //    {
-        //        if (item.Second.HasValue)
-        //        {
-        //            if (old.Count > item.Second.Value) //If not, it will be an item created by the setter of another property
-        //                list.Add(item.First.ApplyChanges(controller, old[item.Second.Value], onFinish));
-        //            else
-        //            {
-        //                list.Add(item.First.ApplyChanges(controller, null, onFinish));
-        //            }
-        //        }
-        //        else
-        //            list.Add(item.First.ApplyChanges(controller, null, onFinish));
-        //    }
-        //    return list;
-        //}
-
+        
         public override string ToString()
         {
             return "List<{0}>(Count:{1}-Ticks:{2}): {3}\r\n{{\r\n{4}\r\n}}".Formato(

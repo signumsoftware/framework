@@ -7,14 +7,16 @@ var sfSummaryErrorClass = "validation-summary-errors";
 var sfInlineErrorVal = "inlineVal";
 var sfGlobalErrorsKey = "sfGlobalErrors";
 var sfGlobalValidationSummary = "sfGlobalValidationSummary";
+var sfDivASustituir = "divASustituir";
 
+var sfInfo = "_sfInfo";
 var sfStaticType = "_sfStaticType";
 var sfRuntimeType = "_sfRuntimeType";
 var sfImplementations = "_sfImplementations";
 var sfImplementationsDDL = "_sfImplementationsDDL";
 var sfId = "_sfId";
 var sfEntity = "_sfEntity";
-var sfEntityTemp = "_sfEntityTemp";
+//var sfEntityTemp = "_sfEntityTemp";
 var sfToStr = "_sfToStr";
 var sfLink = "_sfLink";
 var sfIsNew = "_sfIsNew";
@@ -22,17 +24,21 @@ var sfIndex = "_sfIndex";
 var sfCombo = "_sfCombo";
 var sfTicks = "_sfTicks";
 
-var sfEntitiesContainer = "_sfEntitiesContainer";
-var sfRepeaterElement = "_sfRepeaterElement";
+var sfItemsContainer = "_sfItemsContainer";
+var sfRepeaterItem = "_sfRepeaterItem";
 
 var sfBtnCancel = "sfBtnCancel";
 var sfBtnOk = "sfBtnOk";
 var sfBtnCancelS = "sfBtnCancelS";
 var sfBtnOkS = "sfBtnOkS";
 
+var sfQueryUrlName = "sfQueryUrlName";
 var sfTop = "sfTop";
 var sfAllowMultiple = "sfAllowMultiple";
+var sfSearchOnLoad = "sfSearchOnLoad";
 var sfEntityTypeName = "sfEntityTypeName";
+var sfSuffix = "sfSuffix";
+
 var sfEmbeddedControl = "sfEmbeddedControl";
 var sfTabId = "sfTabId";
 
@@ -40,17 +46,102 @@ var sfIdRelated = "sfIdRelated";
 var sfRuntimeTypeRelated = "sfRuntimeTypeRelated";
 
 var lang = {
-    "error" : "Error",
-    "saving" : "Guardando...",
-    "saved" : "Guardado",
-    "executingOperation" : "Ejecutando operación...",
-    "operationExecuted" : "Operación ejecutada"
-}; 
-    
-$().ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {         
+    "error": "Error",
+    "saving": "Guardando...",
+    "saved": "Guardado",
+    "searching": "Buscando...",
+    "buscar": "Buscar",
+    "executingOperation": "Ejecutando operación...",
+    "operationExecuted": "Operación ejecutada",
+    "popupErrors": "Hay errores en la entidad, ¿desea continuar?",
+    "popupErrorsStop": "Hay errores en la entidad"
+};
+
+var EntityInfo = function(_prefix) {
+    this.prefix = _prefix;
+    this._staticType = 0;
+    this._runtimeType = 1;
+    this._id = 2;
+    this._isEmbedded = 3;
+    this._isNew = 4;
+    this._ticks = 5;
+
+    this.find = function() {
+        return $('#' + this.prefix + sfInfo);
+    };
+    this.value = function() {
+        return this.find().val();
+    };
+    this.toArray = function() {
+        return this.value().split(";")
+    };
+    this.toValue = function(array) {
+        return array[0] + ";" + array[1] + ";" + array[2] + ";" + array[3] + ";" + array[4] + ";" + array[5];
+    };
+    this.getSet = function(key, val) {
+        var array = this.toArray();
+        if (val == undefined)
+            return array[key];
+
+        array[key] = val;
+        this.find().val(this.toValue(array));
+        return this;
+    };
+    this.staticType = function(val) {
+        return this.getSet(this._staticType, val);
+    };
+    this.runtimeType = function(val) {
+        return this.getSet(this._runtimeType, val);
+    };
+    this.id = function(val) {
+        return this.getSet(this._id, val);
+    };
+    this.isEmbedded = function() {
+        return this.getSet(this._isEmbedded, null);
+    };
+    this.isNew = function(val) {
+        return this.getSet(this._isNew, val);
+    };
+    this.ticks = function(val) {
+        return this.getSet(this._ticks, val);
+    };
+    this.createValue = function(staticType, runtimeType, id, isEmbedded, isNew, ticks) {
+        var array = new Array();
+        array[this._staticType] = staticType;
+        array[this._runtimeType] = runtimeType;
+        array[this._id] = id;
+        array[this._isEmbedded] = isEmbedded;
+        array[this._isNew] = isNew;
+        array[this._ticks] = ticks;
+        return this.toValue(array);
+    };
+}
+function EntityInfoFor(prefix) {
+    return new EntityInfo(prefix);
+}
+
+
+$().ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
     ShowError(XMLHttpRequest, ajaxOptions, thrownError);
- });
- 
+});
+
+function NotifyError(s, t) {
+    NotifyInfo(s, t);
+}
+function NotifyInfo(s, t) {
+    $("#loading-area-text").html(s);
+    //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
+    $("#loading-area").css({ marginLeft: -parseInt($("#loading-area").outerWidth() / 2) + "px" });
+    $("#loading-area").show();
+    if (t != undefined) {
+        var timer = setTimeout(function() {
+            $("#loading-area").fadeOut("slow");
+            clearTimeout(timer);
+            timer = null;
+        }, t);
+    }
+}
+
 function qp(name, value) {
     return "&" + name + "=" + value;
 }
@@ -59,65 +150,95 @@ function empty(myString) {
     return (myString == undefined || myString == "");
 }
 
+String.prototype.hasText = function() { return (this == null || this == undefined || this == '') ? false : true; }
+
 function isFalse(value) {
     return value == false || value == "false" || value == "False";
 }
 
+function GetPathPrefixes(prefix) {
+    var path = new Array();
+    var pathSplit = prefix.split("_");
+    for (var i = 0; i < pathSplit.length; i++)
+        path[i] = concat(pathSplit, i);
+    return path;
+}
+
+function concat(array, toIndex) {
+    var path = "";
+    for (var i = 0; i <= toIndex; i++) {
+        if (array[i] != "")
+            path += "_" + array[i];
+    }
+    return path;
+}
+
+function PostServer(urlController) {
+    document.forms[0].action = urlController;
+    document.forms[0].submit();
+}
+
 /*
-    s : string to replace
-    tr: dictionary of translations
+s : string to replace
+tr: dictionary of translations
 */
-function replaceAll(s,tr){
-    var v=s;
-    for (var t in tr){
-        v=v.split(t).join(tr[t]);
+function replaceAll(s, tr) {
+    var v = s;
+    for (var t in tr) {
+        v = v.split(t).join(tr[t]);
         //v=v.replace(new RegExp(t,'g'),tr[t]); //alternativa
     }
     return v;
 }
-
 function ShowError(XMLHttpRequest, textStatus, errorThrown) {
-    var error, r = XMLHttpRequest.responseText; 
-    if (!empty(r)) {
-        var startError = r.indexOf("<title>");
-        var endError = r.indexOf("</title>");
+    var error;
+    if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
+        var startError = XMLHttpRequest.responseText.indexOf("<title>");
+        var endError = XMLHttpRequest.responseText.indexOf("</title>");
         if ((startError != -1) && (endError != -1))
-            error = r.substring(startError + 7, endError);
+            error = XMLHttpRequest.responseText.substring(startError + 7, endError);
         else
-            error = r;
+            error = XMLHttpRequest.responseText;
     }
     else {
         error = textStatus;
     }
     NotifyError(lang['error'], 2000);
+    /* error = replaceAll(error,
+    {'&#237;' : 'í',
+    '&#243;' : 'ó' });*/
     alert("Error: " + error);
+
 }
 
 // establece clase "focused" al div alrededor del campo con foco
 function initAroundDivs() {
     $('.valueLine,.rbValueLine').each(function() {
-        if (!empty(this.id)) {
+        if (this.id != undefined && this.id != null && this.id != "") {
             var elementID = $("#" + this.id);
             var around = elementID.parents('div[class=around]');
             if (around.length > 0) {
                 elementID.focus(function() { around.addClass('focused'); });
                 elementID.blur(function() { around.removeClass('focused'); });
-            } 
+            }
         }
     });
 }
 
 
 
-$(function() { initAroundDivs();});
+$(function() { initAroundDivs(); });
 
-function singleQuote(s) {
-    return s != null ? s.toString().replace(/"/g, "'") : '';
+function singleQuote(myfunction) {
+    if (myfunction != null)
+        return myfunction.toString().replace(/"/g, "'");
+    else
+        return '';
 }
 
 //Performs input validation
 var validator = new function() {
-    this.number = function (e) {
+    this.number = function(e) {
         var c = e.keyCode;
         return (
 			(c >= 48 && c <= 57) || //0-9
@@ -135,10 +256,10 @@ var validator = new function() {
 			(c == 189)
 		);
     };
-	this.decimalNumber = function (e) {
+    this.decimalNumber = function(e) {
         var c = e.keyCode;
         return (
-			this.number(e) || 
+			this.number(e) ||
 			(c == 110) ||  //NumPad Decimal
             (c == 190) || //.
 			(c == 188) //,
@@ -146,77 +267,74 @@ var validator = new function() {
     };
 };
 
-String.prototype.format = function(values)
-{
+String.prototype.format = function(values) {
     var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
-    var getValue = function(key)
-                   {
-                        if(values == null || typeof values === 'undefined')
-                            return null;
+    var getValue = function(key) {
+        if (values == null || typeof values === 'undefined')
+            return null;
 
-                        var value = values[key];
-                        var type = typeof value;
+        var value = values[key];
+        var type = typeof value;
 
-                        return type === 'string' || type === 'number' ? value : null;
-                   };
+        return type === 'string' || type === 'number' ? value : null;
+    };
 
-    return this.replace(regex, function(match) 
-                                { 
-                                    //match will look like {sample-match}
-                                    //key will be 'sample-match';
-                                    var key = match.substr(1, match.length - 2);
+    return this.replace(regex, function(match) {
+        //match will look like {sample-match}
+        //key will be 'sample-match';
+        var key = match.substr(1, match.length - 2);
 
-                                    var value = getValue(key);
+        var value = getValue(key);
 
-                                    return value != null ? value : match;
-                                });
+        return value != null ? value : match;
+    });
 };
 
 
 
-var toggler = new
-function () {
-	this.divName = function (name) {
-		return "div" + name;
-	};
-	this.option = function (elem) {
-		var value = ((elem.type == 'checkbox') ? elem.checked : elem.value === 'true');
-		this.optionValue(this.divName(elem.name), value);
-		if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function () {
-			this.value = "";
-		});
-	};
-	this.optionInverse = function (elem) {
-		var value = ((elem.type == 'checkbox') ? !elem.checked : elem.value === 'false');
-		this.optionValue(this.divName(elem.name), value);
-		if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function () {
-			this.value = "";
-		});
-	};
-	this.numeric = function (id, max) {
-		var name = this.divName(id);
-		var value = $("#" + id).val();
-		if (value == "") {
-			this.optionValue(name, false);
-			return;
-		} else {
-			value = parseInt(value);
-		}
-		this.optionValue(name, (value > max));
-	};
-	this.numericCombo = function (id, max) {
-		var name = this.divName(id);
-		var option = $("#" + combo + " option:selected");
-		if (option.val() == "") {
-			this.optionValue(name, false);
-			return;
-		}
-		var html = option.html();
-		if (html.length == 1 && html <= max.toString()) this.optionValue(name, false);
-		else this.optionValue(name, true);
-	};
-	this.optionValue = function (name, value) {
-		value ? $("#" + name).show() : $("#" + name).hide();
-	};
+var toggler = new 
+function() {
+    this.divName = function(name) {
+        return "div" + name;
+    };
+    this.option = function(elem) {
+        var value = ((elem.type == 'checkbox') ? elem.checked : elem.value === 'true');
+        this.optionValue(this.divName(elem.name), value);
+        if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function() {
+            this.value = "";
+        });
+    };
+    this.optionInverse = function(elem) {
+        var value = ((elem.type == 'checkbox') ? !elem.checked : elem.value === 'false');
+        this.optionValue(this.divName(elem.name), value);
+        if (!value) $('#' + this.divName(elem.name) + ' :input:text').each(function() {
+            this.value = "";
+        });
+    };
+    this.numeric = function(id, max) {
+        var name = this.divName(id);
+        var value = $("#" + id).val();
+        if (value == "") {
+            this.optionValue(name, false);
+            return;
+        } else {
+            value = parseInt(value);
+        }
+        this.optionValue(name, (value > max));
+    };
+    this.numericCombo = function(id, max) {
+        var name = this.divName(id);
+        var option = $("#" + combo + " option:selected");
+        if (option.val() == "") {
+            this.optionValue(name, false);
+            return;
+        }
+        var html = option.html();
+        if (html.length == 1 && html <= max.toString()) this.optionValue(name, false);
+        else this.optionValue(name, true);
+    };
+    this.optionValue = function(name, value) {
+        value ? $("#" + name).show() : $("#" + name).hide();
+    };
 }

@@ -150,33 +150,39 @@ namespace Signum.Web
         {
             if (helper.WriteIdAndRuntime())
             {
+                EntityInfo entityInfo = null;
                 if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
                 {
-                    IdentifiableEntity id = (IdentifiableEntity)(object)tc.Value;
+                    entityInfo = new EntityInfo<T>(typeof(T), tc.Value);
+                    
+                    //IdentifiableEntity id = (IdentifiableEntity)(object)tc.Value;
+                    //if (tc.Value != null)
+                    //    helper.ViewContext.HttpContext.Response.Write(
+                    //        helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
+                    //else
+                    //{
+                    //    //helper.ViewContext.HttpContext.Response.Write(
+                    //    //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), "") + "\n");
+                    //    helper.ViewContext.HttpContext.Response.Write(
+                    //        helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.StaticType), typeof(T).Name) + "\n");
+                    //}
 
-                    if (tc.Value != null)
-                        helper.ViewContext.HttpContext.Response.Write(
-                            helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
-                    else
-                    {
-                        //helper.ViewContext.HttpContext.Response.Write(
-                        //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), "") + "\n");
-                        helper.ViewContext.HttpContext.Response.Write(
-                            helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.StaticType), typeof(T).Name) + "\n");
-                    }
-
-                    helper.ViewContext.HttpContext.Response.Write(
-                        helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
+                    //helper.ViewContext.HttpContext.Response.Write(
+                    //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
                 }
                 else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
                 {
-                    helper.ViewContext.HttpContext.Response.Write(
-                        helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
+                    entityInfo = new EmbeddedEntityInfo<T>(typeof(T), tc.Value, false);
+                    
+                    //helper.ViewContext.HttpContext.Response.Write(
+                    //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
                 }
+                helper.ViewContext.HttpContext.Response.Write(
+                        helper.HiddenSFInfo(helper.GlobalPrefixedName(""), entityInfo));
             }
             //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them
-            if (helper.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
-                helper.ViewData.Remove(ViewDataKeys.EmbeddedControl);
+            if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
+                helper.ViewData.Remove(ViewDataKeys.WriteSFInfo);
         }
 
         public static TypeContext<S> TypeContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
@@ -314,9 +320,20 @@ namespace Signum.Web
         {
             get
             {
-                return properties.LastOrDefault(pi => Reflector.IsIdentifiableEntity(pi.PropertyType))
-                                 .TryCC(prop => prop.PropertyType) ??
-                                 Parent.LastIdentifiableProperty;
+                List<PropertyInfo> pis = Parent.GetPath();
+                pis.AddRange(properties);
+                Type type = null;
+                for (int i = 0; i < pis.Count; i++)
+                {
+                    PropertyInfo p = pis[i];
+                    Type proposed = (Reflector.IsMList(p.PropertyType)) ? p.PropertyType.GetGenericArguments()[0] : p.PropertyType;
+                    if (Reflector.IsIdentifiableEntity(proposed) && i<pis.Count-1)
+                        type = proposed; //If I'm Identifiable and there are more properties: Reset
+                }
+                return type ?? Parent.LastIdentifiableProperty;
+                //return properties.LastOrDefault(pi => Reflector.IsIdentifiableEntity(pi.PropertyType))
+                //                 .TryCC(prop => prop.PropertyType) ??
+                //                 Parent.LastIdentifiableProperty;
             }
         }
 
@@ -324,9 +341,10 @@ namespace Signum.Web
         {
             List<PropertyInfo> pis = Parent.GetPath();
             pis.AddRange(properties);
-            
+
             Type lastIP = LastIdentifiableProperty;
-            int lastPI = pis.FindLastIndex(pi => pi.PropertyType == lastIP); 
+            int lastPI = pis.FindLastIndex(pi => 
+                (Reflector.IsMList(pi.PropertyType) ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType) == lastIP); 
 
             if (lastPI == -1)
                 return pis;
@@ -338,7 +356,7 @@ namespace Signum.Web
         {
             get 
             {
-                string propertiesName = properties.ToString(p => p.Name, TypeContext.Separator);
+                string propertiesName = properties.TryCC(props => props.ToString(p => p.Name, TypeContext.Separator));
                 return //((Parent.Name == TypeContext.Separator) ? "" : Parent.Name) +
                     Parent.Name +
                     (propertiesName.HasText() ? TypeContext.Separator + propertiesName : "");
@@ -375,8 +393,8 @@ namespace Signum.Web
         {
             get
             {
-                if (Reflector.IsIdentifiableEntity(typeof(T)))
-                    return typeof(T); 
+                //if (Reflector.IsIdentifiableEntity(typeof(T)))
+                //    return typeof(T); 
 
                 return Parent.LastIdentifiableProperty;
             }
@@ -387,7 +405,8 @@ namespace Signum.Web
             List<PropertyInfo> pis = Parent.GetPath();
 
             Type lastIP = LastIdentifiableProperty;
-            int lastPI = pis.FindLastIndex(pi => pi.PropertyType == lastIP);
+            int lastPI = pis.FindLastIndex(pi => 
+                (Reflector.IsMList(pi.PropertyType) ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType) == lastIP);
 
             if (lastPI == -1)
                 return pis;
@@ -399,7 +418,7 @@ namespace Signum.Web
         {
             get
             {
-                return "";
+                return TypeContext.Compose(Parent.Name, Index.ToString());
             }
         }
 

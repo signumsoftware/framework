@@ -50,7 +50,7 @@ namespace Signum.Web
                 {
                     List<PropertyInfo> path = context.GetPath();
 
-                    if (eb is EntityList)
+                    if (Reflector.IsMList(context.ContextType)) //if (eb is EntityList)
                         path.Add(path.Last().PropertyType.GetProperty("Item"));
 
                     ((EntityBase)eb).Implementations = Schema.Current.FindImplementations(context.LastIdentifiableProperty, path.Cast<MemberInfo>().ToArray());

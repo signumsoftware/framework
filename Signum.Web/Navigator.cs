@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -18,6 +19,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using System.Configuration;
 using Signum.Utilities.ExpressionTrees;
+#endregion
 
 namespace Signum.Web
 {
@@ -170,9 +172,9 @@ namespace Signum.Web
             return Manager.Find(controller, findOptions);
         }
 
-        public static PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string prefixEnd)
+        public static PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string suffix)
         {
-            return Manager.PartialFind(controller, findOptions, prefix, prefixEnd);
+            return Manager.PartialFind(controller, findOptions, prefix, suffix);
         }
 
         public static PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
@@ -378,19 +380,18 @@ namespace Signum.Web
             if (Manager.EntitySettings.ContainsKey(entityType))
             {
                 el.Create = Navigator.IsCreable(entityType, admin);
-                el.PopupView = Navigator.IsPopupViewable(entityType, admin);
                 el.View = Navigator.IsViewable(entityType, admin);
                 el.Find = Navigator.IsFindable(entityType);
             }
         }
 
+        public static bool IsNavigable(Type type, bool admin)
+        {
+            return Manager.IsNavigable(type, admin);
+        }
         public static bool IsViewable(Type type, bool admin)
         {
             return Manager.IsViewable(type, admin);
-        }
-        public static bool IsPopupViewable(Type type, bool admin)
-        {
-            return Manager.IsPopupViewable(type, admin);
         }
         public static bool IsReadOnly(Type type, bool admin)
         {
@@ -416,7 +417,7 @@ namespace Signum.Web
         public string ErrorPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.Error.aspx";
         public string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
         public string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";
-        public string OKCancelPopulUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.OKCancelPopup.ascx";
+        public string ChooserPopupUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.ChooserPopup.ascx";
         public string SearchPopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchPopupControl.ascx";
         public string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
         public string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
@@ -425,10 +426,11 @@ namespace Signum.Web
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
         protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
+        protected internal Dictionary<string, Type> FullNamesToTypes { get; private set; }
 
         public event Func<Type, bool> GlobalIsCreable;
-        public event Func<Type, bool> GlobalIsPopupViewable;
         public event Func<Type, bool> GlobalIsViewable;
+        public event Func<Type, bool> GlobalIsNavigable;
         public event Func<Type, bool> GlobalIsReadOnly;
         public event Func<object, bool> GlobalIsFindable;
 
@@ -492,7 +494,7 @@ namespace Signum.Web
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
             controller.ViewData[ViewDataKeys.EntityTypeNiceName] = obj.GetType().NiceName();
-            controller.ViewData[ViewDataKeys.Id] = entity.IdOrNull != null ? entity.Id.ToString() : "";
+            controller.ViewData[TypeContext.Id] = entity.IdOrNull != null ? entity.Id.ToString() : "";
 
             if (controller.ViewData.Keys.Count(s => s==ViewDataKeys.PageTitle)==0)
                 controller.ViewData[ViewDataKeys.PageTitle] = entity.ToStr;
@@ -636,7 +638,7 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string prefixEnd)
+        protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string suffix)
         {
             QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
 
@@ -647,7 +649,7 @@ namespace Signum.Web
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            controller.ViewData[ViewDataKeys.PopupSufix] = prefixEnd ?? "";
+            controller.ViewData[ViewDataKeys.PopupSufix] = suffix ?? "";
 
             controller.ViewData[ViewDataKeys.FilterColumns] = columns;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -861,9 +863,11 @@ namespace Signum.Web
 
         protected internal virtual Type ResolveType(string typeName)
         {
-            Type type = Navigator.NameToType.TryGetC(typeName);
+            Type type = Navigator.NameToType.TryGetC(typeName) ?? Type.GetType(typeName, false);
+            
             if (type == null)
                 throw new ArgumentException(Resources.Type0NotFoundInTheSchema.Formato(typeName));
+            
             return type;
         }
 
@@ -970,21 +974,22 @@ namespace Signum.Web
 
         protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix, bool? clone)
         {
-            string typeName = null; 
-            string typeNameKey = TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType);
-            if (form.AllKeys.Contains(typeNameKey))
-                typeName = form[typeNameKey];
-            else
-                typeName = controller.Request.Params[TypeContext.RuntimeType];
+            EntityInfo entityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.Info)]);
+            //string typeName = null; 
+            //string typeNameKey = TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType);
+            //if (form.AllKeys.Contains(typeNameKey))
+            //    typeName = form[typeNameKey];
+            //else
+            //    typeName = controller.Request.Params[TypeContext.RuntimeType];
                 
-            Type type = Navigator.NameToType.GetOrThrow(typeName, Resources.Type0NotFoundInTheSchema);
+            //Type type = Navigator.NameToType.GetOrThrow(typeName, Resources.Type0NotFoundInTheSchema);
 
-            string id = null;
-            string idKey = TypeContext.Compose(prefix ?? "", TypeContext.Id);
-            if (form.AllKeys.Contains(idKey))
-                id = form[idKey];
-            else
-                id = controller.Request.Params[TypeContext.Id];
+            //string id = null;
+            //string idKey = TypeContext.Compose(prefix ?? "", TypeContext.Id);
+            //if (form.AllKeys.Contains(idKey))
+            //    id = form[idKey];
+            //else
+            //    id = controller.Request.Params[TypeContext.Id];
             
             if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive))
             {
@@ -993,11 +998,13 @@ namespace Signum.Web
                 ModifiableEntity mod = (ModifiableEntity)controller.Session[tabID];
                 if (mod == null)
                     throw new ApplicationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
-                string parentTypeName = form[TypeContext.Separator + TypeContext.RuntimeType];
-                string parentId = form[TypeContext.Separator + TypeContext.Id];
-                Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resources.Type0NotFoundInTheSchema);
-                if (mod.GetType() == parentType &&
-                    (typeof(EmbeddedEntity).IsAssignableFrom(parentType) || ((IIdentifiable)mod).IdOrNull.TryToString("") == parentId))
+
+                EntityInfo parentEntityInfo = EntityInfo.FromFormValue(form[TypeContext.Separator + EntityBaseKeys.Info]);
+                //string parentTypeName = form[TypeContext.Separator + TypeContext.RuntimeType];
+                //string parentId = form[TypeContext.Separator + TypeContext.Id];
+                //Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resources.Type0NotFoundInTheSchema);
+                if (mod.GetType() == parentEntityInfo.RuntimeType &&
+                    (parentEntityInfo.IsEmbedded || ((IIdentifiable)mod).IdOrNull == parentEntityInfo.IdOrNull))
                 {
                     if (clone == null || clone.Value) 
                         return (ModifiableEntity)((ICloneable)mod).Clone();
@@ -1007,18 +1014,10 @@ namespace Signum.Web
                     throw new ApplicationException(Resources.IncorrectEntityInSession);
             }
 
-            if (!string.IsNullOrEmpty(id))
-                return Database.Retrieve(type, int.Parse(id));
+            if (entityInfo.IdOrNull != null)
+                return Database.Retrieve(entityInfo.RuntimeType, entityInfo.IdOrNull.Value);
             else
-                return (ModifiableEntity)Constructor.Construct(type, controller);
-        }
-
-        protected internal virtual bool IsPopupViewable(Type type, bool admin)
-        {
-            if (GlobalIsPopupViewable != null && !GlobalIsPopupViewable(type))
-                return false;
-
-            return EntitySettings[type].IsPopupViewable(admin);
+                return (ModifiableEntity)Constructor.Construct(entityInfo.RuntimeType, controller);
         }
 
         protected internal virtual bool IsViewable(Type type, bool admin)
@@ -1027,6 +1026,14 @@ namespace Signum.Web
                 return false;
 
             return EntitySettings[type].IsViewable(admin);
+        }
+
+        protected internal virtual bool IsNavigable(Type type, bool admin)
+        {
+            if (GlobalIsNavigable != null && !GlobalIsNavigable(type))
+                return false;
+
+            return EntitySettings[type].IsNavigable(admin);
         }
 
         protected internal virtual bool IsReadOnly(Type type, bool admin)

@@ -33,7 +33,17 @@ namespace Signum.Web
             fo.FilterOptions = Navigator.ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
 
             if (parameters.AllKeys.Any(k => k == "sfAllowMultiple"))
-                fo.AllowMultiple = bool.Parse(parameters["sfAllowMultiple"]);
+            {
+                bool aux;
+                if (bool.TryParse(parameters["sfAllowMultiple"], out aux))
+                    fo.AllowMultiple = aux;
+            }
+
+            if (parameters.AllKeys.Any(k => k == "sfFilterMode"))
+                fo.FilterMode = (FilterMode)Enum.Parse(typeof(FilterMode), parameters["sfFilterMode"]);
+
+            if (parameters.AllKeys.Any(k => k == "sfCreate"))
+                fo.Create = bool.Parse(parameters["sfCreate"]);
 
             if (parameters.AllKeys.Any(k => k == "sfSearchOnLoad"))
                 fo.SearchOnLoad = bool.Parse(parameters["sfSearchOnLoad"]);

@@ -25,8 +25,9 @@ namespace Signum.Web
                 sb.AppendLine("<div class='field'>");
             idValueField = helper.GlobalName(idValueField);
 
-            if ((StyleContext.Current.ShowTicks == null || StyleContext.Current.ShowTicks.Value) && !StyleContext.Current.ReadOnly && (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText()))
-                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), helper.GetChangeTicks(idValueField) ?? 0));
+            long? ticks = EntityBaseHelper.GetTicks(helper, idValueField, settings);
+            if (ticks != null) //TODO Anto: Sustituir por sfInfo
+                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), ticks.Value));
 
             if (StyleContext.Current.LabelVisible)
             {
@@ -107,7 +108,7 @@ namespace Signum.Web
             if (items == null)
             {
                 items = new List<SelectListItem>();
-                items.Add(new SelectListItem() { Text = "-", Value = "", Selected = true });
+                items.Add(new SelectListItem() { Text = "-", Value = "" });
                 items.AddRange(
                     Enum.GetValues(enumType.UnNullify())
                         .Cast<Enum>()
@@ -121,20 +122,17 @@ namespace Signum.Web
             }
 
             string setTicks = "";
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
                 setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
 
             string reloadOnChangeFunction = "";
-            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
+            if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-            {
-                if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                    settings.ValueHtmlProps["onblur"] = setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                if (settings.ValueHtmlProps.ContainsKey("onchange"))
+                    settings.ValueHtmlProps["onchange"] = setTicks + settings.ValueHtmlProps["onchange"] + reloadOnChangeFunction;
                 else
-                    settings.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
-            }
+                    settings.ValueHtmlProps.Add("onchange", setTicks + reloadOnChangeFunction);
 
             return helper.DropDownList(idValueField, items, settings.ValueHtmlProps);
         }
@@ -150,17 +148,17 @@ namespace Signum.Web
                 settings.ValueHtmlProps["class"] += " hasAge";
 
             string setTicks = "";
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
                 setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
 
             string reloadOnChangeFunction = "";
-            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
+            if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
            
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
             {
                 if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                    settings.ValueHtmlProps["onblur"] = setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                    settings.ValueHtmlProps["onblur"] = setTicks + settings.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
                 else
                     settings.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
@@ -179,16 +177,16 @@ namespace Signum.Web
         public static string TextboxInLine(this HtmlHelper helper, string idValueField, string valueStr, ValueLine settings)
         {
             string setTicks = "";
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
                 setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
 
             string reloadOnChangeFunction = "";
-            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
+            if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
             settings.ValueHtmlProps.Add("autocomplete", "off");
             if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                settings.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction + settings.ValueHtmlProps["onblur"];
+                settings.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + settings.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
             else
                 settings.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
 
@@ -198,21 +196,21 @@ namespace Signum.Web
         public static string CheckBox(this HtmlHelper helper, string idValueField, bool? value, ValueLine settings)
         {
             string setTicks = "";
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
                 setTicks = "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks));
 
             string reloadOnChangeFunction = "";
-            if (settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
-                reloadOnChangeFunction = settings.ReloadOnChangeFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
+            if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
+                reloadOnChangeFunction = settings.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix());
 
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadOnChangeFunction.HasText())
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
             {
                 if (settings.ValueHtmlProps.ContainsKey("onclick"))
                     settings.ValueHtmlProps["onclick"] = setTicks + settings.ValueHtmlProps["onclick"] + reloadOnChangeFunction;
                 else
                     settings.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
             }
-
+            
             return System.Web.Mvc.Html.InputExtensions.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, settings.ValueHtmlProps);
         }
 

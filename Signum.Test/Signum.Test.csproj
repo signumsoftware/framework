@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{DE565EB3-EE44-469D-B6B9-C8F3CA0712EF}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assert2.cs" />
-    <Compile Include="TransactionTest.cs" />
+    <Compile Include="Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
     <Compile Include="LinqProvider\DistinctTest.cs" />
     <Compile Include="LinqProvider\SelectManyTest.cs" />
@@ -62,9 +62,7 @@
     <Compile Include="LinqProvider\OrderByTest.cs" />
     <Compile Include="LinqProvider\JoinGroupTest.cs" />
     <Compile Include="LinqProvider\WhereTest.cs" />
-    <Compile Include="Entities.cs" />
     <Compile Include="LinqProvider\SelectTest.cs" />
-    <Compile Include="Starter.cs" />
     <Compile Include="MetaTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NiceToStringTest.cs" />
@@ -78,6 +76,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Starter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">

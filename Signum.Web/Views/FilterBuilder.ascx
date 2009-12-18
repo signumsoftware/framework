@@ -6,36 +6,14 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 
+<% bool visible = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterMode == FilterMode.Visible;%>
+
 <%= Html.Hidden(Html.GlobalName(ViewDataKeys.EntityTypeName), ViewData[ViewDataKeys.EntityTypeName].ToString())%>
 
-<script type="text/javascript">
- function toggleFilters(id){
-        var elem = $('#' + id + " .filters-header");
-        var R = elem.attr('rev');
-	    var D = $('#'+R);
-	    D.toggle('fast');
-	    $('#'+id+' .filters').toggle('fast');
-	    elem.toggleClass('close');
-	    if (elem.hasClass('close')) elem.html('Mostrar filtros');else elem.html('Ocultar filtros');
-	    return false;
-  }
-  /*
-  $(document).ready(function() {
-    $('#filters-header').click(function(){
-	    var R = $(this).attr('rev');
-	    var D = $('#'+R);
-	    D.toggle('fast');
-	    $('#filters-list').toggle('fast');
-	    $(this).toggleClass('close');
-	    if ($(this).hasClass('close')) $(this).html('Mostrar filtros');else $(this).html('Ocultar filtros');
-	    return false;
-    });
-  });*/
-</script>
 <div id="<%=Html.GlobalName("fields-search")%>">
     <div id="<%=Html.GlobalName("fields-list")%>" class="fields-list">
-        <a onclick="javascript:toggleFilters('<%=Html.GlobalName("fields-search")%>');" class="filters-header" rev="filters-body">Ocultar filtros</a>
-        <div class="filters">
+        <a onclick="javascript:toggleFilters('<%=Html.GlobalName("fields-search")%>');" class="filters-header<%= visible ? "" : " close" %>" rev="filters-body"><%= visible ? "Ocultar filtros" : "Mostrar filtros" %></a>
+        <div class="filters" <%= visible ? "" : "style='display:none'"%>>
             <div id="<%=Html.GlobalName("filters-body")%>" class="filters-body">
                 <label for="<%=Html.GlobalName("ddlNewFilters")%>">Filtrar por campo</label>
                 <select id="<%=Html.GlobalName("ddlNewFilters")%>">
@@ -43,13 +21,16 @@
                 <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
                    {
                        Type type = column.Type.UnNullify();
+                       if (typeof(Lite).IsAssignableFrom(type))
+                            type = Reflector.ExtractLite(type);
+                       string typeName = (Navigator.TypesToURLNames.ContainsKey(type)) ? type.Name : type.AssemblyQualifiedName;
                        %>
-                       <option id="<%=Html.GlobalName("option__" + column.Name) %>" value="<%=typeof(Lite).IsAssignableFrom(type) ? Reflector.ExtractLite(type).Name : type.Name %>"><%=column.DisplayName%></option>
+                       <option id="<%=Html.GlobalName("option__" + column.Name) %>" value="<%=typeName %>"><%=column.DisplayName%></option>
                    <%
                    } 
                 %>
                </select> 
-               <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('Signum/AddFilter','{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
+               <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
                <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "Eliminar Filtros", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
            </div>
     <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>

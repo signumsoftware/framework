@@ -65,7 +65,7 @@ namespace Signum.Web
                         onclick = OnClick.Insert(lastEnd, ", " + strPrefix);
                 }
 
-                //Constructo OnServerClick
+                //Construct OnServerClick
                 if (!string.IsNullOrEmpty(OnServerClickAjax))
                 {
                     if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickPost))
@@ -73,19 +73,13 @@ namespace Signum.Web
                     onclick = OnServerClickAjax;
                 }
 
-                //Constructo OnServerClick
+                //Construct OnServerClick
                 if (!string.IsNullOrEmpty(OnServerClickPost))
                 {
                     if (!string.IsNullOrEmpty(OnClick) || !string.IsNullOrEmpty(OnServerClickAjax))
                         throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(Id));
-                    onclick = "PostServer('{0}');".Formato(OnServerClickPost);
+                    onclick = OnServerClickPost;
                 }
-
-                //Add cursor pointer to the htmlProps
-              /*  if (!HtmlProps.ContainsKey("style"))
-                    HtmlProps.Add("style", "cursor: pointer");
-                else if (HtmlProps["style"].ToString().IndexOf("cursor") == -1)
-                    HtmlProps["style"] = "cursor:pointer; " + HtmlProps["style"].ToString();*/
             }
 
             HtmlProps.Add("title", AltText);

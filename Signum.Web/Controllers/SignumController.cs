@@ -59,11 +59,7 @@ namespace Signum.Web.Controllers
             else
                 throw new ApplicationException("Invalid result type for a Constructor");
 
-            return Content(
-                "<script type=\"text/javascript\">" +
-                "PostServer('{0}');".Formato(Navigator.ViewRoute(type, null)) +
-                "</script>"
-                );
+            return Content(Navigator.ViewRoute(type, null));
         }
 
         public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
@@ -100,7 +96,7 @@ namespace Signum.Web.Controllers
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
             {
-                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
+                this.ViewData[ViewDataKeys.WriteSFInfo] = true;
 
                 Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
                 TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[] { } });
@@ -145,11 +141,12 @@ namespace Signum.Web.Controllers
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
             {
-                this.ViewData[ViewDataKeys.EmbeddedControl] = true;
+                this.ViewData[ViewDataKeys.WriteSFInfo] = true;
 
-                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
-                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[]{} });
-
+                //Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
+                //TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[]{} });
+                string prefixClon = prefix;
+                TypeContext tc = Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefixClon);
                 return Navigator.PartialView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
             }
 
@@ -218,15 +215,8 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult TrySavePartial(string prefix, string prefixToIgnore)
         {
-            //Type type = Navigator.ResolveType(sfStaticType);
-
-            //Modifiable entity = null;
-            //if (sfId.HasValue)
-            //    entity = Database.Retrieve(type, sfId.Value);
-            //else
-            //    entity = (ModifiableEntity)Navigator.CreateInstance(this, type);
             Modifiable parentEntity = Navigator.ExtractEntity(this, Request.Form, prefix);
-
+            
             ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref parentEntity, prefix, prefixToIgnore);
 
             this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
@@ -234,13 +224,18 @@ namespace Signum.Web.Controllers
             if (parentEntity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0))
                 Database.Save((IdentifiableEntity)parentEntity);
 
-            string newToStr;
-            if (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText())
-                newToStr = Modification.GetPropertyValue(parentEntity, prefix).ToString();
-            else
-                newToStr = parentEntity.ToString();
+            Modifiable entity = Navigator.ExtractIsReactive(Request.Form) ? Modification.GetPropertyValue(parentEntity, prefix) : parentEntity;
 
-            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
+            string newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+
+            return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
+                this.ModelState.ToJsonData(),
+                TypeContext.Separator + EntityBaseKeys.ToStr,
+                entity.ToString(),
+                TypeContext.Separator + EntityBaseKeys.ToStrLink,
+                newLink
+                ));
+            //return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -258,26 +253,23 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
 
-            string newToStr;
-            if (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText())
-                newToStr = Modification.GetPropertyValue(parentEntity, prefix).ToString();
-            else
-                newToStr = parentEntity.ToString();
+            Modifiable entity = Navigator.ExtractIsReactive(Request.Form) ? Modification.GetPropertyValue(parentEntity, prefix) : parentEntity;
 
-            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
+            string newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+            
+            return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
+                this.ModelState.ToJsonData(),
+                TypeContext.Separator + EntityBaseKeys.ToStr,
+                entity.ToString(),
+                TypeContext.Separator + EntityBaseKeys.ToStrLink,
+                newLink
+                ));
+            //return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SavePartial(string prefix, string prefixToIgnore)
         {
-            //Type type = Navigator.ResolveType(sfStaticType);
-
-            //Modifiable entity = null;
-            //if (sfId.HasValue)
-            //    entity = Database.Retrieve(type, sfId.Value);
-            //else
-            //    entity = (ModifiableEntity)Navigator.CreateInstance(this, type);
-
             Modifiable entity = Navigator.ExtractEntity(this, Request.Form, prefix);
 
             ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, prefixToIgnore);
@@ -294,28 +286,29 @@ namespace Signum.Web.Controllers
                 return Navigator.View(this, entity);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult TrySavePartialStrict(string prefix, string prefixToIgnore, bool? save)
-        {
-            //Type type = Navigator.ResolveType(sfStaticType);
+        //[AcceptVerbs(HttpVerbs.Post)]
+        //public ContentResult TrySavePartialStrict(string prefix, string prefixToIgnore)
+        //{
+        //    Modifiable parentEntity = Navigator.ExtractEntity(this, Request.Form, prefix);
 
-            //Modifiable entity = null;
-            //if (sfId.HasValue)
-            //    entity = Database.Retrieve(type, sfId.Value);
-            //else
-            //    entity = (ModifiableEntity)Navigator.CreateInstance(type);
+        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref parentEntity, prefix, prefixToIgnore);
 
-            Modifiable entity = Navigator.ExtractEntity(this, Request.Form, prefix);
+        //    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
 
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, prefixToIgnore);
+        //    if (entity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0) && save.HasValue && save.Value)
+        //        Database.Save((IdentifiableEntity)entity);
 
-            this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+        //    string newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
 
-            if (entity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0) && save.HasValue && save.Value)
-                Database.Save((IdentifiableEntity)entity);
-
-            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
-        }
+        //    return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
+        //        this.ModelState.ToJsonData(),
+        //        TypeContext.Separator + EntityBaseKeys.ToStr,
+        //        entity.ToString(),
+        //        TypeContext.Separator + EntityBaseKeys.ToStrLink,
+        //        newLink
+        //        ));
+        //    //return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
+        //}
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult Autocomplete(string typeName, string implementations, string input, int limit)
@@ -346,9 +339,9 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialFind(FindOptions findOptions, string prefix, string prefixEnd)
+        public PartialViewResult PartialFind(FindOptions findOptions, string prefix, string sfSuffix)
         {
-            return Navigator.PartialFind(this, findOptions, prefix, prefixEnd);
+            return Navigator.PartialFind(this, findOptions, prefix, sfSuffix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -368,6 +361,20 @@ namespace Signum.Web.Controllers
         {
             object value = (isLite) ? (object)Lite.Create(Navigator.ResolveTypeFromUrlName(typeUrlName), sfId.Value) : (object)sfValue;
             return Content(SearchControlHelper.QuickFilter(this, sfQueryUrlName, sfColIndex, index, value, prefix));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult GetChooser(string sfImplementations, string prefix)
+        {
+            string strButtons = "";
+            foreach (string typeUrlName in sfImplementations.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                Type type = Navigator.Manager.URLNamesToTypes[typeUrlName];
+                strButtons += "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(type.Name, type.NiceName());
+            }
+            ViewData[ViewDataKeys.CustomHtml] = strButtons;
+            ViewData[ViewDataKeys.PopupPrefix] = prefix;
+            return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

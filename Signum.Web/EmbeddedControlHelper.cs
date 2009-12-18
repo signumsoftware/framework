@@ -87,7 +87,7 @@ namespace Signum.Web
             {
                 { ViewDataKeys.TypeContextKey, prefixedName },
                 { prefixedName, tc }, //Directly the context instead of the context.Value so we don't lose its context path
-                { ViewDataKeys.EmbeddedControl, "" },
+                { ViewDataKeys.WriteSFInfo, "" },
             };
             if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix))
                 vdd[ViewDataKeys.PopupPrefix] = helper.ViewData[ViewDataKeys.PopupPrefix];
@@ -100,14 +100,14 @@ namespace Signum.Web
 
             prefixedName = helper.GlobalName(prefixedName);
 
-            if (tc.UntypedValue != null && typeof(IIdentifiable).IsAssignableFrom(tc.UntypedValue.GetType()) && ((IIdentifiable)tc.UntypedValue).IsNew)
-                helper.Write(helper.Hidden(TypeContext.Compose(prefixedName, EntityBaseKeys.IsNew), ""));
-
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
-            {
-                long? ticks = helper.GetChangeTicks(prefixedName);
-                helper.Write("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(prefixedName, TypeContext.Ticks), ticks!=null ? ticks.Value.ToString() : ""));
-            }
+            //The info commented below should be now automatically included in SFInfo field
+            //if (tc.UntypedValue != null && typeof(IIdentifiable).IsAssignableFrom(tc.UntypedValue.GetType()) && ((IIdentifiable)tc.UntypedValue).IsNew)
+            //    helper.Write(helper.Hidden(TypeContext.Compose(prefixedName, EntityBaseKeys.IsNew), ""));
+            //if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))
+            //{
+            //    long? ticks = helper.GetChangeTicks(prefixedName);
+            //    helper.Write("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(prefixedName, TypeContext.Ticks), ticks!=null ? ticks.Value.ToString() : ""));
+            //}
 
             helper.RenderPartial(ViewName, vdd);
         }

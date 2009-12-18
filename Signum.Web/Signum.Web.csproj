@@ -89,9 +89,26 @@
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="Controllers\WidgetsController.cs" />
-    <Compile Include="EntityLineDetailHelper.cs" />
+    <Compile Include="EntityInfo.cs" />
+    <Compile Include="JSRenderer\JsFindOptions.cs" />
+    <Compile Include="JSRenderer\JsViewOptions.cs" />
+    <Compile Include="JSRenderer\JsBaseLineOptions.cs" />
+    <Compile Include="JSRenderer\JsLines.cs" />
+    <Compile Include="Lines\BaseLine.cs" />
+    <Compile Include="Lines\EntityRepeater.cs" />
+    <Compile Include="Lines\EntityListDetail.cs" />
+    <Compile Include="Lines\EntityList.cs" />
+    <Compile Include="Lines\EntityLineDetail.cs" />
+    <Compile Include="Lines\EntityCombo.cs" />
+    <Compile Include="Lines\ListBase.cs" />
+    <Compile Include="LineHelpers\EntityBaseHelper.cs" />
+    <Compile Include="Lines\EntityLine.cs" />
+    <Compile Include="LineHelpers\ListBaseHelper.cs" />
+    <Compile Include="LineHelpers\EntityListDetailHelper.cs" />
+    <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
     <Compile Include="EmbeddedControlHelper.cs" />
     <Compile Include="FindOptionsModelBinder.cs" />
+    <Compile Include="JSRenderer\JsRenderer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -111,13 +128,13 @@
     <Compile Include="Widgets\WidgetsHelper.cs" />
     <Compile Include="WwwRedirectAttributes.cs" />
     <Compile Include="MenuHelper.cs" />
-    <Compile Include="LightEntityLineHelper.cs" />
+    <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
     <Compile Include="DictionaryExtensions.cs" />
-    <Compile Include="EntityRepeaterHelper.cs" />
-    <Compile Include="EntityComboHelper.cs" />
-    <Compile Include="EntityBase.cs" />
-    <Compile Include="EntityLineHelper.cs" />
-    <Compile Include="EntityListHelper.cs" />
+    <Compile Include="LineHelpers\EntityRepeaterHelper.cs" />
+    <Compile Include="LineHelpers\EntityComboHelper.cs" />
+    <Compile Include="Lines\EntityBase.cs" />
+    <Compile Include="LineHelpers\EntityLineHelper.cs" />
+    <Compile Include="LineHelpers\EntityListHelper.cs" />
     <Compile Include="EntitySettings.cs" />
     <Compile Include="FindOptions.cs" />
     <Compile Include="HtmlHelpers.cs" />
@@ -125,7 +142,7 @@
     <Compile Include="Navigator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuerySettings.cs" />
-    <Compile Include="RadioButtonLine.cs" />
+    <Compile Include="Lines\RadioButtonLine.cs" />
     <Compile Include="ScriptHelper.cs" />
     <Compile Include="ScriptManager.cs">
       <SubType>ASPXCodeBehind</SubType>
@@ -136,7 +153,7 @@
     <Compile Include="StyleContext.cs" />
     <Compile Include="TypeContext.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="ValueLineHelper.cs" />
+    <Compile Include="LineHelpers\ValueLineHelper.cs" />
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -153,10 +170,11 @@
     <EmbeddedResource Include="Views\SearchWindow.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\OKCancelPopup.ascx">
+    <EmbeddedResource Include="Views\ChooserPopup.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\PopupControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NormalPage.aspx">
       <SubType>ASPXCodeBehind</SubType>
@@ -190,17 +208,17 @@
     <EmbeddedResource Include="Scripts\MicrosoftAjax.js" />
     <EmbeddedResource Include="Scripts\MicrosoftMvcAjax.debug.js" />
     <EmbeddedResource Include="Scripts\MicrosoftMvcAjax.js" />
-    <EmbeddedResource Include="Scripts\SF_AjaxValidation.js" />
     <EmbeddedResource Include="Scripts\SF_Globals.js" />
-    <EmbeddedResource Include="Scripts\SF_PopupPanel.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Scripts\SF_Autocomplete.js" />
     <EmbeddedResource Include="Scripts\SF_DragAndDrop.js" />
-    <EmbeddedResource Include="Scripts\SF_SearchEngine.js" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
+    <Content Include="Scripts\SF_AjaxValidation.js" />
+    <Content Include="Scripts\SF_PopupPanel.js" />
+    <Content Include="Scripts\SF_SearchEngine.js" />
     <EmbeddedResource Include="Views\AjaxError.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>

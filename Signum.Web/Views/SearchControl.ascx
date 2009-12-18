@@ -15,7 +15,7 @@
     ""
 %>
 
-<div id="<%=Html.GlobalName("divFilters") %>" style="display:<%= (findOptions.FilterMode == FilterMode.Visible) ? "block" : "none" %>" >
+<div id="<%=Html.GlobalName("divFilters") %>" style="display:<%= (findOptions.FilterMode != FilterMode.AlwaysHidden) ? "block" : "none" %>" >
     <%Html.RenderPartial("~/Plugin/Signum.Web.dll/Signum.Web.Views.FilterBuilder.ascx", ViewData); %>
 </div>
 
@@ -23,12 +23,9 @@
     <label class="OperationDiv" for="<%=Html.GlobalName(ViewDataKeys.Top)%>">Núm.registros</label> 
     <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new Dictionary<string, object>{{"size","5"},{"class","OperationDiv"}})%>
 
-    <% if (findOptions.FilterMode != FilterMode.AlwaysHidden){%>
-        <input class="OperationDiv" type="hidden" onclick="toggleVisibility('<%=Html.GlobalName("divFilters") %>');" value="Filtros" /> 
-    <%} %>
-        <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="$('#{0}').toggleClass('loading');$('#{0}').val('Buscando...');Search('Signum/Search','{1}',function(){{$('#{0}').val('Buscar');$('#{0}').toggleClass('loading');}});".Formato(Html.GlobalName("btnSearch"),ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
+    <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
     <%if ((bool)ViewData[ViewDataKeys.Create]){ %>
-        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate('{0}','{1}',function(){{OnSearchCreateOK('{2}','{1}');}},function(){{OnSearchCreateCancel('{1}');}},'false');".Formato(popupPrefix.HasText() ? "Signum/PopupView" : "Signum/Create", popupPrefix ?? "", "Signum/TrySavePartial")%>" />
+        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(popupPrefix ?? "")%>" />
     <%} %>
     <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], popupPrefix)%> 
 </div>

@@ -138,7 +138,17 @@ namespace Signum.Web
             return sb.ToString();
         }
 
-        public List<OrderedMenu> children;
+        private List<OrderedMenu> children; //Bug: Doesn't update the real item subItems so they are not rendered;
+        public List<OrderedMenu> Children //Made as property as a quick fix for the bug. TODO Anto: Revisar esto
+        {
+            get { return children; }
+            set 
+            {
+                children = value;
+                if (node != null)
+                    node.SubItems = children.Select(om => om.node).ToList(); 
+            }
+        }
         public Item node;
     }
 

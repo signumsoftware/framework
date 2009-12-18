@@ -24,14 +24,14 @@ namespace Signum.Web
         public static string ValidationSummaryAjax(this HtmlHelper html)
         {
             return "<div id='sfGlobalValidationSummary'>" + 
-                   html.ValidationSummary() +
+                   //html.ValidationSummary() +
                    "</div>";
         }
 
         public static string ValidationSummaryAjax(this HtmlHelper html, string prefix)
         {
             return "<div id='{0}sfGlobalValidationSummary'>".Formato(prefix) +
-                   html.ValidationSummary() +
+                   //html.ValidationSummary() +
                    "</div>";
         }
 
