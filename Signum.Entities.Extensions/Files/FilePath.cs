@@ -66,9 +66,9 @@ namespace Signum.Entities.Files
             get { return ((long)FileLength).ToComputerSize(true);}
         }
 
-        [NotNullable, SqlDbType(Size = 260)]
+        [SqlDbType(Size = 260)]
         string sufix;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 260)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
         public string Sufix
         {
             get { return sufix; }

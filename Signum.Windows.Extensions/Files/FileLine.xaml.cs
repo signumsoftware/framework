@@ -91,6 +91,7 @@ namespace Signum.Windows.Files
         public delegate void ViewFileDelegate(object entity);
         public delegate object OpenFileDelegate();
 
+        public event Func<IFile> Creating;
         public event Func<object> Opening;
         public event Action<object> Saving;
         public event Action<object> Viewing;
@@ -165,7 +166,8 @@ namespace Signum.Windows.Files
                 Process.Start(filePath);
             }
             else
-                throw new ApplicationException("Viewing has no default implementation for {0}".Formato(Type));
+                throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.ViewingHasNotDefaultImplementationFor0
+                    .Formato(Type));
         }
 
         private void OnSaving(object entity)
@@ -191,7 +193,7 @@ namespace Signum.Windows.Files
                 }                
             }
             else
-                throw new ApplicationException("Saving has no default implementation for {0}".Formato(Type)); 
+                throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.SavingHasNotDefaultImplementationFor0.Formato(Type)); 
         }
 
 
@@ -218,7 +220,9 @@ namespace Signum.Windows.Files
 
                 if (ofd.ShowDialog() == true)
                 {
-                    IFile file = (IFile)Activator.CreateInstance(cleanType);
+
+                    IFile file = Creating != null ? Creating() :
+                        (IFile)Activator.CreateInstance(cleanType);
                     file.FileName = System.IO.Path.GetFileName(ofd.FileName);
                     file.BinaryFile = File.ReadAllBytes(ofd.FileName);
 
@@ -228,7 +232,7 @@ namespace Signum.Windows.Files
                 return null;
             }
 
-            throw new ApplicationException("Opening has no default implementation for {0}".Formato(Type)); 
+            throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OpeningHasNotDefaultImplementationFor0.Formato(Type)); 
         }
 
         protected bool OnRemoving(object entity)

@@ -180,4 +180,22 @@
   <data name="PleaseSelectAConstructor" xml:space="preserve">
     <value>Please Select a Constructor</value>
   </data>
+  <data name="DownloadFile" xml:space="preserve">
+    <value>Download File</value>
+  </data>
+  <data name="SelectFile" xml:space="preserve">
+    <value>Select File</value>
+  </data>
+  <data name="ViewFile" xml:space="preserve">
+    <value>View file</value>
+  </data>
+  <data name="ViewingHasNotDefaultImplementationFor0" xml:space="preserve">
+    <value>Viewing has no default implementation for {0}</value>
+  </data>
+  <data name="SavingHasNotDefaultImplementationFor0" xml:space="preserve">
+    <value>Saving has no default implementation for {0}</value>
+  </data>
+  <data name="OpeningHasNotDefaultImplementationFor0" xml:space="preserve">
+    <value>Opening has no default implementation for {0}</value>
+  </data>
 </root>

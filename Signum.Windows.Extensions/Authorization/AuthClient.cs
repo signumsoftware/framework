@@ -53,7 +53,7 @@ namespace Signum.Windows.Authorization
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
                 }
 
-                LinksWidget.EntityLinks<RoleDN>((r, c) =>
+                Links.RegisterEntityLinks<RoleDN>((r, c) =>
                 {
                     bool authorized = !Server.Implements<IPermissionAuthServer>() || BasicPermissions.AdminRules.IsAuthorized();
                     return new QuickLink[]

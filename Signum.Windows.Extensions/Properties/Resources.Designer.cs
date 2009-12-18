@@ -97,6 +97,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Download File.
+        /// </summary>
+        public static string DownloadFile {
+            get {
+                return ResourceManager.GetString("DownloadFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Excel XML 2003 Spreadsheet (*.xml)|*.xml.
         /// </summary>
         public static string Excel2003XmlSpreadsheet {
@@ -187,6 +196,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Opening has no default implementation for {0}.
+        /// </summary>
+        public static string OpeningHasNotDefaultImplementationFor0 {
+            get {
+                return ResourceManager.GetString("OpeningHasNotDefaultImplementationFor0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please Select a Constructor.
         /// </summary>
         public static string PleaseSelectAConstructor {
@@ -232,11 +250,47 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Saving has no default implementation for {0}.
+        /// </summary>
+        public static string SavingHasNotDefaultImplementationFor0 {
+            get {
+                return ResourceManager.GetString("SavingHasNotDefaultImplementationFor0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select File.
+        /// </summary>
+        public static string SelectFile {
+            get {
+                return ResourceManager.GetString("SelectFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View.
         /// </summary>
         public static string View {
             get {
                 return ResourceManager.GetString("View", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View file.
+        /// </summary>
+        public static string ViewFile {
+            get {
+                return ResourceManager.GetString("ViewFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Viewing has no default implementation for {0}.
+        /// </summary>
+        public static string ViewingHasNotDefaultImplementationFor0 {
+            get {
+                return ResourceManager.GetString("ViewingHasNotDefaultImplementationFor0", resourceCulture);
             }
         }
         

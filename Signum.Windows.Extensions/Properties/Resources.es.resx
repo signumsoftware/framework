@@ -126,6 +126,9 @@
   <data name="Days" xml:space="preserve">
     <value>Dias</value>
   </data>
+  <data name="DownloadFile" xml:space="preserve">
+    <value>Descargar archivo</value>
+  </data>
   <data name="Excel2003XmlSpreadsheet" xml:space="preserve">
     <value>Hoja de cálculo XML 2003(*.xml)|*.xml</value>
   </data>
@@ -159,6 +162,9 @@
   <data name="Open" xml:space="preserve">
     <value>Abrir</value>
   </data>
+  <data name="OpeningHasNotDefaultImplementationFor0" xml:space="preserve">
+    <value>Abrir no tiene una implementación por defecto para {0}</value>
+  </data>
   <data name="PleaseSelectAConstructor" xml:space="preserve">
     <value>Por favor, seleccione un constructor</value>
   </data>
@@ -167,6 +173,18 @@
   </data>
   <data name="Removed" xml:space="preserve">
     <value>Eliminado</value>
+  </data>
+  <data name="SavingHasNotDefaultImplementationFor0" xml:space="preserve">
+    <value>Guardar no tiene una implementación por defecto para {0}</value>
+  </data>
+  <data name="SelectFile" xml:space="preserve">
+    <value>Seleccionar archivo</value>
+  </data>
+  <data name="ViewFile" xml:space="preserve">
+    <value>Ver archivo</value>
+  </data>
+  <data name="ViewingHasNotDefaultImplementationFor0" xml:space="preserve">
+    <value>Ver no tiene una implementación por defecto para {0}</value>
   </data>
   <data name="Years" xml:space="preserve">
     <value>Años</value>
