@@ -21,7 +21,7 @@ namespace Signum.Web.Operations
     [HandleException, AuthenticationRequired]
     public class OperationController : Controller
     {
-        public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
 
@@ -39,9 +39,9 @@ namespace Signum.Web.Operations
             }
             else
             {
-                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form);
+                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form, sfOldPrefix);
 
-                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, "");
+                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, sfOldPrefix, "");
                 //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", "");
 
                 if (changesLog.Errors != null && changesLog.Errors.Count > 0)
@@ -80,7 +80,7 @@ namespace Signum.Web.Operations
             return Content("");
         }
 
-        public ActionResult ConstructFromExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult ConstructFromExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
 
@@ -98,10 +98,10 @@ namespace Signum.Web.Operations
             }
             else
             {
-                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form);
+                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form, sfOldPrefix);
 
                 //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, ""); Con prefijo falla para Alta Poliza desde presupuesto
-                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", "");
+                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, sfOldPrefix, "");
 
                 if (changesLog.Errors != null && changesLog.Errors.Count > 0)
                 {
