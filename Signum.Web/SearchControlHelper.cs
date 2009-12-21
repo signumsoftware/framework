@@ -69,8 +69,11 @@ namespace Signum.Web
                     else if (mi.HtmlProps["style"].ToString().IndexOf("cursor")==-1)
                         mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
 
+                    if(!mi.HtmlProps.ContainsKey("title"))
+                        mi.HtmlProps["title"] = mi.AltText;
+
                    // sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
-                    sb.Append(helper.Button(mi.Id, mi.AltText, onclick, "", mi.HtmlProps));
+                    sb.Append(helper.Button(mi.Id, mi.Text, onclick, "", mi.HtmlProps));
                 }
             }
             return sb.ToString();

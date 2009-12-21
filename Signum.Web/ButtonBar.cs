@@ -13,6 +13,7 @@ namespace Signum.Web
     {
         public string Id { get; set; }
         public string ImgSrc { get; set; }
+        public string Text { get; set; }
         public string AltText { get; set; }
         public string OnClick { get; set; }
         /// <summary>
@@ -96,7 +97,7 @@ namespace Signum.Web
                     HtmlProps.Add("onclick", onclick);
                 else
                     DivCssClass = DivCssClass + " disabled"; 
-                return helper.Div(Id, AltText, DivCssClass, HtmlProps);
+                return helper.Div(Id, Text, DivCssClass, HtmlProps);
             }
         }
     }

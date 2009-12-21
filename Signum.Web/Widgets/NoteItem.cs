@@ -29,8 +29,8 @@ namespace Signum.Web
         public override string ToString(HtmlHelper helper, string prefix)
         {
             string queryUrlName = Navigator.Manager.QuerySettings[FindOptions.QueryName].UrlName;
-            if (!AltText.HasText())
-                AltText = Navigator.SearchTitle(FindOptions.QueryName);
+            if (!Text.HasText())
+                Text = Navigator.SearchTitle(FindOptions.QueryName);
                         
             if (OnClick.HasText() || OnServerClickAjax.HasText() || OnServerClickPost.HasText())
                 return base.ToString(helper, prefix);
