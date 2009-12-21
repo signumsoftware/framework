@@ -83,7 +83,7 @@ namespace Signum.Web
                 }
             }
 
-            HtmlProps.Add("title", AltText);
+            HtmlProps.Add("title", AltText ?? "");
 
             if (ImgSrc.HasText())
             {

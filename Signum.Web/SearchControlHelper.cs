@@ -70,7 +70,7 @@ namespace Signum.Web
                         mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
 
                     if(!mi.HtmlProps.ContainsKey("title"))
-                        mi.HtmlProps["title"] = mi.AltText;
+                        mi.HtmlProps["title"] = mi.AltText ?? "";
 
                    // sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
                     sb.Append(helper.Button(mi.Id, mi.Text, onclick, "", mi.HtmlProps));
