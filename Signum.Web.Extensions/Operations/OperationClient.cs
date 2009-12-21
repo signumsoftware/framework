@@ -61,7 +61,8 @@ namespace Signum.Web.Operations
                 {
                     WebMenuItem item = new WebMenuItem
                     {
-                        AltText = GetText(oi.Key, dic[oi.Key].OperationSettings),
+                        Text = GetText(oi.Key, dic[oi.Key].OperationSettings),
+                        AltText = dic[oi.Key].OperationInfo.CanExecute ?? GetText(oi.Key, dic[oi.Key].OperationSettings),
                         Id = dic[oi.Key].OperationSettings.TryCC(os => os.Id),
                         ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
                         OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
@@ -106,7 +107,8 @@ namespace Signum.Web.Operations
                 {
                     WebMenuItem item = new WebMenuItem
                     {
-                        AltText = GetText(oi.Key, dic[oi.Key].OperationSettings),
+                        Text = GetText(oi.Key, dic[oi.Key].OperationSettings),
+                        AltText = dic[oi.Key].OperationInfo.CanExecute ?? GetText(oi.Key, dic[oi.Key].OperationSettings),
                         Id = dic[oi.Key].OperationSettings.TryCC(os => os.Id),
                         ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationSettings),
                         OnClick = dic[oi.Key].OperationSettings.TryCC(os => os.OnClick),
@@ -127,8 +129,8 @@ namespace Signum.Web.Operations
 
         protected internal virtual string GetText(Enum key, WebMenuItem os)
         {
-            if (os != null && os.AltText != null)
-                return os.AltText;
+            if (os.TryCC(o => o.Text) != null)
+                return os.Text;
 
             return key.NiceToString();
         }
