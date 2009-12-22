@@ -29,6 +29,7 @@ namespace Signum.Web
         /// </summary>
         public string OnOk { get; set; }
         public string OnCancelled { get; set; }
+        public bool? Async { get; set; }
 
         public JsFindOptions()
         {
@@ -56,6 +57,9 @@ namespace Signum.Web
 
                 if (OnCancelled.HasText())
                     sb.Append("onCancelled:{0},".Formato(OnCancelled));
+
+                if (Async == true)
+                    sb.Append("async:'{0}',".Formato(true));
 
                 if (FindOptions != null)
                 { 

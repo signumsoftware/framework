@@ -39,6 +39,13 @@ namespace Signum.Web
                     fo.AllowMultiple = aux;
             }
 
+            if (parameters.AllKeys.Any(k => k == "sfAsync"))
+            {
+                bool aux;
+                if (bool.TryParse(parameters["sfAsync"], out aux))
+                    fo.Async = aux;
+            }
+
             if (parameters.AllKeys.Any(k => k == "sfFilterMode"))
                 fo.FilterMode = (FilterMode)Enum.Parse(typeof(FilterMode), parameters["sfFilterMode"]);
 
