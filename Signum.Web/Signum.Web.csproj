@@ -217,9 +217,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
-    <Content Include="Scripts\SF_AjaxValidation.js" />
-    <Content Include="Scripts\SF_PopupPanel.js" />
-    <Content Include="Scripts\SF_SearchEngine.js" />
+    <EmbeddedResource Include="Scripts\SF_FindNavigator.js" />
+    <EmbeddedResource Include="Scripts\SF_Lines.js" />
+    <EmbeddedResource Include="Scripts\SF_Mixin.js" />
+    <EmbeddedResource Include="Scripts\SF_Operations.js" />
+    <EmbeddedResource Include="Scripts\SF_Popup.js" />
+    <EmbeddedResource Include="Scripts\SF_Validator.js" />
+    <EmbeddedResource Include="Scripts\SF_ViewNavigator.js" />
     <EmbeddedResource Include="Views\AjaxError.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>

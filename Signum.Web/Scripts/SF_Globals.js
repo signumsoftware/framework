@@ -338,3 +338,30 @@ function() {
         value ? $("#" + name).show() : $("#" + name).hide();
     };
 }
+
+
+$.getScript = function(url, callback, cache){ $.ajax({ type: "GET", url: url, success: callback, dataType: "script", cache: cache }); }; 
+
+var resourcesLoaded = new Array();
+$.jsLoader = function(cond, url, callback) {
+    if (!resourcesLoaded[url] && cond) {
+         console.log("Getting js " + url);
+         $.getScript(url, function() {resourcesLoaded[url]=true; if (callback) callback();}, true);
+        }
+};
+$.cssLoader = function(cond, url) {
+    if (!resourcesLoaded[url] && cond) {
+         console.log("Getting css " + url);
+      /*   jQuery( document.createElement('link') ).attr({
+                href: url,
+                media: media || 'screen',
+                type: 'text/css',
+                rel: 'stylesheet'
+                }).appendTo($('head')); */
+        var head = document.getElementsByTagName('head')[0];
+        $(document.createElement('link'))
+            .attr({type: 'text/css', href: url, rel: 'stylesheet', media: 'screen'})
+            .appendTo(head);                 
+        resourcesLoaded[url]=true;
+    }
+};
