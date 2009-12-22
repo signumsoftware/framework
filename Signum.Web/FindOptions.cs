@@ -58,7 +58,7 @@ namespace Signum.Web
             if (Async == true)
                 sb.Append("$sfAsync=true");
 
-            if (writeAllowMultiple)
+            if (writeAllowMultiple && AllowMultiple.HasValue)
                 sb.Append("&sfAllowMultiple="+AllowMultiple.ToString());
             
             if (filterOptions != null && filterOptions.Count > 0)
