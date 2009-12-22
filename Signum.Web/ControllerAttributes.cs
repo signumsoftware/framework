@@ -185,6 +185,7 @@ namespace Signum.Web
 
             if (LogException != null) LogException(model);
 
+            
             if (filterContext.HttpContext.Request.IsAjaxRequest())
             {
                 //we do not want to use a master page, just render a control with the error string
