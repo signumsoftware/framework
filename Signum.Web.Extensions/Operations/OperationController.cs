@@ -59,8 +59,11 @@ namespace Signum.Web.Operations
                 }
             }
 
-            if (prefix.HasText() && Request.IsAjaxRequest()) 
+            if (prefix.HasText() && Request.IsAjaxRequest())
+            {
+                ViewData[ViewDataKeys.WriteSFInfo] = true;
                 return Navigator.PopupView(this, entity, prefix);
+            }
             else //NormalWindow
                 return Navigator.View(this, entity);
         }
