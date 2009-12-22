@@ -5,6 +5,7 @@ using System.Text;
 using System.Web.Mvc;
 using Signum.Utilities;
 
+
 namespace Signum.Web
 {
     public class DatePickerOptions
@@ -91,6 +92,8 @@ namespace Signum.Web
 
     public static class CalendarHelper
     {
+        public static Action<HtmlHelper, StringBuilder> IncludeCss;
+
         //jQuery ui DatePicker
         public static string Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
@@ -102,11 +105,14 @@ namespace Signum.Web
             
             //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
 
-            sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.all.css",
-                "Scripts/jqueryui/ui.base.css",
-                "Scripts/jqueryui/ui.core.css",
-                "Scripts/jqueryui/ui.datepicker.css",
-                "Scripts/jqueryui/ui.theme.css"));
+            if (IncludeCss != null)
+                IncludeCss(helper, sb);
+            else
+                sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.all.css",
+                    "Scripts/jqueryui/ui.base.css",
+                    "Scripts/jqueryui/ui.core.css",
+                    "Scripts/jqueryui/ui.datepicker.css",
+                    "Scripts/jqueryui/ui.theme.css"));
 
             sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 
