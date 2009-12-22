@@ -3,8 +3,6 @@
 
 <asp:Content ID="loginTitle" ContentPlaceHolderID="head" runat="server">
     <title>Log On</title>
-<!--    <link href="Content/Site.css" rel="stylesheet" type="text/css" />
-    <link href="Content/LineStyles.css" rel="stylesheet" type="text/css" />-->
 </asp:Content>
 
 <asp:Content ID="loginContent" ContentPlaceHolderID="MainContent" runat="server">
