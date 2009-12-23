@@ -23,7 +23,7 @@ namespace Signum.Test.Extensions
         [TestInitialize]
         public void Initialize()
         {
-            Starter.StartAndLoad(Settings.Default.ConnectionString, Queries.Web);
+            Starter.StartAndLoad(Settings.Default.ConnectionString);
 
             //AuthLogic.UnsafeUser("su");
         }
