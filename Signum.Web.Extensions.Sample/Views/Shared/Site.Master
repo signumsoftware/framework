@@ -1,0 +1,150 @@
+<%@ Master Language="C#" Inherits="System.Web.Mvc.ViewMasterPage" %>
+<%@ Import Namespace="Signum.Web" %>
+<%@ Import Namespace="Signum.Web.Authorization" %>
+<%@ Import Namespace="Signum.Web.ScriptCombiner" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title><%=ViewData[ViewDataKeys.PageTitle] ?? ""%></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
+
+    <!--<script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.tablesorter.js" ) %>" type="text/javascript"></script>-->
+    <%--<script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.autogrow.js" ) %>" type="text/javascript"></script>--%>
+    <!--<script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/widget.js" ) %>" type="text/javascript"></script>-->
+
+    <script src="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery-1.3.2.min.js" ) %>" type="text/javascript"></script>    
+   
+    <%--<script type='text/javascript' src='<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) + Html.CombinedJsUrl("jquery-1.3.2.min.js","SF_Globals.js","SF_Popup.js","SF_Lines.js","SF_ViewNavigator.js","SF_FindNavigator.js", "SF_Validator.js", "SF_Operations.js")%>'></script>--%>
+
+   <!-- <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/reset.css" ) %>" rel="stylesheet" type="text/css" />
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/text.css" ) %>" rel="stylesheet" type="text/css" />
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/grid.css" ) %>" rel="stylesheet" type="text/css" />    
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/layout.css" ) %>" rel="stylesheet" type="text/css" />
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/nav.css" ) %>" rel="stylesheet" type="text/css" />
+-->
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/basic.merged.min.css" ) %>" rel="stylesheet" type="text/css" />
+    
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/LineStyles.css" ) %>" rel="stylesheet" type="text/css" />
+    <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/results.css" ) %>" rel="stylesheet" type="text/css" />    
+ <!--   <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/ui.merged.css" ) %>" rel="stylesheet" type="text/css" />-->    
+
+ <!--   <link href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Content/Site.css" ) %>" rel="stylesheet" type="text/css" />    
+-->
+    <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>    
+    <script type="text/javascript">
+    
+    $(function() {
+    
+    if ($.jsLoader) {
+        //Textareas
+        $.jsLoader($("textarea").length>0,
+            "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.autogrow.js" ) %>"
+            );
+            
+        //Sort tables
+       $.jsLoader($(".tblResults").length > 0 || $(".btnSearch").length > 0,
+            "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.tablesorter.min.js" ) %>",
+            function() {
+                $(".btnSearch").click(function(){
+                    $(".tblResults").tablesorter({headers: {
+                        0: {sorter:false},
+                        1: {sorter:false}
+                    }});
+                });
+            }
+        );
+        
+        //Widgets - Tooltips
+        if ($('.tooltipped').length>0) {
+            $.jsLoader(true,
+                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jquery.qtip-1.0.0-rc3.min.js" ) %>"            
+            );
+            $.jsLoader(true,
+                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/widget.js" ) %>"            
+            );        
+        }
+        
+        //Tabs        
+        if ($('input.hasDatepicker').length>0 || $('.tabs').length>0) {
+            $.jsLoader(true,
+                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/jquery-ui.1.7.2.sf.js" ) %>",
+                function() {"Llamando a TABS"; $('.tabs').tabs();}
+            );
+            $.cssLoader(true,
+                "<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/Scripts/jqueryui/ui.merged.css" ) %>"    
+            );
+        }
+        }
+    });
+    </script>
+</head>
+
+<body>
+    <div id="loading-area" class="message-area" style="display:none;">
+        <div class="message-area-text-container">
+            <span id="loading-area-text" class="message-area-text">Cargando...</span>
+        </div>
+    </div>
+  
+    <div class="container_16" id="main">
+        <!--<div class="grid_12 suffix_2"></div>   
+        <div class="grid_2 prefix_12">
+        <ul id="admin-menu" class="dropdown">
+            <li>Administrador
+                <ul>
+                    <li>
+                        <a href="/SegurosMVC/Home/Times">Tiempos</a>
+                        <a href="/SegurosMVC/Home/Times2">Tiempos (detallado)</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        </div> -->
+        <div class="grid_3 prefix_13" id="login">
+            <% Html.RenderPartial(AuthClient.LoginUserControlUrl); %>
+        </div>    
+        <div class="clear"></div> 
+        <div id="title" class="grid_16">
+            <h1><a href="Home/Index">Xena</a></h1>
+        </div>
+        
+        <div class="grid_16">
+            <ul class="nav main">
+                <li><a href="javascript:MostrarMenu();" class="hidden" id="mostrarMenu">Mostrar menú</a></li>
+
+                <% ViewDataDictionary vdd = new ViewDataDictionary(Model){
+                    {ViewDataKeys.MainControlUrl, ViewData[ViewDataKeys.MainControlUrl]}
+                   };
+                     
+                 Html.RenderPartial("Views/Shared/WidgetView",vdd);
+                    %>
+          
+            </ul>
+        </div>
+        <div class="clear"></div> 
+        <%
+            //Sólo mostrar menú si está identificado
+            bool identificado = Signum.Entities.Authorization.UserDN.Current != null;
+            %>
+        <div id="menu" class="grid_3">
+            <% if (identificado)
+               { %>
+            <div class="box menu">
+                <h2><a id="toggle-section-menu" href="#">Menú</a></h2>
+                <% Html.RenderPartial("Menu", ViewData["current"] = Context.Request.RawUrl); %>
+            </div>
+            <% } %>
+        </div>
+        <div id="content" class="container_16 grid_13">           
+            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+        </div>
+        <div class="clear"></div>
+        <div id="footer" class="grid_16">
+            Powered by <span class="company">Signum Framework</span>
+        </div>
+        <div class="clear"></div> 
+    </div>        
+</body>
+</html>
