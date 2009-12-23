@@ -41,8 +41,15 @@ namespace Signum.Test
         public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();
-            DynamicQueryManager dqm = new DynamicQueryManager(); 
+            DynamicQueryManager dqm = new DynamicQueryManager();
 
+            InternalStart(sb, dqm);
+
+            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
+        }
+
+        public static void InternalStart(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
             TypeLogic.Start(sb);
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
@@ -128,8 +135,6 @@ namespace Signum.Test
                                                 a.Category,
                                                 a.Result
                                             }).ToDynamic();
-
-            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
         }
         
         public static void Load()
