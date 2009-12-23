@@ -55,7 +55,12 @@ namespace Signum.Entities
             if (DisableOnCorrupt && !Corruption.Strict)
                 return null;
 
-            return ErrorMessage ?? OverrideError(value); 
+            string defaultError = OverrideError(value);
+
+            if (defaultError == null)
+                return null;
+
+            return ErrorMessage ?? defaultError;
         }
 
         /// <summary>
