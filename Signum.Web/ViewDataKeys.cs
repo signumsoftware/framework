@@ -18,6 +18,7 @@ namespace Signum.Web
         //public const string DivASustituir = "sfDivASustituir";
         public const string LoadAll = "sfLoadAll";
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
+        public const string GlobalValidationSummary = "sfGlobalValidationSummary";
         public const string MainControlUrl = "sfMainControlUrl";
        // public const string PopupInnerControlUrl = "sfPopupInnerControlUrl";
         public const string StyleContext = "sfStyleContext";

@@ -198,8 +198,10 @@ var PartialValidator = function(_pvalOptions) {
         var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId).add(GetSFInfoParams(this.valOptions.prefix));
         var requestData = formChildren.serialize();
 
-        requestData += qp(sfPrefix, this.valOptions.prefix)
-                    + qp(this.valOptions.prefix + sfInfo, new EntityInfo(this.valOptions.prefix).createValue(this.valOptions.type, this.valOptions.type, '', 0, 1, ''));
+        requestData += qp(sfPrefix, this.valOptions.prefix);
+
+        if (formChildren.filter(this.pf(sfInfo)).length == 0)
+            requestData += qp(this.valOptions.prefix + sfInfo, new EntityInfo(this.valOptions.prefix).createValue(this.valOptions.type, this.valOptions.type, '', 0, 1, ''));
 
         if (!empty(this.valOptions.prefixToIgnore))
             requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
