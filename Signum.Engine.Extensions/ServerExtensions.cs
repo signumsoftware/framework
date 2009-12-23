@@ -208,7 +208,7 @@ namespace Signum.Services
         public HashSet<object> AuthorizedQueries()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => QueryAuthLogic.AuthorizedQueryNames(GetQueryManager()));
+            () => QueryAuthLogic.AuthorizedQueryNames());
         }
 
         #endregion

@@ -141,10 +141,10 @@ namespace Signum.Entities.Processes
             if (pi.Is(()=>ExecutionStart) || pi.Is(()=>ExecutionEnd))
             {
                 if (this.ExecutionEnd < this.ExecutionStart)
-                    return "Process Start es greater than Process End";
+                    return Resources.ProcessStartIsGreaterThanProcessEnd;
 
                 if (this.ExecutionStart == null && this.ExecutionEnd != null)
-                    return "Process Start is nulo but Process End is not";
+                    return Resources.ProcessStartIsNullButProcessEndIsNot;
             }
 
             return stateValidator.Validate(this, pi) ?? base.PropertyCheck(pi);

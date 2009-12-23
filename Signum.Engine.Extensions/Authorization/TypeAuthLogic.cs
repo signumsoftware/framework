@@ -12,6 +12,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.Reflection;
 using System.Security.Authentication;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Authorization
 {
@@ -59,7 +60,7 @@ namespace Signum.Engine.Authorization
             {
                 TypeAccess access = GetAccess(RoleDN.Current, ident.GetType());
                 if (access < TypeAccess.Modify || ident.IsNew && access != TypeAccess.Create)
-                    throw new UnauthorizedAccessException("Not authorized to Save '{0}'".Formato(ident.GetType()));
+                    throw new UnauthorizedAccessException(Resources.NotAuthorizedToSave0.Formato(ident.GetType()));
             }
         }
 
@@ -69,7 +70,7 @@ namespace Signum.Engine.Authorization
             {
                 TypeAccess access = GetAccess(RoleDN.Current, type);
                 if (access < TypeAccess.Read)
-                    throw new UnauthorizedAccessException("Not authorized to Retrieve '{0}'".Formato(type));
+                    throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type));
             }
         }
 

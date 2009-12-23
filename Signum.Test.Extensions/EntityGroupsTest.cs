@@ -27,7 +27,7 @@ namespace Signum.Test.Extensions
             if (connection != null && connection == ConnectionScope.Current)
                 return;
 
-            DynamicQueryManager dqm = new DynamicQueryManager(null);
+            DynamicQueryManager dqm = new DynamicQueryManager();
             SchemaBuilder sb = new SchemaBuilder();
             sb.Settings.OverrideTypeAttributes<IEmployeeDN>(new ImplementedByAttribute());
             TypeLogic.Start(sb); 
@@ -38,7 +38,7 @@ namespace Signum.Test.Extensions
             EntityGroupLogic.Register<ResourceDN>(EntityGroups.UserResources, r => r.Propietary.Is(UserDN.Current));
             EntityGroupLogic.Register<SubResourceDN>(EntityGroups.UserResources, Database.Query<ResourceDN>().Where(r => r.Propietary.Is(UserDN.Current)).SelectMany(a => a.SubResources));
 
-            ConnectionScope.Default = new Connection(Settings.Default.SignumTest, sb.Schema);
+            ConnectionScope.Default = new Connection(Settings.Default.SignumTest, sb.Schema, dqm);
 
             Administrator.TotalGeneration();
 

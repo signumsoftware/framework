@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine.Linq;
 using Signum.Entities.DynamicQuery;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Reports
 {
@@ -43,7 +44,7 @@ namespace Signum.Engine.Reports
 
             }
             else if (compositeReport)
-                throw new InvalidOperationException("ExcelReport is necessary for CompositeReports");
+                throw new InvalidOperationException(Resources.ExcelReportArgumentIsNecessaryForCompositeReports);
         }
 
 

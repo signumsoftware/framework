@@ -529,6 +529,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not user logged.
+        /// </summary>
+        internal static string NotUserLogged {
+            get {
+                return ResourceManager.GetString("NotUserLogged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package.
         /// </summary>
         internal static string PackageDN {
@@ -795,6 +804,24 @@ namespace Signum.Entities.Extensions.Properties {
         internal static string ProcessQueries_ErrorExecutions {
             get {
                 return ResourceManager.GetString("ProcessQueries_ErrorExecutions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process Start is greater than Process End.
+        /// </summary>
+        internal static string ProcessStartIsGreaterThanProcessEnd {
+            get {
+                return ResourceManager.GetString("ProcessStartIsGreaterThanProcessEnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process Start is null but Process End is not.
+        /// </summary>
+        internal static string ProcessStartIsNullButProcessEndIsNot {
+            get {
+                return ResourceManager.GetString("ProcessStartIsNullButProcessEndIsNot", resourceCulture);
             }
         }
         
@@ -1182,6 +1209,15 @@ namespace Signum.Entities.Extensions.Properties {
         internal static string ScheduleRuleWeeklyDN_DayOfTheWeek {
             get {
                 return ResourceManager.GetString("ScheduleRuleWeeklyDN_DayOfTheWeek", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The user state must be disabled.
+        /// </summary>
+        internal static string TheUserStateMustBeDisabled {
+            get {
+                return ResourceManager.GetString("TheUserStateMustBeDisabled", resourceCulture);
             }
         }
         

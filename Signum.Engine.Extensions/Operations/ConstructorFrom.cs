@@ -7,6 +7,7 @@ using Signum.Entities.Operations;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
 using Signum.Engine.Basics;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Operations
 {
@@ -62,7 +63,7 @@ namespace Signum.Engine.Operations
                 throw new ApplicationException(error);
 
             if (!OperationLogic.OnAllowOperation(Key))
-                throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key)); 
+                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(Key)); 
 
             try
             {
@@ -107,7 +108,7 @@ namespace Signum.Engine.Operations
         public void AssertIsValid()
         {
             if (Construct == null)
-                throw new ApplicationException("Operation {0} has no Construct".Formato(Key));
+                throw new ApplicationException(Resources.Operation0DoesNotHaveConstructInitialized.Formato(Key));
         }
     }
 }

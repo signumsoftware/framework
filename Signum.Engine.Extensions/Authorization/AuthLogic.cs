@@ -101,8 +101,9 @@ namespace Signum.Engine.Authorization
                     var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
 
                     if (problems.Count > 0)
-                        throw new ApplicationException("Some cycles have been found in the graph of Roles due to the relationships:\r\n{1}"
-                            .Formato(problems.Count, problems.ToString("\r\n")));
+                        throw new ApplicationException(
+                            Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                            problems.ToString("\r\n"));
                 }
             }
         }
@@ -130,8 +131,9 @@ namespace Signum.Engine.Authorization
                 var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
 
                 if (problems.Count > 0)
-                    throw new ApplicationException("Some cycles have been found in the graph of Roles due to the relationships:\r\n{1}"
-                        .Formato(problems.Count, problems.ToString("\r\n")));
+                    throw new ApplicationException(
+                        Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                        problems.ToString("\r\n"));
 
                 return newRoles;
             }
@@ -203,7 +205,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartAllModules(SchemaBuilder sb, Type serviceInterface, params DynamicQueryManager[] queryManagers)
+        public static void StartAllModules(SchemaBuilder sb, Type serviceInterface, DynamicQueryManager queryManagers)
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);

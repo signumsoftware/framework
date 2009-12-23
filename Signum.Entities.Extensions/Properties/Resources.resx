@@ -522,4 +522,16 @@
   <data name="LogOperationDN_Plural" xml:space="preserve">
     <value>Operation Logs</value>
   </data>
+  <data name="NotUserLogged" xml:space="preserve">
+    <value>Not user logged</value>
+  </data>
+  <data name="TheUserStateMustBeDisabled" xml:space="preserve">
+    <value>The user state must be disabled</value>
+  </data>
+  <data name="ProcessStartIsGreaterThanProcessEnd" xml:space="preserve">
+    <value>Process Start is greater than Process End</value>
+  </data>
+  <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
+    <value>Process Start is null but Process End is not</value>
+  </data>
 </root>

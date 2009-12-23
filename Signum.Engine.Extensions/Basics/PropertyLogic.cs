@@ -60,18 +60,16 @@ namespace Signum.Engine.Basics
             return total.Values.ToList();
         }
 
-        private static List<PropertyDN> GenerateProperties(TypeDN typeDN, Type type)
+        static List<PropertyDN> GenerateProperties(TypeDN typeDN, Type type)
         {
-            return Reflector.InstancePropertiesInOrder(type)
-                .GroupBy(a => a.Name).Select(g => g.First()) //Overriden properties
-                .Where(p => !Attribute.IsDefined(p, typeof(HiddenPropertyAttribute)))
+            return Reflector.PublicInstancePropertiesInOrder(type)
                 .SelectMany(pi =>
                 {
                     PropertyDN property = new PropertyDN { Type = typeDN, Name = pi.Name };
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
                     {
-                        var stack = GenerateAllEmbeddedFields(typeDN, pi.PropertyType, pi.Name + ".");
+                        var stack = GenerateEmbeddedProperties(typeDN, pi.PropertyType, pi.Name + ".");
                         return stack.PreAnd(property);
                     }
 
@@ -80,7 +78,7 @@ namespace Signum.Engine.Basics
                         Type colType = ReflectionTools.CollectionType(pi.PropertyType);
                         if (Reflector.IsEmbeddedEntity(colType))
                         {
-                            var stack = GenerateAllEmbeddedFields(typeDN, colType, pi.Name + "/");
+                            var stack = GenerateEmbeddedProperties(typeDN, colType, pi.Name + "/");
                             return stack.PreAnd(property);
                         }
                     }
@@ -89,18 +87,16 @@ namespace Signum.Engine.Basics
                 }).ToList();
         }
 
-        static List<PropertyDN> GenerateAllEmbeddedFields(TypeDN typeDN, Type type, string prefix)
+        static List<PropertyDN> GenerateEmbeddedProperties(TypeDN typeDN, Type type, string prefix)
         {
-            return Reflector.InstancePropertiesInOrder(type)
-                .GroupBy(a => a.Name).Select(g => g.First()) //Overriden properties
-                .Where(p => !Attribute.IsDefined(p, typeof(HiddenPropertyAttribute)))
+            return Reflector.PublicInstancePropertiesInOrder(type)
                 .SelectMany(pi =>
                 {
                     PropertyDN field = new PropertyDN { Type = typeDN, Name = prefix + pi.Name };
 
                     if (Reflector.IsEmbeddedEntity(pi.PropertyType))
                     {
-                        var list = GenerateAllEmbeddedFields(typeDN, pi.PropertyType, prefix + pi.Name + ".");
+                        var list = GenerateEmbeddedProperties(typeDN, pi.PropertyType, prefix + pi.Name + ".");
                         return list.PreAnd(field);
                     }
 

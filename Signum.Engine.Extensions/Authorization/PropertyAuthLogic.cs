@@ -115,7 +115,7 @@ namespace Signum.Engine.Authorization
 
         public static Dictionary<Type, Dictionary<string,Access>> AuthorizedProperties()
         {
-            return RuntimeRules.TryGetC(UserDN.Current.ThrowIfNullC("No user logged-in").Role) ?? new Dictionary<Type, Dictionary<string, Access>>();
+            return RuntimeRules.TryGetC(RoleDN.Current) ?? new Dictionary<Type, Dictionary<string, Access>>();
         }
 
         public static Dictionary<RoleDN, Dictionary<Type, Dictionary<string, Access>>> NewCache()

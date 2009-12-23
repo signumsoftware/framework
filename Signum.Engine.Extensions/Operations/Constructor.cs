@@ -36,7 +36,7 @@ namespace Signum.Engine.Operations
         IIdentifiable IConstructorOperation.Construct(params object[] args)
         {
              if (!OperationLogic.OnAllowOperation(Key))
-                throw new UnauthorizedAccessException("Operation {0} is not Authorized".Formato(Key));
+                throw new UnauthorizedAccessException(Signum.Engine.Extensions.Properties.Resources.Operation0IsNotAuthorized.Formato(Key));
 
              try
              {

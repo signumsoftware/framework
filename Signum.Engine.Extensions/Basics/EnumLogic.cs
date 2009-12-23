@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Engine.Authorization;
 using System.Reflection;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Basics
 {
@@ -89,7 +90,7 @@ namespace Signum.Engine.Basics
 
         public static T ToEntity(Enum key)
         {
-            return toEntity.GetOrThrow(key, "The key {0} is not found in {1} table".Formato(key, typeof(T).Name)); 
+            return toEntity.GetOrThrow(key, Resources.TheKey0IsNotFoundIn1Table.Formato(key, typeof(T).Name)); 
         }
 
         public static Enum ToEnum(T entity)
@@ -99,7 +100,7 @@ namespace Signum.Engine.Basics
 
         public static Enum ToEnum(string keyName)
         {
-            return toEnum.GetOrThrow(keyName, "Not value for {0} is not found in {1} table".Formato(keyName, typeof(T).Name)); 
+            return toEnum.GetOrThrow(keyName, Resources.NotValueFor0IsNotFoundIn1Table.Formato(keyName, typeof(T).Name)); 
         }
 
         internal static IEnumerable<T> AllEntities()

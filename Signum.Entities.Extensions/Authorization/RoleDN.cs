@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Security.Authentication;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Authorization
 {
@@ -37,7 +38,7 @@ namespace Signum.Entities.Authorization
             {
                 UserDN user = UserDN.Current;
                 if (user == null)
-                    throw new AuthenticationException("Not user logged");
+                    throw new AuthenticationException(Resources.NotUserLogged);
 
                 return user.Role;
             }

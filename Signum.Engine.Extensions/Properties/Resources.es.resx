@@ -117,6 +117,142 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="TheEntity0IsNew" xml:space="preserve">
+    <value>La entidad {0} es nueva</value>
+  </data>
+  <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
+    <value>La operation {0} no tiene Delete inicializado</value>
+  </data>
+  <data name="ThereAreDuplicatedTypesInTheXMLHelp" xml:space="preserve">
+    <value>Hay tipos duplicados en la ayuda XML:
+</value>
+  </data>
+  <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
+    <value>Error leyendo los archivos XML de ayuda:
+</value>
+  </data>
+  <data name="QueryOf0Connecting1" xml:space="preserve">
+    <value>Consulta de {0} que relaciona {1}</value>
+  </data>
+  <data name="QueryOf0" xml:space="preserve">
+    <value>Consulta de {0}</value>
+  </data>
+  <data name="TheDatabaseVersion" xml:space="preserve">
+    <value>la versión de la base de datos</value>
+  </data>
+  <data name="YourVersion" xml:space="preserve">
+    <value>tu versión</value>
+  </data>
+  <data name="RemovesThe0FromTheDatabase" xml:space="preserve">
+    <value>Elimona {0} de la base de datos</value>
+  </data>
+  <data name="ConstructsANew0_f" xml:space="preserve">
+    <value>Construye una nueva {0}</value>
+  </data>
+  <data name="From0OfThe1_f" xml:space="preserve">
+    <value>desde {0} de la {1}</value>
+  </data>
+  <data name="NotAuthorizedToSave0" xml:space="preserve">
+    <value>Not autorizado para guardar '{0}'</value>
+  </data>
+  <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
+    <value>No autorizado para recuperar '{0}'</value>
+  </data>
+  <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
+    <value>El acceso a la Query '{0}' no está permitido</value>
+  </data>
+  <data name="AccessToOperation0IsNotAllowed" xml:space="preserve">
+    <value>El acceso a la Operación '{0}' no está permitido</value>
+  </data>
+  <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
+    <value>El acceso a el Método de Fachada '{0}' no está permitido</value>
+  </data>
+  <data name="NotAuthorizedToRetrieveThe0WithId1" xml:space="preserve">
+    <value>No autorizado para recuperar la {0} con Id {1}</value>
+  </data>
+  <data name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" xml:space="preserve">
+    <value>Se han encontrado {0} ciclos en el grafo de roles Roles debido a las relaciones:
+</value>
+  </data>
+  <data name="TheKey0IsNotFoundIn1Table" xml:space="preserve">
+    <value>La clave {0} no se encuentra en la tabla {1}</value>
+  </data>
+  <data name="NotValueFor0IsNotFoundIn1Table" xml:space="preserve">
+    <value>No se ha necontrado ningún valor para para {0} en la tabla {1}</value>
+  </data>
+  <data name="Operation0NotFoundForType1" xml:space="preserve">
+    <value>La operación {0} no se ha encontrado para el tipo {1}</value>
+  </data>
+  <data name="Operation0IsA1NotA2Use3Instead" xml:space="preserve">
+    <value>La operación {0} es una {1} no una {2}, usa '{3}' en su lugar</value>
+  </data>
+  <data name="Operation0IsNotAllowedForLites" xml:space="preserve">
+    <value>La operación {0} no permite Lites</value>
+  </data>
+  <data name="Operation0NeedsALite" xml:space="preserve">
+    <value>La operación {0} necesita un Lite</value>
+  </data>
+  <data name="Type0HasToImplement1AtLeast" xml:space="preserve">
+    <value>El tipo {0} debe implementar {1} al menos</value>
+  </data>
+  <data name="AmbiguityBetweenInterfaces0" xml:space="preserve">
+    <value>Ambiguedad entre las interfaces: {0}</value>
+  </data>
+  <data name="TheOperationNeedsA0InTheArgumentNumber1_m" xml:space="preserve">
+    <value>La operacion necesita un {0} en el argumento {1}</value>
+  </data>
+  <data name="Operation0DoesNotHaveConstructorInitialized" xml:space="preserve">
+    <value>La operación {0} no tiene Constructor inicializado</value>
+  </data>
+  <data name="Operation0HasNoConstruct" xml:space="preserve">
+    <value>La operación {0} no tiene Construct inicializado</value>
+  </data>
+  <data name="A0HaveAlreadyBeenRegistered" xml:space="preserve">
+    <value>Ya se ha registrado un {0}</value>
+  </data>
+  <data name="TheFollowingKeysHaveBeenRepeatedIn01" xml:space="preserve">
+    <value>Las siguientes claves estan repetidas en {0}:
+{1}</value>
+  </data>
+  <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
+    <value>Despues de la operación el estado debería ser {0} en lugar de {1}</value>
+  </data>
+  <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
+    <value>La operación {0} no tiene Execute inicializado</value>
+  </data>
+  <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
+    <value>excelReport argument is necessary for compositeReports</value>
+  </data>
+  <data name="Character" xml:space="preserve">
+    <value>carácter</value>
+  </data>
+  <data name="DateTime" xml:space="preserve">
+    <value>fecha y hora</value>
+  </data>
+  <data name="Integer" xml:space="preserve">
+    <value>entero</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>valor</value>
+  </data>
+  <data name="String" xml:space="preserve">
+    <value>cadena de texto</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>check</value>
+  </data>
+  <data name="Should" xml:space="preserve">
+    <value>. Debe </value>
+  </data>
+  <data name="_0IsA1_f" xml:space="preserve">
+    <value>{0} es una {1}</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>importe</value>
+  </data>
+  <data name="ExpressedIn" xml:space="preserve">
+    <value>expresado en </value>
+  </data>
   <data name="LastExecution" xml:space="preserve">
     <value>Última ejecución</value>
   </data>
@@ -140,5 +276,53 @@
   </data>
   <data name="Operation0IsNotAuthorized" xml:space="preserve">
     <value>La operación {0} no está autorizada</value>
+  </data>
+  <data name="ConstructsANew0_m" xml:space="preserve">
+    <value>Construye un nuevo {0}</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>fecha</value>
+  </data>
+  <data name="From0OfThe1_m" xml:space="preserve">
+    <value>desde {0} del {1}</value>
+  </data>
+  <data name="FromMany0_f" xml:space="preserve">
+    <value>desde muchas {0}</value>
+  </data>
+  <data name="FromMany0_m" xml:space="preserve">
+    <value>desde muchos {0}</value>
+  </data>
+  <data name="TheOperationNeedsA0InTheArgumentNumber1_f" xml:space="preserve">
+    <value>La operacion necesita una {0} en el argumento {1}</value>
+  </data>
+  <data name="_0IsA1_m" xml:space="preserve">
+    <value>{0} es un {1}</value>
+  </data>
+  <data name="OfThe0_f" xml:space="preserve">
+    <value>de la {0}</value>
+  </data>
+  <data name="OfThe0_m" xml:space="preserve">
+    <value>del {0}</value>
+  </data>
+  <data name="The0_f" xml:space="preserve">
+    <value>La {0}</value>
+  </data>
+  <data name="The0_m" xml:space="preserve">
+    <value>El {0}</value>
+  </data>
+  <data name="Call0Over1OfThe2_f" xml:space="preserve">
+    <value>Ejecuta {0} sobre {1} de la {2}</value>
+  </data>
+  <data name="Call0Over1OfThe2_m" xml:space="preserve">
+    <value>Ejecuta {0} sobre {1} del {2}</value>
+  </data>
+  <data name="ValueLike0" xml:space="preserve">
+    <value>valor entre {0}</value>
+  </data>
+  <data name="OrNull" xml:space="preserve">
+    <value>o nulo</value>
+  </data>
+  <data name="_0IsACollectionOfElements1" xml:space="preserve">
+    <value>{0} es una colección de elementos {1}</value>
   </data>
 </root>

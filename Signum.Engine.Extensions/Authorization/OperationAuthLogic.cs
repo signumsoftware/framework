@@ -14,6 +14,7 @@ using Signum.Entities;
 using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using System.Reflection;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Authorization
 {
@@ -59,7 +60,7 @@ namespace Signum.Engine.Authorization
         static void OperationLogic_BeginOperation(IOperation operation, IIdentifiable entity)
         {
             if (!GetAllowed(RoleDN.Current, operation.Key))
-                throw new UnauthorizedAccessException("Access to Action '{0}' is not allowed".Formato(operation.Key));
+                throw new UnauthorizedAccessException(Resources.AccessToOperation0IsNotAllowed.Formato(operation.Key));
         }
 
         static bool GetAllowed(RoleDN role, Enum operationKey)

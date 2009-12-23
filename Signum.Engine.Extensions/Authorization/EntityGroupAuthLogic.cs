@@ -16,7 +16,8 @@ using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Linq; 
+using Signum.Engine.Linq;
+using Signum.Engine.Extensions.Properties; 
 
 namespace Signum.Engine.Authorization
 {
@@ -168,7 +169,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this IIdentifiable ident)
         {
             if (!ident.IsAllowed())
-                throw new UnauthorizedAccessException("Not authorized to retrieve the {0} with Id {1}".Formato(ident.GetType().NiceName(), ident.Id));
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieveThe0WithId1.Formato(ident.GetType().NiceName(), ident.Id));
         }
 
         public static bool IsAllowed(this IIdentifiable ident)

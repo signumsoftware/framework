@@ -11,6 +11,7 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Services;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Authorization
 {
@@ -90,7 +91,7 @@ namespace Signum.Engine.Authorization
         public static void AuthorizeAccess(MethodInfo mi)
         {
             if (!GetAllowed(RoleDN.Current, mi.Name))
-                throw new UnauthorizedAccessException("Access to Service Operation '{0}' is not allowed".Formato(mi.Name));
+                throw new UnauthorizedAccessException(Resources.AccessToFacadeMethod0IsNotAllowed.Formato(mi.Name));
         }
 
         public static Dictionary<RoleDN, Dictionary<string, bool>> NewCache()

@@ -12,6 +12,7 @@ using Signum.Utilities.DataStructures;
 using System.Threading;
 using Signum.Entities;
 using System.Reflection;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Authorization
 {
@@ -24,12 +25,12 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
-                QueryLogic.Start(sb, queryManagers);
+                QueryLogic.Start(sb, dqm);
                
                 sb.Include<RuleQueryDN>();
                 sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
@@ -53,17 +54,17 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        public static HashSet<object> AuthorizedQueryNames(DynamicQueryManager dqm)
+        public static HashSet<object> AuthorizedQueryNames()
         {
             RoleDN role = RoleDN.Current;
 
-            return dqm.GetQueryNames().Where(q => GetAllowed(role, q.ToString())).ToHashSet();
+            return DynamicQueryManager.Current.GetQueryNames().Where(q => GetAllowed(role, q.ToString())).ToHashSet();
         }
 
         public static void AuthorizeQuery(object queryName)
         {
             if (!GetAllowed(RoleDN.Current, queryName.ToString()))
-                throw new UnauthorizedAccessException("Access to Query '{0}' is not allowed".Formato(queryName));
+                throw new UnauthorizedAccessException(Resources.AccessToQuery0IsNotAllowed.Formato(queryName));
         }
 
         static bool GetAllowed(RoleDN role, string queryName)

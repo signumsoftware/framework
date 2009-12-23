@@ -8,6 +8,7 @@ using System.Threading;
 using System.Security.Cryptography;
 using System.ComponentModel;
 using System.Reflection;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Authorization
 {
@@ -86,7 +87,7 @@ namespace Signum.Entities.Authorization
             if (pi.Is(()=>State))
             {
                 if (anulationDate != null && state != UserState.Disabled)
-                    return "The user state must be Anulated {0}".Formato(this.ToString());
+                    return Resources.TheUserStateMustBeDisabled;
             }
 
             return base.PropertyCheck(pi);
@@ -106,9 +107,7 @@ namespace Signum.Entities.Authorization
 
     public enum UserState
     {
-        [Description("Creado")]
         Created,
-        [Description("Anulado")]
         Disabled,
     }
 

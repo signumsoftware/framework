@@ -74,6 +74,9 @@
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
+    <Compile Include="Help\EntityHelp.cs" />
+    <Compile Include="Help\HelpLogic.cs" />
+    <Compile Include="Help\HelpGenerator.cs" />
     <Compile Include="Operations\Constructor.cs" />
     <Compile Include="Operations\ConstructorFrom.cs" />
     <Compile Include="Operations\ConstructorFromMany.cs" />
@@ -119,6 +122,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Help\SignumFrameworkHelp.xsd" />
     <None Include="Operations\Operations.cd" />
   </ItemGroup>
   <ItemGroup>
@@ -132,6 +136,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Help\Sample.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

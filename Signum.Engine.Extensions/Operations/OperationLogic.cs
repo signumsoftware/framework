@@ -15,6 +15,7 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Operations
 {
@@ -145,6 +146,11 @@ namespace Signum.Engine.Operations
                     let eo = TryFind(entity.GetType(), k) as IEntityOperation
                     where eo != null && (eo.AllowsNew || !entity.IsNew) && OnAllowOperation(k)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
+        }
+
+        public static List<OperationInfo> GetAllOperationInfos(Type entityType)
+        {
+            return EnumLogic<OperationDN>.Keys.Select(k => TryFind(entityType, k)).NotNull().Select(o => ToOperationInfo(o, null)).ToList();
         }
 
         #region Execute
@@ -285,10 +291,10 @@ namespace Signum.Engine.Operations
         {
             IOperation result = TryFind(type, operationKey);
             if (result == null)
-                throw new ApplicationException("Operation {0} not found for Type {1}".Formato(operationKey, type));
+                throw new ApplicationException(Resources.Operation0NotFoundForType1.Formato(operationKey, type));
 
             if (!(result is T))
-                throw new ApplicationException("Operation {0} is a {1} not a {2}, use '{3}' instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
+                throw new ApplicationException(Resources.Operation0IsA1NotA2Use3Instead.Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
                     result is IDeleteOperation ? "Delete" :
                     result is IConstructorOperation ? "Construct" :
@@ -302,10 +308,10 @@ namespace Signum.Engine.Operations
              where T : IEntityOperation
         {
             if (isLite && !result.Lite)
-                throw new ApplicationException("Operation {0} is not allowed for lites".Formato(result.Key));
+                throw new ApplicationException(Resources.Operation0IsNotAllowedForLites.Formato(result.Key));
 
             if (!isLite && result.Lite)
-                throw new ApplicationException("Operation {0} needs a Lite".Formato(result.Key));
+                throw new ApplicationException(Resources.Operation0NeedsALite.Formato(result.Key));
 
             return result; 
         }
@@ -313,7 +319,7 @@ namespace Signum.Engine.Operations
         static IOperation TryFind(Type type, Enum operationKey)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                throw new ApplicationException("type is a {0} but to implement {1} at least".Formato(type, typeof(IIdentifiable)));
+                throw new ApplicationException(Resources.Type0HasToImplement1AtLeast.Formato(type, typeof(IIdentifiable)));
 
             IOperation result = type.FollowC(t => t.BaseType)
                 .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
@@ -327,7 +333,7 @@ namespace Signum.Engine.Operations
                 .ToList();
 
             if (interfaces.Count > 1)
-                throw new ApplicationException("Ambiguity between interfaces: {0}".Formato(interfaces.ToString(", ")));
+                throw new ApplicationException(Resources.AmbiguityBetweenInterfaces0.Formato(interfaces.ToString(", ")));
 
             if (interfaces.Count < 1)
                 return null;
@@ -341,7 +347,7 @@ namespace Signum.Engine.Operations
                 throw new ArgumentException("pos");
 
             if (args == null || args.Length <= pos || !(args[pos] is T))
-                throw new ApplicationException("The operation needs a {0} in the argument number {1}".Formato(typeof(T), pos));
+                throw new ApplicationException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
 
             return (T)args[pos];
         }
@@ -355,7 +361,7 @@ namespace Signum.Engine.Operations
                  return null;
 
             if(!(args[pos] is T))
-                throw new ApplicationException("The operation needs a {0} in the argument number {1}".Formato(typeof(T), pos));
+                throw new ApplicationException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
 
             return (T)args[pos];
         }
