@@ -33,6 +33,12 @@ namespace Signum.Entities.Reflection
     {
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
+        static Reflector()
+        {
+            DescriptionManager.CleanTypeName = t => t.Name.EndsWith("DN") ? t.Name.Substring(0, t.Name.Length - 2) : t.Name; //To allow MyEntityDN
+            DescriptionManager.CleanType = t => ExtractLite(t) ?? t; //To allow Lite<T>
+        }
+
         public static bool IsMList(Type ft)
         {
             return ReflectionTools.CollectionType(ft) != null && IsModifiable(ft);
@@ -77,11 +83,15 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
-        public static PropertyInfo[] InstancePropertiesInOrder(Type type)
+        public static PropertyInfo[] PublicInstancePropertiesInOrder(Type type)
         {
             var result = type.For(t => t != typeof(object), t => t.BaseType)
                 .Reverse()
-                .SelectMany(t => t.GetProperties(flags | BindingFlags.DeclaredOnly).OrderBy(f => f.MetadataToken)).ToArray();
+                .SelectMany(t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                                .Where(p => !p.HasAttribute<HiddenPropertyAttribute>())
+                                .OrderBy(f => f.MetadataToken))
+                 .Distinct(a => a.Name) //Overriden properties
+                 .ToArray();
 
             return result;
         }

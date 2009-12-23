@@ -13,11 +13,13 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Linq;
 using Signum.Entities;
 using System.Diagnostics;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.DynamicQuery
 {
     public interface IDynamicQuery
     {
+        Type EntityCleanType();
         QueryDescription GetDescription();
         QueryResult ExecuteQuery(List<Filter> filters, int? limit);
         int ExecuteQueryCount(List<Filter> filters);
@@ -25,7 +27,12 @@ namespace Signum.Engine.DynamicQuery
         string GetErrors();
     }
 
-    public class AutoDynamicQuery<T>: DynamicQuery<T>
+    public interface IAutoQuery
+    {
+        Expression Expression { get; }
+    }
+
+    public class AutoDynamicQuery<T>: DynamicQuery<T>, IAutoQuery
     {
         IQueryable<T> query;
         Dictionary<string, Meta> metas;
@@ -63,6 +70,11 @@ namespace Signum.Engine.DynamicQuery
         public override Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType)
         {
             return query.WhereFilters(filters).SelectEntity().Unique(uniqueType); 
+        }
+
+        public Expression Expression
+        {
+            get { return query.Expression; }
         }
     }
 
@@ -110,7 +122,11 @@ namespace Signum.Engine.DynamicQuery
 
         public string GetErrors()
         {
-            return columns.Where(c => typeof(ModifiableEntity).IsAssignableFrom(c.Type)).ToString(c => c.Name, ", ");
+            int count = columns.Where(c => c.IsEntity).Count();
+
+            string errors = count == 0 ? "No Entity column" : count > 1 ? "More than one Entity column" : null;
+
+            return errors.Add(columns.Where(c => typeof(ModifiableEntity).IsAssignableFrom(c.Type)).ToString(c => c.Name, ", "), ", ");
         }
 
         public QueryDescription GetDescription()
@@ -138,6 +154,13 @@ namespace Signum.Engine.DynamicQuery
             change(col);
 
             return this;
+        }
+
+        public Type EntityCleanType()
+        {
+            Type type = columns.Where(c => c.IsEntity).Single("There's no Entity column", "There's more than one Entity column").Type;
+
+            return Reflector.ExtractLite(type).ThrowIfNullC("Entity column is not a Lite");
         }
     }
 

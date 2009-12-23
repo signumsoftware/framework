@@ -29,7 +29,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
+                throw new InvalidOperationException(Properties.Resources.Server0DoesNotImplement1.Formato(server.GetType(), typeof(S)));
             
             try
             {
@@ -51,7 +51,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(current.GetType(), typeof(S)));
+                throw new InvalidOperationException(Properties.Resources.Server0DoesNotImplement1.Formato(current.GetType(), typeof(S)));
 
             try
             {
@@ -71,12 +71,12 @@ namespace Signum.Windows
                 current = getServer();
 
             if (current == null)
-                throw new InvalidOperationException("A connection with the server is necessary to continue");
+                throw new InvalidOperationException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
         }
 
         static void HandleSessionException(MessageSecurityException e)
         {
-            MessageBox.Show("Session expired", "Session Expired", MessageBoxButton.OK, MessageBoxImage.Hand);
+            MessageBox.Show(Properties.Resources.SessionExpired, Properties.Resources.SessionExpired, MessageBoxButton.OK, MessageBoxImage.Hand);
         }
 
         public static bool Implements<T>()

@@ -43,8 +43,6 @@ namespace Signum.Services
             Return(mi, description, () => { action(); return true; });
         }
 
-        protected abstract DynamicQueryManager GetQueryManager();
-
         #region IBaseServer
         public IdentifiableEntity Retrieve(Type type, int id)
         {
@@ -112,31 +110,31 @@ namespace Signum.Services
         public QueryDescription GetQueryDescription(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => GetQueryManager().QueryDescription(queryName));
+             () => DynamicQueryManager.Current.QueryDescription(queryName));
         }
 
         public QueryResult GetQueryResult(object queryName, List<Filter> filters, int? limit)
         {
             return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(queryName),
-             () => GetQueryManager().ExecuteQuery(queryName, filters, limit));
+             () => DynamicQueryManager.Current.ExecuteQuery(queryName, filters, limit));
         }
 
         public int GetQueryCount(object queryName, List<Filter> filters)
         {
             return Return(MethodInfo.GetCurrentMethod(), "GetQueryCount {0}".Formato(queryName),
-                () => GetQueryManager().ExecuteQueryCount(queryName, filters));
+                () => DynamicQueryManager.Current.ExecuteQueryCount(queryName, filters));
         }
 
         public Lite GetUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType)
         {
             return Return(MethodInfo.GetCurrentMethod(), "GetQueryEntity {0}".Formato(queryName),
-                () => GetQueryManager().ExecuteUniqueEntity(queryName, filters, uniqueType));
+                () => DynamicQueryManager.Current.ExecuteUniqueEntity(queryName, filters, uniqueType));
         }
 
         public List<object> GetQueryNames()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => GetQueryManager().GetQueryNames());
+             () => DynamicQueryManager.Current.GetQueryNames());
         }
         #endregion
 

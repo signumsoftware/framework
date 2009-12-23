@@ -85,7 +85,7 @@ namespace Signum.Windows
         static object CollapseIfNullChanged(FrameworkElement frameworkElement)
         {
             if (GetRoute(frameworkElement) != null)
-                throw new InvalidOperationException("CollapseIfNull has to be set before Route");
+                throw new InvalidOperationException(Resources.CollapseIfNullHasToBeSetBeforeRoute);
             return null;
         }
 
@@ -192,7 +192,7 @@ namespace Signum.Windows
                     context = TypeContext.Root(context.Type); //Reset
 
                 if (!validIdentifier.IsMatch(step))
-                    throw new ApplicationException("'{0}' is not a valid identifier".Formato(step));
+                    throw new ApplicationException(Resources.IsNotAValidIdentifier.Formato(step));
 
                 PropertyInfo pi = context.Type.GetProperty(step).ThrowIfNullC(Resources.Property0DoNotExistOnType1.Formato(step, context.Type.TypeName()));
                 context = new TypeSubContext(pi, context);

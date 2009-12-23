@@ -161,7 +161,26 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException("The collection has no elements");
+                    throw new InvalidOperationException(Resources.TheCollectionHasNoElements);
+
+                T current = enumerator.Current;
+
+                if (enumerator.MoveNext())
+                    return default(T);
+
+                return current;
+            }
+        }
+
+        public static T Only<T>(this IEnumerable<T> collection)
+        {
+            if (collection == null)
+                throw new ArgumentNullException("collection");
+
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                    return default(T);
 
                 T current = enumerator.Current;
 
@@ -192,6 +211,41 @@ namespace Signum.Utilities
                 sb.Append(separator);
             }
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+        }
+
+        public static string CommaAnd<T>(this IEnumerable<T> collection, Func<T, string> toString)
+        {
+            return Comma(collection, toString, Resources.And); 
+        }
+
+        public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
+        {
+            return Comma(collection, toString, Resources.Or);
+        }
+
+        public static string Comma<T>(this IEnumerable<T> collection, Func<T, string> toString, string lastSeparator)
+        {
+            string[] values = collection.Select(toString).ToArray();
+            
+            if (values.Length == 0)
+                return "";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(values[0]);
+
+            for (int i = 1; i < values.Length - 1; i++)
+            {
+                sb.Append(", ");
+                sb.Append(values[i]);
+            }
+
+            if (values.Length > 1)
+            {
+                sb.Append(lastSeparator);
+                sb.Append(values[values.Length - 1]);
+            }
+
+            return sb.ToString();
         }
 
         public static void ToConsole<T>(this IEnumerable<T> collection)
@@ -478,6 +532,11 @@ namespace Signum.Utilities
             }
 
             return result;
+        }
+
+        public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> collection, Func<T, S> func)
+        {
+            return collection.Distinct(new LambdaComparer<T, S>(func));
         }
 
         public static IEnumerable<List<T>> GroupsOf<T>(this IEnumerable<T> collection, int groupSize)

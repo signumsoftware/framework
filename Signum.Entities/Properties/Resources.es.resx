@@ -117,6 +117,55 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
+    <value>La longitud de {{0}} ha de ser menor o igual a {0}</value>
+  </data>
+  <data name="_0IsNewAndHasNoId" xml:space="preserve">
+    <value>'{0}' es nueva y no tiene Id</value>
+  </data>
+  <data name="TheLiteIsPointingToANewEntityAndHasNoIdYet" xml:space="preserve">
+    <value>El Lite apunta a una entidad nueva que aún no tiene Id</value>
+  </data>
+  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
+    <value>property debe ser una expression de acceso a una propiedad</value>
+  </data>
+  <data name="BeNotNull" xml:space="preserve">
+    <value>ser no nulo</value>
+  </data>
+  <data name="Have0Decimals" xml:space="preserve">
+    <value>have {0} decimales</value>
+  </data>
+  <data name="BeBetween0And1" xml:space="preserve">
+    <value>estar entre {0} y {1}</value>
+  </data>
+  <data name="TheNumberOfElementsHasToBe01" xml:space="preserve">
+    <value>El numero de elementos debe ser {0} {1}</value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value> y </value>
+  </data>
+  <data name="HaveBetween0And1Characters" xml:space="preserve">
+    <value>tener entre {0} y {1} caracteres</value>
+  </data>
+  <data name="HaveMinimum0Characters" xml:space="preserve">
+    <value>tener mínimo {0} caracteres</value>
+  </data>
+  <data name="HaveMaximun0Characters" xml:space="preserve">
+    <value>tener máximo {0} caracteres</value>
+  </data>
+  <data name="_0IsNotAllowedOnState1" xml:space="preserve">
+    <value>{0} no está permitido en estado  {1}</value>
+  </data>
+  <data name="_0IsNecessaryOnState1" xml:space="preserve">
+    <value>{0} es necesario en estado {1}</value>
+  </data>
+  <data name="AttemptToSaveANotNewModifiedImmutableEntity" xml:space="preserve">
+    <value>Se ha intentado guardad una ImmutableEntity modificada y no nueva</value>
+  </data>
+  <data name="DifferentInstancesOfTheSameEntity1HaveBeenFound2" xml:space="preserve">
+    <value>Se han encontrado {0} instancias diferentes de la misma entidad ({1}):
+{2}</value>
+  </data>
   <data name="_0DoesNotHaveAValid0Format" xml:space="preserve">
     <value>{{0}} no tiene formato de {0} correcto</value>
   </data>
@@ -167,9 +216,6 @@
   </data>
   <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
     <value>La longitud de {{0}} ha de ser mayor o igual a {0}</value>
-  </data>
-  <data name="TheLengthOf0HasToBeLessOrEqualTo0" xml:space="preserve">
-    <value>La longitud de {{0}} ha de ser menor o igual a {0}</value>
   </data>
   <data name="_0HasNoCorrectFormat" xml:space="preserve">
     <value>{0} no tiene el formato correcto</value>
@@ -254,5 +300,20 @@
   </data>
   <data name="LockeableEntity_Locked" xml:space="preserve">
     <value>Bloqueado</value>
+  </data>
+  <data name="OrBeNull" xml:space="preserve">
+    <value>o ser nulo</value>
+  </data>
+  <data name="HaveNoRepeatedElements" xml:space="preserve">
+    <value>have no repeated elements</value>
+  </data>
+  <data name="HaveValid0Format" xml:space="preserve">
+    <value>have a valid {0} format</value>
+  </data>
+  <data name="HaveNoTimePart" xml:space="preserve">
+    <value>no tener horas minutos y segundos</value>
+  </data>
+  <data name="Be" xml:space="preserve">
+    <value>ser </value>
   </data>
 </root>

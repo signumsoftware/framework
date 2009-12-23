@@ -14,13 +14,13 @@ namespace Signum.Engine.DynamicQuery
 {
     public class DynamicQueryManager
     {
-        internal DynamicQueryManager Parent{get; private set;}
-        Dictionary<object, IDynamicQuery> queries = new Dictionary<object, IDynamicQuery>();
-
-        public DynamicQueryManager(DynamicQueryManager parent)
+        public static DynamicQueryManager Current
         {
-            this.Parent = parent;         
+            get { return ConnectionScope.Current.DynamicQueryManager; }
+
         }
+
+        Dictionary<object, IDynamicQuery> queries = new Dictionary<object, IDynamicQuery>();
 
         public IDynamicQuery this[object queryName]
         {
@@ -41,14 +41,7 @@ namespace Signum.Engine.DynamicQuery
 
         IDynamicQuery TryGet(object queryName)
         {
-            var result = queries.TryGetC(queryName);
-            if (result != null)
-                return result;
-
-            if (Parent != null)
-                return Parent[queryName];
-
-            return null; 
+            return queries.TryGetC(queryName);
         }
 
         public QueryResult ExecuteQuery(object queryName, List<Filter> filter, int? limit)
@@ -73,10 +66,12 @@ namespace Signum.Engine.DynamicQuery
 
         public List<object> GetQueryNames()
         {
-            if (Parent == null)
-                return queries.Keys.ToList();
+            return queries.Keys.ToList();
+        }
 
-            return queries.Keys.Union(Parent.GetQueryNames()).ToList(); 
+        public Dictionary<object, IDynamicQuery> GetQueryNames(Type entityType)
+        {
+            return queries.Where(kvp => kvp.Key == entityType).ToDictionary();
         }
 
         public string Errors(object queryName)

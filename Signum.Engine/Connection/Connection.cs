@@ -10,22 +10,20 @@ using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using Signum.Engine.Exceptions;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine
 {
     public abstract class BaseConnection
     {
-        public BaseConnection(Schema schema)
+        public BaseConnection(Schema schema, DynamicQueryManager dqm)
         {
-            this.schema = schema;
+            this.Schema = schema;
+            this.DynamicQueryManager = dqm;
         }
 
-        Schema schema = new Schema();
-        public Schema Schema
-        {
-            get { return schema; }
-            set { schema = value; }
-        }
+        public Schema Schema { get; private set; }
+        public DynamicQueryManager DynamicQueryManager { get; private set; }
 
         [ThreadStatic]
         static TextWriter log;
@@ -67,8 +65,8 @@ namespace Signum.Engine
         IsolationLevel isolationLevel = IsolationLevel.Unspecified;
         string connectionString;
 
-        public Connection(string connectionString, Schema schema)
-            : base(schema)
+        public Connection(string connectionString, Schema schema, DynamicQueryManager dqm)
+            : base(schema, dqm)
         {
             this.connectionString = connectionString;
         }
@@ -237,8 +235,8 @@ namespace Signum.Engine
 
     public class MockConnection : BaseConnection
     {
-        public MockConnection(Schema schema)
-            : base(schema)
+        public MockConnection(Schema schema, DynamicQueryManager dqm)
+            : base(schema, dqm)
         {
 
         }

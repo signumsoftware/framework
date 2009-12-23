@@ -180,9 +180,6 @@
   <data name="String0IsTooShort" xml:space="preserve">
     <value>String '{0}' is too short</value>
   </data>
-  <data name="ThereIsNoAnidableScopeForType0" xml:space="preserve">
-    <value>The is no ScopeAnidable fot type {0}</value>
-  </data>
   <data name="_0Year1Month2Day" xml:space="preserve">
     <value>{0} Year(s), {1} Month(s), {2} Day(s)</value>
   </data>
@@ -291,5 +288,32 @@
   </data>
   <data name="ThereAreSomeRepeated01" xml:space="preserve">
     <value>There are some repeated {0}: {1}</value>
+  </data>
+  <data name="Method0NotFoundOnType1" xml:space="preserve">
+    <value>Method {0} not found on type {1}</value>
+  </data>
+  <data name="ExpansionFailed0DoesNotImplementIMethodExpander" xml:space="preserve">
+    <value>Expansion failed! '{0}' does not implement IMethodExpander</value>
+  </data>
+  <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
+    <value>Select one of the following options:</value>
+  </data>
+  <data name="EnterYourSelection" xml:space="preserve">
+    <value>Enter your selection: </value>
+  </data>
+  <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
+    <value>Enter yout selections separated by comma: </value>
+  </data>
+  <data name="NoOptionWithKey0Found" xml:space="preserve">
+    <value>No option with key {0} found</value>
+  </data>
+  <data name="TheCollectionHasNoElements" xml:space="preserve">
+    <value>The collection has no elements</value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value> and </value>
+  </data>
+  <data name="Or" xml:space="preserve">
+    <value> or </value>
   </data>
 </root>

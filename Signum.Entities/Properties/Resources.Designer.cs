@@ -151,11 +151,29 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is necessary on state {1}.
+        /// </summary>
+        internal static string _0IsNecessaryOnState1 {
+            get {
+                return ResourceManager.GetString("_0IsNecessaryOnState1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is New and has no id.
         /// </summary>
         internal static string _0IsNewAndHasNoId {
             get {
                 return ResourceManager.GetString("_0IsNewAndHasNoId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is not allowed on state {1}.
+        /// </summary>
+        internal static string _0IsNotAllowedOnState1 {
+            get {
+                return ResourceManager.GetString("_0IsNotAllowedOnState1", resourceCulture);
             }
         }
         
@@ -169,11 +187,56 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  and .
+        /// </summary>
+        internal static string And {
+            get {
+                return ResourceManager.GetString("And", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Attempt to modify {0} when the entity is not new.
         /// </summary>
         internal static string AttemptToModify0WhenTheEntityIsNotNew {
             get {
                 return ResourceManager.GetString("AttemptToModify0WhenTheEntityIsNotNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempt to save a not new modified ImmutableEntity.
+        /// </summary>
+        internal static string AttemptToSaveANotNewModifiedImmutableEntity {
+            get {
+                return ResourceManager.GetString("AttemptToSaveANotNewModifiedImmutableEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to be .
+        /// </summary>
+        internal static string Be {
+            get {
+                return ResourceManager.GetString("Be", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to be between {0} and {1}.
+        /// </summary>
+        internal static string BeBetween0And1 {
+            get {
+                return ResourceManager.GetString("BeBetween0And1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to be not null.
+        /// </summary>
+        internal static string BeNotNull {
+            get {
+                return ResourceManager.GetString("BeNotNull", resourceCulture);
             }
         }
         
@@ -228,6 +291,16 @@ namespace Signum.Entities.Properties {
         internal static string ComparisonType_LessThanOrEqual {
             get {
                 return ResourceManager.GetString("ComparisonType_LessThanOrEqual", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Different instances of the same entity ({1}) have been found:
+        ///{2}.
+        /// </summary>
+        internal static string DifferentInstancesOfTheSameEntity1HaveBeenFound2 {
+            get {
+                return ResourceManager.GetString("DifferentInstancesOfTheSameEntity1HaveBeenFound2", resourceCulture);
             }
         }
         
@@ -349,6 +422,78 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to have {0} decimals.
+        /// </summary>
+        internal static string Have0Decimals {
+            get {
+                return ResourceManager.GetString("Have0Decimals", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have a number of elements {0} {1}.
+        /// </summary>
+        internal static string HaveANumberOfElements01 {
+            get {
+                return ResourceManager.GetString("HaveANumberOfElements01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have between {0} and {1} characters.
+        /// </summary>
+        internal static string HaveBetween0And1Characters {
+            get {
+                return ResourceManager.GetString("HaveBetween0And1Characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have maximun {0} characters.
+        /// </summary>
+        internal static string HaveMaximun0Characters {
+            get {
+                return ResourceManager.GetString("HaveMaximun0Characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have minimum {0} characters.
+        /// </summary>
+        internal static string HaveMinimum0Characters {
+            get {
+                return ResourceManager.GetString("HaveMinimum0Characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have no repeated elements.
+        /// </summary>
+        internal static string HaveNoRepeatedElements {
+            get {
+                return ResourceManager.GetString("HaveNoRepeatedElements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have no time part.
+        /// </summary>
+        internal static string HaveNoTimePart {
+            get {
+                return ResourceManager.GetString("HaveNoTimePart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to have a valid {0} format.
+        /// </summary>
+        internal static string HaveValid0Format {
+            get {
+                return ResourceManager.GetString("HaveValid0Format", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Modification not allowed: the object is locked.
         /// </summary>
         internal static string LockedModificationException {
@@ -381,6 +526,15 @@ namespace Signum.Entities.Properties {
         internal static string OnlyOneArgumentAllowed {
             get {
                 return ResourceManager.GetString("OnlyOneArgumentAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to or be null.
+        /// </summary>
+        internal static string OrBeNull {
+            get {
+                return ResourceManager.GetString("OrBeNull", resourceCulture);
             }
         }
         

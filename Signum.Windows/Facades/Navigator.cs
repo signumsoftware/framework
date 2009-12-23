@@ -592,14 +592,14 @@ namespace Signum.Windows
         internal protected virtual void AssertViewable(Type type, bool admin)
         {
             if (GlobalIsViewable != null && !GlobalIsViewable(type))
-                throw new UnauthorizedAccessException("Entities of type {0} are not allowed".Formato(type.NiceName())); 
+                throw new UnauthorizedAccessException(Resources.EntitiesOfType0AreNotAllowed.Formato(type.NiceName())); 
 
             EntitySettings es = Settings.TryGetC(type);
             if (es == null)
                 throw new InvalidOperationException(Resources.NoEntitySettingsForType0.Formato(type.NiceName()));
 
             if (es.IsViewable != null && !es.IsViewable(admin))
-                throw new InvalidOperationException("Entities of type {0} are not visible from a {0} page".Formato(admin ? "admin" : "normal"));
+                throw new InvalidOperationException(Resources.EntitiesOfType0AreNotVisibleFromA0Window.Formato(admin ? "admin" : "normal"));
         }
 
         internal protected virtual bool ShowSave(Type type)
@@ -687,7 +687,7 @@ namespace Signum.Windows
             string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
-                throw new ApplicationException("Call {0} first".Formato(name));
+                throw new ApplicationException(Resources.Call0First.Formato(name));
         }
 
         public virtual Lite FindUnique(FindUniqueOptions options)

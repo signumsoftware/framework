@@ -34,7 +34,7 @@ namespace Signum.Utilities
                 entry.LastTime = milliseconds;
                 entry.LastDate = DateTime.Now;
                 entry.TotalTime += milliseconds;
-                entry.Times++;
+                entry.Count++;
 
                 if (milliseconds < entry.MinTime) { entry.MinTime = milliseconds; entry.MinDate = DateTime.Now; }
                 if (milliseconds > entry.MaxTime) { entry.MaxTime = milliseconds; entry.MaxDate = DateTime.Now; }
@@ -49,12 +49,12 @@ namespace Signum.Utilities
     {
         public long LastTime = 0;
         public long TotalTime = 0;
-        public int Times = 0;
+        public int Count = 0;
         public long MinTime = long.MaxValue;
         public long MaxTime = long.MinValue;
         public double Average
         {
-            get { return (TotalTime / Times); }
+            get { return (TotalTime / Count); }
         }
 
         public DateTime MinDate;
@@ -63,12 +63,12 @@ namespace Signum.Utilities
 
         public override string ToString()
         { 
-            return "Last: {0}ms, Min: {1}ms, Med: {2}ms, Max: {3}ms, Calls: {4}".Formato(
+            return "Last: {0}ms, Min: {1}ms, Avg: {2}ms, Max: {3}ms, Count: {4}".Formato(
                 LastTime,
                 MinTime,
                 Average,
                 MaxTime,
-                Times);
+                Count);
             ;
         }
     }

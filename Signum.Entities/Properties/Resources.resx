@@ -261,4 +261,56 @@
   <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
     <value>less than or equal</value>
   </data>
+  <data name="BeNotNull" xml:space="preserve">
+    <value>be not null</value>
+  </data>
+  <data name="HaveValid0Format" xml:space="preserve">
+    <value>have a valid {0} format</value>
+  </data>
+  <data name="Have0Decimals" xml:space="preserve">
+    <value>have {0} decimals</value>
+  </data>
+  <data name="HaveNoRepeatedElements" xml:space="preserve">
+    <value>have no repeated elements</value>
+  </data>
+  <data name="BeBetween0And1" xml:space="preserve">
+    <value>be between {0} and {1}</value>
+  </data>
+  <data name="HaveANumberOfElements01" xml:space="preserve">
+    <value>have a number of elements {0} {1}</value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value> and </value>
+  </data>
+  <data name="HaveBetween0And1Characters" xml:space="preserve">
+    <value>have between {0} and {1} characters</value>
+  </data>
+  <data name="HaveMinimum0Characters" xml:space="preserve">
+    <value>have minimum {0} characters</value>
+  </data>
+  <data name="HaveMaximun0Characters" xml:space="preserve">
+    <value>have maximun {0} characters</value>
+  </data>
+  <data name="_0IsNotAllowedOnState1" xml:space="preserve">
+    <value>{0} is not allowed on state {1}</value>
+  </data>
+  <data name="_0IsNecessaryOnState1" xml:space="preserve">
+    <value>{0} is necessary on state {1}</value>
+  </data>
+  <data name="AttemptToSaveANotNewModifiedImmutableEntity" xml:space="preserve">
+    <value>Attempt to save a not new modified ImmutableEntity</value>
+  </data>
+  <data name="DifferentInstancesOfTheSameEntity1HaveBeenFound2" xml:space="preserve">
+    <value>{0} Different instances of the same entity ({1}) have been found:
+{2}</value>
+  </data>
+  <data name="HaveNoTimePart" xml:space="preserve">
+    <value>have no time part</value>
+  </data>
+  <data name="OrBeNull" xml:space="preserve">
+    <value>or be null</value>
+  </data>
+  <data name="Be" xml:space="preserve">
+    <value>be </value>
+  </data>
 </root>

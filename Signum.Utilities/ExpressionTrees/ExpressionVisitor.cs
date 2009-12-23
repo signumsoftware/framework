@@ -189,7 +189,7 @@ namespace Signum.Utilities.ExpressionTrees
                 if (obj != null && obj.Type != m.Object.Type)
                     mi = obj.Type.GetMethod(mi.Name, mi.GetParameters()
                         .Select(p => p.ParameterType).ToArray())
-                        .ThrowIfNullC("Method {0} not found on type {1}".Formato(mi.MethodName(), obj.Type.TypeName())); 
+                        .ThrowIfNullC(Resources.Method0NotFoundOnType1.Formato(mi.MethodName(), obj.Type.TypeName())); 
 
                 return Expression.Call(obj, mi, args);
             }

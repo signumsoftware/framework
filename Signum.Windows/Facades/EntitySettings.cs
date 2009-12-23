@@ -27,11 +27,6 @@ namespace Signum.Windows
         public DataTemplate DataTemplate { get; set; }
         public ImageSource Icon { get; set; }
 
-        //public EntitySettings()
-        //    : this(EntityType.Default)
-        //{
-        //}
-
         public EntitySettings(EntityType entityType)
         {
             switch (entityType)
@@ -78,17 +73,17 @@ namespace Signum.Windows
             if (entity is EmbeddedEntity)
             {
                 if (ViewEmbedded == null)
-                    throw new InvalidOperationException("View not defined in EntitySettings");
+                    throw new InvalidOperationException(Properties.Resources.ViewNotDefinedInEntitySettings);
 
                 if (typeContext == null)
-                    throw new ArgumentException("An EmbeddedEntity needs TypeContext");
+                    throw new ArgumentException(Properties.Resources.AnEmbeddedEntityNeedsTypeContext);
 
                 return ViewEmbedded((EmbeddedEntity)entity, typeContext);
             }
             else //entity could be null
             {
                 if (View == null)
-                    throw new InvalidOperationException("View not defined in EntitySettings");
+                    throw new InvalidOperationException(Properties.Resources.ViewNotDefinedInEntitySettings);
 
                 return View((IdentifiableEntity)entity);
             }

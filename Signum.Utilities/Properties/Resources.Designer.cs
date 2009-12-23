@@ -187,6 +187,15 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  and .
+        /// </summary>
+        internal static string And {
+            get {
+                return ResourceManager.GetString("And", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot remove item that is not in tree..
         /// </summary>
         internal static string CannotRemoveItemThatIsNotInTree {
@@ -277,6 +286,24 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter your selection: .
+        /// </summary>
+        internal static string EnterYourSelection {
+            get {
+                return ResourceManager.GetString("EnterYourSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter yout selections separated by comma: .
+        /// </summary>
+        internal static string EnterYoutSelectionsSeparatedByComma {
+            get {
+                return ResourceManager.GetString("EnterYoutSelectionsSeparatedByComma", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error {0}:
         /// Extra: {1}.
         /// </summary>
@@ -304,6 +331,15 @@ namespace Signum.Utilities.Properties {
         internal static string Error0Lacking1Extra2 {
             get {
                 return ResourceManager.GetString("Error0Lacking1Extra2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expansion failed! &apos;{0}&apos; does not implement IMethodExpander.
+        /// </summary>
+        internal static string ExpansionFailed0DoesNotImplementIMethodExpander {
+            get {
+                return ResourceManager.GetString("ExpansionFailed0DoesNotImplementIMethodExpander", resourceCulture);
             }
         }
         
@@ -407,6 +443,15 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Method {0} not found on type {1}.
+        /// </summary>
+        internal static string Method0NotFoundOnType1 {
+            get {
+                return ResourceManager.GetString("Method0NotFoundOnType1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to method should be an expression calling a method.
         /// </summary>
         internal static string MethodShouldBeAnExpressionCallingAMethod {
@@ -479,6 +524,24 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No option with key {0} found.
+        /// </summary>
+        internal static string NoOptionWithKey0Found {
+            get {
+                return ResourceManager.GetString("NoOptionWithKey0Found", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  or .
+        /// </summary>
+        internal static string Or {
+            get {
+                return ResourceManager.GetString("Or", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to property should be an expression accessing a property.
         /// </summary>
         internal static string PropertyShouldBeAnExpressionAccessingAProperty {
@@ -497,6 +560,15 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select one of the following options:.
+        /// </summary>
+        internal static string SelectOneOfTheFollowingOptions {
+            get {
+                return ResourceManager.GetString("SelectOneOfTheFollowingOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Square not found.
         /// </summary>
         internal static string SquareNotFound {
@@ -511,6 +583,15 @@ namespace Signum.Utilities.Properties {
         internal static string String0IsTooShort {
             get {
                 return ResourceManager.GetString("String0IsTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The collection has no elements.
+        /// </summary>
+        internal static string TheCollectionHasNoElements {
+            get {
+                return ResourceManager.GetString("TheCollectionHasNoElements", resourceCulture);
             }
         }
         
@@ -547,15 +628,6 @@ namespace Signum.Utilities.Properties {
         internal static string ThereIsMoreThanOneElementWithKey0 {
             get {
                 return ResourceManager.GetString("ThereIsMoreThanOneElementWithKey0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The is no ScopeAnidable fot type {0}.
-        /// </summary>
-        internal static string ThereIsNoAnidableScopeForType0 {
-            get {
-                return ResourceManager.GetString("ThereIsNoAnidableScopeForType0", resourceCulture);
             }
         }
         

@@ -54,7 +54,7 @@ namespace Signum.Windows
         private void btnNewNote_Click(object sender, RoutedEventArgs e)
         {
             if (CreateNote == null)
-                throw new ApplicationException("NotesWidget.CreateNote is null");
+                throw new ArgumentNullException("NotesWidget.CreateNote");
 
             if (DataContext == null)
                 return;
@@ -75,7 +75,7 @@ namespace Signum.Windows
         private void ReloadNotes()
         {
             if (CreateNote == null)
-                throw new ApplicationException("NotesWidget.RetrieveNotes is null"); 
+                throw new ArgumentNullException("NotesWidget.RetrieveNotes"); 
 
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
             if (entity == null || entity.IsNew)

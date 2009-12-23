@@ -348,4 +348,46 @@
   <data name="Query0NotRegistered" xml:space="preserve">
     <value>Query {0} is not registered in the DynamicQueryManager</value>
   </data>
+  <data name="TypeForTextArea0ShouldBeString" xml:space="preserve">
+    <value>Type for TextArea {0} should be string</value>
+  </data>
+  <data name="Server0DoesNotImplement1" xml:space="preserve">
+    <value>Server {0} does not implement {1}</value>
+  </data>
+  <data name="AConnectionWithTheServerIsNecessaryToContinue" xml:space="preserve">
+    <value>A connection with the server is necessary to continue</value>
+  </data>
+  <data name="SessionExpired" xml:space="preserve">
+    <value>Session expired</value>
+  </data>
+  <data name="EntitiesOfType0AreNotAllowed" xml:space="preserve">
+    <value>Entities of type {0} are not allowed</value>
+  </data>
+  <data name="EntitiesOfType0AreNotVisibleFromA0Window" xml:space="preserve">
+    <value>Entities of type {0} are not visible from a {0} window</value>
+  </data>
+  <data name="Call0First" xml:space="preserve">
+    <value>Call {0} first</value>
+  </data>
+  <data name="ViewNotDefinedInEntitySettings" xml:space="preserve">
+    <value>View not defined in EntitySettings</value>
+  </data>
+  <data name="AnEmbeddedEntityNeedsTypeContext" xml:space="preserve">
+    <value>An EmbeddedEntity needs TypeContext</value>
+  </data>
+  <data name="ConvertingToTypeContext" xml:space="preserve">
+    <value>Converting to TypeContext: </value>
+  </data>
+  <data name="CollapseIfNullHasToBeSetBeforeRoute" xml:space="preserve">
+    <value>CollapseIfNull has to be set before Route</value>
+  </data>
+  <data name="IsNotAValidIdentifier" xml:space="preserve">
+    <value>'{0}' is not a valid identifier</value>
+  </data>
+  <data name="ChooseAValue" xml:space="preserve">
+    <value>Choose a value</value>
+  </data>
+  <data name="PleaseChooseAValueToContinue" xml:space="preserve">
+    <value>Please, choose a value to continue:</value>
+  </data>
 </root>

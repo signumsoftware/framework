@@ -411,7 +411,6 @@ namespace Signum.Web
     {
         public Dictionary<Type, EntitySettings> EntitySettings;
         public Dictionary<object, QuerySettings> QuerySettings;
-        public DynamicQueryManager Queries { get; set; }
 
         public string AjaxErrorPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.AjaxError.ascx";
         public string ErrorPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.Error.aspx";
@@ -449,14 +448,14 @@ namespace Signum.Web
             TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);
 
-            if (Queries != null)
+            if (DynamicQueryManager.Current != null)
             {
                 if (QuerySettings == null)
                     QuerySettings = new Dictionary<object, QuerySettings>();
-                foreach (object o in Queries.GetQueryNames())
+                foreach (object o in DynamicQueryManager.Current.GetQueryNames())
                 {
                     if (!QuerySettings.ContainsKey(o))
-                        QuerySettings.Add(o, new QuerySettings() { Top = 10 });
+                        QuerySettings.Add(o, new QuerySettings() { Top = 50});
                     if (!QuerySettings[o].UrlName.HasText())
                         QuerySettings[o].UrlName = GetQueryName(o);
                 }
@@ -603,7 +602,7 @@ namespace Signum.Web
 
         protected internal virtual ViewResult Find(Controller controller, FindOptions findOptions)
         {
-            QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
 
@@ -640,7 +639,7 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string suffix)
         {
-            QueryDescription queryDescription = Queries.QueryDescription(findOptions.QueryName);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
 
@@ -686,7 +685,7 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
         {
-            QueryResult queryResult = Queries.ExecuteQuery(findOptions.QueryName, findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(), top);
+            QueryResult queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(), top);
 
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.Results] = queryResult;
@@ -714,7 +713,7 @@ namespace Signum.Web
         {
             List<Filter> result = new List<Filter>();
 
-            QueryDescription queryDescription = Queries.QueryDescription(queryName);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             int index = 0;
             string name;
@@ -773,7 +772,7 @@ namespace Signum.Web
         {
             List<FilterOptions> result = new List<FilterOptions>();
 
-            QueryDescription queryDescription = Queries.QueryDescription(queryName);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             int index = 0;
             string name;
@@ -856,7 +855,7 @@ namespace Signum.Web
 
         protected internal virtual object ResolveQueryFromToStr(string queryNameToStr)
         {
-            return Queries.GetQueryNames()
+            return DynamicQueryManager.Current.GetQueryNames()
                 .SingleOrDefault(qn => qn.ToString() == queryNameToStr)
                 .ThrowIfNullC(Resources.NoQueryWithName0.Formato(queryNameToStr));
         }

@@ -6,9 +6,9 @@ using System.IO;
 
 namespace Signum.Utilities
 {
-    class FileExtensions
+    public static class FileTools
     {
-        private static string AvailableFileName(string fileName)
+        public static string AvailableFileName(string fileName)
         {
             if (!File.Exists(fileName))
                 return fileName;

@@ -86,7 +86,7 @@ namespace Signum.Entities.Reflection
                             select g).ToList();
 
             if (problems.Count > 0)
-                return "CLONE ATACK!\r\n\r\n" + problems.ToString(p => "{0} Different instances of the same entity ({1}) have been found:\r\n{2}".Formato(
+                return "CLONE ATACK!\r\n\r\n" + problems.ToString(p => Properties.Resources.DifferentInstancesOfTheSameEntity1HaveBeenFound2.Formato(
                     p.Count(),
                     p.Key,
                     p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");

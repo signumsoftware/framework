@@ -41,7 +41,7 @@ namespace Signum.Windows
 
             if (typeContext == null || typeContext.Type == null)
             {
-                Content = new Label { Foreground = Brushes.Red, Content = "No Type Context" };
+                Content = new Label { Foreground = Brushes.Red, Content = "No TypeContext" };
                 return;
             }
 
@@ -65,8 +65,7 @@ namespace Signum.Windows
 
         static XElement GenerateStackPanel(Type type)
         {
-            List<PropertyInfo> properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                                            .Where(p => !Attribute.IsDefined(p, typeof(HiddenPropertyAttribute)))
+            List<PropertyInfo> properties = Reflector.PublicInstancePropertiesInOrder(type)
                                            .ToList();
             return new XElement(xmlns + "StackPanel",
                 properties.Select(pi => GenerateField(pi)));

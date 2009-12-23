@@ -21,7 +21,7 @@ namespace Signum.Test
         {
             if(!started)
             {
-                Start(Settings.Default.SignumTest, Queries.Common); 
+                Start(Settings.Default.SignumTest); 
 
                 Administrator.TotalGeneration();
 
@@ -38,17 +38,11 @@ namespace Signum.Test
             started = false;
         }
 
-        public static void Start(string connectionString, DynamicQueryManager dqm)
+        public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();
+            DynamicQueryManager dqm = new DynamicQueryManager(); 
 
-            Starter.Start(sb, dqm);
-
-            ConnectionScope.Default = new Connection(connectionString, sb.Schema);
-        }
-
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
-        {
             TypeLogic.Start(sb);
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
@@ -134,6 +128,8 @@ namespace Signum.Test
                                                 a.Category,
                                                 a.Result
                                             }).ToDynamic();
+
+            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
         }
         
         public static void Load()
@@ -305,24 +301,6 @@ namespace Signum.Test
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
                 Label = emi
             }.Save();
-        }
-    }
-
-    public static class Queries
-    {
-        public static DynamicQueryManager Common = new DynamicQueryManager(null);
-        public static DynamicQueryManager Windows;
-        public static DynamicQueryManager Web;
-
-        static Queries()
-        {
-            Windows = new DynamicQueryManager(Common);
-            Web = new DynamicQueryManager(Common);
-        }
-
-        public static void Initialize()
-        {
-
         }
     }
 }

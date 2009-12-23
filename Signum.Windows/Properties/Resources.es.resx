@@ -117,6 +117,48 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="TypeForTextArea0ShouldBeString" xml:space="preserve">
+    <value>La propiedad Type del TextArea {0} debería ser string</value>
+  </data>
+  <data name="Server0DoesNotImplement1" xml:space="preserve">
+    <value>Server {0} does not implement {1}</value>
+  </data>
+  <data name="AConnectionWithTheServerIsNecessaryToContinue" xml:space="preserve">
+    <value>Es necesario tener conexión con el servidor para consinuar</value>
+  </data>
+  <data name="SessionExpired" xml:space="preserve">
+    <value>Sesión caducada</value>
+  </data>
+  <data name="EntitiesOfType0AreNotAllowed" xml:space="preserve">
+    <value>Las entities de tipo {0} no estan permitidas</value>
+  </data>
+  <data name="EntitiesOfType0AreNotVisibleFromA0Window" xml:space="preserve">
+    <value>Las entities de tipo {0}  nos son visibles desde una ventana {0}</value>
+  </data>
+  <data name="Call0First" xml:space="preserve">
+    <value>Llama a {0} primero</value>
+  </data>
+  <data name="ViewNotDefinedInEntitySettings" xml:space="preserve">
+    <value>View no definido en el EntitySettings</value>
+  </data>
+  <data name="AnEmbeddedEntityNeedsTypeContext" xml:space="preserve">
+    <value>Una EmbeddedEntity necesita TypeContext</value>
+  </data>
+  <data name="ConvertingToTypeContext" xml:space="preserve">
+    <value>Convirtiendo a TypeContext: </value>
+  </data>
+  <data name="CollapseIfNullHasToBeSetBeforeRoute" xml:space="preserve">
+    <value>CollapseIfNull debe establecerse antes de Route</value>
+  </data>
+  <data name="IsNotAValidIdentifier" xml:space="preserve">
+    <value>'{0}' is not a valid identifier</value>
+  </data>
+  <data name="ChooseAValue" xml:space="preserve">
+    <value>Elige a valor</value>
+  </data>
+  <data name="PleaseChooseAValueToContinue" xml:space="preserve">
+    <value>Por favor, elige un valor para continuar:</value>
+  </data>
   <data name="RoutePropertyCanNotBeAppliedWithNullTypeContext" xml:space="preserve">
     <value>La propiedad Route no puede ser aplicada con un TypeContext nulo</value>
   </data>

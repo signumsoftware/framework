@@ -167,7 +167,7 @@
     <value>Cannot enumerate more than once</value>
   </data>
   <data name="EntityOfType0AndId1NotFound" xml:space="preserve">
-    <value>Entity of type {0} and id {1} not found</value>
+    <value>Entity of type {0} and Id {1} not found</value>
   </data>
   <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
     <value>Not all entities of type {0} and ids {1} are removed</value>

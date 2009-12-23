@@ -120,8 +120,7 @@ namespace Signum.Engine.Properties {
         ///DUMMY
         ///DUMP
         ///ELSE
-        ///END
-        /// [rest of string was truncated]&quot;;.
+        ///END        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string @__SqlKeywords__ {
             get {
@@ -193,7 +192,7 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Entity of type {0} and id {1} not found.
+        ///   Looks up a localized string similar to Entity of type {0} and Id {1} not found.
         /// </summary>
         internal static string EntityOfType0AndId1NotFound {
             get {

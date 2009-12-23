@@ -46,9 +46,9 @@ namespace Signum.Windows
         public static bool ShowUntyped(Type type, ref object value, string title, string text, string labelText, string format, string unitText, Window owner)
         {
             ValueLineBox vlb = new ValueLineBox();
-            vlb.Title = title ?? "Choose a value";
+            vlb.Title = title ?? Properties.Resources.ChooseAValue;
 
-            vlb.tb.Text = text ?? "Please, choose a value to continue:";
+            vlb.tb.Text = text ?? Properties.Resources.PleaseChooseAValueToContinue;
 
             vlb.valueLine.Type = type;
 

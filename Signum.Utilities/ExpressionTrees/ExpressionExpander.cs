@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Utilities.Properties;
 
 namespace Signum.Utilities.ExpressionTrees
 {
@@ -71,7 +72,7 @@ namespace Signum.Utilities.ExpressionTrees
 			{
                 IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
 				if (expander == null) 
-                    throw new InvalidOperationException("Expansion failed! '{0}' does not implement IMethodExpander".Formato(attribute.ExpanderType.Name));
+                    throw new InvalidOperationException(Resources.ExpansionFailed0DoesNotImplementIMethodExpander.Formato(attribute.ExpanderType.Name));
 
                 Expression exp = expander.Expand(
                     Visit(m.Object), 

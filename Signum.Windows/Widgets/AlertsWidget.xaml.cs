@@ -62,7 +62,7 @@ namespace Signum.Windows.Widgets
         private void btnNewAlert_Click(object sender, RoutedEventArgs e)
         {
             if (CreateAlert == null)
-                throw new ApplicationException("AlertsWidget.CreateAlert is null");
+                throw new ArgumentNullException("AlertsWidget.CreateAlert");
 
             if (DataContext == null)
                 return;
@@ -83,7 +83,7 @@ namespace Signum.Windows.Widgets
         public void ReloadAlerts()
         {
             if (CreateAlert == null)
-                throw new ApplicationException("AlertsWidget.RetrieveAlerts is null");
+                throw new ArgumentNullException("AlertsWidget.RetrieveAlerts");
 
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
             if (entity == null || entity.IsNew)

@@ -13,6 +13,7 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Web.Properties;
 using Signum.Engine;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web
 {
@@ -81,7 +82,7 @@ namespace Signum.Web
 
         public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, string prefixEnd)
         {
-            QueryDescription queryDescription = Navigator.Manager.Queries.QueryDescription(findOptions.QueryName);
+            QueryDescription queryDescription =  DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             foreach (FilterOptions opt in findOptions.FilterOptions)
             {
@@ -174,7 +175,7 @@ namespace Signum.Web
 
         public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix)
         {
-            QueryDescription qd = Navigator.Manager.Queries.QueryDescription(Navigator.ResolveQueryFromUrlName(queryUrlName));
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryFromUrlName(queryUrlName));
             Column column = qd.Columns.Where(c => c.Visible == true).ToList()[visibleColumnIndex];
             FilterOptions fo = new FilterOptions() { Column = column, ColumnName = column.Name, Operation = FilterOperation.EqualTo, Value = value };
             Type type = Reflector.ExtractLite(column.Type) ?? column.Type;

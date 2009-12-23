@@ -10,6 +10,8 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.Properties;
+using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 
 namespace Signum.Utilities
@@ -74,15 +76,26 @@ namespace Signum.Utilities
                 a.ToString().NiceName();
         }
 
+        public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
+        public static Func<Type, Type> CleanType = t => t; //To allow Lite<T>
+
         public static string NiceName(this Type type)
         {
+            type = CleanType(type);
+
             return DescriptionManager.GetDescription(type) ??
-                type.Name.Map(n => n.EndsWith("DN") ? n.RemoveRight(2) : n).SpacePascal();
+                CleanTypeName(type).SpacePascal();
         }
 
         public static string NiceName(this PropertyInfo pi)
         {
-            return DescriptionManager.GetDescription(pi) ?? pi.Name.NiceName();
+            return DescriptionManager.GetDescription(pi) ??
+                (pi.IsDefaultName() ? pi.PropertyType.NiceName() : pi.Name.NiceName());
+        }
+
+        public static bool IsDefaultName(this PropertyInfo pi)
+        {
+            return pi.Name == CleanTypeName(CleanType(pi.PropertyType)); 
         }
 
         public static string NicePluralName(this Type type)
@@ -98,6 +111,14 @@ namespace Signum.Utilities
                  gender == Gender.Femenine ? "_f" : "_n");
 
             return resource.GetString(compoundKey) ?? resource.GetString(compoundKey);
+        }
+
+        public static string GetGenderAwareResource(this Type type, Expression<Func<string>> resource)
+        {
+            MemberExpression me = (MemberExpression)resource.Body;
+            PropertyInfo pi = me.Member.DeclaringType.GetProperty("ResourceManager", BindingFlags.Static| BindingFlags.NonPublic | BindingFlags.Public);
+            ResourceManager rm = (ResourceManager)pi.GetValue(null, null);
+            return rm.GetGenderAwareResource(me.Member.Name, type.GetGender());
         }
 
 

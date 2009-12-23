@@ -117,11 +117,44 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ThereIsNoAnidableScopeForType0" xml:space="preserve">
-    <value>The is no ScopeAnidable fot type {0}</value>
+  <data name="FieldShouldBeAnExpressionAccessingAField" xml:space="preserve">
+    <value>field debe ser una epression accediendo a un campo</value>
+  </data>
+  <data name="MemberShouldBeAnExpressionAccessingAMember" xml:space="preserve">
+    <value>member debe ser una expresion accediendo a un miembro</value>
+  </data>
+  <data name="MethodShouldBeAnExpressionCallingAMethod" xml:space="preserve">
+    <value>method debe ser una expression invocando un método</value>
+  </data>
+  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
+    <value>property debe ser una expression accediendo a una propiedad</value>
+  </data>
+  <data name="Method0NotFoundOnType1" xml:space="preserve">
+    <value>Método {0} no encontrado en el tipo {1}</value>
+  </data>
+  <data name="ExpansionFailed0DoesNotImplementIMethodExpander" xml:space="preserve">
+    <value>Error en la expansion! '{0}' no implementa IMethodExpander</value>
+  </data>
+  <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
+    <value>Elige una de las siguientes opciones:</value>
+  </data>
+  <data name="EnterYourSelection" xml:space="preserve">
+    <value>Enter your selection: </value>
+  </data>
+  <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
+    <value>Enter yout selections separated by comma: </value>
+  </data>
+  <data name="NoOptionWithKey0Found" xml:space="preserve">
+    <value>Ninguna opción con clave  {0} encontrada</value>
+  </data>
+  <data name="TheCollectionHasNoElements" xml:space="preserve">
+    <value>La colleccion no tiene elementos</value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value> y </value>
   </data>
   <data name="SquareNotFound" xml:space="preserve">
-    <value>Square not found</value>
+    <value>Square no encontrado</value>
   </data>
   <data name="CubeNotFound" xml:space="preserve">
     <value>Cubo no encontrado</value>
@@ -279,5 +312,8 @@
   </data>
   <data name="ThereAreSomeRepeated01" xml:space="preserve">
     <value>Hay algunos {0} repetidos: {1}</value>
+  </data>
+  <data name="Or" xml:space="preserve">
+    <value> o </value>
   </data>
 </root>

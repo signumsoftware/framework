@@ -59,7 +59,7 @@ namespace Signum.Windows
             base.OnLoad(sender, e);
 
             if (this.Type != typeof(string))
-                throw new ApplicationException("Type for TextArea {0} should be string".Formato(this.LabelText));
+                throw new ApplicationException(Properties.Resources.TypeForTextArea0ShouldBeString.Formato(this.LabelText));
         }
     }
 }

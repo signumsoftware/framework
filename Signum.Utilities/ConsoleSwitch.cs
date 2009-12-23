@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.Properties;
 
 namespace Signum.Utilities
 {
@@ -13,7 +14,7 @@ namespace Signum.Utilities
         string welcomeMessage;
 
         public ConsoleSwitch()
-            : this("Select one of the following options:")
+            : this(Resources.SelectOneOfTheFollowingOptions)
         {
         }
 
@@ -45,7 +46,7 @@ namespace Signum.Utilities
 
         public V Choose()
         {
-            return Choose("Enter your selection: ");
+            return Choose(Resources.EnterYourSelection);
         }
 
         public V Choose(string endMessage)
@@ -72,7 +73,7 @@ namespace Signum.Utilities
 
         public V[] ChooseMultiple()
         {
-            return ChooseMultiple("Enter yout selections separated by comma: ");
+            return ChooseMultiple(Resources.EnterYoutSelectionsSeparatedByComma);
         }
 
         public V[] ChooseMultiple(string endMessage)
@@ -102,7 +103,7 @@ namespace Signum.Utilities
 
         private V GetValue(string line)
         {
-            return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).Single("No option with key {0} found".Formato(line))
+            return dictionary.Where(kvp => string.Equals(kvp.Key.ToString(), line, StringComparison.InvariantCultureIgnoreCase)).Single(Resources.NoOptionWithKey0Found.Formato(line))
                 .Value.First;
         }
 

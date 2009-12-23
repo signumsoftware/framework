@@ -1,18 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
-using Signum.Utilities;
-using System.Collections;
-using System.Linq.Expressions;
 using Signum.Entities.Properties;
-using System.Reflection;
-using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
+using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using System.ComponentModel;
-using System.Resources;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
@@ -47,13 +47,15 @@ namespace Signum.Entities
     {
         public bool DisableOnCorrupt { get; set; }
         public string ErrorMessage { get; set; }
+
+        public abstract string HelpMessage { get; }
        
         public string Error(object value)
         {
             if (DisableOnCorrupt && !Corruption.Strict)
                 return null;
 
-            return OverrideError(value); 
+            return ErrorMessage ?? OverrideError(value); 
         }
 
         /// <summary>
@@ -66,10 +68,17 @@ namespace Signum.Entities
 
     public class NotNullValidatorAttribute : ValidatorAttribute
     {
-
         protected override string OverrideError(object obj)
         {
-            return obj != null ? null : (ErrorMessage ?? Resources.Property0HasNoValue);
+            if (obj == null)
+                return Resources.Property0HasNoValue;
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get { return Resources.BeNotNull; }
         }
     }
 
@@ -102,18 +111,34 @@ namespace Signum.Entities
             string val = (string)value;
 
             if (string.IsNullOrEmpty(val))
-                return allowNulls ? null : ErrorMessage ?? Resources.Property0HasNoValue;
+                return allowNulls ? null : Resources.Property0HasNoValue;
 
             if (min == max && min != -1 && val.Length != min)
-                return ErrorMessage ?? Resources.TheLenghtOf0HasToBeEqualTo0.Formato(min);
+                return Resources.TheLenghtOf0HasToBeEqualTo0.Formato(min);
 
             if (min != -1 && val.Length < min)
-                return ErrorMessage ?? Resources.TheLengthOf0HasToBeGreaterOrEqualTo0.Formato(min);
+                return Resources.TheLengthOf0HasToBeGreaterOrEqualTo0.Formato(min);
 
             if (max != -1 && val.Length > max)
-                return ErrorMessage ?? Resources.TheLengthOf0HasToBeLesserOrEqualTo0.Formato(max);
+                return Resources.TheLengthOf0HasToBeLesserOrEqualTo0.Formato(max);
 
             return null; 
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                string result =
+                    min != -1 && max != -1 ? Resources.HaveBetween0And1Characters.Formato(min, max) :
+                    min != -1 ? Resources.HaveMinimum0Characters.Formato(min) :
+                    max != -1 ? Resources.HaveMaximun0Characters.Formato(max) : null;
+
+                if (allowNulls)
+                    result = result.Add(Resources.OrBeNull, " ");
+
+                return result;
+            }
         }
     }
 
@@ -143,9 +168,17 @@ namespace Signum.Entities
                 return null;
 
             if (formatName == null)
-                return ErrorMessage ?? Resources._0HasNoCorrectFormat;
+                return Resources._0HasNoCorrectFormat;
             else
-                return ErrorMessage ?? Resources._0DoesNotHaveAValid0Format.Formato(formatName);
+                return Resources._0DoesNotHaveAValid0Format.Formato(formatName);
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                return Resources.HaveValid0Format.Formato(formatName);
+            }
         }
     }
 
@@ -226,10 +259,15 @@ namespace Signum.Entities
                 value is float && Math.Round((float)value, DecimalPlaces) != (float)value ||
                 value is double && Math.Round((double)value, DecimalPlaces) != (double)value)
             {
-                return ErrorMessage ?? Resources._0HasMoreThan0DecimalPlaces.Formato(DecimalPlaces);
+                return Resources._0HasMoreThan0DecimalPlaces.Formato(DecimalPlaces);
             }
 
             return null;
+        }
+
+        public override string HelpMessage
+        {
+            get { return Resources.Have0Decimals.Formato(DecimalPlaces); }
         }
     }
 
@@ -295,7 +333,12 @@ namespace Signum.Entities
             if (ok)
                 return null;
 
-            return ErrorMessage ?? Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString()); 
+            return Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString()); 
+        }
+
+        public override string HelpMessage
+        {
+            get { return Resources.Be + ComparisonType.NiceToString() + " " + number.ToString(); }
         }
     }
 
@@ -358,13 +401,17 @@ namespace Signum.Entities
                 val.CompareTo(max) <= 0)
                 return null;
 
-            return ErrorMessage ?? Resources._0HasToBeBetween0And1.Formato(min, max); 
+            return Resources._0HasToBeBetween0And1.Formato(min, max); 
+        }
+
+        public override string HelpMessage
+        {
+            get { return Resources.BeBetween0And1.Formato(min, max); }
         }
     }
 
     public class NoRepeatValidator : ValidatorAttribute
     {
-
         protected override string OverrideError(object value)
         {
             IList list = (IList)value;
@@ -374,6 +421,11 @@ namespace Signum.Entities
             if (ex.HasText())
                 return Properties.Resources._0HasSomeRepeatedElements0.Formato(ex);
             return null;
+        }
+
+        public override string HelpMessage
+        {
+            get { return Resources.HaveNoRepeatedElements; }
         }
     }
 
@@ -404,7 +456,12 @@ namespace Signum.Entities
                 (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0))
                 return null;
 
-            return ErrorMessage ?? Resources.TheNumberOfElementsOf0HasToBe01.Formato(ComparisonType.NiceToString(), number.ToString());
+            return Resources.TheNumberOfElementsOf0HasToBe01.Formato(ComparisonType.NiceToString(), number.ToString());
+        }
+
+        public override string HelpMessage
+        {
+            get { return Resources.HaveANumberOfElements01.Formato(ComparisonType.NiceToString(), number.ToString()); }
         }
     }
 
@@ -414,9 +471,14 @@ namespace Signum.Entities
         {
             DateTime? dt = (DateTime?)value;
             if (dt.HasValue && dt.Value != dt.Value.Date)
-                return ErrorMessage ?? Resources._0HasHoursMinutesAndSeconds;
+                return Resources._0HasHoursMinutesAndSeconds;
             
             return null;
+        }
+
+        public override string HelpMessage
+        {
+            get { return Resources.HaveNoTimePart; }
         }
     }
 
@@ -442,14 +504,18 @@ namespace Signum.Entities
             string str = (string)value;
 
             if ((this.textCase == Case.Uppercase) && (str != str.ToUpper()))
-                return ErrorMessage ?? Resources._0HasToBeUppercase;
+                return Resources._0HasToBeUppercase;
 
             if ((this.textCase == Case.Lowercase) && (str != str.ToLower()))
-                return ErrorMessage ?? Resources._0HasToBeLowercase;
+                return Resources._0HasToBeLowercase;
 
             return null;
         }
-      
+
+        public override string HelpMessage
+        {
+            get { return Resources.Be + textCase.NiceToString(); }
+        }
     }
 
     public enum Case
@@ -536,10 +602,10 @@ namespace Signum.Entities
                 val = null;
 
             if (val != null && !necessary.Value)
-                return "{0} is not allowed on state {1}".Formato(propertyNiceNames[index], state);
+                return Resources._0IsNotAllowedOnState1.Formato(propertyNiceNames[index], state);
 
             if (val == null&& necessary.Value)
-                return "{0} is necessary on state {1}".Formato(propertyNiceNames[index], state);
+                return Resources._0IsNecessaryOnState1.Formato(propertyNiceNames[index], state);
 
             return null; 
         }

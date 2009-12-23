@@ -117,206 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="__SqlKeywords__" xml:space="preserve">
-    <value>ADD
-ALL
-ALTER
-AND
-ANY
-AS
-ASC
-AUTHORIZATION
-AVG
-BACKUP
-BEGIN
-BETWEEN
-BREAK
-BROWSE
-BULK
-BY
-CASCADE
-CASE
-CHECK
-CHECKPOINT
-CLOSE
-CLUSTERED
-COALESCE
-COLUMN
-COMMIT
-COMMITTED
-COMPUTE
-CONFIRM
-CONSTRAINT
-CONTAINS
-CONTAINSTABLE
-CONTINUE
-CONTROLROW
-CONVERT
-COUNT
-CREATE
-CROSS
-CURRENT
-CURRENT_DATE
-CURRENT_TIME
-CURRENT_TIMESTAMP
-CURRENT_USER
-CURSOR
-DATABASE
-DBCC
-DEALLOCATE
-DECLARE
-DEFAULT
-DELETE
-DENY
-DESC
-DISK
-DISTINCT
-DISTRIBUTED
-DOUBLE
-DROP
-DUMMY
-DUMP
-ELSE
-END
-ERRLVL
-ERROREXIT
-ESCAPE
-EXCEPT
-EXEC
-EXECUTE
-EXISTS
-EXIT
-FETCH
-FILE
-FILLFACTOR
-FLOPPY
-FOR
-FOREIGN
-FREETEXT
-FREETEXTTABLE
-FROM
-FULL
-GOTO
-GRANT
-GROUP
-HAVING
-HOLDLOCK
-IDENTITY
-IDENTITY_INSERT
-IDENTITYCOL
-IF
-IN
-INDEX
-INNER
-INSERT
-INTERSECT
-INTO
-IS
-ISOLATION
-JOIN
-KEY
-KILL
-LEFT
-LEVEL
-LIKE
-LINENO
-LOAD
-MAX
-MIN
-MIRROREXIT
-NATIONAL
-NOCHECK
-NONCLUSTERED
-NOT
-NULL
-NULLIF
-OF
-OFF
-OFFSETS
-ON
-ONCE
-ONLY
-OPEN
-OPENDATASOURCE
-OPENQUERY
-OPENROWSET
-OPTION
-OR
-ORDER
-OUTER
-OVER
-PERCENT
-PERM
-PERMANENT
-PIPE
-PLAN
-PRECISION
-PREPARE
-PRIMARY
-PRINT
-PRIVILEGES
-PROC
-PROCEDURE
-PROCESSEXIT
-PUBLIC
-RAISERROR
-READ
-READTEXT
-RECONFIGURE
-REFERENCES
-REPEATABLE
-REPLICATION
-RESTORE
-RESTRICT
-RETURN
-REVOKE
-RIGHT
-ROLLBACK
-ROWCOUNT
-ROWGUIDCOL
-RULE
-SAVE
-SCHEMA
-SELECT
-SERIALIZABLE
-SESSION_USER
-SET
-SETUSER
-SHUTDOWN
-SOME
-STATISTICS
-SUM
-SYSTEM_USER
-TABLE
-TAPE
-TEMP
-TEMPORARY
-TEXTSIZE
-THEN
-TO
-TOP
-TRAN
-TRANSACTION
-TRIGGER
-TRUNCATE
-TSEQUAL
-UNCOMMITTED
-UNION
-UNIQUE
-UPDATE
-UPDATETEXT
-USE
-USER
-VALUES
-VARYING
-VIEW
-WAITFOR
-WHEN
-WHERE
-WHILE
-WITH
-WORK
-WRITETEXT</value>
+  <data name="TypeDNTableNotCached" xml:space="preserve">
+    <value>Tabla TypeDN no cacheada. Recuerda llamar a TypeLogic.Start en tu Starter y llamar a Administrator.InitializeCurrentSchema </value>
   </data>
   <data name="FieldInitExpressionBindingsShouldBeEmpty" xml:space="preserve">
     <value>FieldInitExpression binding debe estar vacío</value>
@@ -342,9 +144,6 @@ WRITETEXT</value>
   </data>
   <data name="Table0NotLoadedInSchema" xml:space="preserve">
     <value>La tabla para el tipo {0} no está cargada en el Schema actual</value>
-  </data>
-  <data name="Idof0isZero" xml:space="preserve">
-    <value>El Id de {0} es 0</value>
   </data>
   <data name="TheField0IsNotIncluded" xml:space="preserve">
     <value>El campo {0} no está incluido</value>
@@ -377,7 +176,7 @@ WRITETEXT</value>
     <value>No se puede enumerar más de una vez</value>
   </data>
   <data name="EntityOfType0AndId1NotFound" xml:space="preserve">
-    <value>No se ha encontrado la entidad de tipo {0} e id {1}</value>
+    <value>No se ha encontrado la entidad de tipo {0} e Id {1}</value>
   </data>
   <data name="NotAllEntitiesOfType0AndIds1Removed" xml:space="preserve">
     <value>No se han eliminado todas las entidades de tipo {0} e ids: {1}</value>
@@ -435,11 +234,6 @@ WRITETEXT</value>
   </data>
   <data name="ThereIsADiferentInstanceOfTheSameObjectOnObjectCache" xml:space="preserve">
     <value>Ya existe un objeto con mismo id y tipo en la caché, pero es una instancia distinta</value>
-  </data>
-  <data name="ErrorCatchingTypesTableFrom0TablesInSchemaButNotIn01TablesIn0ButNotInSchema2" xml:space="preserve">
-    <value>Error cacheando la tabla de Tipos desde {0}:
-    Tablas en el Schema pero no en {0}: {1}
-    Tablas en {0} pero no en el Schema: {2}</value>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}</value>
