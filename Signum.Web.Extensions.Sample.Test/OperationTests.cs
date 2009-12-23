@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WatiN.Core;
 using WatiN.Core.UnitTests;
+using Signum.Web;
 
 namespace Signum.Web.Extensions.Sample.Test
 {
@@ -62,19 +63,36 @@ namespace Signum.Web.Extensions.Sample.Test
         #endregion
 
         [TestMethod]
-        public void operation_001()
+        public void operation_001_ConstructFromLite()
         {
             using (var ie = new IE("http://localhost/Signum.Web.Extensions.Sample/View/Album/1"))
-            {
-                ie.Divs.Last(d => d.ClassName == "OperationDiv").Click(); //Clone operation
-                Assert.IsTrue(ie.Div("_NewTemp").Exists);
-            }
-
+                constructFromLite(ie);
+            
             using (var ff = new FireFox("http://localhost/Signum.Web.Extensions.Sample/View/Album/1"))
-            {
-                ff.Divs.Last(d => d.ClassName == "OperationDiv").Click(); //Clone operation
-                Assert.IsTrue(ff.Div("_NewTemp").Exists);
-            }
+                constructFromLite(ff);
+        }
+
+        private static void constructFromLite(Browser b)
+        {
+            //Click clone
+            Div cloneOp = b.Div(d => d.ClassName == "OperationDiv" && d.InnerHtml == "Clone");
+            cloneOp.Click();
+
+            string prefix = "_New";
+            
+            //Check album clone is created in popup
+            Assert.IsTrue(b.Div(prefix + "Temp").Exists);
+            
+            //Close popup
+            b.Div(prefix + ViewDataKeys.BtnCancel).Click();
+
+            //Popup is removed completely from DOM
+            Assert.IsTrue(!b.Div(prefix + "Temp").Exists);
+
+            //Retry
+            cloneOp.Click();
+
+
         }
     }
 }
