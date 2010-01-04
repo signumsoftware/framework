@@ -100,7 +100,7 @@ namespace Signum.Entities
             get
             {
                 string str = ToString();
-                return str.HasText() ? str : this.GetType().Name;
+                return str.HasText() ? str : this.GetType().NiceName();
             }
         }
 
