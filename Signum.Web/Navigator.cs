@@ -443,7 +443,7 @@ namespace Signum.Web
         public void Start()
         {
             URLNamesToTypes = EntitySettings.ToDictionary(
-                kvp => kvp.Value.UrlName ?? (kvp.Key.Name.EndsWith("DN") ? kvp.Key.Name.Substring(0, kvp.Key.Name.Length - 2) : kvp.Key.Name), 
+                kvp => kvp.Value.UrlName ?? Reflector.CleanTypeName(kvp.Key),
                 kvp => kvp.Key);
             TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);

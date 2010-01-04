@@ -26,7 +26,7 @@ namespace Signum.Web.Controllers
 
         static SignumController()
         {
-            ModelBinders.Binders.AddOrReplace(typeof(FindOptions), new FindOptionsModelBinder());
+            ModelBinders.Binders[typeof(FindOptions)] = new FindOptionsModelBinder();
         }
 
         public ViewResult View(string typeUrlName, int? id)
