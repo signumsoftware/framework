@@ -13,7 +13,6 @@ namespace Signum.Utilities
     /// </summary>
     public static class ExpressionExtensions
     {
-
         static Dictionary<LambdaExpression, Delegate> cache = new Dictionary<LambdaExpression, Delegate>();
 
         public static T CompileAndStore<T>(this Expression<T> expression)

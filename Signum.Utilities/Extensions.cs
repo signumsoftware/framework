@@ -6,6 +6,7 @@ using System.Reflection;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Signum.Utilities
 {
@@ -272,9 +273,9 @@ namespace Signum.Utilities
                 yield return i;
         }
 
-        public static IEnumerable<T> For<T>(this T start, Func<T, bool> condition, Func<T, T> incremento)
+        public static IEnumerable<T> For<T>(this T start, Func<T, bool> condition, Func<T, T> increment)
         {
-            for (T i = start; condition(i); i = incremento(i))
+            for (T i = start; condition(i); i = increment(i))
                 yield return i;
         }
 

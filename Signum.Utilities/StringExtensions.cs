@@ -171,16 +171,23 @@ namespace Signum.Utilities
             return str.Etc(max, "(...)");
         }
 
-        public static string EtcLines(this string str, int max)
+        public static string EtcLines(this string str, int max, string etcString)
         {
-            if(!str.HasText())
+            if (!str.HasText())
                 return str;
 
-            int pos = str.IndexOfAny(new []{'\n','\r'});
-            if(pos != -1 && pos < max)
-                max = pos;
+            int pos = str.IndexOfAny(new[] { '\n', '\r' });
+            if (pos != -1 && pos + etcString.Length < max)
+                max = pos + etcString.Length;
 
-            return str.Etc(max);
+            if (str.HasText() && (str.Length > max))
+                return str.Left(max - (etcString.HasText() ? etcString.Length : 0)) + etcString;
+            return str;
+        }
+
+        public static string EtcLines(this string str, int max)
+        {
+            return str.EtcLines(max, "(...)");
         }
 
         public static bool ContinuesWith(this string str, string subString, int pos)
@@ -335,7 +342,7 @@ namespace Signum.Utilities
                     stringBuilder.Append(c);
             }
 
-            return stringBuilder.ToString();
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
         public static string ToComputerSize(this long value)

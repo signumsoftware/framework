@@ -28,7 +28,7 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         /// <summary>
-        /// Colapse un collection o object initializer in one single line
+        /// Dummy method to collapse un collection o object initializer in one single line
         /// </summary>
         public static T Collapse<T>(this T obj)
         {
@@ -150,14 +150,6 @@ namespace Signum.Utilities.ExpressionTrees
              }
         }
 
-        public static CodeTypeReference TypeReference(Type type, string[] importedNamespaces)
-        {
-            if (!type.IsGenericType && !type.IsArray &&  importedNamespaces != null && importedNamespaces.Contains(type.Namespace))
-                return new CodeTypeReference(type.Name);
-            else
-                return new CodeTypeReference(type); ;
-        }
-
         public static CodeExpression GetRightExpressionForValue(object value, Type type, string[] importedNamespaces)
         {
             if (value is DBNull || value == null)
@@ -257,6 +249,14 @@ namespace Signum.Utilities.ExpressionTrees
                 }
             }
             return null;
+        }
+
+        public static CodeTypeReference TypeReference(Type type, string[] importedNamespaces)
+        {
+            if (!type.IsGenericType && !type.IsArray && importedNamespaces != null && importedNamespaces.Contains(type.Namespace))
+                return new CodeTypeReference(type.Name);
+            else
+                return new CodeTypeReference(type); ;
         }
 
     }

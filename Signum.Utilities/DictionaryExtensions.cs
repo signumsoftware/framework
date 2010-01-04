@@ -10,14 +10,6 @@ namespace Signum.Utilities
 {
     public static class DictionaryExtensions
     {
-        public static void AddOrReplace<K, V>(this IDictionary<K, V> dictionary, K key, V value)
-        {
-            if (dictionary.ContainsKey(key))
-                dictionary[key] = value;
-            else
-                dictionary.Add(key, value);
-        }
-
         public static V TryGetC<K, V>(this IDictionary<K, V> dictionary, K key) where V : class
         {
             if (dictionary == null)

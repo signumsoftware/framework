@@ -20,12 +20,7 @@ namespace Signum.Utilities
 
         public static T Initialize<T>(ref T variable, Func<T> initialize) where T : class
         {
-            T value = variable;
-            if (value == null)
-            {
-                variable = value = initialize();
-            }
-            return value;
+            return variable ?? (variable = initialize());
         }
 
         public static void SafeUpdate<T>(ref T variable, Func<T, T> repUpdateFunction) where T : class
@@ -38,7 +33,7 @@ namespace Signum.Utilities
 
                 if (newValue == null)
                     break;
- 
+
             } while (Interlocked.CompareExchange<T>(ref variable, newValue, oldValue) != oldValue);
         }
 

@@ -213,20 +213,39 @@ namespace Signum.Utilities
             return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
         }
 
+
+        public static string CommaAnd<T>(this IEnumerable<T> collection)
+        {
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.And);
+        }
+
         public static string CommaAnd<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
-            return Comma(collection, toString, Resources.And); 
+            return CommaString(collection.Select(toString).ToArray(), Resources.And);
+        }
+
+        public static string CommaOr<T>(this IEnumerable<T> collection)
+        {
+            return CommaString(collection.Select(a=>a.ToString()).ToArray(), Resources.Or);
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
-            return Comma(collection, toString, Resources.Or);
+            return CommaString(collection.Select(toString).ToArray(), Resources.Or);
+        }
+
+        public static string Comma<T>(this IEnumerable<T> collection, string lastSeparator)
+        {
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), lastSeparator);
         }
 
         public static string Comma<T>(this IEnumerable<T> collection, Func<T, string> toString, string lastSeparator)
         {
-            string[] values = collection.Select(toString).ToArray();
-            
+            return CommaString(collection.Select(toString).ToArray(), lastSeparator);
+        }
+
+        static string CommaString(this string[] values, string lastSeparator)
+        {            
             if (values.Length == 0)
                 return "";
 

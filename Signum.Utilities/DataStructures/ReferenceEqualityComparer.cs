@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.CompilerServices;
+using System.Collections;
 
 namespace Signum.Utilities.DataStructures
 {
     [Serializable]
-    public class ReferenceEqualityComparer<T> : IEqualityComparer<T> where T : class
+    public class ReferenceEqualityComparer<T> : IEqualityComparer<T>, IEqualityComparer where T : class
     {
         static ReferenceEqualityComparer<T> _default;
-        
+
         ReferenceEqualityComparer() { }
-        
+
         public static ReferenceEqualityComparer<T> Default
         {
             get { return _default ?? (_default = new ReferenceEqualityComparer<T>()); }
@@ -23,10 +24,19 @@ namespace Signum.Utilities.DataStructures
             return RuntimeHelpers.GetHashCode(item);
         }
 
-        public bool Equals(T i1, T i2)
+        public bool Equals(T x, T y)
         {
-            return object.ReferenceEquals(i1, i2);
+            return object.ReferenceEquals(x, y);
+        }
+
+        bool IEqualityComparer.Equals(object x, object y)
+        {
+            return object.ReferenceEquals(x, y);
+        }
+
+        int IEqualityComparer.GetHashCode(object obj)
+        {
+            return RuntimeHelpers.GetHashCode(obj);
         }
     }
-
 }

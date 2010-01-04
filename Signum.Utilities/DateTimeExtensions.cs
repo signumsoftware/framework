@@ -52,12 +52,10 @@ namespace Signum.Utilities
         /// Checks if the date is inside a date-only interval (compared by entires days) defined by the two given dates
         /// </summary>
         [MethodExpander(typeof(IsInIntervalExpander1))]
-        public static bool IsInDateInterval(this DateTime date, DateTime firstDate, DateTime lastDate)
+        public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime maxDate)
         {
-            AssertDateOnly(date, firstDate, lastDate);
-            if (firstDate <= date && date <= lastDate)
-                return true;
-            return false;
+            AssertDateOnly(date, minDate, maxDate);
+            return minDate <= date && date <= maxDate;
         }
 
         /// <summary>
@@ -66,6 +64,7 @@ namespace Signum.Utilities
         [MethodExpander(typeof(IsInIntervalExpander2))]
         public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
         {
+            AssertDateOnly(date, minDate, maxDate);
             return (minDate == null || minDate <= date) &&
                    (maxDate == null || date < maxDate); 
         }
@@ -76,6 +75,7 @@ namespace Signum.Utilities
         [MethodExpander(typeof(IsInIntervalExpander3))]
         public static bool IsInDateInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
         {
+            AssertDateOnly(date, minDate, maxDate);
             return (minDate == null || minDate <= date) &&
                    (maxDate == null || date < maxDate); 
         }
@@ -200,27 +200,16 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            string s = string.Empty;
-            string separator = ", ";
-            if (Years > 0)
-            {
-                if (Years == 1) s=s.Add(Properties.Resources._0Year.Formato(Years), separator);
-                else s = s.Add(Properties.Resources._0Years.Formato(Years), separator);
-            }
-
-            if (Months > 0)
-            {
-                if (Months == 1) s = s.Add(Properties.Resources._0Month.Formato(Months), separator);
-                else s = s.Add(Properties.Resources._0Months.Formato(Months), separator);
-            }
-
-            if (Days > 0)
-            {
-                if (Days == 1) s = s.Add(Properties.Resources._0Day.Formato(Days), separator);
-                else s = s.Add(Properties.Resources._0Days.Formato(Days), separator);
-            }
-
-            return s;
+            return ", ".Combine(
+                         Years == 0 ? null :
+                         Years == 1 ? Resources._0Year.Formato(Years) :
+                                     Resources._0Years.Formato(Years),
+                         Months == 0 ? null :
+                         Months == 1 ? Resources._0Month.Formato(Years) :
+                                      Resources._0Months.Formato(Years),
+                         Days == 0 ? null :
+                         Days == 1 ? Resources._0Day.Formato(Years) :
+                                    Resources._0Days.Formato(Years));
         }
     }
 }

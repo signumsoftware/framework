@@ -35,8 +35,16 @@ namespace Signum.Entities.Reflection
 
         static Reflector()
         {
-            DescriptionManager.CleanTypeName = t => t.Name.EndsWith("DN") ? t.Name.Substring(0, t.Name.Length - 2) : t.Name; //To allow MyEntityDN
+            DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
             DescriptionManager.CleanType = t => ExtractLite(t) ?? t; //To allow Lite<T>
+        }
+
+        public static string CleanTypeName(Type type)
+        {
+            if (type.Name.EndsWith("DN"))
+                return type.Name.Substring(0, type.Name.Length - 2);
+
+            return type.Name;
         }
 
         public static bool IsMList(Type ft)
