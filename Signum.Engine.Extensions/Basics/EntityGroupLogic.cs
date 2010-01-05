@@ -25,14 +25,12 @@ namespace Signum.Engine.Basics
         class EntityGroupInfo<T> : IEntityGroupInfo
             where T : IdentifiableEntity
         {
-            public EntityGroupInfo(Func<T, bool> func, Expression<Func<T, bool>> expression, IQueryable<T> queryable)
+            public EntityGroupInfo(Func<T, bool> func, Expression<Func<T, bool>> expression)
             {
                 Expression = expression;
                 Func = func;
-                Queryable = queryable;
             }
 
-            public readonly IQueryable<T> Queryable; 
             public readonly Expression<Func<T, bool>> Expression;
             public readonly Func<T, bool> Func;
 
@@ -71,17 +69,9 @@ namespace Signum.Engine.Basics
         public static void Register<T>(Enum entityGroupKey, Expression<Func<T, bool>> isInGroup)
             where T : IdentifiableEntity
         {
-            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup.Compile(), isInGroup, null);
+            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(isInGroup.Compile(), isInGroup);
         }
-
-        public static void Register<T>(Enum entityGroupKey, IQueryable<T> inGroupElements)
-            where T : IdentifiableEntity
-        {
-            Expression<Func<T, bool>> exp = e => inGroupElements.Contains(e);
-
-            infos.GetOrCreate(typeof(T))[entityGroupKey] = new EntityGroupInfo<T>(exp.Compile(), exp, inGroupElements);
-        }
-
+  
         [MethodExpander(typeof(IsInGroupExpander))]
         public static bool IsInGroup(this IdentifiableEntity entity, Enum entityGroupKey)
         {
@@ -156,13 +146,6 @@ namespace Signum.Engine.Basics
         public static LambdaExpression GetInGroupExpression(Type type, Enum entityGroupKey)
         {
             return GetEntityGroupInfo(entityGroupKey, type).UntypedExpression;
-        }
-
-        public static IQueryable<T> GetInGroupQueryable<T>(Enum entityGroupKey)
-            where T : IdentifiableEntity
-        {
-            var queryable = ((EntityGroupInfo<T>)GetEntityGroupInfo(entityGroupKey, typeof(T))).Queryable;
-            return queryable;
         }
     }
 }

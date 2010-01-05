@@ -201,7 +201,6 @@ namespace Signum.Engine.Authorization
                              Group = eg,
                              Allowed = GetAllowed(role, eg),
                              Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
-                             Queryable = EntityGroupLogic.GetInGroupQueryable<T>(eg)
                          }).Where(p => !p.Allowed.InGroup || !p.Allowed.OutGroup).ToList();
 
             if (pairs.Count == 0)
@@ -210,27 +209,16 @@ namespace Signum.Engine.Authorization
             if (pairs.Any(p => !p.Allowed.InGroup && !p.Allowed.OutGroup))
                 return query.Where(p => false);
 
-            var pair = pairs.FirstOrDefault(p => p.Allowed.InGroup && !p.Allowed.OutGroup && p.Queryable != null);
-            if (pair != null && query.IsBase())
-            {
-                pairs.Remove(pair);
-                query = new Query<T>(DbQueryProvider.Single, DbQueryProvider.Clean(pair.Queryable.Expression));
-            }
+            ParameterExpression e = Expression.Parameter(typeof(T), "e");
+            Expression body = pairs.Select(p =>
+                            !p.Allowed.InGroup ? Expression.Not(Expression.Invoke(p.Expression, e)) :
+                                                 (Expression)Expression.Invoke(p.Expression, e)).Aggregate((a, b) => Expression.And(a, b));
 
-            if (pairs.Count > 0)
-            {
-                ParameterExpression e = Expression.Parameter(typeof(T), "e");
-                Expression body = pairs.Select(p =>
-                                !p.Allowed.InGroup ? Expression.Not(Expression.Invoke(p.Expression, e)) :
-                                                     (Expression)Expression.Invoke(p.Expression, e)).Aggregate((a, b) => Expression.And(a, b));
+            Expression cleanBody = DbQueryProvider.Clean(body);
 
-                Expression cleanBody = DbQueryProvider.Clean(body);
+            IQueryable<T> result = query.Where(Expression.Lambda<Func<T, bool>>(cleanBody, e));
 
-                query = query.Where(Expression.Lambda<Func<T, bool>>(cleanBody, e));
-
-            }
-
-            return query;
+            return result;
         }
 
         class WhereAllowedExpander : IMethodExpander
