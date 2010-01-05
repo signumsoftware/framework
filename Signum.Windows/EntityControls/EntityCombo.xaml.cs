@@ -164,6 +164,18 @@ namespace Signum.Windows
                     combo.Items.Add(selectedItem);
 
                 combo.SelectedItem = selectedItem;
+
+                if (selectedItem == null)
+                {
+                    combo.SelectedIndex = -1;
+                    combo.SelectedValue = -1;
+                    combo.Text = "";
+                    combo.SelectedItem = null;
+                    combo.SelectedIndex = -1;
+                    combo.SelectedValue = -1;
+                    combo.Text = "";
+
+                }
             }
             finally
             {

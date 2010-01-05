@@ -13,6 +13,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine;
 using System.Configuration;
 using Signum.Web.Properties;
+using System.Web;
 #endregion
 
 namespace Signum.Web
@@ -137,6 +138,40 @@ namespace Signum.Web
 
             using (ec)
                 helper.InternalEntityCombo(context, ec);
+        }
+
+        public static string RenderOption(this SelectListItem item)
+        {
+            TagBuilder builder = new TagBuilder("option")
+            {
+                InnerHtml = HttpUtility.HtmlEncode(item.Text),
+            };
+
+            if (item.Value != null)
+                builder.Attributes["value"] = item.Value;
+
+            if (item.Selected)
+                builder.Attributes["selected"] = "selected";
+
+            return builder.ToString(TagRenderMode.Normal);
+        }
+
+        public static SelectListItem ToSelectListItem(this Lite lite, bool selected)
+        {
+            return new SelectListItem { Text = lite.ToStr, Value = lite.Id.ToString(), Selected = selected };
+        }
+
+        public static string ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite selectedElement) where T : class, IIdentifiable
+        {
+
+            List<SelectListItem> list = new List<SelectListItem>();
+
+            if (selectedElement == null)
+                list.Add(new SelectListItem { Text = "-", Value = "" });
+
+            list.AddRange(lites.Select(l => l.ToSelectListItem(l == selectedElement)));
+     
+            return list.ToString(RenderOption, "\r\n");
         }
     }
 }

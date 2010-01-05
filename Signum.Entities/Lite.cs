@@ -100,6 +100,12 @@ namespace Signum.Entities
             return id.Value;
         }
 
+        public void RefreshToStr()
+        {
+            if (UntypedEntityOrNull != null)
+                ToStr = UntypedEntityOrNull.toStr;
+        }
+
         public Type RuntimeType
         {
             get { return runtimeType; }
@@ -135,7 +141,7 @@ namespace Signum.Entities
                 throw new ApplicationException(Resources.EntitiesDoNotMatch);
 
             this.UntypedEntityOrNull = ei;
-            if (ei != null)
+            if (ei != null && this.ToStr == null)
                 this.ToStr = ei.ToString();
         }
 
@@ -242,9 +248,9 @@ namespace Signum.Entities
         const int MagicMask = 123456853;
         public override int GetHashCode()
         {
-            if (this.UntypedEntityOrNull != null)
-                return UntypedEntityOrNull.GetHashCode() ^ MagicMask;
-            return this.Id.GetHashCode() ^ this.RuntimeType.Name.GetHashCode() ^ MagicMask;
+            return this.id == null ?
+                UntypedEntityOrNull.GetHashCode() ^ MagicMask :
+                this.RuntimeType.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
         }
     }
 

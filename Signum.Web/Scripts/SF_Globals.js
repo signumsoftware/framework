@@ -345,13 +345,13 @@ $.getScript = function(url, callback, cache){ $.ajax({ type: "GET", url: url, su
 var resourcesLoaded = new Array();
 $.jsLoader = function(cond, url, callback) {
     if (!resourcesLoaded[url] && cond) {
-         console.log("Getting js " + url);
+         //console.log("Getting js " + url);
          $.getScript(url, function() {resourcesLoaded[url]=true; if (callback) callback();}, true);
         }
 };
 $.cssLoader = function(cond, url) {
     if (!resourcesLoaded[url] && cond) {
-         console.log("Getting css " + url);
+      //   console.log("Getting css " + url);
       /*   jQuery( document.createElement('link') ).attr({
                 href: url,
                 media: media || 'screen',

@@ -19,6 +19,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using System.Configuration;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Web.Controllers;
 #endregion
 
 namespace Signum.Web
@@ -462,6 +463,8 @@ namespace Signum.Web
 
                 UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, "UrlQueryNames");
             }
+
+            ModelBinders.Binders.DefaultBinder = new LiteModelBinder(); 
         }
 
         HashSet<string> loadedModules = new HashSet<string>();
