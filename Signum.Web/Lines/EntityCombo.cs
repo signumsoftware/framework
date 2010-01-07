@@ -28,10 +28,12 @@ namespace Signum.Web
         
         public bool Preload { get; set; }
         public List<Lite> Data { get; set; }
+        public int Size { get; set; }
 
         public EntityCombo(string prefix)
         {
             Prefix = prefix;
+            Size = 0;
             Preload = true;
             View = false;
             Create = false;

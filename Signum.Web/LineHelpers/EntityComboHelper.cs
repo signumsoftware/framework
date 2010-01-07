@@ -93,10 +93,22 @@ namespace Signum.Web
 
                     settings.ComboHtmlProperties.Add("onchange", "EComboOnChanged({0});".Formato(settings.ToJS()));
 
-                    sb.AppendLine(helper.DropDownList(
-                        TypeContext.Compose(prefix, EntityComboKeys.Combo),
-                        items,
-                        settings.ComboHtmlProperties));
+                    if (settings.Size == 0)
+                    {
+                        sb.AppendLine(helper.DropDownList(
+                            TypeContext.Compose(prefix, EntityComboKeys.Combo),
+                            items,
+                            settings.ComboHtmlProperties));
+                    }
+                    else
+                    {
+                        settings.Size = Math.Min(settings.Size, items.Count - 1);
+                        string attributes = settings.ComboHtmlProperties != null ? (" " + settings.ComboHtmlProperties.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+                        sb.AppendLine("<select id='{0}' name='{0}' size='{1}' class='entityList'{2}>".Formato(TypeContext.Compose(prefix, EntityComboKeys.Combo), settings.Size, attributes));
+                        for(int i = 1; i<items.Count; i++)
+                            sb.AppendLine("<option value='{0}'{1}>{2}</option>".Formato(items[i].Value, items[i].Selected ? " selected='selected'" : "", items[i].Text));
+                        sb.AppendLine("</select>");
+                    }
                 }
             }
 
