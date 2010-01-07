@@ -102,7 +102,6 @@ namespace Signum.Web.Authorization
                         //if (bl.StyleContext == null)
                         //    bl.StyleContext = new StyleContext();
                         //bl.StyleContext.ReadOnly = true;
-                        bl.ReadOnly = true;
                         bl.SetReadOnly();
                         break;
                     case Access.Modify: 
