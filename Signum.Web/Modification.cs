@@ -454,7 +454,7 @@ namespace Signum.Web
             object oldValue = (entity != null) ? ppm.PropertyPack.GetValue(entity) : null;
             object newValue = ppm.Modification.ApplyChanges(controller, oldValue, onFinish);
 
-            if (ppm.Modification.TicksLastChange != null)
+            if (ppm.Modification.TicksLastChange != null && ppm.Modification.TicksLastChange != 0)
             {
                 PropertyPack pp = ppm.PropertyPack;
                 onFinish.Actions.Add(ppm.Modification.TicksLastChange.Value,
