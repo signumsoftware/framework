@@ -65,9 +65,9 @@ namespace Signum.Web
             return html.Label(id, value, idField, cssClass, null);
         }
 
-        public static string Span(this HtmlHelper html, string name, string value, string cssClass, Dictionary<string, object> htmlAttributes)
+        public static string Span(this HtmlHelper html, string id, string value, string cssClass, Dictionary<string, object> htmlAttributes)
         {
-            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string idname = id.HasText() ? (" id='" + id + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
             string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
             return "<span{0}{1}{2}>{3}</span>".Formato(idname, attributes, css, value);

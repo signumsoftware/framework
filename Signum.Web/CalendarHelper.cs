@@ -117,6 +117,7 @@ namespace Signum.Web
             sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 
                 "$(document).ready(function(){\n" +
+                "log('Añadiendo datepicker a " + elementId + " con longitud ' + $(\"#" + elementId + "\").length);" +
                 "$(\"#" + elementId + "\").datepicker({ " + OptionsToString(settings) +" });\n" + 
                 "});\n" + 
                 "</script>");

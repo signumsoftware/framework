@@ -16,6 +16,11 @@ namespace Signum.Web
     {
         public abstract void SetReadOnly();
 
+        public void SetReadOnly(bool readOnly)
+        {
+            ReadOnly = readOnly;
+        }
+
         public string LabelText { get; set; }
         public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string, object>(0);
 
