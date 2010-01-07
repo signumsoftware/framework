@@ -47,7 +47,7 @@ namespace Signum.Web
         public bool ReadOnly
         {
             get { return readOnly ?? parent.ReadOnly; }
-            set { readOnly = value; }
+            internal set { readOnly = value; }
         }
 
         bool? showValidationMessage = null;

@@ -41,6 +41,7 @@ namespace Signum.Web
 
         public override void SetReadOnly()
         {
+            ReadOnly = true;
             Find = false;
             Create = false;
             Remove = false;
