@@ -11,7 +11,7 @@ namespace Signum.Web
 
         static StyleContext()
         {
-            Default = new StyleContext(false)
+            Default = new StyleContext(false, false)
             {
                 BreakLine = true,
                 LabelVisible = true,
@@ -78,16 +78,17 @@ namespace Signum.Web
             set { showTicks = value; }
         }
 
-        public StyleContext(): this(true)
+        public StyleContext(): this(true, false)
         {
         }
 
-        public StyleContext(bool register)
+        public StyleContext(bool register, bool readOnly)
         {
+            if (readOnly)
+                ReadOnly = readOnly;
+
             if (register)
-            {
                 Register();
-            }
         }
 
         public StyleContext Register()
@@ -99,7 +100,7 @@ namespace Signum.Web
 
         public static StyleContext RegisterCleanStyleContext(bool register)
         {
-            return new StyleContext(register)
+            return new StyleContext(register, false)
             {
                 BreakLine = true,
                 LabelVisible = true,
