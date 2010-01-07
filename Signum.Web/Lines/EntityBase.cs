@@ -87,7 +87,7 @@ namespace Signum.Web
 
             sb.Append("prefix:'{0}'".Formato(Prefix));
 
-            if (OnEntityChanged.HasText())
+            if (OnChangedTotal.HasText())
                 sb.Append(",onEntityChanged:{0}".Formato(OnChangedTotal));
 
             sb.Append("}");
