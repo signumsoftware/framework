@@ -38,7 +38,9 @@ namespace Signum.Web
         {
             FormatRules = new List<FormatterRule>
             {
-                new FormatterRule(c=>true, (h,o) => h.Write(o.TryToString())),
+                new FormatterRule(c=>true, (h,o) => {
+                    if (o != null && o.GetType().BaseType == typeof(Enum)) h.Write(((Enum)o).NiceToString());
+                    else h.Write(o.TryToString());}),
                 new FormatterRule(c=>typeof(Lite).IsAssignableFrom(c.Type), (h,o)=>h.LightEntityLine((Lite)o, false)),
             };
         }

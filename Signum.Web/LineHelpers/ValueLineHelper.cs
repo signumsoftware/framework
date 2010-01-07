@@ -51,7 +51,10 @@ namespace Signum.Web
                     if (value != null && typeof(T).UnNullify() == typeof(DateTime) && settings.ValueLineType != null && settings.ValueLineType == ValueLineType.Date)
                         sb.AppendLine(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
                     else
-                        sb.AppendLine(helper.Span(idValueField, value, "valueLine", typeof(T)));
+                        if (typeof(T).UnNullify().BaseType == typeof(Enum))
+                            sb.AppendLine(helper.Span(idValueField, ((Enum)(object)value).NiceToString(), "valueLine", typeof(T)));
+                        else
+                            sb.AppendLine(helper.Span(idValueField, value, "valueLine", typeof(T)));
                 }
             }
             else
