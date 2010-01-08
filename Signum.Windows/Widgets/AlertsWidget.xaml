@@ -16,7 +16,7 @@
 				<GradientStop Color="#FFd2e1f6" Offset="1"/>
 			</LinearGradientBrush>
 		</Border.Background>
-    <Expander Style="{DynamicResource WidgetExpander}" x:Name="expAlerts" Margin="5"  IsExpanded="True">
+    <Expander Style="{DynamicResource WidgetExpander}" x:Name="expAlerts" Margin="5" IsExpanded="True">
         <Expander.Header>
             <Grid HorizontalAlignment="Stretch" MinWidth="100">
                 <Grid.ColumnDefinitions>

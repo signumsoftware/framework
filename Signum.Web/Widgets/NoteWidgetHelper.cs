@@ -16,7 +16,7 @@ namespace Signum.Web
     {
         //public static event GetNotesDelegate GetNotes;
         public static Func<IdentifiableEntity, INoteDN> CreateNote { get; set; }
-        public static Func<IdentifiableEntity, List<Lite<INoteDN>>> RetrieveNotes { get; set; }
+        public static Func<IdentifiableEntity, int?, List<Lite<INoteDN>>> RetrieveNotes { get; set; }
         public static Func<List<Lite<INoteDN>>,IIdentifiable, WidgetNode> RetrieveNode { get; set; }
         public static void Start()
         {
@@ -29,7 +29,7 @@ namespace Signum.Web
             if (identifiable == null || identifiable.IsNew || identifiable is INoteDN)
                 return null;
 
-            List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)identifiable);
+            List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)identifiable, null);
             return RetrieveNode(notes, identifiable);
 
         }

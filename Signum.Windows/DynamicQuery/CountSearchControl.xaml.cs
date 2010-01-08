@@ -132,7 +132,7 @@ namespace Signum.Windows
                     {
                         FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
                             .Formato(QueryUtils.GetNiceQueryName(QueryName));
-                        tb.FontWeight = FontWeights.Bold;
+                        //tb.FontWeight = FontWeights.Bold;
                     }
                     else
                     {

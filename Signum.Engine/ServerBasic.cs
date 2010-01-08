@@ -139,12 +139,13 @@ namespace Signum.Services
         #endregion
 
         #region INotesServer Members
-        public virtual List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lite)
+        public virtual List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lite, int? max)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => (from n in Database.Query<NoteDN>()
-                    where n.Entity == lite
-                    select n.ToLite<INoteDN>()).ToList());
+                return Return(MethodInfo.GetCurrentMethod(),
+                     () => (from n in Database.Query<NoteDN>()
+                            where n.Entity == lite
+                            select n.ToLite<INoteDN>()).Take(max != null ? max.Value : int.MaxValue).ToList());
+
         }
         #endregion
 

@@ -26,13 +26,17 @@ namespace Signum.Windows
         public event Action ForceShow;
 
         public static Func<IdentifiableEntity, INoteDN> CreateNote { get; set; }
-        public static Func<IdentifiableEntity, List<Lite<INoteDN>>> RetrieveNotes { get; set; }
+        public static Func<IdentifiableEntity, int?, List<Lite<INoteDN>>> RetrieveNotes { get; set; }
+
+        public static Action<IdentifiableEntity> ViewAdditional;
+
+        public int MaxNotes = 2;
 
         public NotesWidget()
         {
             InitializeComponent();
 
-            lvNotas.AddHandler(Button.ClickEvent, new RoutedEventHandler(Note_MouseDown));
+           // lvNotas.AddHandler(Button.ClickEvent, new RoutedEventHandler(Note_MouseDown));
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(NotesWidget_DataContextChanged);
         }
 
@@ -64,6 +68,12 @@ namespace Signum.Windows
             ViewNote(nota);
         }
 
+        private void btnAdditionalNotes_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewAdditional != null)
+                ViewAdditional((IdentifiableEntity)DataContext);
+        }
+
         void ViewNote(INoteDN note)
         {
             Navigator.NavigateUntyped(note, new NavigateOptions
@@ -80,11 +90,13 @@ namespace Signum.Windows
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
             if (entity == null || entity.IsNew)
             {
-                lvNotas.ItemsSource = null;
+               // lvNotas.ItemsSource = null;
                 return; 
             }
 
-            List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)DataContext);
+            List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)DataContext, null);
+
+            int count = notes.Count;
 
             if (notes != null)
             {
@@ -94,7 +106,12 @@ namespace Signum.Windows
                     ForceShow();
             }
 
-            lvNotas.ItemsSource = notes;
+           // lvNotas.ItemsSource = notes.Take(MaxNotes);
+
+            //btnAdditionalNotes.Visibility = count > MaxNotes ? Visibility.Visible : Visibility.Collapsed;
+            btnAdditionalNotes.Content = count + " " + (count!=1 ? "notas" : "nota");
+            if (count > 0) btnAdditionalNotes.FontWeight = FontWeights.Bold;
+            else btnAdditionalNotes.FontWeight = FontWeights.Normal;
         }
     }
 }

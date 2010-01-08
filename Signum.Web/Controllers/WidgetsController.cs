@@ -26,7 +26,7 @@ namespace Signum.Web.Controllers
 
             ViewDataDictionary vdd = new ViewDataDictionary();
             vdd.Add("WidgetNode",NoteWidgetHelper.RetrieveNode(
-                NoteWidgetHelper.RetrieveNotes(entity), entity));
+                NoteWidgetHelper.RetrieveNotes(entity, null), entity));
             HtmlHelper helper = SignumController.CreateHtmlHelper(this);
             return RenderPartialExtenders.RenderPartialToString(helper, "Views/Shared/WidgetView", vdd);
         }
