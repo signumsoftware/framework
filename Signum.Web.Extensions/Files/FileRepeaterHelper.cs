@@ -40,7 +40,7 @@ namespace Signum.Web.Files
 
             sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, settings, new Dictionary<string, object>{{"title", settings.AddElementLinkText}}));
             
-            sb.AppendLine(helper.Div("", "", "clearall", null)); //To keep create and find buttons' space
+           // sb.AppendLine(helper.Div("", "", "clearall", null)); //To keep create and find buttons' space
 
             sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(prefix, EntityRepeaterKeys.ItemsContainer)));
             if (value != null)
