@@ -49,7 +49,7 @@ namespace Signum.Entities.Authorization
         }
 
         string email;
-        [EmailValidator]
+        [EMailValidator]
         public string EMail
         {
             get { return email; }
@@ -81,7 +81,7 @@ namespace Signum.Entities.Authorization
             set { Set(ref state, value, () => State); }
         }
 
-        protected override string PropertyCheck(PropertyInfo pi)
+        protected override string PropertyValidation(PropertyInfo pi)
         {
             
             if (pi.Is(()=>State))
@@ -90,7 +90,7 @@ namespace Signum.Entities.Authorization
                     return Resources.TheUserStateMustBeDisabled;
             }
 
-            return base.PropertyCheck(pi);
+            return base.PropertyValidation(pi);
         }
 
         public override string ToString()

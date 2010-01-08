@@ -38,7 +38,7 @@ namespace Signum.Entities.Scheduler
             return holidays.Any(h => h.Date == date);
         }
 
-        protected override string PropertyCheck(PropertyInfo pi)
+        protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Is(()=>Holidays) && holidays != null)
             {
@@ -51,7 +51,7 @@ namespace Signum.Entities.Scheduler
                     return "Some dates have been repeated: " + rep;
             }
 
-            return base.PropertyCheck(pi);
+            return base.PropertyValidation(pi);
         }
 
 

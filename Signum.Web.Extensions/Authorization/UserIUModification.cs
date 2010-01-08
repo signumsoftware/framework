@@ -126,7 +126,7 @@ namespace Signum.Web.Authorization
                     if (ppm.PropertyPack.PropertyInfo.Name == "PasswordHash")
                         continue;
 
-                    string error = ((ModifiableEntity)entity)[ppm.PropertyPack.PropertyInfo.Name];
+                    string error = ((ModifiableEntity)entity).PropertyCheck(ppm.PropertyPack);
                     if (error != null)
                         errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
                 }

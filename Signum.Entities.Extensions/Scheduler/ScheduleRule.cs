@@ -221,7 +221,7 @@ namespace Signum.Entities.Scheduler
                 base.ToString());
         }
 
-        protected override string PropertyCheck(PropertyInfo pi)
+        protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Is(()=>Holiday))
             {
@@ -232,7 +232,7 @@ namespace Signum.Entities.Scheduler
                     return Resources.Holidayhavetobenullwhennocalendarisset;
             }
 
-            return base.PropertyCheck(pi);
+            return base.PropertyValidation(pi);
         }
 
     }

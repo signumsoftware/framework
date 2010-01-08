@@ -136,7 +136,7 @@ namespace Signum.Entities.Processes
        {ProcessState.Error,     null,    null,                   null,              null,                  null,                null,               null,             true,          true},
         };
 
-        protected override string PropertyCheck(PropertyInfo pi)
+        protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Is(()=>ExecutionStart) || pi.Is(()=>ExecutionEnd))
             {
@@ -147,7 +147,7 @@ namespace Signum.Entities.Processes
                     return Resources.ProcessStartIsNullButProcessEndIsNot;
             }
 
-            return stateValidator.Validate(this, pi) ?? base.PropertyCheck(pi);
+            return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
 
