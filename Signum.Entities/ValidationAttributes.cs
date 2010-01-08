@@ -13,44 +13,21 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
+using System.Globalization;
 
 namespace Signum.Entities
 {
-    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
-    public class HiddenPropertyAttribute : Attribute
-    {
-
-    }
-
-    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
-    public class UnitAttribute : Attribute
-    {
-        public string UnitName { get; private set; }
-        public UnitAttribute(string unitName)
-        {
-            this.UnitName = unitName; 
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
-    public class FormatAttribute : Attribute
-    {
-        public string Format { get; private set; }
-        public FormatAttribute(string format)
-        {
-            this.Format = format;
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
     public abstract class ValidatorAttribute : Attribute
     {
         public bool DisableOnCorrupt { get; set; }
         public string ErrorMessage { get; set; }
 
+        //Descriptive information that continues the sentence: The property should {HelpMessage}
+        //Used for documentation purposes only
         public abstract string HelpMessage { get; }
-       
-        public string Error(object value)
+        
+        public string Error(PropertyInfo property, object value)
         {
             if (DisableOnCorrupt && !Corruption.Strict)
                 return null;
@@ -60,7 +37,21 @@ namespace Signum.Entities
             if (defaultError == null)
                 return null;
 
-            return ErrorMessage ?? defaultError;
+            return GetLocalizedErrorMessage(property, this) ?? ErrorMessage ?? defaultError;
+        }
+
+        static string GetLocalizedErrorMessage(PropertyInfo property, ValidatorAttribute validator)
+        {
+            Assembly assembly = property.DeclaringType.Assembly;
+            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
+            {
+                string key = property.DeclaringType.Name.Add(property.Name, "_").Add(validator.GetType().Name, "_");
+                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -127,7 +118,7 @@ namespace Signum.Entities
             if (max != -1 && val.Length > max)
                 return Resources.TheLengthOf0HasToBeLesserOrEqualTo0.Formato(max);
 
-            return null; 
+            return null;
         }
 
         public override string HelpMessage
@@ -150,13 +141,13 @@ namespace Signum.Entities
 
     public class RegexValidatorAttribute : ValidatorAttribute
     {
-        Regex regex;         
+        Regex regex;
         public RegexValidatorAttribute(string regex)
         {
             this.regex = new Regex(regex);
         }
 
-        string formatName;        
+        string formatName;
         public string FormatName
         {
             get { return formatName; }
@@ -187,13 +178,13 @@ namespace Signum.Entities
         }
     }
 
-    public class EmailValidatorAttribute : RegexValidatorAttribute
+    public class EMailValidatorAttribute : RegexValidatorAttribute
     {
         const string EmailRegex = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}" +
                           @"\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\" +
                           @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
 
-        public EmailValidatorAttribute()
+        public EMailValidatorAttribute()
             : base(EmailRegex)
         {
             this.FormatName = "e-Mail";
@@ -213,8 +204,8 @@ namespace Signum.Entities
 
     public class URLValidatorAttribute : RegexValidatorAttribute
     {
-        const string URLRegex = 
-              "^(https?://)" 
+        const string URLRegex =
+              "^(https?://)"
             + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@ 
             + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184 
             + "|" // allows either IP or domain 
@@ -235,7 +226,8 @@ namespace Signum.Entities
     public class FileNameValidatorAttribute : RegexValidatorAttribute
     {
         const string FileNameRegex = @"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:\"";|/]+$";
-        public FileNameValidatorAttribute() : base(FileNameRegex)
+        public FileNameValidatorAttribute()
+            : base(FileNameRegex)
         {
             this.FormatName = Resources.FileName;
         }
@@ -243,16 +235,16 @@ namespace Signum.Entities
 
     public class DecimalsValidatorAttribute : ValidatorAttribute
     {
-        public int DecimalPlaces {get;set;}
+        public int DecimalPlaces { get; set; }
 
         public DecimalsValidatorAttribute()
         {
-            DecimalPlaces = 2; 
+            DecimalPlaces = 2;
         }
 
         public DecimalsValidatorAttribute(int decimalPlaces)
         {
-            this.DecimalPlaces = decimalPlaces; 
+            this.DecimalPlaces = decimalPlaces;
         }
 
         protected override string OverrideError(object value)
@@ -260,9 +252,7 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            if (value is decimal && Math.Round((decimal)value, DecimalPlaces) != (decimal)value ||
-                value is float && Math.Round((float)value, DecimalPlaces) != (float)value ||
-                value is double && Math.Round((double)value, DecimalPlaces) != (double)value)
+            if (value is decimal && Math.Round((decimal)value, DecimalPlaces) != (decimal)value)
             {
                 return Resources._0HasMoreThan0DecimalPlaces.Formato(DecimalPlaces);
             }
@@ -285,7 +275,7 @@ namespace Signum.Entities
         public NumberIsValidatorAttribute(ComparisonType comparison, float number)
         {
             this.ComparisonType = comparison;
-            this.number = number; 
+            this.number = number;
         }
 
         public NumberIsValidatorAttribute(ComparisonType comparison, double number)
@@ -338,7 +328,7 @@ namespace Signum.Entities
             if (ok)
                 return null;
 
-            return Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString()); 
+            return Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString());
         }
 
         public override string HelpMessage
@@ -388,7 +378,7 @@ namespace Signum.Entities
             this.min = min;
             this.max = max;
         }
-     
+
         protected override string OverrideError(object value)
         {
             if (value == null)
@@ -406,7 +396,7 @@ namespace Signum.Entities
                 val.CompareTo(max) <= 0)
                 return null;
 
-            return Resources._0HasToBeBetween0And1.Formato(min, max); 
+            return Resources._0HasToBeBetween0And1.Formato(min, max);
         }
 
         public override string HelpMessage
@@ -415,7 +405,7 @@ namespace Signum.Entities
         }
     }
 
-    public class NoRepeatValidator : ValidatorAttribute
+    public class NoRepeatValidatorAttribute : ValidatorAttribute
     {
         protected override string OverrideError(object value)
         {
@@ -477,7 +467,7 @@ namespace Signum.Entities
             DateTime? dt = (DateTime?)value;
             if (dt.HasValue && dt.Value != dt.Value.Date)
                 return Resources._0HasHoursMinutesAndSeconds;
-            
+
             return null;
         }
 
@@ -487,7 +477,7 @@ namespace Signum.Entities
         }
     }
 
-    public class StringCaseAttribute : ValidatorAttribute
+    public class StringCaseValidatorAttribute : ValidatorAttribute
     {
         private Case textCase;
         public Case TextCase
@@ -496,7 +486,7 @@ namespace Signum.Entities
             set { this.textCase = value; }
         }
 
-        public StringCaseAttribute(Case textCase)
+        public StringCaseValidatorAttribute(Case textCase)
         {
             this.textCase = textCase;
         }
@@ -528,7 +518,7 @@ namespace Signum.Entities
         Uppercase,
         Lowercase
     }
- 
+
     public enum ComparisonType
     {
         EqualTo,
@@ -539,7 +529,7 @@ namespace Signum.Entities
         LessThanOrEqual,
     }
 
-    public class StateValidator<E, S>: IEnumerable
+    public class StateValidator<E, S> : IEnumerable
         where E : IdentifiableEntity
         where S : struct
     {
@@ -553,30 +543,10 @@ namespace Signum.Entities
         public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties)
         {
             this.getState = getState;
-            PropertyInfo[] pis = properties.Select(p => SlowPropertyInfo(p)).ToArray();
+            PropertyInfo[] pis = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
             propertyNames = pis.Select(pi => pi.Name).ToArray();
             propertyNiceNames = pis.Select(pi => pi.NiceName()).ToArray();
             getters = properties.Select(p => p.Compile()).ToArray();
-        }
-
-        public static PropertyInfo SlowPropertyInfo(LambdaExpression property)
-        {
-            if (property == null)
-                throw new ArgumentNullException("property");
-
-            Expression body = property.Body;
-            if (body.NodeType == ExpressionType.Convert)
-                body = ((UnaryExpression)body).Operand;
-
-            MemberExpression ex = body as MemberExpression;
-            if (ex == null)
-                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
-
-            PropertyInfo pi = ex.Member as PropertyInfo;
-            if (pi == null)
-                throw new ArgumentException(Resources.PropertyShouldBeAnExpressionAccessingAProperty);
-
-            return pi;
         }
 
         public void Add(S state, params bool?[] necessary)
@@ -609,10 +579,10 @@ namespace Signum.Entities
             if (val != null && !necessary.Value)
                 return Resources._0IsNotAllowedOnState1.Formato(propertyNiceNames[index], state);
 
-            if (val == null&& necessary.Value)
+            if (val == null && necessary.Value)
                 return Resources._0IsNecessaryOnState1.Formato(propertyNiceNames[index], state);
 
-            return null; 
+            return null;
         }
 
         public IEnumerator GetEnumerator() //just to use object initializer
@@ -621,18 +591,4 @@ namespace Signum.Entities
         }
     }
 
-    public static class ValidationExtensions
-    {
-        public static bool Is<T>(this PropertyInfo pi, Expression<Func<T>> property)
-        {
-            PropertyInfo pi2 = ReflectionTools.BasePropertyInfo(property);
-            return ReflectionTools.MemeberEquals(pi, pi2);
-        }
-
-        public static bool Is<S, T>(this PropertyInfo pi, Expression<Func<S, T>> property)
-        {
-            PropertyInfo pi2 = ReflectionTools.BasePropertyInfo(property);
-            return ReflectionTools.MemeberEquals(pi, pi2);
-        }
-    }
 }

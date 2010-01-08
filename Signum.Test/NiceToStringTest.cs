@@ -19,12 +19,13 @@ namespace Signum.Test
 {
     public enum EnumPruebas
     {
-        Prueba_1, 
-        MyPrueba2,
-        [System.ComponentModel.Description("Prueba!")]
-        Prueba3,
-        Prueba4,
-        Prueba5
+        Test,
+        [System.ComponentModel.Description("Test!")]
+        Test2,
+        MyTest, 
+        My_Test,
+        TEST,
+        YouAreFromONU,
     }
 
 
@@ -38,11 +39,12 @@ namespace Signum.Test
         [TestMethod]
         public void EnumToStr()
         {
-            Assert.AreEqual(EnumPruebas.Prueba_1.NiceToString(), "Prueba 1");
-            Assert.AreEqual(EnumPruebas.MyPrueba2.NiceToString(), "My Prueba2");
-            Assert.AreEqual(EnumPruebas.Prueba3.NiceToString(), "Prueba!");
-            Assert.AreEqual(EnumPruebas.Prueba4.NiceToString(), "Test 4");
-            Assert.AreEqual(EnumPruebas.Prueba5.NiceToString(), "Custom Test 5");
+            Assert.AreEqual(EnumPruebas.Test.NiceToString(), "Test");
+            Assert.AreEqual(EnumPruebas.Test2.NiceToString(), "Test!");
+            Assert.AreEqual(EnumPruebas.MyTest.NiceToString(), "My test");
+            Assert.AreEqual(EnumPruebas.My_Test.NiceToString(), "My Test");
+            Assert.AreEqual(EnumPruebas.TEST.NiceToString(), "TEST");
+            Assert.AreEqual(EnumPruebas.YouAreFromONU.NiceToString(), "You are from ONU");
         }
 
         [TestMethod]

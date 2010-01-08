@@ -316,4 +316,7 @@
   <data name="Be" xml:space="preserve">
     <value>ser </value>
   </data>
+  <data name="TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery" xml:space="preserve">
+    <value>El Lite {0} no está cargado, usa Database.Retrieve o considera reescribir tu query</value>
+  </data>
 </root>

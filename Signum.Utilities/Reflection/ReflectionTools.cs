@@ -67,6 +67,7 @@ namespace Signum.Utilities.Reflection
             return true;
         }
 
+
         public static PropertyInfo GetPropertyInfo<R>(Expression<Func<R>> property)
         {
             return BasePropertyInfo(property);
@@ -97,6 +98,7 @@ namespace Signum.Utilities.Reflection
             return pi;
         }
 
+
         public static FieldInfo GetFieldInfo<R>(Expression<Func<R>> field)
         {
             return BaseFieldInfo(field);
@@ -126,6 +128,7 @@ namespace Signum.Utilities.Reflection
 
             return pi;
         }
+
 
         public static MemberInfo GetMemberInfo<R>(Expression<Func<R>> member)
         {
@@ -184,6 +187,7 @@ namespace Signum.Utilities.Reflection
 
             return ex.Method;
         }
+
 
         public static Type GetReceiverType<T, R>(Expression<Func<T, R>> lambda)
         {
@@ -363,20 +367,13 @@ namespace Signum.Utilities.Reflection
             }
         }
 
-        public static bool IsReadOnly(this PropertyInfo pi)
-        {
-            MethodInfo mi = pi.GetSetMethod();
-
-            return mi == null || !mi.IsPublic;
-        }
-
         public static Type CollectionType(Type ft)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(ft))
                 return null;
 
-            return ft.GetInterfaces().PreAnd(ft).SingleOrDefault(ti => ti.IsGenericType &&
-                ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            return ft.GetInterfaces().PreAnd(ft)
+                .SingleOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .TryCC(ti => ti.GetGenericArguments()[0]);
         }
     }

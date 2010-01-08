@@ -50,7 +50,7 @@ namespace Signum.Entities
 
                 if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     foreach (ModifiableEntity item in (IEnumerable)variable)
-                        item.PropertyValidation -= ChildPropertyValidation;
+                        item.ExternalPropertyValidation -= ChildPropertyValidation;
             }
 
             if (variable is ModifiableEntity)
@@ -59,7 +59,7 @@ namespace Signum.Entities
                     ((INotifyPropertyChanged)variable).PropertyChanged -= ChildPropertyChanged;
 
                 if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    ((ModifiableEntity)(object)variable).PropertyValidation -= ChildPropertyValidation;
+                    ((ModifiableEntity)(object)variable).ExternalPropertyValidation -= ChildPropertyValidation;
             }
 
             variable = value;
@@ -75,7 +75,7 @@ namespace Signum.Entities
 
                 if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
                     foreach (ModifiableEntity item in (IEnumerable)variable)
-                        item.PropertyValidation += ChildPropertyValidation;
+                        item.ExternalPropertyValidation += ChildPropertyValidation;
             }
 
             if (variable is ModifiableEntity)
@@ -84,7 +84,7 @@ namespace Signum.Entities
                     ((INotifyPropertyChanged)variable).PropertyChanged += ChildPropertyChanged;
 
                 if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    ((ModifiableEntity)(object)variable).PropertyValidation += ChildPropertyValidation;
+                    ((ModifiableEntity)(object)variable).ExternalPropertyValidation += ChildPropertyValidation;
             }
 
             selfModified = true;
@@ -108,7 +108,7 @@ namespace Signum.Entities
         {
             if (this.Set(ref variable, valor, property))
             {
-                NotifyPrivate("ToStringMethod");
+                NotifyError();
                 return true;
             }
             return false;
@@ -119,8 +119,6 @@ namespace Signum.Entities
         protected internal override void PostRetrieving()
         {
             RebindEvents();
-
-            base.PostRetrieving();
         }
 
         protected virtual void RebindEvents()
@@ -158,11 +156,11 @@ namespace Signum.Entities
 
                 var entity = obj as ModifiableEntity;
                 if (entity != null)
-                    entity.PropertyValidation += ChildPropertyValidation;
+                    entity.ExternalPropertyValidation += ChildPropertyValidation;
                 else
                 {
                     foreach (ModifiableEntity item in (IEnumerable)obj)
-                        item.PropertyValidation += ChildPropertyValidation;
+                        item.ExternalPropertyValidation += ChildPropertyValidation;
                 }
             }
         }
@@ -186,9 +184,9 @@ namespace Signum.Entities
             if (AttributeManager<ValidateChildPropertyAttribute>.FieldsToNotify(GetType()).Any(f => f(this) == sender))
             {
                 if (args.NewItems != null)
-                    foreach (var p in args.NewItems.Cast<ModifiableEntity>()) p.PropertyValidation += ChildPropertyValidation;
+                    foreach (var p in args.NewItems.Cast<ModifiableEntity>()) p.ExternalPropertyValidation += ChildPropertyValidation;
                 if (args.OldItems != null)
-                    foreach (var p in args.OldItems.Cast<ModifiableEntity>()) p.PropertyValidation -= ChildPropertyValidation;
+                    foreach (var p in args.OldItems.Cast<ModifiableEntity>()) p.ExternalPropertyValidation -= ChildPropertyValidation;
             }
         }
 
@@ -207,12 +205,22 @@ namespace Signum.Entities
         public event PropertyChangedEventHandler PropertyChanged;
 
         [field: NonSerialized, Ignore]
-        public event PropertyValidationEventHandler PropertyValidation;
+        public event PropertyValidationEventHandler ExternalPropertyValidation;
 
         protected void Notify<T>(Expression<Func<T>> property)
         {
             NotifyPrivate(ReflectionTools.BasePropertyInfo(property).Name);
+            NotifyError();
+        }
+
+        public void NotifyError()
+        {
             NotifyPrivate("Error");
+        }
+
+        public void NotifyToString()
+        {
+            NotifyPrivate("ToStringMethod");
         }
 
         void NotifyPrivate(string propertyName)
@@ -239,62 +247,107 @@ namespace Signum.Entities
         #endregion
 
         #region IDataErrorInfo Members
-
-
         [HiddenProperty]
-        public string Error
+        string IDataErrorInfo.Error
         {
             get { return IntegrityCheck(); }
         }
 
         //override for full entitity integrity check. Remember to call base. 
-        public override string IntegrityCheck()
+        public string IntegrityCheck()
         {
-            return Reflector.GetPropertyPacks(GetType()).Select(k => this[k.Key]).NotNull().ToString("\r\n");
+            return Validator.GetPropertyPacks(GetType()).Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");
         }
 
         //override for per-property checks
         [HiddenProperty]
-        public string this[string columnName]
+        string IDataErrorInfo.this[string columnName]
         {
             get
             {
                 if (columnName == null)
-                    return Error;
+                    return ((IDataErrorInfo)this).Error;
                 else
                 {
-                    PropertyPack pp = Reflector.GetPropertyPacks(GetType()).TryGetC(columnName);
+                    PropertyPack pp = Validator.GetPropertyPack(GetType(), columnName);
                     if (pp == null)
                         return null; //Hidden properties
 
-                    object val = pp.GetValue(this);
-                    string result = pp.Validators.Select(v => v.Error(val)).NotNull().Select(e => e.Formato(pp.PropertyInfo.NiceName())).FirstOrDefault();
-
-                    if (result != null)
-                        return result;
-
-                    result = PropertyCheck(pp.PropertyInfo);
-
-                    if (result != null)
-                        return result;
-
-                    if (PropertyValidation != null)
-                        result = PropertyValidation(this, pp.PropertyInfo, val);
-
-                    return result;
+                    return PropertyCheck(pp);
                 }
             }
         }
 
-        protected virtual string PropertyCheck(PropertyInfo pi)
+        public string PropertyCheck<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
+        {
+            return PropertyCheck(Validator.GetPropertyPack(property));
+        }
+
+        public string PropertyCheck(string propertyName) 
+        {
+            return PropertyCheck(Validator.GetPropertyPack(GetType(), propertyName));
+        }
+       
+        public string PropertyCheck(PropertyPack pp)
+        {
+            if (pp.DoNotValidate)
+                return null;
+
+            object propertyValue = pp.GetValue(this);
+
+            //ValidatorAttributes
+            foreach (var validator in pp.Validators)
+            {
+                string result = validator.Error(pp.PropertyInfo, propertyValue);
+                if (result != null)
+                    return result.Formato(pp.PropertyInfo.NiceName());
+            }
+
+            //Internal Validation
+            if (!pp.SkipPropertyValidation)
+            {
+                string result = PropertyValidation(pp.PropertyInfo);
+                if (result != null)
+                    return result;
+            }
+
+            //External Validation
+            if (!pp.SkipExternalPropertyValidation && ExternalPropertyValidation != null)
+            {
+                string result = ExternalPropertyValidation(this, pp.PropertyInfo, propertyValue);
+                if (result != null)
+                    return result;
+            }
+
+            //Static validation
+            if (pp.StaticPropertyValidation != null)
+            {
+                string result = pp.StaticPropertyValidation(this, pp.PropertyInfo, propertyValue);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        protected virtual string PropertyValidation(PropertyInfo pi)
         {
             return null;
+        }
+
+        public string FullIntegrityCheck()
+        {
+            return GraphExplorer.Integrity(GraphExplorer.FromRoot(this));
+        }
+
+        public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
+        {
+            return GraphExplorer.IntegrityDictionary(GraphExplorer.FromRoot(this));
         }
 
         #endregion
 
         #region ICloneable Members
-
         object ICloneable.Clone()
         {
             BinaryFormatter bf = new BinaryFormatter();
@@ -307,40 +360,5 @@ namespace Signum.Entities
         }
 
         #endregion
-    }
-
-    public delegate string PropertyValidationEventHandler(ModifiableEntity sender, PropertyInfo pi, object propertyValue);
-
-    public static class ModifiableEntityExtensions
-    {
-        public static PropertyValidationEventHandler AddValidation<T, P>(this T entity, Expression<Func<T, P>> property, Func<P, string> error)
-            where T : ModifiableEntity
-        {
-            PropertyInfo pi2 = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
-
-            PropertyValidationEventHandler val = (sender, pi, propertyValue) =>
-                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ?
-                    error((P)propertyValue) :
-                    null;
-
-            entity.PropertyValidation += val;
-
-            return val;
-        }
-
-        public static PropertyValidationEventHandler AddValidation<T, P>(this T entity, Expression<Func<T, P>> property, ValidatorAttribute validator)
-           where T : ModifiableEntity
-        {
-            PropertyInfo pi2 = (PropertyInfo)ReflectionTools.BaseMemberInfo(property);
-
-            PropertyValidationEventHandler val = (sender, pi, propertyValue) =>
-                sender == entity && ReflectionTools.PropertyEquals(pi, pi2) ?
-                    validator.Error(propertyValue).TryCC(str => str.Formato(pi.NiceName())) :
-                    null;
-
-            entity.PropertyValidation += val;
-
-            return val;
-        }
     }
 }

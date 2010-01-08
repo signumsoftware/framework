@@ -318,12 +318,12 @@ namespace Signum.Web
             return Manager.ApplyChanges(controller, modification, ref entity);
         }
 
-        public static Dictionary<string, List<string>> GenerateErrors(Controller controller, Modifiable entity, Modification modification, string prefix)
+        public static Dictionary<string, List<string>> GenerateErrors(Controller controller, ModifiableEntity entity, Modification modification, string prefix)
         {
             return Manager.GenerateErrors(controller, entity, modification, prefix);
         }
 
-        public static Dictionary<string, List<string>> GenerateErrors(Controller controller, Modifiable entity, Modification modification, string prefix, out List<string> fullIntegrityErrors)
+        public static Dictionary<string, List<string>> GenerateErrors(Controller controller, ModifiableEntity entity, Modification modification, string prefix, out List<string> fullIntegrityErrors)
         {
             return Manager.GenerateErrors(controller, entity, modification, prefix, out fullIntegrityErrors);
         }
@@ -879,7 +879,7 @@ namespace Signum.Web
             ModificationState modState = ApplyChanges(controller, modification, ref entity);
             return new ChangesLog
             {
-                Errors = GenerateErrors(controller, (Modifiable)(object)entity, modification, prefix),
+                Errors = GenerateErrors(controller, (ModifiableEntity)(object)entity, modification, prefix),
                 ChangeTicks = ModificationState.ToDictionary(modState.Actions),
             };
         }
@@ -890,7 +890,7 @@ namespace Signum.Web
             ModificationState modState = ApplyChanges(controller, modification, ref entity);
             return new ChangesLog
             {
-                Errors = GenerateErrors(controller, (Modifiable)(object)entity, modification, prefix, out fullIntegrityErrors),
+                Errors = GenerateErrors(controller, (ModifiableEntity)(object)entity, modification, prefix, out fullIntegrityErrors),
                 ChangeTicks = ModificationState.ToDictionary(modState.Actions),
             };
         }
@@ -922,13 +922,13 @@ namespace Signum.Web
             return modState;
         }
 
-        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Controller controller, Modifiable entity, Modification modification, string prefix)
+        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Controller controller, ModifiableEntity entity, Modification modification, string prefix)
         {
             GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity));
             Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
             modification.Validate(controller, entity, errors, prefix);
 
-            Dictionary<Modifiable, string> dicGlobalErrors = entity.FullIntegrityCheckDictionary();
+            Dictionary<ModifiableEntity, string> dicGlobalErrors = entity.FullIntegrityCheckDictionary();
             //Split each error in one entry in the HashTable:
             var globalErrors = dicGlobalErrors.SelectMany(a => a.Value.Lines()).ToList();
             //eliminar de globalErrors los que ya hemos metido en el diccionario
@@ -941,14 +941,14 @@ namespace Signum.Web
             return errors;
         }
 
-        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Controller controller, Modifiable entity, Modification modification, string prefix, out List<string> fullIntegrityErrors)
+        protected internal virtual Dictionary<string, List<string>> GenerateErrors(Controller controller, ModifiableEntity entity, Modification modification, string prefix, out List<string> fullIntegrityErrors)
         {
             fullIntegrityErrors = null;
 
             Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
             modification.Validate(controller, entity, errors, prefix);
 
-            Dictionary<Modifiable, string> dicGlobalErrors = entity.FullIntegrityCheckDictionary();
+            Dictionary<ModifiableEntity, string> dicGlobalErrors = entity.FullIntegrityCheckDictionary();
             //Split each error in one entry in the HashTable:
             var globalErrors = dicGlobalErrors.SelectMany(a => a.Value.Lines()).ToList();
             //eliminar de globalErrors los que ya hemos metido en el diccionario

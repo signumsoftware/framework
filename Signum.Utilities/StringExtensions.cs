@@ -274,18 +274,23 @@ namespace Signum.Utilities
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < pascalStr.Length; i++)
+            if (pascalStr.Length > 1)
+                sb.Append(pascalStr[0]); 
+
+            for (int i = 1; i < pascalStr.Length; i++)
             {
                 char a = pascalStr[i];
-                if (char.IsUpper(a) && i + 1 < pascalStr.Length && !char.IsUpper(pascalStr[i + 1]))
+                if (char.IsUpper(a) && !char.IsUpper(pascalStr[i - 1]))
                 {
                     if (sb.Length > 0)
                         sb.Append(' ');
-                    sb.Append(preserveUppercase || i == 0 ? a : char.ToLower(a));
+                    if (preserveUppercase || i == 0 || (i < pascalStr.Length - 1 && char.IsUpper(pascalStr[i + 1])))
+                        sb.Append(a);
+                    else
+                        sb.Append(char.ToLower(a));
                 }
                 else
                     sb.Append(a);
-
             }
 
             return sb.ToString();

@@ -313,4 +313,7 @@
   <data name="Be" xml:space="preserve">
     <value>be </value>
   </data>
+  <data name="TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery" xml:space="preserve">
+    <value>The Lite {0} is not loaded, use Database.Retrieve or consider rewriting your query</value>
+  </data>
 </root>

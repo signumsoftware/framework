@@ -65,9 +65,9 @@ namespace Signum.Entities.Reflection
             return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.IdentifiableExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
-        public static Dictionary<Modifiable, string> IntegrityDictionary(DirectedGraph<Modifiable> graph)
+        public static Dictionary<ModifiableEntity, string> IntegrityDictionary(DirectedGraph<Modifiable> graph)
         {
-            var result = graph.Select(m => new { m, Error = m.IntegrityCheck() })
+            var result = graph.OfType<ModifiableEntity>().Select(m => new { m, Error = m.IntegrityCheck() })
                 .Where(p => p.Error.HasText()).ToDictionary(a => a.m, a => a.Error);
 
             return result;
@@ -75,7 +75,7 @@ namespace Signum.Entities.Reflection
 
         public static string IdentifiableIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
-            return graph.Select(m => m.IntegrityCheck()).Where(e => e.HasText()).ToString("\r\n");
+            return graph.OfType<ModifiableEntity>().Select(m => m.IntegrityCheck()).Where(e => e.HasText()).ToString("\r\n");
         }
 
         public static string Integrity(DirectedGraph<Modifiable> graph)

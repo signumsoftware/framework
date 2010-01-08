@@ -353,7 +353,7 @@ namespace Signum.Web
             Dictionary<string, PropertyPack> propertyValidators = null;
             Type myType = RuntimeType ?? StaticType;
             if (!myType.IsInterface && !myType.IsAbstract)
-                propertyValidators = Reflector.GetPropertyPacks(myType);
+                propertyValidators = Validator.GetPropertyPacks(myType);
 
             Properties = new Dictionary<string, PropertyPackModification>();
 
@@ -504,7 +504,7 @@ namespace Signum.Web
 
                     if (!prefix.HasText() || ControlID.StartsWith(prefix))
                     {
-                        string error = ((ModifiableEntity)entity)[ppm.PropertyPack.PropertyInfo.Name];
+                        string error = ((ModifiableEntity)entity).PropertyCheck(ppm.PropertyPack);
                         if (error != null)
                             errors.GetOrCreate(ppm.Modification.ControlID).AddRange(error.Lines());
                     }

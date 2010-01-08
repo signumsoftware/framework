@@ -59,5 +59,12 @@ namespace Signum.Utilities
         {
             return ReflectionTools.PropertyEquals(ReflectionTools.BasePropertyInfo(property), pi);
         }
+
+        public static bool IsReadOnly(this PropertyInfo pi)
+        {
+            MethodInfo mi = pi.GetSetMethod();
+
+            return mi == null || !mi.IsPublic;
+        }
     }
 }

@@ -34,21 +34,6 @@ namespace Signum.Entities
         [HiddenProperty]
         public abstract bool SelfModified { get; internal set; }
 
-        public virtual string IntegrityCheck()
-        {
-            return null;
-        }
-
-        public string FullIntegrityCheck()
-        {
-            return GraphExplorer.Integrity(GraphExplorer.FromRoot(this));
-        }
-
-        public Dictionary<Modifiable, string> FullIntegrityCheckDictionary()
-        {
-            return GraphExplorer.IntegrityDictionary(GraphExplorer.FromRoot(this));
-        }
-
         protected internal virtual void PreSaving(ref bool graphModified)
         {
         }

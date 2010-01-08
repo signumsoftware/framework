@@ -122,7 +122,7 @@ namespace Signum.Utilities
         }
 
 
-        public static string GetDescription(MemberInfo memberInfo)
+        static string GetDescription(MemberInfo memberInfo)
         {
             Assembly assembly = (memberInfo.DeclaringType ?? (Type)memberInfo).Assembly;
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
@@ -142,7 +142,7 @@ namespace Signum.Utilities
             return null;
         }
 
-        public static string GetPluralDescription(Type type)
+        static string GetPluralDescription(Type type)
         {
             Assembly assembly = type.Assembly;
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
@@ -168,23 +168,9 @@ namespace Signum.Utilities
             if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
             {
                 string key = type.Name + "_Gender";
-                string result = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
-                if (result != null)
-                {
-                    if (result.Equals("m", StringComparison.InvariantCultureIgnoreCase) ||
-                        result.Equals("male", StringComparison.InvariantCultureIgnoreCase) ||
-                        result.Equals("masculine", StringComparison.InvariantCultureIgnoreCase))
-                        return Gender.Masculine;
-
-                    if (result.Equals("f", StringComparison.InvariantCultureIgnoreCase) ||
-                        result.Equals("female", StringComparison.InvariantCultureIgnoreCase) ||
-                        result.Equals("femenine", StringComparison.InvariantCultureIgnoreCase))
-                        return Gender.Femenine;
-
-                    if (result.Equals("n", StringComparison.InvariantCultureIgnoreCase) ||
-                        result.Equals("neuter", StringComparison.InvariantCultureIgnoreCase))
-                        return Gender.Neuter;
-                }
+                string gender = assembly.GetDefaultResourceManager().GetString(key, CultureInfo.CurrentCulture);
+                if (gender != null)
+                    return ParseGender(gender);
             }
 
             var ga = type.SingleAttribute<GenderAttribute>();
@@ -192,7 +178,17 @@ namespace Signum.Utilities
                 return ga.Gender;
 
             return NaturalLanguageTools.GetGender(type.NiceName());
-        }     
+        }
+
+        static Gender ParseGender(string str)
+        {
+            str = str.Trim().ToLower();
+            if (str == "m") return Gender.Masculine;
+            if (str == "f") return Gender.Femenine;
+            if (str == "n") return Gender.Neuter;
+
+            throw new FormatException("{0} is not a valid Gender. Use m, f or n");
+        }
 
         public static ResourceManager GetDefaultResourceManager(this Assembly assembly)
         {

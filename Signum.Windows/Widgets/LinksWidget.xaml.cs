@@ -37,7 +37,7 @@ namespace Signum.Windows
         {
             IdentifiableEntity ident = e.NewValue as IdentifiableEntity;
             
-            List<QuickLink> links = ident != null ? Links.GetForEntity(ident, Control) : new List<QuickLink>();
+            List<QuickLink> links = ident != null && !ident.IsNew ? Links.GetForEntity(ident, Control) : new List<QuickLink>();
 
             lvQuickLinks.ItemsSource = links;
 

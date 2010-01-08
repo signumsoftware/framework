@@ -62,7 +62,7 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="Attributes.cs" />
+    <Compile Include="FieldAttributes.cs" />
     <Compile Include="Basics\Alert.cs" />
     <Compile Include="Basics\Color.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
@@ -83,8 +83,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="PropertyAttributes.cs" />
     <Compile Include="Reflection\GraphExplorer.cs" />
     <Compile Include="Reflection\Reflector.cs" />
+    <Compile Include="Validator.cs" />
     <Compile Include="Services\IAlertsServer.cs" />
     <Compile Include="Services\IBaseServer.cs" />
     <Compile Include="Services\INotesServer.cs" />

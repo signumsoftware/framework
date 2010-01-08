@@ -32,11 +32,11 @@ namespace Signum.Entities
             : base(runtimeType, id)
         {
             if (!typeof(T).IsAssignableFrom(runtimeType))
-                throw new ApplicationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(T)));
+                throw new InvalidOperationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(T)));
         }
 
-        internal Lite(T entidad)
-            : base((IdentifiableEntity)(IIdentifiable)entidad)
+        internal Lite(T entity)
+            : base((IdentifiableEntity)(IIdentifiable)entity)
         {
         }
 
@@ -57,7 +57,7 @@ namespace Signum.Entities
             get
             {
                 if (entityOrNull == null)
-                    throw new ApplicationException("The Lite is not loaded, use Database.Retrieve or consider rewriting your query");
+                    throw new InvalidOperationException(Resources.TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery.Formato(this));
                 return entityOrNull;
             }
         }
@@ -77,7 +77,7 @@ namespace Signum.Entities
         protected Lite(Type runtimeType, int id)
         {
             if (runtimeType == null || !typeof(IdentifiableEntity).IsAssignableFrom(runtimeType))
-                throw new ApplicationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(IIdentifiable)));
+                throw new InvalidOperationException(Resources.TypeIsNotSmallerThan.Formato(runtimeType, typeof(IIdentifiable)));
 
             this.runtimeType = runtimeType;
             this.id = id;
@@ -116,7 +116,7 @@ namespace Signum.Entities
             get
             {
                 if (id == null)
-                    throw new ApplicationException(Resources.TheLiteIsPointingToANewEntityAndHasNoIdYet);
+                    throw new InvalidOperationException(Resources.TheLiteIsPointingToANewEntityAndHasNoIdYet);
                 return id.Value;
             }
         }
@@ -135,10 +135,10 @@ namespace Signum.Entities
         public void SetEntity(IdentifiableEntity ei)
         {
             if (id == null)
-                throw new ApplicationException(Resources.NewEntitiesAreNotAllowed);
+                throw new InvalidOperationException(Resources.NewEntitiesAreNotAllowed);
 
             if (id != ei.id || RuntimeType != ei.GetType())
-                throw new ApplicationException(Resources.EntitiesDoNotMatch);
+                throw new InvalidOperationException(Resources.EntitiesDoNotMatch);
 
             this.UntypedEntityOrNull = ei;
             if (ei != null && this.ToStr == null)
@@ -148,7 +148,7 @@ namespace Signum.Entities
         public void ClearEntity()
         {
             if (id == null)
-                throw new ApplicationException(Resources.RemovingEntityNotAllowedInNewLazies);
+                throw new InvalidOperationException(Resources.RemovingEntityNotAllowedInNewLazies);
 
             this.UntypedEntityOrNull = null;
         }
@@ -257,36 +257,7 @@ namespace Signum.Entities
 
     public static class LiteUtils
     {
-        public static Lite<T> ToLite<T>(this Lite lite)
-            where T : class, IIdentifiable
-        {
-            if (lite == null)
-                return null;
-
-            if (lite is Lite<T>)
-                return (Lite<T>)lite;
-
-            if (lite.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = lite.ToStr };
-            else
-                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = lite.ToStr };
-        }
-
-        public static Lite<T> ToLite<T>(this Lite lite, string toStr)
-            where T : class, IIdentifiable
-        {
-            if (lite == null)
-                return null;
-
-            if (lite is Lite<T>)
-                return (Lite<T>)lite;
-
-            if (lite.UntypedEntityOrNull != null)
-                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = toStr };
-            else
-                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = toStr };
-        }
-
+      
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IIdentifiable
         {
@@ -294,7 +265,7 @@ namespace Signum.Entities
                 return null;
 
             if (entity.IsNew)
-                throw new ApplicationException(Resources.ToLiteLightNotAllowedForNewEntities);
+                throw new InvalidOperationException(Resources.ToLiteLightNotAllowedForNewEntities);
 
             return new Lite<T>(entity.GetType(), entity.Id) { ToStr = entity.ToString() };
         }
@@ -306,7 +277,7 @@ namespace Signum.Entities
                 return null;
 
             if (entity.IsNew)
-                throw new ApplicationException(Resources.ToLiteLightNotAllowedForNewEntities);
+                throw new InvalidOperationException(Resources.ToLiteLightNotAllowedForNewEntities);
 
             return new Lite<T>(entity.GetType(), entity.Id) { ToStr = toStr };
         }
@@ -342,6 +313,37 @@ namespace Signum.Entities
 
             return new Lite<T>(entity) { ToStr = toStr };
         }
+
+        public static Lite<T> ToLite<T>(this Lite lite)
+          where T : class, IIdentifiable
+        {
+            if (lite == null)
+                return null;
+
+            if (lite is Lite<T>)
+                return (Lite<T>)lite;
+
+            if (lite.UntypedEntityOrNull != null)
+                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = lite.ToStr };
+            else
+                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = lite.ToStr };
+        }
+
+        public static Lite<T> ToLite<T>(this Lite lite, string toStr)
+            where T : class, IIdentifiable
+        {
+            if (lite == null)
+                return null;
+
+            if (lite is Lite<T>)
+                return (Lite<T>)lite;
+
+            if (lite.UntypedEntityOrNull != null)
+                return new Lite<T>((T)(object)lite.UntypedEntityOrNull) { ToStr = toStr };
+            else
+                return new Lite<T>(lite.RuntimeType, lite.Id) { ToStr = toStr };
+        }
+
 
         [MethodExpander(typeof(RefersToExpander))]
         public static bool RefersTo<T>(this Lite<T> lite, T entity)

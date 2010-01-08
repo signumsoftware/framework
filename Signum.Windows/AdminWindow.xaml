@@ -37,16 +37,8 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition MinWidth="200" />
                 <ColumnDefinition MinWidth="200" />
-				<ColumnDefinition MinWidth="200" />
 			</Grid.ColumnDefinitions>
             <m:EntityList x:Name="entityList" Remove="False" Find="False" View="False" ViewOnCreate="False" Margin="5,0,5,5" Entities="{Binding DataContext.Elements, ElementName=Window}"/>
-            <ListBox Margin="5,0,5,5" Grid.Column="2" ItemsSource="{Binding DataContext.Elements, ElementName=Window}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding ToStringMethod}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
             <m:DataBorder Margin="5,0,5,5" Grid.Column="1"  BorderBrush="Gray"   BorderThickness="1" DataContext="{Binding DataContext.Elements/, ElementName=Window}" Padding="5">
 				<ContentControl Content="{Binding Path=MainControl, ElementName=Window}" x:Name="contentControl"/>
 			</m:DataBorder>

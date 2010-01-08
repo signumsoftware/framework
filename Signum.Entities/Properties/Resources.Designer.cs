@@ -602,6 +602,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Lite {0} is not loaded, use Database.Retrieve or consider rewriting your query.
+        /// </summary>
+        internal static string TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery {
+            get {
+                return ResourceManager.GetString("TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The lite is pointing to a new entity and has no id yet.
         /// </summary>
         internal static string TheLiteIsPointingToANewEntityAndHasNoIdYet {

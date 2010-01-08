@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutUtils.cs" />
+    <Compile Include="AboutTools.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
@@ -139,7 +139,7 @@
     <Compile Include="StreamExtensions.cs" />
     <Compile Include="StringDistance.cs" />
     <Compile Include="StringExtensions.cs" />
-    <Compile Include="TreeExtensions.cs" />
+    <Compile Include="TreeHelper.cs" />
     <Compile Include="Properties\Version.cs" />
   </ItemGroup>
   <ItemGroup>
