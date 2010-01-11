@@ -267,7 +267,7 @@ namespace Signum.Web.Controllers
             return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
                 this.ModelState.ToJsonData(),
                 TypeContext.Separator + EntityBaseKeys.ToStr,
-                entity.ToString(),
+                entity.TryToString(""),
                 TypeContext.Separator + EntityBaseKeys.ToStrLink,
                 newLink
                 ));
