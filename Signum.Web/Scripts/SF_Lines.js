@@ -121,9 +121,9 @@ EBaseLine.prototype = {
         if ($('#' + sfReactive).length > 0) {
             extraParams.sfReactive = true;
             extraParams.sfTabId = $('#' + sfTabId).val();
-            var mainEntityInfo = EntityInfoFor('');
-            extraParams.sfRuntimeType = mainEntityInfo.runtimeType();
-            extraParams.sfId = mainEntityInfo.id();
+            //var mainEntityInfo = EntityInfoFor('');
+            //extraParams.sfRuntimeType = mainEntityInfo.runtimeType();
+            //extraParams.sfId = mainEntityInfo.id();
         }
 
         return extraParams;

@@ -109,7 +109,7 @@ namespace Signum.Web
                 throw new ArgumentException(Resources.InvalidPropertyPrefix);
 
             List<PropertyInfo> pis = new List<PropertyInfo>();
-            object currentEntity = entity;
+            object currentEntity = (entity is Lite) ? Database.Retrieve((Lite)entity) : entity;
             try
             {
                 foreach (string property in properties)
@@ -130,6 +130,9 @@ namespace Signum.Web
                         currentEntity = pi.GetValue(currentEntity, null);
                     }
 
+                    if (currentEntity is Lite)
+                        currentEntity = Database.Retrieve((Lite)currentEntity);
+
                     if (currentEntity == null)
                         return null;
                 }
@@ -142,7 +145,7 @@ namespace Signum.Web
             return (Modifiable)currentEntity;
         }
 
-        public static TypeContext GetTCforEmbeddedEntity(NameValueCollection form, Modifiable entity, ref string prefix)
+        public static TypeContext GetTCforEmbeddedEntity(Controller controller, NameValueCollection form, Modifiable entity, ref string prefix)
         {
             if (!prefix.HasText())
                 return null;
@@ -155,32 +158,40 @@ namespace Signum.Web
             string propertyName = prefix.Substring(propertyStart + 1);
             prefix = prefix.Left(propertyStart, true);
 
-            EntityInfo parentEntityInfo = null;
-
+            string prefixWithoutList = null;
             int index;
             bool isListItem = int.TryParse(propertyName, out index);
-            if (isListItem) 
+            if (isListItem)
             {
                 propertyStart = prefix.LastIndexOf(TypeContext.Separator);
                 propertyName = prefix.Substring(propertyStart + 1);
-                string prefixWithoutList = prefix.Left(propertyStart, true);
-                parentEntityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefixWithoutList, EntityBaseKeys.Info)]);
+                prefixWithoutList = prefix.Left(propertyStart, true);
+            }
+
+            Modifiable parent;
+            Type parentType;
+            if (Navigator.ExtractIsReactive(form))
+            {
+                Modifiable root = Navigator.ExtractEntity(controller, form);
+                parent = Modification.GetPropertyValue(root, prefixWithoutList ?? prefix ?? "");
+                parentType = parent.GetType();
             }
             else
-                parentEntityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.Info)]);
-
-            Type parentType = parentEntityInfo.RuntimeType ?? parentEntityInfo.StaticType;
-            
-            Modifiable parent;
-            if (parentEntityInfo.IdOrNull.HasValue)
-                parent = Database.Retrieve(parentType, parentEntityInfo.IdOrNull.Value);
-            else
             {
-                object result = Navigator.CreateInstance(parentType);
-                if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                    parent = (ModifiableEntity)result;
+                EntityInfo parentEntityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefixWithoutList ?? prefix ?? "", EntityBaseKeys.Info)]);
+
+                parentType = parentEntityInfo.RuntimeType ?? parentEntityInfo.StaticType;
+
+                if (parentEntityInfo.IdOrNull.HasValue)
+                    parent = Database.Retrieve(parentType, parentEntityInfo.IdOrNull.Value);
                 else
-                    throw new ApplicationException("Invalid result type for a Constructor");
+                {
+                    object result = Navigator.CreateInstance(parentType);
+                    if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
+                        parent = (ModifiableEntity)result;
+                    else
+                        throw new ApplicationException("Invalid result type for a Constructor");
+                }
             }
 
             PropertyInfo pi = parent.GetType().GetProperty(propertyName);
@@ -189,7 +200,7 @@ namespace Signum.Web
             {
                 Modifiable list = (Modifiable)pi.GetValue(parent, null);
                 Type listTscType = typeof(TypeSubContext<>).MakeGenericType(new Type[] { list.GetType() });
-                TypeContext tsc = (TypeContext)Activator.CreateInstance(listTscType, new object[] { list, GetTCforEmbeddedEntity(form, list, ref prefix), new PropertyInfo[]{pi} });
+                TypeContext tsc = (TypeContext)Activator.CreateInstance(listTscType, new object[] { list, GetTCforEmbeddedEntity(controller, form, list, ref prefix), new PropertyInfo[]{pi} });
 
                 Type tesc = typeof(TypeElementContext<>).MakeGenericType(new Type[] { entity.GetType() });
                 return (TypeContext)Activator.CreateInstance(tesc, new object[] { entity, tsc, index });
@@ -205,7 +216,7 @@ namespace Signum.Web
             else
             {
                 Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { parentType });
-                return (TypeContext)Activator.CreateInstance(ts, new object[] { parent, GetTCforEmbeddedEntity(form, parent, ref prefix), new PropertyInfo[] { pi } });
+                return (TypeContext)Activator.CreateInstance(ts, new object[] { parent, GetTCforEmbeddedEntity(controller, form, parent, ref prefix), new PropertyInfo[] { pi } });
             }
         }
     }

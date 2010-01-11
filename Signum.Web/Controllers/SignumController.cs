@@ -99,7 +99,7 @@ namespace Signum.Web.Controllers
                 this.ViewData[ViewDataKeys.WriteSFInfo] = true;
 
                 Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
-                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[] { } });
+                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(this, Request.Form, entity, ref prefix), new PropertyInfo[] { } });
 
                 return Navigator.PopupView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
             }
@@ -146,7 +146,7 @@ namespace Signum.Web.Controllers
                 //Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
                 //TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[]{} });
                 string prefixClon = prefix;
-                TypeContext tc = Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefixClon);
+                TypeContext tc = Modification.GetTCforEmbeddedEntity(this, Request.Form, entity, ref prefixClon);
                 return Navigator.PartialView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
             }
 
@@ -255,7 +255,14 @@ namespace Signum.Web.Controllers
 
             Modifiable entity = Navigator.ExtractIsReactive(Request.Form) ? Modification.GetPropertyValue(parentEntity, prefix) : parentEntity;
 
-            string newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+            string newLink = "";
+            if (entity == null)
+            {
+                EntityInfo ei = EntityInfo.FromFormValue(Request.Form[TypeContext.Compose(prefix, EntityBaseKeys.Info)]);
+                newLink = Navigator.ViewRoute(ei.StaticType, (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+            }
+            else
+                newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
             
             return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
                 this.ModelState.ToJsonData(),

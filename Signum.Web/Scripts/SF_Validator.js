@@ -22,7 +22,8 @@ Validator.prototype = {
 
     constructRequestData: function() {
         log("Validator constructRequestData");
-        var formChildren = empty(this.valOptions.parentDiv) ? $("form") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId);
+        var formChildren = empty(this.valOptions.parentDiv) ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId);
+        formChildren = formChildren.not(".searchControl *");
         var requestData = formChildren.serialize();
 
         if (!empty(this.valOptions.prefixToIgnore))
@@ -196,6 +197,7 @@ var PartialValidator = function(_pvalOptions) {
     this.constructRequestDataForSaving = function() {
         log("PartialValidator constructRequestDataForSaving");
         var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId).add(GetSFInfoParams(this.valOptions.prefix));
+        formChildren = formChildren.not(".searchControl *");
         var requestData = formChildren.serialize();
 
         requestData += qp(sfPrefix, this.valOptions.prefix);
@@ -255,7 +257,8 @@ var PartialValidator = function(_pvalOptions) {
     this.constructRequestDataForValidating = function() {
         log("PartialValidator constructRequestDataForValidating");
         var isReactive = ($('#' + sfReactive).length > 0);
-        var formChildren = isReactive ? $("form") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId);
+        var formChildren = isReactive ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId);
+        formChildren = formChildren.not(".searchControl *");
         var requestData = formChildren.serialize();
         if (!isReactive) {
             if (formChildren.filter(this.pf(sfInfo)).length == 0) {

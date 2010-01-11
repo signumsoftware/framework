@@ -6,6 +6,7 @@
 <%@ Import Namespace="System.Configuration" %>
 
 <% FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];%>
+<div id="<%=Html.GlobalName("divSearchControl") %>" class="searchControl">
 <%=Html.Hidden(Html.GlobalName("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName)%>
 <%=Html.Hidden(Html.GlobalName("sfAllowMultiple"), findOptions.AllowMultiple.ToString())%>
 <% string popupPrefix = (string)ViewData[ViewDataKeys.PopupPrefix]; %>
@@ -32,3 +33,4 @@
 <div class="clearall"></div>
 <div id="<%=Html.GlobalName("divResults")%>" class="divResults"></div>
 <div id="<%=Html.GlobalName("divASustituir")%>"></div>
+</div>
