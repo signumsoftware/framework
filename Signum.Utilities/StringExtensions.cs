@@ -273,8 +273,9 @@ namespace Signum.Utilities
 
         public static string SpacePascal(this string pascalStr, bool preserveUppercase)
         {
+            
             StringBuilder sb = new StringBuilder();
-            if (pascalStr.Length > 1)
+            if (pascalStr.Length > 0)
                 sb.Append(pascalStr[0]); 
 
             for (int i = 1; i < pascalStr.Length; i++)
