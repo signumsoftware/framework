@@ -8,29 +8,29 @@ namespace Signum.Utilities
     public static class TreeHelper
     {
         public static List<Node<T>> ToTreeC<T>(IEnumerable<T> collection, Func<T, T> getParent)
-            where T: class 
+            where T : class
         {
             Node<T> top = new Node<T>();
 
-            Dictionary<T,Node<T>> dic =new Dictionary<T,Node<T>>();
+            Dictionary<T, Node<T>> dic = new Dictionary<T, Node<T>>();
 
             Func<T, Node<T>> createNode = null;
 
-            createNode = item => dic.GetOrCreate(item, ()=>
+            createNode = item => dic.GetOrCreate(item, () =>
                 {
                     Node<T> itemNode = new Node<T>(item);
                     T parent = getParent(item);
-                    Node<T> parentNode = parent != null? createNode(parent) : top;
+                    Node<T> parentNode = parent != null ? createNode(parent) : top;
                     parentNode.Childs.Add(itemNode);
                     return itemNode;
-                }); 
+                });
 
             foreach (var item in collection)
             {
-                createNode(item); 
+                createNode(item);
             }
 
-            return top.Childs; 
+            return top.Childs;
         }
 
         public static List<Node<T>> ToTreeS<T>(IEnumerable<T> collection, Func<T, T?> getParent)
@@ -70,6 +70,11 @@ namespace Signum.Utilities
                 stack.PushRange(childs(elem));
             }
         }
+
+        public static List<Node<S>> SelectTree<T, S>(List<Node<T>> roots, Func<T, S> selector)
+        {
+            return roots.Select(n => new Node<S>(selector(n.Value)) { Childs = SelectTree(n.Childs, selector) }).ToList();
+        }
     }
 
     public class Node<T>
@@ -80,12 +85,12 @@ namespace Signum.Utilities
         public Node(T value)
         {
             Value = value;
-            Childs = new List<Node<T>>(); 
+            Childs = new List<Node<T>>();
         }
 
         public Node()
         {
-            Childs = new List<Node<T>>(); 
+            Childs = new List<Node<T>>();
         }
     }
 }

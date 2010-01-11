@@ -139,8 +139,8 @@
     <Compile Include="StreamExtensions.cs" />
     <Compile Include="StringDistance.cs" />
     <Compile Include="StringExtensions.cs" />
-    <Compile Include="TreeHelper.cs" />
     <Compile Include="Properties\Version.cs" />
+    <Compile Include="TreeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.es.resx">

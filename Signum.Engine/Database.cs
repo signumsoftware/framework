@@ -227,7 +227,7 @@ namespace Signum.Engine
             }
         }
 
-        public static List<T> RetrieveFromListOfLite<T>(List<Lite<T>> lites)
+        public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites)
          where T : class, IIdentifiable
         {
             using (new EntityCache())
@@ -243,7 +243,7 @@ namespace Signum.Engine
             }
         }
 
-        public static List<IdentifiableEntity> RetrieveFromListOfLite(List<Lite> lites)
+        public static List<IdentifiableEntity> RetrieveFromListOfLite(IEnumerable<Lite> lites)
         {
             using (new EntityCache())
             using (Transaction tr = new Transaction())
