@@ -21,34 +21,67 @@ using System.Xml;
 using System.Resources;
 using Signum.Engine.Extensions.Properties;
 using Signum.Utilities.Reflection;
+using System.Diagnostics;
 
 
 namespace Signum.Engine.Help
 {
     public static class HelpLogic
     {       
-        static string HelpDirectory;
-        static string BaseUrl;
-        static DirectedGraph<Assembly> Assemblies; 
-        static Dictionary<Type, Dictionary<Assembly, string>> TypeToHelpFiles;
+        public static string HelpDirectory = "HelpXml";
+        public static string BaseUrl = "Help";
+        static DirectedGraph<Assembly> Assemblies;
+        static List<HashSet<Assembly>> SortedAssemblies; 
+        static Dictionary<Type, EntityHelp> TypeToHelpFiles;
+        static Dictionary<string, Type> CleanNameToType;
 
-        public  static Type[] AllTypes()
+        public static Type[] AllTypes()
         {
             return TypeToHelpFiles.Keys.ToArray();
         }
 
-        public static void Start(SchemaBuilder sb, string helpDirectory, string baseUrl)
+        public static string EntityUrl(Type entityType)
+        {
+            return BaseUrl + "/" + Reflector.CleanTypeName(entityType); 
+        }
+
+        public static EntityHelp GetEntityHelp(Type entityType)
+        {
+            return TypeToHelpFiles[entityType]; 
+
+            Dictionary<Assembly, string> dict = TypeToHelpFiles[entityType];
+
+            Dictionary<Assembly, EntityHelp> entities = dict.SelectDictionary(k => k, fn =>
+                EntityHelp.Load(entityType, Find(XDocument.Load(fn), entityType), fn));
+
+            return entities; 
+        }
+
+
+        static XElement Find(XDocument document, Type type)
+        {
+            return document
+                .Elements(_Namespace).Single(ns => ns.Attribute(_Namespace).Value == type.Namespace)
+                .Elements(_Entity).Single(a => a.Attribute(_Name).Value == type.Name);
+        }
+
+        public static Type FromCleanName(string cleanName)
+        {
+            return CleanNameToType.GetOrThrow(cleanName, "No help for " + cleanName); 
+        }
+
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                HelpDirectory = helpDirectory;
-                BaseUrl = baseUrl;
                 sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_Initialize); 
             }
         }
 
         static void Schema_Initialize(Schema sender)
         {
+            //Debugger.Break(); 
+
             Type[] types = sender.Tables.Select(t => t.Key).ToArray();
 
             Type[] operations = (from t in types
@@ -58,10 +91,12 @@ namespace Signum.Engine.Help
                               select o.GetType()).ToArray();
 
             Dictionary<string, Assembly> assemblies =
-                 types.Concat(operations).Concat(queries).Select(q => q.Assembly).Distinct().ToDictionary(a => a.FullName);
+                 types.Concat(operations).Concat(queries).Select(q => q.Assembly).Distinct().ToDictionary(a => a.GetName().Name);
 
-            Assemblies = DirectedGraph<Assembly>.Generate(assemblies.Values, a => a.GetReferencedAssemblies()
-                .Select(an => assemblies.TryGetC(an.FullName)).NotNull());
+            Assemblies = DirectedGraph<Assembly>.Generate(assemblies.Values, a =>
+                a.GetReferencedAssemblies().Select(an => assemblies.TryGetC(a.GetName().Name)).NotNull());
+
+            SortedAssemblies = Assemblies.CompilationOrderGroups().ToList();
 
             XmlSchemaSet schemas = new XmlSchemaSet();
             Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
@@ -69,14 +104,14 @@ namespace Signum.Engine.Help
 
             var typesDic = types.ToDictionary(a => a.FullName);
 
-       
+
             if (!Directory.Exists(HelpDirectory))
             {
                 TypeToHelpFiles = new Dictionary<Type, Dictionary<Assembly, string>>();
                 return;
             }
 
-            var documents = Directory.GetFiles(HelpDirectory, "*.help").Select(f => new { File = f, Document = XDocument.Load(f)}).ToList();
+            var documents = Directory.GetFiles(HelpDirectory, "*.help").Select(f => new { File = f, Document = XDocument.Load(f) }).ToList();
 
             List<XmlSchemaException> exceptions = new List<XmlSchemaException>();
             foreach (var doc in documents)
@@ -91,11 +126,11 @@ namespace Signum.Engine.Help
 
                 throw new InvalidOperationException(errorText);
             }
-            
+
             var typeHelpInfo = (from doc in documents
                                 from ns in doc.Document.Root.Elements(_Namespace)
                                 from entity in ns.Elements(_Entity)
-                                let type = typesDic.TryGetC(ns.Attribute(_Name) + "." + entity.Attribute(_Name))
+                                let type = typesDic.TryGetC(ns.Attribute(_Name).Value + "." + entity.Attribute(_Name).Value)
                                 where type != null
                                 select new
                                 {
@@ -107,7 +142,7 @@ namespace Signum.Engine.Help
 
             var duplicatedTypes = (from info in typeHelpInfo
                                    group info by new { info.Type, info.OverriderAssembly } into g
-                                   where g.Count() > 0
+                                   where g.Count() > 1
                                    select "Type: {0} Assembly: {1} Files: {2}".Formato(
                                     g.Key.Type.Name,
                                     (g.Key.OverriderAssembly ?? g.Key.Type.Assembly).GetName().Name,
@@ -118,6 +153,8 @@ namespace Signum.Engine.Help
                 throw new InvalidOperationException(Resources.ThereAreDuplicatedTypesInTheXMLHelp + duplicatedTypes.Indent(2));
 
             TypeToHelpFiles = typeHelpInfo.AgGroupToDictionary(a => a.Type, gr => gr.ToDictionary(a => a.OverriderAssembly ?? a.TargetAssembly, a => a.File));
+
+            CleanNameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => Reflector.CleanTypeName(t));
         }
 
         static string FileName(XDocument document)
@@ -239,5 +276,6 @@ namespace Signum.Engine.Help
         static readonly XName _Name = "Name";
         static readonly XName _Entity = "Entity";
         static readonly XName _Namespace = "Namespace";
+
     }
 }
