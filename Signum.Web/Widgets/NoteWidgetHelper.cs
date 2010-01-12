@@ -60,10 +60,10 @@ namespace Signum.Web
             {
                 Content = 
 @"<div class='widget notes'>
-  <a class='view' onclick=""javascript:OpenFinder({0});>{1}</a>
+  <a class='view' onclick=""javascript:OpenFinder({0});"">{1}</a>
   <a class='create' onclick=""javascript:RelatedEntityCreate({2});"">{3}</a>
 </div>".Formato(foptions.ToJS(), "Ver notas", voptions.ToJS(), "Crear nota"),
-                Label = "<a id='Notes' onclick=\"javascript:OpenFinder({0});\">{1}<span class='notes {2}'>{3}</span></a>".Formato(foptions.ToJS(), Properties.Resources.Notes, count, count == 0 ? "disabled" : ""),
+                Label = "<a id='{1}' onclick=\"javascript:OpenFinder({0});\">{1}<span class='notes {2}'>{3}</span></a>".Formato(foptions.ToJS(), Properties.Resources.Notes, count == 0 ? "disabled" : "", count),
                 Id = "Notes",
                 Show = true,
             };

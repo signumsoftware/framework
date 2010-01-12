@@ -124,11 +124,51 @@ namespace Signum.Web
                 Type = Column.Type,
                 Operation = Operation,
             };
-            if (!typeof(Lite).IsAssignableFrom(Value.GetType()) || Value == null)
-                f.Value = Value;
+            if (!typeof(Lite).IsAssignableFrom(Value.GetType()) || Value == null)                
+                f.Value = Convert(Value, Column.Type);
             else
                 f.Value = Lite.Create(Reflector.ExtractLite(Column.Type), Database.Retrieve((Lite)Value));
             return f;
+        }
+
+          public static object Convert(object obj, Type type)
+        {
+            if (obj == null) return null;
+
+            Type objType = obj.GetType();
+
+            if (type.IsAssignableFrom(objType))
+                return obj;
+
+            if (typeof(Lite).IsAssignableFrom(objType) && type.IsAssignableFrom(((Lite)obj).RuntimeType))
+            {
+                Lite lite = (Lite)obj;
+                return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
+            }
+
+            if (typeof(Lite).IsAssignableFrom(type))
+            {
+                Type liteType = Reflector.ExtractLite(type);
+
+                if (typeof(Lite).IsAssignableFrom(objType))
+                {
+                    Lite lite = (Lite)obj;
+                    if (liteType.IsAssignableFrom(lite.RuntimeType))
+                    {
+                        if (lite.UntypedEntityOrNull != null)
+                            return Lite.Create(liteType, lite.UntypedEntityOrNull);
+                        else
+                            return Lite.Create(liteType, lite.Id, lite.RuntimeType, lite.ToStr);
+                    }
+                }
+
+                else if (liteType.IsAssignableFrom(objType))
+                {
+                    return Lite.Create(liteType, (IdentifiableEntity)obj);
+                }
+            }
+
+            throw new ApplicationException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
         }
 
         public string ToString(int filterIndex)

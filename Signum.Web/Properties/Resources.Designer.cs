@@ -124,6 +124,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Impossible to convert objet {0} from type {1} to type {2}.
+        /// </summary>
+        internal static string ImposibleConvertObject0From1To2 {
+            get {
+                return ResourceManager.GetString("ImposibleConvertObject0From1To2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect entity in Session.
         /// </summary>
         internal static string IncorrectEntityInSession {

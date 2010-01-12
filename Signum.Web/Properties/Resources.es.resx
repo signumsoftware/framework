@@ -190,7 +190,7 @@
     <value>Se debe indicar un valor para {0}</value>
   </data>
   <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
-    <value>La sesión ha expirado, haz click en F5 para recargar la entidad de la base de datos</value>
+    <value>La sesión ha expirado, pulsa F5 para recargar la entidad de la base de datos</value>
   </data>
   <data name="QuickLinkIsNotInitialized" xml:space="preserve">
     <value>El QuickLink no tiene sus FindOptions inicializadas</value>
@@ -200,5 +200,8 @@
   </data>
   <data name="Remove" xml:space="preserve">
     <value>Eliminar</value>
+  </data>
+  <data name="ImposibleConvertObject0From1To2" xml:space="preserve">
+    <value>Imposible convertir el objeto {0} de tipo {1} al tipo {2}</value>
   </data>
 </root>

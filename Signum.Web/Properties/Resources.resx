@@ -222,4 +222,7 @@
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
   </data>
+  <data name="ImposibleConvertObject0From1To2" xml:space="preserve">
+    <value>Impossible to convert objet {0} from type {1} to type {2}</value>
+  </data>
 </root>
