@@ -92,7 +92,7 @@ namespace Signum.Windows
         }
     }
 
-    public class Explore : MarkupExtension
+    public class ExploreExtension : MarkupExtension
     {
         public object QueryName { get; set; }
 
