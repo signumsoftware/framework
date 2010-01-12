@@ -1,13 +1,7 @@
 ﻿var currentText = "";
 var timerID;
 
-$(document).ready(function () {
-	$("form").bind("keypress", function (e) {
-		if (e.keyCode == 13) {
-			return false;
-		}
-	});
-});
+$(function(){$('#form input[type:"text"]').keypress(function(e){return e.which!=13})})
 
 function CreateAutocomplete(ddlName, extendedControlName, entityTypeName, implementations, entityIdFieldName, controllerUrl, numCharacters, numResults, delay, AutoKeyDowned) {
 	$('#' + extendedControlName).bind("keyup", function (e) {
