@@ -461,14 +461,17 @@ namespace Signum.Windows
 
         public void SetColumns(QueryOptions options)
         {
-            QueryDescription view = GetQueryDescription(options.QueryName);
+            SetColumns(options.QueryName, options.FilterOptions);
+        }
 
-            Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
+        public void SetColumns(object queryName, IEnumerable<FilterOption> filterOptions)
+        {
+            QueryDescription view = GetQueryDescription(queryName);
 
-            foreach (var fo in options.FilterOptions)
+            foreach (var fo in filterOptions)
             {
                 fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, options.QueryName));
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, queryName));
                 fo.RefreshRealValue();
             }
         }

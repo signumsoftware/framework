@@ -243,6 +243,8 @@ namespace Signum.Windows
                     ViewReadOnly = Navigator.IsReadOnly(EntityType, IsAdmin);
             }
 
+            Navigator.Manager.SetColumns(QueryName, FilterOptions);
+
             foreach (var fo in FilterOptions)
             {
                 fo.ValueChanged += new EventHandler(fo_ValueChanged);

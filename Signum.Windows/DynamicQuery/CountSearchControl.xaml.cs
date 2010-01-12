@@ -91,12 +91,9 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            Search();
-        }
+            Navigator.Manager.SetColumns(QueryName, FilterOptions);
 
-        public List<Filter> CurrentFilters()
-        {
-            return FilterOptions.Select(f => f.ToFilter()).ToList();
+            Search();
         }
 
         public void Search()
@@ -104,7 +101,8 @@ namespace Signum.Windows
             queryCount = 0;
 
             object vn = QueryName;
-            var lf = CurrentFilters();
+
+            var lf = FilterOptions.Select(f => f.ToFilter()).ToList();
 
             Async.Do(this.FindCurrentWindow(),
                 () =>
