@@ -84,35 +84,6 @@ namespace Signum.Windows.Authorization
                          }
                      };
                 }); 
-
-
-                //public List<QuickLink> QuickLinks()
-                //{
-                //    List<QuickLink> links = new List<QuickLink>();
-
-                //    if (!Server.Implements<IPermissionAuthServer>() || BasicPermissions.AdminRules.IsAuthorized())
-                //    {
-                //        if (Server.Implements<IQueryAuthServer>())
-                //            links.Add(new QuickLinkAction("Query Rules", () => new QueryRules { Role = Lite }.Show()));
-
-                //        if (Server.Implements<IFacadeMethodAuthServer>())
-                //            links.Add(new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = Lite }.Show()));
-
-                //        if (Server.Implements<ITypeAuthServer>())
-                //            links.Add(new QuickLinkAction("Type Rules", () => new TypeRules { Role = Lite }.Show()));
-
-                //        if (Server.Implements<IPermissionAuthServer>())
-                //            links.Add(new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = Lite }.Show()));
-
-                //        if (Server.Implements<IOperationAuthServer>())
-                //            links.Add(new QuickLinkAction("Operation Rules", () => new OperationRules { Role = Lite }.Show()));
-
-                //        if (Server.Implements<IEntityGroupAuthServer>())
-                //            links.Add(new QuickLinkAction("Entity Groups", () => new EntityGroupRules { Role = Lite }.Show()));
-                //    }
-
-                //    return links;
-                //}
             }
         }
 
