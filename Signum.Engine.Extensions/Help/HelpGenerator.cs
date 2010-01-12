@@ -164,12 +164,11 @@ namespace Signum.Engine.Help
 
         public static string GetQueryHelp(Type type, IDynamicQuery dynamicQuery)
         {
-            IAutoQuery autoQuery = dynamicQuery as IAutoQuery;
             Type entityType = dynamicQuery.EntityCleanType();
 
-            if (autoQuery != null)
+            if (dynamicQuery.Expression != null)
             {
-                Expression expression = DbQueryProvider.Clean(autoQuery.Expression);
+                Expression expression = DbQueryProvider.Clean(dynamicQuery.Expression);
 
                 List<Type> types = TableGatherer.GatherTables(expression);
                 if (types.Count == 1 && types.Contains(entityType))
