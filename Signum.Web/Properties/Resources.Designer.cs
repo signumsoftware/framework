@@ -97,11 +97,20 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create new alert.
+        ///   Looks up a localized string similar to Create alert.
         /// </summary>
-        internal static string CreateNewAlert {
+        internal static string CreateAlert {
             get {
-                return ResourceManager.GetString("CreateNewAlert", resourceCulture);
+                return ResourceManager.GetString("CreateAlert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create note.
+        /// </summary>
+        internal static string CreateNote {
+            get {
+                return ResourceManager.GetString("CreateNote", resourceCulture);
             }
         }
         
@@ -363,6 +372,15 @@ namespace Signum.Web.Properties {
         internal static string ValueMustBeSpecifiedFor0 {
             get {
                 return ResourceManager.GetString("ValueMustBeSpecifiedFor0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ver notas.
+        /// </summary>
+        internal static string ViewNotes {
+            get {
+                return ResourceManager.GetString("ViewNotes", resourceCulture);
             }
         }
         

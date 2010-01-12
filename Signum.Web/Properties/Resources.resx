@@ -216,13 +216,19 @@
   <data name="Alerts" xml:space="preserve">
     <value>Alerts</value>
   </data>
-  <data name="CreateNewAlert" xml:space="preserve">
-    <value>Create new alert</value>
+  <data name="CreateAlert" xml:space="preserve">
+    <value>Create alert</value>
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
   </data>
   <data name="ImposibleConvertObject0From1To2" xml:space="preserve">
     <value>Impossible to convert objet {0} from type {1} to type {2}</value>
+  </data>
+  <data name="CreateNote" xml:space="preserve">
+    <value>Create note</value>
+  </data>
+  <data name="ViewNotes" xml:space="preserve">
+    <value>Ver notas</value>
   </data>
 </root>

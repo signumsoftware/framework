@@ -43,7 +43,7 @@ namespace Signum.Web.Controllers
             IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
 
             ViewDataDictionary vdd = new ViewDataDictionary();
-            vdd.Add("WidgetNode", AlertWidgetHelper.CreateAlert(entity));
+            vdd.Add("WidgetNode", AlertWidgetHelper.CreateWidget(entity));
             HtmlHelper helper = SignumController.CreateHtmlHelper(this);
             return RenderPartialExtenders.RenderPartialToString(helper, "Views/Shared/WidgetView", vdd);
         }

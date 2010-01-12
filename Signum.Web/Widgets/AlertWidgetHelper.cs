@@ -17,6 +17,7 @@ namespace Signum.Web
 
     public static class AlertWidgetHelper
     {
+        public static Type Type { get; set; }
         public static Func<IdentifiableEntity, IAlertDN> CreateAlert { get; set; }
         public static object WarnedAlertsQuery { get; set; }
         public static object CheckedAlertsQuery { get; set; }
@@ -37,25 +38,25 @@ namespace Signum.Web
 
             JsViewOptions voptions = new JsViewOptions
             {
-                Type = null, //Navigator.TypesToURLNames[typeof(AlertDN)],
+                Type = Type.Name,
                 ControllerUrl = "Widgets/CreateAlert",
-                OnOkSuccess = "function(){ RefreshAlerts('Widgets/RefreshAlerts','AlertDN'); }"
+                OnOkSuccess = "function(){ RefreshAlerts('Widgets/RefreshAlerts'); }"
             };
 
             return new WidgetItem
             {
                 Content = 
 @"<div class='widget alerts'>
-    <ul>{0}</ul>
+    <ul>{0}</ul>{3}
     <a class='create' onclick=""javascript:RelatedEntityCreate({1});"">{2}</a>
-</div>".Formato(list.Where(a => a.Count > 0).ToString(a => "<li><a href='javascript:OpenFinder(\"{0}\");'>{1}</a></li>".Formato(JsFindOptions(identifiable, a.Query), a.Title), ""),
+</div>".Formato(list.Where(a => a.Count > 0).ToString(a => "<li><a href=\"javascript:OpenFinder({0});\">{1}<span class='count'>{2}</span></a></li>".Formato(JsFindOptions(identifiable, a.Query).ToJS(), a.Title, a.Count), ""),
                 voptions.ToJS(), 
-                Properties.Resources.CreateNewAlert),
-
-                Label = "<a id='Alerts'>{0}{1}</a>".Formato(
+                Properties.Resources.CreateAlert,
+                list.Where(a => a.Count > 0).ToList().Count > 0 ? "<hr/>" : ""),
+                Label = "<a id='{0}'>{0}{1}</a>".Formato(
                     Properties.Resources.Alerts,
-                    list.ToString(a => "<span class='{0} {1}'>{2}</span>".Formato(a.Class, a.Count == 0 ? "disabled" : "", a.Count), "")),
-                Id = "Alerts",
+                    list.ToString(a => "<span class='count {0} {1}'>{2}</span>".Formato(a.Class, a.Count == 0 ? "disabled" : "", a.Count), "")),
+                Id = Properties.Resources.Alerts,
                 Show = true
             };
         }

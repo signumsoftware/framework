@@ -204,4 +204,28 @@
   <data name="ImposibleConvertObject0From1To2" xml:space="preserve">
     <value>Imposible convertir el objeto {0} de tipo {1} al tipo {2}</value>
   </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alertas</value>
+  </data>
+  <data name="Checked" xml:space="preserve">
+    <value>Comprobadas</value>
+  </data>
+  <data name="CreateAlert" xml:space="preserve">
+    <value>Crear alerta</value>
+  </data>
+  <data name="CreateNote" xml:space="preserve">
+    <value>Crear nota</value>
+  </data>
+  <data name="Future" xml:space="preserve">
+    <value>Futuras</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notas</value>
+  </data>
+  <data name="ViewNotes" xml:space="preserve">
+    <value>Ver notas</value>
+  </data>
+  <data name="Warned" xml:space="preserve">
+    <value>Alertadas</value>
+  </data>
 </root>
