@@ -14,7 +14,7 @@ using Signum.Utilities;
 
 namespace Signum.Services
 {
-    public abstract class ServerBasic : IBaseServer, IQueryServer, INotesServer, IAlertsServer
+    public abstract class ServerBasic : IBaseServer, IQueryServer
     {
         protected T Return<T>(MethodBase mi, Func<T> function)
         {
@@ -136,50 +136,6 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
              () => DynamicQueryManager.Current.GetQueryNames());
         }
-        #endregion
-
-        #region INotesServer Members
-        public virtual List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lite, int? max)
-        {
-                return Return(MethodInfo.GetCurrentMethod(),
-                     () => (from n in Database.Query<NoteDN>()
-                            where n.Entity == lite
-                            select n.ToLite<INoteDN>()).Take(max != null ? max.Value : int.MaxValue).ToList());
-
-        }
-        #endregion
-
-        #region IAlertsServer Members
-
-        public virtual List<Lite<IAlertDN>> RetrieveAlerts(Lite<IdentifiableEntity> lite)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => (from n in Database.Query<AlertDN>()
-                    where n.Entity == lite
-                    select n.ToLite<IAlertDN>()).ToList());
-        }
-
-        public virtual IAlertDN CheckAlert(IAlertDN alert)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), () =>
-                {
-                    AlertDN a = (AlertDN)alert;
-                    a.CheckDate = DateTime.Now;
-                    return Database.Save((AlertDN)alert);
-                });
-        }
-
-        public CountAlerts CountAlerts(Lite<IdentifiableEntity> lite)
-        {
-            return Return(MethodInfo.GetCurrentMethod(), () =>
-                new CountAlerts() 
-                {
-                    CheckedAlerts = Database.Query<AlertDN>().Count(a => a.CheckDate.HasValue),
-                    WarnedAlerts = Database.Query<AlertDN>().Count(a => a.AlertDate.HasValue && a.AlertDate <= DateTime.Now),
-                    FutureAlerts = Database.Query<AlertDN>().Count(a => (!a.AlertDate.HasValue || a.AlertDate > DateTime.Now) && !a.CheckDate.HasValue), 
-                });
-        }
-
         #endregion
     }
 }

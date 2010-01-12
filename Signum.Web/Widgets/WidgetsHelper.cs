@@ -5,16 +5,20 @@ using System.Text;
 using System.Web.Mvc;
 using System.Web;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Web
 {
-    public delegate WidgetNode GetWidgetDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
+    public delegate WidgetItem GetWidgetDelegate(HtmlHelper helper, ModifiableEntity entity, string partialViewName, string prefix);
 
-    public class WidgetNode
+    public class WidgetItem
     {
-        public WidgetNode() {
+        public WidgetItem()
+        {
             Show = true;
         }
+
+        public string Id { get; set; }
 
         /// <summary>
         /// Indicates wheter the widget will be shown
@@ -26,26 +30,19 @@ namespace Signum.Web
         /// </summary>
         public string Label { get; set; }
 
-
-        public string Count { get; set; }
-
         /// <summary>
         /// The different widgets
         /// </summary>
         public string Content { get; set; }
-
-        public string Id { get; set; }
-
-        public string Href { get; set; }
     }
 
     public static class WidgetsHelper
     {
         public static event GetWidgetDelegate GetWidgetsForView;
 
-        public static List<WidgetNode> GetWidgetsListForViewName(this HtmlHelper helper, object entity, string partialViewName, string prefix)
+        public static List<WidgetItem> GetWidgetsListForViewName(this HtmlHelper helper, ModifiableEntity entity, string partialViewName, string prefix)
         {
-            List<WidgetNode> widgets = new List<WidgetNode>();
+            List<WidgetItem> widgets = new List<WidgetItem>();
             if (entity != null)
             {
                 if (GetWidgetsForView != null)

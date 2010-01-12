@@ -393,4 +393,13 @@
   <data name="Query0NotRegistered" xml:space="preserve">
     <value>La query {0} no está registrada en el DynamicQueryManager</value>
   </data>
+  <data name="_note" xml:space="preserve">
+    <value>nota</value>
+  </data>
+  <data name="_notes" xml:space="preserve">
+    <value>notas</value>
+  </data>
+  <data name="Column0NotFoundOnQuery11" xml:space="preserve">
+    <value>No se ha encontrado la columna {0} en la consulta {1}</value>
+  </data>
 </root>

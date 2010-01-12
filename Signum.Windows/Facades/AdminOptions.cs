@@ -6,14 +6,19 @@ using System.Windows.Markup;
 
 namespace Signum.Windows
 {
-    public class AdminOptions : MarkupExtension
+    public class AdminOptions
+    {
+        public Type Type { get; set; }
+
+    }
+
+    public class Admin: MarkupExtension
     {
         public Type Type { get; set; }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return this;
+            return new AdminOptions { Type = Type };
         }
     }
-
 }

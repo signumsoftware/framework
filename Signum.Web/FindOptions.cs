@@ -10,18 +10,9 @@ using Signum.Engine;
 
 namespace Signum.Web
 {
-    public class FindOptions
+    public class QueryOptions
     {
-        public FindOptions() { }
-
         public object QueryName { get; set; }
-
-        public bool SearchOnLoad { get; set; }
-        
-        public FindOptions(object queryName)
-        {
-            this.QueryName = queryName;
-        }
 
         List<FilterOptions> filterOptions = new List<FilterOptions>();
         public List<FilterOptions> FilterOptions
@@ -30,6 +21,24 @@ namespace Signum.Web
             set { this.filterOptions = value; }
         }
 
+        public QueryOptions() { }
+        public QueryOptions(object queryName)
+        {
+            this.QueryName = queryName;
+        }
+    }
+
+    public class FindOptions: QueryOptions
+    {
+        public FindOptions() { }
+
+        public FindOptions(object queryName)
+        {
+            this.QueryName = queryName;
+        }
+
+        public bool SearchOnLoad { get; set; }
+        
         public bool? AllowMultiple { get; set; }
         
         FilterMode filterMode = FilterMode.Visible;
@@ -60,11 +69,11 @@ namespace Signum.Web
 
             if (writeAllowMultiple && AllowMultiple.HasValue)
                 sb.Append("&sfAllowMultiple="+AllowMultiple.ToString());
-            
-            if (filterOptions != null && filterOptions.Count > 0)
+
+            if (FilterOptions != null && FilterOptions.Count > 0)
             {
-                for (int i = 0; i < filterOptions.Count; i++)
-                    sb.Append(filterOptions[i].ToString(i));
+                for (int i = 0; i < FilterOptions.Count; i++)
+                    sb.Append(FilterOptions[i].ToString(i));
             }
             string result = sb.ToString();
             if (result.HasText())
@@ -74,6 +83,22 @@ namespace Signum.Web
         }
     }
 
+    public class FindUniqueOptions : QueryOptions
+    {
+        public FindUniqueOptions()
+        {
+            UniqueType = UniqueType.Single;
+        }
+
+        public FindUniqueOptions(object queryName)
+        {
+            UniqueType = UniqueType.Single;
+            QueryName = queryName;
+        }
+
+        public UniqueType UniqueType { get; set; }
+    }
+
     public class FilterOptions
     {
         public Column Column { get; set; }
@@ -81,6 +106,15 @@ namespace Signum.Web
         public bool Frozen { get; set; }
         public FilterOperation Operation { get; set; }
         public object Value { get; set; }
+
+        public FilterOptions(){}
+
+        public FilterOptions(string columnName, object value)
+        {
+            this.ColumnName = columnName;
+            this.Operation = FilterOperation.EqualTo;
+            this.Value = value;
+        }
 
         public Filter ToFilter()
         {

@@ -51,6 +51,7 @@ namespace Signum.Windows
             );
         }
 
+
         public static void Explore(object queryName)
         {
             Manager.Explore(new ExploreOptions(queryName));
@@ -61,7 +62,8 @@ namespace Signum.Windows
             Manager.Explore(options);
         }
 
-        internal static Lite<T> FindUnique<T>(string columnName, object value, UniqueType uniqueType)
+
+        public static Lite<T> FindUnique<T>(string columnName, object value, UniqueType uniqueType)
             where T:class, IIdentifiable
         {
             return (Lite<T>)Manager.FindUnique(new FindUniqueOptions(typeof(T))
@@ -74,7 +76,7 @@ namespace Signum.Windows
             });
         }
 
-        internal static Lite<T> FindUnique<T>(FindUniqueOptions options)
+        public static Lite<T> FindUnique<T>(FindUniqueOptions options)
             where T : class, IIdentifiable
         {
             if (options.QueryName == null)
@@ -83,10 +85,11 @@ namespace Signum.Windows
             return (Lite<T>)Manager.FindUnique(options);
         }
 
-        internal static Lite FindUnique(FindUniqueOptions options)
+        public static Lite FindUnique(FindUniqueOptions options)
         {
             return Manager.FindUnique(options);
         }
+
 
         public static Lite<T> Find<T>()
             where T : IdentifiableEntity
@@ -109,12 +112,6 @@ namespace Signum.Windows
         }
 
 
-
-        //public static Lite[] FindMany(object queryName)
-        //{
-        //    return Manager.FindMany(new FindManyOptions(queryName));
-        //}
-
         public static Lite[] FindMany(FindManyOptions options)
         {
             return Manager.FindMany(options);
@@ -130,8 +127,6 @@ namespace Signum.Windows
             return result.Cast<Lite<T>>().ToArray();
         }
 
-
-
         public static Lite<T>[] FindMany<T>(FindManyOptions options)
             where T : IdentifiableEntity
         {
@@ -140,6 +135,11 @@ namespace Signum.Windows
                 return null;
 
             return result.Cast<Lite<T>>().ToArray();
+        }
+
+        public static int QueryCount(QueryOptions options)
+        {
+            return Manager.QueryCount(options);
         }
 
 
@@ -416,7 +416,7 @@ namespace Signum.Windows
 
         public virtual void Explore(ExploreOptions options)
         {
-            AssertFindable(options.QueryName);
+            AssertFindable(options.QueryName); 
 
             if (options.NavigateIfOne)
             {
@@ -441,8 +441,49 @@ namespace Signum.Windows
             sw.Show();
         }
 
+        public virtual Lite FindUnique(FindUniqueOptions options)
+        {
+            SetColumns(options);
+
+            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+
+            return Server.Return((IQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, options.UniqueType));
+        }
+
+        public int QueryCount(QueryOptions options)
+        {
+            SetColumns(options);
+
+            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+
+            return Server.Return((IQueryServer s) => s.GetQueryCount(options.QueryName, filters));
+        }
+
+        public void SetColumns(QueryOptions options)
+        {
+            QueryDescription view = GetQueryDescription(options.QueryName);
+
+            Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
+
+            foreach (var fo in options.FilterOptions)
+            {
+                fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, options.QueryName));
+                fo.RefreshRealValue();
+            }
+        }
+
+        internal QueryDescription GetQueryDescription(object queryName)
+        {
+            QuerySettings settings = GetQuerySettings(queryName);
+            return settings.QueryDescription ??
+                (settings.QueryDescription = Server.Return((IQueryServer s) => s.GetQueryDescription(queryName))); 
+        }
+
         private SearchWindow CreateSearchWindow(FindOptionsBase options)
         {
+            SetColumns(options);
+
             SearchWindow sw = new SearchWindow(options.GetSearchMode(), options.SearchOnLoad)
             {
                 QueryName = options.QueryName,
@@ -690,20 +731,6 @@ namespace Signum.Windows
                 throw new ApplicationException(Resources.Call0First.Formato(name));
         }
 
-        public virtual Lite FindUnique(FindUniqueOptions options)
-        {
-            QueryDescription qd = Server.Return((IQueryServer s) => s.GetQueryDescription(options.QueryName));
-
-            foreach (var fo in options.FilterOptions)
-            {
-                fo.Column = qd.Columns.Where(c => c.Name == fo.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, options.QueryName));
-                fo.RefreshRealValue();
-            }
-
-            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
-
-            return Server.Return((IQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, options.UniqueType));
-        }
+ 
     }
 }

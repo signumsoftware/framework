@@ -390,4 +390,10 @@
   <data name="PleaseChooseAValueToContinue" xml:space="preserve">
     <value>Please, choose a value to continue:</value>
   </data>
+  <data name="_note" xml:space="preserve">
+    <value>note</value>
+  </data>
+  <data name="_notes" xml:space="preserve">
+    <value>notes</value>
+  </data>
 </root>

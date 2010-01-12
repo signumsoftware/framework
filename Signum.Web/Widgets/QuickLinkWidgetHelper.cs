@@ -19,7 +19,7 @@ namespace Signum.Web
             WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => WidgetsHelper_GetWidgetsForView(helper, entity, partialViewName, prefix);
         }
 
-        private static WidgetNode WidgetsHelper_GetWidgetsForView(HtmlHelper helper, object entity, string partialViewName, string prefix)
+        private static WidgetItem WidgetsHelper_GetWidgetsForView(HtmlHelper helper, object entity, string partialViewName, string prefix)
         {
             List<QuickLinkItem> links = new List<QuickLinkItem>();
             if (GetQuickLinks != null)
@@ -29,11 +29,10 @@ namespace Signum.Web
                     .NotNull()
                     .SelectMany(d => d).ToList());
 
-            return new WidgetNode
+            return new WidgetItem
             {
                 Content = QuickLinksToString(helper, links, prefix),
-                Count = links.Count.ToString(),
-                Label = "Quicklinks",
+                Label = "<a id='Quicklinks'><span class='update-number count{0}'>{0}</span>Quicklinks</a>".Formato(links.Count),
                 Id = "Quicklinks",
                 Show = links.Count > 0
             };

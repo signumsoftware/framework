@@ -15,6 +15,8 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Services;
 using Signum.Windows.Basics;
+using Signum.Entities.DynamicQuery;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -26,11 +28,9 @@ namespace Signum.Windows
         public event Action ForceShow;
 
         public static Func<IdentifiableEntity, INoteDN> CreateNote { get; set; }
-        public static Func<IdentifiableEntity, int?, List<Lite<INoteDN>>> RetrieveNotes { get; set; }
 
-        public static Action<IdentifiableEntity> ViewAdditional;
-
-        public int MaxNotes = 2;
+        public static object NotesQuery { get; set; }
+        public static string NotesQueryColumn { get; set; }
 
         public NotesWidget()
         {
@@ -68,50 +68,66 @@ namespace Signum.Windows
             ViewNote(nota);
         }
 
-        private void btnAdditionalNotes_Click(object sender, RoutedEventArgs e)
+        private void btnExploreNotes_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewAdditional != null)
-                ViewAdditional((IdentifiableEntity)DataContext);
+
+
+            Navigator.Explore(new ExploreOptions(NotesQuery)
+            {
+                ShowFilters = false,
+                SearchOnLoad = true,
+                FilterOptions = new List<FilterOption>
+                {
+                    new FilterOption( NotesQueryColumn, DataContext)
+                    {
+                        Frozen = true
+                    }
+                },
+                Closed = (_, __) => ReloadNotes() 
+            });
         }
 
         void ViewNote(INoteDN note)
         {
             Navigator.NavigateUntyped(note, new NavigateOptions
             {
-                Closed = (o, e) => ReloadNotes(),
+                Closed = (_, __) => ReloadNotes(),
             });
         }
 
         private void ReloadNotes()
         {
             if (CreateNote == null)
-                throw new ArgumentNullException("NotesWidget.RetrieveNotes"); 
+                throw new ArgumentNullException("NotesWidget.RetrieveNotes");
 
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
             if (entity == null || entity.IsNew)
             {
-               // lvNotas.ItemsSource = null;
-                return; 
+                // lvNotas.ItemsSource = null;
+                return;
             }
 
-            List<Lite<INoteDN>> notes = RetrieveNotes((IdentifiableEntity)DataContext, null);
-
-            int count = notes.Count;
-
-            if (notes != null)
+            int count = Navigator.QueryCount(new QueryOptions(NotesQuery)
             {
-                tbNotes.FontWeight = notes.Count == 0 ? FontWeights.Normal : FontWeights.Bold;
+                FilterOptions = new List<FilterOption>{ new FilterOption( NotesQueryColumn, DataContext) }
+            }); 
 
-                if (notes.Count > 0 && ForceShow != null)
-                    ForceShow();
+            if (count == 0)
+            {
+                tbNotes.FontWeight = FontWeights.Normal;
+                btnExploreNotes.Visibility = Visibility.Collapsed;
+              
+            }
+            else
+            {
+                tbNotes.FontWeight = FontWeights.Bold;
+                btnExploreNotes.FontWeight = FontWeights.Bold;
+                btnExploreNotes.Visibility = Visibility.Visible;
+                btnExploreNotes.Content = count + " " + (count > 1 ? Properties.Resources._notes : Properties.Resources._note);
             }
 
-           // lvNotas.ItemsSource = notes.Take(MaxNotes);
-
-            //btnAdditionalNotes.Visibility = count > MaxNotes ? Visibility.Visible : Visibility.Collapsed;
-            btnAdditionalNotes.Content = count + " " + (count!=1 ? "notas" : "nota");
-            if (count > 0) btnAdditionalNotes.FontWeight = FontWeights.Bold;
-            else btnAdditionalNotes.FontWeight = FontWeights.Normal;
+            if (count > 0 && ForceShow != null)
+                ForceShow();
         }
     }
 }

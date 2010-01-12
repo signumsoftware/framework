@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Entities.DynamicQuery;
+using Signum.Services;
 
 namespace Signum.Windows.Widgets
 {
@@ -30,11 +32,10 @@ namespace Signum.Windows.Widgets
         #endregion
 
         public static Func<IdentifiableEntity, IAlertDN> CreateAlert { get; set; }
-        public static Func<IdentifiableEntity, List<Lite<IAlertDN>>> RetrieveAlerts { get; set; }
-        public static Action<IdentifiableEntity, AlertsWidget> WarnedAlerts { get; set; }
-        public static Action<IdentifiableEntity, AlertsWidget> CheckedAlerts { get; set; }
-        public static Action<IdentifiableEntity, AlertsWidget> FutureAlerts { get; set; }
-        public static Func<IdentifiableEntity, CountAlerts> CountAlerts { get; set; }
+        public static object WarnedAlertsQuery { get; set; }
+        public static object CheckedAlertsQuery { get; set; }
+        public static object FutureAlertsQuery { get; set; }
+        public static string AlertsQueryColumn { get; set; }
 
         public AlertsWidget()
         {
@@ -92,85 +93,75 @@ namespace Signum.Windows.Widgets
                 return;
             }
 
-            List<Lite<IAlertDN>> alerts = RetrieveAlerts((IdentifiableEntity)DataContext);
+            bool anyNote = false; 
+            anyNote |= CountAlerts(FutureAlertsQuery, entity, Properties.Resources.FutureAlerts, btnFutureAlerts);
+            anyNote |= CountAlerts(CheckedAlertsQuery, entity, Properties.Resources.CheckedAlerts, btnCheckedAlerts);
+            anyNote |= CountAlerts(WarnedAlertsQuery, entity, Properties.Resources.WarnedAlerts, btnWarnedAlerts);
 
-            if (alerts != null)
+            if (anyNote)
             {
-                tbAlerts.FontWeight = alerts.Count == 0 ? FontWeights.Normal : FontWeights.Bold;
+                tbAlerts.FontWeight = FontWeights.Bold;
 
-                if (alerts.Count > 0 && ForceShow != null)
+                if (ForceShow != null)
                     ForceShow();
             }
-
-            //lvAlerts.ItemsSource = alerts;
-
-            CountAlerts count = CountAlerts(entity);
-
-            if (count == null || count.CheckedAlerts == 0)
-            {
-                btnCheckedAlerts.Visibility = Visibility.Collapsed;
-                btnCheckedAlerts.Content = "{0} (0)".Formato(Properties.Resources.CheckedAlerts);
-            }
             else
             {
-                btnCheckedAlerts.Visibility = Visibility.Visible;
-                btnCheckedAlerts.Content = "{0} ({1})".Formato(Properties.Resources.CheckedAlerts, count.CheckedAlerts);
+                tbAlerts.FontWeight = FontWeights.Normal;
             }
-
-            if (count == null || count.WarnedAlerts == 0)
-            {
-                btnWarnedAlerts.Visibility = Visibility.Collapsed;
-                btnWarnedAlerts.Content = "{0} (0)".Formato(Properties.Resources.WarnedAlerts);
-            }
-            else
-            {
-                btnWarnedAlerts.Visibility = Visibility.Visible;
-                btnWarnedAlerts.Content = "{0} ({1})".Formato(Properties.Resources.WarnedAlerts, count.WarnedAlerts);
-            }
-
-            if (count == null || count.FutureAlerts == 0)
-            {
-                btnFutureAlerts.Visibility = Visibility.Collapsed;
-                btnFutureAlerts.Content = "{0} (0)".Formato(Properties.Resources.FutureAlerts);
-            }
-            else
-            {
-                btnFutureAlerts.Visibility = Visibility.Visible;
-                btnFutureAlerts.Content = "{0} ({1})".Formato(Properties.Resources.FutureAlerts, count.FutureAlerts);
-            }
-
         }
 
-        private void btnAlertsWarn_Click(object sender, RoutedEventArgs e)
+        bool CountAlerts(object queryName, IdentifiableEntity entity, string resource, Button button)
+        {
+            int count = Navigator.QueryCount(new QueryOptions(queryName)
+            {
+                FilterOptions = new List<FilterOption>
+                {
+                    new FilterOption( AlertsQueryColumn , DataContext)
+                }
+            }); 
+
+            if (count == 0)
+            {
+                button.Visibility = Visibility.Collapsed;
+                return false;
+            }
+            else
+            {
+                button.Visibility = Visibility.Visible;
+                button.Content = "{0} ({1})".Formato(resource, count);
+                return true;
+            }
+        }
+
+        private void btnAlerts_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext == null)
                 return;
 
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
 
-            WarnedAlerts(entity, this);
+            object queryName = 
+                sender == btnFutureAlerts? FutureAlertsQuery: 
+                sender == btnCheckedAlerts? CheckedAlertsQuery: 
+                sender == btnWarnedAlerts? WarnedAlertsQuery: null;
+
+            Navigator.Explore(new ExploreOptions(queryName)
+            {
+                ShowFilters = false,
+                SearchOnLoad = true,
+                FilterOptions = new List<FilterOption>() 
+                { 
+                    new FilterOption() 
+                    { 
+                        ColumnName = AlertsQueryColumn, 
+                        Operation = FilterOperation.EqualTo, 
+                        Value = entity,
+                        Frozen = true 
+                    },
+                },
+                Closed = (o, ea) => ReloadAlerts(),
+            });
         }
-
-        private void btnAlertsChecked_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext == null)
-                return;
-
-            IdentifiableEntity entity = DataContext as IdentifiableEntity;
-
-            CheckedAlerts(entity, this);
-        }
-
-        private void btnFutureAlerts_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext == null)
-                return;
-
-            IdentifiableEntity entity = DataContext as IdentifiableEntity;
-
-            FutureAlerts(entity, this);
-        }
-
-
     }
 }

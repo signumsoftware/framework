@@ -84,8 +84,6 @@ namespace Signum.Windows
 
         int queryCount;
 
-        QuerySettings settings;
-
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= SearchControl_Loaded;
@@ -93,19 +91,6 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            settings = Navigator.GetQuerySettings(QueryName);
-
-            QueryDescription view = Server.Return((IQueryServer s) => s.GetQueryDescription(QueryName));
-
-            Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
-
-
-            foreach (var fo in FilterOptions)
-            {
-                fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, QueryName));
-                fo.RefreshRealValue();
-            }
             Search();
         }
 

@@ -54,7 +54,7 @@ namespace Signum.Engine.DynamicQuery
             return this[queryName].ExecuteQueryCount(filters);
         }
 
-        internal Lite ExecuteUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType)
+        public Lite ExecuteUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType)
         {
             return this[queryName].ExecuteUniqueEntity(filters, uniqueType);
         }

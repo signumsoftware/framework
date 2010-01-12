@@ -6,13 +6,6 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Basics
 {
-    public class CountAlerts
-    {
-        public int WarnedAlerts;
-        public int CheckedAlerts;
-        public int FutureAlerts;
-    }
-
     public interface IAlertDN : IIdentifiable
     { }
 

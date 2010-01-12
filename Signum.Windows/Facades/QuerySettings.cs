@@ -20,7 +20,7 @@ namespace Signum.Windows
         public int? Top { get; set; }
         public ImageSource Icon { get; set; }
 
-        private Dictionary<string, Func<Binding, DataTemplate>> formatters;
+        Dictionary<string, Func<Binding, DataTemplate>> formatters;
         public Dictionary<string, Func<Binding, DataTemplate>> Formatters
         {
             get
@@ -34,6 +34,8 @@ namespace Signum.Windows
                 formatters = value;
             }
         }
+
+        internal QueryDescription QueryDescription { get; set; }
 
         public static List<FormatterRule> FormatRules { get; set; }
 

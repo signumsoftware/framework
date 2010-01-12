@@ -37,6 +37,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class QueryDescription
     {
+        public Type[] EntityImplementations { get; set; }
         public List<Column> Columns { get; set; }
     }
 

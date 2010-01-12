@@ -61,6 +61,33 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Alerts.
+        /// </summary>
+        internal static string Alerts {
+            get {
+                return ResourceManager.GetString("Alerts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checked.
+        /// </summary>
+        internal static string Checked {
+            get {
+                return ResourceManager.GetString("Checked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The column {0} is not found on query {1}.
+        /// </summary>
+        internal static string Column0NotFoundOnQuery1 {
+            get {
+                return ResourceManager.GetString("Column0NotFoundOnQuery1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The control ID {0} has an invalid format.
         /// </summary>
         internal static string ControlID0HasAnInvalidFormat {
@@ -70,11 +97,29 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create new alert.
+        /// </summary>
+        internal static string CreateNewAlert {
+            get {
+                return ResourceManager.GetString("CreateNewAlert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Filter Column {0} not found or found more than once in query description.
         /// </summary>
         internal static string FilterColumn0NotFoundOrFoundMoreThanOnce {
             get {
                 return ResourceManager.GetString("FilterColumn0NotFoundOrFoundMoreThanOnce", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Future.
+        /// </summary>
+        internal static string Future {
+            get {
+                return ResourceManager.GetString("Future", resourceCulture);
             }
         }
         
@@ -223,6 +268,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Notes.
+        /// </summary>
+        internal static string Notes {
+            get {
+                return ResourceManager.GetString("Notes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to It&apos;s not possible to set {0} as {1}.
         /// </summary>
         internal static string NotPossibleToAssign0To1 {
@@ -300,6 +354,15 @@ namespace Signum.Web.Properties {
         internal static string ValueMustBeSpecifiedFor0 {
             get {
                 return ResourceManager.GetString("ValueMustBeSpecifiedFor0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warned.
+        /// </summary>
+        internal static string Warned {
+            get {
+                return ResourceManager.GetString("Warned", resourceCulture);
             }
         }
         

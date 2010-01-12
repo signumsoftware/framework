@@ -201,4 +201,25 @@
   <data name="Remove" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
+    <value>The column {0} is not found on query {1}</value>
+  </data>
+  <data name="Warned" xml:space="preserve">
+    <value>Warned</value>
+  </data>
+  <data name="Checked" xml:space="preserve">
+    <value>Checked</value>
+  </data>
+  <data name="Future" xml:space="preserve">
+    <value>Future</value>
+  </data>
+  <data name="Alerts" xml:space="preserve">
+    <value>Alerts</value>
+  </data>
+  <data name="CreateNewAlert" xml:space="preserve">
+    <value>Create new alert</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
 </root>

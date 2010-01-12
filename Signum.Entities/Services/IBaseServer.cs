@@ -34,7 +34,7 @@ namespace Signum.Services
         List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count);
 
         [OperationContract, NetDataContract]
-        Type[] FindImplementations(Type liteType, MemberInfo[] members);
+        Type[] FindImplementations(Type type, MemberInfo[] members);
 
         [OperationContract, NetDataContract]
         Dictionary<Type, TypeDN> ServerTypes();

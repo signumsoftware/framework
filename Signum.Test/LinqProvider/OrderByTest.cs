@@ -65,5 +65,16 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();
         }
 
+        [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+        public void OrderByConstant()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Select(a => new { Constant = "Hi", Artist = a.ToLite() }).OrderBy(p => p.Constant).ToList();
+        }
+
+        [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+        public void OrderByConstantThenByNoConstant()
+        {
+            var songsAlbum = Database.Query<ArtistDN>().Select(a => new { Constant = "Hi", Artist = a.ToLite() }).OrderBy(p => p.Constant).ThenBy(p => p.Artist).ToList();
+        }
     }
 }

@@ -37,18 +37,9 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <!--<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"  MaxHeight="200" Grid.ColumnSpan="2">
-                <ItemsControl x:Name="lvNotas" MaxWidth="120">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding Path=ToStr}" Tag="{Binding}"  Style="{DynamicResource LinkButtonStyle}"  FontFamily="Calibri, Segoe UI" Foreground="#ff375e5f" HorizontalAlignment="Left" VerticalAlignment="Top" Cursor="Hand" Margin="19,0,5,0" HorizontalContentAlignment="Left" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>-->
             <Border Grid.Row="1"  Grid.ColumnSpan="2">
                     <StackPanel>
-                        <Button x:Name="btnAdditionalNotes" Click="btnAdditionalNotes_Click" Content="{m:Loc NewNote}" Style="{DynamicResource LinkButtonStyle}" VerticalAlignment="Top" FontFamily="Calibri, Segoe UI" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" />
+                        <Button x:Name="btnExploreNotes" Click="btnExploreNotes_Click" Style="{DynamicResource LinkButtonStyle}" VerticalAlignment="Top" FontFamily="Calibri, Segoe UI" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" />
                         <Button x:Name="btnNewNote" Click="btnNewNote_Click" Content="{m:Loc NewNote}" Style="{DynamicResource LinkButtonStyle}" VerticalAlignment="Top" FontFamily="Calibri, Segoe UI" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" />
                     </StackPanel>
             </Border>

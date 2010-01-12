@@ -178,6 +178,16 @@ namespace Signum.Web
             return Manager.PartialFind(controller, findOptions, prefix, suffix);
         }
 
+        public static Lite FindUnique(FindUniqueOptions options)
+        {
+            return Manager.FindUnique(options);
+        }
+
+        public static int QueryCount(QueryOptions options)
+        {
+            return Manager.QueryCount(options);
+        }
+
         public static PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
         {
             return Manager.Search(controller, findOptions, top, prefix);
@@ -638,6 +648,37 @@ namespace Signum.Web
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
+        }
+
+        protected internal virtual Lite FindUnique(FindUniqueOptions options)
+        {
+            SetColumns(options);
+
+            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+
+            return DynamicQueryManager.Current.ExecuteUniqueEntity(options.QueryName, filters, options.UniqueType);
+        }
+
+        protected internal virtual int QueryCount(QueryOptions options)
+        {
+            SetColumns(options);
+
+            var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+
+            return DynamicQueryManager.Current.ExecuteQueryCount(options.QueryName, filters);
+        }
+
+        protected internal void SetColumns(QueryOptions options)
+        {
+            QueryDescription view = DynamicQueryManager.Current.QueryDescription(options.QueryName);
+
+            Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
+
+            foreach (var fo in options.FilterOptions)
+            {
+                fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, options.QueryName));
+            }
         }
 
         protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string suffix)

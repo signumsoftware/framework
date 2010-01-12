@@ -48,7 +48,7 @@ namespace Signum.Windows
 
         void LeftNavigationPanel_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            List<IWidget> widgets = GetWidgets != null ? GetWidgets.GetInvocationList().Cast<GetWidgetDelegate>().Select(d => d(DataContext, MainControl)).NotNull().ToList() : new List<IWidget>();
+            List<IWidget> widgets = GetWidgets != null ? GetWidgets.GetInvocationList().Cast<GetWidgetDelegate>().Select(d => d((ModifiableEntity)DataContext, MainControl)).NotNull().ToList() : new List<IWidget>();
 
             this.Visibility = widgets.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 
@@ -72,7 +72,7 @@ namespace Signum.Windows
         }
     }
 
-    public delegate IWidget GetWidgetDelegate(object entity, Control mainControl); 
+    public delegate IWidget GetWidgetDelegate(ModifiableEntity entity, Control mainControl); 
 
     public interface IWidget
     {

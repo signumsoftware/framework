@@ -9,20 +9,29 @@ using Signum.Utilities;
 
 namespace Signum.Windows
 {
-    public abstract class FindOptionsBase : MarkupExtension
+    public class QueryOptions
     {
-        public FindOptionsBase()
-        {
-            this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
-        }
-    
         public object QueryName { get; set; }
+
+        public QueryOptions() { }
+        public QueryOptions(object queryName)
+        {
+            this.QueryName = queryName;
+        }
 
         List<FilterOption> filterOptions = new List<FilterOption>();
         public List<FilterOption> FilterOptions
         {
             get { return filterOptions; }
             set { this.filterOptions = value; }
+        }
+    }
+
+    public abstract class FindOptionsBase : QueryOptions
+    {
+        public FindOptionsBase()
+        {
+            this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
         }
 
         public bool SearchOnLoad { get; set; }
@@ -33,11 +42,6 @@ namespace Signum.Windows
         public bool ShowFooter { get; set; }
 
         internal abstract SearchMode GetSearchMode();
-
-        public override object ProvideValue(IServiceProvider serviceProvider)
-        {
-            return this;
-        }
     }
 
     public class FindManyOptions : FindOptionsBase
@@ -88,7 +92,19 @@ namespace Signum.Windows
         }
     }
 
-    public class FindUniqueOptions
+    public class Explore : MarkupExtension
+    {
+        public object QueryName { get; set; }
+
+        public bool NavigateIfOne { get; set; }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return new ExploreOptions(QueryName) { NavigateIfOne = NavigateIfOne };
+        }
+    }
+
+    public class FindUniqueOptions : QueryOptions
     {
         public FindUniqueOptions() 
         {
@@ -100,16 +116,7 @@ namespace Signum.Windows
             UniqueType = UniqueType.Single;
             QueryName = queryName;
         }
-
-        public object QueryName { get; set; }
-
-        List<FilterOption> filterOptions = new List<FilterOption>();
-        public List<FilterOption> FilterOptions
-        {
-            get { return filterOptions; }
-            set { this.filterOptions = value; }
-        }
-
+     
         public UniqueType UniqueType { get; set; }
     }
 

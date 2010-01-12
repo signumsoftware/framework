@@ -79,6 +79,24 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to note.
+        /// </summary>
+        internal static string _note {
+            get {
+                return ResourceManager.GetString("_note", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to notes.
+        /// </summary>
+        internal static string _notes {
+            get {
+                return ResourceManager.GetString("_notes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A connection with the server is necessary to continue.
         /// </summary>
         internal static string AConnectionWithTheServerIsNecessaryToContinue {

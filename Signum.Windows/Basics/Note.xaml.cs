@@ -28,9 +28,10 @@ namespace Signum.Windows.Basics
             WidgetPanel.GetWidgets += (obj, mainControl) => obj is IdentifiableEntity && !(obj is INoteDN || ((IdentifiableEntity)obj).IsNew) ? new NotesWidget() : null;
 
             NotesWidget.CreateNote = ei => ei.IsNew ? null : new NoteDN { Entity = ei.ToLite() };
-            NotesWidget.RetrieveNotes = (ei, count) => ei == null ? null : Server.Return((INotesServer s) => s.RetrieveNotes(ei.ToLite(), count));
+            NotesWidget.NotesQuery = typeof(NoteDN);
+            NotesWidget.NotesQueryColumn = "Entity";
 
-            Navigator.Manager.Settings.Add(typeof(Note), new EntitySettings(EntityType.Default) { View = e => new Note(), IsCreable = admin => false, Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/note.png", typeof(NotesWidget))) });
+            Navigator.Manager.Settings.Add(typeof(NoteDN), new EntitySettings(EntityType.Default) { View = e => new Note(), IsCreable = admin => false, Icon = BitmapFrame.Create(PackUriHelper.Reference("/Images/note.png", typeof(NotesWidget))) });
         }
 	}
 }

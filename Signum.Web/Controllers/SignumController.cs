@@ -404,9 +404,7 @@ namespace Signum.Web.Controllers
                             new WebFormView(c.ControllerContext.RequestContext.HttpContext.Request.FilePath),
                             c.ViewData,
                             c.TempData),
-
-            new ViewPage());
+                        new ViewPage());
         }
-
     }
 }

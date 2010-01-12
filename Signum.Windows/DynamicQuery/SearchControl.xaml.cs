@@ -225,7 +225,7 @@ namespace Signum.Windows
 
             settings = Navigator.GetQuerySettings(QueryName);
 
-            QueryDescription view = Server.Return((IQueryServer s)=>s.GetQueryDescription(QueryName)); 
+            QueryDescription view = Navigator.Manager.GetQueryDescription(QueryName); 
 
             Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
             if (entity != null)
@@ -233,22 +233,19 @@ namespace Signum.Windows
                 entityIndex = view.Columns.IndexOf(entity);
                 SetValue(EntityTypeKey, Reflector.ExtractLite(entity.Type));
 
-                if (this.NotSet(ViewProperty) && View)
+                if (this.NotSet(ViewProperty) && View && view.EntityImplementations != null)
                     View = Navigator.IsViewable(EntityType, IsAdmin);
 
-                if (this.NotSet(CreateProperty) && Create)
+                if (this.NotSet(CreateProperty) && Create && view.EntityImplementations != null)
                     Create = Navigator.IsCreable(EntityType, IsAdmin);
 
-                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly)
+                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly && view.EntityImplementations != null)
                     ViewReadOnly = Navigator.IsReadOnly(EntityType, IsAdmin);
             }
 
             foreach (var fo in FilterOptions)
             {
-                fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, QueryName));
                 fo.ValueChanged += new EventHandler(fo_ValueChanged);
-                fo.RefreshRealValue();
             }
 
             filterBuilder.Columns = view.Columns.Where(a => a.Filterable).ToList();
@@ -452,22 +449,6 @@ namespace Signum.Windows
         {
             UpdateViewSelection();
         }
-
-        //bool ignoreExpanded = false;
-
-        //private void FilterModeChanged()
-        //{
-        //    expander.IsEnabled = FilterMode == FilterMode.Hidden || FilterMode == FilterMode.Visible;
-        //    try
-        //    {
-        //        ignoreExpanded = true;
-        //        expander.IsExpanded = FilterMode == FilterMode.VisibleAndReadOnly || FilterMode == FilterMode.Visible;
-        //    }
-        //    finally
-        //    {
-        //        ignoreExpanded = false;
-        //    }
-        //}
 
         private void lvResult_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {

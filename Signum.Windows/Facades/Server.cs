@@ -20,6 +20,19 @@ namespace Signum.Windows
         
         static IBaseServer current;
 
+        public static void SetNewServerCallback(Func<IBaseServer> server)
+        {
+            getServer = server;
+        }
+
+        public static void Connect()
+        {
+            if (current == null || (current is ICommunicationObject) && ((ICommunicationObject)current).State == CommunicationState.Faulted)
+                current = getServer();
+
+            if (current == null)
+                throw new InvalidOperationException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+        }
        
         public static void Execute<S>(Action<S> action)
             where S : class
@@ -65,15 +78,6 @@ namespace Signum.Windows
             }
         }
 
-        public static void Connect()
-        {
-            if (current == null || (current is ICommunicationObject) && ((ICommunicationObject)current).State == CommunicationState.Faulted)
-                current = getServer();
-
-            if (current == null)
-                throw new InvalidOperationException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
-        }
-
         static void HandleSessionException(MessageSecurityException e)
         {
             MessageBox.Show(Properties.Resources.SessionExpired, Properties.Resources.SessionExpired, MessageBoxButton.OK, MessageBoxImage.Hand);
@@ -83,11 +87,6 @@ namespace Signum.Windows
         {
             Connect();
             return current is T;
-        }
-
-        public static void SetNewServerCallback(Func<IBaseServer> server)
-        {
-            getServer = server;
         }
 
         public static T Save<T>(this T entidad) where T : IdentifiableEntity
