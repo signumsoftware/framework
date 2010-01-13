@@ -35,8 +35,8 @@ namespace Signum.Utilities
         [MethodExpander(typeof(IsInIntervalExpander3))]
         public static bool IsInInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
         {
-            return (minDate == null || minDate <= date) && 
-                   (maxDate == null || date < maxDate); 
+            return (minDate == null || minDate <= date) &&
+                   (maxDate == null || date < maxDate);
         }
 
         private static void AssertDateOnly(params DateTime?[] args)
@@ -66,7 +66,7 @@ namespace Signum.Utilities
         {
             AssertDateOnly(date, minDate, maxDate);
             return (minDate == null || minDate <= date) &&
-                   (maxDate == null || date < maxDate); 
+                   (maxDate == null || date < maxDate);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Signum.Utilities
         {
             AssertDateOnly(date, minDate, maxDate);
             return (minDate == null || minDate <= date) &&
-                   (maxDate == null || date < maxDate); 
+                   (maxDate == null || date < maxDate);
         }
 
         class IsInIntervalExpander1 : IMethodExpander
@@ -205,11 +205,11 @@ namespace Signum.Utilities
                          Years == 1 ? Resources._0Year.Formato(Years) :
                                      Resources._0Years.Formato(Years),
                          Months == 0 ? null :
-                         Months == 1 ? Resources._0Month.Formato(Years) :
-                                      Resources._0Months.Formato(Years),
+                         Months == 1 ? Resources._0Month.Formato(Months) :
+                                      Resources._0Months.Formato(Months),
                          Days == 0 ? null :
-                         Days == 1 ? Resources._0Day.Formato(Years) :
-                                    Resources._0Days.Formato(Years));
+                         Days == 1 ? Resources._0Day.Formato(Days) :
+                                    Resources._0Days.Formato(Days));
         }
     }
 }
