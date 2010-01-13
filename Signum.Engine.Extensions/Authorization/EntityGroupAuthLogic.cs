@@ -311,11 +311,11 @@ namespace Signum.Engine.Authorization
                 : base(query)
             { }
 
-            public override QueryResult ExecuteQuery(List<Filter> filters, List<Order> orders, int? limit)
+            public override QueryResult ExecuteQuery(List<Filter> filters, int? limit)
             {
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    return base.ExecuteQuery(filters, orders, limit);
+                    return base.ExecuteQuery(filters, limit);
                 }
             }
 
