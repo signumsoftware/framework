@@ -81,7 +81,7 @@ namespace Signum.Engine.Authorization
             AllowedPair max = new AllowedPair(false, false);
             foreach (var item in collection)
             {
-                max = AllowedPair.Max(max, item);
+                max = AllowedPair.Max(max, item ?? AllowedPair.True);
                 if (max.IsTrue())
                     return max;
             }
