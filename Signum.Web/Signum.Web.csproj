@@ -122,11 +122,8 @@
       <DependentUpon>Resources.es.resx</DependentUpon>
     </Compile>
     <Compile Include="Widgets\AlertWidgetHelper.cs" />
-    <Compile Include="Widgets\AlertItem.cs" />
-    <Compile Include="Widgets\NoteItem.cs" />
-    <Compile Include="Widgets\NoteWidgetHelper.cs" />
-    <Compile Include="Widgets\QuickLinkItem.cs" />
     <Compile Include="Widgets\QuickLinkWidgetHelper.cs" />
+    <Compile Include="Widgets\NoteWidgetHelper.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
     <Compile Include="WwwRedirectAttributes.cs" />
     <Compile Include="MenuHelper.cs" />
@@ -179,7 +176,6 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NormalPage.aspx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

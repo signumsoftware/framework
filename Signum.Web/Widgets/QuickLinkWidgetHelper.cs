@@ -5,54 +5,71 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Entities;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
-    public delegate List<QuickLinkItem> GetQuickLinksDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
+    public delegate List<QuickLinkItem> GetQuickLinksDelegate(IdentifiableEntity entity);
 
     public static class QuickLinkWidgetHelper
     {
         public static event GetQuickLinksDelegate GetQuickLinks;
 
-        public static void Start()
-        {
-            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName, prefix) => WidgetsHelper_GetWidgetsForView(helper, entity, partialViewName, prefix);
+
+        public static void Start() {
+            WidgetsHelper.GetWidgetsForView += (helper, entity) => CreateWidget((IdentifiableEntity) entity);
         }
 
-        private static WidgetItem WidgetsHelper_GetWidgetsForView(HtmlHelper helper, object entity, string partialViewName, string prefix)
+        public static WidgetItem CreateWidget(IdentifiableEntity identifiable)
         {
-            List<QuickLinkItem> links = new List<QuickLinkItem>();
-            if (GetQuickLinks != null)
-                links.AddRange(GetQuickLinks.GetInvocationList()
-                    .Cast<GetQuickLinksDelegate>()
-                    .Select(d => d(helper, entity, partialViewName, prefix))
-                    .NotNull()
-                    .SelectMany(d => d).ToList());
-
+            List<QuickLinkItem> quicklinks = new List<QuickLinkItem>();
+            if (GetQuickLinks != null) quicklinks = GetQuickLinks(identifiable);
+            if (quicklinks == null || quicklinks.Count == 0) return null;
             return new WidgetItem
             {
-                Content = QuickLinksToString(helper, links, prefix),
-                Label = "<a id='Quicklinks'><span class='update-number count{0}'>{0}</span>Quicklinks</a>".Formato(links.Count),
-                Id = "Quicklinks",
-                Show = links.Count > 0
+                Content =
+                    @"<div class='widget quicklinks'><ul>{0}</ul>
+                    </div>".Formato(quicklinks.ToString(q => "<li><a onclick=\"javascript:OpenFinder({0});\">{1}</li>".Formato(JsFindOptions(q).ToJS(), QueryUtils.GetNiceQueryName(q.FindOptions.QueryName)), "")),
+                Label = "<a id='{0}'>{0}<span class='count {1}'>{2}</span></a>".Formato("Quicklinks", quicklinks.Count == 0 ? "disabled" : "", quicklinks.Count),
+                Id = "Notes",
+                Show = true,
             };
         }
 
-        private static string QuickLinksToString(HtmlHelper helper, List<QuickLinkItem> links, string prefix)
+        private static JsFindOptions JsFindOptions(QuickLinkItem quickLinkItem)
         {
-            if (links == null || links.Count == 0)
-                return "";
-
-            StringBuilder sb = new StringBuilder();
-
-            sb.AppendLine("<div class='widget quickLinks'>");
-            foreach (QuickLinkItem link in links)
+            JsFindOptions foptions = new JsFindOptions
             {
-                sb.AppendLine(link.ToString(helper, prefix));
-            }
-            sb.AppendLine("</div>");
-
-            return sb.ToString();
+                FindOptions = new FindOptions
+                {
+                    QueryName = quickLinkItem.FindOptions.QueryName,
+                    Create = false,
+                    SearchOnLoad = true,
+                    FilterMode = FilterMode.Hidden,
+                    FilterOptions = quickLinkItem.FindOptions.FilterOptions
+                }
+            };
+            return foptions;
         }
+
+    }
+    public class QuickLinkItem : WebMenuItem
+    {
+        public QuickLinkItem(object queryName, List<FilterOptions> filterOptions)
+        {
+            DivCssClass = "QuickLink";
+            FindOptions = new FindOptions
+            {
+                QueryName = queryName,
+                FilterOptions = filterOptions,
+                AllowMultiple = false,
+                FilterMode = FilterMode.Hidden,
+                SearchOnLoad = true,
+                Create = false,
+            };
+        }
+
+        public FindOptions FindOptions { get; set; }
     }
 }

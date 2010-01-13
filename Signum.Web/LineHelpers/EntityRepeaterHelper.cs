@@ -21,7 +21,7 @@ namespace Signum.Web
     {
         private static void InternalEntityRepeater<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityRepeater settings)
         {
-            if (!settings.Visible)
+            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
                 return;
 
             string prefix = helper.GlobalName(typeContext.Name);

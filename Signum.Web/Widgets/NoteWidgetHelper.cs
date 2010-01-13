@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-using System.Web.Mvc;
-using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Basics;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
-    //public delegate List<NoteItem> GetNotesDelegate(HtmlHelper helper, object entity, string partialViewName, string prefix);
-
     public static class NoteWidgetHelper
     {
-        //public static event GetNotesDelegate GetNotes;
         public static Func<IdentifiableEntity, INoteDN> CreateNote { get; set; }
         public static object NotesQuery { get; set; }
         public static string NotesQueryColumn { get; set; }
@@ -27,12 +20,8 @@ namespace Signum.Web
 
             int count = Navigator.QueryCount(new QueryOptions(NotesQuery)
             {
-                FilterOptions = new List<FilterOptions>
-                {
-                    new FilterOptions(NotesQueryColumn, identifiable) 
-                }
+                FilterOptions = { new FilterOptions(NotesQueryColumn, identifiable) }
             });
-
 
             JsFindOptions foptions = new JsFindOptions
             {
@@ -42,10 +31,7 @@ namespace Signum.Web
                     Create = false,
                     SearchOnLoad = true,
                     FilterMode = FilterMode.Hidden,
-                    FilterOptions = new List<FilterOptions>
-                    {
-                        new FilterOptions( NotesQueryColumn, identifiable.ToLite())
-                    }
+                    FilterOptions = { new FilterOptions( NotesQueryColumn, identifiable.ToLite()) }
                 }
             };
 
@@ -58,11 +44,11 @@ namespace Signum.Web
 
             return new WidgetItem
             {
-                Content = 
-@"<div class='widget notes'>
-  <a class='view' onclick=""javascript:OpenFinder({0});"">{1}</a>
-  <a class='create' onclick=""javascript:RelatedEntityCreate({2});"">{3}</a>
-</div>".Formato(foptions.ToJS(), Properties.Resources.ViewNotes, voptions.ToJS(), Properties.Resources.CreateNote),
+                Content =
+                    @"<div class='widget notes'>
+                      <a class='view' onclick=""javascript:OpenFinder({0});"">{1}</a>
+                      <a class='create' onclick=""javascript:RelatedEntityCreate({2});"">{3}</a>
+                    </div>".Formato(foptions.ToJS(), Properties.Resources.ViewNotes, voptions.ToJS(), Properties.Resources.CreateNote),
                 Label = "<a id='{1}' onclick=\"javascript:OpenFinder({0});\">{1}<span class='count {2}'>{3}</span></a>".Formato(foptions.ToJS(), Properties.Resources.Notes, count == 0 ? "disabled" : "", count),
                 Id = "Notes",
                 Show = true,

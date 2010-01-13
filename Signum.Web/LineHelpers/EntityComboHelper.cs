@@ -22,7 +22,7 @@ namespace Signum.Web
     {
         internal static void InternalEntityCombo<T>(this HtmlHelper helper, TypeContext<T> typeContext, EntityCombo settings)
         {
-            if (!settings.Visible)
+            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
                 return;
 
             string prefix = helper.GlobalName(typeContext.Name);

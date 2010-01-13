@@ -17,7 +17,7 @@ namespace Signum.Web
 
         private static string ManualValueLine<T>(this HtmlHelper helper, string idValueField, T value, ValueLine settings)
         {
-            if (!settings.Visible)
+            if (!settings.Visible || settings.HideIfNull && value == null)
                 return null;
 
             StringBuilder sb = new StringBuilder();

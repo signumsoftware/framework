@@ -23,7 +23,7 @@ namespace Signum.Web
         // This line returns string instead of void as all the other internalLines because it's used when constructing filters dinamically
         internal static string InternalEntityLine<T>(this HtmlHelper helper, TypeContext<T> typeContext, EntityLine settings)
         {
-            if (!settings.Visible)
+            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
                 return null;
 
             string prefix = helper.GlobalName(typeContext.Name);

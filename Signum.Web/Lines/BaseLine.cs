@@ -31,6 +31,13 @@ namespace Signum.Web
             set { visible = value; }
         }
 
+        public bool hideIfNull = true;
+        public bool HideIfNull
+        {
+            get { return hideIfNull; }
+            set { hideIfNull = value; }
+        }
+
         bool reloadOnChange = false;
         public bool ReloadOnChange
         {

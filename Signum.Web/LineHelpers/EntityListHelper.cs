@@ -20,7 +20,7 @@ namespace Signum.Web
     {
         private static void InternalEntityList<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityList settings)
         {
-            if (!settings.Visible)
+            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
                 return;
             
             string prefix = helper.GlobalName(typeContext.Name);
