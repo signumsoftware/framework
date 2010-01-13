@@ -14,7 +14,7 @@ namespace Signum.Entities.Extensions.Basics
         public int Years
         {
             get { return years; }
-            set { SetToStr(ref years, value, () => Years); }
+            set  { SetToStr(ref years, value, () => Years); }
         }
 
         int months;
