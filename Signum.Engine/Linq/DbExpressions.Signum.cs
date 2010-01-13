@@ -251,7 +251,9 @@ namespace Signum.Engine.Linq
         {
             if (reference != null)
             {
-                if (!Reflector.ExtractLite(type).IsAssignableFrom(reference.Type))
+                Type cleanType = Reflector.ExtractLite(type);
+
+                if (!cleanType.IsAssignableFrom(reference.Type) && !(cleanType == typeof(IdentifiableEntity) && reference.Type.IsInterface))
                     throw new ApplicationException(Resources.TheType0IsNotTheLiteVersionOf1.Formato(type.TypeName(), reference.Type.TypeName()));
             }
 

@@ -121,10 +121,10 @@
     <value>La propiedad Type del TextArea {0} debería ser string</value>
   </data>
   <data name="Server0DoesNotImplement1" xml:space="preserve">
-    <value>Server {0} does not implement {1}</value>
+    <value>El servidor {0} no implementa {1}</value>
   </data>
   <data name="AConnectionWithTheServerIsNecessaryToContinue" xml:space="preserve">
-    <value>Es necesario tener conexión con el servidor para consinuar</value>
+    <value>Es necesario tener conexión con el servidor para continuar</value>
   </data>
   <data name="SessionExpired" xml:space="preserve">
     <value>Sesión caducada</value>
@@ -154,7 +154,7 @@
     <value>'{0}' is not a valid identifier</value>
   </data>
   <data name="ChooseAValue" xml:space="preserve">
-    <value>Elige a valor</value>
+    <value>Elige un valor</value>
   </data>
   <data name="PleaseChooseAValueToContinue" xml:space="preserve">
     <value>Por favor, elige un valor para continuar:</value>
