@@ -80,7 +80,7 @@ namespace Signum.Web
             {
                 FilterOptions =
                 {
-                    new FilterOptions(AlertsQueryColumn, identifiable)
+                    new FilterOption(AlertsQueryColumn, identifiable)
                 }
             });
             return count;

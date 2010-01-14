@@ -56,7 +56,7 @@ namespace Signum.Web
     }
     public class QuickLinkItem : WebMenuItem
     {
-        public QuickLinkItem(object queryName, List<FilterOptions> filterOptions)
+        public QuickLinkItem(object queryName, List<FilterOption> filterOptions)
         {
             DivCssClass = "QuickLink";
             FindOptions = new FindOptions

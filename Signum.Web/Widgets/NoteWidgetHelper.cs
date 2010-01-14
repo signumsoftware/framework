@@ -20,7 +20,7 @@ namespace Signum.Web
 
             int count = Navigator.QueryCount(new CountOptions(NotesQuery)
             {
-                FilterOptions = { new FilterOptions(NotesQueryColumn, identifiable) }
+                FilterOptions = { new FilterOption(NotesQueryColumn, identifiable) }
             });
 
             JsFindOptions foptions = new JsFindOptions
@@ -31,7 +31,7 @@ namespace Signum.Web
                     Create = false,
                     SearchOnLoad = true,
                     FilterMode = FilterMode.Hidden,
-                    FilterOptions = { new FilterOptions( NotesQueryColumn, identifiable.ToLite()) }
+                    FilterOptions = { new FilterOption( NotesQueryColumn, identifiable.ToLite()) }
                 }
             };
 
