@@ -33,14 +33,14 @@ namespace Signum.Windows.Reports
 
             if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
             {
-                ExcelReportGenerator.GenerateReport(sfd.FileName, SearchControl.QueryResult);
+                ExcelReportGenerator.GenerateReport(sfd.FileName, SearchControl.ResultTable);
             }
         }
 
         protected override void QueryResultChanged()
         {
-            QueryResult qr = SearchControl.QueryResult;
-            IsEnabled = (qr != null && qr.Data.Length > 0);
+            ResultTable qr = SearchControl.ResultTable;
+            IsEnabled = (qr != null && qr.Rows.Length > 0);
         }
     }
 

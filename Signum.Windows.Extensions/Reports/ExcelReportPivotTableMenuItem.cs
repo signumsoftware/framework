@@ -89,7 +89,7 @@ namespace Signum.Windows.Reports
                 {
                     File.WriteAllBytes(sfd.FileName, report.File.BinaryFile);
 
-                    ExcelReportPivotTablesGenerator.GenerarInforme(sfd.FileName, SearchControl.QueryResult);
+                    ExcelReportPivotTablesGenerator.GenerarInforme(sfd.FileName, SearchControl.ResultTable);
 
                     System.Diagnostics.Process.Start(sfd.FileName);
                 }

@@ -44,7 +44,7 @@ namespace Signum.Windows.Reports
             {Integer,styleInteger}
         };
 
-        public static void GenerateReport(string filename, QueryResult view)
+        public static void GenerateReport(string filename, ResultTable view)
         {
             Workbook book = new Workbook
             {
@@ -147,7 +147,7 @@ namespace Signum.Windows.Reports
         }
         #endregion
 
-        static Worksheet GenerateWorksheetSheet(QueryResult vista)
+        static Worksheet GenerateWorksheetSheet(ResultTable vista)
         {
             return new Worksheet("Datos")
             {
@@ -161,7 +161,7 @@ namespace Signum.Windows.Reports
                     FullRows = 1,
                     Columns = new ColumnCollection 
                     {
-                        vista.VisibleColums.Select(c => 
+                        vista.VisibleColumns.Select(c => 
                             new Signum.Excel.Column(styleColumna) 
                             {
                                   AutoFitWidth = (c.Type == typeof(string)) ? false : true,
@@ -176,7 +176,7 @@ namespace Signum.Windows.Reports
                             AutoFitHeight = false,
                             Cells = new CellCollection()
                             {
-                                vista.VisibleColums.Select((c,i) =>
+                                vista.VisibleColumns.Select((c,i) =>
                                 new Cell
                                 {
                                     StyleID = styleTitulo,
@@ -185,21 +185,21 @@ namespace Signum.Windows.Reports
                                 })
                             }
                         },
-                        vista.Data.Select(fila =>
+                        vista.Rows.Select(row =>
                             new Row
                             {
                                 AutoFitHeight = false,
                                 Cells = new CellCollection()
                                 {
-                                    fila.Zip(vista.Columns).Where(p=>p.Second.Visible).Select((par, i) =>
+                                    vista.VisibleColumns.Select(c=>
                                     {
-                                        TypeCode tc = par.Second.Type.UnNullify().Map(a=>a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
+                                        TypeCode tc = c.Type.UnNullify().Map(a=>a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
                                         DataType dt = TypesConverter[tc];
                                    
                                         return new Cell
                                         {
                                             StyleID = TypeStyle[dt],
-                                            Data = par.First.TryCC(o=>new CellData((dt!=Integer) ? dt : DataType.Number,
+                                            Data = row[c].TryCC(o=>new CellData((dt!=Integer) ? dt : DataType.Number,
                                                       (dt == DataType.DateTime) ? ((DateTime)o).ToStringExcel() :
                                                       (dt==DataType.Number) ? Convert.ToDecimal(o).ToStringExcel() : 
                                                       o.ToString())),

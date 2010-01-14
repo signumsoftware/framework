@@ -19,8 +19,6 @@ namespace Signum.Windows.Reports
     {
         public static void GenerateCompositeReport(CompositeReportDN cr)
         {
-
-
             // establecer la ruta a guardar
             //DefaultExt = extension, //".xls", //".xlsx",
             //Filter = (extension == ".xls") ? Prop.Resources.Excel97_2003Spreadsheet : Prop.Resources.Excel2007Spreadsheet, //.Excel2007Spreadsheet,
@@ -53,7 +51,7 @@ namespace Signum.Windows.Reports
                     File.WriteAllBytes(filename, er.File.BinaryFile);
 
                     // pedimos la consulta y traemos los datos
-                    QueryResult queryResult = Server.Return((IQueryServer s)=>s.GetQueryResult(ReportClient.QueryNames[er.QueryName], null, null)); 
+                    ResultTable queryResult = Server.Return((IQueryServer s) => s.GetQueryResult(ReportClient.QueryNames[er.QueryName], null, null, null)); 
                     ExcelReportPivotTablesGenerator.GenerarInforme(filename, queryResult);
                     filename = "";
 

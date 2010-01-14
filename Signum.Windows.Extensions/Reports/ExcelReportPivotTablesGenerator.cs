@@ -16,9 +16,9 @@ namespace Signum.Windows.Reports
     public static class ExcelReportPivotTablesGenerator
     {
 
-        public static void GenerarInforme(string filename, QueryResult vista)
+        public static void GenerarInforme(string filename, ResultTable vista)
         {
-            if(vista==null || vista.Data==null || vista.Data.Length==0 || vista.Data[0].Length==0)
+            if(vista==null || vista.Rows.Length == 0 || vista.Columns.Length==0)
                 throw new ApplicationException("Los vista con los datos a insertar en el excel está vacía.");
 
             ApplicationClass appExcel = null;
@@ -41,7 +41,7 @@ namespace Signum.Windows.Reports
                         .Single("El fichero Excel usado como template debe tener una Hoja de Cálculo con el nombre: Datos");
                     
                 //Compruebo que las columnas de la vista sean las mismas que las cabeceras de la hoja de datos origen en el excel
-                List<Column> colsVisibles = vista.VisibleColums.Where(c => !c.IsEntity).ToList();
+                List<Column> colsVisibles = vista.VisibleColumns.ToList();
                 for (int numCol = 0; numCol < colsVisibles.Count; numCol++)
                 {
                     string columna = DameColumnaExcel(numCol); //((char)('A' + (char)numCol)).ToString();
@@ -55,22 +55,22 @@ namespace Signum.Windows.Reports
                 Range rangeTotal = wsDatos.get_Range("A2", columnasVista + wsDatos.Rows.Count.ToString());
                 rangeTotal.Clear();
 
-                var visibles = vista.Columns.Select((c, i) => new { Column = c, Index = i }).Where(p => p.Column.Visible).ToList(); 
                 //Copiar nuevos datos origen
-                for (int j = 0; j < vista.Data.Length; j++)
+                for (int j = 0; j < vista.Rows.Length; j++)
                 {
                     int numFilaBase1 = j + 2;
 
-                    var fila = vista.Data[j];
+                    var fila = vista.Rows[j];
 
-                    for (int i = 0; i < visibles.Count; i++)
+                    int i = 0;
+                    foreach (var col in vista.VisibleColumns)
                     {
-                        var par = visibles[i];
-
                         string columna = DameColumnaExcel(i); //((char)('A' + (char)numCol)).ToString();
                         Range range = wsDatos.get_Range(columna + numFilaBase1, columna + numFilaBase1);
                         if (range != null)
-                            range.Value2 = fila[par.Index].TryCC(a => a.ToString());
+                            range.Value2 = fila[col.Index].TryCC(a => a.ToString());
+
+                        i++;
                     }
                 }
 
@@ -85,11 +85,10 @@ namespace Signum.Windows.Reports
                         Interop.PivotTable pt = pivotTables.Item(j);
                         if (pt.SourceData.ToString().StartsWith("Datos!"))
                         {
-                            pt.SourceData = "Datos!F1C1:F" + (int)(vista.Data.Length + 1) + "C" + colsVisibles.Count;
+                            pt.SourceData = "Datos!F1C1:F" + (int)(vista.Rows.Length + 1) + "C" + colsVisibles.Count;
                             pt.PivotCache().Refresh();
                         }
                     }
-
 
                     //bool hayMas = true;
                     //for (int j = 1; hayMas && j < 10; j++)
