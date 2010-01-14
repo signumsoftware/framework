@@ -84,7 +84,7 @@ namespace Signum.Web
         {
             QueryDescription queryDescription =  DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            foreach (FilterOptions opt in findOptions.FilterOptions)
+            foreach (FilterOption opt in findOptions.FilterOptions)
             {
                 opt.Column = queryDescription.Columns.Where(c => c.Name == opt.ColumnName)
                     .Single(Resources.FilterColumn0NotFoundOrFoundMoreThanOnce.Formato(opt.ColumnName));
@@ -177,7 +177,7 @@ namespace Signum.Web
         {
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryFromUrlName(queryUrlName));
             Column column = qd.Columns.Where(c => c.Visible == true).ToList()[visibleColumnIndex];
-            FilterOptions fo = new FilterOptions() { Column = column, ColumnName = column.Name, Operation = FilterOperation.EqualTo, Value = value };
+            FilterOption fo = new FilterOption() { Column = column, ColumnName = column.Name, Operation = FilterOperation.EqualTo, Value = value };
             Type type = Reflector.ExtractLite(column.Type) ?? column.Type;
             
             return NewFilter(controller, type.Name, column.Name, column.DisplayName, filterRowIndex, prefix, FilterOperation.EqualTo, value);
@@ -219,7 +219,7 @@ namespace Signum.Web
             }
         }
 
-        public static void NewFilter(this HtmlHelper helper, FilterOptions filterOptions, int index)
+        public static void NewFilter(this HtmlHelper helper, FilterOption filterOptions, int index)
         {
             StringBuilder sb = new StringBuilder();
 

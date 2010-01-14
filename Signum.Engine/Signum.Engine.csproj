@@ -67,7 +67,9 @@
     </Compile>
     <Compile Include="Administrator.cs" />
     <Compile Include="Connection\CommandTimeout.cs" />
+    <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
     <Compile Include="DynamicQuery\DynamicQuery.cs" />
+    <Compile Include="DynamicQuery\ManualDynamicQuery.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="DynamicQuery\DynamicQueryManager.cs" />

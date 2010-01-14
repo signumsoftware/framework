@@ -15,13 +15,13 @@ namespace Signum.Services
         QueryDescription GetQueryDescription(object queryName);
 
         [OperationContract, NetDataContract]
-        QueryResult GetQueryResult(object queryName, List<Filter> filters, int? limit);
+        ResultTable GetQueryResult(object queryName, List<Filter> filters, List<Order> orders, int? limit);
 
         [OperationContract, NetDataContract]
         int GetQueryCount(object queryName, List<Filter> filters);
 
         [OperationContract, NetDataContract]
-        Lite GetUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType);
+        Lite GetUniqueEntity(object queryName, List<Filter> filters, List<Order> orders, UniqueType uniqueType);
 
         [OperationContract, NetDataContract]
         List<object> GetQueryNames();      

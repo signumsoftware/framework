@@ -20,14 +20,13 @@ using System.Windows.Media;
 using Signum.Services;
 using System.Threading;
 using System.Windows.Threading;
+using System.Windows.Documents;
+using Signum.Windows.DynamicQuery;
 
 namespace Signum.Windows
 {
     public partial class SearchControl
     {
-        private GridViewColumnHeader lastHeaderClicked = null;
-        private ListSortDirection lastDirection = ListSortDirection.Ascending;
-
         public static readonly DependencyProperty QueryNameProperty =
             DependencyProperty.Register("QueryName", typeof(object), typeof(SearchControl), new UIPropertyMetadata(null));
         public object QueryName
@@ -36,8 +35,16 @@ namespace Signum.Windows
             set { SetValue(QueryNameProperty, value); }
         }
 
+        public static readonly DependencyProperty OrderOptionsProperty =
+          DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(SearchControl), new UIPropertyMetadata(null));
+        public ObservableCollection<OrderOption> OrderOptions
+        {
+            get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
+            set { SetValue(OrderOptionsProperty, value); }
+        }
+
         public static readonly DependencyProperty FilterOptionsProperty =
-          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(SearchControl), new UIPropertyMetadata(null));
+           DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(SearchControl), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOption> FilterOptions
         {
             get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
@@ -164,7 +171,6 @@ namespace Signum.Windows
             set { SetValue(ViewOnCreateProperty, value); }
         }
 
-
         private static readonly DependencyPropertyKey EntityTypeKey =
          DependencyProperty.RegisterReadOnly("EntityType", typeof(Type), typeof(SearchControl), new UIPropertyMetadata(null));
         public static readonly DependencyProperty EntityTypeProperty = EntityTypeKey.DependencyProperty;
@@ -196,15 +202,16 @@ namespace Signum.Windows
             this.InitializeComponent();
 
             FilterOptions = new FreezableCollection<FilterOption>();
+            OrderOptions = new ObservableCollection<OrderOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(100);
-            timer.Tick +=new EventHandler(timer_Tick);
+            timer.Tick += new EventHandler(timer_Tick);
         }
 
-        int entityIndex;
-        QueryResult queryResult;
-        public QueryResult QueryResult { get { return queryResult; } }
+        Column entityColumn;
+        ResultTable resultTable;
+        public ResultTable ResultTable { get { return resultTable; } }
 
         public static readonly RoutedEvent QueryResultChangedEvent = EventManager.RegisterRoutedEvent(
             "QueryResultChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SearchControl));
@@ -225,21 +232,20 @@ namespace Signum.Windows
 
             settings = Navigator.GetQuerySettings(QueryName);
 
-            QueryDescription view = Navigator.Manager.GetQueryDescription(QueryName); 
+            QueryDescription view = Navigator.Manager.GetQueryDescription(QueryName);
 
-            Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
-            if (entity != null)
+            entityColumn = view.Columns.SingleOrDefault(a => a.IsEntity);
+            if (entityColumn != null)
             {
-                entityIndex = view.Columns.IndexOf(entity);
-                SetValue(EntityTypeKey, Reflector.ExtractLite(entity.Type));
+                SetValue(EntityTypeKey, Reflector.ExtractLite(entityColumn.Type));
 
-                if (this.NotSet(ViewProperty) && View && view.EntityImplementations != null)
+                if (this.NotSet(ViewProperty) && View && view.EntityImplementations == null)
                     View = Navigator.IsViewable(EntityType, IsAdmin);
 
-                if (this.NotSet(CreateProperty) && Create && view.EntityImplementations != null)
+                if (this.NotSet(CreateProperty) && Create && view.EntityImplementations == null)
                     Create = Navigator.IsCreable(EntityType, IsAdmin);
 
-                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly && view.EntityImplementations != null)
+                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly && view.EntityImplementations == null)
                     ViewReadOnly = Navigator.IsReadOnly(EntityType, IsAdmin);
             }
 
@@ -253,8 +259,15 @@ namespace Signum.Windows
             filterBuilder.Columns = view.Columns.Where(a => a.Filterable).ToList();
             filterBuilder.Filters = new ObservableCollection<FilterOption>(FilterOptions);
 
+            Navigator.Manager.SetColumns(QueryName, OrderOptions); 
+
             GenerateListViewColumns(view);
-            columns = view.Columns;
+
+            adorners = OrderOptions.Select((o, i) => new ColumnOrderInfo(
+                gvResults.Columns.Select(c => (GridViewColumnHeader)c.Header).Single(c => ((Column)c.Tag).Name == o.ColumnName),
+                o.OrderType,
+                i + 1)).ToDictionary(a => ((Column)((GridViewColumnHeader)a.Header).Tag).Name);
+
 
             if (GetCustomMenuItems != null)
             {
@@ -275,28 +288,28 @@ namespace Signum.Windows
             }
         }
 
-        DispatcherTimer timer; 
+        DispatcherTimer timer;
         void fo_ValueChanged(object sender, EventArgs e)
         {
-            timer.Start(); 
+            timer.Start();
         }
 
         void timer_Tick(object sender, EventArgs e)
         {
-            if (queryResult != null)
+            if (resultTable != null)
             {
                 Search();
             }
 
-            timer.Stop(); 
-        } 
+            timer.Stop();
+        }
 
         void SearchControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (((bool)e.NewValue) == true)
             {
                 IsVisibleChanged -= SearchControl_IsVisibleChanged;
-                Search(); 
+                Search();
             }
         }
 
@@ -304,38 +317,27 @@ namespace Signum.Windows
         {
             btView.Visibility = lvResult.SelectedItem != null && View ? Visibility.Visible : Visibility.Collapsed;
 
-            SelectedItem = ((object[])lvResult.SelectedItem).TryCC(a => (Lite)a[entityIndex]);
+            SelectedItem = ((ResultRow)lvResult.SelectedItem).TryCC(a => (Lite)a[entityColumn]);
             if (MultiSelection)
-                SelectedItems = lvResult.SelectedItems.Cast<object[]>().Select(a => (Lite)a[entityIndex]).ToArray();
+                SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(a => (Lite)a[entityColumn]).ToArray();
             else
                 SelectedItems = null;
         }
 
-        List<Column> columns = new List<Column>();
-        List<Column> visibleColumns = new List<Column>();
-
         private void GenerateListViewColumns(QueryDescription view)
         {
             gvResults.Columns.Clear();
-            visibleColumns.Clear();
 
-            for (int i = 0; i < view.Columns.Count; i++)
+            foreach (var c in view.Columns.Where(c=>c.Visible))
             {
-                Column c = view.Columns[i];
-
-                if (!c.Visible)
-                    continue;
-
-                Binding b = new Binding("[{0}]".Formato(i)) { Mode = BindingMode.OneTime };
+                Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
                 DataTemplate dt = settings.GetFormatter(c)(b);
                 gvResults.Columns.Add(
                     new GridViewColumn
                     {
-                        Header = c.DisplayName,
+                        Header = new GridViewColumnHeader { Content = c.DisplayName, Tag = c },
                         CellTemplate = dt,
                     });
-
-                visibleColumns.Add(c);
             }
         }
 
@@ -344,42 +346,38 @@ namespace Signum.Windows
             Search();
         }
 
-        public List<Filter> CurrentFilters()
-        {
-            return filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
-        }
-
         public void Search()
         {
             btFind.IsEnabled = false;
 
-            queryResult = null;
+            resultTable = null;
 
             OnQueryResultChanged(true);
 
             object vn = QueryName;
-            var lf = CurrentFilters();
+            var filters = CurrentFilters();
+            var orders = CurrentOrders();
             tbResultados.Visibility = Visibility.Hidden;
 
             int? limit = MaxItemsCount;
 
             Async.Do(this.FindCurrentWindow(),
-                () => queryResult = Server.Return((IQueryServer s)=>s.GetQueryResult(vn, lf, limit)),
+                () => resultTable = Server.Return((IQueryServer s) => s.GetQueryResult(vn, filters, orders, limit)),
                 () =>
                 {
-                    if (queryResult != null)
+                    if (resultTable != null)
                     {
-                        lvResult.ItemsSource = queryResult.Data;
-                        if (queryResult.Data.Length > 0)
+                        lvResult.ItemsSource = resultTable.Rows;
+                        if (resultTable.Rows.Length > 0)
                         {
                             lvResult.SelectedIndex = 0;
-                            lvResult.ScrollIntoView(queryResult.Data.First());
+                            lvResult.ScrollIntoView(resultTable.Rows.First());
                         }
                         ItemsCount = lvResult.Items.Count;
                         lvResult.Background = Brushes.White;
                         lvResult.Focus();
                         tbResultados.Visibility = Visibility.Visible;
-                        tbResultados.Foreground = queryResult.Data.Length == limit ? Brushes.Red : Brushes.Black;
+                        tbResultados.Foreground = resultTable.Rows.Length == limit ? Brushes.Red : Brushes.Black;
                         OnQueryResultChanged(false);
                     }
 
@@ -387,32 +385,44 @@ namespace Signum.Windows
                 () => { btFind.IsEnabled = true; });
         }
 
-        private void OnQueryResultChanged(bool cleaning)
+        public List<Order> CurrentOrders()
+        {
+            var orders = adorners.Values.Select(a => a.ToOrder()).ToList();
+            return orders;
+        }
+
+        public List<Filter> CurrentFilters()
+        {
+            var filters = filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
+            return filters;
+        }
+
+        void OnQueryResultChanged(bool cleaning)
         {
             if (!cleaning && CollapseOnNoResults)
-                Visibility = queryResult.Data.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+                Visibility = resultTable.Rows.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
 
             RaiseEvent(new RoutedEventArgs(QueryResultChangedEvent));
         }
 
-        private void btView_Click(object sender, RoutedEventArgs e)
+        void btView_Click(object sender, RoutedEventArgs e)
         {
             OnViewClicked();
         }
 
-        private void OnViewClicked()
+        void OnViewClicked()
         {
-            object[] row = (object[])lvResult.SelectedItem;
+            ResultRow row = (ResultRow)lvResult.SelectedItem;
 
             if (row == null)
                 return;
 
-            object entity = row[entityIndex];
+            object entity = row[entityColumn];
 
             OnViewing(entity);
         }
 
-        private void btCreate_Click(object sender, RoutedEventArgs e)
+        void btCreate_Click(object sender, RoutedEventArgs e)
         {
             OnCreate();
         }
@@ -447,12 +457,12 @@ namespace Signum.Windows
         }
 
 
-        private void lvResult_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        void lvResult_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateViewSelection();
         }
 
-        private void lvResult_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        void lvResult_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (DoubleClick != null)
                 DoubleClick();
@@ -461,62 +471,42 @@ namespace Signum.Windows
             e.Handled = true;
         }
 
+
+        Dictionary<string, ColumnOrderInfo> adorners = new Dictionary<string, ColumnOrderInfo>();
+      
         void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
         {
-            if (queryResult == null || queryResult.Data == null)
-                return;
+            GridViewColumnHeader header = sender as GridViewColumnHeader;
+            Column column = header.Tag as Column;
 
-            GridViewColumnHeader headerClicked = e.OriginalSource as GridViewColumnHeader;
-            if (headerClicked == null || headerClicked.Role == GridViewColumnHeaderRole.Padding)
-                return;
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift || (adorners.Count == 1 && adorners.ContainsKey(column.Name)))
+            {
 
-            ListSortDirection direction;
-            if (headerClicked != lastHeaderClicked)
-                direction = ListSortDirection.Ascending;
+            }
             else
             {
-                if (lastDirection == ListSortDirection.Ascending)
-                    direction = ListSortDirection.Descending;
-                else
-                    direction = ListSortDirection.Ascending;
+                foreach (var item in adorners.Values)
+                    item.Clean();
+
+                adorners.Clear();
             }
 
-
-            int columHeaderIndex = gvResults.Columns.IndexOf(headerClicked.Column);
-            int colIndex = columns.IndexOf(visibleColumns[columHeaderIndex]);
-
-            btFind.IsEnabled = false;
-
-            Async.Do(this.FindCurrentWindow(),
-                   () => queryResult.Data = SortResults(colIndex, direction),
-                   () => { lvResult.ItemsSource = queryResult.Data; lvResult.SelectedIndex = 0; lvResult.Focus(); },
-                   () => { btFind.IsEnabled = true; });
-
-            lastHeaderClicked = headerClicked;
-            lastDirection = direction;
-        }
-
-        private object[][] SortResults(int colIndex, ListSortDirection direccion)
-        {
-            Type type = queryResult.Columns[colIndex].Type;
-
-            Func<object[], IComparable> lambda = null;
-
-            if (typeof(IComparable).IsAssignableFrom(type.UnNullify()))
-                lambda = arr => (IComparable)arr[colIndex];
+            ColumnOrderInfo orderOption;
+            if (adorners.TryGetValue(column.Name, out orderOption))
+            {
+                orderOption.Flip();
+            }
             else
-                lambda = arr => arr[colIndex].TryCC(a => a.ToString());
+            {
+                adorners.Add(column.Name, new ColumnOrderInfo(header, OrderType.Ascending, adorners.Count + 1));
+            }
 
-            if (direccion == ListSortDirection.Ascending)
-                return queryResult.Data.OrderBy(lambda).ToArray();
-            else
-                return queryResult.Data.OrderByDescending(lambda).ToArray();
+            Search();
         }
-
 
         public static event MenuItemForQueryName GetCustomMenuItems;
 
-        private void GridViewColumnHeader_PreviewMouseMove(object sender, MouseEventArgs e)
+        void GridViewColumnHeader_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed && this.ShowFilters && _startPoint != null)
             {
@@ -539,23 +529,20 @@ namespace Signum.Windows
             }
         }
 
-        private FilterOption CreateFilter(GridViewColumnHeader header)
+        FilterOption CreateFilter(GridViewColumnHeader header)
         {
-            int columnHeaderIndex = gvResults.Columns.IndexOf(header.Column);
-            Column column = visibleColumns[columnHeaderIndex];
+            Column column = (Column)header.Tag;
 
-            if (queryResult != null)
+            if (resultTable != null)
             {
-                int columnIndex = columns.IndexOf(column);
-
-                object[] row = (object[])lvResult.SelectedItem;
+                ResultRow row = (ResultRow)lvResult.SelectedItem;
                 if (row != null)
                 {
                     return new FilterOption
                     {
                         Column = column,
                         Operation = FilterOperation.EqualTo,
-                        Value = row[columnIndex]
+                        Value = row[column]
                     };
                 }
             }
@@ -570,12 +557,12 @@ namespace Signum.Windows
 
         Point? _startPoint;
 
-        private void GridViewColumnHeader_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        void GridViewColumnHeader_MouseDown(object sender, MouseButtonEventArgs e)
         {
             _startPoint = e.GetPosition(null);
         }
 
-        private void GridViewColumnHeader_MouseLeave(object sender, MouseEventArgs e)
+        void GridViewColumnHeader_MouseLeave(object sender, MouseEventArgs e)
         {
             _startPoint = null;
         }

@@ -38,6 +38,14 @@ namespace Signum.Windows
             set { SetValue(FilterOptionsProperty, value); }
         }
 
+        public static readonly DependencyProperty OrderOptionsProperty =
+             DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public ObservableCollection<OrderOption> OrderOptions
+        {
+            get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
+            set { SetValue(OrderOptionsProperty, value); }
+        }
+
         public static readonly DependencyProperty SelectedItemProperty =
           DependencyProperty.Register("SelectedItem", typeof(Lite), typeof(SearchWindow), new UIPropertyMetadata(null));
         public Lite SelectedItem
@@ -137,6 +145,11 @@ namespace Signum.Windows
         public List<Filter> CurrentFilters()
         {
             return searchControl.CurrentFilters();
+        }
+
+        public List<Order> CurrentOrders()
+        {
+            return searchControl.CurrentOrders();
         }
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)

@@ -18,6 +18,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Services;
 using System.Windows.Threading;
+using System.Collections.ObjectModel;
 
 namespace Signum.Windows
 {
@@ -137,11 +138,10 @@ namespace Signum.Windows
             return result.Cast<Lite<T>>().ToArray();
         }
 
-        public static int QueryCount(QueryOptions options)
+        public static int QueryCount(CountOptions options)
         {
             return Manager.QueryCount(options);
         }
-
 
         public static void NavigateUntyped(object entity)
         {
@@ -443,36 +443,44 @@ namespace Signum.Windows
 
         public virtual Lite FindUnique(FindUniqueOptions options)
         {
-            SetColumns(options);
+            SetColumns(options.QueryName, options.FilterOptions);
+            SetColumns(options.QueryName, options.OrderOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+            var orders = options.OrderOptions.Select(f => f.ToOrder()).ToList();
 
-            return Server.Return((IQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, options.UniqueType));
+            return Server.Return((IQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, orders, options.UniqueType));
         }
 
-        public int QueryCount(QueryOptions options)
+        public int QueryCount(CountOptions options)
         {
-            SetColumns(options);
+            SetColumns(options.QueryName, options.FilterOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
 
             return Server.Return((IQueryServer s) => s.GetQueryCount(options.QueryName, filters));
         }
 
-        public void SetColumns(QueryOptions options)
-        {
-            SetColumns(options.QueryName, options.FilterOptions);
-        }
-
-        public void SetColumns(object queryName, IEnumerable<FilterOption> filterOptions)
+        public void SetColumns(object queryName, IEnumerable<FilterOption> filters)
         {
             QueryDescription view = GetQueryDescription(queryName);
 
-            foreach (var fo in filterOptions)
+            foreach (var f in filters)
             {
-                fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, queryName));
-                fo.RefreshRealValue();
+                f.Column = view.Columns.Where(c => c.Name == f.ColumnName)
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(f.ColumnName, queryName));
+                f.RefreshRealValue();
+            }
+        }
+
+        public void SetColumns(object queryName, IEnumerable<OrderOption> orders)
+        {
+            QueryDescription view = GetQueryDescription(queryName);
+
+            foreach (var o in orders)
+            {
+                view.Columns.Where(c => c.Name == o.ColumnName)
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(o.ColumnName, queryName));
             }
         }
 
@@ -485,12 +493,11 @@ namespace Signum.Windows
 
         private SearchWindow CreateSearchWindow(FindOptionsBase options)
         {
-            SetColumns(options);
-
             SearchWindow sw = new SearchWindow(options.GetSearchMode(), options.SearchOnLoad)
             {
                 QueryName = options.QueryName,
                 FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions),
+                OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions),
                 ShowFilters = options.ShowFilters,
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,

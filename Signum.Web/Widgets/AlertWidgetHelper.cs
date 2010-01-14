@@ -67,7 +67,7 @@ namespace Signum.Web
                     FilterMode = FilterMode.Hidden,
                     FilterOptions =
                     {
-                        new FilterOptions(AlertsQueryColumn,identifiable.ToLite())
+                        new FilterOption(AlertsQueryColumn,identifiable.ToLite())
                     }
                 }
             };
@@ -76,7 +76,7 @@ namespace Signum.Web
 
         private static int GetCount(object queryName, IdentifiableEntity identifiable)
         {
-            int count = Navigator.QueryCount(new QueryOptions(queryName)
+            int count = Navigator.QueryCount(new CountOptions(queryName)
             {
                 FilterOptions =
                 {

@@ -14,6 +14,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Linq
 {
@@ -669,14 +670,14 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             List<OrderExpression> orderings = new List<OrderExpression>();
-            orderings.Add(new OrderExpression(orderType, DbExpressionNominator.FullNominate(MapAndVisitExpand(orderSelector, ref projection), false)));
+            orderings.Add(new OrderExpression(orderType, GetOrderExpression(orderSelector, ref projection)));
 
             if (myThenBys != null)
             {
                 for (int i = myThenBys.Count - 1; i >= 0; i--)
                 {
                     OrderExpression tb = myThenBys[i];
-                    orderings.Add(new OrderExpression(tb.OrderType, DbExpressionNominator.FullNominate(MapAndVisitExpand((LambdaExpression)tb.Expression, ref projection), false)));
+                    orderings.Add(new OrderExpression(tb.OrderType, GetOrderExpression((LambdaExpression)tb.Expression, ref projection)));
                 }
             }
 
@@ -685,6 +686,32 @@ namespace Signum.Engine.Linq
             return new ProjectionExpression(
                 new SelectExpression(alias, false, null, pc.Columns, projection.Source, null, orderings.AsReadOnly(), null),
                 pc.Projector, null, pc.Token);
+        }
+
+        private Expression GetOrderExpression(LambdaExpression lambda, ref ProjectionExpression projection)
+        {
+            map.Add(lambda.Parameters[0], projection.Projector);
+
+            Expression expr = Visit(lambda.Body);
+
+            if (expr is LiteReferenceExpression)
+            {
+                expr = ((LiteReferenceExpression)expr).ToStr ?? ((LiteReferenceExpression)expr).Id;
+            }
+            else if (expr is FieldInitExpression || expr is ImplementedByExpression)
+            {
+                expr = BindMemberAccess(Expression.MakeMemberAccess(expr, ToStrProperty));
+            }
+            else if (expr is ImplementedByAllExpression)
+            {
+                expr = ((ImplementedByAllExpression)expr).Id;
+            }
+
+            projection = ApplyExpansions(projection);
+
+            map.Remove(lambda.Parameters[0]);
+
+            return DbExpressionNominator.FullNominate(expr, false);
         }
 
         protected virtual Expression BindThenBy(Expression source, LambdaExpression orderSelector, OrderType orderType)

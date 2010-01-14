@@ -110,7 +110,7 @@ namespace Signum.Utilities
                 (gender == Gender.Masculine ? "_m" :
                  gender == Gender.Femenine ? "_f" : "_n");
 
-            return resource.GetString(compoundKey) ?? resource.GetString(compoundKey);
+            return resource.GetString(compoundKey) ?? resource.GetString(resourceKey);
         }
 
         public static string GetGenderAwareResource(this Type type, Expression<Func<string>> resource)

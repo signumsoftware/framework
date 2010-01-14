@@ -262,6 +262,7 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
+    <Compile Include="DynamicQuery\SortAdorner.cs" />
     <Compile Include="Fluent\BindExtensions.cs" />
     <Compile Include="Fluent\ControlExtensions.cs" />
     <Compile Include="Fluent\EntityExtensions.cs" />

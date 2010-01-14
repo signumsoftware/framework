@@ -13,6 +13,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
 using System.Data;
 using Signum.Engine.Maps;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Linq
 {

@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
             newExpression = n.Visit(expression);
             return n.candidates;
         }
-
+        
         static internal Expression FullNominate(Expression expression, bool isCondition)
         {
             DbExpressionNominator n = new DbExpressionNominator { existingAliases = null };

@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
+using Signum.Entities.DynamicQuery;
 
 
 namespace Signum.Engine.Linq
@@ -199,15 +200,6 @@ namespace Signum.Engine.Linq
         {
             return "{0}({1})".Formato(AggregateFunction, Source.NiceToString() ?? "*");
         }
-    }
-
-    /// <summary>
-    /// An SQL OrderBy order type 
-    /// </summary>
-    internal enum OrderType
-    {
-        Ascending,
-        Descending
     }
 
     /// <summary>

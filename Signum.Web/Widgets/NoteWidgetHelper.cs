@@ -18,7 +18,7 @@ namespace Signum.Web
             if (identifiable == null || identifiable.IsNew || identifiable is INoteDN)
                 return null;
 
-            int count = Navigator.QueryCount(new QueryOptions(NotesQuery)
+            int count = Navigator.QueryCount(new CountOptions(NotesQuery)
             {
                 FilterOptions = { new FilterOptions(NotesQueryColumn, identifiable) }
             });

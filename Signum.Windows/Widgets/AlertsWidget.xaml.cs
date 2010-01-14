@@ -113,7 +113,7 @@ namespace Signum.Windows.Widgets
 
         bool CountAlerts(object queryName, IdentifiableEntity entity, string resource, Button button)
         {
-            int count = Navigator.QueryCount(new QueryOptions(queryName)
+            int count = Navigator.QueryCount(new CountOptions(queryName)
             {
                 FilterOptions = new List<FilterOption>
                 {

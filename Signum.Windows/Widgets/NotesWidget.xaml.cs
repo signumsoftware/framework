@@ -107,7 +107,7 @@ namespace Signum.Windows
                 return;
             }
 
-            int count = Navigator.QueryCount(new QueryOptions(NotesQuery)
+            int count = Navigator.QueryCount(new CountOptions(NotesQuery)
             {
                 FilterOptions = new List<FilterOption>{ new FilterOption( NotesQueryColumn, DataContext) }
             }); 

@@ -113,10 +113,10 @@ namespace Signum.Services
              () => DynamicQueryManager.Current.QueryDescription(queryName));
         }
 
-        public QueryResult GetQueryResult(object queryName, List<Filter> filters, int? limit)
+        public ResultTable GetQueryResult(object queryName, List<Filter> filters, List<Order> orders, int? limit)
         {
             return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(queryName),
-             () => DynamicQueryManager.Current.ExecuteQuery(queryName, filters, limit));
+             () => DynamicQueryManager.Current.ExecuteQuery(queryName, filters, orders, limit));
         }
 
         public int GetQueryCount(object queryName, List<Filter> filters)
@@ -125,10 +125,10 @@ namespace Signum.Services
                 () => DynamicQueryManager.Current.ExecuteQueryCount(queryName, filters));
         }
 
-        public Lite GetUniqueEntity(object queryName, List<Filter> filters, UniqueType uniqueType)
+        public Lite GetUniqueEntity(object queryName, List<Filter> filters, List<Order> orders, UniqueType uniqueType)
         {
             return Return(MethodInfo.GetCurrentMethod(), "GetQueryEntity {0}".Formato(queryName),
-                () => DynamicQueryManager.Current.ExecuteUniqueEntity(queryName, filters, uniqueType));
+                () => DynamicQueryManager.Current.ExecuteUniqueEntity(queryName, filters, orders, uniqueType));
         }
 
         public List<object> GetQueryNames()

@@ -120,9 +120,9 @@
                 <GridView x:Name="gvResults" AllowsColumnReorder="False">
                     <GridView.ColumnHeaderContainerStyle>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
-                            <EventSetter Event="PreviewMouseMove" Handler="GridViewColumnHeader_PreviewMouseMove"/>
+                            <EventSetter Event="MouseMove" Handler="GridViewColumnHeader_MouseMove"/>
                             <EventSetter Event="Click" Handler="GridViewColumnHeader_Click"/>
-                            <EventSetter Event="PreviewMouseDown" Handler="GridViewColumnHeader_PreviewMouseDown" />
+                            <EventSetter Event="MouseDown" Handler="GridViewColumnHeader_MouseDown" />
                             <EventSetter Event="MouseLeave" Handler="GridViewColumnHeader_MouseLeave" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>

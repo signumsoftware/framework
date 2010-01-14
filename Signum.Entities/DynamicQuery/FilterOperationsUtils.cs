@@ -87,6 +87,9 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,
+                    FilterOperation.Contains,
+                    FilterOperation.StartsWith,
+                    FilterOperation.EndsWith,
                 }
             },
             { 

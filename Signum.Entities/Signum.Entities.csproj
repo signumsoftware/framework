@@ -62,12 +62,13 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="DynamicQuery\Filter.cs" />
     <Compile Include="FieldAttributes.cs" />
     <Compile Include="Basics\Alert.cs" />
     <Compile Include="Basics\Color.cs" />
     <Compile Include="DynamicQuery\Meta.cs" />
     <Compile Include="Patterns\CorruptEntity.cs" />
-    <Compile Include="DynamicQuery\Filter.cs" />
+    <Compile Include="DynamicQuery\Order.cs" />
     <Compile Include="DynamicQuery\FilterOperationsUtils.cs" />
     <Compile Include="DynamicQuery\QueryDescription.cs" />
     <Compile Include="Basics\Note.cs" />

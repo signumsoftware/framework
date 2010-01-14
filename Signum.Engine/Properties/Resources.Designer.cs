@@ -192,6 +192,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Entity column is not a Lite.
+        /// </summary>
+        internal static string EntityColumnIsNotALite {
+            get {
+                return ResourceManager.GetString("EntityColumnIsNotALite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Entity of type {0} and Id {1} not found.
         /// </summary>
         internal static string EntityOfType0AndId1NotFound {
@@ -490,6 +499,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There are more than one Entity column.
+        /// </summary>
+        internal static string ThereAreMoreThanOneEntityColumn {
+            get {
+                return ResourceManager.GetString("ThereAreMoreThanOneEntityColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There are records in &apos;{0}&apos; pointing to this table by column &apos;{1}&apos;.
         /// </summary>
         internal static string ThereAreRecordsIn0PointingToThisTableByColumn1 {
@@ -513,6 +531,15 @@ namespace Signum.Engine.Properties {
         internal static string ThereIsASqlPreComandSimpleWithMoreThan0Parameters {
             get {
                 return ResourceManager.GetString("ThereIsASqlPreComandSimpleWithMoreThan0Parameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no Entity column.
+        /// </summary>
+        internal static string ThereIsNoEntityColumn {
+            get {
+                return ResourceManager.GetString("ThereIsNoEntityColumn", resourceCulture);
             }
         }
         

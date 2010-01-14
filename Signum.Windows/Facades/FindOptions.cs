@@ -9,12 +9,12 @@ using Signum.Utilities;
 
 namespace Signum.Windows
 {
-    public class QueryOptions
+    public class CountOptions
     {
         public object QueryName { get; set; }
 
-        public QueryOptions() { }
-        public QueryOptions(object queryName)
+        public CountOptions() { }
+        public CountOptions(object queryName)
         {
             this.QueryName = queryName;
         }
@@ -27,8 +27,24 @@ namespace Signum.Windows
         }
     }
 
-    public abstract class FindOptionsBase : QueryOptions
+    public abstract class FindOptionsBase 
     {
+        public object QueryName { get; set; }
+
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
+        {
+            get { return filterOptions; }
+            set { this.filterOptions = value; }
+        }
+
+        List<OrderOption> orderOptions = new List<OrderOption>();
+        public List<OrderOption> OrderOptions
+        {
+            get { return orderOptions; }
+            set { this.orderOptions = value; }
+        }
+
         public FindOptionsBase()
         {
             this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
@@ -104,8 +120,24 @@ namespace Signum.Windows
         }
     }
 
-    public class FindUniqueOptions : QueryOptions
+    public class FindUniqueOptions
     {
+        public object QueryName { get; set; }
+
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
+        {
+            get { return filterOptions; }
+            set { this.filterOptions = value; }
+        }
+
+        List<OrderOption> orderOptions = new List<OrderOption>();
+        public List<OrderOption> OrderOptions
+        {
+            get { return orderOptions; }
+            set { this.orderOptions = value; }
+        }
+
         public FindUniqueOptions() 
         {
             UniqueType = UniqueType.Single;
@@ -186,6 +218,37 @@ namespace Signum.Windows
                 return DateTime.Now;
 
             return Activator.CreateInstance(type);
+        }
+    }
+
+    public class OrderOption : Freezable
+    {
+        public OrderOption () 
+        { 
+        }
+
+        public OrderOption (string columnName)
+        {
+            this.ColumnName = columnName;
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            throw new NotImplementedException();
+        }
+
+        public OrderOption(string columnName, OrderType orderType)
+        {
+            this.ColumnName = columnName;
+            this.OrderType = orderType;
+        }
+
+        public string ColumnName { get; set; }
+        public OrderType OrderType { get; set; }
+        
+        public Order ToOrder()
+        {
+            return new Order(ColumnName, OrderType);
         }
     }
 }

@@ -487,4 +487,13 @@ WRITETEXT</value>
   <data name="EndOfSyncScript" xml:space="preserve">
     <value>--- END OF SYNC SCRIPT</value>
   </data>
+  <data name="ThereIsNoEntityColumn" xml:space="preserve">
+    <value>There is no Entity column</value>
+  </data>
+  <data name="ThereAreMoreThanOneEntityColumn" xml:space="preserve">
+    <value>There are more than one Entity column</value>
+  </data>
+  <data name="EntityColumnIsNotALite" xml:space="preserve">
+    <value>Entity column is not a Lite</value>
+  </data>
 </root>

@@ -10,26 +10,42 @@ using Signum.Engine;
 
 namespace Signum.Web
 {
-    public class QueryOptions
+    public class CountOptions
     {
         public object QueryName { get; set; }
 
-        List<FilterOptions> filterOptions = new List<FilterOptions>();
-        public List<FilterOptions> FilterOptions
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
         {
             get { return filterOptions; }
             set { this.filterOptions = value; }
         }
 
-        public QueryOptions() { }
-        public QueryOptions(object queryName)
+        public CountOptions() { }
+        public CountOptions(object queryName)
         {
             this.QueryName = queryName;
         }
     }
 
-    public class FindOptions: QueryOptions
+    public class FindOptions
     {
+        public object QueryName { get; set; }
+
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
+        {
+            get { return filterOptions; }
+            set { this.filterOptions = value; }
+        }
+
+        List<OrderOption> orderOptions = new List<OrderOption>();
+        public List<OrderOption> OrderOptions
+        {
+            get { return orderOptions; }
+            set { this.orderOptions = value; }
+        }
+
         public FindOptions() { }
 
         public FindOptions(object queryName)
@@ -83,8 +99,24 @@ namespace Signum.Web
         }
     }
 
-    public class FindUniqueOptions : QueryOptions
+    public class FindUniqueOptions
     {
+        public object QueryName { get; set; }
+
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
+        {
+            get { return filterOptions; }
+            set { this.filterOptions = value; }
+        }
+
+        List<OrderOption> orderOptions = new List<OrderOption>();
+        public List<OrderOption> OrderOptions
+        {
+            get { return orderOptions; }
+            set { this.orderOptions = value; }
+        }
+
         public FindUniqueOptions()
         {
             UniqueType = UniqueType.Single;
@@ -99,7 +131,7 @@ namespace Signum.Web
         public UniqueType UniqueType { get; set; }
     }
 
-    public class FilterOptions
+    public class FilterOption
     {
         public Column Column { get; set; }
         public string ColumnName { get; set; }
@@ -107,9 +139,9 @@ namespace Signum.Web
         public FilterOperation Operation { get; set; }
         public object Value { get; set; }
 
-        public FilterOptions(){}
+        public FilterOption(){}
 
-        public FilterOptions(string columnName, object value)
+        public FilterOption(string columnName, object value)
         {
             this.ColumnName = columnName;
             this.Operation = FilterOperation.EqualTo;
@@ -189,6 +221,18 @@ namespace Signum.Web
                 result += "&fz{0}=true".Formato(filterIndex);
 
             return result;
+        }
+    }
+
+    public class OrderOption
+    {
+        public Column Column { get; set; }
+        public string ColumnName { get; set; }
+        public OrderType Type { get; set; }
+
+        public Order ToOrder()
+        {
+            return new Order(ColumnName, Type);
         }
     }
 

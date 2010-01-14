@@ -17,6 +17,7 @@
         <m:SearchControl x:Name="searchControl"
                          QueryName="{Binding QueryName, ElementName=me}"
                          FilterOptions="{Binding FilterOptions, ElementName=me}"
+                         OrderOptions="{Binding OrderOptions, ElementName=me}"
                          MultiSelection="{Binding MultiSelection, ElementName=me}"
                          ShowFilters="{Binding ShowFilters, ElementName=me}"
                          ShowFilterButton="{Binding ShowFilterButton, ElementName=me}"

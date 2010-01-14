@@ -7,6 +7,10 @@ using System.Collections.Specialized;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Web.Properties;
+using Signum.Engine.DynamicQuery;
+using Signum.Entities;
+using System.Web;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
@@ -30,7 +34,7 @@ namespace Signum.Web
 
             fo.QueryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
 
-            fo.FilterOptions = Navigator.ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
+            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, fo.QueryName);
 
             if (parameters.AllKeys.Any(k => k == "sfAllowMultiple"))
             {
@@ -56,6 +60,69 @@ namespace Signum.Web
                 fo.SearchOnLoad = bool.Parse(parameters["sfSearchOnLoad"]);
 
             return fo;
+        }
+
+
+        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, object queryName)
+        {
+            List<FilterOption> result = new List<FilterOption>();
+
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            int index = 0;
+            string name;
+            object value;
+            string operation;
+            bool frozen;
+            Type type;
+            NameValueCollection parameters = httpContext.Request.Params;
+            var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
+            foreach (string nameKey in names)
+            {
+                if (!int.TryParse(nameKey.RemoveLeft(2), out index))
+                    continue;
+
+                name = parameters[nameKey];
+                value = parameters["val" + index.ToString()];
+                operation = parameters["sel" + index.ToString()];
+                type = queryDescription.Columns
+                           .SingleOrDefault(c => c.Name == name)
+                           .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
+                           .Type;
+
+                if (type == typeof(bool))
+                {
+                    string[] vals = ((string)value).Split(',');
+                    value = (vals[0] == "true") ? true : false;
+                }
+                if (typeof(Lite).IsAssignableFrom(type))
+                {
+                    string[] vals = ((string)value).Split(';');
+                    int intValue;
+                    if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
+                    {
+                        Type liteType = Navigator.NameToType[vals[1]];
+                        if (typeof(Lite).IsAssignableFrom(liteType))
+                            liteType = Reflector.ExtractLite(liteType);
+                        value = Lite.Create(liteType, intValue);
+                    }
+                    else
+                        value = null;
+                }
+                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
+
+                frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
+
+                result.Add(new FilterOption
+                {
+                    ColumnName = name,
+                    Column = queryDescription.Columns.Single(c => c.Name == name),
+                    Operation = filterOperation,
+                    Frozen = frozen,
+                    Value = value,
+                });
+            }
+            return result;
         }
     }
 }

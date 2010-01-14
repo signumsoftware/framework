@@ -14,6 +14,7 @@ using Signum.Engine.Linq;
 using Signum.Entities;
 using System.Diagnostics;
 using Signum.Entities.Reflection;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -21,107 +22,27 @@ namespace Signum.Engine.DynamicQuery
     {
         Type EntityCleanType();
         QueryDescription GetDescription();
-        QueryResult ExecuteQuery(List<Filter> filters, int? limit);
+        ResultTable ExecuteQuery(List<Filter> filters, List<Order> orders, int? limit);
         int ExecuteQueryCount(List<Filter> filters);
-        Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType);
+        Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
         string GetErrors();
-        Expression Expression { get; }
-    }
-
-    
-    public class AutoDynamicQuery<T>: DynamicQuery<T>
-    {
-        IQueryable<T> query;
-        Dictionary<string, Meta> metas;
-
-        public AutoDynamicQuery(IQueryable<T> query)
-        {
-            if (query == null)
-                throw new ArgumentNullException("query"); 
-
-            this.query = query;
-
-            metas = DynamicQuery.QueryMetadata(query); 
-            
-            members = MemberEntryFactory.GenerateList<T>();
-
-            columns = members.Cast<IMemberEntry>().Select(e =>
-                    new Column(e.MemberInfo, metas[e.MemberInfo.Name])).ToList();
+        Expression Expression { get; } //Optional
         }
-
-        public override QueryResult ExecuteQuery(List<Filter> filters, int? limit)
-        {
-            IQueryable<T> result = query.WhereFilters(filters);
-
-            if (limit != null)
-                result = result.Take(limit.Value);
-
-            return ToQueryResult(result);
-        }
-
-        public override int ExecuteQueryCount(List<Filter> filters)
-        {
-            return query.WhereFilters(filters).Count();
-        }
-
-        public override Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType)
-        {
-            return query.WhereFilters(filters).SelectEntity().Unique(uniqueType); 
-        }
-
-        public override Expression Expression
-        {
-            get { return query.Expression; }
-        }
-    }
-
-    public class ManualDynamicQuery<T>: DynamicQuery<T>
-    {
-        Func<List<Filter>, int?, IEnumerable<T>> execute;
-
-        public ManualDynamicQuery(Func<List<Filter>, int?, IEnumerable<T>> execute)
-        {
-            if (execute == null)
-                throw new ArgumentNullException("execute");
-
-            this.execute = execute;
-         
-            this.members = MemberEntryFactory.GenerateList<T>();
-
-            this.columns = members.Cast<IMemberEntry>().Select(e =>
-                    new Column(e.MemberInfo, null)).ToList();
-        }
-
-        public override QueryResult ExecuteQuery(List<Filter> filters, int? limit)
-        {
-            return ToQueryResult(execute(filters, limit));
-        }
-
-        public override int ExecuteQueryCount(List<Filter> filters)
-        {
-            return execute(filters, null).Count();
-        }
-
-        public override Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType)
-        {
-            return execute(filters, 1).SelectEntity().Unique(uniqueType);
-        }
-    }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
     {
-        protected List<Column> columns; 
-        protected List<MemberEntry<T>> members;
+        protected Column[] columns; 
 
-        public abstract QueryResult ExecuteQuery(List<Filter> filters, int? limit);
+        public abstract ResultTable ExecuteQuery(List<Filter> filters, List<Order> orders, int? limit);
         public abstract int ExecuteQueryCount(List<Filter> filters);
-        public abstract Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType);
+        public abstract Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
 
         public string GetErrors()
         {
             int count = columns.Where(c => c.IsEntity).Count();
 
-            string errors = count == 0 ? "No Entity column" : count > 1 ? "More than one Entity column" : null;
+            string errors = count == 0 ? Resources.ThereIsNoEntityColumn :
+                            count > 1 ? Resources.ThereAreMoreThanOneEntityColumn : null;
 
             return errors.Add(columns.Where(c => typeof(ModifiableEntity).IsAssignableFrom(c.Type)).ToString(c => c.Name, ", "), ", ");
         }
@@ -131,17 +52,9 @@ namespace Signum.Engine.DynamicQuery
             return new QueryDescription { Columns = columns.Where(DynamicQuery.ColumnIsAllowed).ToList() };
         }
        
-        protected QueryResult ToQueryResult(IEnumerable<T> result)
+        protected ResultTable ToQueryResult(IEnumerable<T> result)
         {
-            bool[] allowed = columns.Select(c=>DynamicQuery.ColumnIsAllowed(c)).ToArray();
-
-            List<MemberEntry<T>> allowedMembers= members.Where((m, i) => allowed[i]).ToList();
-
-            return new QueryResult
-            {
-                Columns = columns.Where((c,i) => allowed[i]).ToList(),
-                Data = result.Select(e => allowedMembers.Select(d => d.Getter(e)).ToArray()).ToArray()
-            };
+            return ResultTable.Create(result, columns.Where(DynamicQuery.ColumnIsAllowed));
         }
 
         public DynamicQuery<T> ChangeColumn<S>(Expression<Func<T, S>> column, Action<Column> change)
@@ -155,9 +68,9 @@ namespace Signum.Engine.DynamicQuery
 
         public Type EntityCleanType()
         {
-            Type type = columns.Where(c => c.IsEntity).Single("There's no Entity column", "There's more than one Entity column").Type;
+            Type type = columns.Where(c => c.IsEntity).Single(Resources.ThereIsNoEntityColumn, Resources.ThereAreMoreThanOneEntityColumn).Type;
 
-            return Reflector.ExtractLite(type).ThrowIfNullC("Entity column is not a Lite");
+            return Reflector.ExtractLite(type).ThrowIfNullC(Resources.EntityColumnIsNotALite);
         }
 
         public virtual Expression Expression
@@ -183,11 +96,12 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQuery<T>(query); 
         }
 
-        public static DynamicQuery<T> Manual<T>(Func<List<Filter>, int?, IEnumerable<T>> execute)
+        public static DynamicQuery<T> Manual<T>(Func<List<Filter>, List<Order>, int?, IEnumerable<T>> execute)
         {
             return new ManualDynamicQuery<T>(execute); 
         }
 
+        #region WhereExpression
         static MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
         static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
         static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
@@ -270,6 +184,106 @@ namespace Signum.Engine.DynamicQuery
             return sequence;
         }
 
+        #endregion
+
+        #region OrederBy
+
+        static MethodInfo miOrderByQueryable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByQueryable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByQueryableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByQueryableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
+
+        public static IQueryable<T> OrderBy<T>(this IQueryable<T> query, List<Order> orders)
+        {
+            if (orders == null || orders.Count == 0)
+                return query;
+
+            IOrderedQueryable<T> result = query.OrderBy(orders.First());
+
+            foreach (var order in orders.Skip(1))
+            {
+                result = result.ThenBy(order);
+            }
+
+            return result;
+        }
+  
+        static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> query, Order order)
+        {
+            LambdaExpression lambda = CreateLambda<T>(order);
+
+            MethodInfo mi = (order.OrderType == OrderType.Ascending? miOrderByQueryable: miOrderByQueryableDescending).MakeGenericMethod(lambda.Type.GetGenericArguments());
+
+            return (IOrderedQueryable<T>)query.Provider.CreateQuery<T>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
+        }
+
+        static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> query, Order order)
+        {
+            LambdaExpression lambda = CreateLambda<T>(order);
+
+            MethodInfo mi = (order.OrderType == OrderType.Ascending ? miThenByQueryable : miThenByQueryableDescending).MakeGenericMethod(lambda.Type.GetGenericArguments());
+
+            return (IOrderedQueryable<T>)query.Provider.CreateQuery<T>(Expression.Call(null, mi, new Expression[] { query.Expression, Expression.Quote(lambda) }));
+        }
+
+        static MethodInfo miOrderByEnumerable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByEnumerable = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByEnumerableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByEnumerableDescending = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().ToList().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
+   
+        public static IEnumerable<T> OrderBy<T>(this IEnumerable<T> collection, List<Order> orders)
+        {
+            if (orders == null || orders.Count == 0)
+                return collection;
+
+            IOrderedEnumerable<T> result = collection.OrderBy(orders.First());
+
+            foreach (var order in orders.Skip(1))
+            {
+                result = result.ThenBy(order);
+            }
+
+            return result;
+        }
+
+        static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> collection, Order order)
+        {
+            LambdaExpression lambda = CreateLambda<T>(order);
+
+            MethodInfo mi = (order.OrderType == OrderType.Ascending ? miOrderByEnumerable : miOrderByEnumerableDescending).MakeGenericMethod(lambda.Type.GetGenericArguments());
+
+            return (IOrderedEnumerable<T>)mi.Invoke(null, new object[] { collection, lambda.Compile() });
+        }
+
+        static IOrderedEnumerable<T> ThenBy<T>(this IOrderedEnumerable<T> collection, Order order)
+        {
+            LambdaExpression lambda = CreateLambda<T>(order);
+
+            MethodInfo mi = (order.OrderType == OrderType.Ascending ? miThenByEnumerable : miThenByEnumerableDescending).MakeGenericMethod(lambda.Type.GetGenericArguments());
+
+            return (IOrderedEnumerable<T>)mi.Invoke(null, new object[] { collection, lambda.Compile() });
+        }
+
+        static LambdaExpression CreateLambda<T>(Order order)
+        {
+            ParameterExpression a = Expression.Parameter(typeof(T), "a");
+
+            PropertyInfo property = typeof(T).GetProperty(order.ColumnName)
+               .ThrowIfNullC(Resources.TheProperty0ForType1IsnotFound.Formato(order.ColumnName, typeof(T).TypeName()));
+
+            return Expression.Lambda(Expression.Property(a, property), a);
+        }
+
+        #endregion
+
+        #region SelectEntity
+        private static Expression<Func<T, Lite>> GetSelectEntityExpression<T>()
+        {
+            ParameterExpression e = Expression.Parameter(typeof(T), "e");
+
+            return Expression.Lambda<Func<T, Lite>>(Expression.Convert(Expression.Property(e, Column.Entity), typeof(Lite)), e);
+        }
+
         public static IQueryable<Lite> SelectEntity<T>(this IQueryable<T> query)
         {
             Expression<Func<T, Lite>> select = GetSelectEntityExpression<T>();
@@ -283,7 +297,9 @@ namespace Signum.Engine.DynamicQuery
 
             return query.Select(select);
         }
+        #endregion
 
+        #region Unique
         public static T Unique<T>(this IQueryable<T> query, UniqueType uniqueType)
         {
             switch (uniqueType)
@@ -310,13 +326,9 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
-        private static Expression<Func<T, Lite>> GetSelectEntityExpression<T>()
-        {
-            ParameterExpression e = Expression.Parameter(typeof(T), "e");
+        #endregion
 
-            return Expression.Lambda<Func<T, Lite>>(Expression.Convert(Expression.Property(e, Column.Entity), typeof(Lite)), e);
-        }
-
+        #region TryTake
         public static IQueryable<T> TryTake<T>(this IQueryable<T> query, int? num)
         {
             if (num.HasValue)
@@ -330,6 +342,7 @@ namespace Signum.Engine.DynamicQuery
                 return sequence.Take(num.Value);
             return sequence;
         }
+        #endregion
 
         public static Dictionary<string, Meta> QueryMetadata(IQueryable query)
         {

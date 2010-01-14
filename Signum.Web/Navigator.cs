@@ -183,7 +183,7 @@ namespace Signum.Web
             return Manager.FindUnique(options);
         }
 
-        public static int QueryCount(QueryOptions options)
+        public static int QueryCount(CountOptions options)
         {
             return Manager.QueryCount(options);
         }
@@ -196,11 +196,6 @@ namespace Signum.Web
         internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
         {
             return Manager.ExtractFilters(httpContext, queryName);
-        }
-
-        internal static List<FilterOptions> ExtractFilterOptions(HttpContextBase httpContext, object queryName)
-        {
-            return Manager.ExtractFilterOptions(httpContext, queryName);
         }
 
         public static SortedList<string, object> ToSortedList(NameValueCollection form, string prefixFilter, string prefixToIgnore)
@@ -621,7 +616,7 @@ namespace Signum.Web
 
             List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
 
-            foreach (FilterOptions opt in findOptions.FilterOptions)
+            foreach (FilterOption opt in findOptions.FilterOptions)
             {
                 opt.Column = queryDescription.Columns.Where(c => c.Name == opt.ColumnName)
                     .Single(Resources.FilterColumn0NotFoundOrFoundMoreThanOnce.Formato(opt.ColumnName));
@@ -652,32 +647,45 @@ namespace Signum.Web
 
         protected internal virtual Lite FindUnique(FindUniqueOptions options)
         {
-            SetColumns(options);
+            SetColumns(options.QueryName, options.FilterOptions);
+            SetColumns(options.QueryName, options.OrderOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
+            var orders = options.OrderOptions.Select(o => o.ToOrder()).ToList();
 
-            return DynamicQueryManager.Current.ExecuteUniqueEntity(options.QueryName, filters, options.UniqueType);
+            return DynamicQueryManager.Current.ExecuteUniqueEntity(options.QueryName, filters, orders, options.UniqueType);
         }
 
-        protected internal virtual int QueryCount(QueryOptions options)
+        protected internal virtual int QueryCount(CountOptions options)
         {
-            SetColumns(options);
+            SetColumns(options.QueryName, options.FilterOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
 
             return DynamicQueryManager.Current.ExecuteQueryCount(options.QueryName, filters);
         }
 
-        protected internal void SetColumns(QueryOptions options)
+        protected internal void SetColumns(object queryName, List<FilterOption> filters)
         {
-            QueryDescription view = DynamicQueryManager.Current.QueryDescription(options.QueryName);
+            QueryDescription view = DynamicQueryManager.Current.QueryDescription(queryName);
 
             Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
 
-            foreach (var fo in options.FilterOptions)
+            foreach (var f in filters)
             {
-                fo.Column = view.Columns.Where(c => c.Name == fo.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(fo.ColumnName, options.QueryName));
+                f.Column = view.Columns.Where(c => c.Name == f.ColumnName)
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(f.ColumnName, queryName));
+            }
+        }
+
+        public void SetColumns(object queryName, IEnumerable<OrderOption> orders)
+        {
+            QueryDescription view = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            foreach (var o in orders)
+            {
+                o.Column = view.Columns.Where(c => c.Name == o.ColumnName)
+                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(o.ColumnName, queryName));
             }
         }
 
@@ -729,14 +737,17 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
         {
-            QueryResult queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList(), top);
+            var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
+            var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
+
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, filters, orders, top);
 
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.Results] = queryResult;
             controller.ViewData[ViewDataKeys.AllowMultiple] = findOptions.AllowMultiple;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
 
-            if (queryResult != null && queryResult.Data != null && queryResult.Data.Length > 0 && queryResult.VisibleColums.Count > 0)
+            if (queryResult != null && queryResult.Rows != null && queryResult.Rows.Length > 0 && queryResult.VisibleColumns.Count() > 0)
             {
                 int entityColumnIndex = queryResult.Columns.IndexOf(c => c.IsEntity);
                 controller.ViewData[ViewDataKeys.EntityColumnIndex] = entityColumnIndex;
@@ -812,67 +823,6 @@ namespace Signum.Web
             return result;
         }
 
-        protected internal virtual List<FilterOptions> ExtractFilterOptions(HttpContextBase httpContext, object queryName)
-        {
-            List<FilterOptions> result = new List<FilterOptions>();
-
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            int index = 0;
-            string name;
-            object value;
-            string operation;
-            bool frozen;
-            Type type;
-            NameValueCollection parameters = httpContext.Request.Params;
-            var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
-            foreach (string nameKey in names)
-            {
-                if (!int.TryParse(nameKey.RemoveLeft(2), out index))
-                    continue;
-
-                name = parameters[nameKey];
-                value = parameters["val" + index.ToString()];
-                operation = parameters["sel" + index.ToString()];
-                type = queryDescription.Columns
-                           .SingleOrDefault(c => c.Name == name)
-                           .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
-                           .Type;
-                
-                if (type == typeof(bool))
-                {
-                    string[] vals = ((string)value).Split(',');
-                    value = (vals[0] == "true") ? true : false;
-                }
-                if (typeof(Lite).IsAssignableFrom(type))
-                {
-                    string[] vals = ((string)value).Split(';');
-                    int intValue;
-                    if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
-                    {
-                        Type liteType = Navigator.NameToType[vals[1]];
-                        if (typeof(Lite).IsAssignableFrom(liteType))
-                            liteType = Reflector.ExtractLite(liteType);
-                        value = Lite.Create(liteType, intValue);
-                    }
-                    else
-                        value = null;
-                }
-                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
-
-                frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
-
-                result.Add(new FilterOptions
-                {
-                    ColumnName = name,
-                    Column = queryDescription.Columns.Single(c => c.Name == name),
-                    Operation = filterOperation,
-                    Frozen = frozen,
-                    Value = value,
-                });
-            }
-            return result;
-        }
 
         protected internal virtual Type ResolveTypeFromUrlName(string typeUrlName)
         {
