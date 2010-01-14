@@ -55,6 +55,7 @@ namespace Signum.Entities
         {
             this.PropertyInfo = pi;
             Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true).OfType<ValidatorAttribute>().ToList();
+
             this.GetValue = getValue;
             this.SetValue = setValue;
         }
@@ -63,6 +64,7 @@ namespace Signum.Entities
         public readonly Action<object, object> SetValue;
         public readonly PropertyInfo PropertyInfo;
         public readonly List<ValidatorAttribute> Validators;
+        
         public bool DoNotValidate { get; set; }
         public bool SkipPropertyValidation { get; set; }
         public bool SkipExternalPropertyValidation { get; set; }

@@ -25,14 +25,11 @@ namespace Signum.Engine.DynamicQuery
         int ExecuteQueryCount(List<Filter> filters);
         Lite ExecuteUniqueEntity(List<Filter> filters, UniqueType uniqueType);
         string GetErrors();
-    }
-
-    public interface IAutoQuery
-    {
         Expression Expression { get; }
     }
 
-    public class AutoDynamicQuery<T>: DynamicQuery<T>, IAutoQuery
+    
+    public class AutoDynamicQuery<T>: DynamicQuery<T>
     {
         IQueryable<T> query;
         Dictionary<string, Meta> metas;
@@ -72,7 +69,7 @@ namespace Signum.Engine.DynamicQuery
             return query.WhereFilters(filters).SelectEntity().Unique(uniqueType); 
         }
 
-        public Expression Expression
+        public override Expression Expression
         {
             get { return query.Expression; }
         }
@@ -161,6 +158,11 @@ namespace Signum.Engine.DynamicQuery
             Type type = columns.Where(c => c.IsEntity).Single("There's no Entity column", "There's more than one Entity column").Type;
 
             return Reflector.ExtractLite(type).ThrowIfNullC("Entity column is not a Lite");
+        }
+
+        public virtual Expression Expression
+        {
+            get { return null; }
         }
     }
 
