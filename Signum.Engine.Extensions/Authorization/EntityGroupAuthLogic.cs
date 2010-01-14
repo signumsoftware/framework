@@ -315,7 +315,7 @@ namespace Signum.Engine.Authorization
             {
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    return base.ExecuteQuery(filters, limit);
+                    return base.ExecuteQuery(filters, orders, limit);
                 }
             }
 
