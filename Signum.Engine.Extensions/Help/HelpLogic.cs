@@ -30,10 +30,14 @@ namespace Signum.Engine.Help
     {       
         public static string HelpDirectory = "HelpXml";
         public static string BaseUrl = "Help";
-        static DirectedGraph<Assembly> Assemblies;
-        static List<HashSet<Assembly>> SortedAssemblies; 
         static Dictionary<Type, EntityHelp> TypeToHelpFiles;
         static Dictionary<string, Type> CleanNameToType;
+        public static List<EntityHelp> EntitiesHelp = new List<EntityHelp>();
+
+        public static Type ToType(string s)
+        {
+            return CleanNameToType[s];
+        }
 
         public static Type[] AllTypes()
         {
@@ -48,15 +52,7 @@ namespace Signum.Engine.Help
         public static EntityHelp GetEntityHelp(Type entityType)
         {
             return TypeToHelpFiles[entityType]; 
-
-            Dictionary<Assembly, string> dict = TypeToHelpFiles[entityType];
-
-            Dictionary<Assembly, EntityHelp> entities = dict.SelectDictionary(k => k, fn =>
-                EntityHelp.Load(entityType, Find(XDocument.Load(fn), entityType), fn));
-
-            return entities; 
         }
-
 
         static XElement Find(XDocument document, Type type)
         {
@@ -80,23 +76,7 @@ namespace Signum.Engine.Help
 
         static void Schema_Initialize(Schema sender)
         {
-            //Debugger.Break(); 
-
             Type[] types = sender.Tables.Select(t => t.Key).ToArray();
-
-            Type[] operations = (from t in types
-                                 from oi in OperationLogic.GetAllOperationInfos(t)
-                                 select oi.Key.GetType()).ToArray();
-            Type[] queries = (from o in DynamicQueryManager.Current.GetQueryNames()
-                              select o.GetType()).ToArray();
-
-            Dictionary<string, Assembly> assemblies =
-                 types.Concat(operations).Concat(queries).Select(q => q.Assembly).Distinct().ToDictionary(a => a.GetName().Name);
-
-            Assemblies = DirectedGraph<Assembly>.Generate(assemblies.Values, a =>
-                a.GetReferencedAssemblies().Select(an => assemblies.TryGetC(a.GetName().Name)).NotNull());
-
-            SortedAssemblies = Assemblies.CompilationOrderGroups().ToList();
 
             XmlSchemaSet schemas = new XmlSchemaSet();
             Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
@@ -104,10 +84,9 @@ namespace Signum.Engine.Help
 
             var typesDic = types.ToDictionary(a => a.FullName);
 
-
             if (!Directory.Exists(HelpDirectory))
             {
-                TypeToHelpFiles = new Dictionary<Type, Dictionary<Assembly, string>>();
+                TypeToHelpFiles =  new Dictionary<Type, EntityHelp>();
                 return;
             }
 
@@ -135,35 +114,37 @@ namespace Signum.Engine.Help
                                 select new
                                 {
                                     File = doc.File,
-                                    TargetAssembly = assemblies[doc.Document.Root.Attribute(_TargetAssembly).Value],
-                                    OverriderAssembly = doc.Document.Root.Attribute(_OverriderAssembly).TryCC(xa => assemblies[xa.Value]),
                                     Type = type,
                                 }).ToList();
 
             var duplicatedTypes = (from info in typeHelpInfo
-                                   group info by new { info.Type, info.OverriderAssembly } into g
+                                   group info by info.Type into g
                                    where g.Count() > 1
-                                   select "Type: {0} Assembly: {1} Files: {2}".Formato(
-                                    g.Key.Type.Name,
-                                    (g.Key.OverriderAssembly ?? g.Key.Type.Assembly).GetName().Name,
+                                   select "Type: {0} Files: {1}".Formato(
+                                    g.Key.Name,
                                     g.ToString(f => f.File.Substring(HelpDirectory.Length), ", "))).ToString("\r\n");
 
 
             if (duplicatedTypes.HasText())
                 throw new InvalidOperationException(Resources.ThereAreDuplicatedTypesInTheXMLHelp + duplicatedTypes.Indent(2));
 
-            TypeToHelpFiles = typeHelpInfo.AgGroupToDictionary(a => a.Type, gr => gr.ToDictionary(a => a.OverriderAssembly ?? a.TargetAssembly, a => a.File));
+            //tipo a entityHelp
+            TypeToHelpFiles = typeHelpInfo.ToDictionary(p=>p.Type,p=> GetEntityHelp(p.Type, p.File));
 
             CleanNameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => Reflector.CleanTypeName(t));
         }
 
+        static EntityHelp GetEntityHelp (Type type, string sourceFile)
+        {
+            XElement element = XDocument.Load(sourceFile).Element(_Help)
+                .Elements(_Namespace).Single(ns=>ns.Attribute(_Name).Value == type.Namespace)
+                .Elements(_Entity).Single(el=>el.Attribute(_Name).Value == type.Name);
+            return EntityHelp.Load(type, element, sourceFile);
+        }
+
         static string FileName(XDocument document)
         {
-            var target = document.Root.Attribute(_TargetAssembly);
-            var overrider = document.Root.Attribute(_OverriderAssembly);
-
-            if (overrider != null)
-                return "{0}-{1}.help".Formato(target.Value, overrider.Value);
+            var target = document.Root.Attribute(_Assembly);
 
             var onlyNameSpace = document.Root.Elements(_Namespace).Only();
             if (onlyNameSpace != null)
@@ -194,10 +175,10 @@ namespace Signum.Engine.Help
                     }
                 }
             }
-
-            IEnumerable<XDocument> mainHelp = (from targetAssembly in Assemblies
-                                               from nameSpace in SchemaTypes(targetAssembly).Select(a => a.Namespace).Distinct()
-                                               select Create(targetAssembly, nameSpace)).NotNull();
+           
+            IEnumerable<XDocument> mainHelp = (from type in Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy())
+                                               group type by new {type.Assembly, type.Namespace} into g
+                                               select Create(g.Key.Assembly, g.Key.Namespace, g.ToList())).NotNull();
 
             foreach (XDocument document in mainHelp)
             {
@@ -205,77 +186,32 @@ namespace Signum.Engine.Help
                 path = FileTools.AvailableFileName(path);
                 document.Save(path);
             }
-
-            IEnumerable<XDocument> overrides = (from overriderAssembly in Assemblies
-                                                from targetAssembly in Assemblies.IndirectlyRelatedTo(overriderAssembly)
-                                                select CreateOverride(targetAssembly, overriderAssembly)).NotNull().ToList();
-
-            foreach (XDocument document in overrides)
-            {
-                string path = Path.Combine(HelpDirectory, FileName(document));
-                path = FileTools.AvailableFileName(path);
-                document.Save(path);
-            }
         }
 
-        static IEnumerable<Type> SchemaTypes(Assembly targetAssembly)
+
+        public static XDocument Create(Assembly targetAssembly, string nameSpace, IEnumerable<Type> types)
         {
-            return Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy() && t.Assembly == targetAssembly);
-        }
-
-        public static XDocument Create(Assembly targetAssembly, string nameSpace)
-        {
-            HashSet<Assembly> forbiddenAssemblies = Assemblies.InverseRelatedTo(targetAssembly).ToHashSet();
-
-            var types = (from t in SchemaTypes(targetAssembly)
-                         where t.Namespace == nameSpace
-                         select EntityHelp.Create(t, targetAssembly, forbiddenAssemblies)).ToList();
-
             XDocument result = new XDocument(
                  new XDeclaration("1.0", "utf-8", "yes"),
                  new XElement(_Help,
-                    new XAttribute(_TargetAssembly, targetAssembly.GetName().Name),
+                    new XAttribute(_Assembly, targetAssembly.GetName().Name),
                     new XAttribute(_Language, CultureInfo.CurrentCulture.Name),
                     new XElement(_Namespace, new XAttribute(_Name, nameSpace),
-                        types.Select(h => h.ToXml())
+                        types.Select(t => EntityHelp.Create(t).ToXml())
                     )) //Namespace
                 );//Document
 
-            return result;
-        }
-
-        public static XDocument CreateOverride(Assembly targetAssembly, Assembly overriderAssembly)
-        {
-            var types = (from t in SchemaTypes(targetAssembly)
-                         let h = EntityHelp.CreateOverride(t, targetAssembly, overriderAssembly)
-                         where h.HasHelp()
-                         select h).ToList();
-
-            if (types.Count == 0)
-                return null;
-
-            XDocument result = new XDocument(
-                 new XDeclaration("1.0", "utf-8", "yes"),
-                 new XElement(_Help,
-                    new XAttribute(_TargetAssembly, targetAssembly.GetName().Name),
-                    new XAttribute(_OverriderAssembly, overriderAssembly.GetName().Name),
-                    new XAttribute(_Language, CultureInfo.CurrentCulture.Name),
-                    types.GroupBy(h => h.Type.Namespace)
-                    .Select(g => new XElement(_Namespace, new XAttribute(_Name, g.Key), 
-                        g.Select(h => h.ToXml())
-                    )) //Namespace
-                ));//Document
+            foreach (Type type in types)
+                EntitiesHelp.Add(EntityHelp.Create(type));
 
             return result;
         }
 
         static readonly XName _Help = "Help";
-        static readonly XName _TargetAssembly = "TargetAssembly";
-        static readonly XName _OverriderAssembly = "OverriderAssembly";
+        static readonly XName _Assembly = "Assembly";
         static readonly XName _Language = "Language";
         static readonly XName _Name = "Name";
         static readonly XName _Entity = "Entity";
         static readonly XName _Namespace = "Namespace";
-
     }
 }

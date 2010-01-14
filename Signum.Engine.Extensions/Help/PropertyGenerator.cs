@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Help
 {

@@ -31,6 +31,7 @@
                               <xs:simpleContent>
                                 <xs:extension base="xs:string">
                                   <xs:attribute name="Name" type="xs:string" use="required" />
+                                  <xs:attribute name="Info" type="xs:string" use="required" />
                                 </xs:extension>
                               </xs:simpleContent>
                             </xs:complexType>
@@ -77,8 +78,7 @@
           </xs:complexType>
         </xs:element>
       </xs:sequence>
-      <xs:attribute name="TargetAssembly" type="xs:string" use="required" />
-      <xs:attribute name="OverriderAssembly" type="xs:string" use="optional" />
+      <xs:attribute name="Assembly" type="xs:string" use="required" />
       <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>

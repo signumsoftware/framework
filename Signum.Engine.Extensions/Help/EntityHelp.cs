@@ -10,6 +10,8 @@ using Signum.Entities.Operations;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
+using Signum.Entities.DynamicQuery;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.Help
 {
@@ -18,82 +20,43 @@ namespace Signum.Engine.Help
         public Type Type;
         public string Description;
         public Dictionary<string, PropertyHelp> Properties;
-        public Dictionary<Enum, OperationHelp> Operations;
-        public Dictionary<object, QueryHelp> Queries;
+        public Dictionary<Enum, string> Operations;
+        public Dictionary<object, string> Queries;
+        public string FileName;
 
-        public bool HasHelp()
-        {
-            return Properties != null && Operations != null && _Queries != null;
-        }
-
-        public static EntityHelp Create(Type t, Assembly targetAssembly, HashSet<Assembly> forbiddenAssemblies)
+        public static EntityHelp Create(Type t)
         {
             return new EntityHelp
             {
                 Type = t,
+                Description = "Type description for {0} here".Formato(t.NiceName()),
                 Properties = PropertyGenerator.GenerateProperties(t)
                             .ToDictionary(
                                 kvp=>kvp.Key, 
-                                kvp=>new PropertyHelp(kvp.Value, HelpGenerator.GetPropertyHelp(t, kvp.Value), null)) 
-                            .Collapse(),
+                                kvp=>new PropertyHelp(HelpGenerator.GetPropertyHelp(t, kvp.Value))),
 
                 Operations = OperationLogic.GetAllOperationInfos(t)
-                            .Where(oi => !forbiddenAssemblies.Contains(oi.Key.GetType().Assembly))
                             .ToDictionary(
                                 oi => oi.Key,
-                                oi => new OperationHelp(oi, HelpGenerator.GetOperationHelp(t, oi), null))
-                            .Collapse(),
+                                oi => HelpGenerator.GetOperationHelp(t, oi)),
 
                 Queries = DynamicQueryManager.Current.GetQueryNames(t)
-                           .Distinct(kvp => kvp.Key)
-                           .Where(qn => !forbiddenAssemblies.Contains(qn.Key.GetType().Assembly))
                            .ToDictionary(
                                 kvp => kvp.Key, 
-                                kvp => new QueryHelp(kvp.Value, HelpGenerator.GetQueryHelp(t, kvp.Value), null))
-                           .Collapse()
+                                kvp => HelpGenerator.GetQueryHelp(t, kvp.Value))
             };
         }
-
-        public static EntityHelp CreateOverride(Type t, Assembly targetAssembly, Assembly overriderAssembly)
-        {
-            return new EntityHelp
-            {
-                Type = t,
-
-                Properties = null,
-
-                Operations = OperationLogic.GetAllOperationInfos(t)
-                            .Where(oi => oi.Key.GetType().Assembly == overriderAssembly)
-                             .ToDictionary(
-                                oi => oi.Key,
-                                oi => new OperationHelp(oi, HelpGenerator.GetOperationHelp(t, oi), null))
-                            .Collapse(),
-
-                Queries = DynamicQueryManager.Current.GetQueryNames(t)
-                           .Distinct(kvp => kvp.Key)
-                           .Where(oi => oi.Key.GetType().Assembly == overriderAssembly)
-                            .ToDictionary(
-                                kvp => kvp.Key,
-                                kvp => new QueryHelp(kvp.Value, HelpGenerator.GetQueryHelp(t, kvp.Value), null))
-                           .Collapse()
-            };
-        }
-
-     
-       
-
-    
-
+        
         public XElement ToXml()
         {
             return new XElement(_Entity, new XAttribute(_Name, Type.Name),
-                       Description.TryCC(d=>new XElement(_Description, d)),
-                       Properties.TryCC(ps => new XElement(_Properties,
-                         ps.Select(p => new XElement(_Property, new XAttribute(_Name, p.Key), p.Value.Description)))),
-                       Operations.TryCC(os => new XElement(_Operations,
-                         os.Select(o => new XElement(_Operation, new XAttribute(_Key, o.Key), o.Value)))),
-                       Queries.TryCC(qs => new XElement(_Queries,
-                         qs.Select(q => new XElement(_Query, new XAttribute(_Key, q.Key), q.Value))))
+                       new XElement(_Description, Description),
+                       Properties.Map(ps => ps.Count == 0 ? null : new XElement(_Properties,
+                         ps.Select(p => new XElement(_Property, new XAttribute(_Name, p.Key), new XAttribute(_Info,p.Value.TechnicalDescription), p.Value.UserDescription )))),
+                       Operations.Map(os => os.Count == 0 ? null : new XElement(_Operations,
+                         os.Select(o => new XElement(_Operation, new XAttribute(_Key, OperationDN.UniqueKey(o.Key)), o.Value)))),
+                       Queries.Map(qs => qs.Count == 0 ? null : new XElement(_Queries,
+                         qs.Select(q => new XElement(_Query, new XAttribute(_Key, QueryUtils.GetQueryName(q.Key)), q.Value))))
                    );
         }
 
@@ -107,84 +70,50 @@ namespace Signum.Engine.Help
         static readonly XName _Operation = "Operation";
         static readonly XName _Queries = "Queries";
         static readonly XName _Query = "Query";
+        static readonly XName _Info = "Info";
 
         public static EntityHelp Load(Type type, XElement element, string sourceFile)
         {
             var properties = PropertyGenerator.GenerateProperties(type);
-            var operations = OperationLogic.GetAllOperationInfos(type).ToDictionary(oi => oi.Key.ToString());
-            var queries = DynamicQueryManager.Current.GetQueryNames(type).ToDictionary(oi => oi.Key.ToString());
+            var operations = OperationLogic.GetAllOperationInfos(type).ToDictionary(oi => OperationDN.UniqueKey(oi.Key));
+            var queries = DynamicQueryManager.Current.GetQueryNames(type).ToDictionary(oi => QueryUtils.GetQueryName(oi.Key));
 
             return new EntityHelp
             {
                 Type = type,
-
+                FileName = sourceFile,
                 Description = element.Element(_Description).TryCC(d => d.Value),
 
                 Properties = element.Element(_Properties).TryCC(ps => ps.Elements(_Property).ToDictionary(
                     p => p.Attribute(_Name).Value,
-                    p => new PropertyHelp(properties[p.Attribute(_Name).Value], p.Value, sourceFile))),
+                    p => new PropertyHelp(p.Attribute(_Info).Value,p.Value))),
 
                 Operations = element.Element(_Operations).TryCC(os => os.Elements(_Operation).ToDictionary(
-                    o => operations[o.Attribute(_Name).Value].Key,
-                    o => new OperationHelp(operations[o.Attribute(_Name).Value], o.Value, sourceFile))),
+                    o => operations[o.Attribute(_Key).Value].Key,
+                    o => o.Value)),
 
                 Queries = element.Element(_Queries).TryCC(qs => qs.Elements(_Query).ToDictionary(
-                    q => queries[q.Attribute(_Name).Value].Key,
-                    q => new QueryHelp(queries[q.Attribute(_Name).Value].Value, q.Value, sourceFile))),
+                    q => queries[q.Attribute(_Key).Value].Key,
+                    q => q.Value)),
             };
         }
     }
 
-    static class EntityHelpExtensions
-    {
-        public static Dictionary<K, V> Collapse<K, V>(this Dictionary<K, V> collection)
-        {
-            if (collection.Count == 0)
-                return null;
-            return collection;
-        }
-    }
-
-
     public class PropertyHelp
     {
-        public PropertyHelp(PropertyInfo propertyInfo, string description, string sourceFile)
+
+        public PropertyHelp(string technicalDescription)
         {
-            this.PropertyInfo = propertyInfo;
-            this.Description = description; 
-            this.SourceFile = sourceFile; 
+            this.TechnicalDescription = technicalDescription;
         }
 
-        public string SourceFile {get;private set;}
-        public PropertyInfo PropertyInfo { get; private set; }
-        public string Description { get; private set; }
-    }
-
-    public class OperationHelp
-    {
-        public OperationHelp(OperationInfo operationInfo, string description, string sourceFile)
+        public PropertyHelp(string technicalDescription, string userDescription)
         {
-            this.OperationInfo = operationInfo;
-            this.Description = description; 
-            this.SourceFile = sourceFile; 
+            this.TechnicalDescription = technicalDescription;
+            this.UserDescription = userDescription;
         }
 
-        public string SourceFile {get;private set;}
-        public OperationInfo OperationInfo { get; private set; }
-        public string Description { get; private set; }
-    }
-
-    public class QueryHelp
-    {
-        public QueryHelp(IDynamicQuery dynamicQuery, string description, string sourceFile)
-        {
-            this.DynamicQuery = dynamicQuery;
-            this.Description = description; 
-            this.SourceFile = sourceFile; 
-        }
-
-        public string SourceFile {get;private set;}
-        public IDynamicQuery DynamicQuery { get; private set; }
-        public string Description { get; private set; }
+        public string TechnicalDescription { get; private set; }
+        public string UserDescription { get; private set; }
     }
 }

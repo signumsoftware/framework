@@ -21,7 +21,7 @@ namespace Signum.Engine.Help
     {
         public static string GetPropertyHelp(Type type, PropertyInfo pi)
         {
-            string validations = pi.GetCustomAttributes(false).OfType<ValidatorAttribute>().CommaAnd(v => v.HelpMessage);
+            string validations = Validator.GetPropertyPack(pi.DeclaringType, pi.Name).Validators.CommaAnd(v => v.HelpMessage);
 
             if (validations.HasText())
                 validations = Resources.Should + validations;
