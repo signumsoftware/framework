@@ -33,7 +33,7 @@
                <%=Html.Button(Html.GlobalName("btnAddFilter"), "+", "AddFilter('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
                <%=Html.Button(Html.GlobalName("btnClearAllFilters"), "Eliminar Filtros", "ClearAllFilters('{0}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? ""), "", new Dictionary<string, object>())%>
            </div>
-    <% List<FilterOptions> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
+    <% List<FilterOption> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
   
     <div id="<%=Html.GlobalName("filters-list")%>" class="filters-list">
         <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>">No se han especificado filtros</span>
@@ -48,7 +48,7 @@
             <tbody>
                 <% for (int i=0; i<filterOptions.Count; i++)
                 {
-                    FilterOptions filter = filterOptions[i];
+                    FilterOption filter = filterOptions[i];
                     Html.NewFilter(filter, i);            
                 } 
                 %>

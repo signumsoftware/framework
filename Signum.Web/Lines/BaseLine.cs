@@ -31,7 +31,7 @@ namespace Signum.Web
             set { visible = value; }
         }
 
-        public bool hideIfNull = true;
+        public bool hideIfNull = false;
         public bool HideIfNull
         {
             get { return hideIfNull; }

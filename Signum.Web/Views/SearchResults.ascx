@@ -17,11 +17,11 @@
 //"</script>"
 %>
 
-<%  QueryResult queryResult = (QueryResult)ViewData[ViewDataKeys.Results];
+<%  ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
     int? EntityColumnIndex = (int?)ViewData[ViewDataKeys.EntityColumnIndex];
     bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
     Dictionary<int, bool> colVisibility = new Dictionary<int, bool>();
-    for (int i = 0; i < queryResult.Columns.Count; i++)
+    for (int i = 0; i < queryResult.Columns.Length; i++)
     {
         colVisibility.Add(i, queryResult.Columns[i].Visible);
     }
@@ -38,7 +38,7 @@
             <th></th>
             <%} %>
             <%
-                foreach(Column c in queryResult.VisibleColums) 
+                foreach (Column c in queryResult.VisibleColumns) 
                 {
                     %>
                     <th><%= c.DisplayName %></th>
@@ -50,13 +50,13 @@
     <tbody>
     <%
         List<Action<HtmlHelper, object>> formatters = (List<Action<HtmlHelper, object>>)ViewData[ViewDataKeys.Formatters];
-        for (int row=0; row<queryResult.Data.Length; row++)
+        for (int row=0; row<queryResult.Rows.Length; row++)
         {
             %>
             <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=Html.GlobalName("trResults_" + row.ToString())%>" name="<%=Html.GlobalName("trResults_" + row.ToString())%>">
                 <% Lite entityField = null;
                    if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
-                       entityField = (Lite)queryResult.Data[row][EntityColumnIndex.Value];
+                       entityField = (Lite)queryResult.Rows[row][EntityColumnIndex.Value];
                    
                        if (allowMultiple.HasValue)
                        {
@@ -88,12 +88,12 @@
                 <%
                    
                     
-                    for (int col = 0; col < queryResult.Data[row].Length; col++)
+                    for (int col = 0; col < queryResult.Columns.Length; col++)
                 {
                     if (colVisibility[col])
                     {
                         %>
-                        <td id="<%=Html.GlobalName("row"+row+"td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Data[row][col]);%></td>
+                        <td id="<%=Html.GlobalName("row"+row+"td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Rows[row][col]);%></td>
                         <%
                     }
                 }
