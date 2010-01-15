@@ -60,13 +60,14 @@ namespace Signum.Engine.Operations
                                                {
                                                    Entity = lo.ToLite(),
                                                    lo.Id,
-                                                   Target_nf_ = lo.Target,
+                                                   Target = lo.Target,
                                                    Operation = lo.Operation.ToLite(),
                                                    User = lo.User.ToLite(),
                                                    lo.Start,
                                                    lo.End,
                                                    lo.Exception
-                                               }).ToDynamic();
+                                               }).ToDynamic()
+                                               .Column(a => a.Target, c => c.Filterable = false); 
             }
         }
 
