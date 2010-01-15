@@ -21,7 +21,7 @@ namespace Signum.Utilities
                     Node<T> itemNode = new Node<T>(item);
                     T parent = getParent(item);
                     Node<T> parentNode = parent != null ? createNode(parent) : top;
-                    parentNode.Childs.Add(itemNode);
+                    parentNode.Children.Add(itemNode);
                     return itemNode;
                 });
 
@@ -30,7 +30,7 @@ namespace Signum.Utilities
                 createNode(item);
             }
 
-            return top.Childs;
+            return top.Children;
         }
 
         public static List<Node<T>> ToTreeS<T>(IEnumerable<T> collection, Func<T, T?> getParent)
@@ -47,7 +47,7 @@ namespace Signum.Utilities
                 Node<T> itemNode = new Node<T>(item);
                 T? parent = getParent(item);
                 Node<T> parentNode = parent != null ? createNode(parent.Value) : top;
-                parentNode.Childs.Add(itemNode);
+                parentNode.Children.Add(itemNode);
                 return itemNode;
             });
 
@@ -56,10 +56,10 @@ namespace Signum.Utilities
                 createNode(item);
             }
 
-            return top.Childs;
+            return top.Children;
         }
 
-        public static IEnumerable<T> BreathFirst<T>(T root, Func<T, IEnumerable<T>> childs)
+        public static IEnumerable<T> BreathFirst<T>(T root, Func<T, IEnumerable<T>> children)
         {
             Stack<T> stack = new Stack<T>();
             stack.Push(root);
@@ -67,30 +67,30 @@ namespace Signum.Utilities
             {
                 T elem = stack.Pop();
                 yield return elem;
-                stack.PushRange(childs(elem));
+                stack.PushRange(children(elem));
             }
         }
 
         public static List<Node<S>> SelectTree<T, S>(List<Node<T>> roots, Func<T, S> selector)
         {
-            return roots.Select(n => new Node<S>(selector(n.Value)) { Childs = SelectTree(n.Childs, selector) }).ToList();
+            return roots.Select(n => new Node<S>(selector(n.Value)) { Children = SelectTree(n.Children, selector) }).ToList();
         }
     }
 
     public class Node<T>
     {
         public T Value { get; set; }
-        public List<Node<T>> Childs { get; set; }
+        public List<Node<T>> Children { get; set; }
 
         public Node(T value)
         {
             Value = value;
-            Childs = new List<Node<T>>();
+            Children = new List<Node<T>>();
         }
 
         public Node()
         {
-            Childs = new List<Node<T>>();
+            Children = new List<Node<T>>();
         }
     }
 }
