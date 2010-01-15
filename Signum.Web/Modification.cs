@@ -328,14 +328,18 @@ namespace Signum.Web
         public EntityModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, controlID)
         {
-            string sfInfo = (string)formValues[TypeContext.Compose(controlID, EntityBaseKeys.Info)];
-            EntityInfo entityInfo = EntityInfo.FromFormValue(sfInfo);
+            if (!formValues.ContainsKey(TypeContext.Compose(controlID, EntityBaseKeys.Info)))
+                AvoidChange = true;
+            else
+            {
+                string sfInfo = (string)formValues[TypeContext.Compose(controlID, EntityBaseKeys.Info)];
+                EntityInfo entityInfo = EntityInfo.FromFormValue(sfInfo);
 
-            RuntimeType = entityInfo.RuntimeType;
-            IsNew = entityInfo.IsNew;
-            EntityId = entityInfo.IdOrNull;
-            TicksLastChange = entityInfo.Ticks;
-
+                RuntimeType = entityInfo.RuntimeType;
+                IsNew = entityInfo.IsNew;
+                EntityId = entityInfo.IdOrNull;
+                TicksLastChange = entityInfo.Ticks;
+            }
             //if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
             //{
             //    string runtimeTypeName = (string)formValues[TypeContext.Compose(controlID, TypeContext.RuntimeType)];
@@ -550,6 +554,7 @@ namespace Signum.Web
         public Type CleanType;
         public EntityModification EntityModification;
         public bool IsNew;
+        public bool AvoidChange = false; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
 
         public LiteModification(Type staticType, string controlID)
             : base(staticType, controlID) 
@@ -558,14 +563,18 @@ namespace Signum.Web
         public LiteModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
             : base(staticType, controlID)
         {
-            string sfInfo = (string)formValues[TypeContext.Compose(controlID, EntityBaseKeys.Info)];
-            EntityInfo entityInfo = EntityInfo.FromFormValue(sfInfo);
+            if (!formValues.ContainsKey(TypeContext.Compose(controlID, EntityBaseKeys.Info)))
+                AvoidChange = true;
+            else
+            {
+                string sfInfo = (string)formValues[TypeContext.Compose(controlID, EntityBaseKeys.Info)];
+                EntityInfo entityInfo = EntityInfo.FromFormValue(sfInfo);
 
-            RuntimeType = entityInfo.RuntimeType;
-            IsNew = entityInfo.IsNew;
-            EntityId = entityInfo.IdOrNull;
-            TicksLastChange = entityInfo.Ticks;
-
+                RuntimeType = entityInfo.RuntimeType;
+                IsNew = entityInfo.IsNew;
+                EntityId = entityInfo.IdOrNull;
+                TicksLastChange = entityInfo.Ticks;
+            }
             //if (formValues.ContainsKey(TypeContext.Compose(controlID, TypeContext.RuntimeType)))
             //{
             //    string runtimeTypeName = (string)formValues[TypeContext.Compose(controlID, TypeContext.RuntimeType)];
@@ -593,10 +602,13 @@ namespace Signum.Web
 
         public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
         {
+            Lite lite = (Lite)obj;
+
+            if (AvoidChange)
+                return Lite.Create(CleanType, (IdentifiableEntity)EntityModification.ApplyChanges(controller, Database.Retrieve(lite), onFinish));
+
             if (RuntimeType == null)
                 return null;
-
-            Lite lite = (Lite)obj;
 
             if (IsNew)
             {

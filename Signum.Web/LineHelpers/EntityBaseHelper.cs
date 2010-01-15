@@ -37,9 +37,9 @@ namespace Signum.Web
             return null;
         }
 
-        public static bool RequiresLoadAll<T>(HtmlHelper helper, bool isIdentifiable, bool isLite, T value)
+        public static bool RequiresLoadAll<T>(HtmlHelper helper, bool isIdentifiable, bool isLite, T value, string prefix)
         {
-            return (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null) ||
+            return (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null && helper.GetChangeTicks(prefix) > 0) ||
                     (isIdentifiable && value != null && (value as IIdentifiable).IsNew == true) ||
                     (isLite && value != null && (value as Lite).IdOrNull == null);
         }

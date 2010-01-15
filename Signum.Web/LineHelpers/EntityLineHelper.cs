@@ -48,7 +48,7 @@ namespace Signum.Web
 
                 sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
 
-                if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value))
+                if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
                     sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
                 else if (value != null)
                     sb.AppendLine(helper.Div(TypeContext.Compose(prefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));

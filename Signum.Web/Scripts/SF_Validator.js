@@ -203,7 +203,7 @@ var PartialValidator = function(_pvalOptions) {
         requestData += qp(sfPrefix, this.valOptions.prefix);
 
         if (formChildren.filter(this.pf(sfInfo)).length == 0)
-            requestData += qp(this.valOptions.prefix + sfInfo, new EntityInfo(this.valOptions.prefix).createValue(this.valOptions.type, this.valOptions.type, '', 0, 1, ''));
+            requestData += qp(this.valOptions.prefix + sfInfo, new EntityInfo(this.valOptions.prefix).createValue(this.valOptions.type, this.valOptions.type, '', 'i', 'n', ''));
 
         if (!empty(this.valOptions.prefixToIgnore))
             requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
@@ -268,7 +268,7 @@ var PartialValidator = function(_pvalOptions) {
                 else {
                     var infoField = info.find();
                     if (infoField.length == 0)
-                        requestData += qp(this.valOptions.prefix + sfInfo, info.createValue(this.valOptions.type, this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 0, 1, ''));
+                        requestData += qp(this.valOptions.prefix + sfInfo, info.createValue(this.valOptions.type, this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'i', 'n', ''));
                     else {
                         var infoVal = infoField.val();
                         var index = infoVal.indexOf(";");

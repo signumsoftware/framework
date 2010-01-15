@@ -70,4 +70,27 @@ namespace Signum.Web
             };
         }
     }
+
+    public static class JsValidator
+    {
+        public static JsRenderer ValidatePartial(JsValidatorOptions options)
+        {
+            return new JsRenderer(() => "ValidatePartial({0})".Formato(options.ToJS()));
+        }
+
+        public static JsRenderer TrySavePartial(JsValidatorOptions options)
+        {
+            return new JsRenderer(() => "TrySavePartial({0})".Formato(options.ToJS()));
+        }
+
+        public static JsRenderer Validate(JsValidatorOptions options)
+        {
+            return new JsRenderer(() => "Validate({0})".Formato(options.ToJS()));
+        }
+
+        public static JsRenderer TrySave(JsValidatorOptions options)
+        {
+            return new JsRenderer(() => "TrySave({0})".Formato(options.ToJS()));
+        }
+    }
 }

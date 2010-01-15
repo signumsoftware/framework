@@ -39,9 +39,9 @@ namespace Signum.Web
 
     public static class JSnippetExtensions
     {
-        //public static T Extend<T>(this T firt, T second) where T:IJSnippet
-        //{
-        //    return new JSnippet(() => "$.extend({0},{1})".Formato(firt.ToJS(), second.ToJS())); 
-        //}
+        public static JsRenderer SurroundWithFunction(this JsRenderer js)
+        {
+            return new JsRenderer(() => "function(){ " + js.ToJS() + " }");
+        }
     }
 }

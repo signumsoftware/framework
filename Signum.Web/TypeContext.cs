@@ -178,7 +178,7 @@ namespace Signum.Web
                     //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
                 }
                 helper.ViewContext.HttpContext.Response.Write(
-                        helper.HiddenSFInfo(helper.GlobalPrefixedName(""), entityInfo));
+                    helper.HiddenSFInfo(helper.GlobalName(tc.Name), entityInfo));
             }
             //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them
             if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
@@ -188,6 +188,8 @@ namespace Signum.Web
         public static TypeContext<S> TypeContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
             TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
+            helper.ViewData[ViewDataKeys.WriteSFInfo] = true;
+            WriteRuntimeAndId(helper, typeContext);
             return typeContext;
         }
     }

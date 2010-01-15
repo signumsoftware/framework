@@ -103,7 +103,7 @@ namespace Signum.Web
             {
                 sb.AppendLine(helper.HiddenSFInfo(indexedPrefix, new EntityInfo<T>(cleanStaticType, value) { Ticks = ticks }));
 
-                if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value))
+                if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, indexedPrefix))
                     sb.AppendLine(ListBaseHelper.RenderItemContentInEntityDiv(helper, indexedPrefix, typeContext, value, index, settings, cleanRuntimeType, cleanStaticType, isLite, false));
 
                 else if (value != null)

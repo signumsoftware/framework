@@ -58,8 +58,8 @@ namespace Signum.Web
                 staticTypeName,
                 RuntimeTypeStr,
                 IdOrNull.TryToString(""),
-                IsEmbedded ? "1" : "0",
-                IsNew ? "1" : "0",
+                IsEmbedded ? "e" : "i",
+                IsNew ? "n" : "o",
                 Ticks.TryToString("")
                 );
         }
@@ -88,7 +88,7 @@ namespace Signum.Web
                 StaticType = staticType, 
                 RuntimeType = runtimeType,
                 IdOrNull = (parts[2].HasText()) ? int.Parse(parts[2]) : (int?)null,
-                IsNew = parts[4]=="1" ? true : false,
+                IsNew = parts[4]=="n" ? true : false,
                 Ticks = (parts[5].HasText()) ? long.Parse(parts[5]) : (long?)null
             };
         }

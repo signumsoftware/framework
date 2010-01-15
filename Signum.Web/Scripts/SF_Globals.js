@@ -87,23 +87,37 @@ var EntityInfo = function(_prefix) {
         this.find().val(this.toValue(array));
         return this;
     };
-    this.staticType = function(val) {
-        return this.getSet(this._staticType, val);
+    this.staticType = function() {
+        return this.getSet(this._staticType, null);
     };
-    this.runtimeType = function(val) {
-        return this.getSet(this._runtimeType, val);
+    this.runtimeType = function() {
+        return this.getSet(this._runtimeType, null);
     };
-    this.id = function(val) {
-        return this.getSet(this._id, val);
+    this.id = function() {
+        return this.getSet(this._id, null);
+    };
+    this.isNew = function() {
+        return this.getSet(this._isNew, null);
     };
     this.isEmbedded = function() {
         return this.getSet(this._isEmbedded, null);
     };
-    this.isNew = function(val) {
-        return this.getSet(this._isNew, val);
-    };
     this.ticks = function(val) {
         return this.getSet(this._ticks, val);
+    };
+    this.setEntity = function(runtimeType, id) {
+        this.getSet(this._runtimeType, runtimeType);
+        if (empty(id))
+            this.getSet(this._id, '').getSet(this._isNew, 'n');
+        else
+            this.getSet(this._id, id).getSet(this._isNew, 'o');
+        return this;
+    };
+    this.removeEntity = function() {
+        this.getSet(this._runtimeType, '');
+        this.getSet(this._id, '');
+        this.getSet(this._isNew, 'o');
+        return this;
     };
     this.createValue = function(staticType, runtimeType, id, isEmbedded, isNew, ticks) {
         var array = new Array();

@@ -51,10 +51,10 @@ EBaseLine.prototype = {
     },
 
     remove: function() {
-    log("EBaseLine remove");
+        log("EBaseLine remove");
         $(this.pf(sfToStr)).val("").removeClass(sfInputErrorClass);
         $(this.pf(sfLink)).val("").html("").removeClass(sfInputErrorClass);
-        this.entityInfo().runtimeType('').id('').isNew(0);
+        this.entityInfo().removeEntity();
 
         this.removeSpecific();
         this.fireOnEntityChanged(false);
@@ -78,7 +78,7 @@ EBaseLine.prototype = {
         log("EBaseLine create");
         var _self = this;
         var type = this.getRuntimeType(function(type) {
-            _self.typedCreate($.extend(_viewOptions, { type: type }));
+            _self.typedCreate($.extend({ type: type }, _viewOptions));
         });
     },
 
@@ -93,7 +93,7 @@ EBaseLine.prototype = {
         log("EBaseLine find");
         var _self = this;
         var type = this.getRuntimeType(function(type) {
-            _self.typedFind($.extend(_findOptions, { queryUrlName: type }));
+            _self.typedFind($.extend({ queryUrlName: type }, _findOptions));
         });
     },
 
@@ -109,7 +109,7 @@ EBaseLine.prototype = {
         var extraParams = new Object();
 
         //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
-        if (EntityInfoFor(this.options.prefix).isEmbedded()) {
+        if (EntityInfoFor(this.options.prefix).isEmbedded() == "e") {
             var pathInfo = FullPathNodesSelector(this.options.prefix);
             for (var i = 0; i < pathInfo.length; i++) {
                 var node = pathInfo[i];
@@ -208,7 +208,7 @@ var ELine = function(_elineOptions) {
 
     this.newEntity = function(clonedElements, runtimeType) {
         var info = this.entityInfo();
-        info.runtimeType(runtimeType).isNew(1).find()
+        info.setEntity(runtimeType, '').find()
             .after(hiddenDiv(this.options.prefix + sfEntity, ''));
         $(this.pf(sfEntity)).append(clonedElements);
     };
@@ -238,7 +238,7 @@ var ELine = function(_elineOptions) {
         if (selectedItems == null || selectedItems.length != 1)
             throw "No item or more than one item was returned from Find Window";
         var info = this.entityInfo();
-        info.id(selectedItems[0].id).runtimeType(selectedItems[0].type);
+        info.setEntity(selectedItems[0].type, selectedItems[0].id);
         if ($(this.pf(sfEntity)).length == 0)
             info.find().after(hiddenDiv(this.options.prefix + sfEntity, ''));
         $(this.pf(sfToStr)).val(''); //Clean
@@ -295,7 +295,7 @@ var EDLine = function(_edlineOptions) {
     };
 
     this.newEntity = function(runtimeType) {
-        this.entityInfo().runtimeType(runtimeType).isNew(1);
+        this.entityInfo().setEntity(runtimeType, '');
     };
 
     this.onCreated = function(runtimeType) {
@@ -308,7 +308,7 @@ var EDLine = function(_edlineOptions) {
     log("EDLine find");
         var _self = this;
         var type = this.getRuntimeType(function(type) {
-            _self.typedFind($.extend(_findOptions, { queryUrlName: type }), _viewOptions);
+            _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
         });
     };
 
@@ -333,7 +333,7 @@ var EDLine = function(_edlineOptions) {
         log("EDLine onFindingOk");
         if (selectedItems == null || selectedItems.length != 1)
             throw "No item or more than one item was returned from Find Window";
-        this.entityInfo().id(selectedItems[0].id).runtimeType(selectedItems[0].type);
+        this.entityInfo().setEntity(selectedItems[0].type, selectedItems[0].id);
 
         //View result in the detailDiv
         var viewOptions = this.viewOptionsForCreating($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }));
@@ -383,7 +383,7 @@ var EList = function(_elistOptions) {
         var info = EntityInfoFor(itemPrefix);
         if (info.find().length == 0)
             info = EntityInfoFor(this.options.prefix); //If new item, there will be no sfInfo for it. Use list sfInfo instead
-        if (info.isEmbedded()) {
+        if (info.isEmbedded() == "e") {
             var pathInfo = FullPathNodesSelector(itemPrefix);
             for (var i = 0; i < pathInfo.length; i++) {
                 var node = pathInfo[i];
@@ -477,7 +477,7 @@ var EList = function(_elistOptions) {
     this.newListItem = function(clonedElements, runtimeType, itemPrefix) {
         log("EList newListItem");
         var listInfo = this.entityInfo();
-        var itemInfoValue = new EntityInfo(itemPrefix).createValue(listInfo.staticType(), runtimeType, '', listInfo.isEmbedded(), 1, '');
+        var itemInfoValue = new EntityInfo(itemPrefix).createValue(listInfo.staticType(), runtimeType, '', listInfo.isEmbedded(), 'n', '');
         listInfo.find().after(hiddenInput(itemPrefix + sfInfo, itemInfoValue))
                 .after(hiddenDiv(itemPrefix + sfEntity, ''));
         $('#' + itemPrefix + sfEntity).append(clonedElements);
@@ -550,7 +550,7 @@ var EList = function(_elistOptions) {
             var itemPrefix = this.options.prefix + "_" + lastIndex;
 
             this.newListItem('', item.type, itemPrefix);
-            this.itemEntityInfo(itemPrefix).isNew(0).id(item.id);
+            this.itemEntityInfo(itemPrefix).setEntity(item.type, item.id);
             $('#' + itemPrefix + sfToStr).html(item.toStr);
 
             this.fireOnEntityChanged();
@@ -678,7 +678,7 @@ var ERep = function(_erepOptions) {
     this.newRepItem = function(newHtml, runtimeType, itemPrefix) {
         log("ERep newRepItem");
         var listInfo = this.entityInfo();
-        var itemInfoValue = this.itemEntityInfo(itemPrefix).createValue(listInfo.staticType(), runtimeType, '', listInfo.isEmbedded(), 1, '');
+        var itemInfoValue = this.itemEntityInfo(itemPrefix).createValue(listInfo.staticType(), runtimeType, '', listInfo.isEmbedded(), 'n', '');
         $(this.pf(sfItemsContainer)).append("\n" +
         "<div id='" + itemPrefix + sfRepeaterItem + "' name='" + itemPrefix + sfRepeaterItem + "' class='repeaterElement'>\n" +
         "<a id='" + itemPrefix + "_btnRemove' title='" + this.options.removeItemLinkText + "' href=\"javascript:ERepOnRemoving(new ERep({prefix:'" + this.options.prefix + "', onEntityChanged:"+(empty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged)+"}), '" + itemPrefix + "');\" class='lineButton remove'>" + this.options.removeItemLinkText + "</a>\n" +
@@ -705,7 +705,7 @@ var ERep = function(_erepOptions) {
     log("ERep find");
         var _self = this;
         var type = this.getRuntimeType(function(type) {
-            _self.typedFind($.extend(_findOptions, { queryUrlName: type }), _viewOptions);
+            _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
         });
     };
     
@@ -743,7 +743,7 @@ var ERep = function(_erepOptions) {
             var itemPrefix = this.options.prefix + "_" + lastIndex;
 
             this.newRepItem('', item.type, itemPrefix);
-            this.itemEntityInfo(itemPrefix).isNew(0).id(item.id);
+            this.itemEntityInfo(itemPrefix).setEntity(item.type, item.id);
 
             //View results in the repeater
             var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }), itemPrefix);
@@ -882,7 +882,7 @@ var EDList = function(_edlistOptions) {
         log("EDList find");
         var _self = this;
         var type = this.getRuntimeType(function(type) {
-            _self.typedFind($.extend(_findOptions, { queryUrlName: type }), _viewOptions);
+            _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
         });
     };
 
@@ -917,7 +917,7 @@ var EDList = function(_edlistOptions) {
             var itemPrefix = this.options.prefix + "_" + lastIndex;
 
             this.newListItem('', item.type, itemPrefix);
-            this.itemEntityInfo(itemPrefix).isNew(0).id(item.id);
+            this.itemEntityInfo(itemPrefix).setEntity(item.type, item.id);
             $('#' + itemPrefix + sfToStr).html(item.toStr);
 
             //View result in the detailDiv
@@ -997,7 +997,7 @@ var ECombo = function(_ecomboOptions) {
         var oldId = info.id();
         if (empty(oldId))
             oldId = ""; //Avoid setting null value
-        info.id(newId).runtimeType(newRuntimeType).isNew(0);
+        info.setEntity(newRuntimeType, newId);
         $(this.pf(sfEntity)).html(''); //Clean
         this.fireOnEntityChanged(newEntity);
     };
@@ -1105,8 +1105,7 @@ function AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, has
     var prefix = extendedControlName.substr(0, extendedControlName.indexOf(sfToStr));
     var _index = newIdAndType.indexOf("_");
     var info = EntityInfoFor(prefix);
-    info.id(newIdAndType.substr(0, _index))
-        .runtimeType(newIdAndType.substr(_index + 1, newIdAndType.length))
+    info.setEntity(newIdAndType.substr(_index + 1, newIdAndType.length), newIdAndType.substr(0, _index))
         .ticks(new Date().getTime());
         
     //$('#' + prefix + sfId).val(newIdAndType.substr(0, _index));
