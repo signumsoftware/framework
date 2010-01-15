@@ -57,7 +57,7 @@ namespace Signum.Engine.DynamicQuery
             return ResultTable.Create(result, columns.Where(DynamicQuery.ColumnIsAllowed));
         }
 
-        public DynamicQuery<T> ChangeColumn<S>(Expression<Func<T, S>> column, Action<Column> change)
+        public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<Column> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
             Column col = columns.Single(a => a.Name == member.Name);

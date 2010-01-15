@@ -29,6 +29,8 @@ namespace Signum.Engine.Maps
             set { this.silentMode = value; }
         }
 
+        public SchemaSettings Settings { get; private set; }
+
         Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
         public Dictionary<Type, Table> Tables
         {
@@ -238,8 +240,10 @@ namespace Signum.Engine.Maps
         }
         #endregion
 
-        public Schema()
+        internal Schema(SchemaSettings settings)
         {
+            this.Settings = settings;
+
             Generating += Administrator.RemoveAllScript;
             Generating += Administrator.ShrinkDataBase;
             Generating += Administrator.CreateTablesScript;

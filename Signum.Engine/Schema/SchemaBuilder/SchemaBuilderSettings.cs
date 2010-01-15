@@ -13,15 +13,15 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Maps
 {
-    public class SchemaBuilderSettings
+    public class SchemaSettings
     {
-        class SchemaBuilderTypeSettings
+        class SchemaTypeSettings
         {
             public Attribute[] TypeAttributes;
             public Dictionary<string, Attribute[]> FieldAttributes = new Dictionary<string, Attribute[]>(); 
         }
 
-        Dictionary<Type, SchemaBuilderTypeSettings> types = new Dictionary<Type,SchemaBuilderTypeSettings>();
+        Dictionary<Type, SchemaTypeSettings> types = new Dictionary<Type,SchemaTypeSettings>();
 
         internal static Dictionary<Type, SqlDbType> TypeValues = new Dictionary<Type, SqlDbType>
         {

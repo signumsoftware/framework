@@ -18,20 +18,30 @@ namespace Signum.Engine.Maps
 {
     public class SchemaBuilder
     {
-        public SchemaBuilderSettings Settings { get; private set; }
-
-        public SchemaBuilder() : this(new SchemaBuilderSettings()) { }
-
-        public SchemaBuilder(SchemaBuilderSettings settings)
+        Schema schema;
+        public SchemaSettings Settings
         {
-            this.Settings = settings;
+            get { return schema.Settings; }
         }
 
-        Schema schema = new Schema();
+        public SchemaBuilder()
+        {
+            schema = new Schema(new SchemaSettings());
+        }
+
+        protected SchemaBuilder(Schema schema)
+        {
+            this.schema = schema; 
+        }
+
+        public SchemaBuilder(SchemaSettings settings)
+        {
+            schema = new Schema(settings);
+        }
+       
         public Schema Schema
         {
             get { return schema; }
-            set { schema = value; }
         }
 
         public Table Include<T>() where T : IdentifiableEntity
@@ -380,9 +390,8 @@ namespace Signum.Engine.Maps
 
     internal class ViewBuilder : SchemaBuilder
     {
-        public ViewBuilder(Schema schema)
+        public ViewBuilder(Schema schema) : base(schema)
         {
-            this.Schema = schema;
         }
 
         public override Table Include(Type type)

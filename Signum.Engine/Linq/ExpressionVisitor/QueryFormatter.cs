@@ -50,7 +50,8 @@ namespace Signum.Engine.Linq
             Type clrType = value.Type.UnNullify();
             if (clrType.IsEnum)
                 clrType = typeof(int);
-            SqlDbType sqlDbType = SchemaBuilderSettings.TypeValues.TryGetS(clrType) ?? SqlDbType.Variant;
+
+            SqlDbType sqlDbType = SchemaSettings.TypeValues.TryGetS(clrType) ?? SqlDbType.Variant;
 
             Expression valExpression = value.Type.IsNullable() ? 
                 Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
