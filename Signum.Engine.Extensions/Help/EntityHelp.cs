@@ -20,6 +20,7 @@ namespace Signum.Engine.Help
         public Type Type;
         public string Description;
         public Dictionary<string, PropertyHelp> Properties;
+        public Dictionary<string, Dictionary<string, PropertyHelp>> PropertiesRelations;
         public Dictionary<Enum, string> Operations;
         public Dictionary<object, string> Queries;
         public string FileName;
@@ -29,11 +30,12 @@ namespace Signum.Engine.Help
             return new EntityHelp
             {
                 Type = t,
-                Description = "Type description for {0} here".Formato(t.NiceName()),
+                //Description = "Type description for {0} here".Formato(t.NiceName()),
+                Description = "",
                 Properties = PropertyGenerator.GenerateProperties(t)
                             .ToDictionary(
                                 kvp=>kvp.Key, 
-                                kvp=>new PropertyHelp(HelpGenerator.GetPropertyHelp(t, kvp.Value))),
+                                kvp=>new PropertyHelp(kvp.Value, HelpGenerator.GetPropertyHelp(t, kvp.Value))),
 
                 Operations = OperationLogic.GetAllOperationInfos(t)
                             .ToDictionary(
@@ -44,18 +46,18 @@ namespace Signum.Engine.Help
                            .ToDictionary(
                                 kvp => kvp.Key, 
                                 kvp => HelpGenerator.GetQueryHelp(t, kvp.Value))
-            };
+            };            
         }
         
         public XElement ToXml()
         {
             return new XElement(_Entity, new XAttribute(_Name, Type.Name),
                        new XElement(_Description, Description),
-                       Properties.Map(ps => ps.Count == 0 ? null : new XElement(_Properties,
-                         ps.Select(p => new XElement(_Property, new XAttribute(_Name, p.Key), new XAttribute(_Info,p.Value.TechnicalDescription), p.Value.UserDescription )))),
-                       Operations.Map(os => os.Count == 0 ? null : new XElement(_Operations,
+                       Properties.Map(ps => ps == null || ps.Count == 0 ? null : new XElement(_Properties,
+                         ps.Select(p => new XElement(_Property, new XAttribute(_Name, p.Key), new XAttribute(_Info,p.Value.Info), p.Value.UserDescription )))),
+                       Operations.Map(os => os == null || os.Count == 0 ? null : new XElement(_Operations,
                          os.Select(o => new XElement(_Operation, new XAttribute(_Key, OperationDN.UniqueKey(o.Key)), o.Value)))),
-                       Queries.Map(qs => qs.Count == 0 ? null : new XElement(_Queries,
+                       Queries.Map(qs => qs == null || qs.Count == 0 ? null : new XElement(_Queries,
                          qs.Select(q => new XElement(_Query, new XAttribute(_Key, QueryUtils.GetQueryName(q.Key)), q.Value))))
                    );
         }
@@ -86,7 +88,7 @@ namespace Signum.Engine.Help
 
                 Properties = element.Element(_Properties).TryCC(ps => ps.Elements(_Property).ToDictionary(
                     p => p.Attribute(_Name).Value,
-                    p => new PropertyHelp(p.Attribute(_Info).Value,p.Value))),
+                    p => new PropertyHelp(properties[p.Attribute(_Name).Value], p.Attribute(_Info).Value,p.Value))),
 
                 Operations = element.Element(_Operations).TryCC(os => os.Elements(_Operation).ToDictionary(
                     o => operations[o.Attribute(_Key).Value].Key,
@@ -101,19 +103,21 @@ namespace Signum.Engine.Help
 
     public class PropertyHelp
     {
-
-        public PropertyHelp(string technicalDescription)
+        public PropertyHelp(PropertyInfo propertyInfo, string info)
         {
-            this.TechnicalDescription = technicalDescription;
+            this.PropertyInfo = propertyInfo;
+            this.Info = info;
         }
 
-        public PropertyHelp(string technicalDescription, string userDescription)
+        public PropertyHelp(PropertyInfo propertyInfo, string info, string userDescription)
         {
-            this.TechnicalDescription = technicalDescription;
+            this.PropertyInfo = propertyInfo;
+            this.Info = info;
             this.UserDescription = userDescription;
         }
 
-        public string TechnicalDescription { get; private set; }
-        public string UserDescription { get; private set; }
+        public string Info { get; private set; }
+        public string UserDescription { get; set; }
+        public PropertyInfo PropertyInfo { get; private set; }
     }
 }

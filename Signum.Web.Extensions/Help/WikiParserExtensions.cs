@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using System.Text.RegularExpressions;
+using Signum.Engine.Help;
+using Signum.Utilities;
 
 namespace Signum.Web.Extensions
 {
@@ -17,7 +19,10 @@ namespace Signum.Web.Extensions
                 m = Regex.Match(content, "\\[(?<link>[^\\]]*)\\]");
                 if (m.Success)
                 {
-                    content = content.Replace(m.Value, "<a href=\"Help/" + m.Groups["link"] + "\">" + m.Groups["link"] + "</a>");
+                    string s = m.Groups["link"].ToString();
+                    string typeName = (s.EndsWith("DN") ? s.RemoveRight(2) : s);
+                    Type t = HelpLogic.ToType(typeName);
+                    content = content.Replace(m.Value, "<a href=\"Help/" + typeName + "\">" + t.NiceName() + "</a>");
                 }
             }
             while (m.Success);

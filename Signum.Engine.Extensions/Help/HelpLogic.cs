@@ -32,8 +32,7 @@ namespace Signum.Engine.Help
         public static string BaseUrl = "Help";
         static Dictionary<Type, EntityHelp> TypeToHelpFiles;
         static Dictionary<string, Type> CleanNameToType;
-        public static List<EntityHelp> EntitiesHelp = new List<EntityHelp>();
-
+        
         public static Type ToType(string s)
         {
             return CleanNameToType[s];
@@ -54,10 +53,19 @@ namespace Signum.Engine.Help
             return TypeToHelpFiles[entityType]; 
         }
 
+        public static void SaveEntityHelp(EntityHelp eh)
+        {
+            XDocument document = XDocument.Load(eh.FileName);
+            XElement element = Find(document, eh.Type);
+            element.ReplaceWith(eh.ToXml());
+            document.Save(eh.FileName);
+        }
+
         static XElement Find(XDocument document, Type type)
         {
             return document
-                .Elements(_Namespace).Single(ns => ns.Attribute(_Namespace).Value == type.Namespace)
+                .Element(_Help)
+                .Elements(_Namespace).Single(ns => ns.Attribute(_Name).Value == type.Namespace)
                 .Elements(_Entity).Single(a => a.Attribute(_Name).Value == type.Name);
         }
 
@@ -200,9 +208,6 @@ namespace Signum.Engine.Help
                         types.Select(t => EntityHelp.Create(t).ToXml())
                     )) //Namespace
                 );//Document
-
-            foreach (Type type in types)
-                EntitiesHelp.Add(EntityHelp.Create(type));
 
             return result;
         }
