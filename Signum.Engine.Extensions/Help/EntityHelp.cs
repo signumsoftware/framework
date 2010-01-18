@@ -119,5 +119,10 @@ namespace Signum.Engine.Help
         public string Info { get; private set; }
         public string UserDescription { get; set; }
         public PropertyInfo PropertyInfo { get; private set; }
+
+        public override string ToString()
+        {
+            return PropertyInfo.NiceName() + " | " + this.Info + (this.UserDescription.HasText() ? " | " + this.UserDescription : "");
+        }
     }
 }

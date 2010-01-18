@@ -53,6 +53,11 @@ namespace Signum.Engine.Help
             return TypeToHelpFiles[entityType]; 
         }
 
+        public static List<KeyValuePair<Type,EntityHelp>> GetEntitiesHelp()
+        {
+            return TypeToHelpFiles.ToList();
+        }
+
         public static void SaveEntityHelp(EntityHelp eh)
         {
             XDocument document = XDocument.Load(eh.FileName);
@@ -80,6 +85,11 @@ namespace Signum.Engine.Help
             {
                 sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_Initialize); 
             }
+        }
+
+        public static void LoadDocument(EntityHelp eh)
+        {
+            TypeToHelpFiles[eh.Type] = GetEntityHelp(eh.Type, eh.FileName);
         }
 
         static void Schema_Initialize(Schema sender)

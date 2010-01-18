@@ -29,4 +29,46 @@ namespace Signum.Web.Extensions
             return content;
         }
     }
+
+    public static class FormatHtmlExtensions
+    {
+        public static string AddHtml(this HtmlHelper html, string content, string firstTag, string lastTag, string regex)
+        {
+            //Do not add tags inside the content of other tags
+
+            Regex rTags = new Regex("<[^>]*>[^<]*</[^>]>");
+
+            var matchesTags = rTags.Matches(content);
+
+
+            Regex r = new Regex(regex, RegexOptions.IgnoreCase);
+            
+            int lastIndex = 0;
+            StringBuilder sb = new StringBuilder(content.Length);
+
+            foreach (Match m in r.Matches(content)){
+                bool skip = false;
+                foreach (Match mt in matchesTags)
+                {
+                    if (mt.Index <= m.Index && mt.Index + mt.Length > m.Index + m.Length)
+                    {
+                        skip = true;
+                        break;
+                    }
+                }
+                if (skip)
+                    sb.Append(m.Value);
+                else
+                {
+                    sb.Append(content.Substring(lastIndex, m.Index - lastIndex));
+                    sb.Append(firstTag);
+                    sb.Append(m.Value);
+                }
+                sb.Append(lastTag);
+                lastIndex = m.Index+m.Length;
+            }
+            sb.Append(content.Substring(lastIndex, content.Length-lastIndex));
+            return sb.ToString();
+        }
+    }
 }
