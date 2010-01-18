@@ -150,14 +150,19 @@ namespace Signum.Entities.DynamicQuery
         {
             Index = index;
             Name = mi.Name;
-            
+           
             Type = mi.ReturningType();
             Meta = meta;
 
             if (typeof(IdentifiableEntity).IsInstanceOfType(Type))
                 throw new InvalidOperationException("{0} column returns subtype of IdentifiableEntity, use a Lite instead!!".Formato(mi.MemberName()));
 
-            TwinProperty = (meta as CleanMeta).TryCC(cm => (PropertyInfo)cm.Member);
+            if (meta is CleanMeta)
+                TwinProperty = (PropertyInfo)((CleanMeta)meta).Member;
+            else if (mi is PropertyInfo)
+                DisplayName = ((PropertyInfo)mi).NiceName();
+            else
+                DisplayName = mi.Name.NiceName(); 
 
             Sortable = true;
             if (IsEntity)

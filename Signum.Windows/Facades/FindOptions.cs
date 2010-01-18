@@ -57,6 +57,8 @@ namespace Signum.Windows
         public bool ShowHeader { get; set; }
         public bool ShowFooter { get; set; }
 
+        public string WindowTitle { get; set; }
+
         internal abstract SearchMode GetSearchMode();
     }
 

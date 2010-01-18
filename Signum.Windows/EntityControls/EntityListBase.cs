@@ -6,6 +6,7 @@ using System.Windows;
 using System.Collections;
 using Signum.Utilities.Reflection;
 using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -20,11 +21,17 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty EntitiesTypeProperty =
-          DependencyProperty.Register("EntitiesType", typeof(Type), typeof(EntityListBase), new UIPropertyMetadata((d, e) => ((EntityListBase)d).Type = ReflectionTools.CollectionType((Type)e.NewValue)));
+          DependencyProperty.Register("EntitiesType", typeof(Type), typeof(EntityListBase), new UIPropertyMetadata(null, (d, e) => ((EntityListBase)d).EntitiesTypeChanged((Type)e.NewValue)));
+
         public Type EntitiesType
         {
             get { return (Type)GetValue(EntitiesTypeProperty); }
             set { SetValue(EntitiesTypeProperty, value); }
+        }
+
+        private void EntitiesTypeChanged(Type type)
+        {
+ 	        Type = ReflectionTools.CollectionType(type).ThrowIfNullC("EntitiesType must be a collection type");
         }
 
         public new event Func<object> Finding;

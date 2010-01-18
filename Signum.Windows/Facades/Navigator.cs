@@ -502,7 +502,7 @@ namespace Signum.Windows
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,
                 ShowHeader = options.ShowHeader,
-                Title = SearchTitle(options.QueryName)
+                Title = options.WindowTitle ?? SearchTitle(options.QueryName)
             };
 
             if (TaskViewWindow != null)
