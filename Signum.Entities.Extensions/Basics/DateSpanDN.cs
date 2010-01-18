@@ -14,7 +14,7 @@ namespace Signum.Entities.Extensions.Basics
         public int Years
         {
             get { return years; }
-            set  { SetToStr(ref years, value, () => Years); }
+            set { SetToStr(ref years, value, () => Years); }
         }
 
         int months;
@@ -44,9 +44,9 @@ namespace Signum.Entities.Extensions.Basics
         //}
 
 
-        static Expression<Func<DateSpanDN,DateTime, DateTime>> AddExpression =
+        static Expression<Func<DateSpanDN, DateTime, DateTime>> AddExpression =
              (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
-        public  DateTime Add( DateTime date)
+        public DateTime Add(DateTime date)
         {
             return AddExpression.Invoke(this, date);
         }
@@ -59,6 +59,19 @@ namespace Signum.Entities.Extensions.Basics
         public override string ToString()
         {
             return ToDateSpan().ToString();
+        }
+
+        public DateSpanDN Clonar()
+        {
+
+            DateSpanDN ds = new DateSpanDN
+            {
+                Days = this.days,
+                Months = this.months,
+                Years = this.Years,
+            };
+
+            return ds;
         }
     }
 }
