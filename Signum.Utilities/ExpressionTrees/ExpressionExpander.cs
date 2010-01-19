@@ -89,7 +89,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return Visit(Expression.Invoke(lambda, m.Arguments.Skip(1).Select(a => Visit(a)).ToArray()));
             }
 
-            LambdaExpression lambdaExpression = ExtractAndClean(m.Method);
+            LambdaExpression lambdaExpression = ExtractAndClean(m.Object.TryCC(c => c.Type), m.Method);
             if(lambdaExpression != null)
             {
                 Expression[] args =  m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
@@ -106,7 +106,7 @@ namespace Signum.Utilities.ExpressionTrees
             if(pi == null)
                  return base.VisitMemberAccess(m);
 
-            LambdaExpression lambda = ExtractAndClean(pi); 
+            LambdaExpression lambda = ExtractAndClean(m.Expression.TryCC(c => c.Type), pi);
             if(lambda ==null)
                 return base.VisitMemberAccess(m);
 
@@ -116,13 +116,24 @@ namespace Signum.Utilities.ExpressionTrees
                 return Visit(Expression.Invoke(lambda, Visit(m.Expression)));
         }
 
-        static LambdaExpression ExtractAndClean(MemberInfo mi)
+        static LambdaExpression ExtractAndClean(Type decType, MemberInfo mi)
         {
-            FieldInfo fi = mi.DeclaringType.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (fi == null)
-                return null;
+            FieldInfo fi;
+            if(decType != null)
+            {
+                fi = decType.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (fi != null)
+                    return fi.GetValue(null) as LambdaExpression;
 
-            return fi.GetValue(null) as LambdaExpression;
+                if (decType == mi.DeclaringType)
+                    return null; 
+            }
+
+            fi = mi.DeclaringType.GetField(mi.Name + "Expression", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            if (fi != null)
+                return fi.GetValue(null) as LambdaExpression;
+
+            return null;
         }
 	}
 }
