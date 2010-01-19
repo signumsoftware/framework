@@ -102,7 +102,7 @@ namespace Signum.Engine.Help
 
         static string TypeLink(this Type type)
         {
-            return "[" + type.Name + "]";
+            return "[" + Reflector.CleanTypeName(type) + "]";
         }
 
         static string NaturalTypeDescription(Type type)

@@ -20,9 +20,11 @@ namespace Signum.Web.Extensions
                 if (m.Success)
                 {
                     string s = m.Groups["link"].ToString();
-                    string typeName = (s.EndsWith("DN") ? s.RemoveRight(2) : s);
-                    Type t = HelpLogic.ToType(typeName);
-                    content = content.Replace(m.Value, "<a href=\"Help/" + typeName + "\">" + t.NiceName() + "</a>");
+                    Type t = HelpLogic.ToType(s, false);
+                    content = content.Replace(m.Value, "<a {0} href=\"{1}\">{2}</a>".Formato(
+                        t != null ? "" : "class=\"unavailable\"",
+                        t != null ? HelpLogic.EntityUrl(t) : s,
+                        t != null ? t.NiceName() : s));
                 }
             }
             while (m.Success);

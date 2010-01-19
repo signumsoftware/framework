@@ -33,9 +33,16 @@ namespace Signum.Engine.Help
         static Dictionary<Type, EntityHelp> TypeToHelpFiles;
         static Dictionary<string, Type> CleanNameToType;
         
-        public static Type ToType(string s)
+        public static Type ToType(string s) {
+            return ToType(s, true);
+        }
+
+        public static Type ToType(string s, bool throwException)
         {
-            return CleanNameToType[s];
+            if (!throwException && CleanNameToType.ContainsKey(s) || throwException)
+                return CleanNameToType[s];
+            else
+                return null;
         }
 
         public static Type[] AllTypes()
