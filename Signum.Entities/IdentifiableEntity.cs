@@ -108,7 +108,7 @@ namespace Signum.Entities
         {
             return id == null ?
                 base.GetHashCode() :
-                GetType().GetHashCode() ^ id.Value;
+                GetType().FullName.GetHashCode() ^ id.Value;
         }
     }
 

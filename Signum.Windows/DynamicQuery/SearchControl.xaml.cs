@@ -266,7 +266,7 @@ namespace Signum.Windows
             adorners = OrderOptions.Select((o, i) => new ColumnOrderInfo(
                 gvResults.Columns.Select(c => (GridViewColumnHeader)c.Header).Single(c => ((Column)c.Tag).Name == o.ColumnName),
                 o.OrderType,
-                i + 1)).ToDictionary(a => ((Column)((GridViewColumnHeader)a.Header).Tag).Name);
+                i)).ToDictionary(a => ((Column)((GridViewColumnHeader)a.Header).Tag).Name);
 
 
             if (GetCustomMenuItems != null)
@@ -498,7 +498,7 @@ namespace Signum.Windows
             }
             else
             {
-                adorners.Add(column.Name, new ColumnOrderInfo(header, OrderType.Ascending, adorners.Count + 1));
+                adorners.Add(column.Name, new ColumnOrderInfo(header, OrderType.Ascending, adorners.Count));
             }
 
             Search();

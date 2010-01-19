@@ -28,11 +28,22 @@ namespace Signum.Windows.DynamicQuery
             AdornerLayer.GetAdornerLayer(Header).Update();
         }
 
-        public ColumnOrderInfo(GridViewColumnHeader header,  OrderType orderType, int? order)
+        public ColumnOrderInfo(GridViewColumnHeader header, OrderType orderType, int order)
         {
             Header = header;
             Adorner = new SortAdorner(header, orderType, order);
-            AdornerLayer.GetAdornerLayer(Header).Add(Adorner);
+            if (Header.IsVisible)
+                CreateAdorner(null, new DependencyPropertyChangedEventArgs());
+            else
+                Header.IsVisibleChanged += CreateAdorner;
+        }
+
+        void CreateAdorner(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            Header.IsVisibleChanged -= CreateAdorner;
+            
+            AdornerLayer layer = AdornerLayer.GetAdornerLayer(Header);
+            layer.Add(Adorner);
         }
 
         public Order ToOrder()
@@ -43,13 +54,15 @@ namespace Signum.Windows.DynamicQuery
 
     internal class SortAdorner : Adorner
     {
-        private readonly static Geometry Ascending = Geometry.Parse("M 0,5 L 8,5 L 4,0 Z");
-        private readonly static Geometry Descending = Geometry.Parse("M 0,0 L 8,0 L 4,5 Z");
+        private readonly static Geometry Ascending = Geometry.Parse("M 0,5 L 10,5 L 5,0 Z");
+        private readonly static Geometry Descending = Geometry.Parse("M 0,0 L 10,0 L 5,5 Z");
       
         public OrderType OrderType { get; set; }
-        public int? Order { get; private set; }
+        public int Order { get; private set; }
 
-        public SortAdorner(UIElement element, OrderType orderType, int? order)
+        static Brush[] brushes = new[] { Brushes.Navy, Brushes.RoyalBlue, Brushes.DeepSkyBlue, Brushes.LightSkyBlue };
+
+        public SortAdorner(UIElement element, OrderType orderType, int order)
             : base(element)
         {
             OrderType = orderType;
@@ -60,14 +73,11 @@ namespace Signum.Windows.DynamicQuery
         {
             base.OnRender(drawingContext);
 
-            if (AdornedElement.RenderSize.Width < 20)
-                return;
 
-            drawingContext.PushTransform(new TranslateTransform(AdornedElement.RenderSize.Width - 12, (AdornedElement.RenderSize.Height - 5) / 2));
+            drawingContext.PushTransform(new TranslateTransform(AdornedElement.RenderSize.Width / 2 - 5, 1));
 
-            drawingContext.DrawGeometry(Brushes.DarkBlue, null, OrderType == OrderType.Ascending ? Ascending : Descending);
-            if (Order.HasValue)
-                drawingContext.DrawText(new FormattedText(Order.Value.ToString(), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("MS Sans Serif"), 9, Brushes.DarkBlue), new Point(-8, -5));
+            drawingContext.DrawGeometry(brushes[Order % brushes.Length], null, OrderType == OrderType.Ascending ? Ascending : Descending);
+
             drawingContext.Pop();
         }
     }
