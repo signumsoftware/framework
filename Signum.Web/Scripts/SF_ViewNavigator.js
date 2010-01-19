@@ -66,8 +66,10 @@ ViewNavigator.prototype = {
             throw "Type must be specified to Navigator on createSave mode";
         if (this.isLoaded())
             return this.showViewSave();
-        else 
-            throw "containerDiv must be pre-loaded or html must be supplied to viewSave function";
+        else {
+            var self = this;
+            this.callServer(function(controlHtml) { self.showViewSave(controlHtml); });
+        }
     },
 
     createSave: function() {
@@ -109,9 +111,12 @@ ViewNavigator.prototype = {
         $('#' + this.viewOptions.prefix + sfBtnOk).unbind('click').click(function() { self.onViewOk(); });
         $('#' + this.viewOptions.prefix + sfBtnCancel).unbind('click').click(function() { self.onViewCancel(); });
     },
-    
-    showViewSave: function() {
-    log("ViewNavigator showViewSave");
+
+    showViewSave: function(newHtml) {
+        log("ViewNavigator showViewSave");
+        if (!empty(newHtml))
+            $('#' + this.viewOptions.containerDiv).html(newHtml);
+
         new popup().show(this.viewOptions.containerDiv);
         var self = this;
         $('#' + this.viewOptions.prefix + sfBtnOk).unbind('click').click(function() { self.onCreateSave(); });
