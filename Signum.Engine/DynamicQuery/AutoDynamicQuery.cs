@@ -30,12 +30,11 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(List<Filter> filters, List<Order> orders, int? limit)
         {
-            IQueryable<T> result = query.WhereFilters(filters).OrderBy(orders);
+            IQueryable<T> result = query.WhereFilters(filters).OrderBy(orders).TryTake(limit);
 
-            if (limit != null)
-                result = result.Take(limit.Value);
+            List<T> list = result.ToList(); 
 
-            return ToQueryResult(result);
+            return ToQueryResult(list);
         }
 
         public override int ExecuteQueryCount(List<Filter> filters)

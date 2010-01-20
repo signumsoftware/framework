@@ -25,7 +25,9 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(List<Filter> filters, List<Order> orders, int? limit)
         {
-            return ToQueryResult(execute(filters, orders, limit));
+            List<T> list = execute(filters, orders, limit).ToList();
+
+            return ToQueryResult(list);
         }
 
         public override int ExecuteQueryCount(List<Filter> filters)

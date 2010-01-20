@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
             return new QueryDescription { Columns = columns.Where(DynamicQuery.ColumnIsAllowed).ToList() };
         }
        
-        protected ResultTable ToQueryResult(IEnumerable<T> result)
+        protected ResultTable ToQueryResult(List<T> result)
         {
             return ResultTable.Create(result, columns.Where(DynamicQuery.ColumnIsAllowed));
         }
