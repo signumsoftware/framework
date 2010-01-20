@@ -62,11 +62,11 @@ ViewNavigator.prototype = {
             $('#divASustituir').after(hiddenDiv(this.viewOptions.containerDiv, ''));
         if (html != null)
             $('#' + this.viewOptions.containerDiv).html(html);
-        if (empty(this.viewOptions.type) && EntityInfoFor(this.viewOptions.prefix).find().length == 0)
-            throw "Type must be specified to Navigator on createSave mode";
         if (this.isLoaded())
             return this.showViewSave();
         else {
+            if (empty(this.viewOptions.type) && EntityInfoFor(this.viewOptions.prefix).find().length == 0)
+                throw "Type must be specified to Navigator on viewSave mode";
             var self = this;
             this.callServer(function(controlHtml) { self.showViewSave(controlHtml); });
         }

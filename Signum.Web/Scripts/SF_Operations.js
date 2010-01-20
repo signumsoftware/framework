@@ -94,7 +94,8 @@ OperationManager.prototype = {
         $("form").append(hiddenInput('sfRuntimeType', info.runtimeType()) +
             hiddenInput('sfId', info.id()) +
             hiddenInput('isLite', this.options.isLite) +
-            hiddenInput('sfOperationFullKey', this.options.operationKey));
+            hiddenInput('sfOperationFullKey', this.options.operationKey) +
+            hiddenInput(sfPrefix, this.options.prefix));
         document.forms[0].action = this.options.controllerUrl;
         document.forms[0].submit();
     }
