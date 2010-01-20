@@ -100,6 +100,13 @@ namespace Signum.Windows
             this.QueryName = queryName;
         }
 
+        public ExploreOptions(object queryName, string columnName, object value)
+        {
+            this.QueryName = queryName;
+            this.FilterOptions.Add(new FilterOption(columnName, value));
+            this.NavigateIfOne = true;
+        }
+
         public EventHandler Closed { get; set; }
 
         public bool NavigateIfOne { get; set; }
