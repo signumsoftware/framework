@@ -154,7 +154,7 @@ namespace Signum.Web.Operations
                 {
                     OperationKey = EnumDN.UniqueKey(oi.Key),
                     IsLite = oi.Lite,
-                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
                     ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
                     //Type = ident.GetType().Name,
                     //Id = ident.IdOrNull,
@@ -168,7 +168,7 @@ namespace Signum.Web.Operations
                 {
                     OperationKey = EnumDN.UniqueKey(oi.Key),
                     IsLite = oi.Lite,
-                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
                     ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
                     ReturnType = oi.ReturnType,
                     //OperationLogic.ServiceGetConstructorOperationInfos(ident.GetType()).Single(oinfo => oinfo == oi).
@@ -184,7 +184,7 @@ namespace Signum.Web.Operations
                 {
                     OperationKey = EnumDN.UniqueKey(oi.Key),
                     IsLite = oi.Lite,
-                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
                     ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
                     //Type = ident.GetType().Name,
                     //Id = ident.IdOrNull,
@@ -211,7 +211,7 @@ namespace Signum.Web.Operations
                 {
                     OperationKey = EnumDN.UniqueKey(oi.Key),
                     IsLite = oi.Lite,
-                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
                     ControllerUrl = os.TryCC(set => set.OnServerClickPost),
                     //Type = ident.GetType().Name,
                     //Id = ident.IdOrNull
@@ -227,7 +227,7 @@ namespace Signum.Web.Operations
                 {
                     OperationKey = EnumDN.UniqueKey(oi.Key),
                     IsLite = oi.Lite,
-                    Prefix = httpContext.Request.Params["prefix"] ?? "",
+                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
                     ControllerUrl = os.TryCC(set => set.OnServerClickPost),
                     ReturnType = oi.ReturnType,
                     //Type = ident.GetType().Name,
