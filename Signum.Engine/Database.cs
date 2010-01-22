@@ -301,6 +301,12 @@ namespace Signum.Engine
             return new Query<T>(DbQueryProvider.Single);
         }
 
+        public static IQueryable<T> Query<T, S>(this S entity, Expression<Func<S, IEnumerable<T>>> collection)
+            where S:IdentifiableEntity
+        {
+            return Database.Query<S>().Where(s => s == entity).SelectMany(collection); 
+        }
+
         public static IQueryable<T> View<T>()
             where T : IView
         {
