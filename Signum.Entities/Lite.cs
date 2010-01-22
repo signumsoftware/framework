@@ -250,7 +250,7 @@ namespace Signum.Entities
         {
             return this.id == null ?
                 UntypedEntityOrNull.GetHashCode() ^ MagicMask :
-                this.RuntimeType.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
+                this.RuntimeType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
         }
     }
 
