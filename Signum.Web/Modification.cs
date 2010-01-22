@@ -361,7 +361,7 @@ namespace Signum.Web
             Fill(formValues, interval);
         }
 
-        private void Fill(SortedList<string, object> formValues, Interval<int> interval)
+        protected void Fill(SortedList<string, object> formValues, Interval<int> interval)
         {
             int propertyStart = ControlID.Length + TypeContext.Separator.Length;
 
