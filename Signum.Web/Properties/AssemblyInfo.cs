@@ -35,10 +35,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.3.2-vsdoc.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.3.2.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.3.2.min-vsdoc.js", "text/javascript")]
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.3.2.min.js", "text/javascript")]
+[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.4.min.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftAjax.debug.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftAjax.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftMvcAjax.debug.js", "text/javascript")]

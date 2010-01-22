@@ -198,10 +198,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\jquery-1.3.2-vsdoc.js" />
-    <EmbeddedResource Include="Scripts\jquery-1.3.2.js" />
-    <EmbeddedResource Include="Scripts\jquery-1.3.2.min-vsdoc.js" />
-    <EmbeddedResource Include="Scripts\jquery-1.3.2.min.js" />
     <EmbeddedResource Include="Scripts\MicrosoftAjax.debug.js" />
     <EmbeddedResource Include="Scripts\MicrosoftAjax.js" />
     <EmbeddedResource Include="Scripts\MicrosoftMvcAjax.debug.js" />
@@ -214,6 +210,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
+    <Content Include="Scripts\jquery-1.4.min.js" />
     <EmbeddedResource Include="Scripts\SF_FindNavigator.js" />
     <EmbeddedResource Include="Scripts\SF_Lines.js" />
     <EmbeddedResource Include="Scripts\SF_Mixin.js" />
