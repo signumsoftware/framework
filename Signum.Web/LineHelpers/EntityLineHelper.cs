@@ -82,8 +82,8 @@ namespace Signum.Web
                 sb.AppendLine(helper.Span(TypeContext.Compose(prefix, EntityBaseKeys.ToStr), value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
             }
 
-            string id = (isIdentifiable) ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString("") :
-                (isLite) ? ((Lite)(object)value).TryCS(i => i.IdOrNull).TryToString("") : 
+            string id = (isIdentifiable) ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString() :
+                (isLite) ? ((Lite)(object)value).TryCS(i => i.IdOrNull).TryToString() : 
                 "";
             
             if (settings.Navigate)

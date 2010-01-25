@@ -476,7 +476,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return Value.TryToString("NULL");
+            return Value.TryToString() ?? "NULL";
         }
     }
 

@@ -57,10 +57,10 @@ namespace Signum.Web
             return "{0};{1};{2};{3};{4};{5}".Formato(
                 staticTypeName,
                 RuntimeTypeStr,
-                IdOrNull.TryToString(""),
+                IdOrNull.TryToString(),
                 IsEmbedded ? "e" : "i",
                 IsNew ? "n" : "o",
-                Ticks.TryToString("")
+                Ticks.TryToString()
                 );
         }
 

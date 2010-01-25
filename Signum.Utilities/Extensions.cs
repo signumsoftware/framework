@@ -165,11 +165,11 @@ namespace Signum.Utilities
             return obj.ToString(); 
         }
 
-        public static string TryToString(this object obj, string defaultValue)
+        public static string TryToString(this IFormattable obj, string format)
         {
             if (obj == null)
-                return defaultValue;
-            return obj.ToString();
+                return null;
+            return obj.ToString(format, CultureInfo.CurrentCulture);
         }
 
         #region Map Try Do TryDo

@@ -34,7 +34,7 @@ namespace Signum.Web
             get 
             {
                 return viewRoute ??
-                       (viewRoute = (Type type, int? id) => "View/{0}/{1}".Formato(Navigator.TypesToURLNames[type], id.TryToString("")));
+                       (viewRoute = (Type type, int? id) => "View/{0}/{1}".Formato(Navigator.TypesToURLNames[type], id.TryToString()));
             }
             set 
             {
