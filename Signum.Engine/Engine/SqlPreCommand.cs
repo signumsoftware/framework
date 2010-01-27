@@ -131,10 +131,10 @@ namespace Signum.Engine
                 return "\'" + ((string)value).Replace("'", "''") + "'";
 
             if (value is DateTime)
-                ((DateTime)value).ToUniversalTime();
+                return "convert(datetime, {0:s}, 126)".Formato(value);
 
             if (value is bool)
-                (((bool)value) ? 1 : 0).ToString();
+               return (((bool)value) ? 1 : 0).ToString();
 
             return value.ToString();
         }
