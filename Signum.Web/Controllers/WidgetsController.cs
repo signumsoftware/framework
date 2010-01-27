@@ -17,6 +17,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult CreateNote(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
             IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix, sfUrl);
         }
 
