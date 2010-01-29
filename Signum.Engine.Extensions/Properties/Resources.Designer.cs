@@ -550,16 +550,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are duplicated Types in the XML Help:
-        ///.
-        /// </summary>
-        internal static string ThereAreDuplicatedTypesInTheXMLHelp {
-            get {
-                return ResourceManager.GetString("ThereAreDuplicatedTypesInTheXMLHelp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to type {0} has to implement {1} at least.
         /// </summary>
         internal static string Type0HasToImplement1AtLeast {

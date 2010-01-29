@@ -28,9 +28,9 @@ namespace Signum.Engine.Basics
         const string FieldsForKey = "Properties For:{0}";
         static SqlPreCommand SyncronizeProperties(Replacements replacements)
         {
-            var current = Administrator.TryRetrieveAll<PropertyDN>(replacements).AgGroupToDictionary(a => a.Type.ClassName, g => g.ToDictionary(f => f.Name));
+            var current = Administrator.TryRetrieveAll<PropertyDN>(replacements).AgGroupToDictionary(a => a.Type.ClassName, g => g.ToDictionary(f => f.Path));
 
-            var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.ClassName, (dn, t) => GenerateProperties(dn, t).ToDictionary(f => f.Name));
+            var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.ClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path));
 
             Table table = Schema.Current.Table<PropertyDN>();
 
@@ -45,7 +45,7 @@ namespace Signum.Engine.Basics
                     null,
                     (fn, c, s) =>
                     {
-                        c.Name = s.Name;
+                        c.Path = s.Path;
                         return table.UpdateSqlSync(c);
                     },
                     Spacing.Simple), Spacing.Double);
@@ -53,54 +53,22 @@ namespace Signum.Engine.Basics
 
         public static List<PropertyDN> RetrieveOrGenerateProperty(TypeDN typeDN)
         {
-            var current = Database.Query<PropertyDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Name);
-            var total = GenerateProperties(typeDN, TypeLogic.DnToType[typeDN]).ToDictionary(a => a.Name);
+            var retrieve = Database.Query<PropertyDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
+            var generate = GenerateProperties(TypeLogic.DnToType[typeDN], typeDN).ToDictionary(a => a.Path);
 
-            total.SetRange(current);
-            return total.Values.ToList();
+            generate.SetRange(retrieve);
+
+            return generate.Values.ToList();
         }
 
-        static List<PropertyDN> GenerateProperties(TypeDN typeDN, Type type)
+        public static List<PropertyDN> GenerateProperties(Type type, TypeDN typeDN)
         {
-            return Reflector.PublicInstancePropertiesInOrder(type)
-                .SelectMany(pi =>
+            return PropertyRoute.GenerateRoutes(type).Select(pp =>
+                new PropertyDN
                 {
-                    PropertyDN property = new PropertyDN { Type = typeDN, Name = pi.Name };
-
-                    if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                    {
-                        var stack = GenerateEmbeddedProperties(typeDN, pi.PropertyType, pi.Name + ".");
-                        return stack.PreAnd(property);
-                    }
-
-                    if (Reflector.IsMList(pi.PropertyType))
-                    {
-                        Type colType = ReflectionTools.CollectionType(pi.PropertyType);
-                        if (Reflector.IsEmbeddedEntity(colType))
-                        {
-                            var stack = GenerateEmbeddedProperties(typeDN, colType, pi.Name + "/");
-                            return stack.PreAnd(property);
-                        }
-                    }
-
-                    return new[] { property };
-                }).ToList();
-        }
-
-        static List<PropertyDN> GenerateEmbeddedProperties(TypeDN typeDN, Type type, string prefix)
-        {
-            return Reflector.PublicInstancePropertiesInOrder(type)
-                .SelectMany(pi =>
-                {
-                    PropertyDN field = new PropertyDN { Type = typeDN, Name = prefix + pi.Name };
-
-                    if (Reflector.IsEmbeddedEntity(pi.PropertyType))
-                    {
-                        var list = GenerateEmbeddedProperties(typeDN, pi.PropertyType, prefix + pi.Name + ".");
-                        return list.PreAnd(field);
-                    }
-
-                    return new[] { field };
+                    PropertyPath = pp,
+                    Type = typeDN,
+                    Path = pp.PropertyString()
                 }).ToList();
         }
     }

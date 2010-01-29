@@ -14,14 +14,15 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities;
 using Signum.Engine.Maps;
+using System.IO;
 
 namespace Signum.Engine.Help
 {
-    static class HelpGenerator
+    public static class HelpGenerator
     {
         public static string GetPropertyHelp(Type type, PropertyInfo pi)
         {
-            string validations = Validator.GetPropertyPack(pi.DeclaringType, pi.Name).Validators.CommaAnd(v => v.HelpMessage);
+            string validations = Validator.GetOrCreatePropertyPack(pi.DeclaringType, pi.Name).Validators.CommaAnd(v => v.HelpMessage);
 
             if (validations.HasText())
                 validations = Resources.Should + validations;
@@ -168,7 +169,15 @@ namespace Signum.Engine.Help
 
             if (dynamicQuery.Expression != null)
             {
-                Expression expression = DbQueryProvider.Clean(dynamicQuery.Expression);
+                Expression expression;
+                try
+                {
+                    expression = DbQueryProvider.Clean(dynamicQuery.Expression);
+                }
+                catch (Exception)
+                {
+                    expression = MetaEvaluator.Clean(dynamicQuery.Expression);
+                }
 
                 List<Type> types = TableGatherer.GatherTables(expression);
                 if (types.Count == 1 && types.Contains(entityType))
@@ -179,6 +188,7 @@ namespace Signum.Engine.Help
 
             return Resources.QueryOf0.Formato(entityType.NicePluralName());
         }
+
     }
 
     internal class TableGatherer : ExpressionVisitor

@@ -68,7 +68,7 @@
     <Compile Include="Basics\DateSpanDN.cs" />
     <Compile Include="Basics\EntityGroupDN.cs" />
     <Compile Include="Basics\EnumDN.cs" />
-    <Compile Include="Basics\PropertyDN.cs" />
+    <Compile Include="Basics\PropertyPathDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />

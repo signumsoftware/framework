@@ -3,18 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.Reflection;
 
 namespace Signum.Entities.Basics
 {
     public class PropertyDN : IdentifiableEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string Name
+        public PropertyDN() { }
+
+        [field: Ignore]
+        PropertyRoute entityPath;
+        public PropertyRoute PropertyPath
         {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
+            get { return entityPath; }
+            set { entityPath = value; }
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string path;
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string Path
+        {
+            get { return path; }
+            set { SetToStr(ref path, value, () => Path); }
         }
 
         TypeDN type;
@@ -27,7 +38,7 @@ namespace Signum.Entities.Basics
 
         public override string ToString()
         {
-            return name;
+            return path;
         }
     }
 }

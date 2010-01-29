@@ -100,7 +100,7 @@ namespace Signum.Engine.Authorization
 
             foreach (var type in EntityGroupLogic.Types)
             {
-                miRegister.MakeGenericMethod(type).Invoke(null, new object[] { sender }); 
+                miRegister.GenericInvoke(new[] { type }, null, new object[] { sender });
             }
         }
 
@@ -227,7 +227,7 @@ namespace Signum.Engine.Authorization
 
             public Expression Expand(Expression instance, Expression[] arguments, Type[] typeArguments)
             {
-                return (Expression)mi.MakeGenericMethod(typeArguments[0]).Invoke(null, new object[] { arguments[0] });
+                return (Expression)mi.GenericInvoke(typeArguments, null, new object[] { arguments[0] });
             }
 
             static Expression CallWhereAllowed<T>(Expression expression)
@@ -311,11 +311,11 @@ namespace Signum.Engine.Authorization
                 : base(query)
             { }
 
-            public override ResultTable ExecuteQuery(List<Filter> filters, List<Order> orders, int? limit)
+            public override ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
             {
                 using (EntityGroupAuthLogic.DisableQueries())
                 {
-                    return base.ExecuteQuery(filters, orders, limit);
+                    return base.ExecuteQuery(userColumns, filters, orders, limit);
                 }
             }
 

@@ -133,9 +133,9 @@ namespace Signum.Windows.Authorization
            return typeRules.TryGetS(type) ?? TypeAccess.Create;
         }
 
-        static Access GetPropertyAccess(Type type, string property)
+        static Access GetPropertyAccess(PropertyRoute route)
         {
-            return propertyRules.TryGetC(type).TryGetS(property) ?? Access.Modify;
+            return propertyRules.TryGetC(route.Type).TryGetS(route.PropertyString()) ?? Access.Modify;
         }
 
         static bool GetQueryAceess(object queryName)
@@ -143,21 +143,11 @@ namespace Signum.Windows.Authorization
             return authorizedQueries.Contains(queryName); 
         }
 
-        static void Common_RouteTask(FrameworkElement fe, string route, TypeContext context)
+        static void Common_RouteTask(FrameworkElement fe, string route, PropertyRoute context)
         {
-            var contextList = context.FollowC(a => (a as TypeSubContext).TryCC(t => t.Parent)).ToList();
-
-            if (contextList.Count > 1)
+            if (context.PropertyRouteType == PropertyRouteType.Property)
             {
-                string path = contextList.OfType<TypeSubContext>().Reverse()
-                    .ToString(a => a.PropertyInfo.Map(p =>
-                        p.Name == "Item" && p.GetIndexParameters().Length > 1 ? "/" : p.Name), ".");
-
-                path = path.Replace("./.", "/");
-
-                Type type = contextList.Last().Type;
-
-                switch (GetPropertyAccess(type, path))
+                switch (GetPropertyAccess(context))
                 {
                     case Access.None: fe.Visibility = Visibility.Collapsed; break;
                     case Access.Read: Common.SetIsReadOnly(fe, true); break;

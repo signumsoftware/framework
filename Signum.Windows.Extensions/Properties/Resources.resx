@@ -198,4 +198,7 @@
   <data name="OpeningHasNotDefaultImplementationFor0" xml:space="preserve">
     <value>Opening has no default implementation for {0}</value>
   </data>
+  <data name="SelectSomeRowsFirst" xml:space="preserve">
+    <value>Select some rows first</value>
+  </data>
 </root>

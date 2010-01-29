@@ -14,6 +14,9 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
+using Signum.Entities;
+using System.IO;
+using System.Globalization;
 
 namespace Signum.Engine.Help
 {
@@ -22,48 +25,175 @@ namespace Signum.Engine.Help
         public Type Type;
         public string Description;
         public Dictionary<string, PropertyHelp> Properties;
-        public Dictionary<string, Dictionary<string, PropertyHelp>> PropertiesRelations;
-        public Dictionary<Enum, string> Operations;
-        public Dictionary<object, string> Queries;
+        public Dictionary<Enum, OperationHelp> Operations;
+        public Dictionary<object, QueryHelp> Queries;
         public string FileName;
+        public string Language;
 
         public static EntityHelp Create(Type t)
         {
             return new EntityHelp
             {
                 Type = t,
-                //Description = "Type description for {0} here".Formato(t.NiceName()),
+                Language = CultureInfo.CurrentCulture.Name,
                 Description = "",
-                Properties = PropertyGenerator.GenerateProperties(t)
+                Properties = PropertyRoute.GenerateRoutes(t)
                             .ToDictionary(
-                                kvp => kvp.Key,
-                                kvp => new PropertyHelp(kvp.Value, HelpGenerator.GetPropertyHelp(t, kvp.Value))),
+                                pp => pp.PropertyString(),
+                                pp => new PropertyHelp(pp.PropertyInfo, HelpGenerator.GetPropertyHelp(t, pp.PropertyInfo))),
 
                 Operations = OperationLogic.GetAllOperationInfos(t)
                             .ToDictionary(
                                 oi => oi.Key,
-                                oi => HelpGenerator.GetOperationHelp(t, oi)),
+                                oi => new OperationHelp(oi.Key, HelpGenerator.GetOperationHelp(t, oi))),
 
                 Queries = DynamicQueryManager.Current.GetQueryNames(t)
                            .ToDictionary(
                                 kvp => kvp.Key,
-                                kvp => HelpGenerator.GetQueryHelp(t, kvp.Value))
+                                kvp => new QueryHelp(kvp.Key, HelpGenerator.GetQueryHelp(t, kvp.Value)))
             };
         }
 
-        public XElement ToXml()
+        public XDocument ToXDocument()
         {
-            return new XElement(_Entity, new XAttribute(_Name, Type.Name),
+            return new XDocument(
+                new XDeclaration("1.0", "utf-8", "yes"),
+                new XElement(_Entity, 
+                       new XAttribute(_FullName, Type.FullName),
+                       new XAttribute(_Language, Language),
                        new XElement(_Description, Description),
-                       Properties.Map(ps => ps == null || ps.Count == 0 ? null : new XElement(_Properties,
-                         ps.Select(p => new XElement(_Property, new XAttribute(_Name, p.Key), new XAttribute(_Info, p.Value.Info), p.Value.UserDescription)))),
-                       Operations.Map(os => os == null || os.Count == 0 ? null : new XElement(_Operations,
-                         os.Select(o => new XElement(_Operation, new XAttribute(_Key, OperationDN.UniqueKey(o.Key)), o.Value)))),
-                       Queries.Map(qs => qs == null || qs.Count == 0 ? null : new XElement(_Queries,
-                         qs.Select(q => new XElement(_Query, new XAttribute(_Key, QueryUtils.GetQueryName(q.Key)), q.Value))))
-                   );
+                       Properties.Map(ps => ps == null || ps.Count == 0 ? null : 
+                           new XElement(_Properties,
+                               ps.Select(p => new XElement(_Property, 
+                                   new XAttribute(_Name, p.Key), 
+                                   new XAttribute(_Info, p.Value.Info), 
+                                   p.Value.UserDescription))
+                           )
+                       ),
+                       Operations.Map(os => os == null || os.Count == 0 ? null : 
+                           new XElement(_Operations,
+                               os.Select(o => new XElement(_Operation, 
+                                   new XAttribute(_Key, OperationDN.UniqueKey(o.Key)),
+                                   new XAttribute(_Info, o.Value.Info),
+                                   o.Value.UserDescription))
+                           )
+                       ),
+                       Queries.Map(qs => qs == null || qs.Count == 0 ? null : 
+                           new XElement(_Queries,
+                               qs.Select(q => new XElement(_Query, 
+                                   new XAttribute(_Key, QueryUtils.GetQueryName(q.Key)),
+                                   new XAttribute(_Info, q.Value.Info),
+                                   q.Value.UserDescription))
+                           )
+                       )
+                   )
+               );
         }
 
+
+        public static EntityHelp Load(Type type, XDocument document, string sourceFile)
+        {
+            XElement element = document.Element(_Entity);
+
+            return new EntityHelp
+            {
+                Type = type,
+                FileName = sourceFile,
+                Description = element.Element(_Description).TryCC(d => d.Value),
+                Language = element.Attribute(_Language).Value,
+                Properties = EnumerableExtensions.JoinStrict(
+                    element.Element(_Properties).TryCC(ps => ps.Elements(_Property)) ?? new XElement[0],
+                    PropertyRoute.GenerateRoutes(type),
+                    x => x.Attribute(_Name).Value,
+                    pp => pp.PropertyString(),
+                    (x, pp) => new KeyValuePair<string, PropertyHelp>(
+                         pp.PropertyString(),
+                         new PropertyHelp(pp.PropertyInfo, x.Attribute(_Info).Value, x.Value)),
+                    "Loading Properties for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
+
+                Operations = EnumerableExtensions.JoinStrict(
+                    element.Element(_Operations).TryCC(os => os.Elements(_Operation)) ?? new XElement[0],
+                    OperationLogic.GetAllOperationInfos(type),
+                    x => x.Attribute(_Key).Value,
+                    oi => OperationDN.UniqueKey(oi.Key),
+                    (x, oi) => new KeyValuePair<Enum, OperationHelp>(
+                        oi.Key, 
+                        new OperationHelp(oi.Key,x.Attribute(_Info).Value, x.Value)),
+                    "Loading Operations for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
+
+                Queries = EnumerableExtensions.JoinStrict(
+                    element.Element(_Queries).TryCC(qs => qs.Elements(_Query)) ?? new XElement[0],
+                    DynamicQueryManager.Current.GetQueryNames(type),
+                    x => x.Attribute(_Key).Value,
+                    qn => QueryUtils.GetQueryName(qn.Key),
+                    (x, qn) => new KeyValuePair<object, QueryHelp>(
+                        qn.Key, 
+                        new QueryHelp(qn.Key, x.Attribute(_Info).Value, x.Value)),
+                    "Loading Queries for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary()
+            };
+        }
+
+        public static bool Synchronize(string fileName, XElement loaded, XElement created, TextWriter tw)
+        {
+            bool changed = false; 
+            Action change = ()=>
+            {
+                if(!changed)
+                {
+                    tw.WriteLine("{0} in {1}".Formato(created.Attribute(_Name).Value, fileName));
+                    changed= true;
+                }
+            };
+
+            HelpTools.Syncronize(loaded, created, _Properties, _Property, _Name,
+                  (k, l, c) =>
+                  {
+                      if (Distict(l.Attribute(_Info), c.Attribute(_Info)))
+                      {
+                          c.Value =  l.Value; 
+                          return c;
+                      }
+
+                      return l;
+                  },
+                  (action, prop) =>
+                  {
+                      change();
+                      tw.WriteLine("\tProperty {0} {1}".Formato(action == SyncAction.OrderChanged ? null : prop));
+                  });
+
+            HelpTools.Syncronize(loaded, created, _Queries, _Query, _Key,
+                  (k, l, c) => l,
+                  (action, qn) =>
+                  {
+                      change();
+                      tw.WriteLine("\tQuery {0} {1}".Formato(action, qn));
+                  });
+
+            HelpTools.Syncronize(loaded, created, _Operations, _Operation, _Key,
+                  (k, l, c) => l,
+                  (action, op) =>
+                  {
+                      change();
+                      tw.WriteLine("\tOperation {0} {1}".Formato(action,  op));
+                  });
+
+
+            return changed;
+        }
+
+        static bool Distict(XAttribute a1, XAttribute a2)
+        {
+            if (a1 == null && a2 == null)
+                return true;
+
+            if (a1 == null || a2 == null)
+                return false;
+
+            return a1.Value != a2.Value;
+        }
+
+        static readonly XName _FullName = "FullName";
         static readonly XName _Name = "Name";
         static readonly XName _Key = "Key";
         static readonly XName _Entity = "Entity";
@@ -75,33 +205,13 @@ namespace Signum.Engine.Help
         static readonly XName _Queries = "Queries";
         static readonly XName _Query = "Query";
         static readonly XName _Info = "Info";
+        static readonly XName _Language = "Language";
 
-        public static EntityHelp Load(Type type, XElement element, string sourceFile)
+
+        public string Extract(string s, Match m)
         {
-            var properties = PropertyGenerator.GenerateProperties(type);
-            var operations = OperationLogic.GetAllOperationInfos(type).ToDictionary(oi => OperationDN.UniqueKey(oi.Key));
-            var queries = DynamicQueryManager.Current.GetQueryNames(type).ToDictionary(oi => QueryUtils.GetQueryName(oi.Key));
-
-            return new EntityHelp
-            {
-                Type = type,
-                FileName = sourceFile,
-                Description = element.Element(_Description).TryCC(d => d.Value),
-
-                Properties = element.Element(_Properties).TryCC(ps => ps.Elements(_Property).ToDictionary(
-                    p => p.Attribute(_Name).Value,
-                    p => new PropertyHelp(properties[p.Attribute(_Name).Value], p.Attribute(_Info).Value, p.Value))),
-
-                Operations = element.Element(_Operations).TryCC(os => os.Elements(_Operation).ToDictionary(
-                    o => operations[o.Attribute(_Key).Value].Key,
-                    o => o.Value)),
-
-                Queries = element.Element(_Queries).TryCC(qs => qs.Elements(_Query).ToDictionary(
-                    q => queries[q.Attribute(_Key).Value].Key,
-                    q => q.Value)),
-            };
+            return Extract(s, m.Index, m.Index + m.Length);
         }
-
 
         public string Extract(string s, int low, int high)
         {
@@ -137,7 +247,7 @@ namespace Signum.Engine.Help
             m = regex.Match(Type.NiceName());
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.Type, Type.NiceName(), Type.NiceName() + (Description.HasText() ? " | " + Description.Etc(etcLength) : ""), Type, m);
+                yield return new SearchResult(TypeSearchResult.Type, Type.NiceName(), "|".Combine(Type.NiceName(), Description.Etc(etcLength)), Type, m);
                 yield break;
             }
 
@@ -146,7 +256,7 @@ namespace Signum.Engine.Help
                 m = regex.Match(Description);
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.TypeDescription, Description, Extract(Description, m.Index, m.Index + m.Length), Type, m);
+                yield return new SearchResult(TypeSearchResult.TypeDescription, Description, Extract(Description, m), Type, m);
                 yield break;
             }
 
@@ -156,12 +266,12 @@ namespace Signum.Engine.Help
                 {
                     m = regex.Match(p.Key);
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Property, p.Key, p.Value.ToString(), Type, m);
+                        yield return new SearchResult(TypeSearchResult.Property, p.Key.NiceName(), p.Value.ToString().Etc(etcLength), Type, m);
                     else
                     {
                         m = regex.Match(p.Value.ToString());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.PropertyDescription, p.Key, p.Value.ToString(), Type, m);
+                            yield return new SearchResult(TypeSearchResult.PropertyDescription, p.Key.NiceName(), Extract(p.Value.ToString(), m), Type, m);
                     }
                 }
 
@@ -171,12 +281,12 @@ namespace Signum.Engine.Help
                 {
                     m = regex.Match(QueryUtils.GetNiceQueryName(p.Key));
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), QueryToString(p), Type, m);
+                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Value.ToString().Etc(etcLength), Type, m);
                     else
                     {
-                        m = regex.Match(p.Value);
+                        m = regex.Match(p.Value.ToString());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.QueryDescription, p.Value, QueryToString(p), Type, m);
+                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Value.ToString(), m), Type, m);
                     }
                 }
 
@@ -184,14 +294,14 @@ namespace Signum.Engine.Help
             if (Operations != null)
                 foreach (var p in Operations)
                 {
-                    m = regex.Match(EnumDN.UniqueKey(p.Key));
+                    m = regex.Match(p.Key.NiceToString());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Operation, EnumDN.UniqueKey(p.Key), OperationToString(p), Type, m);
+                        yield return new SearchResult(TypeSearchResult.Operation, p.Key.NiceToString(), p.Value.ToString().Etc(etcLength), Type, m);
                     else
                     {
-                        m = regex.Match(p.Value);
+                        m = regex.Match(p.Value.ToString());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.OperationDescription, p.Value, OperationToString(p), Type, m);
+                            yield return new SearchResult(TypeSearchResult.OperationDescription, p.Key.NiceToString(), Extract(p.Value.ToString(), m), Type, m);
                     }
                 }
         }
@@ -211,7 +321,19 @@ namespace Signum.Engine.Help
             return kvp.Key.NiceName() + " | " + kvp.Value.Description;
         }
 
+        public void Save()
+        {
+            XDocument document = this.ToXDocument();
+            string path = Path.Combine(HelpLogic.HelpDirectory, "{0}.help".Formato(this.Type.FullName));
+            document.Save(path);
+        }
 
+        internal static string GetEntityName(XDocument document)
+        {
+            if (document.Root.Name == _Entity)
+                return document.Root.Attribute(_FullName).Value;
+            return null;
+        }
     }
 
     public class PropertyHelp
@@ -235,7 +357,57 @@ namespace Signum.Engine.Help
 
         public override string ToString()
         {
-            return PropertyInfo.NiceName() + " | " + this.Info + (this.UserDescription.HasText() ? " | " + this.UserDescription : "");
+            return Info + " | " + UserDescription;
+        }
+    }
+
+    public class OperationHelp
+    {
+        public OperationHelp(Enum operationKey, string info)
+        {
+            this.OperationKey = operationKey;
+            this.Info = info;
+        }
+
+        public OperationHelp(Enum operationKey, string info, string userDescription)
+        {
+            this.OperationKey = operationKey;
+            this.Info = info;
+            this.UserDescription = userDescription;
+        }
+
+        public Enum OperationKey { get; set; }
+        public string Info { get; private set; }
+        public string UserDescription { get; set; }
+
+        public override string ToString()
+        {
+            return Info + " | " + UserDescription;
+        }
+    }
+
+    public class QueryHelp
+    {
+        public QueryHelp(object queryKey, string info)
+        {
+            this.QueryKey = queryKey;
+            this.Info = info;
+        }
+
+        public QueryHelp(object queryKey, string info, string userDescription)
+        {
+            this.QueryKey = queryKey;
+            this.Info = info;
+            this.UserDescription = userDescription;
+        }
+
+        public object QueryKey { get; set; }
+        public string Info { get; private set; }
+        public string UserDescription { get; set; }
+
+        public override string ToString()
+        {
+            return Info + " | " + UserDescription;
         }
     }
 
@@ -261,16 +433,19 @@ namespace Signum.Engine.Help
     public class SearchResult : IComparable<SearchResult>
     {
         public TypeSearchResult TypeSearchResult { get; set; }
-        public string Content { get; set; }
         public string ObjectName { get; set; }
         public Type Type { get; set; }
         public Match Match { get; set; }
         public MatchType MatchType { get; set; }
+        public string Description { get; set; }
 
-        public SearchResult(TypeSearchResult typeSearchResult, string objectName, string content,  Type type, Match match)
+        public string Content { get { return ObjectName + " | " + Description; } }
+
+        public SearchResult(TypeSearchResult typeSearchResult, string objectName, string description,  Type type, Match match)
         {
+            this.ObjectName = objectName;
             this.TypeSearchResult = typeSearchResult;
-            this.Content = content;
+            this.Description = description;
             this.Type = type;
             this.Match = match;
 
@@ -279,7 +454,7 @@ namespace Signum.Engine.Help
                 if (Match.Length == objectName.Length)
                     MatchType = MatchType.Total;
                 else
-                    MatchType = MatchType.Contains;
+                    MatchType = MatchType.StartsWith;
             }
             else
             {
@@ -289,7 +464,12 @@ namespace Signum.Engine.Help
 
         public int CompareTo(SearchResult other)
         {
-            return TypeSearchResult.CompareTo(other.TypeSearchResult); 
+            int result = TypeSearchResult.CompareTo(other.TypeSearchResult);
+            
+            if (result != 0)
+                return result;
+
+            return MatchType.CompareTo(other.MatchType);
         }
     }
 }

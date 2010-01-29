@@ -22,7 +22,7 @@ namespace Signum.Windows.Extensions.Basics
     /// </summary>
     public partial class DateSpan : UserControl
     {
-        public DateSpan(TypeContext tc)
+        public DateSpan(PropertyRoute tc)
         {
             Common.SetTypeContext(this, tc); 
             InitializeComponent();

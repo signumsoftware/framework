@@ -62,8 +62,8 @@ namespace Signum.Windows.Operations
 
                 var lites = SearchControl.SelectedItems.TryCC(a => a.Cast<Lite>().ToList());
 
-                if (lites == null && lites.Count == 0)
-                    throw new ApplicationException("Select some rows first");
+                if (lites == null || lites.Count == 0)
+                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.SelectSomeRowsFirst);
 
                 ConstructorFromManySettings settings = (ConstructorFromManySettings)OperationClient.Manager.Settings.TryGetC(operationInfo.Key);
 

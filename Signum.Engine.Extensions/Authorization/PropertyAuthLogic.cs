@@ -34,24 +34,11 @@ namespace Signum.Engine.Authorization
                 sb.Schema.EntityEvents<RulePropertyDN>().Saved +=Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
 
-                if(queries)
-                    DynamicQuery.DynamicQuery.IsAllowed += new Func<Meta, bool>(DynamicQuery_IsAllowed);
+                if (queries)
+                {
+                    PropertyRoute.SetIsAllowedCallback(pp=>GetPropertyAccess(pp) > Access.None);
+                }
             }
-        }
-
-        static bool DynamicQuery_IsAllowed(Meta meta)
-        {
-            if (!AuthLogic.IsEnabled)
-                return true;
-
-            if (meta == null)
-                return true;
-
-            CleanMeta cleanMeta = meta as CleanMeta;
-            if (cleanMeta != null)
-                return GetPropertyAccess(cleanMeta.Type, cleanMeta.PropertyName) > Access.None;
-
-            return ((DirtyMeta)meta).Properties.All(cm => GetPropertyAccess(cm.Type, cm.Member.Name) > Access.None); 
         }
 
         static void Schema_Initializing(Schema sender)
@@ -69,20 +56,20 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        static Access GetAccess(RoleDN role, Type type, string property)
+        static Access GetAccess(RoleDN role, PropertyRoute propertyPath)
         {
-            return RuntimeRules.TryGetC(role).TryGetC(type).TryGetS(property) ?? Access.Modify; 
+            return RuntimeRules.TryGetC(role).TryGetC(propertyPath.IdentifiableType).TryGetS(propertyPath.PropertyString()) ?? Access.Modify; 
         }
 
-        static Access GetBaseAccess(RoleDN role, Type type, string property)
+        static Access GetBaseAccess(RoleDN role, PropertyRoute propertyPath)
         {
             return role.Roles.Count == 0 ? Access.Modify :
-                  role.Roles.Select(r => GetAccess(r, type, property)).MaxAccess();
+                  role.Roles.Select(r => GetAccess(r, propertyPath)).MaxAccess();
         }
 
-        public static Access GetPropertyAccess(Type type, string property)
+        public static Access GetPropertyAccess(PropertyRoute propertyPath)
         {
-            return GetAccess(RoleDN.Current, type, property);
+            return GetAccess(RoleDN.Current, propertyPath);
         }
 
         public static List<AccessRule> GetAccessRule(Lite<RoleDN> roleLite, TypeDN typeDN)
@@ -91,10 +78,10 @@ namespace Signum.Engine.Authorization
 
             Type type = TypeLogic.DnToType[typeDN]; 
             List<PropertyDN> properties = PropertyLogic.RetrieveOrGenerateProperty(typeDN);
-            return properties.Select(p => new AccessRule(GetBaseAccess(role, type, p.Name))
+            return properties.Select(p => new AccessRule(GetBaseAccess(role, p.PropertyPath))
                     {
                         Resource = p,
-                        Access = GetAccess(role, type, p.Name),
+                        Access = GetAccess(role, p.PropertyPath),
                     }).ToList();
         }
 
@@ -102,8 +89,8 @@ namespace Signum.Engine.Authorization
         {
             var role = roleLite.Retrieve(); 
 
-            var current = Database.Query<RulePropertyDN>().Where(r => r.Role == role && r.Property.Type == typeDN).ToDictionary(a => a.Property.Name);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => ((PropertyDN)r.Resource).Name);
+            var current = Database.Query<RulePropertyDN>().Where(r => r.Role == role && r.Property.Type == typeDN).ToDictionary(a => a.Property.Path);
+            var should = rules.Where(a => a.Overriden).ToDictionary(r => ((PropertyDN)r.Resource).Path);
 
             Synchronizer.Synchronize(current, should,
                 (p, pr) => pr.Delete(),
@@ -129,7 +116,7 @@ namespace Signum.Engine.Authorization
                     Database.RetrieveAll<RulePropertyDN>()
                       .AgGroupToDictionary(ru => ru.Role, gr => gr
                           .AgGroupToDictionary(ru => TypeLogic.DnToType[ru.Property.Type], gr2 => gr2
-                              .ToDictionary(ru => ru.Property.Name, ru => ru.Access)));
+                              .ToDictionary(ru => ru.Property.Path, ru => ru.Access)));
 
                 Dictionary<RoleDN, Dictionary<Type, Dictionary<string, Access>>> newRules = new Dictionary<RoleDN, Dictionary<Type, Dictionary<string, Access>>>();
                 foreach (var role in roles)

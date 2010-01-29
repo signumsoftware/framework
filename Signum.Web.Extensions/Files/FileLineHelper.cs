@@ -131,7 +131,7 @@ namespace Signum.Web.Files
 
             FileLine fl = new FileLine(helper.GlobalName(context.Name));
             //Navigator.ConfigureEntityBase(el, runtimeType, false);
-            Common.FireCommonTasks(fl, typeof(T), context);
+            Common.FireCommonTasks(fl, context);
 
             if (settingsModifier != null)
                 settingsModifier(fl);

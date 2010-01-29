@@ -112,7 +112,7 @@ namespace Signum.Web.Files
 
             FileRepeater fl = new FileRepeater(helper.GlobalName(context.Name));
             //Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
-            Common.FireCommonTasks(fl, typeof(T), context);
+            Common.FireCommonTasks(fl, context);
 
             if (settingsModifier != null)
                 settingsModifier(fl);

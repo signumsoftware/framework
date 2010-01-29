@@ -74,22 +74,6 @@ namespace Signum.Engine.Help
             return TypeToHelpFiles.ToList();
         }
 
-        public static void SaveEntityHelp(EntityHelp eh)
-        {
-            XDocument document = XDocument.Load(eh.FileName);
-            XElement element = Find(document, eh.Type);
-            element.ReplaceWith(eh.ToXml());
-            document.Save(eh.FileName);
-        }
-
-        static XElement Find(XDocument document, Type type)
-        {
-            return document
-                .Element(_Help)
-                .Elements(_Namespace).Single(ns => ns.Attribute(_Name).Value == type.Namespace)
-                .Elements(_Entity).Single(a => a.Attribute(_Name).Value == type.Name);
-        }
-
         public static Type FromCleanName(string cleanName)
         {
             return CleanNameToType.GetOrThrow(cleanName, "No help for " + cleanName); 
@@ -103,9 +87,9 @@ namespace Signum.Engine.Help
             }
         }
 
-        public static void LoadDocument(EntityHelp eh)
+        public static void ReloadDocument(EntityHelp eh)
         {
-            TypeToHelpFiles[eh.Type] = GetEntityHelp(eh.Type, eh.FileName);
+            TypeToHelpFiles[eh.Type] = EntityHelp.Load(eh.Type, XDocument.Load(eh.FileName), eh.FileName);
         }
 
         static void Schema_Initialize(Schema sender)
@@ -126,67 +110,33 @@ namespace Signum.Engine.Help
 
             var documents = Directory.GetFiles(HelpDirectory, "*.help").Select(f => new { File = f, Document = XDocument.Load(f) }).ToList();
 
-            List<XmlSchemaException> exceptions = new List<XmlSchemaException>();
+            List<Tuple<XmlSchemaException, string>> exceptions = new List<Tuple<XmlSchemaException, string>>();
             foreach (var doc in documents)
             {
-                doc.Document.Validate(schemas, (s, e) => exceptions.Add(e.Exception));
+                doc.Document.Validate(schemas, (s, e) => exceptions.Add(Tuple.New(e.Exception, doc.File)));
             }
 
             if (exceptions.Count != 0)
             {
                 string errorText = Resources.ErrorParsingXMLHelpFiles + exceptions.ToString(e => "{0} ({1}:{2}): {3}".Formato(
-                    e.SourceUri.Substring(HelpDirectory.Length), e.LineNumber, e.LinePosition, e.Message), "\r\n").Indent(3);
+                    e.Second, e.First.LineNumber, e.First.LinePosition, e.First.Message), "\r\n").Indent(3);
 
                 throw new InvalidOperationException(errorText);
             }
 
-            var typeHelpInfo = (from doc in documents
-                                from ns in doc.Document.Root.Elements(_Namespace)
-                                from entity in ns.Elements(_Entity)
-                                let type = typesDic.TryGetC(ns.Attribute(_Name).Value + "." + entity.Attribute(_Name).Value)
-                                where type != null
-                                select new
-                                {
-                                    File = doc.File,
-                                    Type = type,
-                                }).ToList();
+            var typeHelpInfo = from doc in documents
+                               let typeName = EntityHelp.GetEntityName(doc.Document)
+                               where typeName != null
+                               select EntityHelp.Load(typesDic.GetOrThrow(typeName, "No Type with FullName {0} found in the schema"), doc.Document, doc.File);
 
-            var duplicatedTypes = (from info in typeHelpInfo
-                                   group info by info.Type into g
-                                   where g.Count() > 1
-                                   select "Type: {0} Files: {1}".Formato(
-                                    g.Key.Name,
-                                    g.ToString(f => f.File.Substring(HelpDirectory.Length), ", "))).ToString("\r\n");
-
-
-            if (duplicatedTypes.HasText())
-                throw new InvalidOperationException(Resources.ThereAreDuplicatedTypesInTheXMLHelp + duplicatedTypes.Indent(2));
 
             //tipo a entityHelp
-            TypeToHelpFiles = typeHelpInfo.ToDictionary(p=>p.Type,p=> GetEntityHelp(p.Type, p.File));
+            TypeToHelpFiles = typeHelpInfo.ToDictionary(p=>p.Type);
 
             CleanNameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => Reflector.CleanTypeName(t));
             NameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => t.Name);
         }
 
-        static EntityHelp GetEntityHelp (Type type, string sourceFile)
-        {
-            XElement element = XDocument.Load(sourceFile).Element(_Help)
-                .Elements(_Namespace).Single(ns=>ns.Attribute(_Name).Value == type.Namespace)
-                .Elements(_Entity).Single(el=>el.Attribute(_Name).Value == type.Name);
-            return EntityHelp.Load(type, element, sourceFile);
-        }
-
-        static string FileName(XDocument document)
-        {
-            var target = document.Root.Attribute(_Assembly);
-
-            var onlyNameSpace = document.Root.Elements(_Namespace).Only();
-            if (onlyNameSpace != null)
-                return "{0}.help".Formato(onlyNameSpace.Attribute(_Name).Value);
-
-            return "{0}.help".Formato(target.Value);
-        }
 
         public static void GenerateAll()
         {
@@ -200,7 +150,7 @@ namespace Signum.Engine.Help
 
                 if (files.Length != 0)
                 {
-                    Console.WriteLine("There are files, remove? (y/n)");
+                    Console.WriteLine("There are files in {0}, remove? (y/n)", HelpDirectory);
                     if (Console.ReadLine().ToLower() != "y")
                         return;
 
@@ -211,39 +161,51 @@ namespace Signum.Engine.Help
                 }
             }
            
-            IEnumerable<XDocument> mainHelp = (from type in Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy())
-                                               group type by new {type.Assembly, type.Namespace} into g
-                                               select Create(g.Key.Assembly, g.Key.Namespace, g.ToList())).NotNull();
-
-            foreach (XDocument document in mainHelp)
+            foreach (Type type in Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()))
             {
-                string path = Path.Combine(HelpDirectory, FileName(document));
-                path = FileTools.AvailableFileName(path);
-                document.Save(path);
+                EntityHelp.Create(type).Save();
             }
         }
 
-
-        public static XDocument Create(Assembly targetAssembly, string nameSpace, IEnumerable<Type> types)
+        public static void SyncronizeAll()
         {
-            XDocument result = new XDocument(
-                 new XDeclaration("1.0", "utf-8", "yes"),
-                 new XElement(_Help,
-                    new XAttribute(_Assembly, targetAssembly.GetName().Name),
-                    new XAttribute(_Language, CultureInfo.CurrentCulture.Name),
-                    new XElement(_Namespace, new XAttribute(_Name, nameSpace),
-                        types.Select(t => EntityHelp.Create(t).ToXml())
-                    )) //Namespace
-                );//Document
+            if (!Directory.Exists(HelpDirectory))
+            {
+                Directory.CreateDirectory(HelpDirectory);
+            }
 
-            return result;
+            var should = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy())
+                         .GroupToDictionary(type=>type.Namespace);
+
+            //var current = (from fn in Directory.GetFiles(HelpDirectory, "*.help")
+            //               let help = XDocument.Load(fn).Element(_Help)
+            //               select new
+            //               {
+            //                   Types = help.Elements(_Entity).Select(t => t.Attribute(_Name).Value).ToList(),
+            //                   Namespace = help.Attribute(_NamespaceR).Value,
+            //                   FileName = fn,
+            //               }).ToDictionary(a=>a.Namespace, a=> new { a.FileName, a.Types});
+
+            //Replacements replacements = new Replacements(); 
+            //HelpTools.SynchronizeReplacing(replacements, "Assembly", current, should,
+            //    (assemblyName, oldNamespaces)=>
+            //    {
+            //        foreach (var kvp in oldNamespaces)
+            //            File.Delete(kvp.Value.FileName); 
+            //    },
+            //    (assemblyName, newNamespaces) =>
+            //    {
+            //        foreach (var item in newNamespaces)
+            //            SmartSave(Create(assemblyName, item.Key, item.Value));
+            //    },
+            //    (assemblyName, oldNamespaces, newNamespaces)=>
+            //    {
+            //        HelpTools.SynchronizeReplacing(replacements, "Namespaces for Assembly {0}".Formato(assemblyName), 
+            //            oldNamespaces, newNamespaces,
+            //            (oldNamespaceName, fileAndTypes)=> RemoveNamespace(fileAndTypes.FileName, oldNamespaceName),
+            //            (newNamespaceName, fileTypes)=>
+ 
+            //    }));
         }
-
-        static readonly XName _Help = "Help";
-        static readonly XName _Assembly = "Assembly";
-        static readonly XName _Language = "Language";
-        static readonly XName _Name = "Name";
-        static readonly XName _Entity = "Entity";
-        static readonly XName _Namespace = "Namespace";
     }
 }

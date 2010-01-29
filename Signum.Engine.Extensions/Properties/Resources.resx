@@ -147,10 +147,6 @@
   <data name="Operation0DoesNotHaveDeleteInitialized" xml:space="preserve">
     <value>Operation {0} does not have Delete initialized</value>
   </data>
-  <data name="ThereAreDuplicatedTypesInTheXMLHelp" xml:space="preserve">
-    <value>There are duplicated Types in the XML Help:
-</value>
-  </data>
   <data name="ErrorParsingXMLHelpFiles" xml:space="preserve">
     <value>Error parsing XML Help files:
 </value>

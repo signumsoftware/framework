@@ -189,4 +189,7 @@
   <data name="Years" xml:space="preserve">
     <value>Años</value>
   </data>
+  <data name="SelectSomeRowsFirst" xml:space="preserve">
+    <value>Selecciona algunos elementos primero</value>
+  </data>
 </root>

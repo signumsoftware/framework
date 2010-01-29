@@ -107,6 +107,9 @@ namespace Signum.Engine.Operations
 
         public static void Register(this IOperation operation)
         {
+            if (!typeof(IIdentifiable).IsAssignableFrom(operation.Type))
+                throw new InvalidOperationException(Resources.Type0HasToImplement1AtLeast.Formato(operation.Type));
+
             operation.AssertIsValid(); 
 
             operations.GetOrCreate(operation.Type)[operation.Key] = operation;
@@ -127,31 +130,29 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
         {
-            return (from k in EnumLogic<OperationDN>.Keys
-                    let o = TryFind(entityType, k) as IConstructorOperation
-                    where o != null && OnAllowOperation(k)
+            return (from o in TypeOperations(entityType)
+                    where o is IConstructorOperation && OnAllowOperation(o.Key)
                     select ToOperationInfo(o, null)).ToList();
         }
 
         public static List<OperationInfo> ServiceGetQueryOperationInfos(Type entityType)
         {
-            return (from k in EnumLogic<OperationDN>.Keys
-                    let cfm = TryFind(entityType, k) as IConstructorFromManyOperation
-                    where cfm != null && OnAllowOperation(k)
-                    select ToOperationInfo(cfm, null)).ToList();
+            return (from o in TypeOperations(entityType)
+                    where o is IConstructorOperation && OnAllowOperation(o.Key)
+                    select ToOperationInfo(o, null)).ToList();
         }
 
         public static List<OperationInfo> ServiceGetEntityOperationInfos(IdentifiableEntity entity)
         {
-            return (from k in EnumLogic<OperationDN>.Keys
-                    let eo = TryFind(entity.GetType(), k) as IEntityOperation
-                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OnAllowOperation(k)
+            return (from o in TypeOperations(entity.GetType())
+                    let eo = o as IEntityOperation
+                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OnAllowOperation(o.Key)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
         }
 
         public static List<OperationInfo> GetAllOperationInfos(Type entityType)
         {
-            return EnumLogic<OperationDN>.Keys.Select(k => TryFind(entityType, k)).NotNull().Select(o => ToOperationInfo(o, null)).ToList();
+            return TypeOperations(entityType).Select(o => ToOperationInfo(o, null)).ToList();
         }
 
         #region Execute
@@ -324,13 +325,13 @@ namespace Signum.Engine.Operations
 
             IOperation result = type.FollowC(t => t.BaseType)
                 .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
-                .Select(t => operations.TryGetC(t).TryGetC(operationKey)).FirstOrDefault();
+                .Select(t => operations.TryGetC(t).TryGetC(operationKey)).NotNull().FirstOrDefault();
 
             if (result != null)
                 return result;
 
             List<Type> interfaces = type.GetInterfaces()
-                .Where(t => typeof(IdentifiableEntity).IsAssignableFrom(t) && operations.TryGetC(t).TryGetC(operationKey) != null)
+                .Where(t => typeof(IIdentifiable).IsAssignableFrom(t) && operations.TryGetC(t).TryGetC(operationKey) != null)
                 .ToList();
 
             if (interfaces.Count > 1)
@@ -340,6 +341,23 @@ namespace Signum.Engine.Operations
                 return null;
 
             return operations[interfaces.Single()][operationKey];
+        }
+
+        static List<IOperation> TypeOperations(Type type)
+        {
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                throw new ApplicationException(Resources.Type0HasToImplement1AtLeast.Formato(type, typeof(IIdentifiable)));
+
+            HashSet<Enum> result = type.FollowC(t => t.BaseType)
+                    .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
+                    .Select(t => operations.TryGetC(t)).NotNull().SelectMany(d=>d.Keys).ToHashSet();
+
+            result.UnionWith(type.GetInterfaces()
+                .Where(t => typeof(IIdentifiable).IsAssignableFrom(t))
+                .Select(t => operations.TryGetC(t))
+                .NotNull().SelectMany(d => d.Keys));
+
+            return result.Select(a => TryFind(type, a)).ToList();
         }
 
         public static T GetArg<T>(this object[] args, int pos)

@@ -1,26 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Help TargetAssembly="Signum.Entities" Language="es-ES">
-  <SeeAlso Text="Entities" Link="$help$/Signum.Entities.htm"/>
-  <Namespace Name="Signum.Entities">
-    <SeeAlso Text="Entities" Link="$help$/Signum.Entities.htm"/>
-    <Entity Name="CalendarDN">
-      <Description>A labour day calendar that can be used for [ScheduleTaskDN]</Description>
-      <Properties>
-        <Property Name="Name">The Name of the Calendar</Property>
-        <Property Name="Holidays">A collection of [HolydayDN]</Property>
-      </Properties>
-      <Operations>
-        <Operation Key="CalendarOperations.Remove">Remove the Calendar from the database</Operation>
-      </Operations>
-      <Queries>
-        <Query Key="CalendarDN">Default queries for calendars</Query>
-        <Query Key="CalendarQueries.RemovedCalendars">Shows all the removed calendars</Query>
-      </Queries>
-    </Entity>
-  </Namespace>
-  <Namespace Name="Signum">
-    <Entity Name="NotaDN">
-      <Description>Es una nota pa tus cosilla, si quieres que te avise usa una [AlertaDN]</Description>
-    </Entity>
-  </Namespace>
-</Help>
+<Entity FullName="Signum.EntitiesCalendarDN" Language="es-ES">
+  <Description>A labour day calendar that can be used for [ScheduleTaskDN]</Description>
+  <Properties>
+    <Property Name="Name">The Name of the Calendar</Property>
+    <Property Name="Holidays">A collection of [HolydayDN]</Property>
+  </Properties>
+  <Operations>
+    <Operation Key="CalendarOperations.Remove">Remove the Calendar from the database</Operation>
+  </Operations>
+  <Queries>
+    <Query Key="CalendarDN">Default queries for calendars</Query>
+    <Query Key="CalendarQueries.RemovedCalendars">Shows all the removed calendars</Query>
+  </Queries>
+</Entity>

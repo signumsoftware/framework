@@ -79,29 +79,16 @@ namespace Signum.Web.Authorization
             }
         }
 
-        static void TaskAuthorizeProperties(BaseLine bl, Type type, TypeContext context)
+        static void TaskAuthorizeProperties(BaseLine bl, TypeContext context)
         {
-            List<PropertyInfo> contextList = context.GetPath();
-
-            if (contextList.Count > 0)
+            if (context.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
             {
-                string path = ((IEnumerable<PropertyInfo>)contextList).Reverse()
-                    .ToString(a => a.Map(p =>
-                        p.Name == "Item" && p.GetIndexParameters().Length > 1 ? "/" : p.Name), ".");
-
-                path = path.Replace("./.", "/");
-
-                Type parentType = contextList.Last().DeclaringType;
-
-                switch (PropertyAuthLogic.GetPropertyAccess(parentType, path))
+                switch (PropertyAuthLogic.GetPropertyAccess(context.PropertyRoute))
                 {
                     case Access.None: 
                         bl.Visible = false; 
                         break;
                     case Access.Read:
-                        //if (bl.StyleContext == null)
-                        //    bl.StyleContext = new StyleContext();
-                        //bl.StyleContext.ReadOnly = true;
                         bl.SetReadOnly();
                         break;
                     case Access.Modify: 
