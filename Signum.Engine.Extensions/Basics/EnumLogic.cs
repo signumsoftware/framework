@@ -100,7 +100,12 @@ namespace Signum.Engine.Basics
 
         public static Enum ToEnum(string keyName)
         {
-            return toEnum.GetOrThrow(keyName, Resources.NotValueFor0IsNotFoundIn1Table.Formato(keyName, typeof(T).Name)); 
+            return ToEnum(keyName, true);
+        }
+        public static Enum ToEnum(string keyName, bool throwException)
+        {
+            return throwException ? toEnum.GetOrThrow(keyName, Resources.NotValueFor0IsNotFoundIn1Table.Formato(keyName, typeof(T).Name))
+                : toEnum[keyName]; 
         }
 
         internal static IEnumerable<T> AllEntities()

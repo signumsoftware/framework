@@ -31,7 +31,7 @@ namespace Signum.Engine.Basics
 
         public static object ToQueryName(string uniqueQueryName)
         {
-            return QueryNames.GetOrThrow(uniqueQueryName, "No query with name '{0}' found".Formato(uniqueQueryName));
+            return QueryNames[uniqueQueryName];
         }
 
         static void Schema_Initializing(Schema sender)

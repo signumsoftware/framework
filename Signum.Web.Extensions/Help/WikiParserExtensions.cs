@@ -115,19 +115,27 @@ namespace Signum.Web.Extensions
 
                         case WikiFormat.OperationLink:
                             Enum operation = EnumLogic<OperationDN>.ToEnum(link);
-                            result = new WikiLink(HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.','_'), text.HasText() ? text : operation.NiceToString()).ToHtmlString();
+                            result = new WikiLink(operation != null ?
+                                HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.','_') : link,
+                                text.HasText() ? text : (operation != null ? operation.NiceToString() : link),
+                                operation != null ? "" : "unavailable").ToHtmlString();
                             break;
 
                         case WikiFormat.PropertyLink:
                             string[] parts = link.Split('.');
-                            Type type = HelpLogic.GetNameToType(parts[0], true);
+                            Type type = HelpLogic.GetNameToType(parts[0], false);
                             //TODO: NiceToString de la propiedad
-                            result = new WikiLink(HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1], text.HasText() ? text : parts[1]).ToHtmlString();
+                            result = new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
+                                text.HasText() ? text : parts[1],
+                                type != null ? "" : "unavailable").ToHtmlString();
                             break;
 
                         case WikiFormat.QueryLink:
                             Enum query = (Enum)QueryLogic.ToQueryName(link);
-                            result = new WikiLink(HelpLogic.EntityUrl(EnumLogic<OperationDN>.ToEntity(query).GetType()) + "#" + "q-" + QueryUtils.GetQueryName(query).Replace('.', '_'), text.HasText() ? text : QueryUtils.GetNiceQueryName(query)).ToHtmlString();
+                            result = new WikiLink(
+                                query != null ? HelpLogic.EntityUrl(EnumLogic<OperationDN>.ToEntity(query).GetType()) + "#" + "q-" + QueryUtils.GetQueryName(query).Replace('.', '_') : link,
+                                text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
+                                query != null ? "" : "unavailable").ToHtmlString();
                             break;
 
                         case WikiFormat.WikiLink:
