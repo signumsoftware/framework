@@ -173,7 +173,7 @@ namespace Signum.Web
             return new SelectListItem { Text = lite.ToStr, Value = lite.Id.ToString(), Selected = selected };
         }
 
-        public static string ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite selectedElement) where T : class, IIdentifiable
+        public static string ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IIdentifiable
         {
 
             List<SelectListItem> list = new List<SelectListItem>();
@@ -181,7 +181,7 @@ namespace Signum.Web
             if (selectedElement == null)
                 list.Add(new SelectListItem { Text = "-", Value = "" });
 
-            list.AddRange(lites.Select(l => l.ToSelectListItem(l == selectedElement)));
+            list.AddRange(lites.Select(l => l.ToSelectListItem(l.Is(selectedElement))));
      
             return list.ToString(RenderOption, "\r\n");
         }

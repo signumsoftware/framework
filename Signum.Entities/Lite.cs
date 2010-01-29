@@ -416,7 +416,7 @@ namespace Signum.Entities
             if (lite1 == null || lite2 == null)
                 return false;
 
-            if (lite1.GetType() != lite2.GetType())
+            if (lite1.RuntimeType != lite2.RuntimeType)
                 return false;
 
             if (lite1.IdOrNull != null && lite2.IdOrNull != null)
