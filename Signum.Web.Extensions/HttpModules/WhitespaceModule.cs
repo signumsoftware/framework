@@ -10,6 +10,7 @@ namespace Signum.Web.Extensions.HttpModules
 {
     /// <summary>
     /// Removes whitespace from the webpage.
+    /// Warning: Textarea content can be modified when removing \n, so be careful.
     /// </summary>
     public class WhitespaceModule : IHttpModule
     {
