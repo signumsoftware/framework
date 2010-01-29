@@ -212,7 +212,7 @@ namespace Signum.Windows
         Column entityColumn;
         ResultTable resultTable;
         public ResultTable ResultTable { get { return resultTable; } }
-
+        
         public static readonly RoutedEvent QueryResultChangedEvent = EventManager.RegisterRoutedEvent(
             "QueryResultChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SearchControl));
         public event RoutedEventHandler QueryResultChanged
@@ -232,36 +232,35 @@ namespace Signum.Windows
 
             settings = Navigator.GetQuerySettings(QueryName);
 
-            QueryDescription view = Navigator.Manager.GetQueryDescription(QueryName);
+            QueryDescription description = Navigator.Manager.GetQueryDescription(QueryName);
 
-            entityColumn = view.Columns.SingleOrDefault(a => a.IsEntity);
+            entityColumn = description.StaticColumns.SingleOrDefault(a => a.IsEntity);
             if (entityColumn != null)
             {
                 SetValue(EntityTypeKey, Reflector.ExtractLite(entityColumn.Type));
 
-                if (this.NotSet(ViewProperty) && View && view.EntityImplementations == null)
+                if (this.NotSet(ViewProperty) && View && entityColumn.Implementations == null)
                     View = Navigator.IsViewable(EntityType, IsAdmin);
 
-                if (this.NotSet(CreateProperty) && Create && view.EntityImplementations == null)
+                if (this.NotSet(CreateProperty) && Create && entityColumn.Implementations == null)
                     Create = Navigator.IsCreable(EntityType, IsAdmin);
 
-                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly && view.EntityImplementations == null)
+                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly && entityColumn.Implementations == null)
                     ViewReadOnly = Navigator.IsReadOnly(EntityType, IsAdmin);
             }
 
-            Navigator.Manager.SetColumns(QueryName, FilterOptions);
+            Navigator.Manager.SetTokens(QueryName, FilterOptions);
 
             foreach (var fo in FilterOptions)
             {
                 fo.ValueChanged += new EventHandler(fo_ValueChanged);
             }
 
-            filterBuilder.Columns = view.Columns.Where(a => a.Filterable).ToList();
-            filterBuilder.Filters = new ObservableCollection<FilterOption>(FilterOptions);
+            //filterBuilder.Filters = new ObservableCollection<FilterOption>(FilterOptions);
 
-            Navigator.Manager.SetColumns(QueryName, OrderOptions); 
+            Navigator.Manager.SetTokens(QueryName, OrderOptions); 
 
-            GenerateListViewColumns(view);
+            GenerateListViewColumns(description);
 
             adorners = OrderOptions.Select((o, i) => new ColumnOrderInfo(
                 gvResults.Columns.Select(c => (GridViewColumnHeader)c.Header).Single(c => ((Column)c.Tag).Name == o.ColumnName),
@@ -286,6 +285,28 @@ namespace Signum.Windows
                 else
                     IsVisibleChanged += SearchControl_IsVisibleChanged;
             }
+        }
+
+        private void btCreateFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (tokenBuilder.Token == null)
+            {
+                MessageBox.Show(Properties.Resources.NoFilterSelected);
+                return;
+            }
+
+            FilterType ft = QueryUtils.GetFilterType(tokenBuilder.Token.Type);
+
+            FilterOption f = new FilterOption
+            {
+                Token = tokenBuilder.Token,
+                Value = null,
+                Operation = QueryUtils.GetFilterOperations(ft).First()
+            };
+            
+            FilterOptions.Add(f);
+
+            filterBuilder.RefreshFirstColumn();
         }
 
         DispatcherTimer timer;
@@ -328,7 +349,7 @@ namespace Signum.Windows
         {
             gvResults.Columns.Clear();
 
-            foreach (var c in view.Columns.Where(c=>c.Visible))
+            foreach (var c in view.StaticColumns.Where(c=>c.Visible))
             {
                 Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
                 DataTemplate dt = settings.GetFormatter(c)(b);
@@ -362,7 +383,7 @@ namespace Signum.Windows
             int? limit = MaxItemsCount;
 
             Async.Do(this.FindCurrentWindow(),
-                () => resultTable = Server.Return((IQueryServer s) => s.GetQueryResult(vn, filters, orders, limit)),
+                () => resultTable = Server.Return((IQueryServer s) => s.GetQueryResult(vn, null, filters, orders, limit)),
                 () =>
                 {
                     if (resultTable != null)
@@ -393,7 +414,7 @@ namespace Signum.Windows
 
         public List<Filter> CurrentFilters()
         {
-            var filters = filterBuilder.Filters.Select(f => f.ToFilter()).ToList();
+            var filters = FilterOptions.Select(f => f.ToFilter()).ToList();
             return filters;
         }
 
@@ -540,7 +561,7 @@ namespace Signum.Windows
                 {
                     return new FilterOption
                     {
-                        Column = column,
+                        Token = QueryToken.NewColumn(column),
                         Operation = FilterOperation.EqualTo,
                         Value = row[column]
                     };
@@ -549,7 +570,7 @@ namespace Signum.Windows
 
             return new FilterOption
             {
-                Column = column,
+                Token = QueryToken.NewColumn(column),
                 Operation = FilterOperation.EqualTo,
                 Value = FilterOption.DefaultValue(column.Type),
             };

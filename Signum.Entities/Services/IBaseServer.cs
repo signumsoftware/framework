@@ -28,13 +28,13 @@ namespace Signum.Services
         List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list);
 
         [OperationContract, NetDataContract]
-        List<Lite> RetrieveAllLite(Type liteType, Type[] types);
+        List<Lite> RetrieveAllLite(Type liteType, Implementations implementations);
 
         [OperationContract, NetDataContract]
-        List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count);
+        List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count);
 
         [OperationContract, NetDataContract]
-        Type[] FindImplementations(Type type, MemberInfo[] members);
+        Implementations FindImplementations(PropertyRoute entityPath);
 
         [OperationContract, NetDataContract]
         Dictionary<Type, TypeDN> ServerTypes();

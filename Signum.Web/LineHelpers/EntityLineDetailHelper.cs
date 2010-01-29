@@ -107,7 +107,7 @@ namespace Signum.Web
 
             EntityLineDetail el = new EntityLineDetail(helper.GlobalName(context.Name));
             Navigator.ConfigureEntityBase(el, runtimeType, false);
-            Common.FireCommonTasks(el, typeof(T), context);
+            Common.FireCommonTasks(el, context);
 
             if (settingsModifier != null)
                 settingsModifier(el);

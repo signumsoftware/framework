@@ -110,6 +110,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="DynamicQuery\QueryTokenBuilder.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DynamicQuery\QueryTokenRenderer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SelectorWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -262,6 +270,13 @@
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
+    <Compile Include="Converters\PropertyRouteConverter.cs" />
+    <Compile Include="DynamicQuery\QueryTokenBuilder.xaml.cs">
+      <DependentUpon>QueryTokenBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\QueryTokenRenderer.xaml.cs">
+      <DependentUpon>QueryTokenRenderer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DynamicQuery\SortAdorner.cs" />
     <Compile Include="Fluent\BindExtensions.cs" />
     <Compile Include="Fluent\ControlExtensions.cs" />
@@ -306,7 +321,6 @@
     <Compile Include="Facades\EntitySettings.cs" />
     <Compile Include="MarkupExtensions\LazyExtension.cs" />
     <Compile Include="MarkupExtensions\PackUriExtension.cs" />
-    <Compile Include="TypeContext.cs" />
     <Compile Include="Controls\ColorPicker.cs" />
     <Compile Include="Controls\ColorUtils\ColorSelector.xaml.cs">
       <DependentUpon>ColorSelector.xaml</DependentUpon>

@@ -188,6 +188,22 @@ namespace Signum.Utilities.Reflection
             return ex.Method;
         }
 
+        public static object GenericInvoke(this MethodInfo mi, Type[] typeArguments, object obj, object[] parameters)
+        {
+            if (!mi.IsGenericMethodDefinition)
+                throw new ArgumentException("mi should be a Generic Method Definition");
+
+            try
+            {
+                MethodInfo methodInfo = mi.MakeGenericMethod(typeArguments);
+                return methodInfo.Invoke(obj, parameters); 
+            }
+            catch (TargetInvocationException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
+
 
         public static Type GetReceiverType<T, R>(Expression<Func<T, R>> lambda)
         {

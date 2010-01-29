@@ -148,7 +148,7 @@ namespace Signum.Engine.Maps
                     return GenerateFieldValue(type, fi, fieldType, name);
                 case KindOfField.Reference:
                     {
-                        Attribute at = Settings.GetReferenceFieldType(type, fi, Reflector.ExtractLite(fieldType) ?? fieldType);
+                        Implementations at = Settings.GetImplementations(type, fi);
                         if (at == null)
                             return GenerateFieldReference(type, fi, fieldType, name);
                         else if (at is ImplementedByAttribute)

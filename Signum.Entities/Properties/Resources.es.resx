@@ -117,6 +117,36 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="HaveANumberOfElements01" xml:space="preserve">
+    <value>have a number of elements {0} {1}</value>
+  </data>
+  <data name="QueryUtilsFindImplementationsCallbackNotSet" xml:space="preserve">
+    <value>QueryUtils.FindImplementations callback no establecida</value>
+  </data>
+  <data name="As0" xml:space="preserve">
+    <value>As {0}</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Año</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>Mes</value>
+  </data>
+  <data name="Day" xml:space="preserve">
+    <value>Dia</value>
+  </data>
+  <data name="Hour" xml:space="preserve">
+    <value>Hora</value>
+  </data>
+  <data name="Minute" xml:space="preserve">
+    <value>Minuto</value>
+  </data>
+  <data name="Second" xml:space="preserve">
+    <value>Segundo</value>
+  </data>
+  <data name="Millisecond" xml:space="preserve">
+    <value>Milisegundo</value>
+  </data>
   <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
     <value>La longitud de {{0}} ha de ser menor o igual a {0}</value>
   </data>
@@ -318,5 +348,11 @@
   </data>
   <data name="TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery" xml:space="preserve">
     <value>El Lite {0} no está cargado, usa Database.Retrieve o considera reescribir tu query</value>
+  </data>
+  <data name="IdentifiableEntity_ToStr" xml:space="preserve">
+    <value>[Texto]</value>
+  </data>
+  <data name="Count" xml:space="preserve">
+    <value>[Num]</value>
   </data>
 </root>

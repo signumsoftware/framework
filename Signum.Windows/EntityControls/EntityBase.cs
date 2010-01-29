@@ -36,12 +36,12 @@ namespace Signum.Windows
             }
         }
 
-        protected Type[] safeImplementations;
+        protected Implementations safeImplementations;
         public static readonly DependencyProperty ImplementationsProperty =
-            DependencyProperty.Register("Implementations", typeof(Type[]), typeof(EntityBase), new UIPropertyMetadata((d, e) => ((EntityBase)d).safeImplementations = (Type[])e.NewValue));
-        public Type[] Implementations
+            DependencyProperty.Register("Implementations", typeof(Implementations), typeof(EntityBase), new UIPropertyMetadata((d, e) => ((EntityBase)d).safeImplementations = (Implementations)e.NewValue));
+        public Implementations Implementations
         {
-            get { return (Type[])GetValue(ImplementationsProperty); }
+            get { return (Implementations)GetValue(ImplementationsProperty); }
             set { SetValue(ImplementationsProperty, value); }
         }
 
@@ -282,6 +282,16 @@ namespace Signum.Windows
             UpdateVisibility();
         }
 
+        public Type SelectType()
+        {
+            if (Implementations == null)
+                return CleanType;
+            else if (Implementations.IsByAll)
+                throw new InvalidOperationException("ImplementedByAll is not supported for this operation, override the event");
+            else
+                return Navigator.SelectType(this.FindCurrentWindow(), ((ImplementedByAttribute)Implementations).ImplementedTypes);
+        }
+
         protected object OnCreate()
         {
             if (!CanCreate())
@@ -290,10 +300,10 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = Implementations == null ? CleanType : Navigator.SelectType(this.FindCurrentWindow(), Implementations);
+                Type type = SelectType();
                 if (type == null)
                     return null;
-
+                   
                 object entity = Constructor.Construct(type, this.FindCurrentWindow());
 
                 value = Server.Convert(entity, Type);
@@ -320,7 +330,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = Implementations == null ? CleanType : Navigator.SelectType(this.FindCurrentWindow(), Implementations);
+                Type type = SelectType();
                 if (type == null)
                     return null;
 
@@ -335,7 +345,7 @@ namespace Signum.Windows
             return Server.Convert(value, Type);
         }
 
-        public virtual TypeContext GetEntityTypeContext()
+        public virtual PropertyRoute GetEntityTypeContext()
         {
             return Common.GetTypeContext(this);
         }

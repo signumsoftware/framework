@@ -23,14 +23,7 @@ namespace Signum.Utilities.Reflection
         //You can acces them in a untypef fashion using IMemberEntry 
         public static IList GenerateIList(Type type, MemberOptions options)
         {
-            try
-            {
-                return ((IList)mi1.MakeGenericMethod(type).Invoke(null, new object[] { options }));
-            }
-            catch (TargetInvocationException te)
-            {
-                throw te.InnerException;
-            }
+            return (IList)mi1.GenericInvoke(new[] { type }, null, new object[] { options });
         }
 
         public static List<MemberEntry<T>> GenerateList<T>()

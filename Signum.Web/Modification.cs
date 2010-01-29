@@ -150,8 +150,6 @@ namespace Signum.Web
             if (!prefix.HasText())
                 return null;
 
-            //EntityInfo entityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.Info)]);
-
             string originalPrefix = prefix;
 
             int propertyStart = prefix.LastIndexOf(TypeContext.Separator);

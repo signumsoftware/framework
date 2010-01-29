@@ -166,7 +166,7 @@ namespace Signum.Engine
         static readonly MethodInfo miRetrieveAll = ReflectionTools.GetMethodInfo(()=>RetrieveAll<TypeDN>()).GetGenericMethodDefinition();
         public static List<IdentifiableEntity> RetrieveAll(Type type)
         {
-            IList list = (IList)miRetrieveAll.MakeGenericMethod(type).Invoke(null, null);
+            IList list = (IList)miRetrieveAll.GenericInvoke(new[] { type }, null, null);
             return list.Cast<IdentifiableEntity>().ToList();
         }
 
@@ -179,7 +179,7 @@ namespace Signum.Engine
         static readonly MethodInfo miRetrieveAllLite = ReflectionTools.GetMethodInfo(() => Database.RetrieveAllLite<TypeDN>()).GetGenericMethodDefinition();
         public static List<Lite> RetrieveAllLite(Type type)
         {
-            IList list = (IList)miRetrieveAllLite.MakeGenericMethod(type).Invoke(null, null);
+            IList list = (IList)miRetrieveAllLite.GenericInvoke(new[] { type }, null, null);
             return list.Cast<Lite>().ToList();
         }
 

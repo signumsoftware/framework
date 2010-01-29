@@ -171,7 +171,7 @@ namespace Signum.Engine.Maps
                 return Index.Unique;
         }
 
-        internal Attribute GetReferenceFieldType(Type type, FieldInfo fi, Type entityType)
+        internal Implementations GetImplementations(Type type, FieldInfo fi)
         {
             var fieldAtt = FieldInfoAttributes(type, fi);
 
@@ -183,6 +183,10 @@ namespace Signum.Engine.Maps
 
             if (ib != null) return ib;
             if (iba != null) return iba;
+
+            Type entityType = fi.FieldType;
+            entityType = ReflectionTools.CollectionType(entityType) ?? entityType;
+            entityType = Reflector.ExtractLite(entityType) ?? entityType; 
 
             var typeAtt = TypeAttributes(entityType);
 

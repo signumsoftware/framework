@@ -40,8 +40,14 @@ namespace Signum.Entities
         UniqueMultiNulls
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
-    public sealed class ImplementedByAttribute : Attribute
+    [Serializable]
+    public abstract class Implementations : Attribute
+    {
+        public abstract bool IsByAll { get; }
+    }
+
+    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
+    public sealed class ImplementedByAttribute : Implementations
     {
         Type[] implementedTypes;
 
@@ -54,13 +60,23 @@ namespace Signum.Entities
         {
             implementedTypes = types;
         }
+
+        public override bool IsByAll
+        {
+            get { return false; }
+        }
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
-    public sealed class ImplementedByAllAttribute : Attribute
+    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Interface)]
+    public sealed class ImplementedByAllAttribute : Implementations
     {
         public ImplementedByAllAttribute()
         {
+        }
+
+        public override bool IsByAll
+        {
+            get { return true; }
         }
     }
 

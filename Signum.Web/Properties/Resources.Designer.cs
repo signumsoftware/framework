@@ -61,6 +61,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Abstract Context has not Route.
+        /// </summary>
+        internal static string AbstractContextHasNotRoute {
+            get {
+                return ResourceManager.GetString("AbstractContextHasNotRoute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alerts.
         /// </summary>
         internal static string Alerts {
@@ -115,11 +124,11 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter Column {0} not found or found more than once in query description.
+        ///   Looks up a localized string similar to Expression cannot finish with an type with implementations {{0}}.
         /// </summary>
-        internal static string FilterColumn0NotFoundOrFoundMoreThanOnce {
+        internal static string ExpressionCannotFinishWithAnTypeWithImplementations0 {
             get {
-                return ResourceManager.GetString("FilterColumn0NotFoundOrFoundMoreThanOnce", resourceCulture);
+                return ResourceManager.GetString("ExpressionCannotFinishWithAnTypeWithImplementations0", resourceCulture);
             }
         }
         
@@ -358,11 +367,47 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to type {0} has to be abstract (not in the schema).
+        /// </summary>
+        internal static string Type0HasToBeAbstractNotInTheSchema {
+            get {
+                return ResourceManager.GetString("Type0HasToBeAbstractNotInTheSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to type {0} has to be IIdentifiable at least.
+        /// </summary>
+        internal static string Type0HasToBeIIdentifiableAtLeast {
+            get {
+                return ResourceManager.GetString("Type0HasToBeIIdentifiableAtLeast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to type {0} has to be in the schema.
+        /// </summary>
+        internal static string Type0HasToBeInTheSchema {
+            get {
+                return ResourceManager.GetString("Type0HasToBeInTheSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type {0} not found in the schema.
         /// </summary>
         internal static string Type0NotFoundInTheSchema {
             get {
                 return ResourceManager.GetString("Type0NotFoundInTheSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TypeSubContext can not be created: {0}.
+        /// </summary>
+        internal static string TypeSubContextCanNotBeCreated0 {
+            get {
+                return ResourceManager.GetString("TypeSubContextCanNotBeCreated0", resourceCulture);
             }
         }
         

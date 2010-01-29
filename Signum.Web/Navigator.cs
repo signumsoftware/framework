@@ -427,6 +427,7 @@ namespace Signum.Web
         public string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
         public string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
         public string SearchResultsUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchResults.ascx";
+        public string FilterBuilderUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.FilterBuilder.ascx";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
@@ -469,7 +470,8 @@ namespace Signum.Web
                 UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, "UrlQueryNames");
             }
 
-            ModelBinders.Binders.DefaultBinder = new LiteModelBinder(); 
+            ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
+            ModelBinders.Binders.Add(typeof(Implementations), new ImplementationsModelBinder());
         }
 
         HashSet<string> loadedModules = new HashSet<string>();
@@ -557,7 +559,7 @@ namespace Signum.Web
             if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
             {
                 TypeContext entityTC = (TypeContext)(object)entity;
-                cleanType = Reflector.ExtractLite(entityTC.ContextType) ?? entityTC.ContextType;
+                cleanType = Reflector.ExtractLite(entityTC.Type) ?? entityTC.Type;
             }
 
             string url = partialViewName ??
@@ -586,7 +588,7 @@ namespace Signum.Web
             if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
             {
                 TypeContext entityTC = (TypeContext)(object)entity;
-                cleanType = Reflector.ExtractLite(entityTC.ContextType) ?? entityTC.ContextType;
+                cleanType = Reflector.ExtractLite(entityTC.Type) ?? entityTC.Type;
             }
 
             string url = partialViewName ??
@@ -612,14 +614,13 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
 
-            List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
+            List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
 
             foreach (FilterOption opt in findOptions.FilterOptions)
             {
-                opt.Column = queryDescription.Columns.Where(c => c.Name == opt.ColumnName)
-                    .Single(Resources.FilterColumn0NotFoundOrFoundMoreThanOnce.Formato(opt.ColumnName));
+                opt.Token = QueryToken.Parse(findOptions.QueryName, queryDescription, opt.ColumnName);
             }
 
             //controller.ViewData[ViewDataKeys.SearchResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.SearchResourcesRoute] ?? "../../";
@@ -647,8 +648,8 @@ namespace Signum.Web
 
         protected internal virtual Lite FindUnique(FindUniqueOptions options)
         {
-            SetColumns(options.QueryName, options.FilterOptions);
-            SetColumns(options.QueryName, options.OrderOptions);
+            SetTokens(options.QueryName, options.FilterOptions);
+            SetTokens(options.QueryName, options.OrderOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
             var orders = options.OrderOptions.Select(o => o.ToOrder()).ToList();
@@ -658,34 +659,32 @@ namespace Signum.Web
 
         protected internal virtual int QueryCount(CountOptions options)
         {
-            SetColumns(options.QueryName, options.FilterOptions);
+            SetTokens(options.QueryName, options.FilterOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
 
             return DynamicQueryManager.Current.ExecuteQueryCount(options.QueryName, filters);
         }
 
-        protected internal void SetColumns(object queryName, List<FilterOption> filters)
+        protected internal void SetTokens(object queryName, List<FilterOption> filters)
         {
-            QueryDescription view = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            Column entity = view.Columns.SingleOrDefault(a => a.IsEntity);
+            Column entity = queryDescription.StaticColumns.SingleOrDefault(a => a.IsEntity);
 
             foreach (var f in filters)
             {
-                f.Column = view.Columns.Where(c => c.Name == f.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(f.ColumnName, queryName));
+                f.Token = QueryToken.Parse(queryName, queryDescription, f.ColumnName);
             }
         }
 
-        public void SetColumns(object queryName, IEnumerable<OrderOption> orders)
+        public void SetTokens(object queryName, IEnumerable<OrderOption> orders)
         {
-            QueryDescription view = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
             foreach (var o in orders)
             {
-                o.Column = view.Columns.Where(c => c.Name == o.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(o.ColumnName, queryName));
+                o.Token = QueryToken.Parse(queryName, queryDescription, o.ColumnName);
             }
         }
 
@@ -693,9 +692,9 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Type entitiesType = Reflector.ExtractLite(queryDescription.Columns.Single(a => a.IsEntity).Type);
+            Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
 
-            List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
+            List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
 
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
@@ -740,7 +739,7 @@ namespace Signum.Web
             var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
             var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
 
-            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, filters, orders, top);
+            ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, null, filters, orders, top);
 
             //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
             controller.ViewData[ViewDataKeys.Results] = queryResult;
@@ -749,7 +748,7 @@ namespace Signum.Web
 
             if (queryResult != null && queryResult.Rows != null && queryResult.Rows.Length > 0 && queryResult.VisibleColumns.Count() > 0)
             {
-                int entityColumnIndex = queryResult.Columns.IndexOf(c => c.IsEntity);
+                int entityColumnIndex = queryResult.StaticColumns.IndexOf(c => c.IsEntity);
                 controller.ViewData[ViewDataKeys.EntityColumnIndex] = entityColumnIndex;
             }
 
@@ -785,7 +784,7 @@ namespace Signum.Web
                 name = parameters[nameKey];
                 value = parameters["val" + index.ToString()];
                 operation = parameters["sel" + index.ToString()];
-                type = queryDescription.Columns
+                type = queryDescription.StaticColumns
                            .SingleOrDefault(c => c.Name == name)
                            .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
                            .Type;
@@ -814,8 +813,7 @@ namespace Signum.Web
 
                 result.Add(new Filter
                 {
-                    Name = name, 
-                    Type = type,
+                    Token = QueryToken.Parse(queryName, queryDescription, name),
                     Operation = filterOperation,
                     Value = value,
                 });

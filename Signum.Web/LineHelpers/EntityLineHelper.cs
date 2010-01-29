@@ -14,6 +14,7 @@ using System.Configuration;
 using Signum.Engine;
 using Signum.Web.Properties;
 using Signum.Utilities.Reflection;
+using Signum.Web.Controllers;
 #endregion
 
 namespace Signum.Web
@@ -66,12 +67,20 @@ namespace Signum.Web
                     }));
 
                 if (settings.Autocomplete && Navigator.NameToType.ContainsKey(cleanStaticType.Name))
+                {
+                    if (settings.Implementations != null && settings.Implementations.IsByAll)
+                        throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
+
                     sb.AppendLine(helper.AutoCompleteExtender(TypeContext.Compose(prefix, EntityLineKeys.DDL),
-                                                      TypeContext.Compose(prefix, EntityBaseKeys.ToStr),
-                                                      cleanStaticType.Name,
-                                                      (settings.Implementations != null) ? settings.Implementations.ToString(t => t.Name, ",") : "",
-                                                      TypeContext.Compose(prefix, TypeContext.Id),
-                                                      "Signum/Autocomplete", 1, 5, 500, settings.OnChangedTotal.HasText() ? settings.OnChangedTotal : "''"));
+                                     TypeContext.Compose(prefix, EntityBaseKeys.ToStr),
+                                     cleanStaticType.Name,
+                                     ImplementationsModelBinder.Render(settings.Implementations),
+                                     TypeContext.Compose(prefix, TypeContext.Id),
+                                     "Signum/Autocomplete", 1, 5, 500, settings.OnChangedTotal.HasText() ? settings.OnChangedTotal : "''"));
+
+
+                }
+   
             }
             else
             {
@@ -141,7 +150,7 @@ namespace Signum.Web
             
             EntityLine el = new EntityLine(helper.GlobalName(context.Name));
             Navigator.ConfigureEntityBase(el, runtimeType, false);
-            Common.FireCommonTasks(el, typeof(T), context);
+            Common.FireCommonTasks(el, context);
 
             if (settingsModifier != null)
                 settingsModifier(el);

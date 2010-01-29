@@ -47,7 +47,7 @@ namespace Signum.Web
             }
         }
 
-        public Type[] Implementations { get; set; }
+        public Implementations Implementations { get; set; }
         
         public bool View { get; set; }
         public bool Create { get; set; }

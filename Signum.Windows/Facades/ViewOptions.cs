@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Markup;
 using System.Windows.Controls;
 using System.Windows;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -26,7 +27,7 @@ namespace Signum.Windows
             Clone = true;
         }
 
-        public TypeContext TypeContext { get; set; }
+        public PropertyRoute TypeContext { get; set; }
 
         internal override ViewButtons GetViewButtons()
         {

@@ -11,6 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -102,10 +103,10 @@ namespace Signum.Windows
         private void Grid_Initialized(object sender, EventArgs e)
         {
             Grid grid = (Grid)sender;
-            
-            TypeContext tc = Common.GetTypeContext(grid);
 
-            Common.SetTypeContext(grid, new TypeSubContext(tc.Type.GetProperty("Item"), tc));
+            PropertyRoute tc = Common.GetTypeContext(grid);
+
+            Common.SetTypeContext(grid, tc.Add("Item"));
         }
     }
 

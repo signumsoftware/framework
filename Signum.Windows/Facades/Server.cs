@@ -147,20 +147,20 @@ namespace Signum.Windows
             return Return((IBaseServer s)=>s.RetrieveAll(type)); 
         }
 
-        public static List<Lite> RetrieveAllLite(Type liteType, Type[] types)
+        public static List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
-            return Return((IBaseServer s)=>s.RetrieveAllLite(liteType, types)); 
+            return Return((IBaseServer s)=>s.RetrieveAllLite(liteType, implementations)); 
         }
 
-        public static List<Lite<T>> RetrieveAllLite<T>(Type[] types) where T : class, IIdentifiable
+        public static List<Lite<T>> RetrieveAllLite<T>(Implementations implementations) where T : class, IIdentifiable
         {
-            return Return((IBaseServer s)=>s.RetrieveAllLite(typeof(T), types).Cast<Lite<T>>().ToList()); 
+            return Return((IBaseServer s)=>s.RetrieveAllLite(typeof(T), implementations).Cast<Lite<T>>().ToList()); 
         }
 
 
-        public static List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
+        public static List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
-            return Return((IBaseServer s)=>s.FindLiteLike(liteType, types, subString, count)); 
+            return Return((IBaseServer s)=>s.FindLiteLike(liteType, implementations, subString, count)); 
         }
 
         public static List<T> SaveList<T>(List<T> list)
@@ -169,11 +169,10 @@ namespace Signum.Windows
             return Return((IBaseServer s)=>s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
         }
 
-        public static Type[] FindImplementations(Type liteType, MemberInfo[] implementations)
+        public static Implementations FindImplementations(PropertyRoute propertyRoute)
         {
-            return Return((IBaseServer s)=>s.FindImplementations(liteType, implementations));  
+            return Return((IBaseServer s) => s.FindImplementations(propertyRoute)); 
         }
-
 
         public static object Convert(object obj, Type type)
         {

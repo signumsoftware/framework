@@ -14,12 +14,18 @@ namespace Signum.Entities
     {
         static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();
 
-        public static PropertyPack GetPropertyPack<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
+
+        public static PropertyPack GetOrCreatePropertyPack<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
         {
             return GetPropertyPacks(typeof(T)).TryGetC(ReflectionTools.GetPropertyInfo(property).Name);
         }
 
-        public static PropertyPack GetPropertyPack(Type type, string property)
+        public static PropertyPack GetOrCreatePropertyPack(PropertyInfo pi)
+        {
+            return GetPropertyPacks(pi.DeclaringType).TryGetC(pi.Name);
+        }
+
+        public static PropertyPack GetOrCreatePropertyPack(Type type, string property)
         {
             return GetPropertyPacks(type).TryGetC(property);
         }
@@ -34,7 +40,7 @@ namespace Signum.Entities
                     .Where(p => !Attribute.IsDefined(p.MemberInfo, typeof(HiddenPropertyAttribute)))
                     .ToDictionary(p => p.Name, p => new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter)));
             }
-        }
+        } 
 
         public static bool Is<T>(this PropertyInfo pi, Expression<Func<T>> property)
         {

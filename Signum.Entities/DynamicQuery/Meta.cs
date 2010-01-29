@@ -14,36 +14,29 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class Meta
     {
-
+        public abstract bool IsAllowed();
     }
 
     [Serializable]
     public class CleanMeta : Meta
     {
-        public readonly Type Type;
-        public readonly MemberInfo Member;
-        public readonly CleanMeta Parent;
+        public PropertyRoute PropertyPath; 
 
-        public CleanMeta(Type type, MemberInfo member, CleanMeta parent)
+        public CleanMeta(PropertyRoute propertyPath)
         {
-            this.Type = type;
-            this.Member = member;
-            this.Parent = parent;
+            this.PropertyPath = propertyPath;
         }
 
-        public string PropertyName
+        public override bool IsAllowed()
         {
-            get
-            {
-                if(ReflectionTools.CollectionType(Type)!= null && Member.Name == "Items")
-                    return Parent.PropertyName + "/"; 
-
-                if(Parent != null)
-                    return Parent.PropertyName + "." + Member.Name;
-
-                return Member.Name; 
-            }
+            return PropertyPath.IsAllowed();
         }
+
+        static bool ColumnIsAllowed(UserColumn column)
+        {
+            return column.Token.IsAllowed();
+        }
+
     }
 
     [Serializable]
@@ -56,6 +49,11 @@ namespace Signum.Entities.DynamicQuery
             Properties = properties.OfType<CleanMeta>().Concat(
                 properties.OfType<DirtyMeta>().SelectMany(d => d.Properties))
                 .ToReadOnly();
+        }
+
+        public override bool IsAllowed()
+        {
+            return Properties.All(cm => cm.IsAllowed());
         }
     }
 }

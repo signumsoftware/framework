@@ -888,8 +888,13 @@ namespace Signum.Engine.Linq
                 case ExpressionType.New:
                 {
                     NewExpression nex = (NewExpression)source;
+
                     if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)) && m.Member.Name == "Key")
                         return nex.Arguments[0];
+
+                    if (nex.Type.IsInstantiationOf(typeof(Expandable<>)) && m.Member.Name == "Value")
+                        return nex.Arguments[0];
+
                     MethodInfo mi = ((PropertyInfo)m.Member).GetGetMethod();
                     return nex.Members.Zip(nex.Arguments).Single(p => ReflectionTools.MethodEqual((MethodInfo)p.First, mi)).Second;
                 }

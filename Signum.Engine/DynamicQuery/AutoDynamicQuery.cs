@@ -24,27 +24,27 @@ namespace Signum.Engine.DynamicQuery
 
             metas = DynamicQuery.QueryMetadata(query);
 
-            columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
-                .Select((e, i) => new Column(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();
+            staticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+                .Select((e, i) => new StaticColumn(i, e.MemberInfo, metas[e.MemberInfo.Name], CreateGetter(e.MemberInfo))).ToArray();
         }
 
-        public override ResultTable ExecuteQuery(List<Filter> filters, List<Order> orders, int? limit)
+        public override ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
         {
-            IQueryable<T> result = query.WhereFilters(filters).OrderBy(orders).TryTake(limit);
+            IQueryable<Expandable<T>> result = query.SelectExpandable(userColumns).Where(filters).OrderBy(orders).TryTake(limit);
 
-            List<T> list = result.ToList(); 
+            Expandable<T>[] list = result.ToArray();
 
-            return ToQueryResult(list);
+            return ToQueryResult(list, userColumns);
         }
 
         public override int ExecuteQueryCount(List<Filter> filters)
         {
-            return query.WhereFilters(filters).Count();
+            return query.SelectExpandable(null).Where(filters).Count();
         }
 
         public override Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType)
         {
-            return query.WhereFilters(filters).OrderBy(orders).SelectEntity().Unique(uniqueType);
+            return query.SelectExpandable(null).Where(filters).OrderBy(orders).SelectEntity().Unique(uniqueType);
         }
 
         public override Expression Expression

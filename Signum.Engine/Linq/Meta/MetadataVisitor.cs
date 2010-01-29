@@ -38,9 +38,7 @@ namespace Signum.Engine.Linq
             if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
                 throw new InvalidOperationException("expression Type is not IQueryable");
 
-            Expression expand = ExpressionExpander.Expand(expression);
-            Expression partialEval = MetaEvaluator.PartialEval(expand);
-            Expression simplified = OverloadingSimplifier.Simplify(partialEval);
+            Expression simplified = MetaEvaluator.Clean(expression);
 
             MetaProjectorExpression meta = new MetadataVisitor().Visit(simplified) as MetaProjectorExpression;
 
@@ -62,6 +60,7 @@ namespace Signum.Engine.Linq
                 return (ex as MetaExpression).TryCC(c => c.Meta);
             });
         }
+
 
         static MetaExpression MakeCleanMeta(Type type, Expression expression)
         {
@@ -208,7 +207,7 @@ namespace Signum.Engine.Linq
                 if (meta != null && meta.Meta is CleanMeta)
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
-                            new CleanMeta(elementType, expression.Type.GetProperty("Item"), (CleanMeta)meta.Meta)));
+                            new CleanMeta(((CleanMeta)meta.Meta).PropertyPath.Add("Item"))));
 
                 return new MetaProjectorExpression(expression.Type,
                      MakeVoidMeta(elementType)); 
@@ -381,13 +380,13 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type))
             {
-                MetaExpression meta = source as MetaExpression;
-                if (typeof(EmbeddedEntity).IsAssignableFrom(source.Type) && meta != null && meta.Meta is CleanMeta)
-                {
-                    return new MetaExpression(memberType, new CleanMeta(meta.Type, member, ((CleanMeta)meta.Meta)));
-                }
+                if(typeof(IdentifiableEntity).IsAssignableFrom( source.Type)) //Works for simple entities and also for interface casting
+                    return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add((PropertyInfo)member)));
 
-                return new MetaExpression(memberType, new CleanMeta(source.Type, member, null));
+                MetaExpression meta = (MetaExpression)source;
+                PropertyRoute path = meta.Meta is CleanMeta ? ((CleanMeta)meta.Meta).PropertyPath : PropertyRoute.Root(source.Type);
+
+                return new MetaExpression(memberType, new CleanMeta(path.Add((PropertyInfo)member)));
             }
 
             return MakeDirtyMeta(memberType, source);

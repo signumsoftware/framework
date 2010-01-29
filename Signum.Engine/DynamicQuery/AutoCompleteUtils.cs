@@ -18,30 +18,20 @@ namespace Signum.Engine.DynamicQuery
 {
     public static class AutoCompleteUtils
     {
-        public static List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
+        public static List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
-            List<Lite> result = new List<Lite>();
+            Type[] types;
+            if (implementations == null)
+                types = new[] { liteType };
+            else if (implementations.IsByAll)
+                throw new InvalidOperationException("ImplementedByAll is not supported for FindLiteLike");
+            else
+                types = ((ImplementedByAttribute)implementations).ImplementedTypes;
 
-            foreach (var mi in new[] { miLiteStarting, miLiteContaining })
-            {
-                foreach (var type in types ?? new[] { liteType })
-                {
-                    MethodInfo mig = mi.MakeGenericMethod(liteType, type);
-                    try
-                    {
-                        List<Lite> part = (List<Lite>)mig.Invoke(null, new object[] { subString, count - result.Count });
-                        result.AddRange(part);
-
-                        if (result.Count >= count)
-                            return result;
-                    }
-                    catch (TargetInvocationException te)
-                    {
-                        throw te.InnerException;
-                    }
-                }
-            }
-            return result;
+            return (from mi in new[] { miLiteStarting, miLiteContaining }
+                    from type in types
+                    from lite in (List<Lite>)mi.GenericInvoke(new[] { liteType, type }, null, new object[] { subString, count })
+                    select lite).Take(count).ToList();
         }
 
         static MethodInfo miLiteStarting = ReflectionTools.GetMethodInfo(()=>LiteStarting<TypeDN,TypeDN>(null, 1)).GetGenericMethodDefinition();
@@ -60,24 +50,19 @@ namespace Signum.Engine.DynamicQuery
             return Database.Query<RT>().Where(a => a.ToStr.Contains(subString) && !a.toStr.StartsWith(subString)).Select(a => a.ToLite<LT>()).Take(count).AsEnumerable().OrderBy(l => l.ToStr).Cast<Lite>().ToList();
         }
 
-        public static List<Lite> RetriveAllLite(Type liteType, Type[] types)
+        public static List<Lite> RetriveAllLite(Type liteType, Implementations implementations)
         {
-            List<Lite> result = new List<Lite>();
-
-            foreach (var type in types ?? new[] { liteType })
+            if (implementations == null)
             {
-                MethodInfo mi = miAllLite.MakeGenericMethod(liteType, type);
-                try
-                {
-                    List<Lite> part = (List<Lite>)mi.Invoke(null, null);
-                    result.AddRange(part);
-                }
-                catch (TargetInvocationException te)
-                {
-                    throw te.InnerException;
-                }
+                return (List<Lite>)miAllLite.GenericInvoke(new[] { liteType, liteType }, null, null);
             }
-            return result;
+
+            if (implementations.IsByAll)
+                throw new InvalidOperationException("ImplementedByAll is not supported for RetriveAllLite");
+
+            return (from type in ((ImplementedByAttribute)implementations).ImplementedTypes
+                    from l in (List<Lite>)miAllLite.GenericInvoke(new[] { liteType, type }, null, null)
+                    select l).ToList();
         }
 
         static MethodInfo miAllLite = ReflectionTools.GetMethodInfo(() => AllLite<TypeDN, TypeDN>()).GetGenericMethodDefinition();

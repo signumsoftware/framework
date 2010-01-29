@@ -7,7 +7,7 @@
 <%@ Import Namespace="Signum.Utilities" %>
 
 <%
-//TODO Anto: Habilitar quickfilters: Controlar campos no filtrables _nf_ (con este método se pueden crear)
+//TODO Anto: Habilitar quickfilters: Controlar campos no filtrables  (con este método se pueden crear)
 //"<script type=\"text/javascript\">" + 
 //    "$(document).ready(function() {" + 
 //        "$('.tblResults td').bind('dblclick', function(e) {" + 
@@ -21,9 +21,9 @@
     int? EntityColumnIndex = (int?)ViewData[ViewDataKeys.EntityColumnIndex];
     bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
     Dictionary<int, bool> colVisibility = new Dictionary<int, bool>();
-    for (int i = 0; i < queryResult.Columns.Length; i++)
+    for (int i = 0; i < queryResult.StaticColumns.Length; i++)
     {
-        colVisibility.Add(i, queryResult.Columns[i].Visible);
+        colVisibility.Add(i, queryResult.StaticColumns[i].Visible);
     }
  %>
 <table id="<%=Html.GlobalName("tblResults")%>" class="tblResults">
@@ -88,7 +88,7 @@
                 <%
                    
                     
-                    for (int col = 0; col < queryResult.Columns.Length; col++)
+                    for (int col = 0; col < queryResult.StaticColumns.Length; col++)
                 {
                     if (colVisibility[col])
                     {

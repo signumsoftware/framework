@@ -44,9 +44,9 @@ namespace Signum.Engine.DynamicQuery
             return queries.TryGetC(queryName);
         }
 
-        public ResultTable ExecuteQuery(object queryName, List<Filter> filters, List<Order> orders, int? limit)
+        public ResultTable ExecuteQuery(object queryName, List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
         {
-            return this[queryName].ExecuteQuery(filters, orders, limit);
+            return this[queryName].ExecuteQuery(userColumns, filters, orders, limit);
         }
 
         public int ExecuteQueryCount(object queryName, List<Filter> filters)
@@ -85,7 +85,7 @@ namespace Signum.Engine.DynamicQuery
                     return "Error {0}: No ToLite() on {1}".Formato(queryName, error);
 
                 Connection.CommandCount = 0;
-                ResultTable result = dq.ExecuteQuery(null, null, 100);
+                ResultTable result = dq.ExecuteQuery(null, null, null, 100);
 
                 if(result.Rows.Length == 0)
                     return "Warning {0}: No results".Formato(queryName);

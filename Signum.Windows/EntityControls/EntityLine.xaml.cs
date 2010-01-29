@@ -61,7 +61,7 @@ namespace Signum.Windows
         {
             base.OnLoad(sender, e);
 
-            if(Common.GetIsReadOnly(this))
+            if (Common.GetIsReadOnly(this) || Implementations != null && Implementations.IsByAll)
                 AutoComplete = false;
         }
 

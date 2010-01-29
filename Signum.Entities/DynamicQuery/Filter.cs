@@ -14,9 +14,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Filter
     {
-        public string Name { get; set; }
-
-        public Type Type { get; set; }
+        public QueryToken Token;
 
         public FilterOperation Operation { get; set; }
 
@@ -27,12 +25,11 @@ namespace Signum.Entities.DynamicQuery
 
             set
             {
-                this.value = ReflectionTools.ChangeType(value, Type); 
+                this.value = ReflectionTools.ChangeType(value, Token.Type); 
             }
         }
     }
     
-    [Serializable]
     public enum FilterOperation
     {
         EqualTo,
@@ -52,7 +49,8 @@ namespace Signum.Entities.DynamicQuery
         Number,
         String, 
         DateTime,
-        Lite,   
+        Lite,
+        Entity, //Just for complex tokens, not columns
         Boolean, 
         Enum,
     }
@@ -64,5 +62,6 @@ namespace Signum.Entities.DynamicQuery
         Single,
         SingleOrDefault,
         SingleOrMany, 
+        Only
     }
 }

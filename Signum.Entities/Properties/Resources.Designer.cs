@@ -196,6 +196,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to As {0}.
+        /// </summary>
+        internal static string As0 {
+            get {
+                return ResourceManager.GetString("As0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Attempt to modify {0} when the entity is not new.
         /// </summary>
         internal static string AttemptToModify0WhenTheEntityIsNotNew {
@@ -291,6 +300,24 @@ namespace Signum.Entities.Properties {
         internal static string ComparisonType_LessThanOrEqual {
             get {
                 return ResourceManager.GetString("ComparisonType_LessThanOrEqual", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Count].
+        /// </summary>
+        internal static string Count {
+            get {
+                return ResourceManager.GetString("Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Day.
+        /// </summary>
+        internal static string Day {
+            get {
+                return ResourceManager.GetString("Day", resourceCulture);
             }
         }
         
@@ -494,11 +521,56 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hour.
+        /// </summary>
+        internal static string Hour {
+            get {
+                return ResourceManager.GetString("Hour", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Text].
+        /// </summary>
+        internal static string IdentifiableEntity_ToStr {
+            get {
+                return ResourceManager.GetString("IdentifiableEntity_ToStr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Modification not allowed: the object is locked.
         /// </summary>
         internal static string LockedModificationException {
             get {
                 return ResourceManager.GetString("LockedModificationException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Millisecond.
+        /// </summary>
+        internal static string Millisecond {
+            get {
+                return ResourceManager.GetString("Millisecond", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minute.
+        /// </summary>
+        internal static string Minute {
+            get {
+                return ResourceManager.GetString("Minute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Month.
+        /// </summary>
+        internal static string Month {
+            get {
+                return ResourceManager.GetString("Month", resourceCulture);
             }
         }
         
@@ -562,6 +634,15 @@ namespace Signum.Entities.Properties {
         internal static string RemovingEntityNotAllowedInNewLazies {
             get {
                 return ResourceManager.GetString("RemovingEntityNotAllowedInNewLazies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Second.
+        /// </summary>
+        internal static string Second {
+            get {
+                return ResourceManager.GetString("Second", resourceCulture);
             }
         }
         
@@ -652,6 +733,15 @@ namespace Signum.Entities.Properties {
         internal static string TypeIsNotSmallerThan {
             get {
                 return ResourceManager.GetString("TypeIsNotSmallerThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Year.
+        /// </summary>
+        internal static string Year {
+            get {
+                return ResourceManager.GetString("Year", resourceCulture);
             }
         }
     }

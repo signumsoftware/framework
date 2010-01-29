@@ -318,23 +318,11 @@ namespace Signum.Web.Controllers
         //}
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult Autocomplete(string typeName, string implementations, string input, int limit)
+        public ContentResult Autocomplete(string typeName, Implementations implementations, string input, int limit)
         {
             Type type = Navigator.NameToType[typeName];
 
-            Type[] implementationTypes = null;
-            if (!string.IsNullOrEmpty(implementations))
-            {
-                string[] implementationsArray = implementations.Split(',');
-                implementationTypes = new Type[implementationsArray.Length];
-                for (int i=0; i<implementationsArray.Length;i++)
-                {
-                    Type t = Navigator.NameToType.TryGetC(implementationsArray[i]) ?? null;
-                    if (t != null)
-                        implementationTypes[i] = t;
-                }
-            }
-            var result = AutoCompleteUtils.FindLiteLike(type, implementationTypes, input, limit)
+            var result = AutoCompleteUtils.FindLiteLike(type, implementations, input, limit)
                 .ToDictionary(l => l.Id.ToString() + "_" + l.RuntimeType.Name, l => l.ToStr);
 
             return Content(result.ToJSonObject(idAndType => idAndType.Quote(), str => str.Quote()));
@@ -371,14 +359,14 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult GetChooser(string sfImplementations, string prefix)
+        public PartialViewResult GetChooser(Implementations sfImplementations, string prefix)
         {
-            string strButtons = "";
-            foreach (string typeUrlName in sfImplementations.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                Type type = Navigator.Manager.URLNamesToTypes[typeUrlName];
-                strButtons += "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(type.Name, type.NiceName());
-            }
+            if (sfImplementations == null || sfImplementations.IsByAll)
+                throw new InvalidOperationException("GetChooser needs an ImplementedBy");
+
+            string strButtons = ((ImplementedByAttribute)sfImplementations).ImplementedTypes
+                .ToString(type => "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(type.Name, type.NiceName()), "");
+
             ViewData[ViewDataKeys.CustomHtml] = strButtons;
             ViewData[ViewDataKeys.PopupPrefix] = prefix;
             return PartialView(Navigator.Manager.ChooserPopupUrl);

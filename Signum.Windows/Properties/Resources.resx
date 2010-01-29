@@ -138,9 +138,6 @@
   <data name="NoFilterSelected" xml:space="preserve">
     <value>No filter selected</value>
   </data>
-  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
-    <value>The column {0} is not found on query {1}</value>
-  </data>
   <data name="NoEntitySettingsForType0" xml:space="preserve">
     <value>There is no EntitySetting for {0}</value>
   </data>
@@ -395,5 +392,8 @@
   </data>
   <data name="_notes" xml:space="preserve">
     <value>notes</value>
+  </data>
+  <data name="ParentCanNotBeAPropertyWithATypeThatImplementsIIdentifiabe" xml:space="preserve">
+    <value>parent can not be a Property with a type that implements IIdentifiabe</value>
   </data>
 </root>

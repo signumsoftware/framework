@@ -86,14 +86,13 @@ namespace Signum.Web
 
             foreach (FilterOption opt in findOptions.FilterOptions)
             {
-                opt.Column = queryDescription.Columns.Where(c => c.Name == opt.ColumnName)
-                    .Single(Resources.FilterColumn0NotFoundOrFoundMoreThanOnce.Formato(opt.ColumnName));
+                opt.Token = QueryToken.Parse(findOptions.QueryName, queryDescription, opt.ColumnName);
             }
 
-            Column entityColumn = queryDescription.Columns.SingleOrDefault(a => a.IsEntity);
+            Column entityColumn = queryDescription.StaticColumns.SingleOrDefault(a => a.IsEntity);
             Type entitiesType = entityColumn != null ? Reflector.ExtractLite(entityColumn.Type) : null;
 
-            List<Column> columns = queryDescription.Columns.Where(a => a.Filterable).ToList();
+            List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
 
             helper.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             helper.ViewData[ViewDataKeys.PopupSufix] = prefixEnd ?? "";
@@ -142,8 +141,8 @@ namespace Signum.Web
             //Client doesn't know about Lites, check it ourselves
             if (typeof(IdentifiableEntity).IsAssignableFrom(columnType))
                 columnType = Reflector.GenerateLite(columnType);
-            FilterType filterType = FilterOperationsUtils.GetFilterType(columnType);
-            List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
+            FilterType filterType = QueryUtils.GetFilterType(columnType);
+            List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
 
             sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(prefix + "trFilter_" + index.ToString()));
             
@@ -175,60 +174,26 @@ namespace Signum.Web
 
         public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix)
         {
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(Navigator.ResolveQueryFromUrlName(queryUrlName));
-            Column column = qd.Columns.Where(c => c.Visible == true).ToList()[visibleColumnIndex];
-            FilterOption fo = new FilterOption() { Column = column, ColumnName = column.Name, Operation = FilterOperation.EqualTo, Value = value };
-            Type type = Reflector.ExtractLite(column.Type) ?? column.Type;
+            object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            QueryToken token = QueryToken.NewColumn(qd.StaticColumns.Where(c => c.Visible == true).ToList()[visibleColumnIndex]);
+            FilterOption fo = new FilterOption() { Token = token, ColumnName = null, Operation = FilterOperation.EqualTo, Value = value };
+            Type type = Reflector.ExtractLite(fo.Token.Type) ?? fo.Token.Type;
             
-            return NewFilter(controller, type.Name, column.Name, column.DisplayName, filterRowIndex, prefix, FilterOperation.EqualTo, value);
+            return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, FilterOperation.EqualTo, value);
         }
 
-        private static FilterType GetFilterType(Type type)
-        {
-            type = type.UnNullify();
-
-            if (type.IsEnum)
-                return FilterType.Enum;
-            if (typeof(Lite).IsAssignableFrom(type))
-                return FilterType.Lite;
-
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.DateTime:
-                    return FilterType.DateTime;
-                case TypeCode.Boolean:
-                    return FilterType.Boolean;
-                case TypeCode.Double:
-                case TypeCode.Decimal:
-                case TypeCode.Single:
-                case TypeCode.Byte:
-                case TypeCode.SByte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    return FilterType.Number;
-                case TypeCode.Empty:
-                case TypeCode.Object:
-                case TypeCode.Char:
-                case TypeCode.String:
-                default:
-                    return FilterType.String;
-            }
-        }
 
         public static void NewFilter(this HtmlHelper helper, FilterOption filterOptions, int index)
         {
             StringBuilder sb = new StringBuilder();
 
-            FilterType filterType = FilterOperationsUtils.GetFilterType(filterOptions.Column.Type);
-            List<FilterOperation> possibleOperations = FilterOperationsUtils.FilterOperations[filterType];
+            FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
+            List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
 
             sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("trFilter_" + index.ToString())));
-            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("td" + index.ToString() + "__" + filterOptions.Column.Name)));
-            sb.Append(filterOptions.Column.DisplayName);
+            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("td" + index.ToString() + "__" + filterOptions.Token.FullKey())));
+            sb.Append(filterOptions.Token.FullKey());
             sb.Append("</td>\n");
 
             sb.Append("<td>\n");
@@ -251,7 +216,7 @@ namespace Signum.Web
             if (filterOptions.Frozen)
                 sb.Append("<input type=\"text\" id=\"{0}\" name=\"{0}\" value=\"{1}\" {2}/>\n".Formato(txtId, txtValue, filterOptions.Frozen ? " readonly=\"readonly\"" : ""));
             else
-                sb.Append(PrintValueField(helper, filterType, filterOptions.Column.Type, txtId, filterOptions.Value, filterOptions.Column.Name));
+                sb.Append(PrintValueField(helper, filterType, filterOptions.Token.Type, txtId, filterOptions.Value, filterOptions.Token.FullKey()));
             sb.Append("</td>\n");
 
             sb.Append("<td>\n");
@@ -316,7 +281,7 @@ namespace Signum.Web
                     helper.ViewData.Remove(ViewDataKeys.LoadAll);
                 string result = "";
                 using (el)
-                    result = (string)mi.MakeGenericMethod(tc.ContextType).Invoke(null, new object[] { helper, tc, el });
+                    result = (string)mi.GenericInvoke(new[] { tc.Type }, null, new object[] { helper, tc, el });
                 //string result = (string)EntityLineHelper.InternalEntityLine(helper, id, columnType, value, el);
                 if (loadall)
                     helper.ViewData.Add(ViewDataKeys.LoadAll, true);

@@ -59,7 +59,7 @@ namespace Signum.Windows
 
             this.InitializeComponent();
 
-            Common.SetTypeContext(WidgetPanel, TypeContext.Root(type));
+            Common.SetTypeContext(WidgetPanel, PropertyRoute.Root(type));
 
             entityList.EntitiesType = typeof(MList<>).MakeGenericType(adminType);
             this.DataContext = fake; 

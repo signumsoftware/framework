@@ -18,7 +18,7 @@
                 <label for="<%=Html.GlobalName("ddlNewFilters")%>">Filtrar por campo</label>
                 <select id="<%=Html.GlobalName("ddlNewFilters")%>">
 
-                <% foreach (Column column in (List<Column>)ViewData[ViewDataKeys.FilterColumns])
+                <% foreach (StaticColumn column in (List<StaticColumn>)ViewData[ViewDataKeys.FilterColumns])
                    {
                        Type type = column.Type.UnNullify();
                        if (typeof(Lite).IsAssignableFrom(type))

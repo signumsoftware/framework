@@ -12,6 +12,7 @@ using System.ComponentModel;
 using Signum.Entities.Properties;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Reflection
 {
@@ -235,6 +236,22 @@ namespace Signum.Entities.Reflection
             return name.FirstUpper();
         }
 
+        public static bool QueryableProperty(Type type, PropertyInfo pi)
+        {
+            QueryablePropertyAttribute spa = pi.SingleAttribute<QueryablePropertyAttribute>();
+            if (spa != null)
+                return spa.AvailableForQueries;
+
+            FieldInfo fi = FindFieldInfo(type, pi, false);
+            if (fi != null && !fi.HasAttribute<IgnoreAttribute>())
+                return true;
+
+            if (ExpressionExpander.GetExpansion(type, pi) != null)
+                return true;
+
+            return false;
+        }
+
         public static bool IsLowPopulation(Type type)
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
@@ -271,9 +288,10 @@ namespace Signum.Entities.Reflection
         {
             FormatAttribute format = property.SingleAttribute<FormatAttribute>();
             if(format != null)
-                return format.Format; 
+                return format.Format;
 
-            DateOnlyValidatorAttribute dateOnly = property.SingleAttribute<DateOnlyValidatorAttribute>();
+            var pp = Validator.GetOrCreatePropertyPack(property);
+            DateOnlyValidatorAttribute dateOnly = pp == null ? null : pp.Validators.OfType<DateOnlyValidatorAttribute>().SingleOrDefault();
             if (dateOnly != null)
                 return "d"; 
 

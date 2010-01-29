@@ -232,7 +232,7 @@ namespace Signum.Web
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
             ValueLine vl = new ValueLine();
-            Common.FireCommonTasks(vl, typeof(T), context);
+            Common.FireCommonTasks(vl, context);
 
             return SetManualValueLineOptions<S>(helper, context, vl);
         }
@@ -243,7 +243,7 @@ namespace Signum.Web
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
             ValueLine vl = new ValueLine();
-            Common.FireCommonTasks(vl, typeof(T), context);
+            Common.FireCommonTasks(vl, context);
             
             settingsModifier(vl);
 

@@ -289,16 +289,22 @@ namespace Signum.Engine.Maps
             return result; 
         }
 
-        public Type[] FindImplementations(Type liteType, MemberInfo[] members)
+        public Implementations FindImplementations(PropertyRoute path)
         {
-            if (!Tables.ContainsKey(liteType))
-                return null;
-            
-            Field field = FindField(Table(liteType), members, false); 
+            Type type = path.IdentifiableType; 
 
-            FieldImplementedBy ibaField = field as FieldImplementedBy;
+            if (!Tables.ContainsKey(type))
+                return null;
+
+            Field field = FindField(Table(type), path.Properties, false);
+
+            FieldImplementedBy ibField = field as FieldImplementedBy;
+            if (ibField != null)
+                return new ImplementedByAttribute(ibField.ImplementationColumns.Keys.ToArray());
+
+            FieldImplementedByAll ibaField = field as FieldImplementedByAll;
             if (ibaField != null)
-                return ibaField.ImplementationColumns.Keys.ToArray();
+                return new ImplementedByAllAttribute();
 
             return null;
         }

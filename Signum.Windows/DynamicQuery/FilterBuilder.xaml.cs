@@ -21,27 +21,13 @@ using Signum.Entities.Reflection;
 namespace Signum.Windows
 {
 	public partial class FilterBuilder
-	{  
-        ObservableCollection<FilterOption> filters;
-        public ObservableCollection<FilterOption> Filters
+	{
+        public static readonly DependencyProperty FiltersProperty =
+            DependencyProperty.Register("Filters", typeof(FreezableCollection<FilterOption>), typeof(FilterBuilder), new UIPropertyMetadata(null));
+        public FreezableCollection<FilterOption> Filters
         {
-            get { return filters; }
-            set
-            {
-                filters = value;
-                lvFilters.ItemsSource = filters;
-            }
-        }
-
-        List<Column> columns;
-        public List<Column> Columns
-        {
-            get { return columns; }
-            set
-            {
-                columns = value;
-                cbFilters.ItemsSource = value;
-            }
+            get { return (FreezableCollection<FilterOption>)GetValue(FiltersProperty); }
+            set { SetValue(FiltersProperty, value); }
         }
 
         public FilterBuilder()
@@ -49,32 +35,12 @@ namespace Signum.Windows
             this.InitializeComponent();
         }
 
-        private void btCreate_Click(object sender, RoutedEventArgs e)
-        {
-            if (cbFilters.SelectedItem == null)
-            {
-                MessageBox.Show(Properties.Resources.NoFilterSelected);
-                return;
-            }
-
-            Column c = (Column)cbFilters.SelectedItem;
-            FilterType ft = FilterOperationsUtils.GetFilterType(c.Type);
-            FilterOption f = new FilterOption
-            {
-                Column = c,
-                Operation =  FilterOperationsUtils.FilterOperations[ft].First(),
-                Value = null,
-            };
-
-            filters.Add(f); 
-        }
-
         private void ComboBox_Loaded(object sender, RoutedEventArgs e)
         {
             ComboBox cb = (ComboBox)sender;
             FilterOption f = (FilterOption)cb.DataContext;
-            FilterType ft = FilterOperationsUtils.GetFilterType(f.Column.Type);
-            cb.ItemsSource = FilterOperationsUtils.FilterOperations[ft];
+            FilterType ft = QueryUtils.GetFilterType(f.Token.Type);
+            cb.ItemsSource = QueryUtils.GetFilterOperations(ft);
             cb.IsEnabled = !f.Frozen;
         }
 
@@ -83,16 +49,21 @@ namespace Signum.Windows
             Grid g = (Grid)sender;
             Common.SetCurrentWindow(g, this.FindCurrentWindow());
             FilterOption f = (FilterOption)g.DataContext;
-
-            Common.SetIsReadOnly(g, f.Frozen); 
-
-            Type type = f.Column.Type;
+            Implementations implementations = f.Token.Implementations();
+            Common.SetIsReadOnly(g, f.Frozen);
+        
+            Type type = f.Token.Type;
             if (typeof(Lite).IsAssignableFrom(type) || typeof(IdentifiableEntity).IsAssignableFrom(type))
             {
                 Type cleanType = typeof(Lite).IsAssignableFrom(type) ? Reflector.ExtractLite(type) : type;
                 if (Reflector.IsLowPopulation(cleanType))
                 {
-                    EntityCombo ec = new EntityCombo { Type = type, Style = (Style)FindResource("toolTip") };
+                    EntityCombo ec = new EntityCombo
+                    {
+                        Type = Reflector.GenerateLite(cleanType),
+                        Style = (Style)FindResource("toolTip"),
+                        Implementations = implementations
+                    };
                     ec.SetBinding(EntityCombo.EntityProperty, new Binding
                     {
                         Path = new PropertyPath(FilterOption.RealValueProperty),
@@ -104,7 +75,13 @@ namespace Signum.Windows
                 }
                 else
                 {
-                    EntityLine el = new EntityLine { Type = type, Create = false, HideAutoCompleteOnLostFocus = false };
+                    EntityLine el = new EntityLine
+                    {
+                        Type = Reflector.GenerateLite(cleanType),
+                        Create = false,
+                        HideAutoCompleteOnLostFocus = false,
+                        Implementations = implementations
+                    };
                     el.SetBinding(EntityLine.EntityProperty, new Binding
                     {
                         Path = new PropertyPath(FilterOption.RealValueProperty),
@@ -117,7 +94,9 @@ namespace Signum.Windows
             }
             else
             {
-                ValueLine vl = new ValueLine() { Type = type, Format = f.Column.Format, UnitText = f.Column.Unit };
+                QueryToken token = f.Token;
+
+                ValueLine vl = new ValueLine() { Type = type, Format = token.Format, UnitText = token.Unit};
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
                     Path = new PropertyPath("RealValue"),
@@ -140,7 +119,7 @@ namespace Signum.Windows
             var toRemove = lvFilters.SelectedItems.Cast<FilterOption>().ToList();
             foreach (var f in toRemove)
             {
-                filters.Remove(f);
+                Filters.Remove(f);
             }
         }
 
@@ -163,8 +142,14 @@ namespace Signum.Windows
             {
                 FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
 
-                filters.Add(filter); 
+                Filters.Add(filter); 
             }
         }
-	}
+
+        public void RefreshFirstColumn()
+        {
+            firstColumn.Width = 0;
+            firstColumn.Width = double.NaN;
+        }
+    }
 }

@@ -201,9 +201,6 @@
   <data name="NoFilterSelected" xml:space="preserve">
     <value>Ha de seleccionar un filtro</value>
   </data>
-  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
-    <value>No se ha encontrado la columna {0} en la consulta {1}</value>
-  </data>
   <data name="NoEntitySettingsForType0" xml:space="preserve">
     <value>No existe un EntitySetting para {0}</value>
   </data>
@@ -398,8 +395,5 @@
   </data>
   <data name="_notes" xml:space="preserve">
     <value>notas</value>
-  </data>
-  <data name="Column0NotFoundOnQuery11" xml:space="preserve">
-    <value>No se ha encontrado la columna {0} en la consulta {1}</value>
   </data>
 </root>

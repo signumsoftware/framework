@@ -133,7 +133,7 @@ namespace Signum.Web
 
             EntityList el = new EntityList(helper.GlobalName(context.Name));
             Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
-            Common.FireCommonTasks(el, typeof(T), context);
+            Common.FireCommonTasks(el, context);
 
             if (settingsModifier != null)
                 settingsModifier(el);

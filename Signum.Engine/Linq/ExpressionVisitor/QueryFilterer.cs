@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
 
                 if (query.IsBase() && typeof(IdentifiableEntity).IsAssignableFrom(query.ElementType))
                 {
-                    IQueryable newQuery = (IQueryable)miFilter.MakeGenericMethod(c.Type.GetGenericArguments()[0]).Invoke(null, new object[] { query });
+                    IQueryable newQuery = (IQueryable)miFilter.GenericInvoke(c.Type.GetGenericArguments(), null, new object[] { query });
 
                     if (newQuery != query)
                         return newQuery.Expression;

@@ -14,6 +14,15 @@ namespace Signum.Engine.Linq
     /// </summary>
     public class MetaEvaluator : ExpressionVisitor
     {
+
+        public static Expression Clean(Expression expression)
+        {
+            Expression expand = ExpressionExpander.Expand(expression);
+            Expression partialEval = MetaEvaluator.PartialEval(expand);
+            Expression simplified = OverloadingSimplifier.Simplify(partialEval);
+            return simplified;
+        }
+
         HashSet<Expression> candidates;
 
         private MetaEvaluator() { }
@@ -37,7 +46,7 @@ namespace Signum.Engine.Linq
             }
             if (this.candidates.Contains(exp) && exp.NodeType != ExpressionType.Constant)
             {
-                return (ConstantExpression)miConstant.MakeGenericMethod(exp.Type).Invoke(null, null); 
+                return (ConstantExpression)miConstant.GenericInvoke(new[] { exp.Type }, null, null); 
             }
             return base.Visit(exp);
         }

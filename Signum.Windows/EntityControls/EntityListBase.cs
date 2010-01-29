@@ -64,7 +64,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = Implementations == null ? CleanType : Navigator.SelectType(this.FindCurrentWindow(), Implementations);
+                Type type = SelectType();
                 if (type == null)
                     return null;
 
@@ -82,15 +82,14 @@ namespace Signum.Windows
                 return Server.Convert(value, Type);
         }
 
-        public override TypeContext GetEntityTypeContext()
+        public override PropertyRoute GetEntityTypeContext()
         {
-            TypeContext tc = base.GetEntityTypeContext();
+            PropertyRoute tc = base.GetEntityTypeContext();
             if (tc == null)
                 return null;
 
-            return new TypeSubContext(tc.Type.GetProperty("Item"), tc);
+            return tc.Add("Item");
         }
-
 
         public IList EnsureEntities()
         {

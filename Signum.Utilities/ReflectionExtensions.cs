@@ -45,9 +45,20 @@ namespace Signum.Utilities
             return mi.GetCustomAttributes(typeof(T), false).Cast<T>().SingleOrDefault();
         }
 
-        public static bool IsInstantiationOf(this Type type, Type genericType)
+        public static bool IsInstantiationOf(this Type type, Type genericTypeDefinition)
         {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == genericType;
+            if (!genericTypeDefinition.IsGenericTypeDefinition)
+                throw new ArgumentException("genericTypeDefinition should be a Generic Type Definition");
+
+            return type.IsGenericType && type.GetGenericTypeDefinition() == genericTypeDefinition;
+        }
+
+        public static bool IsInstantiationOf(this MethodInfo method, MethodInfo genericMethodDefinitoin)
+        {
+            if (!genericMethodDefinitoin.IsGenericMethodDefinition)
+                throw new ArgumentException("genericMethodDefinitoin should be a Generic Method Definition");
+
+            return genericMethodDefinitoin.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinitoin);
         }
 
         public static bool FieldEquals<S,T>(this FieldInfo fi, Expression<Func<S, T>> field)

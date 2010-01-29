@@ -14,13 +14,13 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Order
     {
-        public Order(string columnName, OrderType orderType)
+        public Order(QueryToken token, OrderType orderType)
         {
-            this.ColumnName = columnName;
+            this.Token = token;
             this.OrderType = orderType;
         }
 
-        public string ColumnName { get; set; }
+        public QueryToken Token { get; set; }
 
         public OrderType OrderType { get; set; }
     }

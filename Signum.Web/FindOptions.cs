@@ -133,7 +133,7 @@ namespace Signum.Web
 
     public class FilterOption
     {
-        public Column Column { get; set; }
+        public QueryToken Token { get; set; }
         public string ColumnName { get; set; }
         public bool Frozen { get; set; }
         public FilterOperation Operation { get; set; }
@@ -152,18 +152,16 @@ namespace Signum.Web
         {
             Filter f = new Filter
             {
-                Name = Column.Name,
-                Type = Column.Type,
-                Operation = Operation,
+                Token = Token,
+                Operation = Operation,                
             };
-            if (!typeof(Lite).IsAssignableFrom(Value.GetType()) || Value == null)                
-                f.Value = Convert(Value, Column.Type);
-            else
-                f.Value = Lite.Create(Reflector.ExtractLite(Column.Type), Database.Retrieve((Lite)Value));
+
+            f.Value = Convert(Value, f.Token.Type);
+
             return f;
         }
 
-          public static object Convert(object obj, Type type)
+        public static object Convert(object obj, Type type)
         {
             if (obj == null) return null;
 
@@ -226,13 +224,13 @@ namespace Signum.Web
 
     public class OrderOption
     {
-        public Column Column { get; set; }
+        public QueryToken Token{ get; set; }
         public string ColumnName { get; set; }
         public OrderType Type { get; set; }
 
         public Order ToOrder()
         {
-            return new Order(ColumnName, Type);
+            return new Order(Token, Type);
         }
     }
 

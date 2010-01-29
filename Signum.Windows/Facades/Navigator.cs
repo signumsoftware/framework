@@ -443,8 +443,8 @@ namespace Signum.Windows
 
         public virtual Lite FindUnique(FindUniqueOptions options)
         {
-            SetColumns(options.QueryName, options.FilterOptions);
-            SetColumns(options.QueryName, options.OrderOptions);
+            SetTokens(options.QueryName, options.FilterOptions);
+            SetTokens(options.QueryName, options.OrderOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
             var orders = options.OrderOptions.Select(f => f.ToOrder()).ToList();
@@ -454,33 +454,31 @@ namespace Signum.Windows
 
         public int QueryCount(CountOptions options)
         {
-            SetColumns(options.QueryName, options.FilterOptions);
+            SetTokens(options.QueryName, options.FilterOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
 
             return Server.Return((IQueryServer s) => s.GetQueryCount(options.QueryName, filters));
         }
 
-        public void SetColumns(object queryName, IEnumerable<FilterOption> filters)
+        public void SetTokens(object queryName, IEnumerable<FilterOption> filters)
         {
-            QueryDescription view = GetQueryDescription(queryName);
+            QueryDescription description = GetQueryDescription(queryName);
 
             foreach (var f in filters)
             {
-                f.Column = view.Columns.Where(c => c.Name == f.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(f.ColumnName, queryName));
+                f.Token = QueryToken.Parse(queryName, description, f.ColumnName); 
                 f.RefreshRealValue();
             }
         }
 
-        public void SetColumns(object queryName, IEnumerable<OrderOption> orders)
+        public void SetTokens(object queryName, IEnumerable<OrderOption> orders)
         {
-            QueryDescription view = GetQueryDescription(queryName);
+            QueryDescription description = GetQueryDescription(queryName);
 
             foreach (var o in orders)
             {
-                view.Columns.Where(c => c.Name == o.ColumnName)
-                    .Single(Properties.Resources.Column0NotFoundOnQuery1.Formato(o.ColumnName, queryName));
+                o.Token = QueryToken.Parse(queryName, description, o.ColumnName);
             }
         }
 

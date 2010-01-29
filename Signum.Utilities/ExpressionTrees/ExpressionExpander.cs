@@ -89,7 +89,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return Visit(Expression.Invoke(lambda, m.Arguments.Skip(1).Select(a => Visit(a)).ToArray()));
             }
 
-            LambdaExpression lambdaExpression = ExtractAndClean(m.Object.TryCC(c => c.Type), m.Method);
+            LambdaExpression lambdaExpression = GetExpansion(m.Object.TryCC(c => c.Type), m.Method);
             if(lambdaExpression != null)
             {
                 Expression[] args =  m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
@@ -106,7 +106,7 @@ namespace Signum.Utilities.ExpressionTrees
             if(pi == null)
                  return base.VisitMemberAccess(m);
 
-            LambdaExpression lambda = ExtractAndClean(m.Expression.TryCC(c => c.Type), pi);
+            LambdaExpression lambda = GetExpansion(m.Expression.TryCC(c => c.Type), pi);
             if(lambda ==null)
                 return base.VisitMemberAccess(m);
 
@@ -116,7 +116,8 @@ namespace Signum.Utilities.ExpressionTrees
                 return Visit(Expression.Invoke(lambda, Visit(m.Expression)));
         }
 
-        static LambdaExpression ExtractAndClean(Type decType, MemberInfo mi)
+
+        public static LambdaExpression GetExpansion(Type decType, MemberInfo mi)
         {
             FieldInfo fi;
             if(decType != null)

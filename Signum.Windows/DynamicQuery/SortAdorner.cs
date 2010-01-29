@@ -48,7 +48,7 @@ namespace Signum.Windows.DynamicQuery
 
         public Order ToOrder()
         {
-            return new Order(((Column)Header.Tag).Name, Adorner.OrderType);
+            return new Order(QueryToken.NewColumn((Column)Header.Tag), Adorner.OrderType);
         }
     }
 

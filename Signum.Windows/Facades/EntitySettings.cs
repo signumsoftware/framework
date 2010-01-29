@@ -16,7 +16,7 @@ namespace Signum.Windows
     public class EntitySettings
     {
         public Func<IdentifiableEntity, Control> View { get; set; }
-        public Func<EmbeddedEntity, TypeContext, Control> ViewEmbedded { get; set; }
+        public Func<EmbeddedEntity, PropertyRoute, Control> ViewEmbedded { get; set; }
 
         public Func<bool, bool> IsCreable { get; set; }
         public Func<bool, bool> IsReadOnly { get; set; }
@@ -68,7 +68,7 @@ namespace Signum.Windows
             }
         }
 
-        public Control CreateView(ModifiableEntity entity, TypeContext typeContext)
+        public Control CreateView(ModifiableEntity entity, PropertyRoute typeContext)
         {
             if (entity is EmbeddedEntity)
             {
@@ -95,7 +95,7 @@ namespace Signum.Windows
             View = e => overrideView(e, view(e));
         }
 
-        public void OverrideViewEmbedded(Func<EmbeddedEntity, TypeContext, Control, Control> overrideView)
+        public void OverrideViewEmbedded(Func<EmbeddedEntity, PropertyRoute, Control, Control> overrideView)
         {
             var viewEmbedded = ViewEmbedded;
             ViewEmbedded = (e, tc) => overrideView(e, tc, viewEmbedded(e, tc));

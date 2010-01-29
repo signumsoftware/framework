@@ -21,17 +21,9 @@ namespace Signum.Engine.Linq
     {
         static internal ITranslateResult Build(ProjectionExpression proj, ImmutableStack<string> prevAliases)
         {
-            try
-            {
-                Type type =
-                    proj.UniqueFunction == null ? ReflectionTools.CollectionType(proj.Type) : proj.Type;
+            Type type = proj.UniqueFunction == null ? ReflectionTools.CollectionType(proj.Type) : proj.Type;
 
-                return (ITranslateResult)miBuildPrivate.MakeGenericMethod(type).Invoke(null, new object[] { proj, prevAliases });
-            }
-            catch (TargetInvocationException ex)
-            {
-                throw ex.InnerException;
-            }
+            return (ITranslateResult)miBuildPrivate.GenericInvoke(new[] { type }, null, new object[] { proj, prevAliases });
         }
 
         static MethodInfo miBuildPrivate = ReflectionTools.GetMethodInfo(() => BuildTranslateResult<int>(null, null)).GetGenericMethodDefinition();

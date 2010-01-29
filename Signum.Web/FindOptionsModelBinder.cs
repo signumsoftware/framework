@@ -11,6 +11,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using System.Web;
 using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Web
 {
@@ -69,60 +70,62 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            int index = 0;
-            string name;
-            object value;
-            string operation;
-            bool frozen;
-            Type type;
             NameValueCollection parameters = httpContext.Request.Params;
             var names = parameters.AllKeys.Where(k => k.StartsWith("cn"));
             foreach (string nameKey in names)
             {
+                int index;
                 if (!int.TryParse(nameKey.RemoveLeft(2), out index))
                     continue;
 
-                name = parameters[nameKey];
-                value = parameters["val" + index.ToString()];
-                operation = parameters["sel" + index.ToString()];
-                type = queryDescription.Columns
-                           .SingleOrDefault(c => c.Name == name)
-                           .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
+                string name = parameters[nameKey];
+                string value = parameters["val" + index.ToString()];
+                string operation = parameters["sel" + index.ToString()];
+                bool frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
+
+                Type type = queryDescription.StaticColumns
+                            .SingleOrDefault(c => c.Name == name)
+                            .ThrowIfNullC(Resources.InvalidFilterColumn0NotFound.Formato(name))
                            .Type;
 
-                if (type == typeof(bool))
-                {
-                    string[] vals = ((string)value).Split(',');
-                    value = (vals[0] == "true") ? true : false;
-                }
-                if (typeof(Lite).IsAssignableFrom(type))
-                {
-                    string[] vals = ((string)value).Split(';');
-                    int intValue;
-                    if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
-                    {
-                        Type liteType = Navigator.NameToType[vals[1]];
-                        if (typeof(Lite).IsAssignableFrom(liteType))
-                            liteType = Reflector.ExtractLite(liteType);
-                        value = Lite.Create(liteType, intValue);
-                    }
-                    else
-                        value = null;
-                }
-                FilterOperation filterOperation = ((FilterOperation[])Enum.GetValues(typeof(FilterOperation))).SingleOrDefault(op => op.ToString() == operation);
-
-                frozen = parameters.AllKeys.Any(k => k == "fz" + index.ToString());
+                object valueObject = Convert(value, type);
 
                 result.Add(new FilterOption
                 {
                     ColumnName = name,
-                    Column = queryDescription.Columns.Single(c => c.Name == name),
-                    Operation = filterOperation,
+                    Token = QueryToken.Parse(queryName, queryDescription, name),
+                    Operation = EnumExtensions.ToEnum<FilterOperation>(operation),
                     Frozen = frozen,
-                    Value = value,
+                    Value = valueObject,
                 });
             }
             return result;
+        }
+
+        private static object Convert(string value, Type type)
+        {
+            if (type == typeof(bool))
+            {
+                string[] vals = ((string)value).Split(',');
+                return (vals[0] == "true");
+            }
+
+            if (typeof(Lite).IsAssignableFrom(type))
+            {
+                string[] vals = ((string)value).Split(';');
+                int intValue;
+                if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
+                {
+                    Type liteType = Navigator.NameToType[vals[1]];
+                    if (typeof(Lite).IsAssignableFrom(liteType))
+                        liteType = Reflector.ExtractLite(liteType);
+                    return Lite.Create(liteType, intValue);
+                }
+                else
+                    return null;
+            }
+
+            return ReflectionTools.Parse(value, type); 
         }
     }
 }

@@ -228,4 +228,7 @@
   <data name="Warned" xml:space="preserve">
     <value>Alertadas</value>
   </data>
+  <data name="TypeSubContextCanNotBeCreated0" xml:space="preserve">
+    <value>TypeSubContext can not be created: {0}</value>
+  </data>
 </root>

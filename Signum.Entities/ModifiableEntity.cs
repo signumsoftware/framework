@@ -108,7 +108,7 @@ namespace Signum.Entities
         {
             if (this.Set(ref variable, valor, property))
             {
-                NotifyError();
+                NotifyToString();
                 return true;
             }
             return false;
@@ -269,7 +269,7 @@ namespace Signum.Entities
                     return ((IDataErrorInfo)this).Error;
                 else
                 {
-                    PropertyPack pp = Validator.GetPropertyPack(GetType(), columnName);
+                    PropertyPack pp = Validator.GetOrCreatePropertyPack(GetType(), columnName);
                     if (pp == null)
                         return null; //Hidden properties
 
@@ -280,12 +280,12 @@ namespace Signum.Entities
 
         public string PropertyCheck<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
         {
-            return PropertyCheck(Validator.GetPropertyPack(property));
+            return PropertyCheck(Validator.GetOrCreatePropertyPack(property));
         }
 
         public string PropertyCheck(string propertyName) 
         {
-            return PropertyCheck(Validator.GetPropertyPack(GetType(), propertyName));
+            return PropertyCheck(Validator.GetOrCreatePropertyPack(GetType(), propertyName));
         }
        
         public string PropertyCheck(PropertyPack pp)

@@ -58,14 +58,16 @@ namespace Signum.Windows
             obj.SetValue(IsReadOnlyProperty, value);
         }
 
-
+        [TypeConverter(typeof(PropertyRouteConverter))]
         public static readonly DependencyProperty TypeContextProperty =
-            DependencyProperty.RegisterAttached("TypeContext", typeof(TypeContext), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
-        public static TypeContext GetTypeContext(DependencyObject obj)
+            DependencyProperty.RegisterAttached("TypeContext", typeof(PropertyRoute), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
+        [TypeConverter(typeof(PropertyRouteConverter))]
+        public static PropertyRoute GetTypeContext(DependencyObject obj)
         {
-            return (TypeContext)obj.GetValue(TypeContextProperty);
+            return (PropertyRoute)obj.GetValue(TypeContextProperty);
         }
-        public static void SetTypeContext(DependencyObject obj, TypeContext value)
+        [TypeConverter(typeof(PropertyRouteConverter))]
+        public static void SetTypeContext(DependencyObject obj, PropertyRoute value)
         {
             obj.SetValue(TypeContextProperty, value);
         }
@@ -175,7 +177,7 @@ namespace Signum.Windows
 
         private static void InititializeRoute(FrameworkElement fe, string route)
         {
-            TypeContext context = GetTypeContext(fe.Parent);
+            PropertyRoute context = GetTypeContext(fe.Parent);
 
             if (context == null)
                 throw new ApplicationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext + ": '{0}'".Formato(route));
@@ -188,14 +190,10 @@ namespace Signum.Windows
 
             foreach (var step in steps)
             {
-                if (Reflector.IsIdentifiableEntity(context.Type))
-                    context = TypeContext.Root(context.Type); //Reset
-
                 if (!validIdentifier.IsMatch(step))
                     throw new ApplicationException(Resources.IsNotAValidIdentifier.Formato(step));
 
-                PropertyInfo pi = context.Type.GetProperty(step).ThrowIfNullC(Resources.Property0DoNotExistOnType1.Formato(step, context.Type.TypeName()));
-                context = new TypeSubContext(pi, context);
+                context = context.Add(step);
             }
 
             if (!pseudoRoute)
@@ -231,17 +229,14 @@ namespace Signum.Windows
             PseudoRouteTask += TaskSetLabelText;
         }
 
-        public static void TaskSetValueProperty(FrameworkElement fe, string route, TypeContext context)
+        public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
             DependencyProperty valueProperty =
                 fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
-                //fe is LineBase ? ValueLine.ValueProperty :
-                //fe is EntityLine ? EntityLine.EntityProperty :
-                //fe is EntityList ? EntityList.EntitiesProperty :
-                //fe is EntityCombo ? EntityCombo.EntityProperty :
                 FrameworkElement.DataContextProperty;
 
-            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
+
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
 
             if (!BindingOperations.IsDataBound(fe, valueProperty))
             {
@@ -257,7 +252,7 @@ namespace Signum.Windows
         }
 
 
-        public static void TaskSetTypeProperty(FrameworkElement fe, string route, TypeContext context)
+        public static void TaskSetTypeProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
             DependencyProperty typeProperty =
                 fe is LineBase ? ((LineBase)fe).CommonRouteType() :
@@ -269,7 +264,7 @@ namespace Signum.Windows
             }
         }
 
-        public static void TaskSetLabelText(FrameworkElement fe, string route, TypeContext context)
+        public static void TaskSetLabelText(FrameworkElement fe, string route, PropertyRoute context)
         {
             DependencyProperty labelText =
                fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
@@ -278,37 +273,35 @@ namespace Signum.Windows
 
             if (labelText != null && fe.NotSet(labelText))
             {
-                fe.SetValue(labelText, (context as TypeSubContext).TryCC(ts => ts.PropertyInfo.NiceName()));
+                fe.SetValue(labelText, (context as PropertyRoute).TryCC(ts => ts.PropertyInfo.NiceName()));
             }
         }
 
-        static void TaskSetUnitText(FrameworkElement fe, string route, TypeContext context)
+        static void TaskSetUnitText(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            TypeSubContext tsc = context as TypeSubContext;
-            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && tsc != null)
+            if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.Property)
             {
-                UnitAttribute ua = tsc.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
                 if (ua != null)
                     vl.UnitText = ua.UnitName;
             }
         }
 
-        static void TaskSetFormatText(FrameworkElement fe, string route, TypeContext context)
+        static void TaskSetFormatText(FrameworkElement fe, string route, PropertyRoute context)
         {
             ValueLine vl = fe as ValueLine;
-            TypeSubContext tsc = context as TypeSubContext;
-            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && tsc != null)
+            if (vl != null && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.Property)
             {
-                string format = Reflector.FormatString(tsc.PropertyInfo);
+                string format = Reflector.FormatString(context.PropertyInfo);
                 if (format != null)
                     vl.Format = format;
             }
         }
 
-        public static void TaskSetIsReadonly(FrameworkElement fe, string route, TypeContext context)
+        public static void TaskSetIsReadonly(FrameworkElement fe, string route, PropertyRoute context)
         {
-            bool isReadOnly = (context as TypeSubContext).TryCS(tsc => tsc.PropertyInfo.IsReadOnly()) ?? true;
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.Property && context.PropertyInfo.IsReadOnly();
 
             if (isReadOnly && fe.NotSet(Common.IsReadOnlyProperty) && (fe is ValueLine || fe is EntityLine || fe is EntityCombo || fe is TextArea))
             {
@@ -316,26 +309,23 @@ namespace Signum.Windows
             }
         }
 
-        public static void TaskSetImplementations(FrameworkElement fe, string route, TypeContext context)
+        public static void TaskSetImplementations(FrameworkElement fe, string route, PropertyRoute context)
         {
             EntityBase eb = fe as EntityBase;
             if (eb != null && eb.NotSet(EntityBase.ImplementationsProperty))
             {
-                var contextList = eb.GetEntityTypeContext().FollowC(a => (a as TypeSubContext).TryCC(t => t.Parent)).ToList();
+                PropertyRoute entityContext = eb.GetEntityTypeContext();
 
-                if (contextList.Count > 1 && Navigator.Manager.ServerTypes != null)
+                if (entityContext != null)
                 {
-                    var list = contextList.OfType<TypeSubContext>().Select(a => a.PropertyInfo).Reverse().ToList();
 
-                    Type type = contextList.Last().Type;
-
-                    if (Navigator.Manager.ServerTypes.ContainsKey(type))
-                        eb.Implementations = Server.Return((IBaseServer s) => s.FindImplementations(type, list.Cast<MemberInfo>().ToArray()));
+                    if (Navigator.Manager.ServerTypes.ContainsKey(entityContext.IdentifiableType))
+                        eb.Implementations = Server.Return((IBaseServer s) => s.FindImplementations(context));
                 }
             }
         }
 
-        static void TaskSetCollaspeIfNull(FrameworkElement fe, string route, TypeContext context)
+        static void TaskSetCollaspeIfNull(FrameworkElement fe, string route, PropertyRoute context)
         {
             if (GetCollapseIfNull(fe) && fe.NotSet(UIElement.VisibilityProperty))
             {
@@ -390,5 +380,5 @@ namespace Signum.Windows
         }
     }
 
-    public delegate void CommonRouteTask(FrameworkElement fe, string route, TypeContext context);
+    public delegate void CommonRouteTask(FrameworkElement fe, string route, PropertyRoute context);
 }

@@ -172,7 +172,7 @@ namespace Signum.Windows
             this.Value = value; 
         }
 
-        public Column Column { get; set; }
+        public QueryToken Token { get; set; }
         public string ColumnName { get; set; }
         public bool Frozen { get; set; }
         public FilterOperation Operation { get; set; }
@@ -197,17 +197,16 @@ namespace Signum.Windows
 
         public void RefreshRealValue()
         {
-            RealValue = Column != null ? Server.Convert(Value, Column.Type) : Value;
+            RealValue = Token != null ? Server.Convert(Value, Token.Type) : Value;
             if (ValueChanged != null)
-                ValueChanged(this, EventArgs.Empty); 
+                ValueChanged(this, EventArgs.Empty);
         }
 
         public Filter ToFilter()
         {
             return new Filter
             {
-                Name = Column.Name,
-                Type = Column.Type,
+                Token = Token,
                 Operation = Operation,
                 Value = RealValue
             };
@@ -253,11 +252,12 @@ namespace Signum.Windows
         }
 
         public string ColumnName { get; set; }
+        public QueryToken Token { get; set; }
         public OrderType OrderType { get; set; }
         
         public Order ToOrder()
         {
-            return new Order(ColumnName, OrderType);
+            return new Order(Token, OrderType);
         }
     }
 }

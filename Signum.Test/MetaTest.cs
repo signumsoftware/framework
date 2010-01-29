@@ -69,7 +69,7 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
 
-            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.Member.Name).Order().ToString(","), "Name,Name");
+            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.PropertyPath.ToString()).Order().ToString(","), "(AlbumDN).Name,(LabelDN).Name");
         }
 
         [TestMethod]
@@ -112,8 +112,7 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Song"], typeof(CleanMeta));
 
-            Assert.IsNotNull(((CleanMeta)dic["Song"]).Parent);
-            Assert.IsNotNull(((CleanMeta)dic["Song"]).Parent.Parent);
+            Assert.IsNotNull(((CleanMeta)dic["Song"]).PropertyPath.ToString(), "(AlbumDN).Songs/Name");
         }
     }
 }

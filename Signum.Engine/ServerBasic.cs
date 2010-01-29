@@ -56,22 +56,22 @@ namespace Signum.Services
              () => { Database.Save(entidad); return entidad; });
         }
 
-        public List<Lite> RetrieveAllLite(Type liteType, Type[] types)
+        public List<Lite> RetrieveAllLite(Type liteType, Implementations implementations)
         {
             return Return(MethodInfo.GetCurrentMethod(), "RetrieveAllLite {0}".Formato(liteType),
-             () => AutoCompleteUtils.RetriveAllLite(liteType, types));
+                 () => AutoCompleteUtils.RetriveAllLite(liteType, implementations));
         }
 
-        public List<Lite> FindLiteLike(Type liteType, Type[] types, string subString, int count)
+        public List<Lite> FindLiteLike(Type liteType, Implementations implementations, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(), "FindLiteLike {0}".Formato(liteType),
-             () => AutoCompleteUtils.FindLiteLike(liteType, types, subString, count));
+                () => AutoCompleteUtils.FindLiteLike(liteType, implementations, subString, count));
         }
 
-        public Type[] FindImplementations(Type liteType, MemberInfo[] members)
+        public Implementations FindImplementations(PropertyRoute entityPath)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => Schema.Current.FindImplementations(liteType, members));
+                () => Schema.Current.FindImplementations(entityPath));
         }
 
         public List<IdentifiableEntity> RetrieveAll(Type type)
@@ -113,10 +113,10 @@ namespace Signum.Services
              () => DynamicQueryManager.Current.QueryDescription(queryName));
         }
 
-        public ResultTable GetQueryResult(object queryName, List<Filter> filters, List<Order> orders, int? limit)
+        public ResultTable GetQueryResult(object queryName, List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)
         {
             return Return(MethodInfo.GetCurrentMethod(), "GetQueryResult {0}".Formato(queryName),
-             () => DynamicQueryManager.Current.ExecuteQuery(queryName, filters, orders, limit));
+             () => DynamicQueryManager.Current.ExecuteQuery(queryName, userColumns, filters, orders, limit));
         }
 
         public int GetQueryCount(object queryName, List<Filter> filters)

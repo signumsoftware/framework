@@ -205,15 +205,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The column {0} is not found on query {1}.
-        /// </summary>
-        internal static string Column0NotFoundOnQuery1 {
-            get {
-                return ResourceManager.GetString("Column0NotFoundOnQuery1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Context is only possible with IdentifiableEntities.
         /// </summary>
         internal static string ContextItsOnlyPossibleWithIdentifiableEntities {
@@ -572,6 +563,15 @@ namespace Signum.Windows.Properties {
         internal static string Operation {
             get {
                 return ResourceManager.GetString("Operation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to parent can not be a Property with a type that implements IIdentifiabe.
+        /// </summary>
+        internal static string ParentCanNotBeAPropertyWithATypeThatImplementsIIdentifiabe {
+            get {
+                return ResourceManager.GetString("ParentCanNotBeAPropertyWithATypeThatImplementsIIdentifiabe", resourceCulture);
             }
         }
         

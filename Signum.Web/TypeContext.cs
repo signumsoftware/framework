@@ -99,9 +99,9 @@ namespace Signum.Web
             if (typeContext is TypeContext<T>)
                 return (TypeContext<T>)typeContext;
 
-            if (typeContext.ContextType.IsAssignableFrom(typeof(T)))
+            if (typeContext.Type.IsAssignableFrom(typeof(T)))
             {
-                ParameterExpression pe = Expression.Parameter(typeContext.ContextType, "p");
+                ParameterExpression pe = Expression.Parameter(typeContext.Type, "p");
                 LambdaExpression lambda = Expression.Lambda(Expression.Convert(pe, typeof(T)), pe);
                 return (TypeContext<T>)Common.UntypedTypeContext(typeContext, lambda, typeof(T));
             }
@@ -113,13 +113,13 @@ namespace Signum.Web
 
         public static TypeContext ExtractLite<T>(this TypeContext<T> liteTypeContext)
         {
-            if (!typeof(Lite).IsAssignableFrom(liteTypeContext.ContextType))
+            if (!typeof(Lite).IsAssignableFrom(liteTypeContext.Type))
                 return null;
 
-            ParameterExpression pe = Expression.Parameter(liteTypeContext.ContextType, "p");
-            Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLite(liteTypeContext.ContextType)), pe);
+            ParameterExpression pe = Expression.Parameter(liteTypeContext.Type, "p");
+            Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLite(liteTypeContext.Type)), pe);
             LambdaExpression lambda = Expression.Lambda(call, pe);
-            return Common.UntypedTypeContext(liteTypeContext, lambda, Reflector.ExtractLite(liteTypeContext.ContextType));
+            return Common.UntypedTypeContext(liteTypeContext, lambda, Reflector.ExtractLite(liteTypeContext.Type));
         }
 
         static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool? writeIdAndRuntime)
@@ -230,6 +230,11 @@ namespace Signum.Web
 
         public static string Compose(string prefix, params string[] namesToAppend)
         {
+            return Compose(prefix, (IEnumerable<string>)namesToAppend);
+        }
+
+        public static string Compose(string prefix, IEnumerable<string> namesToAppend)
+        {
             string result = prefix;
             foreach (string s in namesToAppend)
                 result += Separator + s;
@@ -239,11 +244,8 @@ namespace Signum.Web
         public abstract object UntypedValue { get; }
         public abstract string Name { get; }
 
-        public abstract string FriendlyName { get; }
-        public abstract Type ContextType { get; }
-        public abstract Type LastIdentifiableProperty { get; }
-        public abstract List<PropertyInfo> GetPath();
-        public abstract PropertyInfo LastProperty { get; }
+        public abstract Type Type { get; }
+        public abstract PropertyRoute PropertyRoute { get; }
 
         public virtual void Dispose()
         {
@@ -258,21 +260,6 @@ namespace Signum.Web
     {
         public T Value { get; set; }
         string prefix;
-
-        public override Type LastIdentifiableProperty
-        {
-            get 
-            {
-                if (!Reflector.IsIdentifiableEntity(typeof(T)))
-                    throw new ApplicationException(Resources.NoIdentifiableEntityPropertyInTypeContextPath);
-                return typeof(T); 
-            }
-        }
-
-        public override List<PropertyInfo> GetPath() 
-        {
-            return new List<PropertyInfo>();
-        }
 
         public override object UntypedValue
         {
@@ -298,19 +285,14 @@ namespace Signum.Web
             }
         }
 
-        public override string FriendlyName
-        {
-            get { throw new NotImplementedException("TypeContext has no DisplayName"); }
-        }
-
-        public override PropertyInfo LastProperty
-        {
-	         get { throw new NotImplementedException("TypeContext has no Property"); }
-        }
-
-        public override Type ContextType
+        public override Type Type
         {
             get { return typeof(T); }
+        }
+
+        public override PropertyRoute PropertyRoute
+        {
+            get { return PropertyRoute.Root(typeof(T)); }
         }
     }
     #endregion
@@ -320,12 +302,14 @@ namespace Signum.Web
     {
         PropertyInfo[] properties; 
         public TypeContext Parent { get; private set; }
+        PropertyRoute route;
 
-        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties)
+        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, PropertyRoute route)
             : base(value)
         {
             this.properties = properties;
-            Parent = parent;
+            this.Parent = parent;
+            this.route = route;
         }
 
         public PropertyInfo[] Properties
@@ -333,61 +317,21 @@ namespace Signum.Web
             get { return properties; }
         }
 
-        public override PropertyInfo LastProperty
-        {
-            get { return properties.Last(); }
-        }
-
-        public override Type LastIdentifiableProperty
-        {
-            get
-            {
-                List<PropertyInfo> pis = Parent.GetPath();
-                pis.AddRange(properties);
-                Type type = null;
-                for (int i = 0; i < pis.Count; i++)
-                {
-                    PropertyInfo p = pis[i];
-                    Type proposed = (Reflector.IsMList(p.PropertyType)) ? p.PropertyType.GetGenericArguments()[0] : p.PropertyType;
-                    if (Reflector.IsIdentifiableEntity(proposed) && i<pis.Count-1)
-                        type = proposed; //If I'm Identifiable and there are more properties: Reset
-                }
-                return type ?? Parent.LastIdentifiableProperty;
-                //return properties.LastOrDefault(pi => Reflector.IsIdentifiableEntity(pi.PropertyType))
-                //                 .TryCC(prop => prop.PropertyType) ??
-                //                 Parent.LastIdentifiableProperty;
-            }
-        }
-
-        public override List<PropertyInfo> GetPath()
-        {
-            List<PropertyInfo> pis = Parent.GetPath();
-            pis.AddRange(properties);
-
-            Type lastIP = LastIdentifiableProperty;
-            int lastPI = pis.FindLastIndex(pi => 
-                (Reflector.IsMList(pi.PropertyType) ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType) == lastIP); 
-
-            if (lastPI == -1)
-                return pis;
-            else
-                return pis.GetRange(lastPI + 1, pis.Count - lastPI - 1);
-        }
 
         public override string Name
         {
             get 
             {
-                string propertiesName = properties.TryCC(props => props.ToString(p => p.Name, TypeContext.Separator));
-                return //((Parent.Name == TypeContext.Separator) ? "" : Parent.Name) +
-                    Parent.Name +
-                    (propertiesName.HasText() ? TypeContext.Separator + propertiesName : "");
+                return TypeContext.Compose(Parent.Name, properties.Select(a => a.Name));
             }
         }
 
-        public override string FriendlyName
+        public override PropertyRoute PropertyRoute
         {
-            get { return LastProperty.NiceName(); }
+            get
+            {
+                return route;
+            }
         }
     }
     #endregion
@@ -398,42 +342,14 @@ namespace Signum.Web
         int Index;
 
         internal TypeContext Parent { get; private set; }
+        PropertyRoute route; 
 
         public TypeElementContext(T value, TypeContext parent, int index)
             : base(value)
         {
             this.Index = index;
             Parent = parent;
-        }
-
-        public override PropertyInfo LastProperty
-        {
-            get { throw new NotImplementedException("TypeElementContext has no LastProperty"); }
-        }
-
-        public override Type LastIdentifiableProperty
-        {
-            get
-            {
-                //if (Reflector.IsIdentifiableEntity(typeof(T)))
-                //    return typeof(T); 
-
-                return Parent.LastIdentifiableProperty;
-            }
-        }
-
-        public override List<PropertyInfo> GetPath()
-        {
-            List<PropertyInfo> pis = Parent.GetPath();
-
-            Type lastIP = LastIdentifiableProperty;
-            int lastPI = pis.FindLastIndex(pi => 
-                (Reflector.IsMList(pi.PropertyType) ? pi.PropertyType.GetGenericArguments()[0] : pi.PropertyType) == lastIP);
-
-            if (lastPI == -1)
-                return pis;
-            else
-                return pis.GetRange(lastPI + 1, pis.Count - lastPI - 1);
+            route = parent.PropertyRoute.Add("Item"); 
         }
 
         public override string Name
@@ -442,11 +358,6 @@ namespace Signum.Web
             {
                 return TypeContext.Compose(Parent.Name, Index.ToString());
             }
-        }
-
-        public override string FriendlyName
-        {
-            get { throw new NotImplementedException("TypeElementContext has no FriendlyName"); }
         }
     }
     #endregion

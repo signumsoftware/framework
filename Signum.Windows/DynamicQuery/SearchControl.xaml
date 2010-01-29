@@ -5,8 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
 	x:Class="Signum.Windows.SearchControl"
-	x:Name="me"
-    >
+	x:Name="me">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -78,8 +77,15 @@
             <RowDefinition Height="Auto"  />
         </Grid.RowDefinitions>
         <StackPanel Visibility="{Binding ShowHeader, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" >
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
+                <Label Content="{m:Loc NewFilter}" Margin="0,2,2,2" Target="{Binding ElementName=cbFilters, Mode=OneWay}"/>
+                <m:QueryTokenBuilder x:Name="tokenBuilder"  Columns="{Binding Columns, ElementName=UserControl}"   />
+                <Button x:Name="btCreateFilter" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" Margin="2,2,2,2" Click="btCreateFilter_Click" />
+            </StackPanel>
             <m:FilterBuilder  x:Name="filterBuilder"  
-                              Visibility="{Binding ShowFilters, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Background="{DynamicResource BlueBackground}" />
+                              Filters="{Binding FilterOptions, ElementName=me}"
+                              Visibility="{Binding ShowFilters, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" 
+                              Background="{DynamicResource BlueBackground}" />
             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent">
                 <StackPanel.Resources>
                     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">

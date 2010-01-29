@@ -143,7 +143,7 @@ namespace Signum.Web
 
             EntityCombo ec = new EntityCombo(helper.GlobalName(context.Name));
             Navigator.ConfigureEntityBase(ec, runtimeType, false);
-            Common.FireCommonTasks(ec, typeof(T), context);
+            Common.FireCommonTasks(ec, context);
 
             if (settingsModifier != null)
                 settingsModifier(ec);

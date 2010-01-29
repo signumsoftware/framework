@@ -8,6 +8,7 @@ using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Web.Properties;
+using Signum.Web.Controllers;
 #endregion
 
 namespace Signum.Web
@@ -77,14 +78,9 @@ namespace Signum.Web
             if (settings.Implementations == null)
                 return "";
 
-            string strButtons = "";
-            foreach (Type t in settings.Implementations)
-            {
-                if (Navigator.TypesToURLNames.ContainsKey(t)) //If type t is not in Navigator: it's not a valid implementation
-                    strButtons += Navigator.TypesToURLNames.TryGetC(t) + ";";
-            }
+            string implementations = ImplementationsModelBinder.Render(settings.Implementations);
 
-            return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.Implementations), strButtons);
+            return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.Implementations), implementations);
         }
 
         public static string WriteViewButton<T>(HtmlHelper helper, EntityBase settings, T value)

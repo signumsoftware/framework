@@ -91,7 +91,7 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            Navigator.Manager.SetColumns(QueryName, FilterOptions);
+            Navigator.Manager.SetTokens(QueryName, FilterOptions);
 
             Search();
         }

@@ -15,7 +15,7 @@ namespace Signum.Services
         QueryDescription GetQueryDescription(object queryName);
 
         [OperationContract, NetDataContract]
-        ResultTable GetQueryResult(object queryName, List<Filter> filters, List<Order> orders, int? limit);
+        ResultTable GetQueryResult(object queryName, List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
 
         [OperationContract, NetDataContract]
         int GetQueryCount(object queryName, List<Filter> filters);

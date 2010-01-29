@@ -120,9 +120,6 @@
   <data name="ControlID0HasAnInvalidFormat" xml:space="preserve">
     <value>The control ID {0} has an invalid format</value>
   </data>
-  <data name="FilterColumn0NotFoundOrFoundMoreThanOnce" xml:space="preserve">
-    <value>Filter Column {0} not found or found more than once in query description</value>
-  </data>
   <data name="IncorrectEntityInSession" xml:space="preserve">
     <value>Incorrect entity in Session</value>
   </data>
@@ -230,5 +227,23 @@
   </data>
   <data name="ViewNotes" xml:space="preserve">
     <value>Ver notas</value>
+  </data>
+  <data name="TypeSubContextCanNotBeCreated0" xml:space="preserve">
+    <value>TypeSubContext can not be created: {0}</value>
+  </data>
+  <data name="Type0HasToBeIIdentifiableAtLeast" xml:space="preserve">
+    <value>type {0} has to be IIdentifiable at least</value>
+  </data>
+  <data name="Type0HasToBeAbstractNotInTheSchema" xml:space="preserve">
+    <value>type {0} has to be abstract (not in the schema)</value>
+  </data>
+  <data name="Type0HasToBeInTheSchema" xml:space="preserve">
+    <value>type {0} has to be in the schema</value>
+  </data>
+  <data name="AbstractContextHasNotRoute" xml:space="preserve">
+    <value>Abstract Context has not Route</value>
+  </data>
+  <data name="ExpressionCannotFinishWithAnTypeWithImplementations0" xml:space="preserve">
+    <value>Expression cannot finish with an type with implementations {{0}}</value>
   </data>
 </root>
