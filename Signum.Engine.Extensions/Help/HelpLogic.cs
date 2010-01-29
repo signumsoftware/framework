@@ -125,7 +125,7 @@ namespace Signum.Engine.Help
             }
 
             var typeHelpInfo = from doc in documents
-                               let typeName = EntityHelp.GetEntityName(doc.Document)
+                               let typeName = EntityHelp.GetEntityFullName(doc.Document)
                                where typeName != null
                                select EntityHelp.Load(typesDic.GetOrThrow(typeName, "No Type with FullName {0} found in the schema"), doc.Document, doc.File);
 
@@ -175,37 +175,32 @@ namespace Signum.Engine.Help
             }
 
             var should = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy())
-                         .GroupToDictionary(type=>type.Namespace);
+                         .ToDictionary(type=>type.FullName);
 
-            //var current = (from fn in Directory.GetFiles(HelpDirectory, "*.help")
-            //               let help = XDocument.Load(fn).Element(_Help)
-            //               select new
-            //               {
-            //                   Types = help.Elements(_Entity).Select(t => t.Attribute(_Name).Value).ToList(),
-            //                   Namespace = help.Attribute(_NamespaceR).Value,
-            //                   FileName = fn,
-            //               }).ToDictionary(a=>a.Namespace, a=> new { a.FileName, a.Types});
+            var current = (from fn in Directory.GetFiles(HelpDirectory, "*.help")
+                           let document = XDocument.Load(fn)
+                           select new
+                           {
+                               TypeName = EntityHelp.GetEntityFullName(document),
+                               File = fn,
+                           }).ToDictionary(a=>a.TypeName , a=>a.File );
 
-            //Replacements replacements = new Replacements(); 
-            //HelpTools.SynchronizeReplacing(replacements, "Assembly", current, should,
-            //    (assemblyName, oldNamespaces)=>
-            //    {
-            //        foreach (var kvp in oldNamespaces)
-            //            File.Delete(kvp.Value.FileName); 
-            //    },
-            //    (assemblyName, newNamespaces) =>
-            //    {
-            //        foreach (var item in newNamespaces)
-            //            SmartSave(Create(assemblyName, item.Key, item.Value));
-            //    },
-            //    (assemblyName, oldNamespaces, newNamespaces)=>
-            //    {
-            //        HelpTools.SynchronizeReplacing(replacements, "Namespaces for Assembly {0}".Formato(assemblyName), 
-            //            oldNamespaces, newNamespaces,
-            //            (oldNamespaceName, fileAndTypes)=> RemoveNamespace(fileAndTypes.FileName, oldNamespaceName),
-            //            (newNamespaceName, fileTypes)=>
- 
-            //    }));
+            Replacements replacements = new Replacements(); 
+            HelpTools.SynchronizeReplacing(replacements, "Assembly", current, should,
+                (fullName, oldFile)=>
+                {
+                    File.Delete(oldFile);
+                    Console.WriteLine("Deleted {0}".Formato(oldFile));
+                },
+                (fullName, type) =>
+                {
+                    string fileName = EntityHelp.Create(type).Save();
+                    Console.WriteLine("Created {0}".Formato(fileName));
+                },
+                (fullName, oldFile, type)=>
+                {
+                    EntityHelp.Synchronize(oldFile, type);
+                });
         }
     }
 }

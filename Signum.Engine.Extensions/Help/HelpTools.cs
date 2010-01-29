@@ -18,54 +18,49 @@ namespace Signum.Engine.Help
             return dic;
         }
 
-        internal static void Syncronize(this XElement loaded, XElement created, XName collectionElementName, XName elementName, XName elementKeyAttribute,
-            Func<string, XElement, XElement, XElement> update,
-            Action<SyncAction, string> notify)
+        internal static void Syncronize(XElement created, XElement loaded,
+            XName collectionElementName, XName elementName, XName elementKeyAttribute, string replacementsKey,
+            Func<string, XElement, XElement, bool> update, Action<SyncAction, string> notify)
         {
-            XElement loadedCollection = loaded.Element(collectionElementName) ?? new XElement(collectionElementName);
-            XElement createdCollection = created.Element(collectionElementName) ?? new XElement(collectionElementName);
+            Dictionary<string, XElement> loadedDictionary = (loaded.Element(collectionElementName) ?? new XElement(collectionElementName))
+                .Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
+            Dictionary<string, XElement> createdDictionary = (created.Element(collectionElementName) ?? new XElement(collectionElementName))
+                .Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
 
-            Dictionary<string, XElement> loadedDictionary = loaded.Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
-            HashSet<string> createdKeys = createdCollection.Elements(elementName).Select(a => a.Attribute(elementKeyAttribute).Value).ToHashSet();
+            Replacements replacements = new Replacements();
+            replacements.AskForReplacements(loadedDictionary, createdDictionary, replacementsKey);
+            var repLoadedDictionary = replacements.ApplyReplacements(loadedDictionary, replacementsKey);
 
-            foreach (var k in loadedDictionary.Keys.Except(createdKeys))
+            foreach (var k in loadedDictionary.Keys.Except(createdDictionary.Keys))
                 notify(SyncAction.Removed, k);
 
-            var result = created.Elements(collectionElementName).Select(elem =>
+            foreach (var elem in createdDictionary.Values)
             {
                 string key = elem.Attribute(elementKeyAttribute).Value;
                 XElement load;
-                if (loadedDictionary.TryGetValue(key, out load))
+                if (repLoadedDictionary.TryGetValue(key, out load))
                 {
-                    var updated = update(key, load, elem);
-                    if (updated == load)
+                    if (update(key, elem, load))
                     {
                         notify(SyncAction.Updated, key);
-                        return updated;
                     }
-
-                    return load;
                 }
                 else
                 {
                     notify(SyncAction.Added, key);
-                    return elem;
                 }
-            }).ToList();
+            }
 
-            if (!loadedDictionary.Keys.Zip(createdKeys, (x, y) => x == y).All(b => b) &&
-                 loadedDictionary.Keys.ToHashSet().SetEquals(createdKeys))
+            if (!loadedDictionary.Keys.Zip(createdDictionary.Keys, (x, y) => x == y).All(b => b) &&
+                 loadedDictionary.Keys.ToHashSet().SetEquals(createdDictionary.Keys))
             {
                 notify(SyncAction.OrderChanged, null);
             }
 
-            if (result.Count == 0)
-                loadedCollection.Remove();
-            else
-                loadedCollection.ReplaceNodes(result);
+            var col = created.Element(collectionElementName);
+            if (col != null && col.Elements().Count() == 0)
+                col.Remove();
         }
-
-
 
         public static void SynchronizeReplacing<O, N>(
              Replacements replacements, string replacementsKey,
