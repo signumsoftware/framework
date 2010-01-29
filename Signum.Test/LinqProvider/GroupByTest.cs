@@ -146,6 +146,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void RootSumWhere()
+        {
+            var songsAlbum = Database.Query<BandDN>().Where(a => a.Members.Sum(m => m.Name.Length) > 0).ToList();
+        }
+
+
+        [TestMethod]
         public void RootSumZero()
         {
             Assert.AreEqual(0, Database.Query<ArtistDN>().Where(a => false).Sum(a => a.Name.Length));

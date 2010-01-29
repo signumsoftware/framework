@@ -43,7 +43,7 @@ namespace Signum.Web
 
             if (isIdentifiable || isLite)
             {
-                sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(cleanStaticType, value) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(value) { Ticks = ticks }));
 
                 if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
                     sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));

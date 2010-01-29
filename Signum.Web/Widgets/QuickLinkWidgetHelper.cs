@@ -10,7 +10,7 @@ using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
-    public delegate List<QuickLinkItem> GetQuickLinksDelegate(IdentifiableEntity entity);
+    public delegate List<QuickLinkItem> GetQuickLinksDelegate(HtmlHelper helper, IdentifiableEntity entity, string partialViewName);
 
     public static class QuickLinkWidgetHelper
     {
@@ -18,13 +18,13 @@ namespace Signum.Web
 
 
         public static void Start() {
-            WidgetsHelper.GetWidgetsForView += (helper, entity) => CreateWidget((IdentifiableEntity) entity);
+            WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName) => CreateWidget(helper, (IdentifiableEntity)entity, partialViewName);
         }
 
-        public static WidgetItem CreateWidget(IdentifiableEntity identifiable)
+        public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName)
         {
             List<QuickLinkItem> quicklinks = new List<QuickLinkItem>();
-            if (GetQuickLinks != null) quicklinks = GetQuickLinks(identifiable);
+            if (GetQuickLinks != null) quicklinks = GetQuickLinks(helper, identifiable, partialViewName);
             if (quicklinks == null || quicklinks.Count == 0) return null;
             return new WidgetItem
             {

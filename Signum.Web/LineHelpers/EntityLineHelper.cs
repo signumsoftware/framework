@@ -44,7 +44,7 @@ namespace Signum.Web
 
             if (isIdentifiable || isLite)
             {
-                sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(cleanStaticType, value) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(value) { Ticks = ticks }));
 
                 sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
 
@@ -75,7 +75,7 @@ namespace Signum.Web
             }
             else
             {
-                sb.AppendLine(helper.HiddenSFInfo(prefix, new EmbeddedEntityInfo<T>(cleanStaticType, value, false) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenSFInfo(prefix, new EmbeddedEntityInfo<T>(value, false) { Ticks = ticks }));
 
                 sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
 

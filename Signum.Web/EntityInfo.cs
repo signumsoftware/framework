@@ -7,6 +7,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
+using System.Linq.Expressions;
 
 namespace Signum.Web
 {
@@ -15,6 +16,38 @@ namespace Signum.Web
         public static string HiddenSFInfo(this HtmlHelper helper, string prefix, EntityInfo entityInfo)
         {
             return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.Info), entityInfo.ToString());
+        }
+
+        public static string HiddenSFInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
+        {
+            if(typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
+                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.Info)), new EmbeddedEntityInfo<T>(parent.Value, false).ToString());
+            else
+                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.Info)), new EntityInfo<T>(parent.Value).ToString());
+        }
+
+        public static string HiddenSFInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
+        {
+            TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
+            if(typeof(EmbeddedEntity).IsAssignableFrom(typeof(S)))
+                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(typeContext.Name, EntityBaseKeys.Info)), new EmbeddedEntityInfo<S>(typeContext.Value, false).ToString());
+            else
+                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(typeContext.Name, EntityBaseKeys.Info)), new EntityInfo<S>(typeContext.Value).ToString());
+        }
+
+        public static void WriteSFInfo(this HtmlHelper helper, string prefix, EntityInfo entityInfo)
+        {
+            helper.Write(helper.HiddenSFInfo(prefix, entityInfo));
+        }
+
+        public static void WriteSFInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
+        {
+            helper.Write(helper.HiddenSFInfo<T>(parent));
+        }
+
+        public static void WriteSFInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
+        {
+            helper.Write(helper.HiddenSFInfo<T, S>(parent, property));
         }
     }
 
@@ -96,12 +129,12 @@ namespace Signum.Web
 
     public class EntityInfo<T> : EntityInfo
     {
-        public EntityInfo(Type staticType, T Value)
+        public EntityInfo(T Value)
         {
-            if (typeof(EmbeddedEntity).IsAssignableFrom(staticType))
-                throw new ArgumentException("EntityInfo<T> cannot be called for an embedded entity. Call EmbeddedEntityInfo<T> instead");
+            this.StaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
 
-            this.StaticType = staticType;
+            if (typeof(EmbeddedEntity).IsAssignableFrom(this.StaticType))
+                throw new ArgumentException("EntityInfo<T> cannot be called for an embedded entity. Call EmbeddedEntityInfo<T> instead");
 
             if (Value == null)
             {
@@ -136,12 +169,12 @@ namespace Signum.Web
 
     public class EmbeddedEntityInfo<T> : EntityInfo
     {
-        public EmbeddedEntityInfo(Type staticType, T value, bool isNew)
+        public EmbeddedEntityInfo(T value, bool isNew)
         {
-            if (!typeof(EmbeddedEntity).IsAssignableFrom(staticType))
+            if (!typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
                 throw new ArgumentException("EmbeddedEntity<T> cannot be called for a non embedded entity. Call EntityInfo<T> instead");
 
-            this.StaticType = staticType;
+            this.StaticType = typeof(T);
             this.IsNew = isNew;
             
             if (value == null)

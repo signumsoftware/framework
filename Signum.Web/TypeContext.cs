@@ -153,7 +153,7 @@ namespace Signum.Web
                 EntityInfo entityInfo = null;
                 if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
                 {
-                    entityInfo = new EntityInfo<T>(typeof(T), tc.Value);
+                    entityInfo = new EntityInfo<T>(tc.Value);
                     
                     //IdentifiableEntity id = (IdentifiableEntity)(object)tc.Value;
                     //if (tc.Value != null)
@@ -172,10 +172,14 @@ namespace Signum.Web
                 }
                 else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
                 {
-                    entityInfo = new EmbeddedEntityInfo<T>(typeof(T), tc.Value, false);
+                    entityInfo = new EmbeddedEntityInfo<T>(tc.Value, false);
                     
                     //helper.ViewContext.HttpContext.Response.Write(
                     //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
+                }
+                else if (Reflector.IsMList(typeof(T)))
+                {
+                    entityInfo = new EntityInfo { StaticType = typeof(T), RuntimeType = typeof(T), IsNew = false };
                 }
                 helper.ViewContext.HttpContext.Response.Write(
                     helper.HiddenSFInfo(helper.GlobalName(tc.Name), entityInfo));
@@ -192,6 +196,18 @@ namespace Signum.Web
             WriteRuntimeAndId(helper, typeContext);
             return typeContext;
         }
+
+        public static IEnumerable<TypeElementContext<S>> TypeElementContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, IList<S>>> property)
+        {
+            using (TypeContext<IList<S>> context = (TypeContext<IList<S>>)Common.WalkExpression(parent, property))
+            {
+                for (int i = 0; i < context.Value.Count; i++)
+                {
+                    var econtext = new TypeElementContext<S>(context.Value[i], context, i);
+                    yield return econtext;
+                }
+            }
+        }
     }
     #endregion
 
@@ -206,7 +222,11 @@ namespace Signum.Web
         public const string CssLineLabel = "labelLine";
         
         public bool ownsStyleContext = false;
-        public bool OwnsStyleContext { get { return ownsStyleContext; } set { ownsStyleContext = value; } }
+        public bool OwnsStyleContext 
+        { 
+            get { return ownsStyleContext; } 
+            set { ownsStyleContext = value; } 
+        }
 
         public static string Compose(string prefix, params string[] namesToAppend)
         {

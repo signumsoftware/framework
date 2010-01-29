@@ -9,7 +9,7 @@ using Signum.Entities;
 
 namespace Signum.Web
 {
-    public delegate WidgetItem GetWidgetDelegate(HtmlHelper helper, ModifiableEntity entity);
+    public delegate WidgetItem GetWidgetDelegate(HtmlHelper helper, ModifiableEntity entity, string partialViewName);
 
     public class WidgetItem
     {
@@ -40,7 +40,7 @@ namespace Signum.Web
     {
         public static event GetWidgetDelegate GetWidgetsForView;
 
-        public static List<WidgetItem> GetWidgetsListForViewName(this HtmlHelper helper, ModifiableEntity entity)
+        public static List<WidgetItem> GetWidgetsListForViewName(this HtmlHelper helper, ModifiableEntity entity, string partialViewName)
         {
             List<WidgetItem> widgets = new List<WidgetItem>();
             if (entity != null)
@@ -48,7 +48,7 @@ namespace Signum.Web
                 if (GetWidgetsForView != null)
                     widgets.AddRange(GetWidgetsForView.GetInvocationList()
                         .Cast<GetWidgetDelegate>()
-                        .Select(d => d(helper, entity))
+                        .Select(d => d(helper, entity, partialViewName))
                         .NotNull().ToList());
             }
             return widgets;

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 using Signum.Engine.Linq;
+using System.Linq.Expressions;
 
 namespace Signum.Test.LinqProvider
 {
@@ -40,18 +41,18 @@ namespace Signum.Test.LinqProvider
             Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
             Assert.IsTrue(artists.Any(a => a.Name.Like("%Michael%")));
 
-            Debug.WriteLine(artists.Select(a => a.Name.Length).ToString(","));
-            Debug.WriteLine(artists.Select(a=>a.Name.ToLower()).ToString(","));
-            Debug.WriteLine(artists.Select(a=>a.Name.ToUpper()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.TrimStart()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.TrimEnd()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Substring(2).InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Substring(2, 2).InSql()).ToString(","));
+            Dump((ArtistDN a)=> a.Name.Length);
+            Dump((ArtistDN a)=>a.Name.ToLower());
+            Dump((ArtistDN a)=>a.Name.ToUpper());
+            Dump((ArtistDN a) => a.Name.TrimStart());
+            Dump((ArtistDN a) => a.Name.TrimEnd());
+            Dump((ArtistDN a) => a.Name.Substring(2).InSql());
+            Dump((ArtistDN a) => a.Name.Substring(2, 2).InSql());
 
-            Debug.WriteLine(artists.Select(a => a.Name.Left(2).InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Right(2).InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Reverse().InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Replicate(2).InSql()).ToString(","));
+            Dump((ArtistDN a) => a.Name.Left(2).InSql());
+            Dump((ArtistDN a) => a.Name.Right(2).InSql());
+            Dump((ArtistDN a) => a.Name.Reverse().InSql());
+            Dump((ArtistDN a) => a.Name.Replicate(2).InSql());
         }
 
         [TestMethod]
@@ -64,62 +65,66 @@ namespace Signum.Test.LinqProvider
             Assert.IsTrue(artists.Any(a => a.Name.EndsWith("Corgan")));
             Assert.IsTrue(artists.Any(a => a.Name.Like("%Michael%")));
 
-            Debug.WriteLine(artists.Select(a => a.Name.Length).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.ToLower()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.ToUpper()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.TrimStart()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.TrimEnd()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Substring(2).InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Substring(2, 2).InSql()).ToString(","));
+            Dump((ArtistDN a) => a.Name.Length);
+            Dump((ArtistDN a) => a.Name.ToLower());
+            Dump((ArtistDN a) => a.Name.ToUpper());
+            Dump((ArtistDN a) => a.Name.TrimStart());
+            Dump((ArtistDN a) => a.Name.TrimEnd());
+            Dump((ArtistDN a) => a.Name.Substring(2).InSql());
+            Dump((ArtistDN a) => a.Name.Substring(2, 2).InSql());
 
-            Debug.WriteLine(artists.Select(a => a.Name.Left(2).InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Right(2).InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Reverse().InSql()).ToString(","));
-            Debug.WriteLine(artists.Select(a => a.Name.Replicate(2).InSql()).ToString(","));
+            Dump((ArtistDN a) => a.Name.Left(2).InSql());
+            Dump((ArtistDN a) => a.Name.Right(2).InSql());
+            Dump((ArtistDN a) => a.Name.Reverse().InSql());
+            Dump((ArtistDN a) => a.Name.Replicate(2).InSql());
         }
 
         [TestMethod]
         public void DateDifFunctions()
         {
-            var notes = Database.Query<NoteDN>();
-            Debug.WriteLine(notes.Select(n => DateTime.Now.InSql()).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Year).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Month).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Day).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.DayOfYear).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Hour).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Minute).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Second).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Millisecond).ToString(","));
-            Debug.WriteLine(notes.Select(n => n.CreationTime.Date).ToString(","));
+            Dump((NoteDN n) => DateTime.Now.InSql());
+            Dump((NoteDN n) => n.CreationTime.Year);
+            Dump((NoteDN n) => n.CreationTime.Month);
+            Dump((NoteDN n) => n.CreationTime.Day);
+            Dump((NoteDN n) => n.CreationTime.DayOfYear);
+            Dump((NoteDN n) => n.CreationTime.Hour);
+            Dump((NoteDN n) => n.CreationTime.Minute);
+            Dump((NoteDN n) => n.CreationTime.Second);
+            Dump((NoteDN n) => n.CreationTime.Millisecond);
+            Dump((NoteDN n) => n.CreationTime.Date);
 
-            Debug.WriteLine(notes.Select(n => (DateTime.Today - n.CreationTime).TotalDays.InSql()).ToString(","));
-            Debug.WriteLine(notes.Select(n => (DateTime.Today - n.CreationTime).TotalHours.InSql()).ToString(","));
-            Debug.WriteLine(notes.Select(n => (DateTime.Today - n.CreationTime).TotalMinutes.InSql()).ToString(","));
-            Debug.WriteLine(notes.Select(n => (DateTime.Today - n.CreationTime).TotalSeconds.InSql()).ToString(","));
-            Debug.WriteLine(notes.Select(n => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql()).ToString(","));
+            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalDays.InSql());
+            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalHours.InSql());
+            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalMinutes.InSql());
+            Dump((NoteDN n) => (DateTime.Today - n.CreationTime).TotalSeconds.InSql());
+            Dump((NoteDN n) => (n.CreationTime.AddDays(1) - n.CreationTime).TotalMilliseconds.InSql());
         }
 
         [TestMethod]
         public void MathFunctions()
         {
-            var album = Database.Query<AlbumDN>();
-            Debug.WriteLine(album.Select(a => Math.Sign(a.Year)).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Abs(a.Year)).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Sin(a.Year)).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Asin(Math.Sin(a.Year))).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Cos(a.Year)).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Acos(Math.Cos(a.Year))).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Tan(a.Year)).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Atan(Math.Tan(a.Year))).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Atan2(1,1).InSql()).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Pow(a.Year, 2).InSql()).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Sqrt(a.Year)).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Exp(Math.Log(a.Year))).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Floor(a.Year + 0.5).InSql()).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Log10(a.Year)).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Ceiling(a.Year + 0.5).InSql()).ToString(","));
-            Debug.WriteLine(album.Select(a => Math.Round(a.Year + 0.5).InSql()).ToString(","));
+            Dump((AlbumDN a) => Math.Sign(a.Year));
+            Dump((AlbumDN a) => Math.Abs(a.Year));
+            Dump((AlbumDN a) => Math.Sin(a.Year));
+            Dump((AlbumDN a) => Math.Asin(Math.Sin(a.Year)));
+            Dump((AlbumDN a) => Math.Cos(a.Year));
+            Dump((AlbumDN a) => Math.Acos(Math.Cos(a.Year)));
+            Dump((AlbumDN a) => Math.Tan(a.Year));
+            Dump((AlbumDN a) => Math.Atan(Math.Tan(a.Year)));
+            Dump((AlbumDN a) => Math.Atan2(1,1).InSql());
+            Dump((AlbumDN a) => Math.Pow(a.Year, 2).InSql());
+            Dump((AlbumDN a) => Math.Sqrt(a.Year));
+            Dump((AlbumDN a) => Math.Exp(Math.Log(a.Year)));
+            Dump((AlbumDN a) => Math.Floor(a.Year + 0.5).InSql());
+            Dump((AlbumDN a) => Math.Log10(a.Year));
+            Dump((AlbumDN a) => Math.Ceiling(a.Year + 0.5).InSql());
+            Dump((AlbumDN a) => Math.Round(a.Year + 0.5).InSql());
+        }
+
+        public void Dump<T,S>(Expression<Func<T, S>> bla)
+            where T:IdentifiableEntity
+        {
+            Debug.WriteLine(Database.Query<T>().Select(a => bla.Invoke(a).InSql()).ToString(","));
         }
     }
 }

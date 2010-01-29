@@ -76,9 +76,9 @@ namespace Signum.Web
             sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityListBaseKeys.Index), index.ToString()));
 
             if (isIdentifiable || isLite)
-                sb.AppendLine(helper.HiddenSFInfo(indexedPrefix, new EntityInfo<T>(cleanStaticType, value) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenSFInfo(indexedPrefix, new EntityInfo<T>(value) { Ticks = ticks }));
             else
-                sb.AppendLine(helper.HiddenSFInfo(indexedPrefix, new EmbeddedEntityInfo<T>(cleanStaticType, value, false) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenSFInfo(indexedPrefix, new EmbeddedEntityInfo<T>(value, false) { Ticks = ticks }));
 
             if (settings.Remove)
                 sb.AppendLine(
