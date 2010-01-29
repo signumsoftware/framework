@@ -90,7 +90,13 @@ namespace Signum.Engine.Basics
 
         public static T ToEntity(Enum key)
         {
-            return toEntity.GetOrThrow(key, Resources.TheKey0IsNotFoundIn1Table.Formato(key, typeof(T).Name)); 
+            return ToEntity(key, true);
+        }
+
+        public static T ToEntity(Enum key, bool throwException)
+        {
+            return throwException || toEntity.ContainsKey(key) ? toEntity.GetOrThrow(key, Resources.TheKey0IsNotFoundIn1Table.Formato(key, typeof(T).Name))
+                : null;
         }
 
         public static Enum ToEnum(T entity)
@@ -104,8 +110,8 @@ namespace Signum.Engine.Basics
         }
         public static Enum ToEnum(string keyName, bool throwException)
         {
-            return throwException ? toEnum.GetOrThrow(keyName, Resources.NotValueFor0IsNotFoundIn1Table.Formato(keyName, typeof(T).Name))
-                : toEnum[keyName]; 
+            return throwException || toEnum.ContainsKey(keyName) ? toEnum.GetOrThrow(keyName, Resources.NotValueFor0IsNotFoundIn1Table.Formato(keyName, typeof(T).Name))
+                : null; 
         }
 
         internal static IEnumerable<T> AllEntities()

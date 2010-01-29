@@ -31,7 +31,13 @@ namespace Signum.Engine.Basics
 
         public static object ToQueryName(string uniqueQueryName)
         {
-            return QueryNames[uniqueQueryName];
+            return ToQueryName(uniqueQueryName, true);
+        }
+
+        public static object ToQueryName(string uniqueQueryName, bool throwException)
+        {
+            return throwException || QueryNames.ContainsKey(uniqueQueryName) ? QueryNames[uniqueQueryName]
+                : null ;
         }
 
         static void Schema_Initializing(Schema sender)

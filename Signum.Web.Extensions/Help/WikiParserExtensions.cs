@@ -114,7 +114,7 @@ namespace Signum.Web.Extensions
                             break;
 
                         case WikiFormat.OperationLink:
-                            Enum operation = EnumLogic<OperationDN>.ToEnum(link);
+                            Enum operation = EnumLogic<OperationDN>.ToEnum(link, false);
                             result = new WikiLink(operation != null ?
                                 HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.','_') : link,
                                 text.HasText() ? text : (operation != null ? operation.NiceToString() : link),
@@ -131,9 +131,9 @@ namespace Signum.Web.Extensions
                             break;
 
                         case WikiFormat.QueryLink:
-                            Enum query = (Enum)QueryLogic.ToQueryName(link);
+                            Enum query = (Enum)QueryLogic.ToQueryName(link, false);
                             result = new WikiLink(
-                                query != null ? HelpLogic.EntityUrl(EnumLogic<OperationDN>.ToEntity(query).GetType()) + "#" + "q-" + QueryUtils.GetQueryName(query).Replace('.', '_') : link,
+                                query != null ? (EnumLogic<OperationDN>.ToEntity(query, false) != null ? HelpLogic.EntityUrl(EnumLogic<OperationDN>.ToEntity(query).GetType()) + "#" + "q-" + QueryUtils.GetQueryName(query).Replace('.', '_') : link) : link,
                                 text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
                                 query != null ? "" : "unavailable").ToHtmlString();
                             break;
