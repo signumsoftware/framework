@@ -19,6 +19,7 @@ namespace Signum.Web.Extensions
     public static class WikiParserExtensions
     {
         public static string WikiUrl = "http://192.168.0.5:8085/";
+        public static string ImagesFolder = "HelpImagenes/";
         public class WikiLink
         {
             public string Text { get; set; }
@@ -50,6 +51,38 @@ namespace Signum.Web.Extensions
                     Url,
                     Text);
             }
+        }
+        public static string ProcessImages(string content)
+        {
+            StringBuilder sb = new StringBuilder();
+            int firstIndex = 0;
+            string result = string.Empty;
+
+            Match m = Regex.Match(content, @"\[image(?<position>[^\|]+)\|(?<part1>[^\|\]]*)(\|(?<part2>.*))?\]");
+
+            while (m.Success)
+            {
+                string position = m.Groups["position"].ToString();
+                string part1 = m.Groups["part1"].ToString();
+                string part2 = m.Groups["part2"].ToString();
+
+                if (part2.HasText())
+                {
+                    //Has footer
+                    result = "<div class=\"image{0}\"><img alt=\"{1}\" src=\"{2}{3}\"/><p class=\"imagedescription\">{1}</p></div>".Formato(position, part1, ImagesFolder, part2); 
+                }
+                else
+                {
+                    result = "<div class=\"image{0}\"><img src=\"{1}{2}\"/></div>".Formato(position, ImagesFolder, part1); 
+                }                
+
+                sb.Append(content.Substring(firstIndex, m.Index - firstIndex));
+                sb.Append(result);
+                firstIndex = m.Index + m.Length;
+                m = m.NextMatch();
+            }
+            sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
+            return sb.ToString();
         }
 
         public static string WikiParse(this HtmlHelper html, string content)
@@ -110,6 +143,7 @@ namespace Signum.Web.Extensions
             sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
 
             string postLinks = sb.ToString();
+            postLinks = ProcessImages(postLinks);
 
             // Replacing both
             postLinks = Regex.Replace(postLinks,
@@ -143,14 +177,58 @@ namespace Signum.Web.Extensions
 
             // Replacing lists
             postLinks = Regex.Replace(postLinks,
-            "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
-            "<li>${content}</li>",
-            RegexOptions.Compiled);
-            postLinks = Regex.Replace(postLinks,
-            "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
-            "<ul>${content}</ul>",
-            RegexOptions.Compiled);
+     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
+     "<li>${content}</li>",
+     RegexOptions.Compiled);
 
+            postLinks = Regex.Replace(postLinks,
+     "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#])",
+     "<oli>${content}</oli>",
+     RegexOptions.Compiled);
+
+     postLinks = Regex.Replace(postLinks,
+     "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
+     "<ul>${content}</ul>",
+     RegexOptions.Compiled);
+
+     postLinks = Regex.Replace(postLinks,
+"(?<content>\\<oli\\>{1}.+\\<\\/oli\\>)",
+"<ol>${content}</ol>",
+RegexOptions.Compiled);
+
+     postLinks = Regex.Replace(postLinks,
+"(?<content>oli\\>{1})",
+"li>",
+RegexOptions.Compiled);
+             
+/*     postLinks = Regex.Replace(postLinks,
+     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
+     "<li1>${content}</li1>",
+     RegexOptions.Compiled);
+     postLinks = Regex.Replace(postLinks,
+     "(?<content>\\<li1\\>{1}.+\\<\\/li1\\>)",
+     "<ul>${content}</ul>",
+     RegexOptions.Compiled);
+
+     // Replacing lists
+     postLinks = Regex.Replace(postLinks,
+     "(?<begin>\\*{1})(?<content>.+)(?<end>[^*])",
+     "<li2>${content}</li2>",
+     RegexOptions.Compiled);
+     postLinks = Regex.Replace(postLinks,
+     "(?<content>\\<li2\\>{1}.+\\<\\/li2\\>)",
+     "<ul>${content}</ul>",
+     RegexOptions.Compiled);
+
+     postLinks = Regex.Replace(postLinks,
+     "(?<content>\\<li[0-9]+\\>{1})",
+     "<li>",
+     RegexOptions.Compiled);
+
+     postLinks = Regex.Replace(postLinks,
+     "(?<content>\\</li[0-9]+\\>{1})",
+     "</li>",
+     RegexOptions.Compiled);*/
 
           //  postLinks = Parse(postLinks, "'''", "<b>", "</b>");
           //  postLinks = Parse(postLinks, "''", "<i>", "</i>"); 
@@ -173,6 +251,37 @@ namespace Signum.Web.Extensions
             sb.Append(text.Substring(firstIndex, text.Length - firstIndex));
             return sb.ToString();
         }
+
+     /*  public static string HandleList(MatchCollection mathes) {
+           
+         Dictionary<string, string> listtypes = new Dictionary<string,string> { "*" = "ul", "#" = "ol"};
+
+		 StringBuilder output = new StringBuilder();
+		 
+           int newlevel = 0;
+		    int listLevel = 0;
+		while ($this->list_level!=$newlevel) {
+			$listchar = substr($matches[1],-1);
+			$listtype = $listtypes[$listchar];
+			
+			//$output .= "[".$this->list_level."->".$newlevel."]";
+			
+			if ($this->list_level>$newlevel) {
+				$listtype = '/'.array_pop($this->list_level_types);
+				$this->list_level--;
+			} else {
+				$this->list_level++;
+				array_push($this->list_level_types,$listtype);
+			}
+			$output .= "\n<{$listtype}>\n";
+		}
+		
+		if ($close) return $output;
+		
+		$output .= "<li>".$matches[2]."</li>\n";
+		
+		return $output;
+	}*/
     }
 
    
