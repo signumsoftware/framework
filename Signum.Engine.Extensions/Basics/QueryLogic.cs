@@ -13,16 +13,14 @@ namespace Signum.Engine.Basics
 {
     public static class QueryLogic
     {
-        public static HashSet<object> QueryNames { get; private set; }
+        public static Dictionary<string, object> QueryNames { get; private set; }
 
-        static DynamicQueryManager[] QueryManagers;
-
-        public static void Start(SchemaBuilder sb, params DynamicQueryManager[] queryManagers)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
 
-                QueryManagers = queryManagers;
+               // QueryManagers = queryManagers;
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, new InitEventHandler(Schema_Initializing));
 
                 sb.Include<QueryDN>();
@@ -31,15 +29,20 @@ namespace Signum.Engine.Basics
             }
         }
 
+        public static object ToQueryName(string uniqueQueryName)
+        {
+            return QueryNames.GetOrThrow(uniqueQueryName, "No query with name '{0}' found".Formato(uniqueQueryName));
+        }
+
         static void Schema_Initializing(Schema sender)
         {
-            QueryNames = QueryManagers.SelectMany(a => a.GetQueryNames()).ToHashSet();
+            QueryNames = DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryName(qn));
         }
 
         public static List<QueryDN> RetrieveOrGenerateQueries()
         {
             var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Name);
-            var total = QueryNames.Select(o => new QueryDN { Name = Signum.Entities.DynamicQuery.QueryUtils.GetQueryName(o) }).ToDictionary(a => a.Name);
+            var total = QueryNames.Select(kvp => new QueryDN { Name = kvp.Key }).ToDictionary(a => a.Name);
 
             total.SetRange(current);
             return total.Values.ToList();
@@ -49,8 +52,7 @@ namespace Signum.Engine.Basics
 
         static SqlPreCommand SynchronizeQueries(Replacements replacements)
         {
-            var should = QueryManagers.SelectMany(a => a.GetQueryNames()).Distinct()
-                .Select(o => new QueryDN { Name = QueryUtils.GetQueryName(o) }).ToList();
+            var should = QueryNames.Select(kvp => new QueryDN { Name = kvp.Key });
 
             var current = Administrator.TryRetrieveAll<QueryDN>(replacements);
 

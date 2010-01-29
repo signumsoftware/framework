@@ -205,12 +205,12 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static void StartAllModules(SchemaBuilder sb, Type serviceInterface, DynamicQueryManager queryManagers)
+        public static void StartAllModules(SchemaBuilder sb, Type serviceInterface)
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
             FacadeMethodAuthLogic.Start(sb, serviceInterface);
-            QueryAuthLogic.Start(sb, queryManagers);
+            QueryAuthLogic.Start(sb);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);
         }

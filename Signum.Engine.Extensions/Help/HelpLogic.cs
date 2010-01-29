@@ -32,6 +32,7 @@ namespace Signum.Engine.Help
         public static string BaseUrl = "Help";
         static Dictionary<Type, EntityHelp> TypeToHelpFiles;
         static Dictionary<string, Type> CleanNameToType;
+        static Dictionary<string, Type> NameToType;
         
         public static Type ToType(string s) {
             return ToType(s, true);
@@ -41,6 +42,14 @@ namespace Signum.Engine.Help
         {
             if (!throwException && CleanNameToType.ContainsKey(s) || throwException)
                 return CleanNameToType[s];
+            else
+                return null;
+        }
+
+        public static Type GetNameToType(string s, bool throwException)
+        {
+            if (!throwException && NameToType.ContainsKey(s) || throwException)
+                return NameToType[s];
             else
                 return null;
         }
@@ -157,6 +166,7 @@ namespace Signum.Engine.Help
             TypeToHelpFiles = typeHelpInfo.ToDictionary(p=>p.Type,p=> GetEntityHelp(p.Type, p.File));
 
             CleanNameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => Reflector.CleanTypeName(t));
+            NameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => t.Name);
         }
 
         static EntityHelp GetEntityHelp (Type type, string sourceFile)

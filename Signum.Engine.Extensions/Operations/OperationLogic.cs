@@ -366,6 +366,13 @@ namespace Signum.Engine.Operations
 
             return (T)args[pos];
         }
+
+        public static Type FindType(Enum operation)
+        {
+            return OperationLogic.operations.Where(o => o.Value.ContainsKey(operation)).Single(
+                "Operation '{0}' not registered".Formato(operation),
+                "Operation '{0}' registered for more than one element".Formato(operation)).Key;
+        }
     }
 
     public delegate void OperationHandler(IOperation operation, IIdentifiable entity);

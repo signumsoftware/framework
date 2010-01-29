@@ -25,12 +25,12 @@ namespace Signum.Engine.Authorization
             get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
-                QueryLogic.Start(sb, dqm);
+                QueryLogic.Start(sb);
                
                 sb.Include<RuleQueryDN>();
                 sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
