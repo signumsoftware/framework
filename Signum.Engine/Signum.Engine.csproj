@@ -82,6 +82,7 @@
     <Compile Include="Linq\ExpressionVisitor\AggregateOptimizer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
+    <Compile Include="Linq\ExpressionVisitor\AliasGenerator.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasProjectionReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasReplacer.cs" />
     <Compile Include="Linq\ExpressionVisitor\ColumnProjector.cs" />

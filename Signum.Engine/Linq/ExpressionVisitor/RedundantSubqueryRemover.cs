@@ -51,17 +51,14 @@ namespace Signum.Engine.Linq
             JoinExpression join = select.From as JoinExpression;
             if (join != null)
             {
-                SelectExpression left = join.Left as SelectExpression;
-                SelectExpression right = join.Right as SelectExpression;
+                List<SelectExpression> toRemove = new List<SelectExpression>();
+                
+                GatherRedundantSelects(join.Left, toRemove);
+                GatherRedundantSelects(join.Right, toRemove);
 
-                bool leftRemovable = left != null && left.SelectRoles == 0;
-                bool rightRemovable = right != null && right.SelectRoles == 0;
-
-                if (leftRemovable || rightRemovable)
+                if (toRemove.Count > 0)
                 {
-                    SelectExpression newSelect = (SelectExpression)SubqueryRemover.Remove(select, new[] { 
-                            leftRemovable ? left : null, 
-                            rightRemovable ? right: null }.NotNull());
+                    SelectExpression newSelect = (SelectExpression)SubqueryRemover.Remove(select, toRemove);
                     return newSelect;
                 }
             }
@@ -69,6 +66,19 @@ namespace Signum.Engine.Linq
             return select; 
         }
 
+        private static void GatherRedundantSelects(SourceExpression source, List<SelectExpression> toRemove)
+        {
+            SelectExpression select = source as SelectExpression;
+            if (select != null && select.SelectRoles == 0)
+                toRemove.Add(select); 
+
+            JoinExpression join = source as JoinExpression;
+            if(join != null)
+            {
+                GatherRedundantSelects(join.Left, toRemove);
+                GatherRedundantSelects(join.Right, toRemove);
+            }
+        }
 
         protected override Expression VisitDelete(DeleteExpression original)
         {

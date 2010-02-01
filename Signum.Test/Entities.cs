@@ -209,6 +209,31 @@ namespace Signum.Test
             set { SetToStr(ref name, value, () => Name); }
         }
 
+        CountryDN country;
+        public CountryDN Country
+        {
+            get { return country; }
+            set { Set(ref country, value, () => Country); }
+        }
+
+        public override string ToString()
+        {
+            return name;
+        }
+    }
+
+    [Serializable]
+    public class CountryDN : Entity
+    {
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        string name;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Name
+        {
+            get { return name; }
+            set { SetToStr(ref name, value, () => Name); }
+        }
+
         public override string ToString()
         {
             return name;

@@ -44,6 +44,28 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectLetExpansion()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        let l = a.Label
+                        select l.Name).ToList();
+        }
+
+        [TestMethod]
+        public void SelectLetExpansionRedundant()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        let label = a.Label
+                        select new
+                        {
+                            Artist = label.Country.ToStr,
+                            Author = a.Label.ToStr
+                        }).ToList();
+
+            Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
+        }
+
+        [TestMethod]
         public void SelectWhereExpansion()
         {
             var list = Database.Query<AlbumDN>().Where(a=>a.Label != null).Select(a => a.Label.Name).ToList();
@@ -83,6 +105,23 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteIB()
         {
             var list = Database.Query<AlbumDN>()
+                .Select(a => a.Author.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectLiteIBRedundant()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        let band = (BandDN)a.Author
+                        select new { Artist = band.LastAward.ToStr, Author = a.Author.ToStr }).ToList();
+
+            Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
+        }
+
+        [TestMethod]
+        public void SelectLiteIBWhere()
+        {
+            var list = Database.Query<AlbumDN>()
                 .Select(a => a.Author.ToLite())
                 .Where(a => a.ToStr.StartsWith("Michael")).ToList();
         }
@@ -109,6 +148,14 @@ namespace Signum.Test.LinqProvider
         public void SelectEntityIB()
         {
             var list = Database.Query<AlbumDN>().Select(a => a.Author).ToList();
+        }
+
+        [TestMethod]
+        public void SelectEntityIBRedundant()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        let aut = a.Author
+                        select new { aut, a.Author }).ToList();
         }
 
         [TestMethod]

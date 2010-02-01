@@ -68,6 +68,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.SelectRowCount:
                     return this.VisitSelectRowCount((SelectRowCountExpression)exp);
                 case DbExpressionType.FieldInit:
+                    
                     return this.VisitFieldInit((FieldInitExpression)exp);
                 case DbExpressionType.EmbeddedFieldInit:
                     return this.VisitEmbeddedFieldInit((EmbeddedFieldInitExpression)exp); 
@@ -199,20 +200,26 @@ namespace Signum.Engine.Linq
             return token;
         }
 
+
+        Dictionary<FieldInitExpression, FieldInitExpression> fieCache = new Dictionary<FieldInitExpression, FieldInitExpression>();
+
         protected virtual Expression VisitFieldInit(FieldInitExpression fie)
         {
-            var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
-          
-            var id = Visit(fie.ExternalId);
-            var typeId = Visit(fie.TypeId);
-            var other = Visit(fie.OtherCondition);
+            return fieCache.GetOrCreate(fie, () =>
+            {
+                var bindings = fie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
 
-            var token = VisitProjectionToken(fie.Token);
+                var id = Visit(fie.ExternalId);
+                var typeId = Visit(fie.TypeId);
+                var other = Visit(fie.OtherCondition);
 
-            if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token || fie.TypeId != typeId)
-                return new FieldInitExpression(fie.Type, fie.TableAlias, id, typeId, other, token) { Bindings = bindings };
+                var token = VisitProjectionToken(fie.Token);
 
-            return fie;
+                if (fie.Bindings != bindings || fie.ExternalId != id || fie.OtherCondition != other || fie.Token != token || fie.TypeId != typeId)
+                    return new FieldInitExpression(fie.Type, fie.TableAlias, id, typeId, other, token) { Bindings = bindings };
+
+                return fie;
+            });
         }
 
         protected virtual Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)

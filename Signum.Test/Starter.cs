@@ -147,11 +147,14 @@ namespace Signum.Test
                 LastAward = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }
             };
 
+            CountryDN usa = new CountryDN { Name = "USA" };
+            CountryDN japan = new CountryDN { Name = "Japan" };
+
             smashingPumpkins.Members.ForEach(m => m.Friends = smashingPumpkins.Members.Where(a => a.Sex != m.Sex).Select(a => a.ToLiteFat()).ToMList());
 
             new NoteDN { CreationTime = DateTime.Now.AddDays(-30), Text = "American alternative rock band", Target = smashingPumpkins }.Save();
 
-            LabelDN virgin = new LabelDN { Name = "Virgin" };
+            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa };
 
             new AlbumDN
             {
@@ -180,7 +183,7 @@ namespace Signum.Test
 
             new NoteDN { CreationTime = DateTime.Now.AddDays(-100), Text = "The blue one with the angel", Target = mellon }.Save();
 
-            LabelDN wea = new LabelDN { Name = "WEA International" };
+            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa };
 
             new AlbumDN
             {
@@ -209,7 +212,7 @@ namespace Signum.Test
 
             new NoteDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Save();
 
-            LabelDN universal = new LabelDN { Name = "UMG Recordings" };
+            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa };
 
             new AlbumDN
             {
@@ -220,7 +223,7 @@ namespace Signum.Test
                 Label = universal,
             }.Save();
 
-            LabelDN sony = new LabelDN { Name = "Sony" };
+            LabelDN sony = new LabelDN { Name = "Sony", Country = japan };
 
             new AlbumDN
             {
@@ -232,7 +235,7 @@ namespace Signum.Test
                 Label = sony
             }.Save();
 
-            LabelDN mjj = new LabelDN { Name = "MJJ" };
+            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa };
 
             new AlbumDN
             {
@@ -283,7 +286,7 @@ namespace Signum.Test
                 LastAward = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
             };
 
-            LabelDN fatCat = new LabelDN { Name = "FatCat Records" }; 
+            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa }; 
 
             new AlbumDN
             {
@@ -295,7 +298,7 @@ namespace Signum.Test
                 Label = fatCat
             }.Save();
 
-            LabelDN emi = new LabelDN { Name = "EMI" }; 
+            LabelDN emi = new LabelDN { Name = "EMI", Country = usa }; 
 
             new AlbumDN
             {
