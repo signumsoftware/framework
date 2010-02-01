@@ -14,7 +14,7 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>
-        <TextBox Text="{Binding Path=Text, ElementName=me}" AcceptsReturn="True" AcceptsTab="True" 
+        <TextBox Text="{Binding Path=Text, ElementName=me, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" 
                  IsReadOnly="{Binding Path=(m:Common.IsReadOnly), ElementName=me}" 
                  TextWrapping="Wrap"/>
 </m:LineBase>
