@@ -18,7 +18,7 @@
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Focusable="False">
             <ContentControl Content="{Binding Path=MainControl, ElementName=Window}" Focusable="False"
                         VerticalContentAlignment="Stretch" x:Name="contentControl" 
-                        HorizontalContentAlignment="Stretch" MinWidth="40" MinHeight="40" Margin="5,5,5,5"/>
+                        HorizontalContentAlignment="Stretch" MinWidth="40" MinHeight="40" Margin="5"/>
         </ScrollViewer>
     </DockPanel>
 </Window>
