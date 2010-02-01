@@ -13,6 +13,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Operations;
 using Signum.Engine;
 using Signum.Engine.Maps;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web.Extensions
 {
@@ -133,7 +134,7 @@ namespace Signum.Web.Extensions
                         case WikiFormat.QueryLink:
                             Enum query = (Enum)QueryLogic.ToQueryName(link, false);
                             result = new WikiLink(
-                                query != null ? (EnumLogic<OperationDN>.ToEntity(query, false) != null ? HelpLogic.EntityUrl(EnumLogic<OperationDN>.ToEntity(query).GetType()) + "#" + "q-" + QueryUtils.GetQueryName(query).Replace('.', '_') : link) : link,
+                                query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityCleanType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
                                 text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
                                 query != null ? "" : "unavailable").ToHtmlString();
                             break;
