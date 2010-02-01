@@ -82,7 +82,7 @@
     </xs:complexType>
   </xs:element>
   
-  <xs:element name="Apendix">
+  <xs:element name="Appendix">
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" maxOccurs="1" name="Description">
@@ -94,6 +94,7 @@
         </xs:element>
       </xs:sequence>
       <xs:attribute name="Title" type="xs:string" use="required" />
+      <xs:attribute name="Name" type="xs:string" use="required" />
       <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>

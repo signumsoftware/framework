@@ -135,8 +135,10 @@ namespace Signum.Engine.Help
 
         public static void Synchronize(string fileName, Type type)
         {
-            XElement loaded = XDocument.Load(fileName).Root;
-            XElement created = EntityHelp.Create(type).ToXDocument().Root;
+            
+            XElement loaded = XDocument.Load(fileName).Element(_Entity);
+            XDocument createdDoc = EntityHelp.Create(type).ToXDocument();
+            XElement created = createdDoc.Element(_Entity);
 
             created.Element(_Description).Value = loaded.Element(_Description).Value;
 
@@ -200,11 +202,11 @@ namespace Signum.Engine.Help
             {
                 Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, goodFileName));
                 File.Delete(fileName);
-                created.Save(goodFileName);
+                createdDoc.Save(goodFileName);
             }
             else
             {
-                created.Save(fileName);
+                createdDoc.Save(fileName);
             }
 
             if (changed)

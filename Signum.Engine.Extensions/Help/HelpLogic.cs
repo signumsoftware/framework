@@ -33,8 +33,12 @@ namespace Signum.Engine.Help
         static Dictionary<Type, EntityHelp> TypeToHelpFiles;
         static Dictionary<string, Type> CleanNameToType;
         static Dictionary<string, Type> NameToType;
-        
-        public static Type ToType(string s) {
+
+        static Dictionary<string, NamespaceHelp> Namespaces;
+        static Dictionary<string, AppendixHelp> Appendices;
+
+        public static Type ToType(string s)
+        {
             return ToType(s, true);
         }
 
@@ -96,19 +100,61 @@ namespace Signum.Engine.Help
         {
             Type[] types = sender.Tables.Select(t => t.Key).ToArray();
 
-            XmlSchemaSet schemas = new XmlSchemaSet();
-            Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
-            schemas.Add("", XmlReader.Create(str));
-
             var typesDic = types.ToDictionary(a => a.FullName);
 
             if (!Directory.Exists(HelpDirectory))
             {
-                TypeToHelpFiles =  new Dictionary<Type, EntityHelp>();
+                TypeToHelpFiles = new Dictionary<Type, EntityHelp>();
                 return;
             }
 
-            var documents = Directory.GetFiles(HelpDirectory, "*.help").Select(f => new { File = f, Document = XDocument.Load(f) }).ToList();
+
+            var documents = LoadDocuments();
+
+            //Scope
+            {
+                var typeHelpInfo = from doc in documents
+                                   let typeName = EntityHelp.GetEntityFullName(doc.Document)
+                                   where typeName != null
+                                   select EntityHelp.Load(typesDic.GetOrThrow(typeName, "No Type with FullName {0} found in the schema"), doc.Document, doc.File);
+
+
+                //tipo a entityHelp
+                TypeToHelpFiles = typeHelpInfo.ToDictionary(p => p.Type);
+
+                CleanNameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => Reflector.CleanTypeName(t));
+                NameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => t.Name);
+            }
+
+            //Scope
+            {
+                var nameSpaceInfo = from doc in documents
+                                   let namespaceName = NamespaceHelp.GetNamespaceName(doc.Document)
+                                   where namespaceName != null
+                                   select NamespaceHelp.Load(doc.Document, doc.File);
+
+                Namespaces = nameSpaceInfo.ToDictionary(a => a.Name);
+            }
+
+            //Scope
+            {
+                var appendixInfo = from doc in documents
+                                    let namespaceName = AppendixHelp.GetApendixName(doc.Document)
+                                    where namespaceName != null
+                                    select AppendixHelp.Load(doc.Document, doc.File);
+
+                Appendices = appendixInfo.ToDictionary(a => a.Name);
+            }
+
+        }
+
+        private static List<FileXDocument> LoadDocuments()
+        {
+            XmlSchemaSet schemas = new XmlSchemaSet();
+            Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
+            schemas.Add("", XmlReader.Create(str));
+
+            var documents = Directory.GetFiles(HelpDirectory, "*.help").Select(f => new FileXDocument { File = f, Document = XDocument.Load(f) }).ToList();
 
             List<Tuple<XmlSchemaException, string>> exceptions = new List<Tuple<XmlSchemaException, string>>();
             foreach (var doc in documents)
@@ -123,18 +169,13 @@ namespace Signum.Engine.Help
 
                 throw new InvalidOperationException(errorText);
             }
+            return documents;
+        }
 
-            var typeHelpInfo = from doc in documents
-                               let typeName = EntityHelp.GetEntityFullName(doc.Document)
-                               where typeName != null
-                               select EntityHelp.Load(typesDic.GetOrThrow(typeName, "No Type with FullName {0} found in the schema"), doc.Document, doc.File);
-
-
-            //tipo a entityHelp
-            TypeToHelpFiles = typeHelpInfo.ToDictionary(p=>p.Type);
-
-            CleanNameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => Reflector.CleanTypeName(t));
-            NameToType = typeHelpInfo.Select(t => t.Type).ToDictionary(t => t.Name);
+        class FileXDocument
+        {
+            public XDocument Document;
+            public string File; 
         }
 
 
@@ -160,10 +201,17 @@ namespace Signum.Engine.Help
                     }
                 }
             }
-           
-            foreach (Type type in Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()))
+
+            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
+
+            foreach (Type type in types)
             {
                 EntityHelp.Create(type).Save();
+            }
+
+            foreach (var ns in types.Select(a=>a.Namespace).Distinct())
+            {
+                NamespaceHelp.Create(ns).Save();
             }
         }
 
@@ -174,33 +222,72 @@ namespace Signum.Engine.Help
                 Directory.CreateDirectory(HelpDirectory);
             }
 
-            var should = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy())
-                         .ToDictionary(type=>type.FullName);
+            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
+            var documents = LoadDocuments();
 
-            var current = (from fn in Directory.GetFiles(HelpDirectory, "*.help")
-                           let document = XDocument.Load(fn)
-                           select new
-                           {
-                               TypeName = EntityHelp.GetEntityFullName(document),
-                               File = fn,
-                           }).ToDictionary(a=>a.TypeName , a=>a.File );
+            Replacements replacements = new Replacements();
+            //Scope
+            {
+                var should = types.Select(type => type.Namespace).ToDictionary(a => a);
 
-            Replacements replacements = new Replacements(); 
-            HelpTools.SynchronizeReplacing(replacements, "Assembly", current, should,
-                (fullName, oldFile)=>
-                {
-                    File.Delete(oldFile);
-                    Console.WriteLine("Deleted {0}".Formato(oldFile));
-                },
-                (fullName, type) =>
-                {
-                    string fileName = EntityHelp.Create(type).Save();
-                    Console.WriteLine("Created {0}".Formato(fileName));
-                },
-                (fullName, oldFile, type)=>
-                {
-                    EntityHelp.Synchronize(oldFile, type);
-                });
+                var current = (from doc in documents
+                               let name = NamespaceHelp.GetNamespaceName(doc.Document)
+                               where name != null
+                               select new
+                               {
+                                   Namespace = name,
+                                   File = doc.File,
+                               }).ToDictionary(a => a.Namespace, a => a.File);
+
+                HelpTools.SynchronizeReplacing(replacements, "Namespace", current, should,
+                 (nameSpace, oldFile) =>
+                 {
+                     File.Delete(oldFile);
+                     Console.WriteLine("Deleted {0}".Formato(oldFile));
+                 },
+                 (nameSpace, _) =>
+                 {
+                     string fileName = NamespaceHelp.Create(nameSpace).Save();
+                     Console.WriteLine("Created {0}".Formato(fileName));
+                 },
+                 (nameSpace, oldFile, type) =>
+                 {
+                     NamespaceHelp.Synchronize(oldFile, type);
+                 });
+            }
+
+            //Scope
+            {
+                var should = types.ToDictionary(type => type.FullName);
+
+                var current = (from doc in documents 
+                               let name = EntityHelp.GetEntityFullName(doc.Document)
+                               where name != null
+                               select new
+                               {
+                                   TypeName = name,
+                                   File = doc.File,
+                               }).ToDictionary(a => a.TypeName, a => a.File);
+
+             
+                HelpTools.SynchronizeReplacing(replacements, "Type", current, should,
+                    (fullName, oldFile) =>
+                    {
+                        File.Delete(oldFile);
+                        Console.WriteLine("Deleted {0}".Formato(oldFile));
+                    },
+                    (fullName, type) =>
+                    {
+                        string fileName = EntityHelp.Create(type).Save();
+                        Console.WriteLine("Created {0}".Formato(fileName));
+                    },
+                    (fullName, oldFile, type) =>
+                    {
+                        EntityHelp.Synchronize(oldFile, type);
+                    });
+            }
+
+         
         }
     }
 }

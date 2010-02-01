@@ -74,10 +74,12 @@
     <Compile Include="Basics\PropertyLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
+    <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\EntityHelp.cs" />
     <Compile Include="Help\HelpGenerator.cs" />
     <Compile Include="Help\HelpLogic.cs" />
     <Compile Include="Help\HelpTools.cs" />
+    <Compile Include="Help\NamespaceHelp.cs" />
     <Compile Include="Operations\Constructor.cs" />
     <Compile Include="Operations\ConstructorFrom.cs" />
     <Compile Include="Operations\ConstructorFromMany.cs" />
