@@ -39,7 +39,7 @@ namespace Signum.Web
             {
                 Type = Type.Name,
                 ControllerUrl = "Widgets/CreateNote",
-                OnOkSuccess = "function(){ RefreshNotes('Widgets/RefreshNotes'); }"
+                OnCancelled = "function(){ RefreshNotes('Widgets/RefreshNotes'); }"
             };
 
             return new WidgetItem

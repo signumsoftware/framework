@@ -354,13 +354,20 @@ function() {
 }
 
 
-$.getScript = function(url, callback, cache){ $.ajax({ type: "GET", url: url, success: callback, dataType: "script", cache: cache }); }; 
+$.getScript = function(url, callback, cache, async){ $.ajax({ type: "GET", url: url, success: callback, async: async, dataType: "script", cache: cache }); }; 
 
 var resourcesLoaded = new Array();
-$.jsLoader = function(cond, url, callback) {
+$.jsLoader = function(cond, url, callback, async) {
+    var a = (async != undefined) ? async : true;
+    console.log("Retrieving from " + url + " " + (a ? "a" : "") + "synchronuosly");
     if (!resourcesLoaded[url] && cond) {
          //console.log("Getting js " + url);
-         $.getScript(url, function() {resourcesLoaded[url]=true; if (callback) callback();}, true);
+         $.getScript(url, function() {
+            resourcesLoaded[url]=true;
+            if (callback) callback();
+            },
+            true,
+            a);
         }
 };
 $.cssLoader = function(cond, url) {
