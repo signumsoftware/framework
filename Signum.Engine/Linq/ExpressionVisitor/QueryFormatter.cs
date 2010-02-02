@@ -567,7 +567,7 @@ namespace Signum.Engine.Linq
                 }
 
                 sb.Append(" AS ");
-                sb.Append(((SourceWithAliasExpression)source).Alias);
+                sb.Append(((SourceWithAliasExpression)source).Alias.SqlScape());
             }
             else
                 this.VisitJoin((JoinExpression)source);
