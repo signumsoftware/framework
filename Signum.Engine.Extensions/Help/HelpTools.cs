@@ -87,11 +87,10 @@ namespace Signum.Engine.Help
 
                 if (oldVal == null)
                     createNew(key, newVal);
-
-                if (newVal == null)
+                else if (newVal == null)
                     removeOld(key, oldVal);
-
-                merge(key, oldVal, newVal);
+                else
+                    merge(key, oldVal, newVal);
             }
         }
     }

@@ -228,7 +228,7 @@ namespace Signum.Engine.Help
             Replacements replacements = new Replacements();
             //Scope
             {
-                var should = types.Select(type => type.Namespace).ToDictionary(a => a);
+                var should = types.Select(type => type.Namespace).Distinct().ToDictionary(a => a);
 
                 var current = (from doc in documents
                                let name = NamespaceHelp.GetNamespaceName(doc.Document)
