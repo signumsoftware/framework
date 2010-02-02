@@ -589,11 +589,17 @@ namespace Signum.Windows
         }
     }
 
-    public delegate MenuItem MenuItemForQueryName(object queryName, Type entityType);
+    public delegate SearchControlMenuItem MenuItemForQueryName(object queryName, Type entityType);
 
     public class SearchControlMenuItem : MenuItem
     {
         protected SearchControl SearchControl;
+
+        public SearchControlMenuItem() { }
+        public SearchControlMenuItem(RoutedEventHandler onClick) 
+        {
+            this.Click += onClick;
+        }
 
         protected override void OnInitialized(EventArgs e)
         {
