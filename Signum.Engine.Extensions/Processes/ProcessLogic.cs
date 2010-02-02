@@ -34,13 +34,13 @@ namespace Signum.Engine.Processes
         static int numberOfThreads;
 
         static Timer timer = new Timer(new TimerCallback(DispatchEvents), // main timer
-								null,
-								Timeout.Infinite,
-								Timeout.Infinite);
+                                null,
+                                Timeout.Infinite,
+                                Timeout.Infinite);
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null, 0))); 
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null, 0)));
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, int numberOfThreads)
@@ -56,7 +56,7 @@ namespace Signum.Engine.Processes
                 EnumLogic<ProcessDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
                 OperationLogic.AssertIsStarted(sb);
-                AuthLogic.AssertIsStarted(sb); 
+                AuthLogic.AssertIsStarted(sb);
                 new ProcessExecutionGraph().Register();
 
                 sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_InitializingApplication);
@@ -78,7 +78,7 @@ namespace Signum.Engine.Processes
                               .Column(a => a.NumExecutions, a => a.DisplayName = Resources.Executions)
                               .Column(a => a.LastExecution, a => a.DisplayName = Resources.LastExecution);
 
-                dqm[typeof(ProcessExecutionDN)] = 
+                dqm[typeof(ProcessExecutionDN)] =
                              (from pe in Database.Query<ProcessExecutionDN>()
                               select new
                               {
@@ -140,7 +140,7 @@ namespace Signum.Engine.Processes
                                   pe.Exception
                               }).ToDynamic();
 
-                PackageLogic.Start(sb, dqm); 
+                PackageLogic.Start(sb, dqm);
             }
         }
 
@@ -201,7 +201,7 @@ namespace Signum.Engine.Processes
                 foreach (var pe in pes)
                 {
                     pe.Queue();
-                    pe.Save(); 
+                    pe.Save();
                 }
 
                 threads = 0.To(numberOfThreads).Select(i => new Thread(DoWork)).ToArray();
@@ -254,7 +254,7 @@ namespace Signum.Engine.Processes
                 foreach (var pe in pes)
                 {
                     pe.Queue();
-                    pe.Save(); 
+                    pe.Save();
                 }
 
                 RefreshPlan();
@@ -269,7 +269,7 @@ namespace Signum.Engine.Processes
             if (logic == null)
                 throw new ArgumentNullException("logic");
 
-            registeredProcesses.Add(processKey, logic); 
+            registeredProcesses.Add(processKey, logic);
         }
 
         static void DoWork(object number)
@@ -292,33 +292,48 @@ namespace Signum.Engine.Processes
 
         public class ProcessExecutionGraph : Graph<ProcessExecutionDN, ProcessState>
         {
+            private ProcessExecutionDN Create(ProcessDN process, Enum processKey, params object[] args)
+            {
+                IProcessDataDN data;
+                if (args != null && args.Length != 0 && args[0] is IProcessDataDN)
+                {
+                    data = (IProcessDataDN)args[0];
+                }
+                else
+                {
+                    IProcessAlgorithm processAlgorithm = registeredProcesses[processKey];
+                    data = processAlgorithm.CreateData(args);
+                }
+
+                return new ProcessExecutionDN(process)
+                {
+                    State = ProcessState.Created,
+                    ProcessData = data
+                }.Save();
+            }
+
             public ProcessExecutionGraph()
             {
                 this.GetState = e => e.State;
                 this.Operations = new List<IGraphOperation>()
                 {   
+
+                    new Construct(ProcessOperation.Create , ProcessState.Created)
+                    {                     
+                        Constructor = args=>
+                        {
+                            Enum processKey = args.GetArg<Enum>(0); 
+                            return Create(EnumLogic<ProcessDN>.ToEntity(processKey), processKey, args.Skip(1).ToArray());
+                        }
+                    },
+
                     new ConstructFrom<ProcessDN>(ProcessOperation.FromProcess, ProcessState.Created)
                     {
                         Lite = false,
                         Construct = (process, args)=>
-                         {
-                             IProcessDataDN data;
-                             if(args != null && args.Length != 0 && args[0] is IProcessDataDN)
-                             {
-                                 data = (IProcessDataDN)args[0];  
-                             }
-                             else 
-                             {
-                                 IProcessAlgorithm processAlgorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(process.Key)]; 
-                                 data = processAlgorithm.CreateData(args); 
-                             } 
-
-                             return new ProcessExecutionDN(process)
-                             {
-                                 State = ProcessState.Created,
-                                 ProcessData = data
-                             }.Save();
-                         }
+                        {
+                            return Create(process, EnumLogic<ProcessDN>.ToEnum(process), args);
+                        }
                     },
                     new Goto(ProcessOperation.Save, ProcessState.Created)
                     {
@@ -394,7 +409,7 @@ namespace Signum.Engine.Processes
 
         public static ProcessExecutionDN Create(ProcessDN process, params object[] args)
         {
-            return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, args); 
+            return process.ConstructFrom<ProcessExecutionDN>(ProcessOperation.FromProcess, args);
         }
 
         public static ProcessExecutionDN Create(ProcessDN process, IProcessDataDN processData)
@@ -410,7 +425,7 @@ namespace Signum.Engine.Processes
                 Algorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(pe.Process.Key)],
                 Data = pe.ProcessData,
                 Execution = pe,
-                
+
             };
 
             ep.Execute();

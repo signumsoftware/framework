@@ -201,6 +201,7 @@ namespace Signum.Entities.Processes
 
     public enum ProcessOperation
     {
+        Create,
         FromProcess,
         Plan,
         Save,
