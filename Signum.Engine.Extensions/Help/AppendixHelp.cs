@@ -21,8 +21,9 @@ namespace Signum.Engine.Help
         {
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
-                   new XElement(_Apendix,
+                   new XElement(_Appendix,
                        new XAttribute(_Name, Name),
+                       new XAttribute(_Title, Title),
                        new XAttribute(_Language, Language),
                        new XElement(_Description, Description)
                    )
@@ -31,20 +32,20 @@ namespace Signum.Engine.Help
 
         public static AppendixHelp Load(XDocument document, string sourceFile)
         {
-            XElement ns = document.Element(_Apendix);
+            XElement ns = document.Element(_Appendix);
             return new AppendixHelp
             {
                 Name = ns.Attribute(_Name).Value,
                 Title = ns.Attribute(_Title).Value,
                 Language = ns.Attribute(_Language).Value,
-                Description = ns.Attribute(_Description).Value,
+                Description = ns.Element(_Description).Value,
                 FileName = sourceFile,
             }; 
         }
 
         internal static string GetApendixName(XDocument document)
         {
-            if (document.Root.Name == _Apendix)
+            if (document.Root.Name == _Appendix)
                 return document.Root.Attribute(_Name).Value;
             return null;
         }
@@ -73,7 +74,7 @@ namespace Signum.Engine.Help
             return path;
         }
 
-        static readonly XName _Apendix = "Apendix";
+        static readonly XName _Appendix = "Appendix";
         static readonly XName _Name = "Name";
         static readonly XName _Title = "Title";
         static readonly XName _Description = "Description";
