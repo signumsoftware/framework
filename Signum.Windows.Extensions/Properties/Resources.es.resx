@@ -192,4 +192,7 @@
   <data name="SelectSomeRowsFirst" xml:space="preserve">
     <value>Selecciona algunos elementos primero</value>
   </data>
+  <data name="FileTypes" xml:space="preserve">
+    <value>Tipos de archivo</value>
+  </data>
 </root>

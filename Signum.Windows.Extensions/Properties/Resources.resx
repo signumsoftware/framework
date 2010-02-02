@@ -201,4 +201,7 @@
   <data name="SelectSomeRowsFirst" xml:space="preserve">
     <value>Select some rows first</value>
   </data>
+  <data name="FileTypes" xml:space="preserve">
+    <value>FileTypes</value>
+  </data>
 </root>
