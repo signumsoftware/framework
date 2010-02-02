@@ -63,6 +63,16 @@ namespace Signum.Engine.Help
             return Namespaces.TryGetC(@namespace);
         }
 
+        public static List<AppendixHelp> GetAppendices()
+        {
+            return Appendices.Select(kvp => kvp.Value).ToList();
+        }
+
+        public static AppendixHelp GetAppendix(string appendix)
+        {
+            return Appendices.TryGetC(appendix);
+        }
+
         public static Type[] AllTypes()
         {
             return TypeToHelpFiles.Keys.ToArray();
@@ -96,14 +106,19 @@ namespace Signum.Engine.Help
             }
         }
 
-        public static void ReloadDocument(EntityHelp eh)
+        public static void ReloadDocument(EntityHelp entityHelp)
         {
-            TypeToHelpFiles[eh.Type] = EntityHelp.Load(eh.Type, XDocument.Load(eh.FileName), eh.FileName);
+            TypeToHelpFiles[entityHelp.Type] = EntityHelp.Load(entityHelp.Type, XDocument.Load(entityHelp.FileName), entityHelp.FileName);
         }
 
-        public static void ReloadDocumentNamespace(NamespaceHelp nh)
+        public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
         {
-            Namespaces[nh.Name] = NamespaceHelp.Load(XDocument.Load(nh.FileName), nh.FileName);
+            Namespaces[namespaceHelp.Name] = NamespaceHelp.Load(XDocument.Load(namespaceHelp.FileName), namespaceHelp.FileName);
+        }
+
+        public static void ReloadDocumentAppendix(AppendixHelp appendixHelp)
+        {
+            Appendices[appendixHelp.Name] = AppendixHelp.Load(XDocument.Load(appendixHelp.FileName), appendixHelp.FileName);
         }
 
         static void Schema_Initialize(Schema sender)
@@ -299,5 +314,6 @@ namespace Signum.Engine.Help
 
          
         }
+
     }
 }
