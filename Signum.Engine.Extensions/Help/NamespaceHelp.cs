@@ -35,7 +35,7 @@ namespace Signum.Engine.Help
             {
                 Name = ns.Attribute(_Name).Value,
                 Language = ns.Attribute(_Language).Value,
-                Description = ns.Attribute(_Description).Value,
+                Description = ns.Element(_Description).Value,
                 FileName = sourceFile,
             }; 
         }

@@ -58,6 +58,11 @@ namespace Signum.Engine.Help
                 return null;
         }
 
+        public static NamespaceHelp GetNamespace(string @namespace)
+        {
+            return Namespaces.TryGetC(@namespace);
+        }
+
         public static Type[] AllTypes()
         {
             return TypeToHelpFiles.Keys.ToArray();
@@ -94,6 +99,11 @@ namespace Signum.Engine.Help
         public static void ReloadDocument(EntityHelp eh)
         {
             TypeToHelpFiles[eh.Type] = EntityHelp.Load(eh.Type, XDocument.Load(eh.FileName), eh.FileName);
+        }
+
+        public static void ReloadDocumentNamespace(NamespaceHelp nh)
+        {
+            Namespaces[nh.Name] = NamespaceHelp.Load(XDocument.Load(nh.FileName), nh.FileName);
         }
 
         static void Schema_Initialize(Schema sender)
