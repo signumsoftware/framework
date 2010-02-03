@@ -106,7 +106,7 @@ namespace Signum.Web.Extensions
                         case WikiFormat.EntityLink:
                             Type t = HelpLogic.GetNameToType(link, false);
                             result = new WikiLink(t != null ? HelpLogic.EntityUrl(t) : link,
-                                t != null ? t.NiceName() : link,
+                                text.HasText() ? text : t != null ? t.NiceName() : link,
                                 t != null ? "" : "unavailable").ToHtmlString();
                             break;
 
