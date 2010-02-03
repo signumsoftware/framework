@@ -91,7 +91,7 @@ namespace Signum.Web.Extensions
             StringBuilder sb = new StringBuilder();
             int firstIndex = 0;
 
-            Match m = Regex.Match(content, @"\[(?<letter>.):(?<link>[^\|\]]*)(\|(?<text>.*))?\]");
+            Match m = Regex.Match(content, @"\[(?<letter>.):(?<link>[^\|\]]*)(\|(?<text>.*?))?\]");
             
                 while (m.Success)
                 {
