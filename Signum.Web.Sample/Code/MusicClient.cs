@@ -5,7 +5,7 @@ using System.Web;
 using Signum.Web;
 using Signum.Utilities;
 using System.Reflection;
-using Signum.Test.LinqProvider;
+using Signum.Test;
 
 namespace Signum.Web.Sample
 {

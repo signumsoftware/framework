@@ -1,6 +1,6 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
-<%@ Import Namespace="Signum.Test.LinqProvider" %>
+<%@ Import Namespace="Signum.Test" %>
 
     <%        
         OrderedMenu menu = new OrderedMenu { Children = new List<OrderedMenu>() };

@@ -3,7 +3,7 @@
 <%@ Import Namespace="Signum.Engine" %>
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Utilities" %>
-<%@ Import Namespace="Signum.Test.LinqProvider" %>
+<%@ Import Namespace="Signum.Test" %>
 
 <%
 using (var e = Html.TypeContext<AlbumDN>()) 
@@ -12,6 +12,7 @@ using (var e = Html.TypeContext<AlbumDN>())
 	Html.ValueLine(e, f => f.Year);
 	Html.EntityLine(e, f => f.Author);
 	Html.EntityList(e, f => f.Songs);
+    Html.EntityLine(e, f => f.BonusTrack);
 	Html.EntityCombo(e, f => f.Label);
 }
 %>

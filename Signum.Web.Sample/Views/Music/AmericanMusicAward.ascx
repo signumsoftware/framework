@@ -3,7 +3,7 @@
 <%@ Import Namespace="Signum.Engine" %>
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Utilities" %>
-<%@ Import Namespace="Signum.Test.LinqProvider" %>
+<%@ Import Namespace="Signum.Test" %>
 
 <%
 using (var e = Html.TypeContext<AmericanMusicAwardDN>()) 

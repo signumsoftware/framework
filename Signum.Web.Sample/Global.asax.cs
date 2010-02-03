@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Hosting;
 using Signum.Utilities;
-using Signum.Test.LinqProvider;
+using Signum.Test;
 using Signum.Engine.Maps;
 using Signum.Web.Sample.Properties;
 
@@ -52,7 +52,7 @@ namespace Signum.Web.Sample
 
             HostingEnvironment.RegisterVirtualPathProvider(new AssemblyResourceProvider());
 
-            Starter.Start(Settings.Default.ConnectionString, Queries.Web);
+            Starter.Start(Settings.Default.ConnectionString);
 
             Schema.Current.Initialize();
             LinkTypesAndViews();
@@ -69,7 +69,6 @@ namespace Signum.Web.Sample
                 {
                     // {typeof(EfColaboradoraDN), new EntitySettings(false){PartialViewName="Views/Home/EfColaboradoraIU" }},
                 },
-                Queries = Queries.Web,
             };
 
             Constructor.Start(new ConstructorManager
