@@ -51,15 +51,6 @@ namespace Signum.Web.Files
             ViewData["IdValueField"] = prefix;
             ViewData["FileType"] = fileType;
 
-            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-            {
-                this.ViewData[ViewDataKeys.WriteSFInfo] = true;
-
-                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
-                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(this, Request.Form, entity, ref prefix), new PropertyInfo[] { } });
-
-                return Navigator.PartialView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
-            }
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
 
