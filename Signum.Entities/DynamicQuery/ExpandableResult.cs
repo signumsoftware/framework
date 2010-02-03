@@ -5,18 +5,15 @@ using System.Text;
 
 namespace Signum.Entities.DynamicQuery
 {
-    public abstract class Expandable
+    public class Expandable<T>
     {
-        public object[] Expansions { get; set; }
-    }
-
-    public class Expandable<T> : Expandable
-    {
-        public Expandable(T value)
+        public Expandable(T value, params object[] expansions)
         {
             this.Value = value;
+            this.Expansions = expansions;
         }
 
+        public object[] Expansions { get; private set; }
         public T Value { get; private set;}
     }
 }

@@ -24,7 +24,8 @@
                       AllowDrop="True"
                       ItemsSource="{Binding Filters, ElementName=UserControl}"
                       DragDrop.DragOver="lvFilters_DragOver"
-                      DragDrop.Drop="lvFilters_Drop">
+                      DragDrop.Drop="lvFilters_Drop"
+                  >
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -35,7 +36,7 @@
                     <GridViewColumn Header="{m:Loc Field}" x:Name="firstColumn">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <m:QueryTokenRenderer Token="{Binding Token}" />
+                                <m:QueryTokenRenderer Token="{Binding Token}" m:DragController.DragController="{Binding FilterDragController, ElementName=UserControl}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

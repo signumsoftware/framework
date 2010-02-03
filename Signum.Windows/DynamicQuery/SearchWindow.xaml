@@ -6,27 +6,47 @@
 	x:Name="me"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" ResizeMode="CanResizeWithGrip">
-	<Window.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="..\Resources.xaml"/>
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
-	</Window.Resources>
-	<Grid>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="..\Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Border BorderThickness="0,0,0,1" Padding="2">
+            <Border.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFD9ECFF" Offset="0.015"/>
+                    <GradientStop Color="#FFEAF3F6" Offset="0.205"/>
+                    <GradientStop Color="White" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="5">
+                <TextBox x:Name="tbEntityType" IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" TextBlock.FontWeight="SemiBold" />
+                <TextBox x:Name="tbQueryName" IsReadOnly="True"  Foreground="#ff666666"  BorderThickness="0" FontSize="18" Background="{x:Null}" />
+            </StackPanel>
+        </Border>
         <m:SearchControl x:Name="searchControl"
+                         Grid.Row="1"
                          QueryName="{Binding QueryName, ElementName=me}"
                          FilterOptions="{Binding FilterOptions, ElementName=me}"
                          OrderOptions="{Binding OrderOptions, ElementName=me}"
+                         UserColumns="{Binding UserColumns, ElementName=me}"
+                         AllowUserColumns="{Binding AllowUserColumns, ElementName=me}"
                          MultiSelection="{Binding MultiSelection, ElementName=me}"
                          ShowFilters="{Binding ShowFilters, ElementName=me}"
                          ShowFilterButton="{Binding ShowFilterButton, ElementName=me}"
                          ShowFooter="{Binding ShowFooter, ElementName=me}"
                          ShowHeader="{Binding ShowHeader, ElementName=me}" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,6"  VerticalAlignment="Bottom" > 
-			 <m:ImageButton x:Name="btOk" Margin="6,0,6,0" Image="..\Images\ok.png" Content="{m:Loc Ok}"  Width="70" IsDefault="True" Click="Ok_Click" />
-			 <m:ImageButton x:Name="btCancel" Margin="6,0,6,0" Image="..\Images\cancel.png" Content="{m:Loc Cancel}"  Width="70" IsCancel="True" Click="Cancel_Click" />
-			 <m:ImageButton x:Name="btClose" Margin="6,0,0,0" Image="..\Images\close.png" Content="{m:Loc Close}"  Width="70" IsCancel="True" Click="Close_Click" />
-		</StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,6,6"  VerticalAlignment="Bottom" Grid.Row="1">
+            <m:ImageButton x:Name="btOk" Margin="6,0,6,0" Image="..\Images\ok.png" Content="{m:Loc Ok}"  Width="70" IsDefault="True" Click="Ok_Click" />
+            <m:ImageButton x:Name="btCancel" Margin="6,0,6,0" Image="..\Images\cancel.png" Content="{m:Loc Cancel}"  Width="70" IsCancel="True" Click="Cancel_Click" />
+            <m:ImageButton x:Name="btClose" Margin="6,0,6,0" Image="..\Images\close.png" Content="{m:Loc Close}"  Width="70" IsCancel="True" Click="Close_Click" />
+        </StackPanel>
     </Grid>
 </Window>

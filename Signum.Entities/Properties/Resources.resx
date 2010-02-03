@@ -346,4 +346,10 @@
   <data name="Count" xml:space="preserve">
     <value>[Count]</value>
   </data>
+  <data name="Of" xml:space="preserve">
+    <value> of </value>
+  </data>
+  <data name="_0As1" xml:space="preserve">
+    <value>({0} as {1})</value>
+  </data>
 </root>

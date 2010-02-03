@@ -154,7 +154,7 @@ namespace Signum.Windows.Widgets
                 { 
                     new FilterOption() 
                     { 
-                        ColumnName = AlertsQueryColumn, 
+                        Path = AlertsQueryColumn, 
                         Operation = FilterOperation.EqualTo, 
                         Value = entity,
                         Frozen = true 

@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Markup;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities;
+using Signum.Windows.DynamicQuery;
+using System.Windows.Controls;
 
 namespace Signum.Windows
 {
@@ -43,6 +45,13 @@ namespace Signum.Windows
         {
             get { return orderOptions; }
             set { this.orderOptions = value; }
+        }
+
+        List<UserColumnOption> userColumnOptions = new List<UserColumnOption>();
+        public List<UserColumnOption> UserColumnOptions
+        {
+            get { return userColumnOptions; }
+            set { this.userColumnOptions = value; }
         }
 
         public FindOptionsBase()
@@ -100,10 +109,10 @@ namespace Signum.Windows
             this.QueryName = queryName;
         }
 
-        public ExploreOptions(object queryName, string columnName, object value)
+        public ExploreOptions(object queryName, string path, object value)
         {
             this.QueryName = queryName;
-            this.FilterOptions.Add(new FilterOption(columnName, value));
+            this.FilterOptions.Add(new FilterOption(path, value));
             this.NavigateIfOne = true;
         }
 
@@ -165,15 +174,15 @@ namespace Signum.Windows
     {
         public FilterOption(){}
 
-        public FilterOption(string columnName, object value)
+        public FilterOption(string path, object value)
         {
-            this.ColumnName = columnName;
+            this.Path = path;
             this.Operation = FilterOperation.EqualTo;
             this.Value = value; 
         }
 
         public QueryToken Token { get; set; }
-        public string ColumnName { get; set; }
+        public string Path { get; set; }
         public bool Frozen { get; set; }
         public FilterOperation Operation { get; set; }
 
@@ -235,9 +244,15 @@ namespace Signum.Windows
         { 
         }
 
-        public OrderOption (string columnName)
+        public OrderOption (string path)
         {
-            this.ColumnName = columnName;
+            this.Path = path;
+        }
+
+        public OrderOption(string path, OrderType orderType)
+        {
+            this.Path = path;
+            this.OrderType = orderType;
         }
 
         protected override Freezable CreateInstanceCore()
@@ -245,19 +260,39 @@ namespace Signum.Windows
             throw new NotImplementedException();
         }
 
-        public OrderOption(string columnName, OrderType orderType)
-        {
-            this.ColumnName = columnName;
-            this.OrderType = orderType;
-        }
-
-        public string ColumnName { get; set; }
+        public string Path { get; set; }
         public QueryToken Token { get; set; }
         public OrderType OrderType { get; set; }
         
+        internal ColumnOrderInfo ColumnOrderInfo; 
+
         public Order ToOrder()
         {
             return new Order(Token, OrderType);
         }
     }
+
+    public class UserColumnOption : Freezable
+    {
+        public UserColumnOption()
+        {
+        }
+
+        public UserColumnOption(string path)
+        {
+            this.Path = path;
+        }
+
+        protected override Freezable CreateInstanceCore()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Path { get; set; }
+        public string DisplayName { get; set; }
+
+        public UserColumn UserColumn { get; set; }
+
+        internal GridViewColumn GridViewColumn;
+    }  
 }

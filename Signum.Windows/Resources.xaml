@@ -180,29 +180,6 @@
         </Path.Fill>
     </Path>
 
-    <Canvas x:Key="Filter" Width="20" Height="20">
-        <Path Width="20.8025" Height="16.363" Canvas.Left="-0.375411" Canvas.Top="4.13698" Stretch="Fill" StrokeLineJoin="Round" Stroke="#FF0096FF" Data="F1 M 19.9271,4.63698L 13.0677,14.101L 13.0677,18.7028C 13.0677,19.4192 11.729,20 10.0776,20C 8.42617,20 7.08745,19.4192 7.08745,18.7028C 7.08745,18.6326 7.10031,18.5637 7.08222,14.2885L 0.124589,4.66602L 19.9271,4.63698 Z ">
-            <Path.Fill>
-                <LinearGradientBrush StartPoint="0.791954,0.369766" EndPoint="0.190179,0.369766">
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStop Color="#FF8AC1FF" Offset="0"/>
-                        <GradientStop Color="#FF004694" Offset="1"/>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-            </Path.Fill>
-        </Path>
-        <Ellipse Width="21" Height="9.10261" Canvas.Left="-0.5" Canvas.Top="-0.5" Stretch="Fill" StrokeLineJoin="Round" Stroke="#FF0096FF">
-            <Ellipse.Fill>
-                <LinearGradientBrush StartPoint="0.182031,0.47117" EndPoint="0.886198,0.47117">
-                    <LinearGradientBrush.GradientStops>
-                        <GradientStop Color="#FF8AC1FF" Offset="0"/>
-                        <GradientStop Color="#FF004694" Offset="1"/>
-                    </LinearGradientBrush.GradientStops>
-                </LinearGradientBrush>
-            </Ellipse.Fill>
-        </Ellipse>
-    </Canvas>
-
     <Style TargetType="{x:Type Button}" x:Key="RoundButton">
         <Setter Property="Width" Value="22"/>
         <Setter Property="Height" Value="22"/>

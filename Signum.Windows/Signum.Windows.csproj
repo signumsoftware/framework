@@ -266,6 +266,7 @@
     <Compile Include="Controls\AutoCompleteTextBox.xaml.cs">
       <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DragDropController.cs" />
     <Compile Include="Controls\WatermarkTextBox.cs" />
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
@@ -466,6 +467,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\forbidden.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\newColumn.png" />
+    <Resource Include="Images\newFilter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

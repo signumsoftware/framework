@@ -30,8 +30,14 @@ namespace Signum.Windows
             set { SetValue(FiltersProperty, value); }
         }
 
+        public DragController FilterDragController {get;set;}
+
         public FilterBuilder()
         {
+            FilterDragController = new DragController(fe => {
+                FilterOption fo = ((FilterOption)((QueryTokenRenderer)fe).DataContext);
+                return new FilterOption { Token = fo.Token, Operation = fo.Operation, RealValue = fo.RealValue };               
+            }, DragDropEffects.Copy);
             this.InitializeComponent();
         }
 
@@ -142,7 +148,9 @@ namespace Signum.Windows
             {
                 FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
 
-                Filters.Add(filter); 
+                Filters.Add(filter);
+
+                RefreshFirstColumn();
             }
         }
 

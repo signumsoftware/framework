@@ -45,11 +45,6 @@ namespace Signum.Windows.DynamicQuery
             AdornerLayer layer = AdornerLayer.GetAdornerLayer(Header);
             layer.Add(Adorner);
         }
-
-        public Order ToOrder()
-        {
-            return new Order(QueryToken.NewColumn((Column)Header.Tag), Adorner.OrderType);
-        }
     }
 
     internal class SortAdorner : Adorner

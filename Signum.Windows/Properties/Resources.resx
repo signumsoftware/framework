@@ -154,7 +154,7 @@
     <value>Find</value>
   </data>
   <data name="NewFilter" xml:space="preserve">
-    <value>_New Filter:</value>
+    <value>New Filter</value>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Operation</value>
@@ -395,5 +395,8 @@
   </data>
   <data name="ParentCanNotBeAPropertyWithATypeThatImplementsIIdentifiabe" xml:space="preserve">
     <value>parent can not be a Property with a type that implements IIdentifiabe</value>
+  </data>
+  <data name="NewColumn" xml:space="preserve">
+    <value>New Column</value>
   </data>
 </root>

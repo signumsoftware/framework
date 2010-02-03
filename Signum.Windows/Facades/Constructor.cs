@@ -75,7 +75,7 @@ namespace Signum.Windows
 
             if (window is SearchWindow)
             {
-                var filters = ((SearchWindow)window).CurrentFilters().Where(fo => fo.Operation == FilterOperation.EqualTo && fo.Token is ColumnToken);
+                var filters = ((SearchWindow)window).FilterOptions.Where(fo => fo.Operation == FilterOperation.EqualTo && fo.Token is ColumnToken);
 
                 var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                             join fo in filters on pi.Name equals fo.Token.Key

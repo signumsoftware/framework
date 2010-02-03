@@ -289,14 +289,14 @@ namespace Signum.Engine.Maps
             return result; 
         }
 
-        public Implementations FindImplementations(PropertyRoute path)
+        public Implementations FindImplementations(PropertyRoute route)
         {
-            Type type = path.IdentifiableType; 
+            Type type = route.IdentifiableType; 
 
             if (!Tables.ContainsKey(type))
                 return null;
 
-            Field field = FindField(Table(type), path.Properties, false);
+            Field field = FindField(Table(type), route.Properties, false);
 
             FieldImplementedBy ibField = field as FieldImplementedBy;
             if (ibField != null)

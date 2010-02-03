@@ -95,7 +95,7 @@ namespace Signum.Engine.DynamicQuery
                    userColumns.ToArray(),
                    collection.Length,
                    c=> c is StaticColumn? CreateValuesStaticColumnsUntyped((StaticColumn)c, collection):
-                       collection.AsEnumerable<Expandable>().Select(e=>e.Expansions[((UserColumn)c).UserQueryIndex]).ToArray());
+                       collection.Select(e=>e.Expansions[((UserColumn)c).UserColumnIndex]).ToArray());
             return result;
         }
 
@@ -146,18 +146,21 @@ namespace Signum.Engine.DynamicQuery
             return query.Select(GetExpansions<T>(userColumns).Compile());
         }
 
-        static PropertyInfo piExpansions = ReflectionTools.GetPropertyInfo((Expandable e)=>e.Expansions); 
         static Expression<Func<T, Expandable<T>>> GetExpansions<T>(List<UserColumn> userColumns)
         {
             ParameterExpression param = Expression.Parameter(typeof(T), "p");
 
-            NewArrayExpression newArray = Expression.NewArrayInit(typeof(object), userColumns.Select(uc=>uc.Token.BuildExpression(param)));
+            NewArrayExpression newArray = Expression.NewArrayInit(typeof(object),
+                userColumns.Select(uc => (Expression)Expression.Convert(uc.Token.BuildExpression(param), typeof(object))));
+
+            var ctor = typeof(Expandable<T>).GetConstructor(new[] { typeof(T), typeof(object[]) });
 
             return Expression.Lambda<Func<T, Expandable<T>>>(
-                      Expression.MemberInit(
-                         Expression.New(typeof(Expandable<T>).GetConstructor(new[] { typeof(T) }), param),
-                         Expression.Bind(piExpansions, newArray)), param); 
+                Expression.New(ctor, param, newArray),
+                param);
         }
+
+        
 	    #endregion
 
         #region Where
@@ -330,7 +333,7 @@ namespace Signum.Engine.DynamicQuery
         #region SelectEntity
         static Expression<Func<Expandable<T>, Lite>> GetSelectEntityExpression<T>()
         {
-            ParameterExpression e = Expression.Parameter(typeof(T), "e");
+            ParameterExpression e = Expression.Parameter(typeof(Expandable<T>), "e");
 
             return Expression.Lambda<Func<Expandable<T>, Lite>>(
                 Expression.Convert(

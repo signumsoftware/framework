@@ -13,27 +13,27 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ResultTable
     {
-        public StaticColumn[] StaticColumns { get; private set; }
-        public UserColumn[] UserColumns { get; private set; }
+        public Column[] Columns { get; private set; }
         public ResultRow[] Rows { get; private set; }
         internal Array[] Values;
 
         public ResultTable(StaticColumn[] staticColumns, UserColumn[] userColumns, int rows, Func<Column, Array> values)
         {
-            this.StaticColumns = staticColumns;
-            this.UserColumns = userColumns;
+            this.Columns = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).ToArray();
+            string errors = Columns.Where((c, i) => c.Index != i).ToString(c => "{0} ({1})".Formato(c.Name, c.Index), " ");
+            if (errors.HasText())
+                throw new InvalidOperationException("Some columns are not correctly numered: " + errors);
+
             this.Rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
-            this.Values = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).Select(c => values(c)).ToArray();
+            this.Values = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).Select(c =>
+                {
+                    Array array = values(c);
+                    if (array.Length != rows)
+                        throw new InvalidOperationException("{0} results (insted of {1}) for column {2}".Formato(array.Length, rows, c.Name));
+                    return array;
+                }).ToArray();
         }
-
-        public IEnumerable<Column> Columns
-        {
-            get
-            {
-                return StaticColumns.Cast<Column>().Concat(UserColumns.Cast<Column>());
-            }
-        }
-
+   
         public IEnumerable<Column> VisibleColumns
         {
             get

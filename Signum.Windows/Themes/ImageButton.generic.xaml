@@ -37,7 +37,8 @@
 								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
 								SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
 								Margin="{TemplateBinding Padding}">
-								<Image Width="16" Height="16" Stretch="None" Source="{TemplateBinding Image}" Margin="5,0,5,0"   SnapsToDevicePixels="True" />
+								<Image Width="16" Height="16" Stretch="None" Source="{TemplateBinding Image}" 
+                                       Margin="5,0,5,0" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" />
 								<ContentPresenter   RecognizesAccessKey="True" Margin="0,0,5,0" />
 							</StackPanel>
 					</Microsoft_Windows_Themes:ButtonChrome>

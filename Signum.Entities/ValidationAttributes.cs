@@ -23,6 +23,8 @@ namespace Signum.Entities
         public bool DisableOnCorrupt { get; set; }
         public string ErrorMessage { get; set; }
 
+        public int Order { get; set; }
+
         //Descriptive information that continues the sentence: The property should {HelpMessage}
         //Used for documentation purposes only
         public abstract string HelpMessage { get; }

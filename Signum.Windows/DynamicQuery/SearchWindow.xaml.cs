@@ -46,6 +46,23 @@ namespace Signum.Windows
             set { SetValue(OrderOptionsProperty, value); }
         }
 
+
+        public static readonly DependencyProperty UserColumnsProperty =
+            DependencyProperty.Register("UserColumns", typeof(ObservableCollection<UserColumnOption>), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public ObservableCollection<UserColumnOption> UserColumns
+        {
+            get { return (ObservableCollection<UserColumnOption>)GetValue(UserColumnsProperty); }
+            set { SetValue(UserColumnsProperty, value); }
+        }
+
+        public static readonly DependencyProperty AllowUserColumnsProperty =
+            DependencyProperty.Register("AllowUserColumns", typeof(bool), typeof(SearchWindow), new UIPropertyMetadata(true));
+        public bool AllowUserColumns
+        {
+            get { return (bool)GetValue(AllowUserColumnsProperty); }
+            set { SetValue(AllowUserColumnsProperty, value); }
+        }
+
         public static readonly DependencyProperty SelectedItemProperty =
           DependencyProperty.Register("SelectedItem", typeof(Lite), typeof(SearchWindow), new UIPropertyMetadata(null));
         public Lite SelectedItem
@@ -114,12 +131,28 @@ namespace Signum.Windows
             this.Mode = mode;
 
             ButtonsChanged();
+            searchControl.Loaded += new RoutedEventHandler(searchControl_Loaded);
         }
 
         public SearchWindow()
         {
             this.InitializeComponent();
             ButtonsChanged();
+            searchControl.Loaded += new RoutedEventHandler(searchControl_Loaded);
+        }
+
+        void searchControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            tbEntityType.Text = searchControl.EntityType.NicePluralName();
+
+            string niceQueryName = QueryUtils.GetNiceQueryName(QueryName);
+
+            if (niceQueryName.StartsWith(tbEntityType.Text))
+                niceQueryName = niceQueryName.Substring(tbEntityType.Text.Length).Trim();
+            else
+                niceQueryName = "- " + niceQueryName;
+
+            tbQueryName.Text = niceQueryName;
         }
 
         void ButtonsChanged()
@@ -140,16 +173,6 @@ namespace Signum.Windows
             {
                 searchControl.DoubleClick -= new Action(searchControl_DoubleClick);
             }
-        }
-
-        public List<Filter> CurrentFilters()
-        {
-            return searchControl.CurrentFilters();
-        }
-
-        public List<Order> CurrentOrders()
-        {
-            return searchControl.CurrentOrders();
         }
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)

@@ -288,7 +288,9 @@ namespace Signum.Windows
         public event Func<Type, bool> GlobalIsViewable;
         public event Func<object, bool> GlobalIsFindable;
 
-        public event Action<Window, WindowsType, object> TaskViewWindow;
+        public event Action<AdminWindow, Type> TaskAdminWindow;
+        public event Action<NormalWindow, ModifiableEntity> TaskNormalWindow;
+        public event Action<SearchWindow, object> TaskSearchWindow;
 
         public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");
         public ImageSource DefaultAdminIcon = ImageLoader.GetImageSortName("admin.png");
@@ -296,28 +298,38 @@ namespace Signum.Windows
 
         public NavigationManager()
         {
-            TaskViewWindow += TaskSetSetIcon;
-            TaskViewWindow += TaskSetLabelShortcuts;
+            TaskAdminWindow += TaskSetIconAdminWindow;
+            TaskNormalWindow += TaskSetIconNormalWindow;
+            TaskSearchWindow += TaskSetIconSearchWindow;
+
+            TaskAdminWindow += TaskSetLabelAdminWindow;
+            TaskNormalWindow += TaskSetLabelNormalWindow;    
         }
 
-        public void TaskSetSetIcon(Window windows, WindowsType winType, object typeOrQueryName)
+        void TaskSetIconSearchWindow(SearchWindow sw, object qn)
         {
-            switch (winType)
-            {
-                case WindowsType.View: windows.Icon = GetEntityIcon((Type)typeOrQueryName, true); break;
-                case WindowsType.Find: windows.Icon = GetFindIcon(typeOrQueryName, true); break;
-                case WindowsType.Admin: windows.Icon = GetEntityIcon((Type)typeOrQueryName, true); break;
-                default:
-                    break;
-            }
+            sw.Icon = GetFindIcon(qn, true); 
         }
 
-        public void TaskSetLabelShortcuts(Window windows, WindowsType winType, object typeOrQueryName)
+        void TaskSetIconNormalWindow(NormalWindow nw, ModifiableEntity entity)
         {
-            if (winType == WindowsType.Find)
-                return;
+            nw.Icon = GetEntityIcon(entity.GetType(), true);
+        }
 
-            ShortcutHelper.SetLabelShortcuts(windows);
+        void TaskSetIconAdminWindow(AdminWindow aw, Type type)
+        {
+            aw.Icon = GetEntityIcon(type, true);
+        }
+
+
+        void TaskSetLabelNormalWindow(NormalWindow nw, ModifiableEntity entity)
+        {
+            ShortcutHelper.SetLabelShortcuts(nw);
+        }
+
+        void TaskSetLabelAdminWindow(AdminWindow aw, Type type)
+        {
+            ShortcutHelper.SetLabelShortcuts(aw);
         }
 
         public ImageSource GetEntityIcon(Type type, bool useDefault)
@@ -467,7 +479,7 @@ namespace Signum.Windows
 
             foreach (var f in filters)
             {
-                f.Token = QueryToken.Parse(queryName, description, f.ColumnName); 
+                f.Token = QueryToken.Parse(queryName, description, f.Path); 
                 f.RefreshRealValue();
             }
         }
@@ -478,7 +490,19 @@ namespace Signum.Windows
 
             foreach (var o in orders)
             {
-                o.Token = QueryToken.Parse(queryName, description, o.ColumnName);
+                o.Token = QueryToken.Parse(queryName, description, o.Path);
+            }
+        }
+
+        public void SetUserColumns(object queryName, IList<UserColumnOption> userColumns)
+        {
+            QueryDescription description = GetQueryDescription(queryName);
+
+            for (int i = 0; i < userColumns.Count; i++)
+            {
+                UserColumnOption uco = userColumns[i];
+                QueryToken token = QueryToken.Parse(queryName, description, uco.Path);
+                uco.UserColumn = new UserColumn(description.StaticColumns.Count, token) { UserColumnIndex = i, DisplayName = uco.DisplayName.DefaultText(token.FullKey()) };
             }
         }
 
@@ -489,13 +513,14 @@ namespace Signum.Windows
                 (settings.QueryDescription = Server.Return((IQueryServer s) => s.GetQueryDescription(queryName))); 
         }
 
-        private SearchWindow CreateSearchWindow(FindOptionsBase options)
+        protected virtual SearchWindow CreateSearchWindow(FindOptionsBase options)
         {
             SearchWindow sw = new SearchWindow(options.GetSearchMode(), options.SearchOnLoad)
             {
                 QueryName = options.QueryName,
                 FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions),
                 OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions),
+                UserColumns = new ObservableCollection<UserColumnOption>(options.UserColumnOptions),
                 ShowFilters = options.ShowFilters,
                 ShowFilterButton = options.ShowFilterButton,
                 ShowFooter = options.ShowFooter,
@@ -503,8 +528,8 @@ namespace Signum.Windows
                 Title = options.WindowTitle ?? SearchTitle(options.QueryName)
             };
 
-            if (TaskViewWindow != null)
-                TaskViewWindow(sw, WindowsType.Find, options.QueryName);
+            if (TaskSearchWindow != null)
+                TaskSearchWindow(sw, options.QueryName);
 
             return sw;
         }
@@ -529,7 +554,7 @@ namespace Signum.Windows
 
             Control ctrl = options.View ?? es.CreateView(entity, null);
 
-            Window win = CreateViewWindow((ModifiableEntity)entity, options, es, ctrl);
+            Window win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
 
             if (options.Closed != null)
                 win.Closed += options.Closed;
@@ -555,7 +580,7 @@ namespace Signum.Windows
 
             Control ctrl = options.View ?? es.CreateView(entity, options.TypeContext);
 
-            Window win = CreateViewWindow((ModifiableEntity)entity, options, es, ctrl);
+            Window win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
 
             bool? ok = win.ShowDialog();
             if (ok != true)
@@ -570,7 +595,7 @@ namespace Signum.Windows
 
         }
 
-        protected virtual Window CreateViewWindow(ModifiableEntity entity, ViewOptionsBase options, EntitySettings es, Control ctrl)
+        protected virtual NormalWindow CreateNormalWindow(ModifiableEntity entity, ViewOptionsBase options, EntitySettings es, Control ctrl)
         {
             Type entityType = entity.GetType();
 
@@ -593,8 +618,8 @@ namespace Signum.Windows
             if (isReadOnly)
                 Common.SetIsReadOnly(win, true);
 
-            if (TaskViewWindow != null)
-                TaskViewWindow(win, WindowsType.View, entityType);
+            if (TaskNormalWindow != null)
+                TaskNormalWindow(win, entity);
 
             return win;
         }
@@ -689,15 +714,22 @@ namespace Signum.Windows
 
             EntitySettings es = Settings.GetOrThrow(type, Resources.NoEntitySettingsForType0);
 
+            AdminWindow nw = CreateAdminWindow(type, es);
+
+            nw.Show();
+        }
+
+        private AdminWindow CreateAdminWindow(Type type, EntitySettings es)
+        {
             AdminWindow nw = new AdminWindow(type)
             {
                 MainControl = es.CreateView(null, null),
             };
 
-            if (TaskViewWindow != null)
-                TaskViewWindow(nw, WindowsType.Admin, type);
+            if (TaskAdminWindow != null)
+                TaskAdminWindow(nw, type);
 
-            nw.Show();
+            return nw;
         }
 
         public virtual Type SelectTypes(Window parent, Type[] implementations)

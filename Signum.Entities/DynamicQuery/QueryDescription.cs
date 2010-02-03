@@ -24,7 +24,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class Column
     {
-        public int Index { get; internal set; }
+        public abstract int Index { get; }
 
         public string Name { get; internal set; }
         public Type Type { get; internal set; }
@@ -45,28 +45,52 @@ namespace Signum.Entities.DynamicQuery
         {
             return "{0} {1}".Formato(Type.TypeName(), Name);
         }
+
+        public abstract QueryToken GetQueryToken();
     }
 
     [Serializable]
     public class UserColumn : Column
     {
-        public int UserQueryIndex { get; set; }
+        public int UserColumnIndex { get; set; }
         public QueryToken Token { get; internal set; }
 
-        public UserColumn(int index, QueryToken token)
+        int baseIndex;
+        public UserColumn(int baseIndex, QueryToken token)
         {
-
+            this.baseIndex = baseIndex;
+            this.Token = token;
+            this.Name = token.FullKey();
+            this.Implementations = token.Implementations();
+            this.Format = token.Format;
+            this.Unit = token.Unit;
+            this.Type = token.Type;
         }
 
         public override bool IsAllowed()
         {
             return Token.IsAllowed();
         }
+
+        public override QueryToken GetQueryToken()
+        {
+            return Token;
+        }
+
+        public override int Index
+        {
+            get { return baseIndex + UserColumnIndex; }
+        }
     }
 
     [Serializable]
     public class StaticColumn : Column
     {
+        public override int Index
+        {
+            get { return index; }
+        }
+
         public PropertyInfo twinProperty;
         public PropertyInfo TwinProperty
         {
@@ -94,34 +118,43 @@ namespace Signum.Entities.DynamicQuery
             get { return this.Name == Entity; }
         }
 
+        int index;
+
         public StaticColumn(int index, MemberInfo mi, Meta meta, Delegate getter)
         {
-            Index = index;
+            this.index = index;
             Name = mi.Name;
             Getter = getter;
 
             Type = mi.ReturningType();
             Meta = meta;
 
-            if (typeof(IdentifiableEntity).IsInstanceOfType(Type))
+            if (typeof(IIdentifiable).IsInstanceOfType(Type))
                 throw new InvalidOperationException("{0} column returns subtype of IdentifiableEntity, use a Lite instead!!".Formato(mi.MemberName()));
 
             if (meta is CleanMeta && ((CleanMeta)meta).PropertyPath.PropertyRouteType == PropertyRouteType.Property)
                 TwinProperty = ((CleanMeta)meta).PropertyPath.PropertyInfo;
-            else if (mi is PropertyInfo)
-                DisplayName = ((PropertyInfo)mi).NiceName();
             else
-                DisplayName = mi.Name.NiceName();
+            {
+                if (mi is PropertyInfo)
+                    DisplayName = ((PropertyInfo)mi).NiceName();
+                else
+                    DisplayName = mi.Name.NiceName();
+            }
 
             Sortable = true;
+            Filterable = true;
             if (IsEntity)
             {
+                Type cleanType = Reflector.ExtractLite(Type); 
+                if(cleanType  == null)
+                    throw new InvalidOperationException("Entity must be a Lite");
+                DisplayName = cleanType.NiceName();
+
                 Visible = false;
-                Filterable = false;
             }
             else
             {
-                Filterable = true;
                 Visible = true;
             }
 
@@ -130,6 +163,11 @@ namespace Signum.Entities.DynamicQuery
         public override bool IsAllowed()
         {
             return Meta == null || Meta.IsAllowed();
+        }
+
+        public override QueryToken GetQueryToken()
+        {
+            return QueryToken.NewColumn(this);
         }
     }
 }

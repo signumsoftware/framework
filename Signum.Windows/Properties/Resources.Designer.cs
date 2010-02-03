@@ -432,7 +432,16 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to _New Filter:.
+        ///   Looks up a localized string similar to New Column.
+        /// </summary>
+        internal static string NewColumn {
+            get {
+                return ResourceManager.GetString("NewColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New Filter.
         /// </summary>
         internal static string NewFilter {
             get {

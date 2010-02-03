@@ -12,9 +12,10 @@ using Signum.Entities.Reflection;
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public abstract class QueryToken
+    public abstract class QueryToken : IEquatable<QueryToken>
     {
         public abstract override string ToString();
+        public abstract string NiceName();
         public abstract string Format { get; }
         public abstract string Unit { get; }
         public abstract Type Type { get; }
@@ -23,7 +24,7 @@ namespace Signum.Entities.DynamicQuery
      
         public abstract Expression BuildExpression(Expression expression);
 
-        public abstract PropertyRoute GetEntityPath();
+        public abstract PropertyRoute GetPropertyRoute();
         public abstract Implementations Implementations();
         public abstract bool IsAllowed();
 
@@ -34,7 +35,7 @@ namespace Signum.Entities.DynamicQuery
             this.Parent = parent;
         }
 
-        public static QueryToken NewColumn(Column column)
+        public static QueryToken NewColumn(StaticColumn column)
         {
             return new ColumnToken(column);
         }
@@ -120,7 +121,7 @@ namespace Signum.Entities.DynamicQuery
 
             string first = tokens.First();
 
-            Column column = queryDescription.StaticColumns.Where(a => a.Name == first).Single(
+            StaticColumn column = queryDescription.StaticColumns.Where(a => a.Name == first).Single(
                 "Column {0} not found on query {1}".Formato(first, QueryUtils.GetNiceQueryName(queryName)),
                 "More than one column named {0} on query {1}".Formato(first, QueryUtils.GetNiceQueryName(queryName)));
 
@@ -136,7 +137,10 @@ namespace Signum.Entities.DynamicQuery
             return result;
         }
 
-    
+        public bool Equals(QueryToken other)
+        {
+            return other != null && other.FullKey() == this.FullKey();
+        }
     }
 
     [Serializable]
@@ -244,9 +248,14 @@ namespace Signum.Entities.DynamicQuery
             return Parent.IsAllowed();
         }
 
-        public override PropertyRoute GetEntityPath()
+        public override PropertyRoute GetPropertyRoute()
         {
             return null;
+        }
+
+        public override string NiceName()
+        {
+            return DisplayName + Resources.Of + Parent.NiceName();
         }
     }
 
@@ -346,12 +355,17 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool IsAllowed()
         {
-            return Parent.IsAllowed() && GetEntityPath().IsAllowed();
+            return Parent.IsAllowed() && GetPropertyRoute().IsAllowed();
         }
 
-        public override PropertyRoute GetEntityPath()
+        public override PropertyRoute GetPropertyRoute()
         {
-            return Parent.GetEntityPath().Add(PropertyInfo) ;
+            return Parent.GetPropertyRoute().Add(PropertyInfo);
+        }
+
+        public override string NiceName()
+        {
+            return PropertyInfo.NiceName() + Resources.Of + Parent.NiceName();
         }
     }
 
@@ -420,17 +434,23 @@ namespace Signum.Entities.DynamicQuery
             return Parent.IsAllowed();
         }
 
-        public override PropertyRoute GetEntityPath()
+        public override PropertyRoute GetPropertyRoute()
         {
             return PropertyRoute.Root(type);
+        }
+
+        public override string NiceName()
+        {
+            return Resources._0As1.Formato(Parent.NiceName(), type.NiceName());
         }
     }
 
     [Serializable]
     public class ColumnToken : QueryToken
     {
-        public Column Column { get; private set; }
-        internal ColumnToken(Column column)
+        public StaticColumn Column { get; private set; }
+
+        internal ColumnToken(StaticColumn column)
             : base(null)
         {
             if (column == null)
@@ -466,10 +486,6 @@ namespace Signum.Entities.DynamicQuery
 
         public override Expression BuildExpression(Expression expression)
         {
-            UserColumn uc = Column as UserColumn;
-            if (uc != null)
-                return uc.Token.BuildExpression(expression);
-
             //No base
             return Expression.Property(expression, Column.Name);
         }
@@ -478,10 +494,9 @@ namespace Signum.Entities.DynamicQuery
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
-                StaticColumn sc = Column as StaticColumn;
-                if (sc != null && sc.TwinProperty != null)
+                if (Column.TwinProperty != null)
                 {
-                    var pp = Validator.GetOrCreatePropertyPack(sc.TwinProperty);
+                    var pp = Validator.GetOrCreatePropertyPack(Column.TwinProperty);
                     if (pp != null && pp.Validators.OfType<DateOnlyValidatorAttribute>().Any())
                         return NetPropertyToken.DateProperties(this);
                 }
@@ -503,13 +518,18 @@ namespace Signum.Entities.DynamicQuery
             return Column.IsAllowed();
         }
 
-        public override PropertyRoute GetEntityPath()
+        public override PropertyRoute GetPropertyRoute()
         {
             Type type = Reflector.ExtractLite(Type);
             if (type != null)
                 return PropertyRoute.Root(type);
 
             return null;
+        }
+
+        public override string NiceName()
+        {
+            return Column.DisplayName;
         }
     }
 }

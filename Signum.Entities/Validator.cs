@@ -60,7 +60,9 @@ namespace Signum.Entities
         internal PropertyPack(PropertyInfo pi, Func<object, object> getValue, Action<object, object> setValue)
         {
             this.PropertyInfo = pi;
-            Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true).OfType<ValidatorAttribute>().ToList();
+            Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true)
+                .OfType<ValidatorAttribute>()
+                .OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
 
             this.GetValue = getValue;
             this.SetValue = setValue;

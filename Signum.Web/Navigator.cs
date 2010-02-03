@@ -754,7 +754,7 @@ namespace Signum.Web
 
             if (queryResult != null && queryResult.Rows != null && queryResult.Rows.Length > 0 && queryResult.VisibleColumns.Count() > 0)
             {
-                int entityColumnIndex = queryResult.StaticColumns.IndexOf(c => c.IsEntity);
+                int entityColumnIndex = queryResult.Columns.OfType<StaticColumn>().IndexOf(c => c.IsEntity);
                 controller.ViewData[ViewDataKeys.EntityColumnIndex] = entityColumnIndex;
             }
 

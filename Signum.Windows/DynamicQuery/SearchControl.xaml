@@ -11,63 +11,60 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="..\Resources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-        	<Style x:Key="FilterButtonStyle" TargetType="{x:Type ToggleButton}">
-        		<Style.BasedOn>
-        			<Style TargetType="{x:Type ButtonBase}">
-        				<Setter Property="FocusVisualStyle">
-        					<Setter.Value>
-        						<Style>
-        							<Setter Property="Control.Template">
-        								<Setter.Value>
-        									<ControlTemplate>
-        										<Rectangle Stroke="Black" StrokeDashArray="1 2" StrokeThickness="1" Margin="2" SnapsToDevicePixels="True"/>
-        									</ControlTemplate>
-        								</Setter.Value>
-        							</Setter>
-        						</Style>
-        					</Setter.Value>
-        				</Setter>
-        				<Setter Property="Background">
-        					<Setter.Value>
-        						<LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-        							<GradientStop Color="#FFF3F3F3" Offset="0"/>
-        							<GradientStop Color="#FFEBEBEB" Offset="0.5"/>
-        							<GradientStop Color="#FFDDDDDD" Offset="0.5"/>
-        							<GradientStop Color="#FFCDCDCD" Offset="1"/>
-        						</LinearGradientBrush>
-        					</Setter.Value>
-        				</Setter>
-        				<Setter Property="BorderBrush" Value="#FF707070"/>
-        				<Setter Property="BorderThickness" Value="1"/>
-        				<Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-        				<Setter Property="HorizontalContentAlignment" Value="Center"/>
-        				<Setter Property="VerticalContentAlignment" Value="Center"/>
-        				<Setter Property="Padding" Value="1"/>
-        				<Setter Property="Template">
-        					<Setter.Value>
-        						<ControlTemplate TargetType="{x:Type ButtonBase}">
-        							<Border x:Name="border" CornerRadius="0,0,5,0">
-        								<ContentPresenter x:Name="contentPresenter" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" RecognizesAccessKey="True"/>
-        							</Border>
-        							<ControlTemplate.Triggers>
-        								<Trigger Property="IsKeyboardFocused" Value="True"/>
-        								<Trigger Property="ToggleButton.IsChecked" Value="True">
-        									<Setter Property="Background" TargetName="border" Value="#FFC9E4FF"/>
-        								</Trigger>
-        								<Trigger Property="IsEnabled" Value="False">
-        									<Setter Property="Foreground" Value="#FFADADAD"/>
-        								</Trigger>
-        								<Trigger Property="IsMouseOver" Value="True">
-        									<Setter Property="OpacityMask" TargetName="contentPresenter" Value="#FF74B8FF"/>
-        									<Setter Property="Background" TargetName="border" Value="#FFA6D3FF"/>
-        								</Trigger>
-        							</ControlTemplate.Triggers>
-        						</ControlTemplate>
-        					</Setter.Value>
-        				</Setter>
-        			</Style>
-        		</Style.BasedOn>
-        	</Style>
+            <Style x:Key="FilterButtonStyle" TargetType="{x:Type ToggleButton}">
+                <Style.BasedOn>
+                    <Style TargetType="{x:Type ButtonBase}">
+                        <Setter Property="FocusVisualStyle">
+                            <Setter.Value>
+                                <Style>
+                                    <Setter Property="Control.Template">
+                                        <Setter.Value>
+                                            <ControlTemplate>
+                                                <Rectangle Stroke="Black" StrokeDashArray="1 2" StrokeThickness="1" Margin="2" SnapsToDevicePixels="True"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="BorderBrush" Value="#FF707070"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Setter Property="Padding" Value="1"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                                    <Border x:Name="border" CornerRadius="0,0,5,0">
+                                        <ContentPresenter x:Name="contentPresenter" 
+                                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                                          Margin="{TemplateBinding Padding}" 
+                                                          Content="{TemplateBinding Content}" 
+                                                          ContentStringFormat="{TemplateBinding ContentStringFormat}" 
+                                                          ContentTemplate="{TemplateBinding ContentTemplate}" 
+                                                          RecognizesAccessKey="True"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsKeyboardFocused" Value="True"/>
+                                        <Trigger Property="ToggleButton.IsChecked" Value="True">
+                                            <Setter Property="Background" TargetName="border" Value="#FFC9E4FF"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Foreground" Value="#FFADADAD"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" TargetName="border" Value="#FFA6D3FF"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Style.BasedOn>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -77,15 +74,20 @@
             <RowDefinition Height="Auto"  />
         </Grid.RowDefinitions>
         <StackPanel Visibility="{Binding ShowHeader, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" >
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
-                <Label Content="{m:Loc NewFilter}" Margin="0,2,2,2" Target="{Binding ElementName=cbFilters, Mode=OneWay}"/>
-                <m:QueryTokenBuilder x:Name="tokenBuilder"  Columns="{Binding Columns, ElementName=UserControl}"   />
-                <Button x:Name="btCreateFilter" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" Margin="2,2,2,2" Click="btCreateFilter_Click" />
-            </StackPanel>
-            <m:FilterBuilder  x:Name="filterBuilder"  
-                              Filters="{Binding FilterOptions, ElementName=me}"
-                              Visibility="{Binding ShowFilters, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" 
-                              Background="{DynamicResource BlueBackground}" />
+            <Grid Background="#FFC9E4FF" 
+                Visibility="{Binding ShowFilters, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
+                    <m:QueryTokenBuilder x:Name="tokenBuilder" />
+                    <m:ImageButton Image="..\Images\newFilter.png" Content="{m:Loc NewFilter}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" />
+                    <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc NewColumn}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click"
+                                   Visibility="{Binding AllowUserColumns, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}"/>
+                </StackPanel>
+                <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1" Filters="{Binding FilterOptions, ElementName=me}"/>
+            </Grid>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent">
                 <StackPanel.Resources>
                     <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
@@ -98,10 +100,9 @@
                 <ToggleButton x:Name="btFilters" 
                               IsChecked="{Binding ShowFilters, ElementName=me}"
                               Visibility="{Binding ShowFilterButton, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Margin="0,0,5,0" Style="{DynamicResource FilterButtonStyle}" Padding="5,1" >
-                	<StackPanel Orientation="Horizontal">
-                		<Border Child="{StaticResource Filter}" Margin="4,0,0,0" Opacity="0.5" VerticalAlignment="Center"/>
-                		<TextBlock Text="Filtros" VerticalAlignment="Center" Margin="3,0,0,0"/>
-                	</StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Filtros" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                    </StackPanel>
                 </ToggleButton>
                 <Button x:Name="btFind" Click="FilterBuilder_SearchClicked"  ToolTip="{m:Loc Find}" Style="{DynamicResource RoundBigButton}" >
                     <StackPanel Orientation="Horizontal">
@@ -121,15 +122,16 @@
                   Background="WhiteSmoke"
                   SelectionChanged="lvResult_SelectionChanged" 
 			      SelectionMode="{Binding MultiSelection, Converter={x:Static m:Converters.BoolToSelectionMode}, ElementName=me}"
-			      VirtualizingStackPanel.IsVirtualizing="True">
+			      VirtualizingStackPanel.IsVirtualizing="True"
+                  AllowDrop="{Binding AllowUserColumns, ElementName=me}"
+                  DragOver="lvResult_DragOver"
+                  Drop="lvResult_Drop">
             <ListView.View>
                 <GridView x:Name="gvResults" AllowsColumnReorder="False">
                     <GridView.ColumnHeaderContainerStyle>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
-                            <EventSetter Event="MouseMove" Handler="GridViewColumnHeader_MouseMove"/>
+                            <Setter Property="m:DragController.DragController" Value="{Binding ColumnDragController, ElementName=me}"/>
                             <EventSetter Event="Click" Handler="GridViewColumnHeader_Click"/>
-                            <EventSetter Event="MouseDown" Handler="GridViewColumnHeader_MouseDown" />
-                            <EventSetter Event="MouseLeave" Handler="GridViewColumnHeader_MouseLeave" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
                 </GridView>

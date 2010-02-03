@@ -217,7 +217,7 @@
     <value>Buscar</value>
   </data>
   <data name="NewFilter" xml:space="preserve">
-    <value>_Nuevo filtro:</value>
+    <value>Nuevo filtro</value>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Operación</value>
@@ -395,5 +395,8 @@
   </data>
   <data name="_notes" xml:space="preserve">
     <value>notas</value>
+  </data>
+  <data name="NewColumn" xml:space="preserve">
+    <value>Nueva columna</value>
   </data>
 </root>

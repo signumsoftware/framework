@@ -61,6 +61,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ({0} as {1}).
+        /// </summary>
+        internal static string _0As1 {
+            get {
+                return ResourceManager.GetString("_0As1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {{0}} does not have a valid {0} format.
         /// </summary>
         internal static string _0DoesNotHaveAValid0Format {
@@ -589,6 +598,15 @@ namespace Signum.Entities.Properties {
         internal static string NewEntitiesAreNotAllowed {
             get {
                 return ResourceManager.GetString("NewEntitiesAreNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  of .
+        /// </summary>
+        internal static string Of {
+            get {
+                return ResourceManager.GetString("Of", resourceCulture);
             }
         }
         

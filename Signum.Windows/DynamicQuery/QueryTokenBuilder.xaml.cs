@@ -56,7 +56,10 @@ namespace Signum.Windows
             for (int i = 0; i < tokens.Count + 1; i++)
 			{
                 QueryToken[] subTokens = i == 0? Columns.Select(c=>QueryToken.NewColumn(c)).ToArray():
-                                                 tokens[i-1].SubTokens(); 
+                                                 tokens[i-1].SubTokens();
+
+                if (i == tokens.Count && subTokens == null || subTokens.Length == 0)
+                    break;
 
                 int index = i == tokens.Count ? -1: Array.FindIndex(subTokens, a=>a.Key == tokens[i].Key);
 
@@ -99,6 +102,21 @@ namespace Signum.Windows
         {
             InitializeComponent();
             sp.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(cb_SelectionChanged));
+        }
+
+        private void sp_DragOver(object sender, DragEventArgs e)
+        {
+             e.Effects = e.Data.GetDataPresent(typeof(FilterOption)) ? DragDropEffects.Copy : DragDropEffects.None;
+        }
+
+        private void sp_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(FilterOption)))
+            {
+                FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
+
+                Token = filter.Token;
+            }
         }
     }
 }
