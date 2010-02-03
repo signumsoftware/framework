@@ -42,7 +42,12 @@ namespace Signum.Engine.Basics
 
         static void Schema_Initializing(Schema sender)
         {
-            QueryNames = DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryName(qn));
+            QueryNames = CreateQueryNames();
+        }
+
+        private static Dictionary<string, object> CreateQueryNames()
+        {
+            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryName(qn));
         }
 
         public static List<QueryDN> RetrieveOrGenerateQueries()
@@ -58,7 +63,7 @@ namespace Signum.Engine.Basics
 
         static SqlPreCommand SynchronizeQueries(Replacements replacements)
         {
-            var should = QueryNames.Select(kvp => new QueryDN { Name = kvp.Key });
+            var should = CreateQueryNames().Select(kvp => new QueryDN { Name = kvp.Key });
 
             var current = Administrator.TryRetrieveAll<QueryDN>(replacements);
 
