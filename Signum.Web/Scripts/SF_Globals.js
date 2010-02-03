@@ -359,7 +359,7 @@ $.getScript = function(url, callback, cache, async){ $.ajax({ type: "GET", url: 
 var resourcesLoaded = new Array();
 $.jsLoader = function(cond, url, callback, async) {
     var a = (async != undefined) ? async : true;
-    console.log("Retrieving from " + url + " " + (a ? "a" : "") + "synchronuosly");
+    //log("Retrieving from " + url + " " + (a ? "a" : "") + "synchronuosly");
     if (!resourcesLoaded[url] && cond) {
          //console.log("Getting js " + url);
          $.getScript(url, function() {
