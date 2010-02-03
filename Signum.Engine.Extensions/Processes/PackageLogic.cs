@@ -67,18 +67,14 @@ namespace Signum.Engine.Processes
     public abstract class PackageAlgorithm<T>: IProcessAlgorithm
         where T:class, IIdentifiable
     {
-        public Enum OperationKey { get; private set; }
-
         Func<List<Lite<T>>> getLazies;
 
-        public PackageAlgorithm(Enum operationKey)
+        public PackageAlgorithm()
         {
-            this.OperationKey = operationKey;
         }
 
-        public PackageAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLazies)
+        public PackageAlgorithm(Func<List<Lite<T>>> getLazies)
         {
-            this.OperationKey = operationKey;
             this.getLazies = getLazies;
         }
 
@@ -106,14 +102,6 @@ namespace Signum.Engine.Processes
             return package;
         }
 
-        protected virtual PackageDN CreatePackage(object[] args)
-        {
-            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
-
-            if (args != null && args.Length > 0)
-                package.Name = args.TryGetArg<string>(0);
-            return package;
-        }
 
         public FinalState Execute(IExecutingProcess executingProcess)
         {
@@ -167,24 +155,37 @@ namespace Signum.Engine.Processes
         }
 
         public int NotificationSteps = 100; 
-
+        protected abstract PackageDN CreatePackage(object[] args);
         public abstract void ExecuteLine(PackageLineDN pl, PackageDN package);
     }
 
-    public class PackageExecuteAlgorithm<T> : PackageAlgorithm<T> where T:class, IIdentifiable
+    public class PackageExecuteAlgorithm<T> : PackageAlgorithm<T> where T : class, IIdentifiable
     {
+        public Enum OperationKey { get; private set; }
+
         public PackageExecuteAlgorithm(Enum operationKey)
-            : base(operationKey)
         {
+            this.OperationKey = operationKey;
         }
 
-        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLazies):base(operationKey, getLazies)
+        public PackageExecuteAlgorithm(Enum operationKey, Func<List<Lite<T>>> getLazies)
+            : base(getLazies)
         {
+            this.OperationKey = operationKey;
         }
 
         public override void ExecuteLine(PackageLineDN pl, PackageDN package)
         {
             OperationLogic.ExecuteLite<T>(pl.Target.ToLite<T>(), OperationKey);
+        }
+
+        protected override PackageDN CreatePackage(object[] args)
+        {
+            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
+
+            if (args != null && args.Length > 0)
+                package.Name = args.TryGetArg<string>(0);
+            return package;
         }
     }
 
@@ -192,13 +193,17 @@ namespace Signum.Engine.Processes
         where T : class, IIdentifiable
         where F : class, IIdentifiable
     {
+        public Enum OperationKey { get; private set; }
+
         public PackageConstructFromAlgorithm(Enum operationKey)
-            : base(operationKey)
         {
+            this.OperationKey = operationKey;
         }
 
-        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLazies):base(operationKey, getLazies)
+        public PackageConstructFromAlgorithm(Enum operationKey, Func<List<Lite<F>>> getLazies)
+            : base(getLazies)
         {
+            this.OperationKey = operationKey;
         }
 
         public override void ExecuteLine(PackageLineDN pl, PackageDN package)
@@ -208,6 +213,15 @@ namespace Signum.Engine.Processes
                 result.Save();
 
             pl.Result = result.ToLite<IIdentifiable>();
+        }
+
+        protected override PackageDN CreatePackage(object[] args)
+        {
+            PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
+
+            if (args != null && args.Length > 0)
+                package.Name = args.TryGetArg<string>(0);
+            return package;
         }
     }
 }
