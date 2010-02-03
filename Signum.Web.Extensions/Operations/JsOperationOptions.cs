@@ -12,15 +12,16 @@ namespace Signum.Web.Operations
         public string Prefix { get; set; }
         public string OperationKey { get; set; }
         public bool? IsLite { get; set; }
-        //public string Type { get; set; }
-        //public int? Id { get; set; }
         public Type ReturnType { get; set; }
         public string ControllerUrl { get; set; }
         public string OnOk { get; set; }
+        public string OnOperationSuccess { get; set; }
+        public string OnCancelled { get; set; }
         public bool? MultiStep { get; set; }
         public bool? NavigateOnSuccess { get; set; }
+        public bool? ClosePopupOnSuccess { get; set; }
         public string ConfirmMessage { get; set; }
-
+        
         public JsOperationOptions()
         {
             renderer = () =>
@@ -38,23 +39,27 @@ namespace Signum.Web.Operations
 
                 if (ReturnType != null)
                     sb.Append("returnType:'{0}',".Formato(ReturnType.Name));
-                //if (Type.HasText())
-                //    sb.Append("type:'{0}',".Formato(Type));
-
-                //if (Id.HasValue)
-                //    sb.Append("id:'{0}',".Formato(Id.Value.ToString()));
-
+                
                 if (ControllerUrl.HasText())
                     sb.Append("controllerUrl:'{0}',".Formato(ControllerUrl));
 
                 if (OnOk.HasText())
                     sb.Append("onOk:{0},".Formato(OnOk));
 
+                if (OnOperationSuccess.HasText())
+                    sb.Append("onOperationSuccess:{0},".Formato(OnOperationSuccess));
+
+                if (OnCancelled.HasText())
+                    sb.Append("onCancelled:{0},".Formato(OnCancelled));
+
                 if (MultiStep == true)
                     sb.Append("multiStep:'{0}',".Formato(MultiStep.Value));
 
                 if (NavigateOnSuccess == true)
                     sb.Append("navigateOnSuccess:'{0}',".Formato(NavigateOnSuccess.Value));
+
+                if (ClosePopupOnSuccess == true)
+                    sb.Append("closePopupOnSuccess:'{0}',".Formato(ClosePopupOnSuccess.Value));
 
                 if (ConfirmMessage.HasText())
                     sb.Append("confirmMsg:'{0}',".Formato(ConfirmMessage));

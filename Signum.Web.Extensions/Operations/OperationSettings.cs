@@ -9,21 +9,24 @@ using System.Web;
 
 namespace Signum.Web.Operations
 {
-    public class ConstructorSettings : WebMenuItem
+    public abstract class OperationSettings : WebMenuItem
+    { 
+        public JsOperationOptions Options { get; set; }
+    }
+
+    public class ConstructorSettings : OperationSettings
     {
         public Func<OperationInfo, HttpContextBase, IdentifiableEntity> Constructor { get; set; }
         public Func<OperationInfo, bool> IsVisible { get; set; }
     }
 
-    public class EntityOperationSettings : WebMenuItem
+    public class EntityOperationSettings : OperationSettings
     {
         public Func<IdentifiableEntity, bool> IsVisible { get; set; }
-        public bool? MultiStep { get; set; }
-        public bool? NavigateOnSuccess { get; set; }
         public bool? Post { get; set; }
     }
 
-    public class ConstructorFromManySettings : WebMenuItem
+    public class ConstructorFromManySettings : OperationSettings
     {
         public Func<ConstructorFromManyEventArgs, HttpContextBase, IdentifiableEntity> Constructor { get; set; }
         public Func<object, OperationInfo, bool> IsVisible { get; set; }

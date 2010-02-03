@@ -150,47 +150,57 @@ namespace Signum.Web.Operations
 
             if (oi.OperationType == OperationType.Execute)
             {
+                EntityOperationSettings eos = os as EntityOperationSettings;
                 return JsOperationBase.Execute(new JsOperationExecutor(new JsOperationOptions
                 {
-                    OperationKey = EnumDN.UniqueKey(oi.Key),
-                    IsLite = oi.Lite,
-                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
-                    ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
-                    //Type = ident.GetType().Name,
-                    //Id = ident.IdOrNull,
-                    MultiStep = ((EntityOperationSettings)os).TryCS(s => s.MultiStep),
-                    NavigateOnSuccess = ((EntityOperationSettings)os).TryCS(s => s.NavigateOnSuccess)
+                    OperationKey = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OperationKey) ?? EnumDN.UniqueKey(oi.Key),
+                    IsLite = eos.TryCC(sett => sett.Options).TryCS(opt => opt.IsLite) ??  oi.Lite,
+                    Prefix = eos.TryCC(sett => sett.Options).TryCC(opt => opt.Prefix) ?? (httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : ""),
+                    ControllerUrl = eos.TryCC(sett => sett.Options).TryCC(opt => opt.ControllerUrl) ?? os.TryCC(set => set.OnServerClickAjax),
+                    ConfirmMessage = eos.TryCC(sett => sett.Options).TryCC(opt => opt.ConfirmMessage),
+                    OnCancelled = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnCancelled),
+                    OnOk = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnOk),
+                    OnOperationSuccess = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnOperationSuccess),
+                    MultiStep = eos.TryCC(sett => sett.Options).TryCS(opt => opt.MultiStep),
+                    NavigateOnSuccess = eos.TryCC(sett => sett.Options).TryCS(opt => opt.NavigateOnSuccess),
+                    ClosePopupOnSuccess = eos.TryCC(sett => sett.Options).TryCS(opt => opt.ClosePopupOnSuccess)
                 })).ToJS();
             }
             else if (oi.OperationType == OperationType.ConstructorFrom)
             {
+                EntityOperationSettings eos = os as EntityOperationSettings;
                 return JsOperationBase.ConstructFrom(new JsOperationConstructorFrom(new JsOperationOptions
                 {
-                    OperationKey = EnumDN.UniqueKey(oi.Key),
-                    IsLite = oi.Lite,
-                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
-                    ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
+                    OperationKey = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OperationKey) ?? EnumDN.UniqueKey(oi.Key),
+                    IsLite = eos.TryCC(sett => sett.Options).TryCS(opt => opt.IsLite) ??  oi.Lite,
+                    Prefix = eos.TryCC(sett => sett.Options).TryCC(opt => opt.Prefix) ?? (httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : ""),
+                    ControllerUrl = eos.TryCC(sett => sett.Options).TryCC(opt => opt.ControllerUrl) ?? os.TryCC(set => set.OnServerClickAjax),
                     ReturnType = oi.ReturnType,
-                    //OperationLogic.ServiceGetConstructorOperationInfos(ident.GetType()).Single(oinfo => oinfo == oi).
-                    //Type = ident.GetType().Name,
-                    //Id = ident.IdOrNull,
-                    MultiStep = ((EntityOperationSettings)os).TryCS(s => s.MultiStep),
-                    NavigateOnSuccess = ((EntityOperationSettings)os).TryCS(s => s.NavigateOnSuccess)
+                    ConfirmMessage = eos.TryCC(sett => sett.Options).TryCC(opt => opt.ConfirmMessage),
+                    OnCancelled = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnCancelled),
+                    OnOk = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnOk),
+                    OnOperationSuccess = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnOperationSuccess),
+                    MultiStep = eos.TryCC(sett => sett.Options).TryCS(opt => opt.MultiStep),
+                    NavigateOnSuccess = eos.TryCC(sett => sett.Options).TryCS(opt => opt.NavigateOnSuccess),
+                    ClosePopupOnSuccess = eos.TryCC(sett => sett.Options).TryCS(opt => opt.ClosePopupOnSuccess)
                 })).ToJS();
             }
             else if (oi.OperationType == OperationType.Delete)
             {
+                EntityOperationSettings eos = os as EntityOperationSettings;
                 return JsOperationBase.Delete(new JsOperationDelete(new JsOperationOptions
                 {
-                    OperationKey = EnumDN.UniqueKey(oi.Key),
-                    IsLite = oi.Lite,
-                    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
-                    ControllerUrl = os.TryCC(set => set.OnServerClickAjax),
-                    //Type = ident.GetType().Name,
-                    //Id = ident.IdOrNull,
-                    MultiStep = ((EntityOperationSettings)os).TryCS(s => s.MultiStep),
-                    NavigateOnSuccess = ((EntityOperationSettings)os).TryCS(s => s.NavigateOnSuccess),
-                    ConfirmMessage = Resources.AreYouSureOfDeletingTheEntity012.Formato(ident.ToStr, Navigator.TypesToURLNames[ident.GetType()], ident.Id)
+                    OperationKey = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OperationKey) ?? EnumDN.UniqueKey(oi.Key),
+                    IsLite = eos.TryCC(sett => sett.Options).TryCS(opt => opt.IsLite) ??  oi.Lite,
+                    Prefix = eos.TryCC(sett => sett.Options).TryCC(opt => opt.Prefix) ?? (httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : ""),
+                    ControllerUrl = eos.TryCC(sett => sett.Options).TryCC(opt => opt.ControllerUrl) ?? os.TryCC(set => set.OnServerClickAjax),
+                    OnCancelled = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnCancelled),
+                    OnOk = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnOk),
+                    OnOperationSuccess = eos.TryCC(sett => sett.Options).TryCC(opt => opt.OnOperationSuccess),
+                    MultiStep = eos.TryCC(sett => sett.Options).TryCS(opt => opt.MultiStep),
+                    NavigateOnSuccess = eos.TryCC(sett => sett.Options).TryCS(opt => opt.NavigateOnSuccess),
+                    ClosePopupOnSuccess = eos.TryCC(sett => sett.Options).TryCS(opt => opt.ClosePopupOnSuccess),
+                    ConfirmMessage = eos.TryCC(sett => sett.Options).TryCC(opt => opt.ConfirmMessage) ?? Resources.AreYouSureOfDeletingTheEntity012.Formato(ident.ToStr, Navigator.TypesToURLNames[ident.GetType()], ident.Id)
                 })).ToJS();
             }
             throw new ApplicationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(oi.OperationType.ToString(), EnumDN.UniqueKey(oi.Key)));
