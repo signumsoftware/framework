@@ -179,7 +179,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMaxException()
         {
-            Assert2.Throws<NullReferenceException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
+            Assert2.Throws<InvalidCastException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -191,7 +191,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMinException()
         {
-            Assert2.Throws<NullReferenceException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
+            Assert2.Throws<InvalidCastException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
         }
 
         [TestMethod]

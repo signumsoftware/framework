@@ -252,6 +252,46 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<ArtistDN>().Select(a => new { a.Name, Count = a.AlbumCount() }).ToArray();
         }
+
+
+        [TestMethod]
+        public void SelectThrowIntNullable()
+        {
+            Assert2.Throws<InvalidCastException>(() =>
+                Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Id).ToArray());
+        }
+
+        [TestMethod]
+        public void SelectThrowBoolNullable()
+        {
+            Assert2.Throws<InvalidCastException>(() =>
+                Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Dead).ToArray());
+        }
+        
+        [TestMethod]
+        public void SelectThrowEnumNullable()
+        {
+            Assert2.Throws<InvalidCastException>(() =>
+                Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Sex).ToArray());
+        }
+
+        [TestMethod]
+        public void SelectIntNullable()
+        {
+            Database.Query<AlbumDN>().Select(a => (int?)((ArtistDN)a.Author).Id).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectBoolNullable()
+        {
+            Database.Query<AlbumDN>().Select(a => (bool?)((ArtistDN)a.Author).Dead).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectEnumNullable()
+        {
+            Database.Query<AlbumDN>().Select(a => (Sex?)((ArtistDN)a.Author).Sex).ToArray();
+        }
     }
 
     public static class AuthorExtensions

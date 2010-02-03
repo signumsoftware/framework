@@ -888,7 +888,7 @@ namespace Signum.Engine.Linq
                     FieldInfo fi = Reflector.FindFieldInfo(fie.Type, m.Member, false);
 
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
-                        return fie.ExternalId;
+                        return fie.ExternalId.UnNullify();
 
                     if (fie.TableAlias == null)
                     {

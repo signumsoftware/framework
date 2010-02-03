@@ -80,6 +80,15 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
         [DebuggerStepThrough]
+        public static Expression UnNullify(this Expression expression)
+        {
+            Type type = expression.Type.UnNullify();
+            if (expression.Type != type)
+                return Expression.Convert(expression, type);
+            return expression;
+        }
+
+        [DebuggerStepThrough]
         public static Expression GetArgument(this MethodCallExpression mce, string parameterName)
         {
             int index = Array.FindIndex(mce.Method.GetParameters(), p => p.Name == parameterName);

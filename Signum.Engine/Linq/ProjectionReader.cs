@@ -65,9 +65,15 @@ namespace Signum.Engine.Linq
         {
             if (this.alias == alias)
             {
-                S result = ReflectionTools.ChangeType<S>(currentRow.IsNull(name) ? null: currentRow[name]);
-
-                return result;
+                object value = currentRow.IsNull(name) ? null : currentRow[name];
+                try
+                {
+                    return ReflectionTools.ChangeType<S>(value);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidCastException("Impossible to convert the value of {0}.{1} ({2}) to {3}".Formato(alias, name, value.TryToString() ?? "null", typeof(S)));
+                }
             }
             return previous.GetValue<S>(alias, name); 
         }

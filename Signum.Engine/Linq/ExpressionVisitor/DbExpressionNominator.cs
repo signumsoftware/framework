@@ -301,7 +301,7 @@ namespace Signum.Engine.Linq
             if (operand != u.Operand)
                 u = Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
 
-            if (candidates.Contains(operand) && (u.NodeType != ExpressionType.Convert || u.Operand.Type.UnNullify() == u.Type.UnNullify() || IsFullNominate))
+            if (candidates.Contains(operand))
                 candidates.Add(u);
 
             return u;
