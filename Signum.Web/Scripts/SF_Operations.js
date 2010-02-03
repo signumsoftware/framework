@@ -5,8 +5,11 @@
         isLite: false,
         controllerUrl: null,
         onOk: null,
+        onCancelled: null,
+        onOperationSuccess: null,
         multiStep: false,
         navigateOnSuccess: false,
+        closePopupOnSuccess: false,
         confirmMsg: null
     }, _options);
 };
@@ -43,8 +46,7 @@ OperationManager.prototype = {
                      + qp("sfOperationFullKey", this.options.operationKey)
                      + qp(sfPrefix, newPrefix)
                      + qp("sfOldPrefix", this.options.prefix)
-                     + qp("sfOnOk", singleQuote(this.options.onOk))
-                     + qp("sfOnCancel", singleQuote(this.options.onCancel));
+                     + qp("sfOnOk", singleQuote(this.options.onOk));
 
         return formChildren;
     },
@@ -141,7 +143,8 @@ var OperationExecutor = function(_options) {
                     new ViewNavigator({
                         prefix: newPrefix,
                         containerDiv: newPrefix + "externalPopupDiv",
-                        onOk: self.options.onOk
+                        onOk: self.options.onOk,
+                        onCancelled: self.options.onCancelled
                     }).viewSave(operationResult);
                     return;
                 }
@@ -149,12 +152,21 @@ var OperationExecutor = function(_options) {
                 if (empty(self.options.prefix)) //NormalWindow
                     $("#content").html(operationResult.substring(operationResult.indexOf("<form"), operationResult.indexOf("</form>") + 7));
                 else { //PopupWindow
-                    new ViewNavigator({
-                        prefix: newPrefix,
-                        containerDiv: newPrefix + "externalPopupDiv",
-                        onOk: self.options.onOk
-                    }).viewSave(operationResult);
+                    if (self.options.closePopupOnSuccess) {
+                        $('#' + newPrefix + "externalPopupDiv").remove();
+                    }
+                    else {
+                        new ViewNavigator({
+                            prefix: newPrefix,
+                            containerDiv: newPrefix + "externalPopupDiv",
+                            onOk: self.options.onOk,
+                            onCancelled: self.options.onCancelled
+                        }).viewSave(operationResult);
+                    }
                 }
+
+                if (!empty(self.options.onOperationSuccess))
+                    self.options.onOperationSuccess();
 
                 NotifyInfo(lang['operationExecuted'], 2000);
             },
@@ -166,7 +178,9 @@ var OperationExecutor = function(_options) {
 
 OperationExecutor.prototype = new OperationManager();
 
-function OperationExecute(executor) {
+function OperationExecute(executor, prefix) {
+    if (!empty(prefix))
+        executor.options = $.extend(executor.options, { prefix: prefix });
     executor.execute();
 }
 
@@ -202,8 +216,8 @@ var ConstructorFrom = function(_options) {
             async: false,
             dataType: "html",
             success: function(operationResult) {
-            if (!self.executedSuccessfully(operationResult)) {
-                NotifyInfo(lang['error'], 2000);
+                if (!self.executedSuccessfully(operationResult)) {
+                    NotifyInfo(lang['error'], 2000);
                     return;
                 }
 
@@ -212,10 +226,19 @@ var ConstructorFrom = function(_options) {
                     return;
                 }
 
-                var navigator = new ViewNavigator({ prefix: self.newPrefix(), type: self.options.returnType }).showCreateSave(operationResult);
+                var navigator = new ViewNavigator({
+                    prefix: self.newPrefix(),
+                    type: self.options.returnType,
+                    onOk: self.options.onOk,
+                    onCancelled: self.options.onCancelled
+                }).showCreateSave(operationResult);
                 //$(self.pf("divASustituir")).html(operationResult);
                 //new popup().show(self.options.prefix + "divASustituir");
                 //$('#' + self.options.prefix + sfBtnCancel).click(empty(self.options.onCancel) ? (function() { $('#' + self.options.prefix + "divASustituir").html(""); }) : self.options.onCancel);
+
+                if (!empty(self.options.onOperationSuccess))
+                    self.options.onOperationSuccess();
+
                 NotifyInfo(lang['operationExecuted'], 2000);
             },
             error:
@@ -260,8 +283,8 @@ var DeleteExecutor = function(_options) {
             async: false,
             dataType: "html",
             success: function(operationResult) {
-            if (!self.executedSuccessfully(operationResult)) {
-                NotifyInfo(lang['error'], 2000);
+                if (!self.executedSuccessfully(operationResult)) {
+                    NotifyInfo(lang['error'], 2000);
                     return;
                 }
 
@@ -269,6 +292,9 @@ var DeleteExecutor = function(_options) {
                     PostServer(operationResult);
                     return;
                 }
+
+                if (!empty(self.options.onOperationSuccess))
+                    self.options.onOperationSuccess();
 
                 NotifyInfo(lang['operationExecuted'], 2000);
             },
@@ -288,6 +314,7 @@ function ConstructFromManyExecute(urlController, typeName, operationKey, prefix,
     var ids = GetSelectedElements(prefix);
     if (ids == "") return;
     var newPrefix = prefix + "_New";
+    var self = this;
     $.ajax({
         type: "POST",
         url: urlController,
@@ -296,9 +323,9 @@ function ConstructFromManyExecute(urlController, typeName, operationKey, prefix,
         dataType: "html",
         success: function(msg) {
             $('#' + prefix + "divASustituir").html(msg);
-            new popup().show(self.options.prefix + "divASustituir");
+            new popup().show(prefix + "divASustituir");
             $('#' + newPrefix + sfBtnOk).click(onOk);
-            $('#' + newPrefix + sfBtnCancel).click(empty(onCancel) ? (function() { $('#' + prefix + "divASustituir").html(""); }) : onCancel);
+            $('#' + newPrefix + sfBtnCancel).click(function() { $('#' + prefix + "divASustituir").html(""); if (onCancel != null) onCancel(); });
         }
     });
 }
