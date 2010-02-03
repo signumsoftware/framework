@@ -132,11 +132,25 @@ namespace Signum.Web.Extensions
                             break;
 
                         case WikiFormat.QueryLink:
-                            Enum query = (Enum)QueryLogic.ToQueryName(link, false);
-                            result = new WikiLink(
-                                query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityCleanType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
-                                text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
-                                query != null ? "" : "unavailable").ToHtmlString();
+                            object o = QueryLogic.ToQueryName(link, false);
+                            if (o as Enum != null)
+                            {
+                                Enum query = (Enum)o;
+                                result = new WikiLink(
+                                    query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityCleanType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
+                                    text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
+                                    query != null ? "" : "unavailable").ToHtmlString();
+                            }
+                            else
+                            {
+                                Type query = (Type)o;
+                                result = new WikiLink(
+                                    query != null ? (HelpLogic.EntityUrl(query) + "#" + "q-" + query.FullName.Replace(".", "_")) : link,
+                                    text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
+                                    query != null ? "" : "unavailable").ToHtmlString();
+
+                                //Treat as entity
+                            }
                             break;
 
                         case WikiFormat.WikiLink:
