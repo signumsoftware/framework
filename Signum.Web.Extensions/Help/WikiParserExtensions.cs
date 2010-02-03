@@ -200,12 +200,12 @@ namespace Signum.Web.Extensions
 
             // Replacing lists
             postLinks = Regex.Replace(postLinks,
-     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
+     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*]?)",
      "<li>${content}</li>",
      RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
-     "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#])",
+     "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#]?)",
      "<oli>${content}</oli>",
      RegexOptions.Compiled);
 
@@ -223,7 +223,22 @@ RegexOptions.Compiled);
 "(?<content>oli\\>{1})",
 "li>",
 RegexOptions.Compiled);
-             
+
+    // Assign the replace method to the MatchEvaluator delegate.
+    MatchEvaluator meTitle = new MatchEvaluator(ReplaceTitle);
+
+
+     // Replacing titles
+     postLinks = Regex.Replace(postLinks,
+     "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})",
+     meTitle,
+     RegexOptions.Compiled);
+
+            //Remove multiple breakline
+     postLinks = Regex.Replace(postLinks,
+    "(?<content>\n{2,})","\n",
+    RegexOptions.Compiled);
+
 /*     postLinks = Regex.Replace(postLinks,
      "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
      "<li1>${content}</li1>",
@@ -256,7 +271,12 @@ RegexOptions.Compiled);
           //  postLinks = Parse(postLinks, "'''", "<b>", "</b>");
           //  postLinks = Parse(postLinks, "''", "<i>", "</i>"); 
            // postLinks = WikiMarkupToHtml(postLinks);
-            return postLinks;
+            return postLinks.Trim();
+        }
+
+        public static string ReplaceTitle(Match m)
+        {
+            return "<h" + m.Groups["begin"].Length + ">" + m.Groups["content"].ToString() + "</h" + m.Groups["end"].Length + ">";
         }
 
         public static string Parse(string text, string token, string first, string last)
