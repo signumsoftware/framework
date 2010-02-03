@@ -51,8 +51,19 @@ namespace Signum.Web
 
             sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(prefix, EntityBaseKeys.Entity)));
 
+            sb.AppendLine(RenderPopupContent<T>(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
+
+            sb.AppendLine("</div>");
+
+            return sb.ToString();
+        }
+
+        public static string RenderPopupContent<T>(HtmlHelper helper, string prefix, TypeContext<T> typeContext, EntityBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
+        {
+            StringBuilder sb = new StringBuilder();
+
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
-            
+
             TypeContext tc = typeContext;
             if (isLite)
                 tc = typeContext.ExtractLite();
@@ -68,9 +79,35 @@ namespace Signum.Web
             using (var sc = StyleContext.RegisterCleanStyleContext(true))
                 sb.AppendLine(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
 
-            sb.AppendLine("</div>");
+            return sb.ToString();
+        }
+
+        public static string RenderContent<T>(HtmlHelper helper, string prefix, TypeContext<T> typeContext, EntityBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
+
+            TypeContext tc = typeContext;
+            if (isLite)
+                tc = typeContext.ExtractLite();
+
+            ViewDataDictionary vdd = new ViewDataDictionary(tc)
+            { 
+                { ViewDataKeys.MainControlUrl, helper.ParentPrefix() }
+            };
+            helper.PropagateSFKeys(vdd);
+            if (settings.ReloadOnChange)
+                vdd[ViewDataKeys.Reactive] = true;
+
+            sb.AppendLine(helper.RenderPartialToString(settings.PartialViewName ?? es.PartialViewName, vdd));
 
             return sb.ToString();
+        }
+
+        public static string JsEscape(string input)
+        {
+            return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
         }
 
         public static string WriteImplementations(HtmlHelper helper, EntityBase settings, string prefix)

@@ -179,17 +179,19 @@ namespace Signum.Web
                                                               entityIdFieldName + 
                                                               "', event); {0}".Formato(Utils.Specify(AutoKeyDowned)) }, 
                         }));
-            sb.AppendLine("<script type=\"text/javascript\">CreateAutocomplete('" + ddlName + 
-                                                              "','" + extendedControlName + 
-                                                              "','" + entityTypeName + 
+            sb.AppendLine("<script type=\"text/javascript\">" + "CreateAutocomplete('" + ddlName +
+                                                              "','" + extendedControlName +
+                                                              "','" + entityTypeName +
                                                               "','" + implementations +
-                                                              "','" + entityIdFieldName + 
+                                                              "','" + entityIdFieldName +
                                                               "','" + controllerUrl +
                                                               "'," + numCharacters +
                                                               "," + numResults +
                                                               "," + delayMiliseconds +
                                                               "," + AutoKeyDowned +
-                                                              ");</script>");
+                                                              ");" +
+                                                              "</script>"
+                                                              );
             return sb.ToString();
         }
 

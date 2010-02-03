@@ -5,10 +5,10 @@ using System.Text;
 using Signum.Entities;
 using System.Windows;
 using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Test
 {
-
     [Serializable]
     public class NoteDN : Entity
     {
@@ -273,6 +273,13 @@ namespace Signum.Test
         {
             get { return songs; }
             set { Set(ref songs, value, () => Songs); }
+        }
+
+        SongDN bonusTrack;
+        public SongDN BonusTrack
+        {
+            get { return bonusTrack; }
+            set { Set(ref bonusTrack, value, () => BonusTrack); }
         }
 
         LabelDN label;

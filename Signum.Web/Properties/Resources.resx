@@ -246,4 +246,7 @@
   <data name="ExpressionCannotFinishWithAnTypeWithImplementations0" xml:space="preserve">
     <value>Expression cannot finish with an type with implementations {{0}}</value>
   </data>
+  <data name="EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0" xml:space="preserve">
+    <value>EntityCombo can only be done for an identifiable or a lite, not for {0}</value>
+  </data>
 </root>

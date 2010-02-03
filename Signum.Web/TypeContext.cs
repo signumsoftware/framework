@@ -294,6 +294,11 @@ namespace Signum.Web
         {
             get { return PropertyRoute.Root(typeof(T)); }
         }
+
+        internal virtual TypeContextExpression CreateExpression()
+        {
+            return new TypeContextExpression(new PropertyInfo[0], typeof(T));
+        }
     }
     #endregion
 
@@ -333,6 +338,11 @@ namespace Signum.Web
                 return route;
             }
         }
+
+        internal override TypeContextExpression CreateExpression()
+        {
+            return new TypeSubContextExpression(new PropertyInfo[0], PropertyRoute);
+        }
     }
     #endregion
 
@@ -358,6 +368,16 @@ namespace Signum.Web
             {
                 return TypeContext.Compose(Parent.Name, Index.ToString());
             }
+        }
+
+        public override PropertyRoute PropertyRoute
+        {
+            get { return route; }
+        }
+
+        internal override TypeContextExpression CreateExpression()
+        {
+            return new TypeElementContextExpression(new PropertyInfo[0], PropertyRoute, Index);
         }
     }
     #endregion

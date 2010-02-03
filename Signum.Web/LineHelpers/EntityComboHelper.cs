@@ -30,7 +30,10 @@ namespace Signum.Web
             Type cleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T); //typeContext.ContextType;
             bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(typeof(T));
             bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
-            
+
+            if (!isIdentifiable && !isLite)
+                throw new ApplicationException(Resources.EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0.Formato(cleanStaticType));
+
             Type cleanRuntimeType = null;
             if (value != null)
                 cleanRuntimeType = typeof(Lite).IsAssignableFrom(value.GetType()) ? (value as Lite).RuntimeType : value.GetType();
@@ -41,74 +44,71 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings, TypeContext.Compose(prefix, EntityComboKeys.Combo)));
 
-            if (isIdentifiable || isLite)
+            sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(value) { Ticks = ticks }));
+
+            if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
+                sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
+            else if (value != null)
+                sb.AppendLine(helper.Div(TypeContext.Compose(prefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+
+            if (settings.Implementations != null)
+                throw new ApplicationException("Types with Implementations are not allowed for EntityCombo yet");
+
+            if (StyleContext.Current.ReadOnly)
+                sb.AppendLine(helper.Span(prefix, (value != null) ? value.ToString() : "", "valueLine"));
+            else
             {
-                sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(value) { Ticks = ticks }));
-
-                if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
-                    sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
-                else if (value != null)
-                    sb.AppendLine(helper.Div(TypeContext.Compose(prefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
-
-                if (settings.Implementations != null)
-                    throw new ApplicationException("Types with Implementations are not allowed for EntityCombo yet");
-
-                if (StyleContext.Current.ReadOnly)
-                    sb.AppendLine(helper.Span(prefix, (value != null) ? value.ToString() : "", "valueLine"));
-                else
+                List<SelectListItem> items = new List<SelectListItem>();
+                items.Add(new SelectListItem() { Text = "-", Value = "" });
+                if (settings.Preload)
                 {
-                    List<SelectListItem> items = new List<SelectListItem>();
-                    items.Add(new SelectListItem() { Text = "-", Value = "" });
-                    if (settings.Preload)
+                    if (settings.Data != null)
                     {
-                        if (settings.Data != null)
-                        {
-                            items.AddRange(
-                                settings.Data.Select(lite => new SelectListItem()
-                                    {
-                                        Text = lite.ToString(),
-                                        Value = lite.Id.ToString(),
-                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
-                                    })
-                                );
-                        }
-                        else
-                        {
-                            items.AddRange(
-                                Database.RetrieveAllLite(cleanStaticType)
-                                    .Select(lite => new SelectListItem()
-                                    {
-                                        Text = lite.ToString(),
-                                        Value = lite.Id.ToString(),
-                                        Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
-                                    })
-                                );
-                        }
-                    }
-
-                    settings.ComboHtmlProperties.Add("class","valueLine");
-
-                    if (settings.ComboHtmlProperties.ContainsKey("onchange"))
-                        throw new ApplicationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
-
-                    settings.ComboHtmlProperties.Add("onchange", "EComboOnChanged({0});".Formato(settings.ToJS()));
-
-                    if (settings.Size == 0)
-                    {
-                        sb.AppendLine(helper.DropDownList(
-                            TypeContext.Compose(prefix, EntityComboKeys.Combo),
-                            items,
-                            settings.ComboHtmlProperties));
+                        items.AddRange(
+                            settings.Data.Select(lite => new SelectListItem()
+                                {
+                                    Text = lite.ToString(),
+                                    Value = lite.Id.ToString(),
+                                    Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
+                                })
+                            );
                     }
                     else
                     {
-                        settings.Size = Math.Min(settings.Size, items.Count - 1);
-                        string attributes = settings.ComboHtmlProperties != null ? (" " + settings.ComboHtmlProperties.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
-                        sb.AppendLine("<select id='{0}' name='{0}' size='{1}' class='entityList'{2}>".Formato(TypeContext.Compose(prefix, EntityComboKeys.Combo), settings.Size, attributes));
-                        for(int i = 1; i<items.Count; i++)
-                            sb.AppendLine("<option value='{0}'{1}>{2}</option>".Formato(items[i].Value, items[i].Selected ? " selected='selected'" : "", items[i].Text));
-                        sb.AppendLine("</select>");
+                        items.AddRange(
+                            Database.RetrieveAllLite(cleanStaticType)
+                                .Select(lite => new SelectListItem()
+                                {
+                                    Text = lite.ToString(),
+                                    Value = lite.Id.ToString(),
+                                    Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
+                                })
+                            );
                     }
+                }
+
+                settings.ComboHtmlProperties.Add("class","valueLine");
+
+                if (settings.ComboHtmlProperties.ContainsKey("onchange"))
+                    throw new ApplicationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
+
+                settings.ComboHtmlProperties.Add("onchange", "EComboOnChanged({0});".Formato(settings.ToJS()));
+
+                if (settings.Size == 0)
+                {
+                    sb.AppendLine(helper.DropDownList(
+                        TypeContext.Compose(prefix, EntityComboKeys.Combo),
+                        items,
+                        settings.ComboHtmlProperties));
+                }
+                else
+                {
+                    settings.Size = Math.Min(settings.Size, items.Count - 1);
+                    string attributes = settings.ComboHtmlProperties != null ? (" " + settings.ComboHtmlProperties.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+                    sb.AppendLine("<select id='{0}' name='{0}' size='{1}' class='entityList'{2}>".Formato(TypeContext.Compose(prefix, EntityComboKeys.Combo), settings.Size, attributes));
+                    for(int i = 1; i<items.Count; i++)
+                        sb.AppendLine("<option value='{0}'{1}>{2}</option>".Formato(items[i].Value, items[i].Selected ? " selected='selected'" : "", items[i].Text));
+                    sb.AppendLine("</select>");
                 }
             }
 

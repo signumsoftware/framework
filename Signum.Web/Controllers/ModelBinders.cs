@@ -46,7 +46,7 @@ namespace Signum.Web.Controllers
 
             ImplementedByAttribute ib = (ImplementedByAttribute)implementations;
             return ib.ImplementedTypes
-                .Select(t => Navigator.TypesToURLNames.TryGetC(t))
+                .Select(t => Navigator.Manager.TypesToURLNames.TryGetC(t))
                 .NotNull()
                 .ToString(";");
         }
@@ -58,7 +58,7 @@ namespace Signum.Web.Controllers
             if (implementations == "[All]")
                 return new ImplementedByAllAttribute();
             else
-                return new ImplementedByAttribute(implementations.Split(';').Select(tn => Navigator.NameToType.TryGetC(tn)).NotNull().ToArray());
+                return new ImplementedByAttribute(implementations.Split(';').Select(tn => Navigator.Manager.URLNamesToTypes.TryGetC(tn)).NotNull().ToArray());
         }
     }
 }

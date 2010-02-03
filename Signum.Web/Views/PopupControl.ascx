@@ -10,8 +10,8 @@
     if(Model is TypeContext)
     {
         TypeContext tc = (TypeContext)Model;
-        popupTitle = tc.UntypedValue.ToString();
-        typeNiceName = tc.UntypedValue.GetType().NiceName();
+        popupTitle = tc.UntypedValue.TryToString();
+        typeNiceName = tc.UntypedValue.TryCC(uv => uv.GetType()).TryCC(t => t.NiceName());
     }
     else
     { 

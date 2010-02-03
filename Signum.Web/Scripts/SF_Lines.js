@@ -86,7 +86,13 @@ EBaseLine.prototype = {
         log("EBaseline create");
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EBaseline typedCreate. Call create instead";
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        new ViewNavigator(viewOptions).createOk();
+        var template = window[this.options.prefix + "_sfTemplate"];
+        if (!empty(template)) { //Template pre-loaded: In case of a list, it will be created with "_0" itemprefix => replace it with the current one
+            template = template.replace(new RegExp("\"" + this.options.prefix + "_0", "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix + "_0", "gi"), "'" + viewOptions.prefix);
+            new ViewNavigator(viewOptions).showCreateOk(template);
+        }
+        else
+            new ViewNavigator(viewOptions).createOk();
     },
 
     find: function(_findOptions) {
@@ -141,12 +147,24 @@ EBaseLine.prototype = {
         if (hasEntity == true) {
             if (link.html() == "")
                 link.html("&nbsp;");
-            txt.hide(); btnCreate.hide(); btnFind.hide();
-            link.show(); btnRemove.show(); btnView.show();
+            if (link.length > 0) {
+                txt.hide();
+                link.show();
+            }
+            else
+                txt.show();
+            btnCreate.hide(); btnFind.hide();
+            btnRemove.show(); btnView.show();
         }
         else {
-            link.hide(); btnRemove.hide(); btnView.hide();
-            txt.show(); btnCreate.show(); btnFind.show();
+            if (link.length > 0) {
+                link.hide();
+                txt.show();
+            }
+            else
+                txt.hide();
+            btnRemove.hide(); btnView.hide();
+            btnCreate.show(); btnFind.show();
         }
     }
 };
@@ -280,7 +298,13 @@ var EDLine = function(_edlineOptions) {
     log("EDLine create");
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EDLine typedCreate. Call create instead";
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        new ViewNavigator(viewOptions).viewEmbedded();
+        var template = window[this.options.prefix + "_sfTemplate"];
+        if (!empty(template)) { //Template pre-loaded: EmbeddedEntity
+            $('#' + viewOptions.containerDiv).html(template);
+        }
+        else{
+            new ViewNavigator(viewOptions).viewEmbedded();
+        }
         this.onCreated(viewOptions.type);
     };
     
@@ -376,7 +400,7 @@ var EList = function(_elistOptions) {
     };
 
     this.extraJsonParams = function(itemPrefix) {
-        log("EBaseLine extraJsonParams");
+    log("EList extraJsonParams");
         var extraParams = new Object();
 
         //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
@@ -647,10 +671,18 @@ var ERep = function(_erepOptions) {
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in ERep typedCreate. Call create instead";
         if (!this.canAddItems()) return;
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        var self = this;
-        new ViewNavigator(viewOptions).createEmbedded(function(newHtml) {
-            self.onItemCreated(newHtml, viewOptions);
-        });
+        var template = window[this.options.prefix + "_sfTemplate"];
+        if (!empty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
+            template = template.replace(new RegExp("\"" + this.options.prefix + "_0", "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix + "_0", "gi"), "'" + viewOptions.prefix);
+            this.onItemCreated(template, viewOptions);
+        }
+        else {
+
+            var self = this;
+            new ViewNavigator(viewOptions).createEmbedded(function(newHtml) {
+                self.onItemCreated(newHtml, viewOptions);
+            });
+        }
     };
 
     this.viewOptionsForCreating = function(_viewOptions) {
@@ -667,8 +699,8 @@ var ERep = function(_erepOptions) {
     };
 
     this.onItemCreated = function(newHtml, viewOptions) {
-    log("ERep onItemCreated");
-    if (empty(viewOptions.type)) throw "ViewOptions type parameter must not be null in ERep onItemCreated";
+        log("ERep onItemCreated");
+        if (empty(viewOptions.type)) throw "ViewOptions type parameter must not be null in ERep onItemCreated";
         var itemPrefix = viewOptions.prefix;
         this.newRepItem(newHtml, viewOptions.type, itemPrefix);
         this.fireOnEntityChanged();
@@ -681,7 +713,7 @@ var ERep = function(_erepOptions) {
         var itemInfoValue = this.itemEntityInfo(itemPrefix).createValue(listInfo.staticType(), runtimeType, '', listInfo.isEmbedded(), 'n', '');
         $(this.pf(sfItemsContainer)).append("\n" +
         "<div id='" + itemPrefix + sfRepeaterItem + "' name='" + itemPrefix + sfRepeaterItem + "' class='repeaterElement'>\n" +
-        "<a id='" + itemPrefix + "_btnRemove' title='" + this.options.removeItemLinkText + "' href=\"javascript:ERepOnRemoving(new ERep({prefix:'" + this.options.prefix + "', onEntityChanged:"+(empty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged)+"}), '" + itemPrefix + "');\" class='lineButton remove'>" + this.options.removeItemLinkText + "</a>\n" +
+        "<a id='" + itemPrefix + "_btnRemove' title='" + this.options.removeItemLinkText + "' href=\"javascript:ERepOnRemoving(new ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (empty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}), '" + itemPrefix + "');\" class='lineButton remove'>" + this.options.removeItemLinkText + "</a>\n" +
         hiddenInput(itemPrefix + sfInfo, itemInfoValue) +
         //hiddenInput(itemPrefix + sfIndex, (parseInt(lastIndex)+1) + "\" />\n" +
         "<div id='" + itemPrefix + sfEntity + "' name='" + itemPrefix + sfEntity + "'>\n" +
@@ -702,17 +734,17 @@ var ERep = function(_erepOptions) {
     };
 
     this.find = function(_findOptions, _viewOptions) {
-    log("ERep find");
+        log("ERep find");
         var _self = this;
         var type = this.getRuntimeType(function(type) {
             _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
         });
     };
-    
+
     this.typedFind = function(_findOptions, _viewOptions) {
-    log("ERep typedFind");
-    if (empty(_findOptions.queryUrlName)) throw "FindOptions queryUrlName parameter must not be null in ERep typedFind. Call find instead";
-    if (!this.canAddItems()) return;
+        log("ERep typedFind");
+        if (empty(_findOptions.queryUrlName)) throw "FindOptions queryUrlName parameter must not be null in ERep typedFind. Call find instead";
+        if (!this.canAddItems()) return;
         var findOptions = this.createFindOptions(_findOptions, _viewOptions);
         new FindNavigator(findOptions).openFinder();
     },
@@ -788,7 +820,14 @@ var EDList = function(_edlistOptions) {
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EDList typedCreate. Call create instead";
         this.restoreCurrent();
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        new ViewNavigator(viewOptions).viewEmbedded();
+        var template = window[this.options.prefix + "_sfTemplate"];
+        if (!empty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
+            template = template.replace(new RegExp("\"" + this.options.prefix + "_0", "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix + "_0", "gi"), "'" + viewOptions.prefix);
+            $('#' + viewOptions.containerDiv).html(template);
+        }
+        else {
+            new ViewNavigator(viewOptions).viewEmbedded();
+        }
         this.onItemCreated(viewOptions);
     };
 
@@ -930,7 +969,7 @@ var EDList = function(_edlistOptions) {
     };
 
     this.EDListRemove = function() {
-    log("EDList EDListRemove");
+        log("EDList EDListRemove");
         var selectedItemPrefix = this.selectedItemPrefix();
         if (empty(selectedItemPrefix))
             return;

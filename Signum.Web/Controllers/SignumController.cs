@@ -91,18 +91,11 @@ namespace Signum.Web.Controllers
                 }
             }
 
+            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
+                throw new ApplicationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
+
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
-
-            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-            {
-                this.ViewData[ViewDataKeys.WriteSFInfo] = true;
-
-                Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
-                TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(this, Request.Form, entity, ref prefix), new PropertyInfo[] { } });
-
-                return Navigator.PopupView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
-            }
 
             return Navigator.PopupView(this, entity, prefix, sfUrl);
         }
@@ -140,15 +133,7 @@ namespace Signum.Web.Controllers
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-            {
-                this.ViewData[ViewDataKeys.WriteSFInfo] = true;
-
-                //Type ts = typeof(TypeSubContext<>).MakeGenericType(new Type[] { entity.GetType() });
-                //TypeContext tc = (TypeContext)Activator.CreateInstance(ts, new object[] { entity, Modification.GetTCforEmbeddedEntity(Request.Form, entity, ref prefix), new PropertyInfo[]{} });
-                string prefixClon = prefix;
-                TypeContext tc = Modification.GetTCforEmbeddedEntity(this, Request.Form, entity, ref prefixClon);
-                return Navigator.PartialView(this, tc, "", sfUrl); //No prefix as its info is in the TypeContext
-            }
+                throw new ApplicationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
 
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }

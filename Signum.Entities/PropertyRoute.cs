@@ -88,7 +88,7 @@ namespace Signum.Entities
                 throw new ArgumentNullException("type");
 
             if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new ArgumentException("type must be a Type inhriting IdentitiableEntity");
+                throw new ArgumentException("type must be a Type inheriting IdentitiableEntity");
 
             this.type = type;
             this.PropertyRouteType = PropertyRouteType.Root;

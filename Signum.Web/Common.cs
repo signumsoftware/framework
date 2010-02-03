@@ -50,10 +50,17 @@ namespace Signum.Web
             {
                 PropertyRoute route = context.PropertyRoute;
 
-                if (Reflector.IsMList(context.Type)) //if (eb is EntityList)
+                if (Reflector.IsMList(context.Type))
                     route = route.Add("Item");
 
                 eb.Implementations = Schema.Current.FindImplementations(route);
+
+                if (eb.Implementations != null && eb.Implementations.IsByAll)
+                {
+                    EntityLine el = eb as EntityLine;
+                    if (el != null)
+                        el.Autocomplete = false;
+                }
             }
         }
 
@@ -130,7 +137,8 @@ namespace Signum.Web
     { 
         TypeContext,
         AbstractContext,
-        TypeSubContext
+        TypeSubContext,
+        TypeElementContext
     }
 
     class TypeContextExpression : Expression
@@ -142,8 +150,13 @@ namespace Signum.Web
         {
             this.Properties = properties;
 
-            if (!Schema.Current.Tables.ContainsKey(type))
+            if (!IsConcrete(type))
                 throw new InvalidOperationException(Web.Properties.Resources.Type0HasToBeInTheSchema.Formato(type)); 
+        }
+
+        bool IsConcrete(Type type)
+        {
+            return Schema.Current.FindImplementations(PropertyRoute.Root(type)) == null || typeof(EmbeddedEntity).IsAssignableFrom(type);
         }
 
         protected TypeContextExpression(PropertyInfo[] properties, Type type, TypeContextNodeType nodeType)
@@ -169,6 +182,11 @@ namespace Signum.Web
         {
             get { return PropertyRoute.Root(Type); }
         }
+
+        protected internal virtual TypeContext<T> CreateTypeContext<T>(TypeContext parent, T value)
+        {
+            return new TypeContext<T>(value, TypeContext.Compose(parent.Name, Properties.Select(a => a.Name)));
+        }
     }
 
     class AbstractContextExpression : TypeContextExpression
@@ -183,6 +201,11 @@ namespace Signum.Web
         public override PropertyRoute Route
         {
             get { throw new InvalidOperationException(Web.Properties.Resources.AbstractContextHasNotRoute); }
+        }
+
+        protected internal override TypeContext<T> CreateTypeContext<T>(TypeContext parent, T value)
+        {
+            throw new InvalidOperationException(Web.Properties.Resources.ExpressionCannotFinishWithAnTypeWithImplementations0.Formato(typeof(T)));
         }
     }
 
@@ -199,6 +222,34 @@ namespace Signum.Web
         {
             this.route = route;
         }
+
+         protected internal override TypeContext<T> CreateTypeContext<T>(TypeContext parent, T value)
+         {
+             return new TypeSubContext<T>(value, parent, Properties, Route); 
+         }
+    }
+
+    class TypeElementContextExpression : TypeContextExpression
+    { 
+        private PropertyRoute route;
+        public override PropertyRoute Route
+        {
+            get { return route; }
+        }
+
+        int index;
+
+        public TypeElementContextExpression(PropertyInfo[] properties, PropertyRoute route, int index)
+            :base(properties, route.Type, TypeContextNodeType.TypeElementContext)
+        {
+            this.route = route;
+            this.index = index;
+        }
+
+        protected internal override TypeContext<T> CreateTypeContext<T>(TypeContext parent, T value)
+        {
+            return new TypeElementContext<T>(value, parent, index);
+        }
     }
     
     internal class MemberAccessGatherer : ExpressionVisitor
@@ -209,20 +260,14 @@ namespace Signum.Web
         {
             var mag = new MemberAccessGatherer()
             {
-                replacements = { { lambda.Parameters[0], (tc is TypeSubContext<T>) ? 
-                                     new TypeSubContextExpression(new PropertyInfo[0], tc.PropertyRoute) :
-                                     new TypeContextExpression(new PropertyInfo[0], typeof(T)) } }
+                replacements = { { lambda.Parameters[0], tc.CreateExpression() } }
             };
 
             TypeContextExpression result = Cast(mag.Visit(lambda.Body));
 
             S value = lambda.Compile()(tc.Value);
 
-            if (result is TypeSubContextExpression)
-                return new TypeSubContext<S>(value, tc, result.Properties, ((TypeSubContextExpression)result).Route); 
-            if (result is AbstractContextExpression)
-                throw new InvalidOperationException(Properties.Resources.ExpressionCannotFinishWithAnTypeWithImplementations0.Formato(lambda.NiceToString()));
-            return new TypeContext<S>(value, TypeContext.Compose(tc.Name, result.Properties.Select(a => a.Name)));            
+            return result.CreateTypeContext<S>(tc, value);
         }
 
         protected override Expression VisitParameter(ParameterExpression p)

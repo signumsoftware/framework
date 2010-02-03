@@ -162,6 +162,7 @@ namespace Signum.Test
                 Year = 1993,
                 Author = smashingPumpkins,
                 Songs = new MList<SongDN> { new SongDN { Name = "Disarm" } },
+                BonusTrack = new SongDN{Name = "Zero"},
                 Label = virgin
             }.Save();
 
@@ -176,6 +177,7 @@ namespace Signum.Test
                     new SongDN { Name = "1976" }, 
                     new SongDN { Name = "Tonight, Tonight" } 
                 },
+                BonusTrack = new SongDN { Name = "Jellybelly" },
                 Label = virgin
             };
 
@@ -191,6 +193,7 @@ namespace Signum.Test
                 Year = 2007,
                 Author = smashingPumpkins,
                 Songs = new MList<SongDN> { new SongDN { Name = "Tarantula" } },
+                BonusTrack = new SongDN{Name = "1976"},
                 Label = wea,
             }.Save();
 
@@ -200,6 +203,7 @@ namespace Signum.Test
                 Year = 2008,
                 Author = smashingPumpkins,
                 Songs = new MList<SongDN> { new SongDN { Name = "The Rose March" } },
+                BonusTrack = new SongDN{Name = "Tonight, Tonight"},
                 Label = wea,
             }.Save();
 
@@ -220,6 +224,7 @@ namespace Signum.Test
                 Year = 1972,
                 Author = michael,
                 Songs = new MList<SongDN> { new SongDN { Name = "Ben" } },
+                BonusTrack = new SongDN{Name = "Michael"},
                 Label = universal,
             }.Save();
 
@@ -232,6 +237,7 @@ namespace Signum.Test
                 Author = michael,
                 Songs = "Wanna Be Startin' Somethin', Thriller, Beat It"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongDN{Name = "Billie Jean"},
                 Label = sony
             }.Save();
 
@@ -244,6 +250,7 @@ namespace Signum.Test
                 Author = michael,
                 Songs = "Bad, Man in the Mirror, Dirty Diana, Smooth Criminal"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongDN { Name = "Thriller" },
                 Label = mjj
             }.Save();
 
@@ -254,6 +261,7 @@ namespace Signum.Test
                 Author = michael,
                 Songs = "Black or White, Who Is It, Give it to Me"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongDN { Name = "Beat it" },
                 Label = mjj
             }.Save();
 
@@ -262,8 +270,9 @@ namespace Signum.Test
                 Name = "HIStory",
                 Year = 1995,
                 Author = michael,
-                Songs = "Heal The World, Stranger In Moscow"
+                Songs = "Billie Jean, Stranger In Moscow"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongDN{Name="Heal The World"},
                 Label = mjj
             }.Save();
 
@@ -274,6 +283,7 @@ namespace Signum.Test
                 Author = michael,
                 Songs = "Blood on the Dance Floor, Morphine"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongDN { Name = "Stranger In Moscow" },
                 Label = mjj
             }.Save();
 
@@ -295,6 +305,7 @@ namespace Signum.Test
                 Author = sigurRos,
                 Songs = "Scefn-g-englar"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongDN { Name = "Intro" },
                 Label = fatCat
             }.Save();
 
@@ -307,6 +318,7 @@ namespace Signum.Test
                 Author = sigurRos,
                 Songs = "Hoppípolla, Glósóli, Saeglópur"
                 .Split(',').Select(s => new SongDN { Name = s.Trim() }).ToMList(),
+                BonusTrack = new SongDN { Name = "Svo hljótt" },
                 Label = emi
             }.Save();
         }

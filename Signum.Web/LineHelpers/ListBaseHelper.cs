@@ -25,15 +25,22 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
+            sb.AppendLine(RenderItemPopupContents(helper, indexedPrefix, listTypeContext, itemValue, index, settings, cleanRuntimeType, cleanStaticType, isLite));
+            sb.AppendLine("</div>");
 
+            return sb.ToString();
+        }
+
+        public static string RenderItemPopupContents<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
+        {
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
-            
+
             TypeContext tc;
             if (isLite)
                 tc = (TypeContext)Activator.CreateInstance(typeof(TypeElementContext<>).MakeGenericType(cleanRuntimeType), new object[] { Database.Retrieve((Lite)(object)itemValue), listTypeContext, index });
             else
                 tc = new TypeElementContext<T>(itemValue, listTypeContext, index);
-            
+
             ViewDataDictionary vdd = new ViewDataDictionary(tc)
             { 
                 { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName},
@@ -43,12 +50,11 @@ namespace Signum.Web
             if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
                 vdd[ViewDataKeys.Reactive] = true;
 
+            string contents;
             using (var sc = StyleContext.RegisterCleanStyleContext(true))
-                sb.Append(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
-            
-            sb.AppendLine("</div>");
+                contents= helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd);
 
-            return sb.ToString();
+            return contents;
         }
 
         public static string RenderItemContentInEntityDiv<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite, bool visibleDiv)
@@ -58,6 +64,17 @@ namespace Signum.Web
             sb.AppendLine("<div id='{0}' name='{0}'{1}>".Formato(
                 TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity),
                 visibleDiv ? "" : " style='display:none'"));
+
+            sb.AppendLine(RenderItemContent<T>(helper, indexedPrefix, listTypeContext, itemValue, index, settings, cleanRuntimeType, cleanStaticType, isLite));
+            
+            sb.AppendLine("</div>");
+
+            return sb.ToString();
+        }
+
+        public static string RenderItemContent<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
+        {
+            StringBuilder sb = new StringBuilder();
 
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
 
@@ -75,8 +92,7 @@ namespace Signum.Web
 
             sb.AppendLine(
                 helper.RenderPartialToString(settings.PartialViewName ?? es.PartialViewName, vdd));
-            sb.AppendLine("</div>");
-
+            
             return sb.ToString();
         }
 

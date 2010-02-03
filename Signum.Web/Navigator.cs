@@ -381,13 +381,19 @@ namespace Signum.Web
             get { return Manager.TypesToURLNames; }
         }
 
-        internal static void ConfigureEntityBase(EntityBase el, Type entityType, bool admin)
+        internal static void ConfigureEntityBase(EntityBase eb, Type entityType, bool admin)
         {
             if (Manager.EntitySettings.ContainsKey(entityType))
             {
-                el.Create = Navigator.IsCreable(entityType, admin);
-                el.View = Navigator.IsViewable(entityType, admin);
-                el.Find = Navigator.IsFindable(entityType);
+                eb.Create = Navigator.IsCreable(entityType, admin);
+                eb.View = Navigator.IsViewable(entityType, admin);
+                eb.Find = Navigator.IsFindable(entityType);
+            }
+            if (typeof(EmbeddedEntity).IsAssignableFrom(entityType))
+            {
+                EntityLine el = eb as EntityLine;
+                if (el != null)
+                    el.Navigate = false;
             }
         }
 

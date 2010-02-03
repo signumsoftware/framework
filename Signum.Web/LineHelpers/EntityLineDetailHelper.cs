@@ -50,6 +50,12 @@ namespace Signum.Web
             else
             {
                 sb.AppendLine(helper.HiddenSFInfo(prefix, new EmbeddedEntityInfo<T>(value, false) { Ticks = ticks }));
+                
+                typeContext.Value = (T)(object)Constructor.ConstructStrict(cleanRuntimeType ?? cleanStaticType);
+                sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\";</script>".Formato(
+                        TypeContext.Compose(prefix, EntityBaseKeys.Template),
+                        EntityBaseHelper.JsEscape(EntityBaseHelper.RenderContent(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
+                typeContext.Value = value;
             }
 
             sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, settings, value));
@@ -60,17 +66,8 @@ namespace Signum.Web
 
             string controlHtml = null;
             if (value != null)
-            {
-                ViewDataDictionary vdd = new ViewDataDictionary(typeContext) //value
-                { 
-                    { ViewDataKeys.PopupPrefix, helper.ParentPrefix() }, // idValueField},
-                };
-                helper.PropagateSFKeys(vdd);
-                controlHtml = helper.RenderPartialToString(
-                        settings.PartialViewName ?? Navigator.Manager.EntitySettings[value.GetType()].PartialViewName,
-                        vdd);
-            }
-
+                controlHtml = EntityBaseHelper.RenderContent<T>(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite);
+            
             if (settings.DetailDiv == settings.DefaultDetailDiv)
                 sb.AppendLine("<div id='{0}' name='{0}'>{1}</div>".Formato(settings.DetailDiv, controlHtml ?? ""));
             else if (controlHtml != null)

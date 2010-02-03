@@ -77,18 +77,22 @@ namespace Signum.Web
                                      ImplementationsModelBinder.Render(settings.Implementations),
                                      TypeContext.Compose(prefix, TypeContext.Id),
                                      "Signum/Autocomplete", 1, 5, 500, settings.OnChangedTotal.HasText() ? settings.OnChangedTotal : "''"));
-
-
                 }
-   
             }
             else
             {
                 sb.AppendLine(helper.HiddenSFInfo(prefix, new EmbeddedEntityInfo<T>(value, false) { Ticks = ticks }));
 
-                sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
+                typeContext.Value = (T)(object)Constructor.ConstructStrict(cleanRuntimeType ?? cleanStaticType);
+                sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
+                        TypeContext.Compose(prefix, EntityBaseKeys.Template),
+                        EntityBaseHelper.JsEscape(EntityBaseHelper.RenderPopupContent(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
+                typeContext.Value = value;
 
-                sb.AppendLine(helper.Span(TypeContext.Compose(prefix, EntityBaseKeys.ToStr), value.ToString(), "valueLine", new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "block" : "none") } }));
+                if (value != null)
+                    sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
+
+                sb.AppendLine(helper.Span(TypeContext.Compose(prefix, EntityBaseKeys.ToStr), value.TryToString(), "valueLine"));
             }
 
             string id = (isIdentifiable) ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString() :
@@ -109,7 +113,7 @@ namespace Signum.Web
                         linkText, viewingUrl, "View", "valueLine",
                         new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
             }
-            else
+            else if (isIdentifiable || isLite)
             {
                 sb.AppendLine(
                     helper.Span(TypeContext.Compose(prefix, EntityBaseKeys.ToStrLink),

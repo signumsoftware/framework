@@ -37,6 +37,12 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
 
+            //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
+            if (typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanStaticType))
+                sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\";</script>".Formato(
+                        TypeContext.Compose(prefix, EntityBaseKeys.Template),
+                        EntityBaseHelper.JsEscape(ListBaseHelper.RenderItemPopupContents(helper, prefix, typeContext, (T)(object)Constructor.ConstructStrict(typeof(T)), 0, settings, elementsCleanStaticType, elementsCleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
+
             if (settings.ShowFieldDiv)
                 sb.AppendLine("<div class='fieldList'>");
 
