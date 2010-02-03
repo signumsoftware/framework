@@ -107,7 +107,7 @@ namespace Signum.Windows.Reports
                 {
                     new FilterOption 
                     { 
-                        ColumnName = "QueryName", 
+                        Path = "QueryName", 
                         Operation = FilterOperation.EqualTo, 
                         Value = SearchControl.QueryName.ToString(),
                         Frozen = true

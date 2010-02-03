@@ -18,7 +18,7 @@ namespace Signum.Windows.Reports
 
         public static void GenerarInforme(string filename, ResultTable vista)
         {
-            if (vista == null || vista.Rows.Length == 0 || vista.StaticColumns.Length == 0)
+            if (vista == null || vista.Rows.Length == 0 || vista.Columns.Length == 0)
                 throw new ApplicationException("Los vista con los datos a insertar en el excel está vacía.");
 
             ApplicationClass appExcel = null;

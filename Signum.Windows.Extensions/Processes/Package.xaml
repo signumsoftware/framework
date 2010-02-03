@@ -12,7 +12,7 @@
         <GroupBox Header="Lines">
             <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:PackageLineDN}" MaxHeight="400">
                 <m:SearchControl.FilterOptions>
-                    <m:FilterOption ColumnName="Package" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
+                    <m:FilterOption Path="Package" Operation="EqualTo" Value="{Binding DataContext, ElementName=ctrl}" Frozen="True"/>
                 </m:SearchControl.FilterOptions>
             </m:SearchControl>
         </GroupBox>
