@@ -183,5 +183,17 @@ namespace Signum.Test.LinqProvider
 
             var female = Database.Query<ArtistDN>().Single(a=>females.Contains(a));
         }
+
+        [TestMethod]
+        public void WhereEmbeddedNull()
+        {
+            var albumsWithBonusTrack = Database.Query<AlbumDN>().Where(a => a.BonusTrack == null).ToList();
+        }
+
+        [TestMethod]
+        public void WhereEmbeddedNotNull()
+        {
+            var albumsWithBonusTrack = Database.Query<AlbumDN>().Where(a => a.BonusTrack != null).ToList();
+        }
     }
 }

@@ -593,6 +593,21 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded : Field, IFieldFinder
     {
+        public partial class EmbeddedHasValueColumn : IColumn
+        {
+            public string Name { get; set; }
+            public bool Nullable { get { return false; } } //even on neasted embeddeds
+            public Index Index { get; set; }
+            public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
+            bool IColumn.PrimaryKey { get { return false; } }
+            bool IColumn.Identity { get { return false; } }
+            int? IColumn.Size { get { return null; } }
+            int? IColumn.Scale { get { return null; } }
+            public Table ReferenceTable { get { return null; } }
+        }
+
+        public EmbeddedHasValueColumn HasValue { get; set; }
+
         public Dictionary<string, EntityField> EmbeddedFields { get; set; }
 
         public Func<EmbeddedEntity> Constructor { get; private set; } 
@@ -627,7 +642,14 @@ namespace Signum.Engine.Maps
 
         public override IEnumerable<IColumn> Columns()
         {
-            return EmbeddedFields.Values.SelectMany(c => c.Field.Columns());
+            var result = new List<IColumn>();
+
+            if (HasValue != null)
+                result.Add(HasValue);
+
+            result.AddRange(EmbeddedFields.Values.SelectMany(c => c.Field.Columns()));
+
+            return result;
         }
     }
 

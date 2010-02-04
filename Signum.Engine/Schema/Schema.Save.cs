@@ -131,10 +131,9 @@ namespace Signum.Engine.Maps
             if (forbidden.Count == 0)
                 collection.Modified = false;
 
-            var clean = newEntity ? null : SqlBuilder.RelationalDeleteScope(Name, BackReference.Name); 
+            var clean = newEntity ? null : SqlBuilder.RelationalDeleteScope(Name, BackReference.Name);
 
-            var inserts =  ((IEnumerable)collection).Cast<object>()
-                .Where(o => (o as IdentifiableEntity).TryCS(e => !forbidden.Contains(e)) ?? true)
+            var inserts = ((IEnumerable)collection).Cast<object>()
                 .Select(o => SqlBuilder.RelationalInsertScope(Name, BackReference.Name,
                     new List<SqlParameter>().Do(lp => Field.CreateParameter(lp, o, SqlCommandType.Insert, forbidden))))
                 .Combine(Spacing.Simple);
@@ -235,10 +234,28 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
+        SqlParameter HasValueParameter(bool hasValue)
+        {
+            return SqlParameterBuilder.CreateParameter(HasValue.Name, HasValue.SqlDbType, HasValue.Nullable, hasValue);
+        }
+
         protected internal override void CreateParameter(List<SqlParameter> parameters, object value, SqlCommandType type, Forbidden forbidden)
         {
-            if (value != null)
+            if (value == null)
             {
+                if (HasValue != null)
+                    parameters.Add(HasValueParameter(false));
+                else
+                    throw new InvalidOperationException("Impossible to save null not-nullable embedded field, use Nullable Attribute over the field");
+                
+                foreach (var v in EmbeddedFields.Values)
+                    v.Field.CreateParameter(parameters, null, type, forbidden);
+            }
+            else
+            {
+                 if (HasValue != null)
+                     parameters.Add(HasValueParameter(true));
+
                 EmbeddedEntity ec = (EmbeddedEntity)value;
                 if (forbidden.Count == 0)
                     ec.Modified = false;

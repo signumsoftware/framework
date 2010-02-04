@@ -129,6 +129,9 @@ namespace Signum.Engine.Maps
     {
         internal override object GenerateValue(DataRow row, Retriever retriever)
         {
+            if (HasValue != null && ((bool)row.Cell(HasValue.Name)) == false)
+                return null;
+
             EmbeddedEntity result = Constructor();
 
             foreach (EntityField ef in EmbeddedFields.Values)

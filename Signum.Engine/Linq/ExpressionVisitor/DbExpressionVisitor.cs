@@ -225,10 +225,11 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
         {
             var bindings = efie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
-          
-            if (efie.Bindings != bindings)
+            var hasValue = Visit(efie.HasValue);
+
+            if (efie.Bindings != bindings || efie.HasValue != hasValue)
             {
-                return new EmbeddedFieldInitExpression(efie.Type, bindings);
+                return new EmbeddedFieldInitExpression(efie.Type, hasValue, bindings);
             }
             return efie;
         }

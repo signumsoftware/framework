@@ -64,11 +64,43 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void UpdateConstant()
+        public void UpdateValueSqlFunction()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Name = a.Name.ToUpper() });
+        }
+
+        [TestMethod]
+        public void UpdateValueNull()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<NoteDN>().UnsafeUpdate(a => new NoteDN { Text = null });
+        }
+
+        [TestMethod]
+        public void UpdateValueConstant()
         {
             Starter.Dirty();
 
             int count = Database.Query<AlbumDN>().Where(a => a.Year < 1990).UnsafeUpdate(a => new AlbumDN { Year = 1990 });
+        }
+
+        [TestMethod]
+        public void UpdateEnum()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<ArtistDN>().UnsafeUpdate(a => new ArtistDN { Sex = a.Sex == Sex.Female ? Sex.Male : Sex.Female });
+        }
+
+        [TestMethod]
+        public void UpdateEnumConstant()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<ArtistDN>().UnsafeUpdate(a => new ArtistDN { Sex = Sex.Male });
         }
 
         [TestMethod]
@@ -82,7 +114,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod, ExpectedException(typeof(InvalidOperationException), "The entity is New")]
-        public void UpdateNewFie()
+        public void UpdateFieNew()
         {
             Starter.Dirty();
 
@@ -92,7 +124,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void UpdateFieIb()
+        public void UpdateFieNull()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = null });
+        }
+
+        [TestMethod]
+        public void UpdateIbFie()
         {
             Starter.Dirty();
 
@@ -101,13 +141,46 @@ namespace Signum.Test.LinqProvider
             int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = michael });
         }
 
-        [TestMethod]
-        public void UpdateEnum()
+
+        public void UpdateIbNull()
         {
             Starter.Dirty();
 
-            int count = Database.Query<ArtistDN>().Where(a => ((AmericanMusicAwardDN)a.LastAward).Category == null)
-                .UnsafeUpdate(a => new ArtistDN { Sex = Sex.Male });
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = null });
+        }
+
+        [TestMethod]
+        public void UpdateIbaFie()
+        {
+            Starter.Dirty();
+
+            ArtistDN michael = Database.Query<ArtistDN>().Single(a => a.Dead);
+
+            int count = Database.Query<NoteDN>().UnsafeUpdate(n => new NoteDN {  Target = michael });
+        }
+
+        [TestMethod]
+        public void UpdateIbaNull()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<NoteDN>().UnsafeUpdate(n => new NoteDN { Target = null });
+        }
+
+        [TestMethod]
+        public void UpdateEmbeddedField()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = { Name = a.BonusTrack.Name + " - " } });
+        }
+
+        [TestMethod]
+        public void UpdateEmbeddedNull()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { BonusTrack = null });
         }
     }
 }

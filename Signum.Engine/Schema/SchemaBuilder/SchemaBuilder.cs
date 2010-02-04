@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using System.Linq.Expressions;
+using System.Runtime.Remoting.Contexts;
 
 namespace Signum.Engine.Maps
 {
@@ -82,7 +83,7 @@ namespace Signum.Engine.Maps
             Type type = table.Type;
             table.Identity = Reflector.ExtractEnumProxy(type) == null;
             table.Name = GenerateTableName(type);
-            table.Fields = GenerateFields(type, Contexts.Normal, table, NameSequence.Void);
+            table.Fields = GenerateFields(type, Contexts.Normal, table, NameSequence.Void, false);
             table.GenerateColumns();
         }
 
@@ -101,7 +102,7 @@ namespace Signum.Engine.Maps
         }
 
         #region Field Generator
-        protected Dictionary<string, EntityField> GenerateFields(Type type, Contexts contexto, Table table, NameSequence preName)
+        protected Dictionary<string, EntityField> GenerateFields(Type type, Contexts contexto, Table table, NameSequence preName, bool forceNull)
         {
             Dictionary<string, EntityField> result = new Dictionary<string, EntityField>();
             foreach (FieldInfo fi in Reflector.InstanceFieldsInOrder(type))
@@ -111,7 +112,7 @@ namespace Signum.Engine.Maps
                     if (!SilentMode() && Reflector.FindPropertyInfo(fi) == null)
                         Debug.WriteLine(Resources.Field0OfTipe1HasNoCompatibleProperty.Formato(fi.Name, type.Name));
 
-                    Field campo = GenerateField(type, fi, fi.FieldType, contexto, table, preName);
+                    Field campo = GenerateField(type, fi, fi.FieldType, contexto, table, preName, forceNull);
                     result.Add(fi.Name, new EntityField(type, fi) { Field = campo });
                 }
             }
@@ -123,7 +124,7 @@ namespace Signum.Engine.Maps
             return schema.SilentMode; 
         }
 
-        protected virtual Field GenerateField(Type type, FieldInfo fi, Type fieldType, Contexts contexto, Table table, NameSequence preName)
+        protected virtual Field GenerateField(Type type, FieldInfo fi, Type fieldType, Contexts contexto, Table table, NameSequence preName, bool forceNull)
         {
             //fieldType: Va variando segun se entra en colecciones o contenidos
             //fi.Type: el tipo del campo asociado
@@ -145,21 +146,21 @@ namespace Signum.Engine.Maps
                 case KindOfField.PrimaryKey:
                     return GenerateFieldPrimaryKey(type, fi, table, name);
                 case KindOfField.Value:
-                    return GenerateFieldValue(type, fi, fieldType, name);
+                    return GenerateFieldValue(type, fi, fieldType, name, forceNull);
                 case KindOfField.Reference:
                     {
                         Implementations at = Settings.GetImplementations(type, fi);
                         if (at == null)
-                            return GenerateFieldReference(type, fi, fieldType, name);
+                            return GenerateFieldReference(type, fi, fieldType, name, forceNull);
                         else if (at is ImplementedByAttribute)
-                            return GenerateFieldImplmentedBy(type, fi, fieldType, name, (ImplementedByAttribute)at);
+                            return GenerateFieldImplmentedBy(type, fi, fieldType, name, forceNull, (ImplementedByAttribute)at);
                         else
-                            return GenerateFieldImplmentedByAll(type, fi, fieldType, name, (ImplementedByAllAttribute)at);
+                            return GenerateFieldImplmentedByAll(type, fi, fieldType, name, forceNull, (ImplementedByAllAttribute)at);
                     }
                 case KindOfField.Enum:
-                    return GenerateFieldEnum(type, fi, fieldType, name);
+                    return GenerateFieldEnum(type, fi, fieldType, name, forceNull);
                 case KindOfField.Embedded:
-                    return GenerateFieldEmbebed(type, fi, fieldType, name);
+                    return GenerateFieldEmbedded(type, fi, fieldType, name, forceNull);
                 case KindOfField.MList:
                     return GenerateFieldMList(type, fi, table, name);
                 default:
@@ -210,7 +211,7 @@ namespace Signum.Engine.Maps
             return new FieldPrimaryKey(fi.FieldType, table);
         }
 
-        protected virtual Field GenerateFieldValue(Type type, FieldInfo fi, Type fieldType, NameSequence name)
+        protected virtual Field GenerateFieldValue(Type type, FieldInfo fi, Type fieldType, NameSequence name, bool forceNull)
         {
             SqlDbType sqlDbType = Settings.GetSqlDbType(type, fi, fieldType.UnNullify()).Value;
 
@@ -218,38 +219,38 @@ namespace Signum.Engine.Maps
             {
                 Name = name.ToString(),
                 SqlDbType = sqlDbType,
-                Nullable = Settings.IsNullable(type, fi, fieldType),
+                Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
                 Size = Settings.GetSqlSize(type, fi, sqlDbType),
                 Scale = Settings.GetSqlScale(type, fi, sqlDbType),
                 Index = Settings.IndexType(type, fi) ?? Index.None
             };
         }
 
-        protected virtual Field GenerateFieldEnum(Type type, FieldInfo fi, Type fieldType, NameSequence name)
+        protected virtual Field GenerateFieldEnum(Type type, FieldInfo fi, Type fieldType, NameSequence name, bool forceNull)
         {
             return new FieldEnum(fieldType)
             {
-                Nullable = Settings.IsNullable(type, fi, fieldType),
+                Name = name.ToString(),
+                Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
                 IsLite = false,
                 Index = Settings.IndexType(type, fi) ?? Index.None,
-                Name = name.ToString(),
                 ReferenceTable = Include(Reflector.GenerateEnumProxy(fieldType.UnNullify())),
             };
         }
 
-        protected virtual Field GenerateFieldReference(Type type, FieldInfo fi, Type fieldType, NameSequence name)
+        protected virtual Field GenerateFieldReference(Type type, FieldInfo fi, Type fieldType, NameSequence name, bool forceNull)
         {
             return new FieldReference(fieldType)
             {
                 Name = name.ToString(),
-                ReferenceTable = Include(Reflector.ExtractLite(fieldType) ?? fieldType),
                 Index = Settings.IndexType(type, fi) ?? DefaultReferenceIndex(),
-                Nullable = Settings.IsNullable(type, fi, fieldType),
-                IsLite  = Reflector.ExtractLite(fieldType) != null
+                Nullable = Settings.IsNullable(type, fi, fieldType, forceNull),
+                IsLite  = Reflector.ExtractLite(fieldType) != null,
+                ReferenceTable = Include(Reflector.ExtractLite(fieldType) ?? fieldType),
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedBy(Type type, FieldInfo fi, Type fieldType, NameSequence name, ImplementedByAttribute ib)
+        protected virtual Field GenerateFieldImplmentedBy(Type type, FieldInfo fi, Type fieldType, NameSequence name, bool forceNull, ImplementedByAttribute ib)
         {
             Type cleanType = Reflector.ExtractLite(fieldType) ?? fieldType;
             string erroneos = ib.ImplementedTypes.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
@@ -258,7 +259,7 @@ namespace Signum.Engine.Maps
 
             Index indice = Settings.IndexType(type, fi) ?? DefaultReferenceIndex();
 
-            bool nullable = Settings.IsNullable(type, fi, fieldType) || ib.ImplementedTypes.Length > 1;
+            bool nullable = Settings.IsNullable(type, fi, fieldType, forceNull) || ib.ImplementedTypes.Length > 1;
 
             return new FieldImplementedBy(fieldType)
             {
@@ -267,16 +268,16 @@ namespace Signum.Engine.Maps
                     ReferenceTable = Include(t),
                     Name = name.Add(t.Name).ToString(),
                     Index = indice,
-                    Nullable = true,
+                    Nullable = nullable,
                 }),
                 IsLite  = Reflector.ExtractLite(fieldType) != null
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedByAll(Type type, FieldInfo fi, Type fieldType, NameSequence preName, ImplementedByAllAttribute implementedByAllAttribute)
+        protected virtual Field GenerateFieldImplmentedByAll(Type type, FieldInfo fi, Type fieldType, NameSequence preName, bool forceNull, ImplementedByAllAttribute iba)
         {
             Index indice = Settings.IndexType(type, fi) ?? DefaultReferenceIndex();
-            bool nullable = Settings.IsNullable(type, fi, fieldType);
+            bool nullable = Settings.IsNullable(type, fi, fieldType, forceNull);
 
             return new FieldImplementedByAll(fieldType)
             {
@@ -314,16 +315,19 @@ namespace Signum.Engine.Maps
                         ReferenceTable = table
                     },
                     PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
-                    Field = GenerateField(type, fi, elementType, Contexts.MList, null, NameSequence.Void) // sin FieldInfo!
+                    Field = GenerateField(type, fi, elementType, Contexts.MList, null, NameSequence.Void, false) 
                 }.Do(t => t.GenerateColumns())
             };
         }
 
-        protected virtual Field GenerateFieldEmbebed(Type type, FieldInfo fi, Type fieldType, NameSequence name)
+        protected virtual Field GenerateFieldEmbedded(Type type, FieldInfo fi, Type fieldType, NameSequence name, bool forceNull)
         {
+            bool nullable = Settings.IsNullable(type, fi, fieldType, false);
+
             return new FieldEmbedded(fieldType)
             {
-                EmbeddedFields = GenerateFields(fieldType, Contexts.Embedded, null, name)
+                HasValue = nullable ? new FieldEmbedded.EmbeddedHasValueColumn() { Name = name.Add("HasValue").ToString() } : null,
+                EmbeddedFields = GenerateFields(fieldType, Contexts.Embedded, null, name, nullable || forceNull)
             };
         }
         #endregion
@@ -412,7 +416,7 @@ namespace Signum.Engine.Maps
                 IsView = true
             };
 
-            table.Fields = GenerateFields(type, Contexts.View, table, NameSequence.Void);
+            table.Fields = GenerateFields(type, Contexts.View, table, NameSequence.Void, false);
 
             return table;
         }

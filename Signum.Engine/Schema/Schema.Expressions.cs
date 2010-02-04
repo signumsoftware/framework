@@ -39,7 +39,7 @@ namespace Signum.Engine.Maps
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, binder))).ToReadOnly();
 
-            return new EmbeddedFieldInitExpression(this.Type, bindings);
+            return new EmbeddedFieldInitExpression(this.Type, null, bindings);
         }
     }
 
@@ -131,9 +131,10 @@ namespace Signum.Engine.Maps
         {
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, binder))).ToReadOnly(); 
-                                          
-            return new EmbeddedFieldInitExpression(this.FieldType, bindings); 
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(token, tableAlias, binder))).ToReadOnly();
+
+            ColumnExpression hasValue = HasValue == null ? null : new ColumnExpression(typeof(bool), tableAlias, HasValue.Name);
+            return new EmbeddedFieldInitExpression(this.FieldType, hasValue, bindings); 
         }
     }
 

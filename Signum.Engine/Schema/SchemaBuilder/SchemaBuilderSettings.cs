@@ -143,10 +143,16 @@ namespace Signum.Engine.Maps
             return result ?? fi.GetCustomAttributes(false).Cast<Attribute>().ToArray();
         }
 
-        internal bool IsNullable(Type type, FieldInfo fi, Type fieldType)
+        internal bool IsNullable(Type type, FieldInfo fi, Type fieldType, bool forceNull)
         {
+            if (forceNull)
+                return true;
+
             if (FieldInfoAttributes(type, fi).OfType<NotNullableAttribute>().Any())
-                return false; 
+                return false;
+
+            if (FieldInfoAttributes(type, fi).OfType<NullableAttribute>().Any())
+                return false;
 
             return fieldType.IsValueType ? Nullable.GetUnderlyingType(fieldType) != null : true;
         }

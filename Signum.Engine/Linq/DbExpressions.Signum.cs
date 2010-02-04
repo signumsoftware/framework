@@ -89,13 +89,20 @@ namespace Signum.Engine.Linq
   
     internal class EmbeddedFieldInitExpression : DbExpression
     {
+        public readonly Expression HasValue; 
+
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
-        public EmbeddedFieldInitExpression(Type type, IEnumerable<FieldBinding> bindings)
+        public EmbeddedFieldInitExpression(Type type, Expression hasValue, IEnumerable<FieldBinding> bindings)
             : base(DbExpressionType.EmbeddedFieldInit, type)
         {
             if (bindings == null)
                 throw new ArgumentNullException("bindings");
+
+            if (hasValue != null && hasValue.Type != typeof(bool))
+                throw new ArgumentException("hasValue should be a bool expression");
+
+            HasValue = hasValue;
 
             Bindings = bindings.ToReadOnly();
         }

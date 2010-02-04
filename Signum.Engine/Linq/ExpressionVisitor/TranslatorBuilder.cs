@@ -152,8 +152,13 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
             {
-                return Expression.MemberInit(Expression.New(efie.Type),
+                Expression ctor = Expression.MemberInit(Expression.New(efie.Type),
                        efie.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding))).ToArray());
+
+                if (efie.HasValue == null)
+                    return ctor;
+
+                return Expression.Condition(Expression.Equal(Visit(efie.HasValue), Expression.Constant(true)), ctor, Expression.Constant(null, ctor.Type));
             }
 
             protected override Expression VisitMList(MListExpression ml)

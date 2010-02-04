@@ -243,13 +243,15 @@ namespace Signum.Engine.Linq
                     if (newExp.NodeType == ExpressionType.Equal)
                     {
                         BinaryExpression be = (BinaryExpression)newExp;
-                        return be.NodeType == ExpressionType.Equal ?
-                            Expression.NotEqual(be.Left, be.Right) :
-                            Expression.Equal(be.Left, be.Right);
+                        return Expression.NotEqual(be.Left, be.Right);
                     }
                     else if (newExp.NodeType == (ExpressionType)DbExpressionType.IsNull)
                     {
                         return new IsNotNullExpression(((IsNullExpression)newExp).Expression);
+                    }
+                    else if (newExp.NodeType == ExpressionType.Not)
+                    {
+                        return ((UnaryExpression)newExp).Operand;
                     }
                     else
                     {

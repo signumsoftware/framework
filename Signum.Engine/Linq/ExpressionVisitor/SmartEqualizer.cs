@@ -87,6 +87,11 @@ namespace Signum.Engine.Linq
             var tE1 = (DbExpressionType)e1.NodeType;
             var tE2 = (DbExpressionType)e2.NodeType;
 
+            if (tE1 == DbExpressionType.EmbeddedFieldInit && e2.IsNull())
+                return EmbeddedNullEquals((EmbeddedFieldInitExpression)e1);
+            if (tE2 == DbExpressionType.EmbeddedFieldInit && e1.IsNull())
+                return EmbeddedNullEquals((EmbeddedFieldInitExpression)e2);
+
             if (tE1 == DbExpressionType.FieldInit)
                 if (tE2 == DbExpressionType.FieldInit) return FieFieEquals((FieldInitExpression)e1, (FieldInitExpression)e2);
                 else if (tE2 == DbExpressionType.ImplementedBy) return FieIbEquals((FieldInitExpression)e1, (ImplementedByExpression)e2);
@@ -112,6 +117,14 @@ namespace Signum.Engine.Linq
                 else if (e2.IsNull()) return SqlConstantExpression.True;
                 else return null;
             else return null;
+        }
+
+        static Expression EmbeddedNullEquals(EmbeddedFieldInitExpression efie)
+        {
+            if (efie.HasValue == null)
+                return SqlConstantExpression.False; 
+
+            return Expression.Not(efie.HasValue);
         }
 
         static Expression FieFieEquals(FieldInitExpression fie1, FieldInitExpression fie2)

@@ -12,7 +12,7 @@ namespace Signum.Test
     [Serializable]
     public class NoteDN : Entity
     {
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        [SqlDbType(Size = int.MaxValue)]
         string text;
         [StringLengthValidator(AllowNulls = false, Min = 3)]
         public string Text
@@ -298,7 +298,7 @@ namespace Signum.Test
     [Serializable]
     public class SongDN : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        [NotNullable, SqlDbType(Size = 100)]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Name

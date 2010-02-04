@@ -35,18 +35,6 @@ namespace Signum.Engine.Linq
             return new FieldInitExpression(fieldInit.Type, fieldInit.TableAlias, newID, null, null, null); // eliminamos los bindings
         }
 
-        protected override Expression VisitEmbeddedFieldInit(EmbeddedFieldInitExpression efie)
-        {
-            var bindings = efie.Bindings.NewIfChange(fb => Visit(fb.Binding).Map(r => r == fb.Binding ? fb : new FieldBinding(fb.FieldInfo, r)));
-
-            if (efie.Bindings != bindings)
-            {
-                return new EmbeddedFieldInitExpression(efie.Type, bindings);
-            }
-
-            return efie;
-        }
-
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)
         {
             var implementations = reference.Implementations

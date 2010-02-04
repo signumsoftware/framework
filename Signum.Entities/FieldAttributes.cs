@@ -93,6 +93,12 @@ namespace Signum.Entities
     }
 
     [AttributeUsage(AttributeTargets.Field)]
+    public sealed class NullableAttribute : Attribute
+    {
+    }
+
+
+    [AttributeUsage(AttributeTargets.Field)]
     public sealed class SqlDbTypeAttribute : Attribute
     {
         SqlDbType? type;

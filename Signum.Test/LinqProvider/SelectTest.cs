@@ -292,6 +292,12 @@ namespace Signum.Test.LinqProvider
         {
             Database.Query<AlbumDN>().Select(a => (Sex?)((ArtistDN)a.Author).Sex).ToArray();
         }
+
+        [TestMethod]
+        public void SelectEmbeddedNullable()
+        {
+            var bonusTracks = Database.Query<AlbumDN>().Select(a => a.BonusTrack).ToArray();
+        }
     }
 
     public static class AuthorExtensions
