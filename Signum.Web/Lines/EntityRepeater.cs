@@ -25,7 +25,12 @@ namespace Signum.Web
 
     public class EntityRepeater : EntityListBase
     {
-        public string RemoveElementLinkText { get; set; }
+        public string removeElementLinkText = "Delete";
+        public string RemoveElementLinkText
+        {
+            get { return removeElementLinkText; }
+            set { removeElementLinkText = value; }
+        }
         public string AddElementLinkText { get; set; }
         public int? MaxElements { get; set; }
 
@@ -54,6 +59,9 @@ namespace Signum.Web
 
             if (MaxElements.HasValue)
                 sb.Append(",maxElements:'{0}'".Formato(MaxElements.Value));
+
+            if (RemoveElementLinkText.HasText())
+                sb.Append(",removeItemLinkText:'{0}'".Formato(RemoveElementLinkText));
 
             sb.Append("}");
             return sb.ToString();

@@ -222,7 +222,16 @@ function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     {'&#237;' : 'í',
     '&#243;' : 'ó' });*/
     alert("Error: " + error);
+}
 
+var debug = true;
+function log(s) {
+    if (debug) {
+        if (typeof console != "undefined" && typeof console.debug != "undefined")
+            console.log(s);
+        //else
+        //    alert(s);
+    }
 }
 
 // establece clase "focused" al div alrededor del campo con foco

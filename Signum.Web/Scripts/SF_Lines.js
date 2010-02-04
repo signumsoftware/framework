@@ -638,7 +638,7 @@ var ERep = function(_erepOptions) {
     this.canAddItems = function() {
         log("ERep canAddItems");
         if (!empty(this.options.maxElements)) {
-            if ($(this.pf(sfItemsContainer) + " > div[name$=" + sfRepeaterItem + "]").length >= parseInt(maxElements))
+            if ($(this.pf(sfItemsContainer) + " > div[name$=" + sfRepeaterItem + "]").length >= parseInt(this.options.maxElements))
                 return false;
         }
         return true;
@@ -1114,16 +1114,6 @@ function hiddenInput(id, value)
 function hiddenDiv(id, innerHTML) {
     return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHTML + "</div>\n";
 };
-
-var debug = true;
-function log(s) {
-    if (debug) {
-        if (typeof console != "undefined" && typeof console.debug != "undefined")
-            console.log(s);
-        //else
-        //    alert(s);
-    }
-}
 
 function FullPathNodesSelector(prefix) {
     var pathPrefixes = GetPathPrefixes(prefix);
