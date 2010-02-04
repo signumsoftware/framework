@@ -21,9 +21,9 @@
     int? EntityColumnIndex = (int?)ViewData[ViewDataKeys.EntityColumnIndex];
     bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
     Dictionary<int, bool> colVisibility = new Dictionary<int, bool>();
-    for (int i = 0; i < queryResult.StaticColumns.Length; i++)
+    for (int i = 0; i < queryResult.Columns.Length; i++)
     {
-        colVisibility.Add(i, queryResult.StaticColumns[i].Visible);
+        colVisibility.Add(i, queryResult.Columns[i].Visible);
     }
  %>
 <table id="<%=Html.GlobalName("tblResults")%>" class="tblResults">
@@ -88,7 +88,7 @@
                 <%
                    
                     
-                    for (int col = 0; col < queryResult.StaticColumns.Length; col++)
+                    for (int col = 0; col < queryResult.Columns.Length; col++)
                 {
                     if (colVisibility[col])
                     {
