@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</ProjectGuid>
+    <ProjectGuid>{68B4ED5F-D57F-4AD7-951F-4DB3B396FBB8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Engine.Extensions</RootNamespace>
@@ -111,10 +111,6 @@
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
-      <Name>Signum.Entities.Extensions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
@@ -122,6 +118,10 @@
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
+      <Project>{1A274FA6-4A7D-45AF-9026-5EC6646C3081}</Project>
+      <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -3,9 +3,9 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{86EE7792-96CF-4420-997B-8C811E2B166D}</ProjectGuid>
+    <ProjectGuid>{AA6389CF-52AB-47C0-BF39-60590CD159C3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Web.Extensions</RootNamespace>
@@ -133,17 +133,9 @@
     <Compile Include="ViewsChecker\ViewsCheckerController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
-      <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
-      <Name>Signum.Engine.Extensions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
-      <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
@@ -156,6 +148,14 @@
     <ProjectReference Include="..\..\Framework\Signum.Web\Signum.Web.csproj">
       <Project>{61898D02-521F-49AB-928B-F80615D55CA3}</Project>
       <Name>Signum.Web</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
+      <Project>{68B4ED5F-D57F-4AD7-951F-4DB3B396FBB8}</Project>
+      <Name>Signum.Engine.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
+      <Project>{1A274FA6-4A7D-45AF-9026-5EC6646C3081}</Project>
+      <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
