@@ -218,6 +218,11 @@ namespace Signum.Entities.Reflection
             return fi;
         }
 
+        public static PropertyInfo FindPropertyInfo(MemberInfo mi)
+        {
+            return mi as PropertyInfo ?? FindPropertyInfo((FieldInfo)mi); 
+        }
+
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)
         {
             return (fi.DeclaringType.GetProperty(CleanFieldName(fi.Name), BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public));

@@ -380,13 +380,13 @@ namespace Signum.Engine.Linq
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type))
             {
-                if(typeof(IdentifiableEntity).IsAssignableFrom( source.Type)) //Works for simple entities and also for interface casting
-                    return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add((PropertyInfo)member)));
+                if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type)) //Works for simple entities and also for interface casting
+                    return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add(Reflector.FindPropertyInfo(member))));
 
                 MetaExpression meta = (MetaExpression)source;
                 PropertyRoute path = meta.Meta is CleanMeta ? ((CleanMeta)meta.Meta).PropertyPath : PropertyRoute.Root(source.Type);
 
-                return new MetaExpression(memberType, new CleanMeta(path.Add((PropertyInfo)member)));
+                return new MetaExpression(memberType, new CleanMeta(path.Add(Reflector.FindPropertyInfo(member))));
             }
 
             return MakeDirtyMeta(memberType, source);
