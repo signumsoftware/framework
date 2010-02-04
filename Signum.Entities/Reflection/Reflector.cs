@@ -299,6 +299,10 @@ namespace Signum.Entities.Reflection
             if(decimals != null)
                 return "N" + decimals.DecimalPlaces;
 
+            StringCaseValidatorAttribute stringCase = property.SingleAttribute<StringCaseValidatorAttribute>();
+            if (stringCase != null)
+                return stringCase.TextCase == Case.Lowercase ? "L" : "U"; 
+
             return FormatString(property.PropertyType);
         }
 

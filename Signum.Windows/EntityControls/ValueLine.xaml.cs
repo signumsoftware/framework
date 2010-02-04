@@ -260,7 +260,16 @@ namespace Signum.Windows
                 }
                 return nt;
             }},
-            {ValueLineType.String, (t,n,f)=> new TextBox()},
+            {ValueLineType.String, (t,n,f)=> 
+                {
+                    var tb = new TextBox();
+                    if(f == "U")
+                        tb.CharacterCasing = CharacterCasing.Upper;
+                    else if(f == "L")
+                        tb.CharacterCasing = CharacterCasing.Lower;
+                    return tb;
+                }
+            },
             {ValueLineType.DateTime, (t,n,f)=> 
             {
                 var dt = new DateTimePicker(); 
