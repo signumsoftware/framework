@@ -100,5 +100,14 @@ namespace Signum.Test.LinqProvider
 
             int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Author = michael });
         }
+
+        [TestMethod]
+        public void UpdateEnum()
+        {
+            Starter.Dirty();
+
+            int count = Database.Query<ArtistDN>().Where(a => ((AmericanMusicAwardDN)a.LastAward).Category == null)
+                .UnsafeUpdate(a => new ArtistDN { Sex = Sex.Male });
+        }
     }
 }

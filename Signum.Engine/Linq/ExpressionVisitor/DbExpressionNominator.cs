@@ -297,14 +297,23 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitUnary(UnaryExpression u)
         {
+            if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify().IsEnum &&
+                u.Operand.NodeType == ExpressionType.Convert && u.Operand.Type.IsEnum)
+            {
+                u = Expression.Convert(Expression.Convert(((UnaryExpression)u.Operand).Operand, typeof(int?)), u.Type); //Expand nullability
+            }
+
             Expression operand = this.Visit(u.Operand);
-            if (operand != u.Operand)
-                u = Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
 
-            if (candidates.Contains(operand))
-                candidates.Add(u);
+            UnaryExpression result = operand == u.Operand ? u : Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
 
-            return u;
+            if (candidates.Contains(operand) &&
+                (u.NodeType == ExpressionType.Not ||
+                 u.NodeType == ExpressionType.Negate ||
+                 u.NodeType == ExpressionType.Convert && (u.Operand.Type.UnNullify() == u.Type.UnNullify() || IsFullNominate))) //Expand nullability
+                candidates.Add(result);
+
+            return result;
         }
 
         protected override Expression VisitIn(InExpression inExp)
