@@ -66,8 +66,7 @@ namespace Signum.Engine.Operations
                                                    lo.Start,
                                                    lo.End,
                                                    lo.Exception
-                                               }).ToDynamic()
-                                               .Column(a => a.Target, c => c.Filterable = false); 
+                                               }).ToDynamic(); 
             }
         }
 
