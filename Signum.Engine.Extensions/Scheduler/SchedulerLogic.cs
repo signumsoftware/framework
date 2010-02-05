@@ -120,6 +120,8 @@ namespace Signum.Engine.Scheduler
                 TimeSpan ts = priorityQueue.Peek().NextDate.Value - DateTime.Now;
                 if (ts < TimeSpan.Zero)
                     ts = TimeSpan.Zero; // cannot be negative !
+                if (ts.TotalMilliseconds > int.MaxValue)
+                    ts = TimeSpan.FromMilliseconds(int.MaxValue);
 
                 timer.Change((int)ts.TotalMilliseconds, Timeout.Infinite); // invoke after the timespan
             }
@@ -131,6 +133,8 @@ namespace Signum.Engine.Scheduler
                 Error(message, ex); 
         }
 
+        static readonly TimeSpan MinimumSpan = TimeSpan.FromSeconds(10); 
+
         static void DispatchEvents(object obj) // obj ignored
         {
             using (new EntityCache(true))
@@ -140,7 +144,14 @@ namespace Signum.Engine.Scheduler
                 if (priorityQueue.Empty)
                     OnError("Inconstency in SchedulerLogic PriorityQueue", null);
 
-                ScheduledTaskDN st = priorityQueue.Pop();
+                ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
+                if (st.NextDate.HasValue && (st.NextDate - DateTime.Now) > MinimumSpan)
+                {
+                    SetTimer();
+                    return;
+                }
+
+                priorityQueue.Pop();
                 using (SafeSaving())
                     st.Save();
                 priorityQueue.Push(st);
