@@ -156,6 +156,14 @@ namespace Signum.Web.Extensions
                         case WikiFormat.WikiLink:
                             result = new WikiLink(WikiUrl + link, text.HasText() ? text : "Enlace a wiki").ToHtmlString();
                             break;
+
+                        case WikiFormat.NameSpaceLink:
+                            NamespaceHelp nameSpace = HelpLogic.GetNamespace(link);
+                            result = new WikiLink(
+                                HelpLogic.BaseUrl + "/Namespace/"+ link,
+                                text.HasText() ? text : link,
+                                nameSpace != null ? "" : "unavailable").ToHtmlString();
+                            break;
                     }
 
                     sb.Append(content.Substring(firstIndex, m.Index - firstIndex));

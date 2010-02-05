@@ -240,6 +240,7 @@ namespace Signum.Engine.Help
         public const string OperationLink = "o";
         public const string HyperLink = "h";
         public const string WikiLink = "w";
+        public const string NameSpaceLink = "n";
 
         public const string Separator = ":";
     }
