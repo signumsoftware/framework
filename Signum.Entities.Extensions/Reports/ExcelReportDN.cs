@@ -31,6 +31,7 @@ namespace Signum.Entities.Reports
             set { SetToStr(ref displayName, value, () => DisplayName); }
         }
 
+        [NotNullable]
         EmbeddedFileDN file;
         [NotNullValidator]
         public EmbeddedFileDN File

@@ -19,7 +19,8 @@ namespace Signum.Entities.Scheduler
             get { return name; }
             set { SetToStr(ref name, value, () => Name); }
         }
-
+        
+        [NotNullable]
         MList<HolidayDN> holidays;
         [NotNullValidator]
         public MList<HolidayDN> Holidays
