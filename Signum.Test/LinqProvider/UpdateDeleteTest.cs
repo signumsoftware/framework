@@ -113,6 +113,17 @@ namespace Signum.Test.LinqProvider
             int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN { Label = label });
         }
 
+        [TestMethod]
+        public void UpdateFieToLite()
+        {
+            Starter.Dirty();
+
+            LabelDN label = Database.Query<LabelDN>().First();
+
+            int count = Database.Query<LabelDN>().UnsafeUpdate(a => new LabelDN { Owner = label.ToLite() });
+        }
+
+
         [TestMethod, ExpectedException(typeof(InvalidOperationException), "The entity is New")]
         public void UpdateFieNew()
         {

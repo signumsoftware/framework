@@ -201,7 +201,7 @@ namespace Signum.Engine.Linq
         }
 
 
-        Dictionary<FieldInitExpression, FieldInitExpression> fieCache = new Dictionary<FieldInitExpression, FieldInitExpression>();
+        protected Dictionary<FieldInitExpression, FieldInitExpression> fieCache = new Dictionary<FieldInitExpression, FieldInitExpression>();
 
         protected virtual Expression VisitFieldInit(FieldInitExpression fie)
         {

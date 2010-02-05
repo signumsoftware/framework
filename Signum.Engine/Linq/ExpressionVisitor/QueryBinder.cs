@@ -1264,7 +1264,7 @@ namespace Signum.Engine.Linq
             {
                 MemberAssignment ma = (MemberAssignment)m;
                 Expression colExpression = Visit(Expression.MakeMemberAccess(obj, ma.Member));
-                Expression expression = DbExpressionNominator.FullNominate(Visit(DbQueryProvider.Clean(ma.Expression)), false);
+                Expression expression = Visit(DbQueryProvider.Clean(ma.Expression));
                 return Assign(colExpression, expression);
             }
             else if (m is MemberMemberBinding)
@@ -1279,7 +1279,14 @@ namespace Signum.Engine.Linq
             
             throw new NotImplementedException(m.ToString()); 
         }
-        
+
+        ColumnAssignment AssignColumn(Expression column, Expression expression)
+        {
+            if (!(column is ColumnExpression))
+                throw new InvalidOperationException("{0} does not represent a column".Formato(column.NiceToString()));
+
+            return new ColumnAssignment((ColumnExpression)column, DbExpressionNominator.FullNominate(expression, false));
+        }
 
         private ColumnAssignment[] Assign(Expression colExpression, Expression expression)
         {
@@ -1291,13 +1298,11 @@ namespace Signum.Engine.Linq
 
             if (colExpression is ColumnExpression)
             {
-                return new[] { new ColumnAssignment((ColumnExpression)colExpression, expression) };
+                return new[] { AssignColumn(colExpression, expression) };
             }
             else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type.UnNullify().IsEnum && ((UnaryExpression)colExpression).Operand is ColumnExpression)
             {
-                ColumnExpression col2 = (ColumnExpression) ((UnaryExpression)colExpression).Operand;
-
-                return new[] { new ColumnAssignment(col2, expression) };
+                return new[] { AssignColumn(((UnaryExpression)colExpression).Operand, expression) };
             }
             else if (colExpression is LiteReferenceExpression)
             {
@@ -1310,7 +1315,7 @@ namespace Signum.Engine.Linq
             {
                 FieldInitExpression colFie = (FieldInitExpression)colExpression;
                 if (expression is FieldInitExpression)
-                    return new[] { new ColumnAssignment((ColumnExpression)colFie.ExternalId, ((FieldInitExpression)expression).ExternalId) };
+                    return new[] { AssignColumn(colFie.ExternalId, ((FieldInitExpression)expression).ExternalId) };
 
             }
             else if (colExpression is ImplementedByExpression)
@@ -1323,7 +1328,7 @@ namespace Signum.Engine.Linq
                     if(!colIb.Implementations.Any(i=>i.Type == fie.Type))
                         throw new ApplicationException("Type {0} is not in {1}".Formato(fie.Type.Name, colIb.Implementations.ToString(i=>i.Type.Name, ", ")));
 
-                    return colIb.Implementations.Select(imp => (new ColumnAssignment((ColumnExpression)imp.Field.ExternalId,
+                    return colIb.Implementations.Select(imp => (AssignColumn(imp.Field.ExternalId,
                        imp.Type == fie.Type ? fie.ExternalId : NullId))).ToArray();
                 }
                 else if(expression is ImplementedByExpression)
@@ -1334,7 +1339,7 @@ namespace Signum.Engine.Linq
                     if(types.Any())
                         throw new ApplicationException("No implementation for type(s) {0}".Formato(types.ToString(t=>t.Name, ", ")));
 
-                    return colIb.Implementations.Select(cImp => new ColumnAssignment((ColumnExpression)cImp.Field.ExternalId,
+                    return colIb.Implementations.Select(cImp => AssignColumn(cImp.Field.ExternalId,
                             ib.Implementations.SingleOrDefault(imp => imp.Type == cImp.Type).TryCC(imp => imp.Field.ExternalId) ?? NullId)).ToArray();
                 }
 
@@ -1347,8 +1352,8 @@ namespace Signum.Engine.Linq
                     FieldInitExpression fie = (FieldInitExpression)expression;
                     return new []
                     {
-                        new ColumnAssignment((ColumnExpression)colIba.Id, fie.ExternalId),
-                        new ColumnAssignment((ColumnExpression)colIba.TypeId, TypeConstant(fie.Type))
+                        AssignColumn(colIba.Id, fie.ExternalId),
+                        AssignColumn(colIba.TypeId, TypeConstant(fie.Type))
                     };
                 }
                 
@@ -1357,10 +1362,10 @@ namespace Signum.Engine.Linq
                     ImplementedByExpression ib = (ImplementedByExpression)expression;
                     return new []
                     {
-                        new ColumnAssignment((ColumnExpression)colIba.Id, Coalesce(typeof(int?), ib.Implementations.Select(e => e.Field.ExternalId))),
-                        new ColumnAssignment((ColumnExpression)colIba.TypeId,
+                        AssignColumn(colIba.Id, Coalesce(typeof(int?), ib.Implementations.Select(e => e.Field.ExternalId))),
+                        AssignColumn(colIba.TypeId, 
                             new CaseExpression(ib.Implementations.Select(i => 
-                                new When(new IsNotNullExpression(i.Field.ExternalId), TypeConstant(i.Type))), NullId))
+                            new When(new IsNotNullExpression(i.Field.ExternalId), TypeConstant(i.Type))), NullId))
                     }; 
                 }
                 
@@ -1369,8 +1374,8 @@ namespace Signum.Engine.Linq
                     ImplementedByAllExpression iba = (ImplementedByAllExpression)expression;
                     return new []
                     {
-                        new ColumnAssignment((ColumnExpression)colIba.Id, iba.Id),
-                        new ColumnAssignment((ColumnExpression)colIba.TypeId, iba.TypeId)
+                        AssignColumn(colIba.Id, iba.Id),
+                        AssignColumn(colIba.TypeId, iba.TypeId)
                     };
                 }
             }
@@ -1382,13 +1387,13 @@ namespace Signum.Engine.Linq
         {
             if (colExpression is ColumnExpression)
             {
-                return new[] { new ColumnAssignment((ColumnExpression)colExpression, new SqlConstantExpression(null, colExpression.Type)) };
+                return new[] { AssignColumn(colExpression, new SqlConstantExpression(null, colExpression.Type)) };
             }
             else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type.UnNullify().IsEnum && ((UnaryExpression)colExpression).Operand is ColumnExpression)
             {
                 ColumnExpression col2 = (ColumnExpression)((UnaryExpression)colExpression).Operand;
 
-                return new[] { new ColumnAssignment(col2, new SqlConstantExpression(null, colExpression.Type)) };
+                return new[] { AssignColumn(col2, new SqlConstantExpression(null, colExpression.Type)) };
             }
             else if (colExpression is LiteReferenceExpression)
             {
@@ -1398,12 +1403,12 @@ namespace Signum.Engine.Linq
             else if (colExpression is FieldInitExpression)
             {
                 FieldInitExpression colFie = (FieldInitExpression)colExpression;
-                return new[] { new ColumnAssignment((ColumnExpression)colFie.ExternalId, NullId) };
+                return new[] { AssignColumn(colFie.ExternalId, NullId) };
             }
             else if (colExpression is ImplementedByExpression)
             {
                 ImplementedByExpression colIb = (ImplementedByExpression)colExpression;     
-                return colIb.Implementations.Select(imp => (new ColumnAssignment((ColumnExpression)imp.Field.ExternalId, NullId))).ToArray();
+                return colIb.Implementations.Select(imp => (AssignColumn(imp.Field.ExternalId, NullId))).ToArray();
             }
             else if (colExpression is ImplementedByAllExpression)
             {
@@ -1411,14 +1416,14 @@ namespace Signum.Engine.Linq
 
                 return new[]
                 {
-                    new ColumnAssignment((ColumnExpression)colIba.Id, NullId),
-                    new ColumnAssignment((ColumnExpression)colIba.TypeId, NullId)
+                    AssignColumn(colIba.Id, NullId),
+                    AssignColumn(colIba.TypeId, NullId)
                 };
             }
             else if (colExpression is EmbeddedFieldInitExpression)
             {
                 EmbeddedFieldInitExpression colEfie = (EmbeddedFieldInitExpression)colExpression;
-                ColumnAssignment ca = new ColumnAssignment((ColumnExpression)colEfie.HasValue, new SqlConstantExpression(true, typeof(bool)));
+                ColumnAssignment ca = AssignColumn(colEfie.HasValue, new SqlConstantExpression(true, typeof(bool)));
                 return colEfie.Bindings.SelectMany(fb => AssignNull(fb.Binding)).PreAnd(ca).ToArray();
             }
 

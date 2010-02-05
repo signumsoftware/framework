@@ -216,6 +216,13 @@ namespace Signum.Test
             set { Set(ref country, value, () => Country); }
         }
 
+        Lite<LabelDN> owner;
+        public Lite<LabelDN> Owner
+        {
+            get { return owner; }
+            set { Set(ref owner, value, () => Owner); }
+        }
+
         public override string ToString()
         {
             return name;

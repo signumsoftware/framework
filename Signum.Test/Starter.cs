@@ -184,7 +184,7 @@ namespace Signum.Test
 
             new NoteDN { CreationTime = DateTime.Now.AddDays(-100), Text = "The blue one with the angel", Target = mellon }.Save();
 
-            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa };
+            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite() };
 
             new AlbumDN
             {
@@ -291,7 +291,7 @@ namespace Signum.Test
                 LastAward = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
             };
 
-            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa }; 
+            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite() }; 
 
             new AlbumDN
             {
