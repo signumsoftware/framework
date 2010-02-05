@@ -59,14 +59,15 @@ namespace Signum.Windows
             Common.SetIsReadOnly(g, f.Frozen);
         
             Type type = f.Token.Type;
-            if (typeof(Lite).IsAssignableFrom(type) || typeof(IdentifiableEntity).IsAssignableFrom(type))
+            if (typeof(Lite).IsAssignableFrom(type))
             {
-                Type cleanType = typeof(Lite).IsAssignableFrom(type) ? Reflector.ExtractLite(type) : type;
-                if (Reflector.IsLowPopulation(cleanType))
+                Type cleanType = Reflector.ExtractLite(type);
+
+                if (Reflector.IsLowPopulation(cleanType) && !(implementations is ImplementedByAllAttribute))
                 {
                     EntityCombo ec = new EntityCombo
                     {
-                        Type = Reflector.GenerateLite(cleanType),
+                        Type = type,
                         Style = (Style)FindResource("toolTip"),
                         Implementations = implementations
                     };
@@ -83,7 +84,7 @@ namespace Signum.Windows
                 {
                     EntityLine el = new EntityLine
                     {
-                        Type = Reflector.GenerateLite(cleanType),
+                        Type = type,
                         Create = false,
                         HideAutoCompleteOnLostFocus = false,
                         Implementations = implementations
@@ -98,18 +99,36 @@ namespace Signum.Windows
                     g.Children.Add(el);
                 }
             }
+            else if (typeof(EmbeddedEntity).IsAssignableFrom(type))
+            {
+                EntityLine el = new EntityLine
+                {
+                    Type = type,
+                    Create = false,
+                    HideAutoCompleteOnLostFocus = false,
+                    Implementations = implementations
+                };
+                el.SetBinding(EntityLine.EntityProperty, new Binding
+                {
+                    Path = new PropertyPath(FilterOption.RealValueProperty),
+                    NotifyOnValidationError = true,
+                    ValidatesOnDataErrors = true,
+                    ValidatesOnExceptions = true
+                });
+                g.Children.Add(el);
+            }
             else
             {
                 QueryToken token = f.Token;
 
-                ValueLine vl = new ValueLine() { Type = type, Format = token.Format, UnitText = token.Unit};
+                ValueLine vl = new ValueLine() { Type = type, Format = token.Format, UnitText = token.Unit };
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
                     Path = new PropertyPath("RealValue"),
                     NotifyOnValidationError = true,
                     ValidatesOnDataErrors = true,
                     ValidatesOnExceptions = true,
-                    Converter = Reflector.IsNumber(type) ?  Converters.Identity: null,
+                    Converter = Reflector.IsNumber(type) ? Converters.Identity : null,
                 });
                 g.Children.Add(vl);
             }

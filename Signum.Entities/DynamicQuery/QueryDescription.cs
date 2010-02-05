@@ -91,20 +91,33 @@ namespace Signum.Entities.DynamicQuery
             get { return index; }
         }
 
-        public PropertyInfo twinProperty;
-        public PropertyInfo TwinProperty
+        PropertyRoute propertyRoute;
+        public PropertyRoute PropertyRoute
         {
-            get { return twinProperty; }
+            get { return propertyRoute; }
             set
             {
-                twinProperty = value;
-                if (twinProperty != null)
+                propertyRoute = value;
+                if (propertyRoute != null)
                 {
-                    DisplayName = twinProperty.NiceName();
-                    Format = Reflector.FormatString(twinProperty);
-                    Unit = twinProperty.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
+                    if (propertyRoute.PropertyRouteType != PropertyRouteType.Property)
+                        throw new InvalidOperationException("propertyRoute has to be a Property");
+
+                    PropertyInfo pi = propertyRoute.PropertyInfo;
+
+                    if (pi.Name == this.Name)
+                        DisplayName = pi.NiceName();
+                    Format = Reflector.FormatString(pi);
+                    Unit = pi.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
+                    //Implementations = propertyRoute.GetImplementations(); delayed to connection creation
                 }
             }
+        }
+
+        public void SetPropertyRoute<T>(Expression<Func<T, object>> expression)
+            where T : IdentifiableEntity
+        {
+            PropertyRoute = PropertyRoute.Construct(expression);
         }
 
         [NonSerialized]
@@ -132,10 +145,17 @@ namespace Signum.Entities.DynamicQuery
             if (typeof(IIdentifiable).IsInstanceOfType(Type))
                 throw new InvalidOperationException("{0} column returns subtype of IdentifiableEntity, use a Lite instead!!".Formato(mi.MemberName()));
 
-            if (meta is CleanMeta && ((CleanMeta)meta).PropertyPath.PropertyRouteType == PropertyRouteType.Property)
-                TwinProperty = ((CleanMeta)meta).PropertyPath.PropertyInfo;
-            else
+            Type cleanType = Reflector.ExtractLite(Type); 
+            if (IsEntity &&  cleanType == null)
+                throw new InvalidOperationException("Entity must be a Lite");
+
+            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+                PropertyRoute = ((CleanMeta)meta).PropertyRoute;
+
+            if (DisplayName == null)
             {
+                if (IsEntity)
+                    DisplayName = cleanType.NiceName();
                 if (mi is PropertyInfo)
                     DisplayName = ((PropertyInfo)mi).NiceName();
                 else
@@ -144,20 +164,7 @@ namespace Signum.Entities.DynamicQuery
 
             Sortable = true;
             Filterable = true;
-            if (IsEntity)
-            {
-                Type cleanType = Reflector.ExtractLite(Type); 
-                if(cleanType  == null)
-                    throw new InvalidOperationException("Entity must be a Lite");
-                DisplayName = cleanType.NiceName();
-
-                Visible = false;
-            }
-            else
-            {
-                Visible = true;
-            }
-
+            Visible = !IsEntity;
         }
 
         public override bool IsAllowed()

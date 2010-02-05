@@ -285,6 +285,8 @@ namespace Signum.Windows
                 fo.ValueChanged += new EventHandler(fo_ValueChanged);
             }
 
+            filterBuilder.Filters = FilterOptions;
+
             Navigator.Manager.SetTokens(QueryName, OrderOptions);
 
             for (int i = 0; i < OrderOptions.Count; i++)

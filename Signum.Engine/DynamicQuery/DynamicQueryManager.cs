@@ -9,6 +9,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.Properties;
 using Signum.Entities;
 using System.Diagnostics;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -102,5 +103,17 @@ namespace Signum.Engine.DynamicQuery
         }
 
 
+
+        internal void SetSchemaImplementations(Schema schema)
+        {
+            foreach (var dm in queries.Values)
+            {
+                foreach (var col in dm.StaticColumns)
+                {
+                    if (col.PropertyRoute != null && col.Implementations == null)
+                        col.Implementations = schema.FindImplementations(col.PropertyRoute); 
+                }
+            }
+        }
     }
 }

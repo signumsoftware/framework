@@ -259,8 +259,8 @@ namespace Signum.Entities.Reflection
 
         public static bool IsLowPopulation(Type type)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new ApplicationException(Resources._0DoesNotInheritFromIdentifiableEntity);
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                throw new ApplicationException(Resources._0DoesNotInheritFromIdentifiableEntity.Formato(type));
 
             LowPopulationAttribute lpa = type.SingleAttribute<LowPopulationAttribute>();
             if (lpa != null)
@@ -296,17 +296,20 @@ namespace Signum.Entities.Reflection
                 return format.Format;
 
             var pp = Validator.GetOrCreatePropertyPack(property);
-            DateOnlyValidatorAttribute dateOnly = pp == null ? null : pp.Validators.OfType<DateOnlyValidatorAttribute>().SingleOrDefault();
-            if (dateOnly != null)
-                return "d"; 
+            if (pp != null)
+            {
+                DateOnlyValidatorAttribute dateOnly = pp.Validators.OfType<DateOnlyValidatorAttribute>().SingleOrDefault();
+                if (dateOnly != null)
+                    return "d";
 
-            DecimalsValidatorAttribute decimals = property.SingleAttribute<DecimalsValidatorAttribute>();
-            if(decimals != null)
-                return "N" + decimals.DecimalPlaces;
+                DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefault();
+                if (decimals != null)
+                    return "N" + decimals.DecimalPlaces;
 
-            StringCaseValidatorAttribute stringCase = property.SingleAttribute<StringCaseValidatorAttribute>();
-            if (stringCase != null)
-                return stringCase.TextCase == Case.Lowercase ? "L" : "U"; 
+                StringCaseValidatorAttribute stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefault();
+                if (stringCase != null)
+                    return stringCase.TextCase == Case.Lowercase ? "L" : "U";
+            }
 
             return FormatString(property.PropertyType);
         }

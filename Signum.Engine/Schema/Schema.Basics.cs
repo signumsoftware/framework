@@ -240,6 +240,11 @@ namespace Signum.Engine.Maps
         }
         #endregion
 
+        static Schema()
+        {
+            PropertyRoute.SetFindImplementationsCallback(pr => Schema.Current.FindImplementations(pr));
+        }
+
         internal Schema(SchemaSettings settings)
         {
             this.Settings = settings;

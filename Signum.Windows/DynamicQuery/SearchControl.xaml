@@ -86,7 +86,7 @@
                     <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc NewColumn}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click"
                                    Visibility="{Binding AllowUserColumns, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}"/>
                 </StackPanel>
-                <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1" Filters="{Binding FilterOptions, ElementName=me}"/>
+                <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
             </Grid>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent">
                 <StackPanel.Resources>

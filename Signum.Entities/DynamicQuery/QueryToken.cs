@@ -494,9 +494,9 @@ namespace Signum.Entities.DynamicQuery
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
-                if (Column.TwinProperty != null)
+                if (Column.PropertyRoute != null)
                 {
-                    var pp = Validator.GetOrCreatePropertyPack(Column.TwinProperty);
+                    var pp = Validator.GetOrCreatePropertyPack(Column.PropertyRoute.PropertyInfo);
                     if (pp != null && pp.Validators.OfType<DateOnlyValidatorAttribute>().Any())
                         return NetPropertyToken.DateProperties(this);
                 }

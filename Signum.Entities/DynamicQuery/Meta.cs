@@ -20,16 +20,16 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class CleanMeta : Meta
     {
-        public PropertyRoute PropertyPath; 
+        public PropertyRoute PropertyRoute; 
 
-        public CleanMeta(PropertyRoute propertyPath)
+        public CleanMeta(PropertyRoute propertyRoute)
         {
-            this.PropertyPath = propertyPath;
+            this.PropertyRoute = propertyRoute;
         }
 
         public override bool IsAllowed()
         {
-            return PropertyPath.IsAllowed();
+            return PropertyRoute.IsAllowed();
         }
 
         static bool ColumnIsAllowed(UserColumn column)

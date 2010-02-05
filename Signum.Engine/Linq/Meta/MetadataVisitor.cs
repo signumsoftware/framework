@@ -207,7 +207,7 @@ namespace Signum.Engine.Linq
                 if (meta != null && meta.Meta is CleanMeta)
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
-                            new CleanMeta(((CleanMeta)meta.Meta).PropertyPath.Add("Item"))));
+                            new CleanMeta(((CleanMeta)meta.Meta).PropertyRoute.Add("Item"))));
 
                 return new MetaProjectorExpression(expression.Type,
                      MakeVoidMeta(elementType)); 
@@ -384,7 +384,7 @@ namespace Signum.Engine.Linq
                     return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add(Reflector.FindPropertyInfo(member))));
 
                 MetaExpression meta = (MetaExpression)source;
-                PropertyRoute path = meta.Meta is CleanMeta ? ((CleanMeta)meta.Meta).PropertyPath : PropertyRoute.Root(source.Type);
+                PropertyRoute path = meta.Meta is CleanMeta ? ((CleanMeta)meta.Meta).PropertyRoute : PropertyRoute.Root(source.Type);
 
                 return new MetaExpression(memberType, new CleanMeta(path.Add(Reflector.FindPropertyInfo(member))));
             }

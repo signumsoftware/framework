@@ -27,11 +27,12 @@ namespace Signum.Engine.DynamicQuery
         Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
         string GetErrors();
         Expression Expression { get; } //Optional
+        StaticColumn[] StaticColumns { get; } 
     }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
     {
-        protected StaticColumn[] staticColumns; 
+        public StaticColumn[] StaticColumns { get; protected set; } 
 
         public abstract ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
         public abstract int ExecuteQueryCount(List<Filter> filters);
@@ -39,28 +40,28 @@ namespace Signum.Engine.DynamicQuery
 
         public string GetErrors()
         {
-            int count = staticColumns.Where(c => c.IsEntity).Count();
+            int count = StaticColumns.Where(c => c.IsEntity).Count();
 
             string errors = count == 0 ? Resources.ThereIsNoEntityColumn :
                             count > 1 ? Resources.ThereAreMoreThanOneEntityColumn : null;
 
-            return errors.Add(staticColumns.Where(c => typeof(ModifiableEntity).IsAssignableFrom(c.Type)).ToString(c => c.Name, ", "), ", ");
+            return errors.Add(StaticColumns.Where(c => typeof(ModifiableEntity).IsAssignableFrom(c.Type)).ToString(c => c.Name, ", "), ", ");
         }
 
         public QueryDescription GetDescription()
         {
-            return new QueryDescription { StaticColumns = staticColumns.Where(a=>a.IsAllowed()).ToList() };
+            return new QueryDescription { StaticColumns = StaticColumns.Where(a => a.IsAllowed()).ToList() };
         }
 
         protected ResultTable ToQueryResult(Expandable<T>[] result, IEnumerable<UserColumn> userColumns)
         {
-            return Create(result, staticColumns.Where(a => a.IsAllowed()), userColumns == null ? new UserColumn[0] : userColumns.Where(a => a.IsAllowed()));
+            return Create(result, StaticColumns.Where(a => a.IsAllowed()), userColumns == null ? new UserColumn[0] : userColumns.Where(a => a.IsAllowed()));
         }
 
         public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<StaticColumn> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
-            StaticColumn col = staticColumns.Single(a => a.Name == member.Name);
+            StaticColumn col = StaticColumns.Single(a => a.Name == member.Name);
             change(col);
 
             return this;
@@ -68,7 +69,7 @@ namespace Signum.Engine.DynamicQuery
 
         public Type EntityCleanType()
         {
-            Type type = staticColumns.Where(c => c.IsEntity).Single(Resources.ThereIsNoEntityColumn, Resources.ThereAreMoreThanOneEntityColumn).Type;
+            Type type = StaticColumns.Where(c => c.IsEntity).Single(Resources.ThereIsNoEntityColumn, Resources.ThereAreMoreThanOneEntityColumn).Type;
 
             return Reflector.ExtractLite(type).ThrowIfNullC(Resources.EntityColumnIsNotALite);
         }

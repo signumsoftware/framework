@@ -191,8 +191,13 @@ namespace Signum.Windows
             if (this.NotSet(EntityBase.ViewProperty) && View && Implementations == null)
                 View = Navigator.IsViewable(CleanType, false);
 
-            if (this.NotSet(EntityBase.FindProperty) && Find && Implementations == null)
-                Find = Navigator.IsFindable(CleanType);
+            if (this.NotSet(EntityBase.FindProperty) && Find)
+            {
+                if (Implementations == null)
+                    Find = Navigator.IsFindable(CleanType);
+                if (Implementations is ImplementedByAllAttribute)
+                    Find = false;
+            }
 
             if (this.NotSet(EntityBase.ViewOnCreateProperty) && ViewOnCreate && !View)
                 ViewOnCreate = false;

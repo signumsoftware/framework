@@ -21,7 +21,7 @@ namespace Signum.Engine.DynamicQuery
 
             this.execute = execute;
 
-            this.staticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties).Select((e, i) =>
+            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties).Select((e, i) =>
                     new StaticColumn(i, e.MemberInfo, null, CreateGetter(e.MemberInfo))).ToArray();
         }
 

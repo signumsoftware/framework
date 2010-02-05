@@ -24,7 +24,7 @@ namespace Signum.Engine.DynamicQuery
 
             metas = DynamicQuery.QueryMetadata(query);
 
-            staticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
                 .Select((e, i) => new StaticColumn(i, e.MemberInfo, metas[e.MemberInfo.Name], CreateGetter(e.MemberInfo))).ToArray();
         }
 
