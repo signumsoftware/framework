@@ -305,7 +305,8 @@
       <DependentUpon>EntityTitle.xaml</DependentUpon>
     </Compile>
     <Compile Include="MarkupExtensions\EqualsExtension.cs" />
-    <Compile Include="ThemeManager.cs" />
+    <Compile Include="Utilities\Monitors.cs" />
+    <Compile Include="Utilities\ThemeManager.cs" />
     <Compile Include="ValueLineBox.xaml.cs">
       <DependentUpon>ValueLineBox.xaml</DependentUpon>
     </Compile>

@@ -29,13 +29,8 @@ namespace Signum.Engine.DynamicQuery
             {
                 return TryGet(queryName).ThrowIfNullC(Resources.TheView0IsNotOnQueryManager.Formato(queryName));
             }
-            set {
-
-                string error = value.GetErrors();
-
-                if (error.HasText())
-                    Debug.WriteLine("Query {0} -> {1}".Formato(Signum.Entities.DynamicQuery.QueryUtils.GetQueryName(queryName), error));
-
+            set
+            {
                 queries[queryName] = value;
             }
         }
@@ -80,10 +75,6 @@ namespace Signum.Engine.DynamicQuery
             try
             {
                 IDynamicQuery dq = this[queryName];
-
-                string error = dq.GetErrors();
-                if (error.HasText())
-                    return "Error {0}: No ToLite() on {1}".Formato(queryName, error);
 
                 Connection.CommandCount = 0;
                 ResultTable result = dq.ExecuteQuery(null, null, null, 100);

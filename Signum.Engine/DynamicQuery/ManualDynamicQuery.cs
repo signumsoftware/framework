@@ -21,8 +21,7 @@ namespace Signum.Engine.DynamicQuery
 
             this.execute = execute;
 
-            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties).Select((e, i) =>
-                    new StaticColumn(i, e.MemberInfo, null, CreateGetter(e.MemberInfo))).ToArray();
+            InitializeColumns(mi => null);
         }
 
         public override ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)

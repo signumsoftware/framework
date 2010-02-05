@@ -24,8 +24,7 @@ namespace Signum.Engine.DynamicQuery
 
             metas = DynamicQuery.QueryMetadata(query);
 
-            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
-                .Select((e, i) => new StaticColumn(i, e.MemberInfo, metas[e.MemberInfo.Name], CreateGetter(e.MemberInfo))).ToArray();
+            InitializeColumns(mi => metas[mi.Name]);
         }
 
         public override ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit)

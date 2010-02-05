@@ -114,7 +114,7 @@ namespace Signum.Windows
         {
             base.OnClosing(e);
 
-            if (buttonBar.SaveVisible && this.HasChanges())
+            if (this.HasChanges())
             {
                 var result = MessageBox.Show(Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
                     MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
@@ -148,6 +148,14 @@ namespace Signum.Windows
         private void widgetPanel_ExpandedCollapsed(object sender, RoutedEventArgs e)
         {
             this.SizeToContent = SizeToContent.WidthAndHeight;
+        }
+
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            var info = Monitors.GetMonitorFromWindow(this, NotFoundOptions.DefaultToNearest);
+
+            this.MaxWidth = info.WorkingArea.Width;
+            this.MaxHeight = info.WorkingArea.Height;
         }
     }
 }

@@ -20,13 +20,17 @@ namespace Signum.Windows
     {
         public static bool HasChanges(this FrameworkElement element)
         {
+            IHasChangesHandler hch = element as IHasChangesHandler;
+            if (hch != null)
+                return hch.HasChanges();
+
             var graph = GraphExplorer.FromRoot((Modifiable)element.DataContext);
             return graph.Any(a => a.SelfModified);
         }
 
         public static bool AssertErrors(this FrameworkElement element)
         {
-            IAsserErrorsHandler aeh = element as IAsserErrorsHandler;
+            IAssertErrorsHandler aeh = element as IAssertErrorsHandler;
             if (aeh != null)
                 return aeh.AssertErrors();
 
@@ -56,8 +60,13 @@ namespace Signum.Windows
         }
     }
     
-    public interface IAsserErrorsHandler
+    public interface IAssertErrorsHandler
     {
         bool AssertErrors();
+    }
+
+    public interface IHasChangesHandler
+    {
+        bool HasChanges();
     }
 }

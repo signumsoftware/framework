@@ -25,27 +25,24 @@ namespace Signum.Engine.DynamicQuery
         ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
         int ExecuteQueryCount(List<Filter> filters);
         Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
-        string GetErrors();
         Expression Expression { get; } //Optional
         StaticColumn[] StaticColumns { get; } 
     }
 
     public abstract class DynamicQuery<T> : IDynamicQuery
     {
-        public StaticColumn[] StaticColumns { get; protected set; } 
+        public StaticColumn[] StaticColumns { get; private set; } 
 
         public abstract ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
         public abstract int ExecuteQueryCount(List<Filter> filters);
         public abstract Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
 
-        public string GetErrors()
+        protected void InitializeColumns(Func<MemberInfo, Meta> getMeta)
         {
-            int count = StaticColumns.Where(c => c.IsEntity).Count();
+            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+              .Select((e, i) => new StaticColumn(i, e.MemberInfo, getMeta(e.MemberInfo), CreateGetter(e.MemberInfo))).ToArray();
 
-            string errors = count == 0 ? Resources.ThereIsNoEntityColumn :
-                            count > 1 ? Resources.ThereAreMoreThanOneEntityColumn : null;
-
-            return errors.Add(StaticColumns.Where(c => typeof(ModifiableEntity).IsAssignableFrom(c.Type)).ToString(c => c.Name, ", "), ", ");
+            StaticColumns.Where(a => a.IsEntity).Single("Entity column not found", "More than one Entity column"); 
         }
 
         public QueryDescription GetDescription()

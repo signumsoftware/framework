@@ -4,8 +4,10 @@
 	xmlns:m="clr-namespace:Signum.Windows"
 	x:Class="Signum.Windows.SearchWindow"
 	x:Name="me"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" ResizeMode="CanResizeWithGrip">
+    SizeToContent="WidthAndHeight"
+	ResizeMode="CanResizeWithGrip" 
+	WindowStartupLocation="CenterScreen"
+    LocationChanged="me_LocationChanged">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

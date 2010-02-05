@@ -142,8 +142,8 @@ namespace Signum.Entities.DynamicQuery
             Type = mi.ReturningType();
             Meta = meta;
 
-            if (typeof(IIdentifiable).IsInstanceOfType(Type))
-                throw new InvalidOperationException("{0} column returns subtype of IdentifiableEntity, use a Lite instead!!".Formato(mi.MemberName()));
+            if (typeof(IIdentifiable).IsAssignableFrom(Type))
+                throw new InvalidOperationException("The type of column {0} is a subtype of IIdentifiable, use a Lite instead!!".Formato(mi.MemberName()));
 
             Type cleanType = Reflector.ExtractLite(Type); 
             if (IsEntity &&  cleanType == null)
