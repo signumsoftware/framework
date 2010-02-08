@@ -75,7 +75,7 @@ namespace Signum.Engine.DynamicQuery
 
         public void AssertQueryAllowed(object queryName)
         {
-            if(QueryAllowed(queryName))
+            if(!QueryAllowed(queryName))
                 throw new UnauthorizedAccessException(Resources.AccessToQuery0IsNotAllowed.Formato(queryName));
         }
 
