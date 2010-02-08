@@ -86,6 +86,90 @@ namespace Signum.Web.Extensions
             return sb.ToString();
         }
 
+        public static IEnumerable<WikiLink> WikiLinks(string content)
+        {
+            Match m = Regex.Match(content, @"\[(?<letter>.):(?<link>[^\|\]]*)(\|(?<text>.*?))?\]");
+
+            while (m.Success)
+            {
+                string letter = m.Groups["letter"].ToString();
+                string link = m.Groups["link"].ToString();
+                string text = m.Groups["text"].ToString();
+
+                WikiLink result = null;
+
+                switch (letter)
+                {
+                    case WikiFormat.EntityLink:
+                        Type t = HelpLogic.GetNameToType(link, false);
+                        result = new WikiLink(t != null ? HelpLogic.EntityUrl(t) : link,
+                            text.HasText() ? text : t != null ? t.NiceName() : link,
+                            t != null ? "" : "unavailable");
+                        break;
+
+                    case WikiFormat.HyperLink:
+                        result = new WikiLink(link, text);
+                        break;
+
+                    case WikiFormat.OperationLink:
+                        Enum operation = EnumLogic<OperationDN>.ToEnum(link, false);
+                        result = new WikiLink(operation != null ?
+                            HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_') : link,
+                            text.HasText() ? text : (operation != null ? operation.NiceToString() : link),
+                            operation != null ? "" : "unavailable");
+                        break;
+
+                    case WikiFormat.PropertyLink:
+                        string[] parts = link.Split('.');
+                        Type type = HelpLogic.GetNameToType(parts[0], false);
+                        //TODO: NiceToString de la propiedad
+                        result = new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
+                            text.HasText() ? text : parts[1],
+                            type != null ? "" : "unavailable");
+                        break;
+
+                    case WikiFormat.QueryLink:
+                        object o = QueryLogic.ToQueryName(link, false);
+                        if (o as Enum != null)
+                        {
+                            Enum query = (Enum)o;
+                            result = new WikiLink(
+                                query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityCleanType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
+                                text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
+                                query != null ? "" : "unavailable");
+                        }
+                        else
+                        {
+                            Type query = (Type)o;
+                            result = new WikiLink(
+                                query != null ? (HelpLogic.EntityUrl(query) + "#" + "q-" + query.FullName.Replace(".", "_")) : link,
+                                text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
+                                query != null ? "" : "unavailable");
+
+                            //Treat as entity
+                        }
+                        break;
+
+                    case WikiFormat.WikiLink:
+                        result = new WikiLink(WikiUrl + link, text.HasText() ? text : "Enlace a wiki");
+                        break;
+
+                    case WikiFormat.NameSpaceLink:
+                        NamespaceHelp nameSpace = HelpLogic.GetNamespace(link);
+                        result = new WikiLink(
+                            HelpLogic.BaseUrl + "/Namespace/" + link,
+                            text.HasText() ? text : link,
+                            nameSpace != null ? "" : "unavailable");
+                        break;
+                }
+
+                yield return result;
+
+                m = m.NextMatch();
+            }
+            yield break;
+        }
+        
         public static string WikiParse(this HtmlHelper html, string content)
         {
             StringBuilder sb = new StringBuilder();
