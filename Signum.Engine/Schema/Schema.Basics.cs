@@ -354,6 +354,8 @@ namespace Signum.Engine.Maps
 
         public event FilterQueryEventHandler<T> FilterQuery; 
 
+        
+
         public IQueryable<T> OnFilterQuery(IQueryable<T> query)
         {
             if(FilterQuery != null)
