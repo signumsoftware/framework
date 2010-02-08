@@ -114,19 +114,32 @@ namespace Signum.Windows
         {
             base.OnClosing(e);
 
-            if (this.HasChanges())
+            if (buttonBar.ViewButtons== ViewButtons.Save && this.HasChanges())
             {
-                var result = MessageBox.Show(Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
-                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
-
-                if (result == MessageBoxResult.Cancel)
+                if (buttonBar.SaveVisible)
                 {
-                    e.Cancel = true;
-                    return;
-                }
+                    var result = MessageBox.Show(Properties.Resources.SaveChanges, Properties.Resources.ThereAreChanges,
+                        MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
 
-                if (result == MessageBoxResult.Yes)
-                    DataContext = Server.Save((IdentifiableEntity)DataContext);
+                    if (result == MessageBoxResult.Cancel)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+
+                    if (result == MessageBoxResult.Yes)
+                        DataContext = Server.Save((IdentifiableEntity)DataContext);
+                }
+                else
+                {
+                    var result = MessageBox.Show(Properties.Resources.LoseChanges, Properties.Resources.ThereAreChanges, MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+
+                    if (result == MessageBoxResult.Cancel)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
             }
         }
 

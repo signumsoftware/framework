@@ -27,6 +27,7 @@ namespace Signum.Engine.DynamicQuery
         {
             get
             {
+                AssertQueryAllowed(queryName);
                 return TryGet(queryName).ThrowIfNullC(Resources.TheView0IsNotOnQueryManager.Formato(queryName));
             }
             set
@@ -37,6 +38,7 @@ namespace Signum.Engine.DynamicQuery
 
         IDynamicQuery TryGet(object queryName)
         {
+            AssertQueryAllowed(queryName); 
             return queries.TryGetC(queryName);
         }
 
@@ -58,6 +60,28 @@ namespace Signum.Engine.DynamicQuery
         public QueryDescription QueryDescription(object queryName)
         {
             return this[queryName].GetDescription();
+        }
+
+
+        public event Func<object, bool> AllowQuery;
+
+        public bool QueryAllowed(object queryName)
+        {
+            if (AllowQuery == null)
+                return true;
+
+            return AllowQuery(queryName);
+        }
+
+        public void AssertQueryAllowed(object queryName)
+        {
+            if(QueryAllowed(queryName))
+                throw new UnauthorizedAccessException(Resources.AccessToQuery0IsNotAllowed.Formato(queryName));
+        }
+
+        public List<object> GetAllowedQueryNames()
+        {
+            return queries.Keys.Where(QueryAllowed).ToList();
         }
 
         public List<object> GetQueryNames()
@@ -92,8 +116,6 @@ namespace Signum.Engine.DynamicQuery
                 return "Error {0}: {1}".Formato(queryName, e.Message);
             }
         }
-
-
 
         internal void SetSchemaImplementations(Schema schema)
         {

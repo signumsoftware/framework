@@ -496,4 +496,7 @@ WRITETEXT</value>
   <data name="EntityColumnIsNotALite" xml:space="preserve">
     <value>Entity column is not a Lite</value>
   </data>
+  <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
+    <value>Access to Query '{0}' is not allowed</value>
+  </data>
 </root>

@@ -396,6 +396,16 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There are changes that hasn&apos;t been saved. 
+        ///Lose changes?.
+        /// </summary>
+        internal static string LoseChanges {
+            get {
+                return ResourceManager.GetString("LoseChanges", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Move down.
         /// </summary>
         internal static string MoveDown {

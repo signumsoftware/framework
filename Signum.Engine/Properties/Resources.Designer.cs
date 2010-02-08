@@ -156,6 +156,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Access to Query &apos;{0}&apos; is not allowed.
+        /// </summary>
+        internal static string AccessToQuery0IsNotAllowed {
+            get {
+                return ResourceManager.GetString("AccessToQuery0IsNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to caching types&apos; table from {0}.
         /// </summary>
         internal static string CachingTypesTableFrom0 {

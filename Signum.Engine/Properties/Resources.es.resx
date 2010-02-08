@@ -286,4 +286,7 @@
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
     <value>¿Se ha renombrado '{0}' en {1}?</value>
   </data>
+  <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
+    <value>El acceso a la Query '{0}' no está permitido</value>
+  </data>
 </root>

@@ -707,7 +707,6 @@ namespace Signum.Windows
                 throw new InvalidOperationException(Properties.Resources.Query0NotRegistered.Formato(queryName));
         }
 
-
         public virtual void Admin(AdminOptions adminOptions)
         {
             Type type = adminOptions.Type;
