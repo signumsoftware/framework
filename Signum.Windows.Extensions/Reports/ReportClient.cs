@@ -17,7 +17,6 @@ namespace Signum.Windows.Reports
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-
                 if (toExcel)
                 {
                     SearchControl.GetCustomMenuItems += (qn, type) => new ExcelReportMenuItem();
