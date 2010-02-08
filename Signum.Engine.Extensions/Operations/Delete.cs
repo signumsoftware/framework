@@ -55,12 +55,11 @@ namespace Signum.Engine.Operations
 
         void IDeleteOperation.Delete(IIdentifiable entity, params object[] parameters)
         {
+            OperationLogic.AssertOperationAllowed(Key);
+
             string error = OnCanDelete((T)entity);
             if (error != null)
                 throw new ApplicationException(error);
-
-            if (!OperationLogic.OnAllowOperation(Key))
-                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(Key)); 
 
             try
             {

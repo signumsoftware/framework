@@ -178,12 +178,6 @@
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
     <value>Not authorized to Retrieve '{0}'</value>
   </data>
-  <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
-    <value>Access to Query '{0}' is not allowed</value>
-  </data>
-  <data name="AccessToOperation0IsNotAllowed" xml:space="preserve">
-    <value>Access to Operation '{0}' is not allowed</value>
-  </data>
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>Access to Facade Method '{0}' is not allowed</value>
   </data>

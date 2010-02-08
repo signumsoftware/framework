@@ -58,12 +58,11 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructorFromOperation.Construct(IIdentifiable entity, params object[] args)
         {
+            OperationLogic.AssertOperationAllowed(Key);
+
             string error = OnCanConstruct(entity);
             if (error != null)
                 throw new ApplicationException(error);
-
-            if (!OperationLogic.OnAllowOperation(Key))
-                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(Key)); 
 
             try
             {

@@ -154,12 +154,6 @@
   <data name="NotAuthorizedToRetrieve0" xml:space="preserve">
     <value>No autorizado para recuperar '{0}'</value>
   </data>
-  <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
-    <value>El acceso a la Query '{0}' no está permitido</value>
-  </data>
-  <data name="AccessToOperation0IsNotAllowed" xml:space="preserve">
-    <value>El acceso a la Operación '{0}' no está permitido</value>
-  </data>
   <data name="AccessToFacadeMethod0IsNotAllowed" xml:space="preserve">
     <value>El acceso a el Método de Fachada '{0}' no está permitido</value>
   </data>

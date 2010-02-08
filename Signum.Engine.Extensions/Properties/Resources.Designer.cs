@@ -107,24 +107,6 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Access to Operation &apos;{0}&apos; is not allowed.
-        /// </summary>
-        internal static string AccessToOperation0IsNotAllowed {
-            get {
-                return ResourceManager.GetString("AccessToOperation0IsNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Access to Query &apos;{0}&apos; is not allowed.
-        /// </summary>
-        internal static string AccessToQuery0IsNotAllowed {
-            get {
-                return ResourceManager.GetString("AccessToQuery0IsNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to After the operation the state should be {0} but is {1}.
         /// </summary>
         internal static string AfterTheOperationTheStateShouldBe0ButIs1 {

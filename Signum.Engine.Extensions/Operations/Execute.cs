@@ -57,12 +57,11 @@ namespace Signum.Engine.Operations
 
         void IExecuteOperation.Execute(IIdentifiable entity, params object[] parameters)
         {
+            OperationLogic.AssertOperationAllowed(Key);
+
             string error = OnCanExecute((T)entity);
             if (error != null)
                 throw new ApplicationException(error);
-
-            if (!OperationLogic.OnAllowOperation(Key))
-                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(Key)); 
 
             try
             {

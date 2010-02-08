@@ -71,6 +71,7 @@ namespace Signum.Engine.Operations
         }
 
         #region Events
+
         public static event OperationHandler BeginOperation;
         public static event OperationHandler EndOperation;
         public static event ErrorOperationHandler ErrorOperation;
@@ -94,12 +95,18 @@ namespace Signum.Engine.Operations
                 ErrorOperation(operation, entity, ex);
         }
 
-        internal static bool OnAllowOperation(Enum operationKey)
+        public static bool OperationAllowed(Enum operationKey)
         {
             if (AllowOperation != null)
                 return AllowOperation(operationKey);
             else 
                 return true; 
+        }
+
+        public static void AssertOperationAllowed(Enum operationKey)
+        {
+            if (!OperationAllowed(operationKey))
+                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(operationKey));
         }
         #endregion
 
@@ -130,14 +137,14 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> ServiceGetConstructorOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where o is IConstructorOperation && OnAllowOperation(o.Key)
+                    where o is IConstructorOperation && OperationAllowed(o.Key)
                     select ToOperationInfo(o, null)).ToList();
         }
 
         public static List<OperationInfo> ServiceGetQueryOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where o is IConstructorOperation && OnAllowOperation(o.Key)
+                    where o is IConstructorOperation && OperationAllowed(o.Key)
                     select ToOperationInfo(o, null)).ToList();
         }
 
@@ -145,7 +152,7 @@ namespace Signum.Engine.Operations
         {
             return (from o in TypeOperations(entity.GetType())
                     let eo = o as IEntityOperation
-                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OnAllowOperation(o.Key)
+                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key)
                     select ToOperationInfo(eo, eo.CanExecute(entity))).ToList();
         }
 

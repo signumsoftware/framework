@@ -33,13 +33,18 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertIsStarted(sb);
                 OperationLogic.AssertIsStarted(sb);
 
-                OperationLogic.BeginOperation += new OperationHandler(OperationLogic_BeginOperation); 
+                OperationLogic.AllowOperation += new AllowOperationHandler(OperationLogic_AllowOperation);
 
                 sb.Include<RuleOperationDN>();
                 sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RuleOperationDN>().Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
+        }
+
+        static bool OperationLogic_AllowOperation(Enum operationKey)
+        {
+            return GetAllowed(RoleDN.Current, operationKey);
         }
 
         static void Schema_Initializing(Schema sender)
@@ -55,12 +60,6 @@ namespace Signum.Engine.Authorization
         static void UserAndRoleLogic_RolesModified()
         {
             Transaction.RealCommit += () => _runtimeRules = null;
-        }
-
-        static void OperationLogic_BeginOperation(IOperation operation, IIdentifiable entity)
-        {
-            if (!GetAllowed(RoleDN.Current, operation.Key))
-                throw new UnauthorizedAccessException(Resources.AccessToOperation0IsNotAllowed.Formato(operation.Key));
         }
 
         static bool GetAllowed(RoleDN role, Enum operationKey)

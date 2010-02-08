@@ -37,11 +37,7 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructorFromManyOperation.Construct(List<Lite> lites, params object[] args)
         {
-            if (Constructor == null)
-                throw new ArgumentException("FromLite");
-
-            if (!OperationLogic.OnAllowOperation(Key))
-                throw new UnauthorizedAccessException(Resources.Operation0IsNotAuthorized.Formato(Key)); 
+            OperationLogic.AssertOperationAllowed(Key);
 
             try
             {

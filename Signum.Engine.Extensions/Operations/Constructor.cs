@@ -8,6 +8,7 @@ using Signum.Entities.Authorization;
 using System.Threading;
 using Signum.Utilities;
 using Signum.Engine.Basics;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Operations
 {
@@ -35,9 +36,8 @@ namespace Signum.Engine.Operations
 
         IIdentifiable IConstructorOperation.Construct(params object[] args)
         {
-             if (!OperationLogic.OnAllowOperation(Key))
-                throw new UnauthorizedAccessException(Signum.Engine.Extensions.Properties.Resources.Operation0IsNotAuthorized.Formato(Key));
-
+            OperationLogic.AssertOperationAllowed(Key);
+             
              try
              {
 

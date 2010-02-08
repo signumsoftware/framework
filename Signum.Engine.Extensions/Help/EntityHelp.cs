@@ -40,7 +40,7 @@ namespace Signum.Engine.Help
                 Properties = PropertyRoute.GenerateRoutes(t)
                             .ToDictionary(
                                 pp => pp.PropertyString(),
-                                pp => new PropertyHelp(pp.PropertyInfo, HelpGenerator.GetPropertyHelp(t, pp.PropertyInfo))),
+                                pp => new PropertyHelp(pp, HelpGenerator.GetPropertyHelp(t, pp.PropertyInfo))),
 
                 Operations = OperationLogic.GetAllOperationInfos(t)
                             .ToDictionary(
@@ -108,7 +108,7 @@ namespace Signum.Engine.Help
                     pp => pp.PropertyString(),
                     (x, pp) => new KeyValuePair<string, PropertyHelp>(
                          pp.PropertyString(),
-                         new PropertyHelp(pp.PropertyInfo, x.Attribute(_Info).Value, x.Value)),
+                         new PropertyHelp(pp, x.Attribute(_Info).Value, x.Value)),
                     "Loading Properties for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
 
                 Operations = EnumerableExtensions.JoinStrict(
@@ -375,22 +375,25 @@ namespace Signum.Engine.Help
 
     public class PropertyHelp
     {
-        public PropertyHelp(PropertyInfo propertyInfo, string info)
+        public PropertyHelp(PropertyRoute propertyRoute, string info)
         {
-            this.PropertyInfo = propertyInfo;
+            if(propertyRoute.PropertyRouteType != PropertyRouteType.Property)
+                throw new ArgumentException("propertyRoute should be of type Property"); 
+
+            this.PropertyRoute = propertyRoute;
             this.Info = info;
         }
 
-        public PropertyHelp(PropertyInfo propertyInfo, string info, string userDescription)
+        public PropertyHelp(PropertyRoute propertyRoute, string info, string userDescription)
+            : this(propertyRoute, info)
         {
-            this.PropertyInfo = propertyInfo;
-            this.Info = info;
             this.UserDescription = userDescription;
         }
 
         public string Info { get; private set; }
         public string UserDescription { get; set; }
-        public PropertyInfo PropertyInfo { get; private set; }
+        public PropertyInfo PropertyInfo { get { return PropertyRoute.PropertyInfo; } }
+        public PropertyRoute PropertyRoute { get; private set; }
 
         public override string ToString()
         {
