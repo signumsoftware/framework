@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Signum.Utilities;
 
 // Version information for an assembly consists of the following four values:
 //

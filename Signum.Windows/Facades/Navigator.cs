@@ -284,7 +284,7 @@ namespace Signum.Windows
         public Dictionary<Type, TypeDN> ServerTypes { get; private set; }
 
         public event Func<Type, bool> GlobalIsCreable;
-        public event Func<Type, bool> GlobalIsReadOnly;
+        public event Func<Type, bool> GlobalIsReadOnly; //IsNew
         public event Func<Type, bool> GlobalIsViewable;
         public event Func<object, bool> GlobalIsFindable;
 
@@ -601,7 +601,7 @@ namespace Signum.Windows
 
             ViewButtons buttons = options.GetViewButtons();
 
-            bool isReadOnly = options.ReadOnly ?? IsReadOnly(entityType, false);
+            bool isReadOnly = options.ReadOnly ?? (!IsNew(entity) && IsReadOnly(entityType, options.Admin));
 
             NormalWindow win = new NormalWindow()
             {
@@ -622,6 +622,14 @@ namespace Signum.Windows
                 TaskNormalWindow(win, entity);
 
             return win;
+        }
+
+        private bool IsNew(ModifiableEntity entity)
+        {
+            if (entity is IdentifiableEntity)
+                return ((IdentifiableEntity)entity).IsNew;
+
+            return false;
         }
 
         internal protected virtual bool IsCreable(Type type, bool admin)

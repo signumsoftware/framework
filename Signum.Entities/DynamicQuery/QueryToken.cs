@@ -44,7 +44,7 @@ namespace Signum.Entities.DynamicQuery
         {
             if (type.UnNullify() == typeof(DateTime))
             {
-                return NetPropertyToken.DateTimeProperties(this);
+                return NetPropertyToken.DateTimeProperties(this, DateTimePrecision.Milliseconds);
             }
 
             Type cleanType = Reflector.ExtractLite(type) ?? type;
@@ -211,28 +211,18 @@ namespace Signum.Entities.DynamicQuery
             return new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo(property), propertyName);
         }
 
-        public static QueryToken[] DateTimeProperties(QueryToken parent)
+        public static QueryToken[] DateTimeProperties(QueryToken parent, DateTimePrecision precission)
         {
             return new[]
             {
                 NewNetProperty(parent, (DateTime dt)=>dt.Year, Resources.Year), 
                 NewNetProperty(parent, (DateTime dt)=>dt.Month, Resources.Month), 
                 NewNetProperty(parent, (DateTime dt)=>dt.Day, Resources.Day), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Hour, Resources.Hour), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Minute, Resources.Minute), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Second, Resources.Second), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Millisecond, Resources.Millisecond), 
-            };
-        }
-
-        public static QueryToken[] DateProperties(QueryToken parent)
-        {
-            return new[]
-            {
-                NewNetProperty(parent, (DateTime dt)=>dt.Year, Resources.Year), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Month, Resources.Month), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Day, Resources.Day)
-            };
+                precission < DateTimePrecision.Hours ? null: NewNetProperty(parent, (DateTime dt)=>dt.Hour, Resources.Hour), 
+                precission < DateTimePrecision.Minutes ? null: NewNetProperty(parent, (DateTime dt)=>dt.Minute, Resources.Minute), 
+                precission < DateTimePrecision.Seconds ? null: NewNetProperty(parent, (DateTime dt)=>dt.Second, Resources.Second), 
+                precission < DateTimePrecision.Milliseconds? null: NewNetProperty(parent, (DateTime dt)=>dt.Millisecond, Resources.Millisecond), 
+            }.NotNull().ToArray();
         }
 
         public static QueryToken[] CollectionProperties(QueryToken parent)
@@ -324,9 +314,12 @@ namespace Signum.Entities.DynamicQuery
             {
                 if (PropertyInfo != null)
                 {
-                    var pp = Validator.GetOrCreatePropertyPack(PropertyInfo);
-                    if (pp != null && pp.Validators.OfType<DateOnlyValidatorAttribute>().Any())
-                        return NetPropertyToken.DateTimeProperties(this);
+                    var att = Validator.GetOrCreatePropertyPack(PropertyInfo).TryCC(pp =>
+                        pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault());
+                    if (att != null)
+                    {
+                        return NetPropertyToken.DateTimeProperties(this, att.Precision);
+                    }
                 }
             }
 
@@ -496,13 +489,15 @@ namespace Signum.Entities.DynamicQuery
             {
                 if (Column.PropertyRoute != null)
                 {
-                    var pp = Validator.GetOrCreatePropertyPack(Column.PropertyRoute.PropertyInfo);
-                    if (pp != null && pp.Validators.OfType<DateOnlyValidatorAttribute>().Any())
-                        return NetPropertyToken.DateProperties(this);
+                    var att = Validator.GetOrCreatePropertyPack(Column.PropertyRoute.PropertyInfo)
+                        .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
+                    if (att != null)
+                        return NetPropertyToken.DateTimeProperties(this, att.Precision);
                 }
 
                 if (Column.Format == "d")
-                    return NetPropertyToken.DateProperties(this);
+                    return NetPropertyToken.DateTimeProperties(this, DateTimePrecision.Days);
+
             }
 
             return SubTokens(Column.Type, Column.Implementations);

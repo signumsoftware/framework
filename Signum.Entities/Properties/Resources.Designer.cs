@@ -476,6 +476,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to have a precision of .
+        /// </summary>
+        internal static string HaveAPrecisionOf {
+            get {
+                return ResourceManager.GetString("HaveAPrecisionOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to have between {0} and {1} characters.
         /// </summary>
         internal static string HaveBetween0And1Characters {
@@ -508,15 +517,6 @@ namespace Signum.Entities.Properties {
         internal static string HaveNoRepeatedElements {
             get {
                 return ResourceManager.GetString("HaveNoRepeatedElements", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to have no time part.
-        /// </summary>
-        internal static string HaveNoTimePart {
-            get {
-                return ResourceManager.GetString("HaveNoTimePart", resourceCulture);
             }
         }
         

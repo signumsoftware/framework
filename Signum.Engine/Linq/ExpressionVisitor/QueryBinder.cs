@@ -745,6 +745,8 @@ namespace Signum.Engine.Linq
             TableExpression tableExpression; 
             if (typeof(IdentifiableEntity).IsAssignableFrom(type))
             {
+                Schema.Current.AssertAllowed(type);
+
                 table = ConnectionScope.Current.Schema.Table(type);
 
                 tableExpression = new TableExpression(tableAlias, table.Name);

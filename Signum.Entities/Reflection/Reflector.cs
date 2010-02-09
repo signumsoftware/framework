@@ -298,9 +298,9 @@ namespace Signum.Entities.Reflection
             var pp = Validator.GetOrCreatePropertyPack(property);
             if (pp != null)
             {
-                DateOnlyValidatorAttribute dateOnly = pp.Validators.OfType<DateOnlyValidatorAttribute>().SingleOrDefault();
-                if (dateOnly != null)
-                    return "d";
+                DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
+                if (datetimePrecission != null)
+                    return datetimePrecission.FormatString;
 
                 DecimalsValidatorAttribute decimals = pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefault();
                 if (decimals != null)

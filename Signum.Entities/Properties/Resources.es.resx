@@ -340,9 +340,6 @@
   <data name="HaveValid0Format" xml:space="preserve">
     <value>debe tener un formato {0} válido</value>
   </data>
-  <data name="HaveNoTimePart" xml:space="preserve">
-    <value>no tener horas minutos y segundos</value>
-  </data>
   <data name="Be" xml:space="preserve">
     <value>ser </value>
   </data>
@@ -354,5 +351,8 @@
   </data>
   <data name="Count" xml:space="preserve">
     <value>[Num]</value>
+  </data>
+  <data name="HaveAPrecisionOf" xml:space="preserve">
+    <value>tener una precision de</value>
   </data>
 </root>

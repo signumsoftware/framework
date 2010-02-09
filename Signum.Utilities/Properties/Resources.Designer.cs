@@ -232,6 +232,51 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Days.
+        /// </summary>
+        internal static string DateTimePrecision_Days {
+            get {
+                return ResourceManager.GetString("DateTimePrecision_Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hours.
+        /// </summary>
+        internal static string DateTimePrecision_Hours {
+            get {
+                return ResourceManager.GetString("DateTimePrecision_Hours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Milliseconds.
+        /// </summary>
+        internal static string DateTimePrecision_Milliseconds {
+            get {
+                return ResourceManager.GetString("DateTimePrecision_Milliseconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minutes.
+        /// </summary>
+        internal static string DateTimePrecision_Minutes {
+            get {
+                return ResourceManager.GetString("DateTimePrecision_Minutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Seconds.
+        /// </summary>
+        internal static string DateTimePrecision_Seconds {
+            get {
+                return ResourceManager.GetString("DateTimePrecision_Seconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dictionary Empty.
         /// </summary>
         internal static string DictionaryEmpty {

@@ -53,6 +53,22 @@ namespace Signum.Engine.Maps
 
         #region Events
 
+        public event Func<Type, bool> IsAllowedCallback;
+
+        public bool IsAllowed(Type type)
+        {
+            if (IsAllowedCallback != null)
+                return IsAllowedCallback(type);
+
+            return true;
+        }
+
+        public void AssertAllowed(Type type)
+        {
+            if (!IsAllowed(type))
+                throw new UnauthorizedAccessException("Unauthorized access to {0}".Formato(type.NiceName()));
+        }
+
         readonly IEntityEvents entityEventsGlobal = new EntityEvents<IdentifiableEntity>(); 
         public EntityEvents<IdentifiableEntity> EntityEventsGlobal
         {
@@ -68,6 +84,8 @@ namespace Signum.Engine.Maps
 
         internal void OnSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified)
         {
+            AssertAllowed(entity.GetType()); 
+
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
@@ -78,6 +96,8 @@ namespace Signum.Engine.Maps
 
         internal void OnSaved(IdentifiableEntity entity, bool isRoot)
         {
+            AssertAllowed(entity.GetType()); 
+
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
@@ -88,6 +108,8 @@ namespace Signum.Engine.Maps
 
         internal void OnRetrieving(Type type, int id, bool isRoot)
         {
+            AssertAllowed(type); 
+
             IEntityEvents ee = entityEvents.TryGetC(type);
 
             if (ee != null)
@@ -98,6 +120,8 @@ namespace Signum.Engine.Maps
 
         internal void OnRetrieved(IdentifiableEntity entity, bool isRoot)
         {
+            AssertAllowed(entity.GetType()); 
+
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
@@ -108,6 +132,8 @@ namespace Signum.Engine.Maps
 
         internal void OnDeleting(Type type, List<int> ids)
         {
+            AssertAllowed(type); 
+
             IEntityEvents ee = entityEvents.TryGetC(type);
 
             foreach (var id in ids)

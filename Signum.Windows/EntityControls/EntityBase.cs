@@ -69,14 +69,6 @@ namespace Signum.Windows
             set { SetValue(ViewProperty, value); }
         }
 
-        public static readonly DependencyProperty ViewReadOnlyProperty =
-            DependencyProperty.Register("ViewReadOnly", typeof(bool), typeof(EntityBase), new UIPropertyMetadata(false));
-        public bool ViewReadOnly
-        {
-            get { return (bool)GetValue(ViewReadOnlyProperty); }
-            set { SetValue(ViewReadOnlyProperty, value); }
-        }
-
         public static readonly DependencyProperty ViewButtonsProperty =
             DependencyProperty.Register("ViewButtons", typeof(ViewButtons), typeof(EntityBase), new UIPropertyMetadata(ViewButtons.Ok));
         public ViewButtons ViewButtons
@@ -363,6 +355,8 @@ namespace Signum.Windows
             if (Viewing != null)
                 return Viewing(entity);
 
+            bool isReadOnly = Common.GetIsReadOnly(this) && !IsNew(entity);
+
             if (ViewButtons == ViewButtons.Ok)
             {
                 var options = new ViewOptions
@@ -370,8 +364,8 @@ namespace Signum.Windows
                     TypeContext =  typeof(EmbeddedEntity).IsAssignableFrom(CleanType) ? GetEntityTypeContext() : null, 
                 };
 
-                if(this.NotSet(ViewReadOnlyProperty) ? Common.GetIsReadOnly(this) : ViewReadOnly)
-                    options.ReadOnly = true;
+                if (isReadOnly)
+                    options.ReadOnly = isReadOnly;
 
                 return Navigator.ViewUntyped(entity, options);
             }
@@ -379,13 +373,24 @@ namespace Signum.Windows
             {
                 var options = new NavigateOptions();
 
-                if(ViewReadOnly)
-                    options.ReadOnly = true;
+                if (isReadOnly)
+                    options.ReadOnly = isReadOnly;
 
                 Navigator.NavigateUntyped(entity, options);
 
                 return null;
             }
+        }
+
+        protected bool IsNew(object entity)
+        {
+            if (entity is IdentifiableEntity)
+                return ((IdentifiableEntity)entity).IsNew;
+
+            if (entity is Lite)
+                return ((Lite)entity).UntypedEntityOrNull != null && ((Lite)entity).UntypedEntityOrNull.IsNew;
+
+            return false;
         }
 
         protected bool OnRemoving(object entity)

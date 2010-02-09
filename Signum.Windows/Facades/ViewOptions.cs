@@ -15,6 +15,8 @@ namespace Signum.Windows
 
         public bool? ReadOnly { get; set; }
 
+        public bool Admin { get; set; }
+
         public Control View { get; set; }
 
         internal abstract ViewButtons GetViewButtons();

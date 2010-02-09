@@ -11,6 +11,12 @@ namespace Signum.Utilities
 {
     public static class EnumExtensions
     {
+        public static bool HasFlag(this Enum value, Enum flag)
+        {
+            int val = Convert.ToInt32(flag);
+            return (Convert.ToInt32(value) & val) == val;
+        }
+
         public static T ToEnum<T>(this string str) where T : struct
         {
             return (T)Enum.Parse(typeof(T), str);

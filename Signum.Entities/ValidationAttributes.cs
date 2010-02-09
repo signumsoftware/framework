@@ -462,20 +462,65 @@ namespace Signum.Entities
         }
     }
 
-    public class DateOnlyValidatorAttribute : ValidatorAttribute
+    public class DaysPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
     {
+        public DaysPrecissionValidatorAttribute()
+            : base(DateTimePrecision.Days)
+        { }
+    }
+
+    public class SecondsPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
+    {
+        public SecondsPrecissionValidatorAttribute()
+            : base(DateTimePrecision.Seconds)
+        { }
+    }
+
+    public class DateTimePrecissionValidatorAttribute : ValidatorAttribute
+    {
+
+        public DateTimePrecision Precision { get; private set; }
+
+        public DateTimePrecissionValidatorAttribute(DateTimePrecision precision)
+        {
+            this.Precision = precision; 
+        }
+
         protected override string OverrideError(object value)
         {
-            DateTime? dt = (DateTime?)value;
-            if (dt.HasValue && dt.Value != dt.Value.Date)
-                return Resources._0HasHoursMinutesAndSeconds;
+            if (value == null)
+                return null;
+
+            var prec = ((DateTime)value).GetPrecision();
+            if (prec > Precision)
+                return "{{0}} has a precission of {0} instead of {1}".Formato(prec, Precision);
 
             return null;
         }
 
+        public string FormatString
+        {
+            get
+            {
+                var dtfi = CultureInfo.CurrentCulture.DateTimeFormat;
+                switch (Precision)
+                {
+                    case DateTimePrecision.Days: return "d";
+                    case DateTimePrecision.Hours: return dtfi.ShortDatePattern + " " + "HH";
+                    case DateTimePrecision.Minutes: return "g";
+                    case DateTimePrecision.Seconds: return "G";
+                    case DateTimePrecision.Milliseconds: return dtfi.ShortDatePattern + " " + dtfi.LongTimePattern + ".fff";
+                    default: return "";
+                }
+            }
+        }
+
         public override string HelpMessage
         {
-            get { return Resources.HaveNoTimePart; }
+            get
+            {
+                return Resources.HaveAPrecisionOf + Precision.NiceToString();
+            }
         }
     }
 

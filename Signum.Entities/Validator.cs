@@ -14,7 +14,6 @@ namespace Signum.Entities
     {
         static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();
 
-
         public static PropertyPack GetOrCreatePropertyPack<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
         {
             return GetPropertyPacks(typeof(T)).TryGetC(ReflectionTools.GetPropertyInfo(property).Name);
@@ -34,24 +33,12 @@ namespace Signum.Entities
         {
             lock (validators)
             {
-                return validators.GetOrCreate(type, () =>
-                {
-                    var result = MemberEntryFactory.GenerateIList(type, MemberOptions.Properties | MemberOptions.Getter | MemberOptions.Setters | MemberOptions.Untyped)
+                return validators.GetOrCreate(type, () => MemberEntryFactory.GenerateIList(type, MemberOptions.Properties | MemberOptions.Getter | MemberOptions.Setters | MemberOptions.Untyped)
                     .Cast<IMemberEntry>()
                     .Where(p => !Attribute.IsDefined(p.MemberInfo, typeof(HiddenPropertyAttribute)))
-                    .ToDictionary(p => p.Name, p =>
-                    {
-                        var pp = new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter);
-                        if (Generating != null)
-                            Generating(type, pp);
-                        return pp;
-                    });
-                    return result;
-                });
+                    .ToDictionary(p => p.Name, p => new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter)));
             }
         }
-
-        public static event Action<Type, PropertyPack> Generating; 
 
         public static bool Is<T>(this PropertyInfo pi, Expression<Func<T>> property)
         {

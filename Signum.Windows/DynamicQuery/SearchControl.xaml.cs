@@ -163,14 +163,6 @@ namespace Signum.Windows
             set { SetValue(ViewProperty, value); }
         }
 
-        public static readonly DependencyProperty ViewReadOnlyProperty =
-            DependencyProperty.Register("ViewReadOnly", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
-        public bool ViewReadOnly
-        {
-            get { return (bool)GetValue(ViewReadOnlyProperty); }
-            set { SetValue(ViewReadOnlyProperty, value); }
-        }
-
         public static readonly DependencyProperty CreateProperty =
             DependencyProperty.Register("Create", typeof(bool), typeof(SearchControl), new FrameworkPropertyMetadata(true, (d, e) => ((SearchControl)d).UpdateVisibility()));
         public bool Create
@@ -211,8 +203,8 @@ namespace Signum.Windows
             UpdateViewSelection();
         }
 
-        public event Func<object> Creating;
-        public event Action<object> Viewing;
+        public event Func<IdentifiableEntity> Creating;
+        public event Action<IdentifiableEntity> Viewing;
         public event Action DoubleClick;
 
         public SearchControl()
@@ -269,9 +261,6 @@ namespace Signum.Windows
 
                 if (this.NotSet(CreateProperty) && Create && entityColumn.Implementations == null)
                     Create = Navigator.IsCreable(EntityType, IsAdmin);
-
-                if (this.NotSet(ViewReadOnlyProperty) && !ViewReadOnly && entityColumn.Implementations == null)
-                    ViewReadOnly = Navigator.IsReadOnly(EntityType, IsAdmin);
             }
 
             Navigator.Manager.SetUserColumns(QueryName, UserColumns);
@@ -505,7 +494,9 @@ namespace Signum.Windows
             if (row == null)
                 return;
 
-            object entity = row[entityColumn];
+            Lite lite = (Lite)row[entityColumn];
+
+            IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(lite, EntityType);
 
             OnViewing(entity);
         }
@@ -520,7 +511,7 @@ namespace Signum.Windows
             if (!Create)
                 return;
 
-            object result = Creating == null ? Constructor.Construct(EntityType, this.FindCurrentWindow()) : Creating();
+            IdentifiableEntity result = Creating == null ? (IdentifiableEntity)Constructor.Construct(EntityType, this.FindCurrentWindow()) : Creating();
 
             if (result == null)
                 return;
@@ -531,19 +522,16 @@ namespace Signum.Windows
             }
         }
 
-        protected void OnViewing(object entity)
+        protected void OnViewing(IdentifiableEntity entity)
         {
             if (!View)
                 return;
 
             if (this.Viewing == null)
-            {
-                Navigator.NavigateUntyped(entity, new NavigateOptions { ReadOnly = ViewReadOnly });
-            }
+                Navigator.NavigateUntyped(entity, new NavigateOptions { Admin = IsAdmin });
             else
                 this.Viewing(entity);
         }
-
 
         void lvResult_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

@@ -81,7 +81,9 @@ namespace Signum.Web
             ValueLine vl = bl as ValueLine;
             if (vl != null && context.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
             {
-                if (context.PropertyRoute.PropertyInfo.HasAttribute<DateOnlyValidatorAttribute>())
+                var dpva = Validator.GetOrCreatePropertyPack(context.PropertyRoute.PropertyInfo).Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
+
+                if (dpva != null && dpva.Precision == DateTimePrecision.Days)
                     vl.ValueLineType = ValueLineType.Date;
             }
         }

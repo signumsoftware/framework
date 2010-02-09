@@ -304,9 +304,6 @@
     <value>{0} Different instances of the same entity ({1}) have been found:
 {2}</value>
   </data>
-  <data name="HaveNoTimePart" xml:space="preserve">
-    <value>have no time part</value>
-  </data>
   <data name="OrBeNull" xml:space="preserve">
     <value>or be null</value>
   </data>
@@ -351,5 +348,8 @@
   </data>
   <data name="_0As1" xml:space="preserve">
     <value>({0} as {1})</value>
+  </data>
+  <data name="HaveAPrecisionOf" xml:space="preserve">
+    <value>have a precision of </value>
   </data>
 </root>

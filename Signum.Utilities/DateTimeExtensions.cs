@@ -39,13 +39,13 @@ namespace Signum.Utilities
                    (maxDate == null || date < maxDate);
         }
 
-        private static void AssertDateOnly(params DateTime?[] args)
+        static void AssertDateOnly(DateTime? date)
         {
-            foreach (DateTime d in args.Where(dt => dt.HasValue))
-            {
-                if (d.Hour != 0 || d.Minute != 0 || d.Second != 0 || d.Millisecond != 0)
-                    throw new ApplicationException(Resources.TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond);
-            }
+            if (date == null)
+                return;
+            DateTime d = date.Value;
+            if (d.Hour != 0 || d.Minute != 0 || d.Second != 0 || d.Millisecond != 0)
+                throw new ApplicationException(Resources.TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond);
         }
 
         /// <summary>
@@ -54,7 +54,9 @@ namespace Signum.Utilities
         [MethodExpander(typeof(IsInIntervalExpander1))]
         public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime maxDate)
         {
-            AssertDateOnly(date, minDate, maxDate);
+            AssertDateOnly(date);
+            AssertDateOnly(minDate);
+            AssertDateOnly(maxDate);
             return minDate <= date && date <= maxDate;
         }
 
@@ -64,7 +66,9 @@ namespace Signum.Utilities
         [MethodExpander(typeof(IsInIntervalExpander2))]
         public static bool IsInDateInterval(this DateTime date, DateTime minDate, DateTime? maxDate)
         {
-            AssertDateOnly(date, minDate, maxDate);
+            AssertDateOnly(date);
+            AssertDateOnly(minDate);
+            AssertDateOnly(maxDate);
             return (minDate == null || minDate <= date) &&
                    (maxDate == null || date < maxDate);
         }
@@ -75,7 +79,9 @@ namespace Signum.Utilities
         [MethodExpander(typeof(IsInIntervalExpander3))]
         public static bool IsInDateInterval(this DateTime date, DateTime? minDate, DateTime? maxDate)
         {
-            AssertDateOnly(date, minDate, maxDate);
+            AssertDateOnly(date);
+            AssertDateOnly(minDate);
+            AssertDateOnly(maxDate);
             return (minDate == null || minDate <= date) &&
                    (maxDate == null || date < maxDate);
         }
@@ -149,6 +155,58 @@ namespace Signum.Utilities
         {
             return a > b ? a : b;
         }
+
+        /// <param name="precision">Using Milliseconds does nothing, using Days use DateTime.Date</param>
+        public static DateTime TrimTo(this DateTime dateTime, DateTimePrecision precision)
+        {
+            switch (precision)
+            {
+                case DateTimePrecision.Days: return dateTime.Date;
+                case DateTimePrecision.Hours: return TrimToHours(dateTime);
+                case DateTimePrecision.Minutes: return TrimToMinutes(dateTime);
+                case DateTimePrecision.Seconds: return TrimToSeconds(dateTime);
+                case DateTimePrecision.Milliseconds: return dateTime;
+            }
+            throw new ArgumentException("precission");
+        }
+
+        public static DateTime TrimToSeconds(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
+        }
+
+        public static DateTime TrimToMinutes(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0);
+        }
+
+        public static DateTime TrimToHours(this DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0);
+        }
+
+        public static DateTimePrecision GetPrecision(this DateTime dateTime)
+        {
+            if (dateTime.Millisecond != 0)
+                return DateTimePrecision.Milliseconds;
+            if (dateTime.Second != 0)
+                return DateTimePrecision.Seconds;
+            if (dateTime.Minute != 0)
+                return DateTimePrecision.Minutes;
+            if (dateTime.Hour != 0)
+                return DateTimePrecision.Hours;
+
+            return DateTimePrecision.Days;
+        }   
+    }
+
+    public enum DateTimePrecision
+    {
+        Days,
+        Hours,
+        Minutes,
+        Seconds,
+        Milliseconds,
     }
 
     public struct DateSpan
