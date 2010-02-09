@@ -14,6 +14,7 @@ namespace Signum.Web.Operations
         public bool? IsLite { get; set; }
         public Type ReturnType { get; set; }
         public string ControllerUrl { get; set; }
+        public string ValidationControllerUrl { get; set; }
         public string OnOk { get; set; }
         public string OnOperationSuccess { get; set; }
         public string OnCancelled { get; set; }
@@ -42,6 +43,9 @@ namespace Signum.Web.Operations
                 
                 if (ControllerUrl.HasText())
                     sb.Append("controllerUrl:'{0}',".Formato(ControllerUrl));
+                
+                if (ValidationControllerUrl.HasText())
+                    sb.Append("validationControllerUrl:'{0}',".Formato(ValidationControllerUrl));
 
                 if (OnOk.HasText())
                     sb.Append("onOk:{0},".Formato(OnOk));
