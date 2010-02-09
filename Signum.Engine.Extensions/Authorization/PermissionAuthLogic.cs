@@ -44,6 +44,8 @@ namespace Signum.Engine.Authorization
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
                 sb.Schema.EntityEvents<RulePermissionDN>().Saved += Schema_Saved;
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
+
+                RegisterTypes(typeof(BasicPermissions));
             }
         }
 
@@ -67,15 +69,22 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
-        public static void Authorize(Enum permissionKey)
+        public static void Authorize(this Enum permissionKey)
         {
-            if (!GetAllowed(RoleDN.Current, EnumDN.UniqueKey(permissionKey)))
+            if (!GetAllowed(RoleDN.Current, PermissionDN.UniqueKey(permissionKey)))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
+        public static Dictionary<Enum, bool> ServicePermissionRules()
+        {
+            RoleDN role = RoleDN.Current;
+
+            return EnumLogic<PermissionDN>.Keys.ToDictionary(a => a, a => GetAllowed(RoleDN.Current, PermissionDN.UniqueKey(a)));
+        }
+        
         public static bool IsAuthorized(this Enum permissionKey)
         {
-            return GetAllowed(RoleDN.Current, EnumDN.UniqueKey(permissionKey));
+            return GetAllowed(RoleDN.Current, PermissionDN.UniqueKey(permissionKey));
         }
 
         static bool GetAllowed(RoleDN role, string permissionKey)

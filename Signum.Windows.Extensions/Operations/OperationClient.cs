@@ -25,28 +25,34 @@ namespace Signum.Windows.Operations
 
         public static void Start(OperationManager operationManager)
         {
-            Manager = operationManager;
-
-            ButtonBar.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
-
-            Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
-
-            SearchControl.GetCustomMenuItems += (qn, type) =>
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (type == null)
-                    return null;
+                Navigator.Manager.Settings.Add(typeof(LogOperationDN), new EntitySettings(EntityType.ServerOnly) { View = e => new LogOperation() });
 
-                var list = Server.Return((IOperationServer o)=>o.GetQueryOperationInfos(type)).Where(oi =>
+                Manager = operationManager;
+
+                ButtonBar.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
+
+                Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
+
+                SearchControl.GetCustomMenuItems += (qn, type) =>
                 {
-                    ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
-                    return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
-                }).ToList();
+                    if (type == null)
+                        return null;
 
-                if (list.Count == 0)
-                    return null;
+                    var list = Server.Return((IOperationServer o) => o.GetQueryOperationInfos(type)).Where(oi =>
+                    {
+                        ConstructorFromManySettings set = (ConstructorFromManySettings)Manager.Settings.TryGetC(oi.Key);
+                        return set == null || set.IsVisible == null || set.IsVisible(qn, oi);
+                    }).ToList();
 
-                return new ConstructFromMenuItem { OperationInfos = list };
-            };
+                    if (list.Count == 0)
+                        return null;
+
+                    return new ConstructFromMenuItem { OperationInfos = list };
+                };
+
+            }
         }
 
         public static Brush GetBackground(Enum key)

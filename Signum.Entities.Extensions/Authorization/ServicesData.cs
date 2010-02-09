@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Entities.Authorization
 {
@@ -214,22 +215,36 @@ namespace Signum.Entities.Authorization
             }
         }
 
+        public static readonly TypeAccess CreateKey = (TypeAccess)4; 
         public bool Create
         {
-            get { return Access == TypeAccess.Create; }
-            set { if (value) Access = TypeAccess.Create; }
+            get { return Access.HasFlag(CreateKey); }
+            set
+            {
+                if (value)
+                    Access = Access | TypeAccess.CreateOnly;
+                else
+                    Access = Access & ~CreateKey;
+            }
         }
 
+        public static readonly TypeAccess ModifyKey = (TypeAccess)2; 
         public bool Modify
         {
-            get { return Access == TypeAccess.Modify; }
-            set { if (value) Access = TypeAccess.Modify; }
+            get { return Access.HasFlag(ModifyKey); }
+            set
+            {
+                if (value)
+                    Access = Access | TypeAccess.ModifyOnly;
+                else
+                    Access = Access & ~ModifyKey;
+            }
         }
 
         public bool Read
         {
-            get { return Access == TypeAccess.Read; }
-            set { if (value) Access = TypeAccess.Read; }
+            get { return Access.HasFlag(TypeAccess.Read); }
+            set { if (value) Access = Access | TypeAccess.Read; }
         }
 
         public bool None

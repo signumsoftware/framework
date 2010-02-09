@@ -34,10 +34,10 @@ namespace Signum.Web.Authorization
 
                 if (types)
                 {
-                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type) == TypeAccess.Create;
-                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type) < TypeAccess.Modify;
-                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
-                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type) >= TypeAccess.Read;
+                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccessRule.CreateKey);
+                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccessRule.ModifyKey);
+                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccess.Read);
+                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccess.Read);
                 }
 
                 if (queries)

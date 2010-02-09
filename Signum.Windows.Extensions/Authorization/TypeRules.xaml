@@ -29,14 +29,14 @@
                     <GridViewColumn Header="Create" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Create}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <CheckBox IsChecked="{Binding Path=Create}" Background="Green"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Modify" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Modify}" Style="{StaticResource SphereRadioButton}" Background="GreenYellow"  />
+                                <CheckBox IsChecked="{Binding Path=Modify}" Background="Blue"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

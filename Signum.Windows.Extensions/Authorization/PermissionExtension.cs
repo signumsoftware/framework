@@ -19,7 +19,7 @@ namespace Signum.Windows.Authorization
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return Server.Return((IPermissionAuthServer s) => s.IsAuthorized(permission)); 
+            return AuthClient.IsAuthorized(permission);
         }
     }
 
@@ -34,7 +34,7 @@ namespace Signum.Windows.Authorization
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return Server.Return((IPermissionAuthServer s) => s.IsAuthorized(permission)) ? Visibility.Visible : Visibility.Collapsed; 
+            return AuthClient.IsAuthorized(permission) ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

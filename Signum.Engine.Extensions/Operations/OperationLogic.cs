@@ -144,7 +144,7 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> ServiceGetQueryOperationInfos(Type entityType)
         {
             return (from o in TypeOperations(entityType)
-                    where o is IConstructorOperation && OperationAllowed(o.Key)
+                    where o is IConstructorFromManyOperation && OperationAllowed(o.Key)
                     select ToOperationInfo(o, null)).ToList();
         }
 

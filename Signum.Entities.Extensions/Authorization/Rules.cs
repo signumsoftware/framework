@@ -208,14 +208,15 @@ namespace Signum.Entities.Authorization
         {
             get { return access; }
             set { Set(ref access, value, () => Access); }
-        }
+        }        
     }
 
     public enum TypeAccess
     {
-        None,
-        Read,
-        Modify,
-        Create,
+        None = 0,
+        Read = 1,
+        ModifyOnly = 3,
+        CreateOnly = 5,
+        FullAccess =7,
     }
 }

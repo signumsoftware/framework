@@ -11,8 +11,6 @@
         <m:ValueLine m:Common.Route="Start" />
         <m:ValueLine m:Common.Route="End" />
         <m:EntityLine m:Common.Route="User" />
-        <GroupBox Header="Exception" m:Common.Route="Exception" m:Common.CollapseIfNull="True">
-            <TextBlock Text="{Binding}"/>
-        </GroupBox>
+        <m:TextArea m:Common.Route="Exception" />
     </StackPanel>
 </UserControl>

@@ -72,85 +72,32 @@ namespace Signum.Engine.Authorization
    
         public static Access MaxAccess(this IEnumerable<Access> collection)
         {
-            Access max = Access.None;
-            foreach (var item in collection)
-            {
-                if (item == Access.Modify)
-                    return Access.Modify;
-
-                if (item > Access.None)
-                    max = item;
-            }
-
-            return max;
+            return collection.Max();
         }
 
         public static Access MaxAccess(this IEnumerable<Access?> collection)
         {
-            Access max = Access.None;
-            foreach (var item in collection)
-            {
-                if (item == null || item.Value == Access.Modify)
-                    return Access.Modify;
-
-                if (item.Value > Access.None)
-                    max = item.Value;
-            }
-
-            return max;
+            return collection.Select(a => a ?? Access.Modify).Max();
         }
 
         public static TypeAccess MaxTypeAccess(this IEnumerable<TypeAccess> collection)
         {
-            TypeAccess max = TypeAccess.None;
-            foreach (var item in collection)
-            {
-                if (item == TypeAccess.Create)
-                    return TypeAccess.Create;
-
-                if (item > TypeAccess.None)
-                    max = item;
-            }
-
-            return max;
+            return collection.Aggregate(TypeAccess.None, (a, b) => a | b); 
         }
 
         public static TypeAccess MaxTypeAccess(this IEnumerable<TypeAccess?> collection)
         {
-            TypeAccess max = TypeAccess.None;
-            foreach (var item in collection)
-            {
-                if (item == null || item.Value == TypeAccess.Create)
-                    return TypeAccess.Create;
-
-                if (item.Value > TypeAccess.None)
-                    max = item.Value;
-            }
-
-            return max;
+            return collection.Aggregate(TypeAccess.None, (a, b) => a | (b ?? TypeAccess.FullAccess));
         }
 
         public static bool MaxAllowed(this IEnumerable<bool> collection)
         {
-            foreach (var item in collection)
-            {
-                if (item)
-                    return true;
-            }
-
-            return false;
+            return collection.Any(a => a);
         }
 
         public static bool MaxAllowed(this IEnumerable<bool?> collection)
         {
-            foreach (var item in collection)
-            {
-                if (item == null || item.Value)
-                    return true;
-            }
-
-            return false;
+            return collection.Any(a => (a ?? true));
         }
-
     }
 }

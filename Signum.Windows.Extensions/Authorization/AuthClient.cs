@@ -20,8 +20,41 @@ namespace Signum.Windows.Authorization
         static HashSet<object> authorizedQueries; 
         static Dictionary<Type, TypeAccess> typeRules; 
         static Dictionary<Type, Dictionary<string, Access>> propertyRules;
+        static Dictionary<Enum, bool> permissionRules; 
 
-        public static void Start(bool types, bool property, bool queries)
+        public static void UpdateCache()
+        {
+            if (propertyRules != null)
+                propertyRules = Server.Return((IPropertyAuthServer s) => s.AuthorizedProperties());
+
+            if (authorizedQueries != null)
+                authorizedQueries = Server.Return((IQueryAuthServer s) => s.AuthorizedQueries()); 
+
+            if (typeRules != null)
+                typeRules = Server.Return((ITypeAuthServer s) => s.AuthorizedTypes());
+
+            if (permissionRules != null)
+                permissionRules = Server.Return((IPermissionAuthServer s) => s.PermissionRules());
+        }
+
+        public static bool? TryIsAuthorized(this Enum permissionKey)
+        {
+            return permissionRules.TryGetS(permissionKey);
+        }
+
+        public static bool IsAuthorized(this Enum permissionKey)
+        {
+            if(permissionRules == null)
+                throw new InvalidOperationException("Permissions not enabled in AuthClient");
+ 
+            bool result;
+            if(!permissionRules.TryGetValue(permissionKey, out result))
+                throw new ArgumentException("{0} is not a permissionKey registered in the server".Formato(permissionKey));
+ 
+            return result;
+        }
+
+        public static void Start(bool types, bool property, bool queries, bool permissions)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -37,10 +70,10 @@ namespace Signum.Windows.Authorization
 
                 if (types)
                 {
-                    typeRules = Server.Return((ITypeAuthServer s)=>s.AuthorizedTypes()); 
-                    Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type) == TypeAccess.Create;
-                    Navigator.Manager.GlobalIsReadOnly += type => GetTypeAccess(type) < TypeAccess.Modify;
-                    Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type) >= TypeAccess.Read;
+                    typeRules = Server.Return((ITypeAuthServer s)=>s.AuthorizedTypes());
+                    Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type).HasFlag(TypeAccessRule.CreateKey);
+                    Navigator.Manager.GlobalIsReadOnly += type => !GetTypeAccess(type).HasFlag(TypeAccessRule.ModifyKey);
+                    Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type).HasFlag(TypeAccess.Read);
 
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
                 }
@@ -53,9 +86,14 @@ namespace Signum.Windows.Authorization
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksQueries);
                 }
 
+                if (permissions)
+                {
+                    permissionRules = Server.Return((IPermissionAuthServer s) => s.PermissionRules());
+                }
+
                 Links.RegisterEntityLinks<RoleDN>((r, c) =>
                 {
-                    bool authorized = !Server.Implements<IPermissionAuthServer>() || BasicPermissions.AdminRules.IsAuthorized();
+                    bool authorized = BasicPermissions.AdminRules.TryIsAuthorized() ?? true;
                     return new QuickLink[]
                     {
                          new QuickLinkAction("Query Rules", () => new QueryRules { Role = r.ToLite() }.Show())
@@ -86,6 +124,8 @@ namespace Signum.Windows.Authorization
                 }); 
             }
         }
+
+
 
         static void MenuManager_TasksTypes(MenuItem menuItem)
         {
@@ -130,7 +170,7 @@ namespace Signum.Windows.Authorization
 
         static TypeAccess GetTypeAccess(Type type)
         {
-           return typeRules.TryGetS(type) ?? TypeAccess.Create;
+            return typeRules.TryGetS(type) ?? TypeAccess.FullAccess;
         }
 
         static Access GetPropertyAccess(PropertyRoute route)

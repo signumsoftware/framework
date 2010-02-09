@@ -35,6 +35,7 @@ namespace Signum.Engine.Authorization
                 sb.Schema.EntityEvents<RuleTypeDN>().Saved += RuleType_Saved;
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving;
                 sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
+                sb.Schema.IsAllowedCallback += new Func<Type, bool>(Schema_IsAllowedCallback);
                 AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
         }
@@ -54,13 +55,24 @@ namespace Signum.Engine.Authorization
             Transaction.RealCommit += () => _runtimeRules = null;
         }
 
+        static bool Schema_IsAllowedCallback(Type type)
+        {
+            if (!AuthLogic.IsEnabled)
+                return true;
+
+            return GetAccess(RoleDN.Current, type) != TypeAccess.None;
+        }
+
         static void Schema_Saving(IdentifiableEntity ident, bool isRoot, ref bool graphModified)
         {
             if (AuthLogic.IsEnabled)
             {
                 TypeAccess access = GetAccess(RoleDN.Current, ident.GetType());
-                if (access < TypeAccess.Modify || ident.IsNew && access != TypeAccess.Create)
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedToSave0.Formato(ident.GetType()));
+
+                if (access == TypeAccess.FullAccess || (ident.IsNew ? access == TypeAccess.CreateOnly : access == TypeAccess.ModifyOnly))
+                    return;
+
+                throw new UnauthorizedAccessException(Resources.NotAuthorizedToSave0.Formato(ident.GetType()));
             }
         }
 
@@ -76,12 +88,12 @@ namespace Signum.Engine.Authorization
 
         static TypeAccess GetAccess(RoleDN role, Type type)
         {
-            return RuntimeRules.TryGetC(role).TryGetS(type) ?? TypeAccess.Create;
+            return RuntimeRules.TryGetC(role).TryGetS(type) ?? TypeAccess.FullAccess;
         }
 
         static TypeAccess GetBaseAccess(RoleDN role, Type type)
         {
-            return role.Roles.Count == 0 ? TypeAccess.Create :
+            return role.Roles.Count == 0 ? TypeAccess.FullAccess :
                   role.Roles.Select(r => GetAccess(r, type)).MaxTypeAccess();
         }
 
@@ -138,7 +150,7 @@ namespace Signum.Engine.Authorization
                          null :
                          role.Roles.Select(r => newRules.TryGetC(r)).OuterCollapseDictionariesS(vals => vals.MaxTypeAccess()));
 
-                    permissions = permissions.Override(realRules.TryGetC(role)).Simplify(a => a == TypeAccess.Create);
+                    permissions = permissions.Override(realRules.TryGetC(role)).Simplify(a => a == TypeAccess.FullAccess);
 
                     if (permissions != null)
                         newRules.Add(role, permissions);

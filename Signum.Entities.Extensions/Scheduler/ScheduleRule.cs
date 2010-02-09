@@ -36,7 +36,7 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime startingOn = DateTime.Today;
-        [DateOnlyValidator]
+        [DaysPrecissionValidator]
         public DateTime StartingOn
         {
             get { return startingOn; }

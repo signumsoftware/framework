@@ -227,10 +227,10 @@ namespace Signum.Services
             () => PermissionAuthLogic.SetAllowedRule(rules, role));
         }
 
-        public bool IsAuthorized(Enum permissionKey)
+        public Dictionary<Enum, bool> PermissionRules()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-           () => PermissionAuthLogic.IsAuthorized(permissionKey));
+           () => PermissionAuthLogic.ServicePermissionRules());
         }
 
         #endregion

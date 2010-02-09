@@ -66,7 +66,7 @@ namespace Signum.Entities.Scheduler
     public class HolidayDN : EmbeddedEntity
     {
         DateTime date;
-        [DateOnlyValidator]
+        [DaysPrecissionValidator]
         public DateTime Date
         {
             get { return date; }

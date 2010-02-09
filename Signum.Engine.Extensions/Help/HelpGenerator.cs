@@ -93,7 +93,7 @@ namespace Signum.Engine.Help
             string typeName =
                     cleanType.IsEnum ? Resources.ValueLike0.Formato(Enum.GetValues(cleanType).Cast<Enum>().CommaOr(e => e.NiceToString())) :
                     cleanType == typeof(decimal) && unit != null && unit.UnitName == "€" ? Resources.Amount :
-                    cleanType == typeof(decimal) && pi.HasAttribute<DateOnlyValidatorAttribute>() ? Resources.Date :
+                    cleanType == typeof(DateTime) && Validator.GetOrCreatePropertyPack(pi).Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault().Map(a=>a != null && a.Precision == DateTimePrecision.Days) ? Resources.Date :
                     NaturalTypeDescription(cleanType);
 
             string orNull = Nullable.GetUnderlyingType(pi.PropertyType) != null ? Resources.OrNull : null;
