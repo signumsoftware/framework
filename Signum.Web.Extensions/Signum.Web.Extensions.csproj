@@ -154,7 +154,7 @@
       <Name>Signum.Engine.Extensions</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{1A274FA6-4A7D-45AF-9026-5EC6646C3081}</Project>
+      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
