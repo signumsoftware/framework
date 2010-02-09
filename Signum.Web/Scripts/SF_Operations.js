@@ -4,6 +4,7 @@
         operationKey: null,
         isLite: false,
         controllerUrl: null,
+        validationControllerUrl: null,
         onOk: null,
         onCancelled: null,
         onOperationSuccess: null,
@@ -56,9 +57,9 @@ OperationManager.prototype = {
         var info = this.entityInfo();
         var isValid = null;
         if (empty(this.options.prefix))
-            isValid = new Validator().validate();
+            isValid = new Validator({controllerUrl:this.options.validationControllerUrl}).validate();
         else
-            isValid = new PartialValidator({ prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).validate().isValid;
+            isValid = new PartialValidator({ controllerUrl:this.options.validationControllerUrl, prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).validate().isValid;
         if (!isValid) {
             window.alert(lang['popupErrorsStop']);
             return false;
