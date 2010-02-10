@@ -618,8 +618,7 @@ namespace Signum.Entities
                 return null;
 
             object val = getters[index](entity);
-
-            if (val is string && ((string)val).Length == 0)
+            if (val is IList && ((IList)val).Count == 0 || val is string && ((string)val).Length == 0) //both are indistinguible after retrieving
                 val = null;
 
             if (val != null && !necessary.Value)
