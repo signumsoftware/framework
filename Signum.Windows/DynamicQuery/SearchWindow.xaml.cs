@@ -215,14 +215,6 @@ namespace Signum.Windows
         {
             OkAndClose();
         }
-
-        private void me_LocationChanged(object sender, EventArgs e)
-        {
-            var info = Monitors.GetMonitorFromWindow(this, NotFoundOptions.DefaultToNearest);
-
-            this.MaxWidth = info.WorkingArea.Width;
-            this.MaxHeight = info.WorkingArea.Height;
-        }
     }
 
     public enum SearchMode

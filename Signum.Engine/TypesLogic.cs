@@ -44,7 +44,7 @@ namespace Signum.Engine
             List<TypeDN> types = Administrator.UnsafeRetrieveAll<TypeDN>();
 
             var dict = EnumerableExtensions.JoinStrict(
-                types, sender.Tables.Keys, t => t.ClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).Name,
+                types, sender.Tables.Keys, t => t.FullClassName, t => (Reflector.ExtractEnumProxy(t) ?? t).FullName,
                 (typeDN, type) => new { typeDN, type },
                 Resources.CachingTypesTableFrom0.Formato(sender.Table(typeof(TypeDN)).Name)
                 ).ToDictionary(a => a.type, a => a.typeDN);
@@ -59,7 +59,7 @@ namespace Signum.Engine
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
         {
             return (from dn in Administrator.TryRetrieveAll<TypeDN>(replacements)
-                    join t in Schema.Current.Tables.Keys on dn.ClassName equals (Reflector.ExtractEnumProxy(t) ?? t).Name
+                    join t in Schema.Current.Tables.Keys on dn.FullClassName equals (Reflector.ExtractEnumProxy(t) ?? t).Name
                     select new { dn, t }).ToDictionary(a => a.dn, a => a.t);
         }
 
@@ -78,7 +78,7 @@ namespace Signum.Engine
                 (tn, s) => table.InsertSqlSync(s),
                 (tn, c, s) =>
                 {
-                    c.ClassName = s.ClassName;
+                    c.FullClassName = s.FullClassName;
                     c.TableName = s.TableName;
                     c.FriendlyName = s.FriendlyName;
                     return table.UpdateSqlSync(c);
@@ -99,7 +99,7 @@ namespace Signum.Engine
                          let type = Reflector.ExtractEnumProxy(tab.Type) ?? tab.Type
                          select new TypeDN
                          {
-                             ClassName = type.Name,
+                             FullClassName = type.FullName,
                              TableName = tab.Name,
                              FriendlyName = type.NiceName()
                          }).ToList();

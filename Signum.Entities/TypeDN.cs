@@ -9,11 +9,11 @@ namespace Signum.Entities
     public class TypeDN : IdentifiableEntity
     {
         [UniqueIndex]
-        string className;
-        public string ClassName
+        string fullClassName;
+        public string FullClassName
         {
-            get { return className; }
-            set { Set(ref className, value, () => ClassName); }
+            get { return fullClassName; }
+            set { Set(ref fullClassName, value, () => FullClassName); }
         }
 
         [UniqueIndex]
@@ -43,7 +43,7 @@ namespace Signum.Entities
             if (type == null)
                 throw new ArgumentException("type");
 
-            return ClassName == type.Name;
+            return FullClassName == type.FullName;
         }
     }
 }

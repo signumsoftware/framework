@@ -493,9 +493,6 @@ WRITETEXT</value>
   <data name="ThereAreMoreThanOneEntityColumn" xml:space="preserve">
     <value>There are more than one Entity column</value>
   </data>
-  <data name="EntityColumnIsNotALite" xml:space="preserve">
-    <value>Entity column is not a Lite</value>
-  </data>
   <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
     <value>Access to Query '{0}' is not allowed</value>
   </data>

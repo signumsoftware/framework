@@ -137,6 +137,41 @@ namespace Signum.Windows
                 WorkingArea = mi.work.ToRect(),
             };
         }
+
+        public static bool GetAdjustToMonitor(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(AdjustToMonitorProperty);
+        }
+
+        public static void SetAdjustToMonitor(DependencyObject obj, bool value)
+        {
+            obj.SetValue(AdjustToMonitorProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for AdjustToMonitor.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty AdjustToMonitorProperty =
+            DependencyProperty.RegisterAttached("AdjustToMonitor", typeof(bool), typeof(Common), new UIPropertyMetadata(false, (d, e) => AdjustChanged(d, (bool)e.NewValue)));
+
+        static void AdjustChanged(DependencyObject dep, bool newValue)
+        {
+            if (!(dep is Window))
+                throw new InvalidOperationException("AdjustToMonitor is only compatible with Window");
+
+            if (newValue)
+                ((Window)dep).LocationChanged += Window_LocationChanged;
+            else
+                ((Window)dep).LocationChanged -= Window_LocationChanged;
+        }
+
+        static void Window_LocationChanged(object sender, EventArgs e)
+        {
+            Window win = (Window)sender;
+
+            var info = Monitors.GetMonitorFromWindow(win, NotFoundOptions.DefaultToNearest);
+
+            win.MaxWidth = info.WorkingArea.Width;
+            win.MaxHeight = info.WorkingArea.Height;
+        }
     }
 
     public enum NotFoundOptions

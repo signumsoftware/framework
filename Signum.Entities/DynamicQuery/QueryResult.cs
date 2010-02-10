@@ -19,14 +19,18 @@ namespace Signum.Entities.DynamicQuery
 
         public ResultTable(StaticColumn[] staticColumns, UserColumn[] userColumns, int rows, Func<Column, Array> values)
         {
-            this.Columns = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).ToArray();
-            string errors = Columns.Where((c, i) => c.Index != i).ToString(c => "{0} ({1})".Formato(c.Name, c.Index), " ");
+            var columns = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).ToArray();
+            string errors = columns.Where((c, i) => c.Index != i).ToString(c => "{0} ({1})".Formato(c.Name, c.Index), " ");
             if (errors.HasText())
                 throw new InvalidOperationException("Some columns are not correctly numered: " + errors);
 
+            this.Columns = columns.Where(c => c.IsAllowed()).ToArray();
             this.Rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
-            this.Values = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).Select(c =>
+            this.Values = columns.Select(c =>
                 {
+                    if (!c.IsAllowed())
+                        return null;
+
                     Array array = values(c);
                     if (array.Length != rows)
                         throw new InvalidOperationException("{0} results (insted of {1}) for column {2}".Formato(array.Length, rows, c.Name));

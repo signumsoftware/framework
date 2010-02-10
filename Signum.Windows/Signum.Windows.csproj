@@ -272,6 +272,7 @@
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
     <Compile Include="Converters\PropertyRouteConverter.cs" />
+    <Compile Include="Converters\TypeDataTemplateSelector.cs" />
     <Compile Include="DynamicQuery\QueryTokenBuilder.xaml.cs">
       <DependentUpon>QueryTokenBuilder.xaml</DependentUpon>
     </Compile>

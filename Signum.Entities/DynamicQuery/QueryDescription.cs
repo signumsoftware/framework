@@ -176,5 +176,27 @@ namespace Signum.Entities.DynamicQuery
         {
             return QueryToken.NewColumn(this);
         }
+
+        public Type DefaultEntityType()
+        {
+            if (Implementations == null)
+                return Reflector.ExtractLite(this.Type);
+
+            if (Implementations.IsByAll)
+                return null;
+
+            return ((ImplementedByAttribute)Implementations).ImplementedTypes.FirstOrDefault(); 
+        }
+
+        public bool CompatibleWith(Type entityType)
+        {
+            if (Implementations == null)
+                return Reflector.ExtractLite(this.Type) == entityType;
+
+            if (Implementations.IsByAll)
+                return true;
+
+            return ((ImplementedByAttribute)Implementations).ImplementedTypes.Contains(entityType); 
+        }
     }
 }

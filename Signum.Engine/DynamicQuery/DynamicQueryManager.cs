@@ -91,7 +91,7 @@ namespace Signum.Engine.DynamicQuery
 
         public Dictionary<object, IDynamicQuery> GetQueryNames(Type entityType)
         {
-            return queries.Where(kvp => kvp.Value.EntityCleanType() == entityType).ToDictionary();
+            return queries.Where(kvp => kvp.Value.EntityColumn().CompatibleWith(entityType)).ToDictionary();
         }
 
         public string Errors(object queryName)

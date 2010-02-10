@@ -20,7 +20,7 @@ namespace Signum.Engine.DynamicQuery
 {
     public interface IDynamicQuery
     {
-        Type EntityCleanType();
+        StaticColumn EntityColumn();
         QueryDescription GetDescription();
         ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
         int ExecuteQueryCount(List<Filter> filters);
@@ -50,9 +50,9 @@ namespace Signum.Engine.DynamicQuery
             return new QueryDescription { StaticColumns = StaticColumns.Where(a => a.IsAllowed()).ToList() };
         }
 
-        protected ResultTable ToQueryResult(Expandable<T>[] result, IEnumerable<UserColumn> userColumns)
+        protected ResultTable ToQueryResult(Expandable<T>[] result, List<UserColumn> userColumns)
         {
-            return Create(result, StaticColumns.Where(a => a.IsAllowed()), userColumns == null ? new UserColumn[0] : userColumns.Where(a => a.IsAllowed()));
+            return Create(result, StaticColumns, userColumns ?? new List<UserColumn>());
         }
 
         public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<StaticColumn> change)
@@ -64,18 +64,15 @@ namespace Signum.Engine.DynamicQuery
             return this;
         }
 
-        public Type EntityCleanType()
+        public StaticColumn EntityColumn()
         {
-            Type type = StaticColumns.Where(c => c.IsEntity).Single(Resources.ThereIsNoEntityColumn, Resources.ThereAreMoreThanOneEntityColumn).Type;
-
-            return Reflector.ExtractLite(type).ThrowIfNullC(Resources.EntityColumnIsNotALite);
+            return StaticColumns.Where(c => c.IsEntity).Single(Resources.ThereIsNoEntityColumn, Resources.ThereAreMoreThanOneEntityColumn);
         }
 
         public virtual Expression Expression
         {
             get { return null; }
         }
-
 
         protected static Delegate CreateGetter(MemberInfo memberInfo)
         {
@@ -86,10 +83,10 @@ namespace Signum.Engine.DynamicQuery
                        memberInfo.Name), pe).Compile();
         }
 
-        protected static ResultTable Create(Expandable<T>[] collection, IEnumerable<StaticColumn> staticColumns, IEnumerable<UserColumn> userColumns)
+        protected static ResultTable Create(Expandable<T>[] collection, StaticColumn[] staticColumns, List<UserColumn> userColumns)
         {
             ResultTable result = new ResultTable(
-                   staticColumns.ToArray(),
+                   staticColumns,
                    userColumns.ToArray(),
                    collection.Length,
                    c=> c is StaticColumn? CreateValuesStaticColumnsUntyped((StaticColumn)c, collection):

@@ -8,7 +8,8 @@
 	x:Name="Window"
 	ShowInTaskbar="True" 
 	ResizeMode="CanResizeWithGrip" 
-	WindowStartupLocation="CenterScreen" 
+	WindowStartupLocation="CenterScreen"
+    m:Monitors.AdjustToMonitor="true"
 	MinHeight="180"
     SizeToContent="WidthAndHeight"
 	SnapsToDevicePixels="True" >

@@ -186,6 +186,4 @@ namespace Signum.Windows
             return this;
         }
     }
-
-
 }

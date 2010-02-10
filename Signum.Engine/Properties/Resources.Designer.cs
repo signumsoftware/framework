@@ -120,7 +120,8 @@ namespace Signum.Engine.Properties {
         ///DUMMY
         ///DUMP
         ///ELSE
-        ///END        /// [rest of string was truncated]&quot;;.
+        ///END
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string @__SqlKeywords__ {
             get {
@@ -197,15 +198,6 @@ namespace Signum.Engine.Properties {
         internal static string EndOfSyncScript {
             get {
                 return ResourceManager.GetString("EndOfSyncScript", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Entity column is not a Lite.
-        /// </summary>
-        internal static string EntityColumnIsNotALite {
-            get {
-                return ResourceManager.GetString("EntityColumnIsNotALite", resourceCulture);
             }
         }
         

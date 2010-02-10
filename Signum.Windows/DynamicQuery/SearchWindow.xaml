@@ -7,7 +7,7 @@
     SizeToContent="WidthAndHeight"
 	ResizeMode="CanResizeWithGrip" 
 	WindowStartupLocation="CenterScreen"
-    LocationChanged="me_LocationChanged">
+    m:Monitors.AdjustToMonitor="true">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
