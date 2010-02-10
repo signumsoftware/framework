@@ -156,7 +156,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 if (IsEntity)
                     DisplayName = cleanType.NiceName();
-                if (mi is PropertyInfo)
+                else if (mi is PropertyInfo)
                     DisplayName = ((PropertyInfo)mi).NiceName();
                 else
                     DisplayName = mi.Name.NiceName();
