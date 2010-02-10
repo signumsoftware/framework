@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Properties;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using Signum.Utilities;
 
 namespace Signum.Entities.Patterns
 {
@@ -34,8 +35,8 @@ namespace Signum.Entities.Patterns
         protected override bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
         {
             if (this.locked)
-                throw new ApplicationException(Resources.LockedModificationException);
-
+                throw new ApplicationException(Resources.LockedModificationException + " "+ this.ToString());
+            
             return base.Set<T>(ref variable, value, property);
         }
 
