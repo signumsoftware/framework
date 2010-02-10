@@ -74,10 +74,10 @@ namespace Signum.Services
     public interface IQueryAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role);
+        List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
-        void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role);
+        void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
         HashSet<object> AuthorizedQueries();
@@ -87,10 +87,10 @@ namespace Signum.Services
     public interface IOperationAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role);
+        List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
-        void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role);
+        void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN);
     }
 
     [ServiceContract]

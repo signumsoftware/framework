@@ -28,9 +28,9 @@ namespace Signum.Engine.Basics
         const string FieldsForKey = "Properties For:{0}";
         static SqlPreCommand SyncronizeProperties(Replacements replacements)
         {
-            var current = Administrator.TryRetrieveAll<PropertyDN>(replacements).AgGroupToDictionary(a => a.Type.ClassName, g => g.ToDictionary(f => f.Path));
+            var current = Administrator.TryRetrieveAll<PropertyDN>(replacements).AgGroupToDictionary(a => a.Type.FullClassName, g => g.ToDictionary(f => f.Path));
 
-            var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.ClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path));
+            var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path));
 
             Table table = Schema.Current.Table<PropertyDN>();
 
@@ -56,9 +56,7 @@ namespace Signum.Engine.Basics
             var retrieve = Database.Query<PropertyDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.DnToType[typeDN], typeDN).ToDictionary(a => a.Path);
 
-            generate.SetRange(retrieve);
-
-            return generate.Values.ToList();
+            return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDoC(pi => pi.PropertyPath = kvp.Value.PropertyPath) ?? kvp.Value).ToList();
         }
 
         public static List<PropertyDN> GenerateProperties(Type type, TypeDN typeDN)

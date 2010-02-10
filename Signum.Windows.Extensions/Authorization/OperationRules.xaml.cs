@@ -21,6 +21,14 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class OperationRules : Window
     {
+        public static readonly DependencyProperty TypeProperty =
+            DependencyProperty.Register("Type", typeof(TypeDN), typeof(OperationRules), new UIPropertyMetadata(null));
+        public TypeDN Type
+        {
+            get { return (TypeDN)GetValue(TypeProperty); }
+            set { SetValue(TypeProperty, value); }
+        }
+
         public Lite<RoleDN> Role
         {
             get { return (Lite<RoleDN>)GetValue(RoleProperty); }
@@ -43,12 +51,12 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Return((IOperationAuthServer s)=>s.GetOperationAllowedRules(Role)); 
+            listView.ItemsSource = Server.Return((IOperationAuthServer s)=>s.GetOperationAllowedRules(Role, Type)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IOperationAuthServer s)=>s.SetOperationAllowedRules((List<AllowedRule>)listView.ItemsSource, Role)); 
+            Server.Execute((IOperationAuthServer s) => s.SetOperationAllowedRules((List<AllowedRule>)listView.ItemsSource, Role, Type)); 
             Load(); 
         }  
 

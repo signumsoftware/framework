@@ -165,7 +165,7 @@ namespace Signum.Engine.Help
 
         public static string GetQueryHelp(Type type, IDynamicQuery dynamicQuery)
         {
-            Type entityType = dynamicQuery.EntityCleanType();
+            Type entityType = dynamicQuery.EntityColumn().DefaultEntityType();
 
             if (dynamicQuery.Expression != null)
             {

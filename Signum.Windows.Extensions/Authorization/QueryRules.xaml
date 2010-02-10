@@ -4,7 +4,10 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
+    xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities"
     SizeToContent="WidthAndHeight"
+    m:Monitors.AdjustToMonitor="true"
+    WindowStartupLocation="CenterOwner"
     Title="Query Rules" x:Name="me" MinWidth="300" MinHeight="300">
 	<Window.Resources>
 		<ResourceDictionary>
@@ -16,6 +19,7 @@
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
         <m:EntityLine VerticalAlignment="Top"  LabelText="Role" m:Common.IsReadOnly="True" Type="{m:Lite authdn:RoleDN}" Entity="{Binding Role, ElementName=me}" DockPanel.Dock="Top"/>
+        <m:EntityLine VerticalAlignment="Top"  LabelText="Type" m:Common.IsReadOnly="True" Type="{x:Type dn:TypeDN}" Entity="{Binding Type, ElementName=me}" DockPanel.Dock="Top"/>
         <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">

@@ -8,6 +8,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities;
 
 namespace Signum.Engine.Basics
 {
@@ -31,13 +32,12 @@ namespace Signum.Engine.Basics
 
         public static object ToQueryName(string uniqueQueryName)
         {
-            return ToQueryName(uniqueQueryName, true);
+            return QueryNames.GetOrThrow(uniqueQueryName, "QueryName with unique name {0} not found");
         }
 
-        public static object ToQueryName(string uniqueQueryName, bool throwException)
+        public static object TryToQueryName(string uniqueQueryName)
         {
-            return throwException || QueryNames.ContainsKey(uniqueQueryName) ? QueryNames[uniqueQueryName]
-                : null ;
+            return QueryNames.TryGetC(uniqueQueryName);
         }
 
         static void Schema_Initializing(Schema sender)
@@ -50,10 +50,14 @@ namespace Signum.Engine.Basics
             return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryName(qn));
         }
 
-        public static List<QueryDN> RetrieveOrGenerateQueries()
+        public static List<QueryDN> RetrieveOrGenerateQueries(TypeDN typeDN)
         {
-            var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Name);
-            var total = QueryNames.Select(kvp => new QueryDN { Name = kvp.Key }).ToDictionary(a => a.Name);
+            Type type = TypeLogic.DnToType[typeDN];
+
+            string[] queryNames = DynamicQueryManager.Current.GetQueryNames(type).Keys.Select(qn => QueryUtils.GetQueryName(qn)).ToArray();
+
+            var current = Database.RetrieveAll<QueryDN>().Where(a => queryNames.Contains(a.Name)).ToDictionary(a => a.Name);
+            var total = queryNames.Select(un => new QueryDN { Name = un }).ToDictionary(a => a.Name);
 
             total.SetRange(current);
             return total.Values.ToList();

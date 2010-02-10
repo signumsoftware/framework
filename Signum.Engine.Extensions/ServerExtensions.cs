@@ -193,16 +193,16 @@ namespace Signum.Services
 
         #region IQueryAuthServer Members
 
-        public List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role)
+        public List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => QueryAuthLogic.GetAllowedRule(role));
+              () => QueryAuthLogic.GetAllowedRule(role, typeDN));
         }
 
-        public void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
+        public void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-               () => QueryAuthLogic.SetAllowedRule(rules, role));
+               () => QueryAuthLogic.SetAllowedRule(rules, role, typeDN));
         }
 
         public HashSet<object> AuthorizedQueries()
@@ -237,17 +237,17 @@ namespace Signum.Services
 
         #region IOperationAuthServer Members
 
-        public List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role)
+        public List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationAuthLogic.GetAllowedRule(role));
+              () => OperationAuthLogic.GetAllowedRule(role, typeDN));
         }
 
 
-        public void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
+        public void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-               () => OperationAuthLogic.SetAllowedRule(rules, role));
+               () => OperationAuthLogic.SetAllowedRule(rules, role, typeDN));
         }
 
         #endregion

@@ -6,6 +6,8 @@
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities"
     SizeToContent="WidthAndHeight"
+    m:Monitors.AdjustToMonitor="true"
+    WindowStartupLocation="CenterOwner"
     Title="Property Rules" x:Name="me" MinWidth="300" MinHeight="300">
     <Window.Resources>
         <ResourceDictionary>

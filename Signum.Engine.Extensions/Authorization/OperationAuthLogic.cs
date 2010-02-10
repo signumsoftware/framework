@@ -80,31 +80,34 @@ namespace Signum.Engine.Authorization
             return operationInfos.Where(ai => GetAllowed(role, ai.Key)).ToList(); 
         }
 
-        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite)
+        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
             var role = roleLite.Retrieve();
 
-            var queries = Database.RetrieveAll<OperationDN>();
-            return (from a in queries
-                    let ak = EnumLogic<OperationDN>.ToEnum(a.Key)     
-                    select new AllowedRule(GetBaseAllowed(role, ak))
+            Type type = TypeLogic.DnToType[typeDN];
+
+            var operations = Database.RetrieveAll<OperationDN>();
+            return (from oi in OperationLogic.GetAllOperationInfos(type)
+                    select new AllowedRule(GetBaseAllowed(role, oi.Key))
                     {
-                        Resource = a,
-                        Allowed = GetAllowed(role, ak),
-                    }).ToList();    
+                        Resource = EnumLogic<OperationDN>.ToEntity(oi.Key),
+                        Allowed = GetAllowed(role, oi.Key),
+                    }).ToList();
         }
 
-        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite)
+        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite, TypeDN typeDN)
         {
             var role = roleLite.Retrieve();
 
-            var current = Database.Query<RuleQueryDN>().Where(r => r.Role == role).ToDictionary(a => a.Query);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => (QueryDN)r.Resource);
+            Type type = TypeLogic.DnToType[typeDN];
+            var operations = OperationLogic.GetAllOperationInfos(type).Select(a => EnumLogic<OperationDN>.ToEntity(a.Key)).ToArray();
+            var current = Database.Query<RuleOperationDN>().Where(r => r.Role == role && operations.Contains(r.Operation)).ToDictionary(a => a.Operation);
+            var should = rules.Where(a => a.Overriden).ToDictionary(r => (OperationDN)r.Resource);
 
             Synchronizer.Synchronize(current, should,
-                (q,qr)=>qr.Delete(),
-                (q,ar)=>new RuleQueryDN{ Query = q, Allowed = ar.Allowed, Role = role}.Save(),
-                (q, qr, ar) => { qr.Allowed = ar.Allowed; qr.Save(); });
+                (o, or)=>or.Delete(),
+                (o, ar) => new RuleOperationDN { Operation = o, Allowed = ar.Allowed, Role = role }.Save(),
+                (o, or, ar) => { or.Allowed = ar.Allowed; or.Save(); });
 
             _runtimeRules = null; 
         }

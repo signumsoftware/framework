@@ -4,72 +4,101 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
-    SizeToContent="WidthAndHeight"
+    m:Monitors.AdjustToMonitor="true"
+    WindowStartupLocation="CenterOwner"
     Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300">
-	<Window.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="AuthResources.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/Signum.Windows;component/Resources.xaml"/>
-			</ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="TreeViewColumnResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-	</Window.Resources>
+    </Window.Resources>
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
         <m:EntityLine VerticalAlignment="Top"  LabelText="Role" m:Common.IsReadOnly="True" Type="{m:Lite authdn:RoleDN}" Entity="{Binding Role, ElementName=me}" DockPanel.Dock="Top"/>
-        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <ScrollViewer x:Name="swTop" Grid.Column="1"
+                      DockPanel.Dock="Top"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Disabled"
+                      Margin="1,1,18,1">
+            <Grid x:Name="grid" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+
+                <ColumnDefinition Width="38" />
+                <ColumnDefinition Width="38" />
+                <ColumnDefinition Width="38" />
+                <ColumnDefinition Width="38" />
+
+                <ColumnDefinition Width="58" />
+                <ColumnDefinition Width="58" />
+                <ColumnDefinition Width="58" />
+                <ColumnDefinition Width="58" />
+            </Grid.ColumnDefinitions>
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="0" Content="Type"/>
+
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="1" Content="Create" />
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="2" Content="Modify" />
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="3" Content="Read" />
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="4" Content="None" />
+
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="5" Content="Overriden" />
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="Properties" />
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="7" Content="Operations" />
+            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="Queries" />
+        </Grid>
+            </ScrollViewer>
+
+        <TreeView 
+            ScrollViewer.VerticalScrollBarVisibility="Visible"
+            HorizontalAlignment="Stretch" 
+            VerticalAlignment="Stretch"
+            Width="Auto" 
+            Height="Auto" 
+            x:Name="treeView"
+            ScrollViewer.ScrollChanged="treeView_ScrollChanged">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem" BasedOn="{StaticResource TreeViewItemStyle1}">
+                    <Setter Property="IsExpanded" Value="{Binding Expanded}"/>
                 </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Resource}" />
-                    <GridViewColumn Header="Create" Width="40">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox IsChecked="{Binding Path=Create}" Background="Green"  />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Modify" Width="40">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox IsChecked="{Binding Path=Modify}" Background="Blue"  />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Read" Width="40">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="None" Width="40">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=None}" Style="{StaticResource SphereRadioButton}" Background="Red" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Overriden" Width="60">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox  IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Properties" Width="60">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                              <Button Click="Button_Click"  Content="{StaticResource View}" Style="{StaticResource RoundButton}" ToolTip="{m:Loc View}"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.ItemTemplateSelector>
+                <m:TypeDataTemplateSelector>
+                    <HierarchicalDataTemplate  DataType="{x:Type auth:NamespaceNode}" ItemsSource="{Binding SubNodes}">
+                        <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Name}" />
+                    </HierarchicalDataTemplate>
+
+                    <HierarchicalDataTemplate DataType="{x:Type authdn:TypeAccessRule}">
+                        <Grid ShowGridLines="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+
+                                <ColumnDefinition Width="38" />
+                                <ColumnDefinition Width="38" />
+                                <ColumnDefinition Width="38" />
+                                <ColumnDefinition Width="38" />
+
+                                <ColumnDefinition Width="58" />
+                                <ColumnDefinition Width="58" />
+                                <ColumnDefinition Width="58" />
+                                <ColumnDefinition Width="58" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Type.FriendlyName}" Grid.Column="0" />
+                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Create}" Style="{StaticResource SphereRadioButton}" Background="DodgerBlue" Grid.Column="1"/>
+                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Modify}" Style="{StaticResource SphereRadioButton}" Background="Lime" Grid.Column="2" />
+                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" Grid.Column="3"  />
+                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=None}" Style="{StaticResource SphereRadioButton}" Background="Red" Grid.Column="4"  />
+                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" Grid.Column="5"  />
+                            <Button Click="properties_Click" x:Name="properties" Content="{StaticResource View}" Style="{StaticResource RoundButton}" ToolTip="{m:Loc View}" Grid.Column="6" Visibility="{Binding Properties, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+                            <Button Click="operations_Click" x:Name="operations" Content="{StaticResource View}" Style="{StaticResource RoundButton}" ToolTip="{m:Loc View}" Grid.Column="7"  Visibility="{Binding Properties, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+                            <Button Click="queries_Click" x:Name="queries" Content="{StaticResource View}" Style="{StaticResource RoundButton}" ToolTip="{m:Loc View}" Grid.Column="8"  Visibility="{Binding Properties, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
+                        </Grid>
+                    </HierarchicalDataTemplate>
+                </m:TypeDataTemplateSelector>
+            </TreeView.ItemTemplateSelector>
+        </TreeView>
     </DockPanel>
 </Window>

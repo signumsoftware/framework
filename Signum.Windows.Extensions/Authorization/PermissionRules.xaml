@@ -5,6 +5,8 @@
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     SizeToContent="WidthAndHeight"
+    m:Monitors.AdjustToMonitor="true"
+    WindowStartupLocation="CenterOwner"
     Title="Permission Rules" x:Name="me" MinWidth="500" MinHeight="300">
 	<Window.Resources>
 		<ResourceDictionary>

@@ -4,6 +4,8 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
+    m:Monitors.AdjustToMonitor="true"
+    WindowStartupLocation="CenterOwner"
     SizeToContent="WidthAndHeight"
     Title="Facade Method Rules" x:Name="me" MinWidth="500" MinHeight="300">
 	<Window.Resources>

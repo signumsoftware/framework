@@ -258,11 +258,11 @@ namespace Signum.Entities.Authorization
             get { return accessOverride.HasValue; }
         }
 
-        IdentifiableEntity resource;
-        public IdentifiableEntity Resource
+        TypeDN type;
+        public TypeDN Type
         {
-            get { return resource; }
-            set { Set(ref resource, value, () => Resource); }
+            get { return type; }
+            set { Set(ref type, value, () => Type); }
         }
     }
 }

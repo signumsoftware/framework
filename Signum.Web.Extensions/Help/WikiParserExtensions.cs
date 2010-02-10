@@ -21,6 +21,7 @@ namespace Signum.Web.Extensions
     {
         public static string WikiUrl = "http://192.168.0.5:8085/";
         public static string ImagesFolder = "HelpImagenes/";
+        
         public class WikiLink
         {
             public string Text { get; set; }
@@ -53,6 +54,7 @@ namespace Signum.Web.Extensions
                     Text);
             }
         }
+
         public static string ProcessImages(string content)
         {
             StringBuilder sb = new StringBuilder();
@@ -70,12 +72,12 @@ namespace Signum.Web.Extensions
                 if (part2.HasText())
                 {
                     //Has footer
-                    result = "<div class=\"image{0}\"><img alt=\"{1}\" src=\"{2}{3}\"/><p class=\"imagedescription\">{1}</p></div>".Formato(position, part1, ImagesFolder, part2); 
+                    result = "<div class=\"image{0}\"><img alt=\"{1}\" src=\"{2}{3}\"/><p class=\"imagedescription\">{1}</p></div>".Formato(position, part1, ImagesFolder, part2);
                 }
                 else
                 {
-                    result = "<div class=\"image{0}\"><img src=\"{1}{2}\"/></div>".Formato(position, ImagesFolder, part1); 
-                }                
+                    result = "<div class=\"image{0}\"><img src=\"{1}{2}\"/></div>".Formato(position, ImagesFolder, part1);
+                }
 
                 sb.Append(content.Substring(firstIndex, m.Index - firstIndex));
                 sb.Append(result);
@@ -112,7 +114,7 @@ namespace Signum.Web.Extensions
                         break;
 
                     case WikiFormat.OperationLink:
-                        Enum operation = EnumLogic<OperationDN>.ToEnum(link, false);
+                        Enum operation = EnumLogic<OperationDN>.TryToEnum(link);
                         result = new WikiLink(operation != null ?
                             HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_') : link,
                             text.HasText() ? text : (operation != null ? operation.NiceToString() : link),
@@ -129,12 +131,12 @@ namespace Signum.Web.Extensions
                         break;
 
                     case WikiFormat.QueryLink:
-                        object o = QueryLogic.ToQueryName(link, false);
+                        object o = QueryLogic.TryToQueryName(link);
                         if (o as Enum != null)
                         {
                             Enum query = (Enum)o;
                             result = new WikiLink(
-                                query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityCleanType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
+                                query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
                                 text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
                                 query != null ? "" : "unavailable");
                         }
@@ -169,92 +171,92 @@ namespace Signum.Web.Extensions
             }
             yield break;
         }
-        
+
         public static string WikiParse(this HtmlHelper html, string content)
         {
             StringBuilder sb = new StringBuilder();
             int firstIndex = 0;
 
             Match m = Regex.Match(content, @"\[(?<letter>.):(?<link>[^\|\]]*)(\|(?<text>.*?))?\]");
-            
-                while (m.Success)
+
+            while (m.Success)
+            {
+                string letter = m.Groups["letter"].ToString();
+                string link = m.Groups["link"].ToString();
+                string text = m.Groups["text"].ToString();
+
+                string result = string.Empty;
+
+                switch (letter)
                 {
-                    string letter = m.Groups["letter"].ToString();
-                    string link = m.Groups["link"].ToString();
-                    string text = m.Groups["text"].ToString();
+                    case WikiFormat.EntityLink:
+                        Type t = HelpLogic.GetNameToType(link, false);
+                        result = new WikiLink(t != null ? HelpLogic.EntityUrl(t) : link,
+                            text.HasText() ? text : t != null ? t.NiceName() : link,
+                            t != null ? "" : "unavailable").ToHtmlString();
+                        break;
 
-                    string result = string.Empty;
+                    case WikiFormat.HyperLink:
+                        result = new WikiLink(link, text).ToHtmlString();
+                        break;
 
-                    switch (letter)
-                    {
-                        case WikiFormat.EntityLink:
-                            Type t = HelpLogic.GetNameToType(link, false);
-                            result = new WikiLink(t != null ? HelpLogic.EntityUrl(t) : link,
-                                text.HasText() ? text : t != null ? t.NiceName() : link,
-                                t != null ? "" : "unavailable").ToHtmlString();
-                            break;
+                    case WikiFormat.OperationLink:
+                        Enum operation = EnumLogic<OperationDN>.TryToEnum(link);
+                        result = new WikiLink(operation != null ?
+                            HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_') : link,
+                            text.HasText() ? text : (operation != null ? operation.NiceToString() : link),
+                            operation != null ? "" : "unavailable").ToHtmlString();
+                        break;
 
-                        case WikiFormat.HyperLink:
-                            result = new WikiLink(link, text).ToHtmlString();
-                            break;
+                    case WikiFormat.PropertyLink:
+                        string[] parts = link.Split('.');
+                        Type type = HelpLogic.GetNameToType(parts[0], false);
+                        //TODO: NiceToString de la propiedad
+                        result = new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
+                            text.HasText() ? text : parts[1],
+                            type != null ? "" : "unavailable").ToHtmlString();
+                        break;
 
-                        case WikiFormat.OperationLink:
-                            Enum operation = EnumLogic<OperationDN>.ToEnum(link, false);
-                            result = new WikiLink(operation != null ?
-                                HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.','_') : link,
-                                text.HasText() ? text : (operation != null ? operation.NiceToString() : link),
-                                operation != null ? "" : "unavailable").ToHtmlString();
-                            break;
-
-                        case WikiFormat.PropertyLink:
-                            string[] parts = link.Split('.');
-                            Type type = HelpLogic.GetNameToType(parts[0], false);
-                            //TODO: NiceToString de la propiedad
-                            result = new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
-                                text.HasText() ? text : parts[1],
-                                type != null ? "" : "unavailable").ToHtmlString();
-                            break;
-
-                        case WikiFormat.QueryLink:
-                            object o = QueryLogic.ToQueryName(link, false);
-                            if (o as Enum != null)
-                            {
-                                Enum query = (Enum)o;
-                                result = new WikiLink(
-                                    query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityCleanType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
-                                    text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
-                                    query != null ? "" : "unavailable").ToHtmlString();
-                            }
-                            else
-                            {
-                                Type query = (Type)o;
-                                result = new WikiLink(
-                                    query != null ? (HelpLogic.EntityUrl(query) + "#" + "q-" + query.FullName.Replace(".", "_")) : link,
-                                    text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
-                                    query != null ? "" : "unavailable").ToHtmlString();
-
-                                //Treat as entity
-                            }
-                            break;
-
-                        case WikiFormat.WikiLink:
-                            result = new WikiLink(WikiUrl + link, text.HasText() ? text : "Enlace a wiki").ToHtmlString();
-                            break;
-
-                        case WikiFormat.NameSpaceLink:
-                            NamespaceHelp nameSpace = HelpLogic.GetNamespace(link);
+                    case WikiFormat.QueryLink:
+                        object o = QueryLogic.TryToQueryName(link);
+                        if (o as Enum != null)
+                        {
+                            Enum query = (Enum)o;
                             result = new WikiLink(
-                                HelpLogic.BaseUrl + "/Namespace/"+ link,
-                                text.HasText() ? text : link,
-                                nameSpace != null ? "" : "unavailable").ToHtmlString();
-                            break;
-                    }
+                                query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
+                                text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
+                                query != null ? "" : "unavailable").ToHtmlString();
+                        }
+                        else
+                        {
+                            Type query = (Type)o;
+                            result = new WikiLink(
+                                query != null ? (HelpLogic.EntityUrl(query) + "#" + "q-" + query.FullName.Replace(".", "_")) : link,
+                                text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
+                                query != null ? "" : "unavailable").ToHtmlString();
 
-                    sb.Append(content.Substring(firstIndex, m.Index - firstIndex));
-                    sb.Append(result);
-                    firstIndex = m.Index + m.Length;
-                    m = m.NextMatch();
+                            //Treat as entity
+                        }
+                        break;
+
+                    case WikiFormat.WikiLink:
+                        result = new WikiLink(WikiUrl + link, text.HasText() ? text : "Enlace a wiki").ToHtmlString();
+                        break;
+
+                    case WikiFormat.NameSpaceLink:
+                        NamespaceHelp nameSpace = HelpLogic.GetNamespace(link);
+                        result = new WikiLink(
+                            HelpLogic.BaseUrl + "/Namespace/" + link,
+                            text.HasText() ? text : link,
+                            nameSpace != null ? "" : "unavailable").ToHtmlString();
+                        break;
                 }
+
+                sb.Append(content.Substring(firstIndex, m.Index - firstIndex));
+                sb.Append(result);
+                firstIndex = m.Index + m.Length;
+                m = m.NextMatch();
+            }
             sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
 
             string postLinks = sb.ToString();
@@ -301,68 +303,68 @@ namespace Signum.Web.Extensions
      "<oli>${content}</oli>",
      RegexOptions.Compiled);
 
-     postLinks = Regex.Replace(postLinks,
-     "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
-     "<ul>${content}</ul>",
-     RegexOptions.Compiled);
+            postLinks = Regex.Replace(postLinks,
+            "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
+            "<ul>${content}</ul>",
+            RegexOptions.Compiled);
 
-     postLinks = Regex.Replace(postLinks,
-"(?<content>\\<oli\\>{1}.+\\<\\/oli\\>)",
-"<ol>${content}</ol>",
-RegexOptions.Compiled);
+            postLinks = Regex.Replace(postLinks,
+       "(?<content>\\<oli\\>{1}.+\\<\\/oli\\>)",
+       "<ol>${content}</ol>",
+       RegexOptions.Compiled);
 
-     postLinks = Regex.Replace(postLinks,
-"(?<content>oli\\>{1})",
-"li>",
-RegexOptions.Compiled);
+            postLinks = Regex.Replace(postLinks,
+       "(?<content>oli\\>{1})",
+       "li>",
+       RegexOptions.Compiled);
 
-    // Assign the replace method to the MatchEvaluator delegate.
-    MatchEvaluator meTitle = new MatchEvaluator(ReplaceTitle);
+            // Assign the replace method to the MatchEvaluator delegate.
+            MatchEvaluator meTitle = new MatchEvaluator(ReplaceTitle);
 
 
-     // Replacing titles
-     postLinks = Regex.Replace(postLinks,
-     "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})",
-     meTitle,
-     RegexOptions.Compiled);
+            // Replacing titles
+            postLinks = Regex.Replace(postLinks,
+            "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})",
+            meTitle,
+            RegexOptions.Compiled);
 
             //Remove multiple breakline
-     postLinks = Regex.Replace(postLinks,
-    "(?<content>\n{2,})","\n",
-    RegexOptions.Compiled);
+            postLinks = Regex.Replace(postLinks,
+           "(?<content>\n{2,})", "\n",
+           RegexOptions.Compiled);
 
-/*     postLinks = Regex.Replace(postLinks,
-     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
-     "<li1>${content}</li1>",
-     RegexOptions.Compiled);
-     postLinks = Regex.Replace(postLinks,
-     "(?<content>\\<li1\\>{1}.+\\<\\/li1\\>)",
-     "<ul>${content}</ul>",
-     RegexOptions.Compiled);
+            /*     postLinks = Regex.Replace(postLinks,
+                 "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
+                 "<li1>${content}</li1>",
+                 RegexOptions.Compiled);
+                 postLinks = Regex.Replace(postLinks,
+                 "(?<content>\\<li1\\>{1}.+\\<\\/li1\\>)",
+                 "<ul>${content}</ul>",
+                 RegexOptions.Compiled);
 
-     // Replacing lists
-     postLinks = Regex.Replace(postLinks,
-     "(?<begin>\\*{1})(?<content>.+)(?<end>[^*])",
-     "<li2>${content}</li2>",
-     RegexOptions.Compiled);
-     postLinks = Regex.Replace(postLinks,
-     "(?<content>\\<li2\\>{1}.+\\<\\/li2\\>)",
-     "<ul>${content}</ul>",
-     RegexOptions.Compiled);
+                 // Replacing lists
+                 postLinks = Regex.Replace(postLinks,
+                 "(?<begin>\\*{1})(?<content>.+)(?<end>[^*])",
+                 "<li2>${content}</li2>",
+                 RegexOptions.Compiled);
+                 postLinks = Regex.Replace(postLinks,
+                 "(?<content>\\<li2\\>{1}.+\\<\\/li2\\>)",
+                 "<ul>${content}</ul>",
+                 RegexOptions.Compiled);
 
-     postLinks = Regex.Replace(postLinks,
-     "(?<content>\\<li[0-9]+\\>{1})",
-     "<li>",
-     RegexOptions.Compiled);
+                 postLinks = Regex.Replace(postLinks,
+                 "(?<content>\\<li[0-9]+\\>{1})",
+                 "<li>",
+                 RegexOptions.Compiled);
 
-     postLinks = Regex.Replace(postLinks,
-     "(?<content>\\</li[0-9]+\\>{1})",
-     "</li>",
-     RegexOptions.Compiled);*/
+                 postLinks = Regex.Replace(postLinks,
+                 "(?<content>\\</li[0-9]+\\>{1})",
+                 "</li>",
+                 RegexOptions.Compiled);*/
 
-          //  postLinks = Parse(postLinks, "'''", "<b>", "</b>");
-          //  postLinks = Parse(postLinks, "''", "<i>", "</i>"); 
-           // postLinks = WikiMarkupToHtml(postLinks);
+            //  postLinks = Parse(postLinks, "'''", "<b>", "</b>");
+            //  postLinks = Parse(postLinks, "''", "<i>", "</i>"); 
+            // postLinks = WikiMarkupToHtml(postLinks);
             return postLinks.Trim();
         }
 
@@ -387,36 +389,36 @@ RegexOptions.Compiled);
             return sb.ToString();
         }
 
-     /*  public static string HandleList(MatchCollection mathes) {
+        /*  public static string HandleList(MatchCollection mathes) {
            
-         Dictionary<string, string> listtypes = new Dictionary<string,string> { "*" = "ul", "#" = "ol"};
+            Dictionary<string, string> listtypes = new Dictionary<string,string> { "*" = "ul", "#" = "ol"};
 
-		 StringBuilder output = new StringBuilder();
+            StringBuilder output = new StringBuilder();
 		 
-           int newlevel = 0;
-		    int listLevel = 0;
-		while ($this->list_level!=$newlevel) {
-			$listchar = substr($matches[1],-1);
-			$listtype = $listtypes[$listchar];
+              int newlevel = 0;
+               int listLevel = 0;
+           while ($this->list_level!=$newlevel) {
+               $listchar = substr($matches[1],-1);
+               $listtype = $listtypes[$listchar];
 			
-			//$output .= "[".$this->list_level."->".$newlevel."]";
+               //$output .= "[".$this->list_level."->".$newlevel."]";
 			
-			if ($this->list_level>$newlevel) {
-				$listtype = '/'.array_pop($this->list_level_types);
-				$this->list_level--;
-			} else {
-				$this->list_level++;
-				array_push($this->list_level_types,$listtype);
-			}
-			$output .= "\n<{$listtype}>\n";
-		}
+               if ($this->list_level>$newlevel) {
+                   $listtype = '/'.array_pop($this->list_level_types);
+                   $this->list_level--;
+               } else {
+                   $this->list_level++;
+                   array_push($this->list_level_types,$listtype);
+               }
+               $output .= "\n<{$listtype}>\n";
+           }
 		
-		if ($close) return $output;
+           if ($close) return $output;
 		
-		$output .= "<li>".$matches[2]."</li>\n";
+           $output .= "<li>".$matches[2]."</li>\n";
 		
-		return $output;
-	}*/
+           return $output;
+       }*/
     }
 
    

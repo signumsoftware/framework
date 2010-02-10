@@ -96,27 +96,27 @@ namespace Signum.Windows.Authorization
                     bool authorized = BasicPermissions.AdminRules.TryIsAuthorized() ?? true;
                     return new QuickLink[]
                     {
-                         new QuickLinkAction("Query Rules", () => new QueryRules { Role = r.ToLite() }.Show())
+                         new QuickLinkAction("Type Rules", () => 
+                            new TypeRules 
+                            { 
+                                Owner = c.FindCurrentWindow(),
+                                Role = r.ToLite(), 
+                                Properties = property, 
+                                Operations = Server.Implements<IOperationAuthServer>(), 
+                                Queries = queries 
+                            }.Show())
                          { 
-                             IsVisible = authorized && Server.Implements<IQueryAuthServer>()
+                             IsVisible = authorized && types
                          },
-                         new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite() }.Show())
+                         new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r.ToLite(), Owner = c.FindCurrentWindow() }.Show())
+                         {
+                             IsVisible = authorized && permissions
+                         },
+                         new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite(), Owner = c.FindCurrentWindow() }.Show())
                          { 
                              IsVisible = authorized && Server.Implements<IFacadeMethodAuthServer>()
                          },
-                         new QuickLinkAction("Type Rules", () => new TypeRules { Role = r.ToLite() }.Show())
-                         { 
-                             IsVisible = authorized && Server.Implements<ITypeAuthServer>()
-                         },
-                         new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r.ToLite() }.Show())
-                         {
-                             IsVisible = authorized && Server.Implements<IPermissionAuthServer>()
-                         },
-                         new QuickLinkAction("Operation Rules", () => new OperationRules { Role = r.ToLite() }.Show())
-                         {
-                             IsVisible = authorized && Server.Implements<IOperationAuthServer>(),
-                         },
-                         new QuickLinkAction("Entity Groups", () => new EntityGroupRules { Role = r.ToLite() }.Show())
+                         new QuickLinkAction("Entity Groups", () => new EntityGroupRules { Role = r.ToLite(), Owner = c.FindCurrentWindow() }.Show())
                          {
                              IsVisible = authorized && Server.Implements<IEntityGroupAuthServer>(),
                          }
@@ -175,7 +175,7 @@ namespace Signum.Windows.Authorization
 
         static Access GetPropertyAccess(PropertyRoute route)
         {
-            return propertyRules.TryGetC(route.Type).TryGetS(route.PropertyString()) ?? Access.Modify;
+            return propertyRules.TryGetC(route.IdentifiableType).TryGetS(route.PropertyString()) ?? Access.Modify;
         }
 
         static bool GetQueryAceess(object queryName)

@@ -21,14 +21,21 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class QueryRules : Window
     {
+        public static readonly DependencyProperty TypeProperty =
+            DependencyProperty.Register("Type", typeof(TypeDN), typeof(QueryRules), new UIPropertyMetadata(null));
+        public TypeDN Type
+        {
+            get { return (TypeDN)GetValue(TypeProperty); }
+            set { SetValue(TypeProperty, value); }
+        }
+
+        public static readonly DependencyProperty RoleProperty =
+          DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(QueryRules), new UIPropertyMetadata(null));
         public Lite<RoleDN> Role
         {
             get { return (Lite<RoleDN>)GetValue(RoleProperty); }
             set { SetValue(RoleProperty, value); }
         }
-
-        public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(QueryRules), new UIPropertyMetadata(null));
 
         public QueryRules()
         {
@@ -43,12 +50,12 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Return((IQueryAuthServer s)=>s.GetQueryAllowedRules(Role)); 
+            listView.ItemsSource = Server.Return((IQueryAuthServer s)=>s.GetQueryAllowedRules(Role, Type)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IQueryAuthServer s)=>s.SetQueryAllowedRules((List<AllowedRule>)listView.ItemsSource, Role)); 
+            Server.Execute((IQueryAuthServer s) => s.SetQueryAllowedRules((List<AllowedRule>)listView.ItemsSource, Role, Type)); 
             Load(); 
         }
 

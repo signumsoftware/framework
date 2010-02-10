@@ -13,6 +13,7 @@ using Signum.Utilities;
 using System.Reflection;
 using System.Security.Authentication;
 using Signum.Engine.Extensions.Properties;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Authorization
 {
@@ -101,9 +102,9 @@ namespace Signum.Engine.Authorization
         {
             var role = roleLite.Retrieve();
 
-            return TypeLogic.TypeToDN.Select(t => new TypeAccessRule(GetBaseAccess(role, t.Key))
+            return TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(t => new TypeAccessRule(GetBaseAccess(role, t.Key))
                     {
-                        Resource = t.Value,
+                        Type = t.Value,
                         Access = GetAccess(role, t.Key),
                     }).ToList();
         }
@@ -113,7 +114,7 @@ namespace Signum.Engine.Authorization
             var role = roleLite.Retrieve(); 
 
             var current = Database.Query<RuleTypeDN>().Where(r => r.Role == role).ToDictionary(a => a.Type);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => (TypeDN)r.Resource);
+            var should = rules.Where(a => a.Overriden).ToDictionary(r => r.Type);
 
             Synchronizer.Synchronize(current, should,
                 (t, tr) => tr.Delete(),

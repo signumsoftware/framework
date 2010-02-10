@@ -88,11 +88,13 @@ namespace Signum.Engine.Authorization
             return GetAllowed(RoleDN.Current, queryName.ToString());
         }
 
-        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite)
+        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
             var role = roleLite.Retrieve();
 
-            var queries = QueryLogic.RetrieveOrGenerateQueries();
+            Type type = TypeLogic.DnToType[typeDN]; 
+
+            var queries = QueryLogic.RetrieveOrGenerateQueries(typeDN);
             return queries.Select(q => new AllowedRule(GetBaseAllowed(role, q.Name))
                    {
                        Resource = q,
@@ -100,19 +102,22 @@ namespace Signum.Engine.Authorization
                    }).ToList();    
         }
 
-        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite)
+        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite, TypeDN typeDN)
         {
             var role = roleLite.Retrieve();
 
-            var current = Database.Query<RuleQueryDN>().Where(r => r.Role == role).ToDictionary(a => a.Query);
+            Type type = TypeLogic.DnToType[typeDN];
+            var queries = QueryLogic.RetrieveOrGenerateQueries(typeDN).Where(qn => !qn.IsNew).ToArray();
+
+            var current = Database.Query<RuleQueryDN>().Where(r => r.Role == role && queries.Contains(r.Query)).ToDictionary(a => a.Query);
             var should = rules.Where(a => a.Overriden).ToDictionary(r => (QueryDN)r.Resource);
 
             Synchronizer.Synchronize(current, should,
-                (q,qr)=>qr.Delete(),
-                (q,ar)=>new RuleQueryDN{ Query = q, Allowed = ar.Allowed, Role = role}.Save(),
+                (q, qr) => qr.Delete(),
+                (q, ar) => new RuleQueryDN { Query = q, Allowed = ar.Allowed, Role = role }.Save(),
                 (q, qr, ar) => { qr.Allowed = ar.Allowed; qr.Save(); });
 
-            _runtimeRules = null; 
+            _runtimeRules = null;
         }
 
         public static Dictionary<RoleDN, Dictionary<string, bool>> NewCache()
