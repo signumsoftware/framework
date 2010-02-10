@@ -706,13 +706,13 @@ namespace Signum.Windows
         }
 
         internal protected virtual void AssertFindable(object queryName)
-        {
-            if (GlobalIsFindable != null && !GlobalIsFindable(queryName))
-                throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
-
+        {      
             QuerySettings es = QuerySetting.TryGetC(queryName);
             if (es == null)
                 throw new InvalidOperationException(Properties.Resources.Query0NotRegistered.Formato(queryName));
+
+            if (GlobalIsFindable != null && !GlobalIsFindable(queryName))
+                throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
         }
 
         public virtual void Admin(AdminOptions adminOptions)

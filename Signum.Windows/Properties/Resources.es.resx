@@ -399,4 +399,8 @@
   <data name="NewColumn" xml:space="preserve">
     <value>Nueva columna</value>
   </data>
+  <data name="LoseChanges" xml:space="preserve">
+    <value>Hay cambios que no se han guardado. 
+¿Perder cambios?</value>
+  </data>
 </root>
