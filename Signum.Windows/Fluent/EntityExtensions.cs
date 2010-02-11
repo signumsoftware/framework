@@ -34,13 +34,7 @@ namespace Signum.Windows
             if (aeh != null)
                 return aeh.AssertErrors();
 
-            return AssertErrors((Modifiable)element.DataContext);
-        }
-
-        public static bool AssertErrors(Modifiable mod)
-        {
-            var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
-            string error = GraphExplorer.Integrity(graph);
+            string error = GetErrors(element);
 
             if (error.HasText())
             {
@@ -48,6 +42,35 @@ namespace Signum.Windows
                 return false;
             }
             return true;
+        }
+
+        public static bool AssertErrors(Modifiable mod)
+        {
+            string error = GetErrors(mod); 
+
+            if (error.HasText())
+            {
+                MessageBox.Show(Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            return true;
+        }
+
+        public static string GetErrors(this FrameworkElement element)
+        {
+            IGetErrorsHandler geh = element as IGetErrorsHandler;
+            if (geh != null)
+                return geh.GetErrors();
+
+            return GetErrors((Modifiable)element.DataContext);
+        }
+
+        public static string GetErrors(Modifiable mod)
+        {
+            var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
+            string error = GraphExplorer.Integrity(graph);
+
+            return error;
         }
 
         public static bool LooseChangesIfAny(this FrameworkElement element)
@@ -63,6 +86,11 @@ namespace Signum.Windows
     public interface IAssertErrorsHandler
     {
         bool AssertErrors();
+    }
+
+    public interface IGetErrorsHandler
+    {
+        string GetErrors();
     }
 
     public interface IHasChangesHandler

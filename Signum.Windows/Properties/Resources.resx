@@ -403,4 +403,17 @@
     <value>There are changes that hasn't been saved. 
 Lose changes?</value>
   </data>
+  <data name="The0HasErrors1" xml:space="preserve">
+    <value>The {0} has errors: 
+{1}</value>
+  </data>
+  <data name="FixErrors" xml:space="preserve">
+    <value>Fix Errors</value>
+  </data>
+  <data name="ContinueWithErrors" xml:space="preserve">
+    <value>Continue with errors?</value>
+  </data>
+  <data name="ContinueAnyway" xml:space="preserve">
+    <value>Continue anyway?</value>
+  </data>
 </root>

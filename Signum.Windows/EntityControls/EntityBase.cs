@@ -355,7 +355,7 @@ namespace Signum.Windows
             if (Viewing != null)
                 return Viewing(entity);
 
-            bool isReadOnly = Common.GetIsReadOnly(this) && !IsNew(entity);
+            bool isReadOnly = Common.GetIsReadOnly(this);
 
             if (ViewButtons == ViewButtons.Ok)
             {

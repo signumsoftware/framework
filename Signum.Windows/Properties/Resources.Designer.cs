@@ -214,6 +214,24 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Continue anyway?.
+        /// </summary>
+        internal static string ContinueAnyway {
+            get {
+                return ResourceManager.GetString("ContinueAnyway", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Continue with errors?.
+        /// </summary>
+        internal static string ContinueWithErrors {
+            get {
+                return ResourceManager.GetString("ContinueWithErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Converting to TypeContext: .
         /// </summary>
         internal static string ConvertingToTypeContext {
@@ -318,6 +336,15 @@ namespace Signum.Windows.Properties {
         internal static string FinderOf0 {
             get {
                 return ResourceManager.GetString("FinderOf0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fix Errors.
+        /// </summary>
+        internal static string FixErrors {
+            get {
+                return ResourceManager.GetString("FixErrors", resourceCulture);
             }
         }
         
@@ -755,6 +782,16 @@ namespace Signum.Windows.Properties {
         internal static string SessionExpired {
             get {
                 return ResourceManager.GetString("SessionExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} has errors: 
+        ///{1}.
+        /// </summary>
+        internal static string The0HasErrors1 {
+            get {
+                return ResourceManager.GetString("The0HasErrors1", resourceCulture);
             }
         }
         

@@ -403,4 +403,21 @@
     <value>Hay cambios que no se han guardado. 
 ¿Perder cambios?</value>
   </data>
+  <data name="The0HasErrors1_f" xml:space="preserve">
+    <value>La {0} tiene errores: 
+{1}</value>
+  </data>
+  <data name="The0HasErrors1_m" xml:space="preserve">
+    <value>El {0} tiene errores: 
+{1}</value>
+  </data>
+  <data name="FixErrors" xml:space="preserve">
+    <value>Corrige los errores</value>
+  </data>
+  <data name="ContinueWithErrors" xml:space="preserve">
+    <value>Continuar con errores?</value>
+  </data>
+  <data name="ContinueAnyway" xml:space="preserve">
+    <value>Continuar de todas formas?</value>
+  </data>
 </root>

@@ -580,7 +580,10 @@ namespace Signum.Windows
 
             Control ctrl = options.View ?? es.CreateView(entity, options.TypeContext);
 
-            Window win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
+            NormalWindow win = CreateNormalWindow((ModifiableEntity)entity, options, es, ctrl);
+
+            if (options.AllowErrors != AllowErrors.Ask)
+                win.AllowErrors = options.AllowErrors; 
 
             bool? ok = win.ShowDialog();
             if (ok != true)
@@ -601,7 +604,7 @@ namespace Signum.Windows
 
             ViewButtons buttons = options.GetViewButtons();
 
-            bool isReadOnly = options.ReadOnly ?? (!IsNew(entity) && IsReadOnly(entityType, options.Admin));
+            bool isReadOnly = options.ReadOnly ?? IsReadOnly(entityType, options.Admin);
 
             NormalWindow win = new NormalWindow()
             {
@@ -622,14 +625,6 @@ namespace Signum.Windows
                 TaskNormalWindow(win, entity);
 
             return win;
-        }
-
-        private bool IsNew(ModifiableEntity entity)
-        {
-            if (entity is IdentifiableEntity)
-                return ((IdentifiableEntity)entity).IsNew;
-
-            return false;
         }
 
         internal protected virtual bool IsCreable(Type type, bool admin)

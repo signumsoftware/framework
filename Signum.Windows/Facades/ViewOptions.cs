@@ -31,6 +31,8 @@ namespace Signum.Windows
 
         public PropertyRoute TypeContext { get; set; }
 
+        public AllowErrors AllowErrors { get; set; }
+
         internal override ViewButtons GetViewButtons()
         {
             return ViewButtons.Ok;

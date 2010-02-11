@@ -28,6 +28,14 @@ namespace Signum.Windows
             set { SetValue(MainControlProperty, value); }
         }
 
+        public static readonly DependencyProperty AllowErrorsProperty =
+            DependencyProperty.Register("AllowErrors", typeof(AllowErrors), typeof(NormalWindow), new UIPropertyMetadata(AllowErrors.Ask));
+        public AllowErrors AllowErrors
+        {
+            get { return (AllowErrors)GetValue(AllowErrorsProperty); }
+            set { SetValue(AllowErrorsProperty, value); }
+        }
+
         public ButtonBar ButtonBar
         {
             get { return this.buttonBar; }
@@ -81,6 +89,27 @@ namespace Signum.Windows
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
+            string errors = this.GetErrors();
+
+            if (errors.HasText())
+            {
+                Type type = DataContext.GetType();
+
+                switch (AllowErrors)
+                {
+                    case AllowErrors.Yes: break;
+                    case AllowErrors.No:
+                        MessageBox.Show(type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)), Properties.Resources.FixErrors,
+                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        return;
+                    case AllowErrors.Ask:
+                        if (MessageBox.Show(type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) +"\r\n" +  Properties.Resources.ContinueAnyway, Properties.Resources.ContinueWithErrors,
+                            MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.None) == MessageBoxResult.No)
+                            return;
+                        break;
+                }
+            }
+
             base.DialogResult = true;
         }
 
@@ -162,5 +191,12 @@ namespace Signum.Windows
         {
             this.SizeToContent = SizeToContent.WidthAndHeight;
         }
+    }
+
+    public enum AllowErrors
+    {
+        Ask,
+        Yes, 
+        No,
     }
 }
