@@ -35,6 +35,35 @@ namespace Signum.Web
                    "</div>";
         }
 
+
+        public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled)
+        {
+            if (enabled)
+                return html.CheckBox(name, value);
+            else {
+                StringBuilder sb = new StringBuilder();
+
+	            var tagBuilder = new TagBuilder("input");
+    		    tagBuilder.MergeAttribute("type", HtmlHelper.GetInputTypeString(InputType.CheckBox));
+                tagBuilder.MergeAttribute("id", name, true);
+                tagBuilder.MergeAttribute("name", name, true);
+                tagBuilder.MergeAttribute("value", value ? "true" : "flase");
+                tagBuilder.MergeAttribute("disabled", "disabled");
+    		    if (value)
+    		    {
+    			    tagBuilder.MergeAttribute("checked", "checked");
+    		    }
+                sb.Append(tagBuilder.ToString(TagRenderMode.SelfClosing));
+                TagBuilder hiddenInput = new TagBuilder("input");
+                hiddenInput.MergeAttribute("type", HtmlHelper.GetInputTypeString(InputType.Hidden));
+                tagBuilder.MergeAttribute("id", name, true);
+                hiddenInput.MergeAttribute("name", name);
+                hiddenInput.MergeAttribute("value", value ? "true" : "flase");
+                sb.Append(hiddenInput.ToString(TagRenderMode.SelfClosing));
+                return sb.ToString();
+            }
+        }
+
         /// <summary>
         /// Returns a "label" label that is used to show the name of a field in a form
         /// </summary>
@@ -44,7 +73,7 @@ namespace Signum.Web
         /// <param name="idField">The id of the field that the label is describing</param>
         /// <param name="cssClass">The class that will be appended to the label</param>
         /// <returns>An HTML string representing a "label" label</returns>
-        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass, Dictionary<string, object> htmlAttributes)
+        public static string Label(this HtmlHelper html, string id, string value, string idField, string cssClass, Dictionary<string, object> htmlAttributes)
         {
             if (htmlAttributes == null)
                 htmlAttributes = new Dictionary<string, object>();
@@ -60,7 +89,7 @@ namespace Signum.Web
                 String.Format("<label for='{0}' id='{1}' {2}>{3}</label>", idField, id, htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), value);
         }
 
-        public static String Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
+        public static string Label(this HtmlHelper html, string id, string value, string idField, string cssClass)
         {
             return html.Label(id, value, idField, cssClass, null);
         }

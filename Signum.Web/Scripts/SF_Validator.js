@@ -143,7 +143,11 @@ Validator.prototype = {
         }
 
         if (allErrors != "")
+        {
+            log("(Errors Validator showErrors): " + allErrors);
             return false;
+            
+        }
         return true;
     },
 
