@@ -371,7 +371,9 @@ namespace Signum.Engine.Operations
             if (pos < 0)
                 throw new ArgumentException("pos");
 
-            if (args == null || args.Length <= pos || !(args[pos] is T))
+            bool acceptsNulls = typeof(T).IsByRef || Nullable.GetUnderlyingType(typeof(T)) != null;
+
+            if (args == null || args.Length <= pos || (args[pos] == null ? !acceptsNulls : !(args[pos] is T)))
                 throw new ApplicationException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
 
             return (T)args[pos];
