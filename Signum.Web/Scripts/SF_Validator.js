@@ -61,7 +61,10 @@ Validator.prototype = {
                     if (self.valOptions.onSuccess != null)
                         self.valOptions.onSuccess();
                 }
-            }
+            },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                       ShowError(XMLHttpRequest, textStatus, errorThrown);
+                   }
         });
         return returnValue;
     },
@@ -86,7 +89,10 @@ Validator.prototype = {
                     if (self.valOptions.onSuccess != null)
                         self.valOptions.onSuccess();
                 }
-            }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                       ShowError(XMLHttpRequest, textStatus, errorThrown);
+                   }
         });
         return returnValue;
     },
@@ -102,7 +108,7 @@ Validator.prototype = {
     },
 
     showErrors: function(modelState, showPathErrors) {
-        log("Validator showErrors");
+        log("Validator showErrors: " + modelState);
         //Remove previous errors
         $('.' + sfFieldErrorClass).replaceWith("");
         $('.' + sfInputErrorClass).removeClass(sfInputErrorClass);
@@ -315,7 +321,10 @@ var PartialValidator = function(_pvalOptions) {
                     if (self.valOptions.onSuccess != null)
                         self.valOptions.onSuccess();
                 }
-            }
+            },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                       ShowError(XMLHttpRequest, textStatus, errorThrown);
+                   }
         });
         return validatorResult;
     };

@@ -134,22 +134,30 @@ function EntityInfoFor(prefix) {
     return new EntityInfo(prefix);
 }
 
-
-$().ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
+/*
+$(function() {
+    $().ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
+    console.log("General error");
     ShowError(XMLHttpRequest, ajaxOptions, thrownError);
 });
+});*/
 
 function NotifyError(s, t) {
-    NotifyInfo(s, t);
+    NotifyInfo(s, t, 'error');
 }
-function NotifyInfo(s, t) {
+function NotifyInfo(s, t, cssClass) {
+    if (cssClass == undefined) cssClass='info';
     $("#loading-area-text").html(s);
     //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
-    $("#loading-area").css({ marginLeft: -parseInt($("#loading-area").outerWidth() / 2) + "px" });
-    $("#loading-area").show();
+    $(".message-area-text-container").addClass(cssClass);
+    $("#loading-area").css({ marginLeft: -parseInt($("#loading-area").outerWidth() / 2) + "px" })
+       // .css({top:"-30px"})
+        .show()
+       // .animate({"top": "+=30px"}, "slow");
     if (t != undefined) {
         var timer = setTimeout(function() {
             $("#loading-area").fadeOut("slow");
+            $(".message-area-text-container").removeClass(cssClass);
             clearTimeout(timer);
             timer = null;
         }, t);
@@ -217,7 +225,9 @@ function ShowError(XMLHttpRequest, textStatus, errorThrown) {
     else {
         error = textStatus;
     }
-    NotifyError(lang['error'], 2000);
+    
+    var message = error.length > 50 ? error.substring(0,49) + "..." : error;
+    NotifyError(lang['error'] + ": " + message, 2000);
     /* error = replaceAll(error,
     {'&#237;' : 'í',
     '&#243;' : 'ó' });*/
