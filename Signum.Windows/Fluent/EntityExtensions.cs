@@ -69,7 +69,6 @@ namespace Signum.Windows
         {
             var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
             string error = GraphExplorer.Integrity(graph);
-
             return error;
         }
 
