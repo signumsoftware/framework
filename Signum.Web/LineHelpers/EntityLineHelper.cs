@@ -99,18 +99,11 @@ namespace Signum.Web
                 (isLite) ? ((Lite)(object)value).TryCS(i => i.IdOrNull).TryToString() : 
                 "";
             
-            if (settings.Navigate)
+            if (settings.Navigate && id.HasText())
             {
-                string viewingUrl = "";
-                string linkText = "";
-                if (id.HasText())
-                {
-                    viewingUrl = Navigator.ViewRoute(cleanRuntimeType, int.Parse(id));
-                    linkText = value.ToString();
-                }
                 sb.AppendLine(
                     helper.Href(TypeContext.Compose(prefix, EntityBaseKeys.ToStrLink),
-                        linkText, viewingUrl, "View", "valueLine",
+                        value.ToString(), Navigator.ViewRoute(cleanRuntimeType, int.Parse(id)), "View", "valueLine",
                         new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
             }
             else if (isIdentifiable || isLite)
