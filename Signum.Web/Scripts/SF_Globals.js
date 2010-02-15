@@ -134,13 +134,12 @@ function EntityInfoFor(prefix) {
     return new EntityInfo(prefix);
 }
 
-/*
 $(function() {
-    $().ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
+    $(document).ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
     console.log("General error");
     ShowError(XMLHttpRequest, ajaxOptions, thrownError);
 });
-});*/
+});
 
 function NotifyError(s, t) {
     NotifyInfo(s, t, 'error');

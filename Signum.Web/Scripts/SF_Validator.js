@@ -61,10 +61,7 @@ Validator.prototype = {
                     if (self.valOptions.onSuccess != null)
                         self.valOptions.onSuccess();
                 }
-            },
-                        error: function(XMLHttpRequest, textStatus, errorThrown) {
-                       ShowError(XMLHttpRequest, textStatus, errorThrown);
-                   }
+            }
         });
         return returnValue;
     },
@@ -89,10 +86,7 @@ Validator.prototype = {
                     if (self.valOptions.onSuccess != null)
                         self.valOptions.onSuccess();
                 }
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) {
-                       ShowError(XMLHttpRequest, textStatus, errorThrown);
-                   }
+            }
         });
         return returnValue;
     },
@@ -108,7 +102,7 @@ Validator.prototype = {
     },
 
     showErrors: function(modelState, showPathErrors) {
-        log("Validator showErrors: " + modelState);
+        log("Validator showErrors");
         //Remove previous errors
         $('.' + sfFieldErrorClass).replaceWith("");
         $('.' + sfInputErrorClass).removeClass(sfInputErrorClass);
@@ -148,11 +142,10 @@ Validator.prototype = {
             this.setPathErrors(controlID, partialErrors, showPathErrors);
         }
 
-        if (allErrors != "")
-        {
+        if (allErrors != "") {
             log("(Errors Validator showErrors): " + allErrors);
             return false;
-            
+
         }
         return true;
     },
@@ -321,10 +314,7 @@ var PartialValidator = function(_pvalOptions) {
                     if (self.valOptions.onSuccess != null)
                         self.valOptions.onSuccess();
                 }
-            },
-                        error: function(XMLHttpRequest, textStatus, errorThrown) {
-                       ShowError(XMLHttpRequest, textStatus, errorThrown);
-                   }
+            }
         });
         return validatorResult;
     };
@@ -341,4 +331,3 @@ function ValidatePartial(_partialValOptions) {
     var validator = new PartialValidator(_partialValOptions);
     return validator.validate();
 };
-
