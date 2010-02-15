@@ -172,9 +172,9 @@ namespace Signum.Test
                 Author = smashingPumpkins,
                 Songs = new MList<SongDN> 
                 { 
-                    new SongDN { Name = "Zero" }, 
+                    new SongDN { Name = "Zero", Duration = 123 }, 
                     new SongDN { Name = "1976" }, 
-                    new SongDN { Name = "Tonight, Tonight" } 
+                    new SongDN { Name = "Tonight, Tonight", Duration = 376 } 
                 },
                 BonusTrack = new SongDN { Name = "Jellybelly" },
                 Label = virgin
@@ -201,7 +201,7 @@ namespace Signum.Test
                 Name = "American Gothic", 
                 Year = 2008,
                 Author = smashingPumpkins,
-                Songs = new MList<SongDN> { new SongDN { Name = "The Rose March" } },
+                Songs = new MList<SongDN> { new SongDN { Name = "The Rose March", Duration = 276 } },
                 Label = wea,
             }.Save();
 

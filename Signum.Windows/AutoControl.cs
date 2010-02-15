@@ -54,13 +54,18 @@ namespace Signum.Windows
         }
 
 
-        public  XElement GenerateEntityStackPanel(Type type)
+        public XElement GenerateEntityStackPanel(Type type)
         {
+            XNamespace entityNamespace = "clr-namespace:{0};assembly={1}".Formato(type.Namespace, type.Assembly.GetName().Name);
+            string alias = new string(type.Namespace.Split('.').Select(a => a[0]).ToArray()).ToLower();
+
             XElement sp = GenerateStackPanel(type);
             sp.Add(new XAttribute("xmlns", xmlns.NamespaceName),
                    new XAttribute(XNamespace.Xmlns + "x", x.NamespaceName),
-                   new XAttribute(XNamespace.Xmlns + "m", m.NamespaceName));
-            return sp; 
+                   new XAttribute(XNamespace.Xmlns + "m", m.NamespaceName),
+                   new XAttribute(XNamespace.Xmlns + alias, entityNamespace.NamespaceName),
+                   new XAttribute(m + "Common.TypeContext", alias + ":" + type.Name));
+            return sp;
         }
 
         static XElement GenerateStackPanel(Type type)

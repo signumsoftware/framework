@@ -13,6 +13,7 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using System.ComponentModel;
+using System.Collections;
 
 namespace Signum.Entities
 {
@@ -196,13 +197,13 @@ namespace Signum.Entities
                     return new TypeAttributePack
                     {
                         Fields = list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray(),
-                        PropertyNames = list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToHashSet()
+                        PropertyNames = list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToArray()
                     };
                 });
             }
         }
 
-        public static bool HasToNotify(Type type, PropertyInfo pi)
+        public static bool FieldContainsAttribute(Type type, PropertyInfo pi)
         {
             TypeAttributePack pack = GetFieldsAndProperties(type);
 
@@ -212,22 +213,37 @@ namespace Signum.Entities
             return pack.PropertyNames.Contains(pi.Name);
         }
 
-        readonly static Func<object, object>[] EmptyArray = new Func<object, object>[0]; 
+        readonly static object[] EmptyArray = new object[0];
 
-        public static Func<object, object>[] FieldsToNotify(Type type)
+        public static object[] FieldsWithAttribute(ModifiableEntity entity)
         {
-            TypeAttributePack pack = GetFieldsAndProperties(type);
+            TypeAttributePack pack = GetFieldsAndProperties(entity.GetType());
 
             if (pack == null)
                 return EmptyArray;
 
-            return GetFieldsAndProperties(type).Fields;
+            return pack.Fields.Select(f=>f(entity)).ToArray();
+        }
+
+        public static string FindPropertyName(ModifiableEntity entity, object fieldValue)
+        {
+            TypeAttributePack pack = GetFieldsAndProperties(entity.GetType());
+
+            if (pack == null)
+                return null;
+
+            int index = pack.Fields.IndexOf(f => f(entity) == fieldValue);
+
+            if (index == -1)
+                return null;
+
+            return pack.PropertyNames[index];
         }
     }
 
     internal class TypeAttributePack
     {
         public Func<object, object>[] Fields;
-        public HashSet<string> PropertyNames; 
+        public string[] PropertyNames; 
     }
 }

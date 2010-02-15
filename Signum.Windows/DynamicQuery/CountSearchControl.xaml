@@ -14,7 +14,7 @@
     </UserControl.Resources>
     <TextBlock>
         <Hyperlink>
-            <TextBlock Name="tb" FontWeight="Bold" Margin="5,2,2,2" Text="{Binding Path=FormattedText, ElementName=me, Mode=Default}" MouseLeftButtonDown="ItemCount_Click" />
+            <TextBlock Name="tb" FontWeight="Bold" Margin="5,2,2,2" Text="{Binding Path=FormattedText, ElementName=me, Mode=Default}" MouseLeftButtonUp="tb_MouseLeftButtonUp"/>
         </Hyperlink>
     </TextBlock>
 </UserControl>

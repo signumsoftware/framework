@@ -163,7 +163,7 @@ namespace Signum.Windows
 
         protected override void btView_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnViewing(this.listBox.SelectedItem);
+            object entity = OnViewing(this.listBox.SelectedItem, false);
 
             if (entity != null)
             {

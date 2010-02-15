@@ -131,6 +131,9 @@ namespace Signum.Windows
         public static Lite<T>[] FindMany<T>(FindManyOptions options)
             where T : IdentifiableEntity
         {
+            if (options.QueryName == null)
+                options.QueryName = typeof(T);
+
             Lite[] result = Manager.FindMany(options);
             if (result == null)
                 return null;
@@ -455,6 +458,8 @@ namespace Signum.Windows
 
         public virtual Lite FindUnique(FindUniqueOptions options)
         {
+            AssertFindable(options.QueryName);
+
             SetTokens(options.QueryName, options.FilterOptions);
             SetTokens(options.QueryName, options.OrderOptions);
 
@@ -466,6 +471,8 @@ namespace Signum.Windows
 
         public int QueryCount(CountOptions options)
         {
+            AssertFindable(options.QueryName);
+
             SetTokens(options.QueryName, options.FilterOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();

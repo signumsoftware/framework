@@ -32,59 +32,63 @@ namespace Signum.Entities
             internal set { selfModified = value; }
         }
 
-        protected virtual bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
+        protected virtual bool Set<T>(ref T field, T value, Expression<Func<T>> property)
         {
-            if (EqualityComparer<T>.Default.Equals(variable, value))
+            if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
             PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
 
-            if (variable is INotifyCollectionChanged)
+            INotifyCollectionChanged col = field as INotifyCollectionChanged;
+            if (col != null)
             {
-                if (AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), pi))
-                    ((INotifyCollectionChanged)variable).CollectionChanged -= ChildCollectionChanged;
+                if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
+                    col.CollectionChanged -= ChildCollectionChanged;
 
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    foreach (INotifyPropertyChanged item in (IEnumerable)variable)
+                if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    foreach (INotifyPropertyChanged item in (IEnumerable)col)
                         item.PropertyChanged -= ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)variable)
+                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    foreach (ModifiableEntity item in (IEnumerable)col)
                         item.ExternalPropertyValidation -= ChildPropertyValidation;
             }
 
-            if (variable is ModifiableEntity)
+            ModifiableEntity mod = field as ModifiableEntity;
+            if (mod != null)
             {
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    ((INotifyPropertyChanged)variable).PropertyChanged -= ChildPropertyChanged;
+                if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    mod.PropertyChanged -= ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    ((ModifiableEntity)(object)variable).ExternalPropertyValidation -= ChildPropertyValidation;
+                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    mod.ExternalPropertyValidation -= ChildPropertyValidation;
             }
 
-            variable = value;
+            field = value;
 
-            if (variable is INotifyCollectionChanged)
+            col = field as INotifyCollectionChanged;
+            if (col != null)
             {
-                if (AttributeManager<NotifyCollectionChangedAttribute>.HasToNotify(GetType(), pi))
-                    ((INotifyCollectionChanged)variable).CollectionChanged += ChildCollectionChanged;
+                if (AttributeManager<NotifyCollectionChangedAttribute>.FieldContainsAttribute(GetType(), pi))
+                    col.CollectionChanged += ChildCollectionChanged;
 
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    foreach (INotifyPropertyChanged item in (IEnumerable)variable)
+                if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    foreach (INotifyPropertyChanged item in (IEnumerable)col)
                         item.PropertyChanged += ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    foreach (ModifiableEntity item in (IEnumerable)variable)
+                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    foreach (ModifiableEntity item in (IEnumerable)col)
                         item.ExternalPropertyValidation += ChildPropertyValidation;
             }
 
-            if (variable is ModifiableEntity)
+            mod = field as ModifiableEntity;
+            if (mod != null)
             {
-                if (AttributeManager<NotifyChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    ((INotifyPropertyChanged)variable).PropertyChanged += ChildPropertyChanged;
+                if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    mod.PropertyChanged += ChildPropertyChanged;
 
-                if (AttributeManager<ValidateChildPropertyAttribute>.HasToNotify(GetType(), pi))
-                    ((ModifiableEntity)(object)variable).ExternalPropertyValidation += ChildPropertyValidation;
+                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
+                    mod.ExternalPropertyValidation += ChildPropertyValidation;
             }
 
             selfModified = true;
@@ -104,9 +108,9 @@ namespace Signum.Entities
             }
         }
 
-        public bool SetToStr<T>(ref T variable, T valor, Expression<Func<T>> property)
+        public bool SetToStr<T>(ref T field, T value, Expression<Func<T>> property)
         {
-            if (this.Set(ref variable, valor, property))
+            if (this.Set(ref field, value, property))
             {
                 NotifyToString();
                 return true;
@@ -123,43 +127,40 @@ namespace Signum.Entities
 
         protected virtual void RebindEvents()
         {
-            foreach (Func<object, object> getter in AttributeManager<NotifyCollectionChangedAttribute>.FieldsToNotify(GetType()))
+            foreach (INotifyCollectionChanged notify in AttributeManager<NotifyCollectionChangedAttribute>.FieldsWithAttribute(this))
             {
-                INotifyCollectionChanged notify = (INotifyCollectionChanged)getter(this);
-                if (notify != null)
-                    notify.CollectionChanged += ChildCollectionChanged;
+                if (notify == null)
+                    continue;
+             
+                notify.CollectionChanged += ChildCollectionChanged;
             }
 
-            foreach (Func<object, object> getter in AttributeManager<NotifyChildPropertyAttribute>.FieldsToNotify(GetType()))
+            foreach (object field in AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this))
             {
-                object obj = getter(this);
-
-                if (obj == null)
+                if (field == null)
                     continue;
 
-                var entity = obj as INotifyPropertyChanged;
+                var entity = field as ModifiableEntity;
                 if (entity != null)
                     entity.PropertyChanged += ChildPropertyChanged;
                 else
                 {
-                    foreach (INotifyPropertyChanged item in (IEnumerable)obj)
+                    foreach (INotifyPropertyChanged item in (IEnumerable)field)
                         item.PropertyChanged += ChildPropertyChanged;
                 }
             }
 
-            foreach (Func<object, object> getter in AttributeManager<ValidateChildPropertyAttribute>.FieldsToNotify(GetType()))
+            foreach (object field in AttributeManager<ValidateChildPropertyAttribute>.FieldsWithAttribute(this))
             {
-                object obj = getter(this);
-
-                if (obj == null)
+                if (field == null)
                     continue;
 
-                var entity = obj as ModifiableEntity;
+                var entity = field as ModifiableEntity;
                 if (entity != null)
                     entity.ExternalPropertyValidation += ChildPropertyValidation;
                 else
                 {
-                    foreach (ModifiableEntity item in (IEnumerable)obj)
+                    foreach (ModifiableEntity item in (IEnumerable)field)
                         item.ExternalPropertyValidation += ChildPropertyValidation;
                 }
             }
@@ -173,7 +174,11 @@ namespace Signum.Entities
 
         protected virtual void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if (AttributeManager<NotifyChildPropertyAttribute>.FieldsToNotify(GetType()).Any(f => f(this) == sender))
+            string propertyName = AttributeManager<NotifyCollectionChangedAttribute>.FindPropertyName(this, sender);
+            if (propertyName != null)
+                NotifyPrivate(propertyName); 
+
+            if (AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this).Contains(sender))
             {
                 if (args.NewItems != null)
                     foreach (var p in args.NewItems.Cast<INotifyPropertyChanged>()) p.PropertyChanged += ChildPropertyChanged;
@@ -181,7 +186,7 @@ namespace Signum.Entities
                     foreach (var p in args.OldItems.Cast<INotifyPropertyChanged>()) p.PropertyChanged -= ChildPropertyChanged;
             }
 
-            if (AttributeManager<ValidateChildPropertyAttribute>.FieldsToNotify(GetType()).Any(f => f(this) == sender))
+            if (AttributeManager<ValidateChildPropertyAttribute>.FieldsWithAttribute(this).Contains(sender))
             {
                 if (args.NewItems != null)
                     foreach (var p in args.NewItems.Cast<ModifiableEntity>()) p.ExternalPropertyValidation += ChildPropertyValidation;

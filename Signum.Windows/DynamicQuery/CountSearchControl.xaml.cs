@@ -126,7 +126,7 @@ namespace Signum.Windows
                 () => { });
         }
 
-        private void ItemCount_Click(object sender, MouseButtonEventArgs e)
+        private void tb_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (LinkClick != null)
                 LinkClick(this, EventArgs.Empty);
@@ -138,6 +138,8 @@ namespace Signum.Windows
                     QueryName = QueryName
                 });
             }
+
+            e.Handled = true;
         }
     }
 }

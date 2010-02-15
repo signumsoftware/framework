@@ -236,6 +236,11 @@ namespace Signum.Windows
 
             return Activator.CreateInstance(type);
         }
+
+        public override string ToString()
+        {
+            return "{0} {1} {2}".Formato(Path, Operation, Value);
+        }
     }
 
     public class OrderOption : Freezable

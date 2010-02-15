@@ -204,7 +204,7 @@ namespace Signum.Engine.Linq
 
         private ProjectionExpression AsProjection(Expression expression)
         {
-            expression = RemoveConvert(expression);
+            expression = RemoveGroupByConvert(expression);
 
             if (expression.NodeType == ExpressionType.New)
             {
@@ -220,9 +220,9 @@ namespace Signum.Engine.Linq
             return (ProjectionExpression)expression;
         }
 
-        private static Expression RemoveConvert(Expression expression)
+        private static Expression RemoveGroupByConvert(Expression expression)
         {
-            if (expression.NodeType == ExpressionType.Convert)
+            if (expression.NodeType == ExpressionType.Convert && expression.Type.IsInstantiationOf(typeof(IGrouping<,>)))
                 expression = ((UnaryExpression)expression).Operand;
             return expression;
         }
@@ -636,7 +636,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(resultExpr, alias, projection.Source.KnownAliases, new[] { projection.Token });
 
             // make it possible to tie aggregates back to this group-by
-            NewExpression newResult = (NewExpression)RemoveConvert(pc.Projector);
+            NewExpression newResult = (NewExpression)RemoveGroupByConvert(pc.Projector);
             GroupByInfo info = new GroupByInfo { Alias = alias, Projection = new ProjectionExpression(projection.Source, elemExpr, null, projection.Token) };
             
             this.groupByMap.Add(((ProjectionExpression)newResult.Arguments[1]).Token, info);
@@ -645,6 +645,7 @@ namespace Signum.Engine.Linq
                 new SelectExpression(alias, false, null, pc.Columns, projection.Source, null, null, groupExprs),
                 pc.Projector, null, pc.Token);
         }
+
    
         List<OrderExpression> thenBys;
         protected virtual Expression BindOrderBy(Type resultType, Expression source, LambdaExpression orderSelector, OrderType orderType)
@@ -863,7 +864,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            source = RemoveConvert(source);
+            source = RemoveGroupByConvert(source);
 
             switch (source.NodeType)
             {
@@ -1040,8 +1041,6 @@ namespace Signum.Engine.Linq
 
         Expression GetId(Expression expression)
         {
-            expression = RemoveConvert(expression); 
-
             if (expression is FieldInitExpression)
                 return ((FieldInitExpression)expression).ExternalId;
 
@@ -1056,8 +1055,6 @@ namespace Signum.Engine.Linq
 
         Expression GetTypeId(Expression expression)
         {
-            expression = RemoveConvert(expression); 
-
             if (expression is FieldInitExpression)
                 return ((FieldInitExpression)expression).TypeId;
 
@@ -1090,8 +1087,6 @@ namespace Signum.Engine.Linq
 
         ProjectionToken GetToken(Expression expression)
         {
-            expression = RemoveConvert(expression);
-
             if (expression is FieldInitExpression)
                 return ((FieldInitExpression)expression).Token;
 
@@ -1104,8 +1099,17 @@ namespace Signum.Engine.Linq
             throw new NotSupportedException();
         }
 
+        private static Expression RemoveEntityConvert(Expression expression)
+        {
+            if (expression.NodeType == ExpressionType.Convert && typeof(IIdentifiable).IsAssignableFrom(expression.Type))
+                expression = ((UnaryExpression)expression).Operand;
+            return expression;
+        }
+
         internal Expression MakeLite(Type type, Expression entity, Expression toStr)
         {
+            entity = RemoveEntityConvert(entity);
+
             if (toStr == null && !(entity is ImplementedByAllExpression))
                 toStr = BindMemberAccess(Expression.MakeMemberAccess(entity, ToStrProperty));
 

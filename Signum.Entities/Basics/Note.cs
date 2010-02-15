@@ -14,11 +14,11 @@ namespace Signum.Entities.Basics
     public class NoteDN : IdentifiableEntity, INoteDN
     {
         [ImplementedByAll]
-        Lite<IdentifiableEntity> entity;
-        public Lite<IdentifiableEntity> Entity
+        Lite<IdentifiableEntity> target;
+        public Lite<IdentifiableEntity> Target
         {
-            get { return entity; }
-            set { Set(ref entity, value, () => Entity); }
+            get { return target; }
+            set { Set(ref target, value, () => Target); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]

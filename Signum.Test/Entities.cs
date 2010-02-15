@@ -314,6 +314,14 @@ namespace Signum.Test
             set { SetToStr(ref name, value, () => Name); }
         }
 
+        int? duration;
+        [Unit("s")]
+        public int? Duration
+        {
+            get { return duration; }
+            set { Set(ref duration, value, () => Duration); }
+        }
+
         public override string ToString()
         {
             return name;

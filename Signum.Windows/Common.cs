@@ -18,6 +18,7 @@ using System.Collections;
 using Signum.Services;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
+using System.Windows.Input;
 
 namespace Signum.Windows
 {
@@ -144,7 +145,6 @@ namespace Signum.Windows
                 fe.Initialized += (s, e2) => del.Dispose();
         }
 
-        static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
         public static void RoutePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             FrameworkElement fe = (FrameworkElement)d;
@@ -175,26 +175,25 @@ namespace Signum.Windows
             }
         }
 
+        public enum RouteType
+        {
+            All, 
+            TypeContextOnly, 
+            LabelOnly, 
+        }
+
         private static void InititializeRoute(FrameworkElement fe, string route)
         {
-            PropertyRoute context = GetTypeContext(fe.Parent);
+            PropertyRoute parentContext = GetTypeContext(fe.Parent);
 
-            if (context == null)
-                throw new ApplicationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext + ": '{0}'".Formato(route));
+            if (parentContext == null)
+                throw new InvalidOperationException(Properties.Resources.RoutePropertyCanNotBeAppliedWithNullTypeContext + ": '{0}'".Formato(route));
 
             bool pseudoRoute = route.StartsWith("$");
             if (pseudoRoute)
                 route = route.Substring(1);
 
-            string[] steps = route.Replace("/", ".Item.").Split('.').Where(s => s.Length > 0).ToArray();
-
-            foreach (var step in steps)
-            {
-                if (!validIdentifier.IsMatch(step))
-                    throw new ApplicationException(Resources.IsNotAValidIdentifier.Formato(step));
-
-                context = context.Add(step);
-            }
+            var context = ContinueRouteExtension.Continue(parentContext, route); 
 
             if (!pseudoRoute)
             {
@@ -364,6 +363,12 @@ namespace Signum.Windows
         {
             return fe.FollowC(a => (FrameworkElement)(a.Parent ?? a.TemplatedParent))
                       .Select(a => Common.GetCurrentWindow(a) ?? a as Window).NotNull().First(Properties.Resources.ParentWindowNotFound);
+        }
+
+        public static IDisposable OverrideCursor(System.Windows.Input.Cursor cursor)
+        {
+            Mouse.OverrideCursor = cursor;
+            return new Disposable(() => Mouse.OverrideCursor = null);
         }
     }
 

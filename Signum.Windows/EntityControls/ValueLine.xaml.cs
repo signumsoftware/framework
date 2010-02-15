@@ -190,7 +190,7 @@ namespace Signum.Windows
 
             if (type.IsEnum)
                 return ValueLineType.Enum;
-            else if (type == typeof(Color))
+            else if (type == typeof(ColorDN))
                 return ValueLineType.Color;
             else
             {

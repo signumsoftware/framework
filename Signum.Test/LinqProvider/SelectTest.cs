@@ -109,6 +109,19 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectLiteGenericUpcast()
+        {
+            var list = SelectAuthorsLite<ArtistDN, IAuthorDN>();
+        }
+
+        public List<Lite<LT>> SelectAuthorsLite<T, LT>()
+            where T : IdentifiableEntity, LT
+            where LT : class, IIdentifiable
+        {
+            return Database.Query<T>().Select(a => a.ToLite<LT>()).ToList(); //an explicit convert is injected in this scenario
+        }
+
+        [TestMethod]
         public void SelectLiteIBRedundant()
         {
             var list = (from a in Database.Query<AlbumDN>()
@@ -294,9 +307,25 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectEnumNullableValue()
+        {
+            Database.Query<AlbumDN>().Where(a => a.Author is ArtistDN)
+                .Select(a => ((Sex?)((ArtistDN)a.Author).Sex).Value).ToArray();
+        }
+
+        [TestMethod]
         public void SelectEmbeddedNullable()
         {
             var bonusTracks = Database.Query<AlbumDN>().Select(a => a.BonusTrack).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectNullable()
+        {
+            var durations = (from a in Database.Query<AlbumDN>()
+                             from s in a.Songs
+                             where s.Duration.HasValue
+                             select s.Duration.Value).ToArray();
         }
     }
 

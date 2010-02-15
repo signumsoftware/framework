@@ -259,7 +259,7 @@ namespace Signum.Windows
 
         protected virtual void btView_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnViewing(Entity);
+            object entity = OnViewing(Entity, false);
 
             if (entity != null)
                 SetEntityUserInteraction(entity);
@@ -313,7 +313,7 @@ namespace Signum.Windows
 
             if (ViewOnCreate)
             {
-                value = OnViewing(value);
+                value = OnViewing(value, true);
             }
 
             return value;
@@ -347,7 +347,7 @@ namespace Signum.Windows
             return Common.GetTypeContext(this);
         }
 
-        protected object OnViewing(object entity)
+        protected object OnViewing(object entity, bool creating)
         {
             if (!CanView(entity))
                 return null;
@@ -355,7 +355,7 @@ namespace Signum.Windows
             if (Viewing != null)
                 return Viewing(entity);
 
-            bool isReadOnly = Common.GetIsReadOnly(this);
+            bool isReadOnly = Common.GetIsReadOnly(this) && !creating;
 
             if (ViewButtons == ViewButtons.Ok)
             {
@@ -380,17 +380,6 @@ namespace Signum.Windows
 
                 return null;
             }
-        }
-
-        protected bool IsNew(object entity)
-        {
-            if (entity is IdentifiableEntity)
-                return ((IdentifiableEntity)entity).IsNew;
-
-            if (entity is Lite)
-                return ((Lite)entity).UntypedEntityOrNull != null && ((Lite)entity).UntypedEntityOrNull.IsNew;
-
-            return false;
         }
 
         protected bool OnRemoving(object entity)
