@@ -156,8 +156,9 @@ function NotifyInfo(s, t, cssClass) {
     if (t != undefined) {
         var timer = setTimeout(function() {
             //$("#loading-area").fadeOut("slow");
-            $("#loading-area").animate({"top": "-=30px"}, "slow");
-            $(".message-area-text-container").removeClass(cssClass);
+            $("#loading-area").animate({"top": "-30px"}, "slow")
+                .hide()
+                .children(".message-area-text-container").first().removeClass(cssClass);
             clearTimeout(timer);
             timer = null;
         }, t);
