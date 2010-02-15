@@ -146,11 +146,12 @@ function NotifyError(s, t) {
 }
 function NotifyInfo(s, t, cssClass) {
     if (cssClass == undefined) cssClass='info';
-    $("#loading-area-text").html(s);
+    $("#loading-area-text").html(s)
+        .children().first().addClass(cssClass);
     //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
     $(".message-area-text-container").addClass(cssClass);
     $("#loading-area").css({ marginLeft: -parseInt($("#loading-area").outerWidth() / 2) + "px" })
-       // .css({top:"-30px"})
+        .css({top:"0px"})
         .show()
        // .animate({"top": "0px"}, "slow");
     if (t != undefined) {
@@ -158,7 +159,7 @@ function NotifyInfo(s, t, cssClass) {
             //$("#loading-area").fadeOut("slow");
             $("#loading-area").animate({"top": "-30px"}, "slow")
                 .hide()
-                .children(".message-area-text-container").first().removeClass(cssClass);
+                .children().first().removeClass(cssClass);
             clearTimeout(timer);
             timer = null;
         }, t);
