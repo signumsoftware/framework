@@ -150,9 +150,9 @@ function NotifyInfo(s, t, cssClass) {
     //$("#loading-area-text").css({left: parseInt(document.documentElement.clientWidth - $("#loading-area").outerWidth() / 2) + "px"});
     $(".message-area-text-container").addClass(cssClass);
     $("#loading-area").css({ marginLeft: -parseInt($("#loading-area").outerWidth() / 2) + "px" })
-        .css({top:"-30px"})
+       // .css({top:"-30px"})
         .show()
-        .animate({"top": "+=30px"}, "slow");
+       // .animate({"top": "0px"}, "slow");
     if (t != undefined) {
         var timer = setTimeout(function() {
             //$("#loading-area").fadeOut("slow");
