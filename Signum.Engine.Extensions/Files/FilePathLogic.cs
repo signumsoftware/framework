@@ -59,7 +59,14 @@ namespace Signum.Engine.Files
                                                Entity = f.ToLite(),
                                                f.Name
                                            }).ToDynamic();
+
+                sb.Schema.Generating += new Func<SqlPreCommand>(Schema_Generating);
             }
+        }
+
+        static SqlPreCommand Schema_Generating()
+        {
+            return Administrator.AddMultiColumnIndexScript<FilePathDN>(true, f => f.Sufix, f => f.Repository);
         }
 
         static void FilePath_Deleting(Type type, int id)
