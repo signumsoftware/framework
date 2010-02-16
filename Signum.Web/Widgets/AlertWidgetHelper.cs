@@ -64,7 +64,7 @@ namespace Signum.Web
                     QueryName = queryName,
                     Create = false,
                     SearchOnLoad = true,
-                    FilterMode = FilterMode.Hidden,
+                    FilterMode = FilterMode.AlwaysHidden,
                     FilterOptions =
                     {
                         new FilterOption(AlertsQueryColumn,identifiable.ToLite())

@@ -30,7 +30,7 @@ namespace Signum.Web
                     QueryName = NotesQuery,
                     Create = false,
                     SearchOnLoad = true,
-                    FilterMode = FilterMode.Hidden,
+                    FilterMode = FilterMode.AlwaysHidden,
                     FilterOptions = { new FilterOption( NotesQueryColumn, identifiable.ToLite()) }
                 }
             };
@@ -49,7 +49,7 @@ namespace Signum.Web
                       <a class='view' onclick=""javascript:OpenFinder({0});"">{1}</a>
                       <a class='create' onclick=""javascript:RelatedEntityCreate({2});"">{3}</a>
                     </div>".Formato(foptions.ToJS(), Properties.Resources.ViewNotes, voptions.ToJS(), Properties.Resources.CreateNote),
-                Label = "<a id='{1}' onclick=\"javascript:OpenFinder({0});\">{1}<span class='count {2}'>{3}</span></a>".Formato(foptions.ToJS(), Properties.Resources.Notes, count == 0 ? "disabled" : "", count),
+                Label = "<a id='{0}'>{0}<span class='count {1}'>{2}</span></a>".Formato(Properties.Resources.Notes, count == 0 ? "disabled" : "", count),
                 Id = "Notes",
                 Show = true,
             };
