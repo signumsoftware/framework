@@ -84,8 +84,7 @@ namespace Signum.Web
 
         public StyleContext(bool register, bool readOnly)
         {
-            if (readOnly)
-                ReadOnly = readOnly;
+            ReadOnly = readOnly;
 
             if (register)
                 Register();

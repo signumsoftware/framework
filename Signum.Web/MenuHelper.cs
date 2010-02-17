@@ -59,6 +59,40 @@ namespace Signum.Web
 
             return ManualHref.HasText() || ManualA.HasText();
         }
+
+        public string ToString(string currentUrl)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (IsVisible())
+            {
+                sb.AppendLine("<li>");
+                if (ManualHref.HasText())
+                {
+                    if (ManualHref == currentUrl) { sb.Append("<b>"); }
+                    sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(ManualHref, Title, Text));
+                    if (ManualHref == currentUrl) { sb.Append("/<b>"); }
+                }
+                else if (ManualA.HasText())
+                {
+                    if (ManualHref == currentUrl) { sb.Append("<b>"); }
+                    sb.AppendLine(ManualA);
+                    if (ManualHref == currentUrl) { sb.Append("</b>"); }
+                }
+                else
+                {
+                    if (Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?") == currentUrl) { sb.Append("<b>"); }
+                    sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?"), Title, Text));
+                    if (Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?") == currentUrl) { sb.Append("<b>"); }
+                }
+            }
+            else
+            {
+                if (FindOptions == null && ManualA == null && ManualHref == null)
+                    sb.AppendLine("<li>{1}".Formato(Text));
+            }
+
+            return sb.ToString();
+        }
     }
 
 

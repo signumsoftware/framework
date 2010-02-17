@@ -148,7 +148,7 @@ namespace Signum.Web
 
         private static void WriteRuntimeAndId<T>(this HtmlHelper helper, TypeContext<T> tc)
         {
-            if (helper.WriteIdAndRuntime())
+            if (helper.WriteIdAndRuntime(tc))
             {
                 EntityInfo entityInfo = null;
                 if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))

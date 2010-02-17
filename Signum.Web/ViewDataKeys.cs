@@ -78,13 +78,14 @@ namespace Signum.Web
             return "";
         }
 
-        public static bool WriteIdAndRuntime(this HtmlHelper helper)
+        public static bool WriteIdAndRuntime(this HtmlHelper helper, TypeContext tc)
         {
             if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
                 return true;
 
-            return !helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix) ||
-                !((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText();
+            return tc.Name == "" && 
+                (!helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix) ||
+                !((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText());
         }
 
         public static long? GetChangeTicks(this HtmlHelper helper, string controlID)
