@@ -108,7 +108,7 @@ namespace Signum.Web
 
             prefixedName = helper.GlobalName(prefixedName);
 
-            //The info commented below should be now automatically included in SFInfo field
+            //The info commented below should be now automatically included in sfRuntimeInfo field
             //if (tc.UntypedValue != null && typeof(IIdentifiable).IsAssignableFrom(tc.UntypedValue.GetType()) && ((IIdentifiable)tc.UntypedValue).IsNew)
             //    helper.Write(helper.Hidden(TypeContext.Compose(prefixedName, EntityBaseKeys.IsNew), ""));
             //if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive))

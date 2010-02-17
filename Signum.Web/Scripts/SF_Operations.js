@@ -17,8 +17,8 @@
 
 OperationManager.prototype = {
 
-    entityInfo: function() {
-        return EntityInfoFor(this.options.prefix);
+    runtimeInfo: function() {
+        return RuntimeInfoFor(this.options.prefix);
     },
 
     pf: function(s) {
@@ -39,7 +39,7 @@ OperationManager.prototype = {
                 formChildren = $(this.pf("panelPopup *") + ", #" + sfReactive + ", #" + sfTabId).serialize();
         }
 
-        var info = this.entityInfo();
+        var info = this.runtimeInfo();
 
         formChildren += qp("isLite", this.options.isLite)
                      + qp("sfRuntimeType", info.runtimeType())
@@ -54,7 +54,7 @@ OperationManager.prototype = {
 
     entityIsValid: function() {
         log("OperationManager entityIsValid");
-        var info = this.entityInfo();
+        var info = this.runtimeInfo();
         var isValid = null;
         if (empty(this.options.prefix))
             isValid = new Validator({controllerUrl:this.options.validationControllerUrl}).validate();
@@ -77,7 +77,7 @@ OperationManager.prototype = {
         if (empty(this.options.prefix))
             new Validator().showErrors(modelState);
         else {
-            var info = this.entityInfo();
+            var info = this.runtimeInfo();
             new PartialValidator({ prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).showErrors(modelState);
         }
         return false;
@@ -93,7 +93,7 @@ OperationManager.prototype = {
         if (!this.entityIsValid())
             return;
 
-        var info = this.entityInfo();
+        var info = this.runtimeInfo();
         $("form").append(hiddenInput('sfRuntimeType', info.runtimeType()) +
             hiddenInput('sfId', info.id()) +
             hiddenInput('isLite', this.options.isLite) +

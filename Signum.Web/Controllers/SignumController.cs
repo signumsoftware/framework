@@ -23,7 +23,6 @@ namespace Signum.Web.Controllers
     [HandleException, AuthenticationRequired]
     public class SignumController : Controller
     {
-
         static SignumController()
         {
             ModelBinders.Binders[typeof(FindOptions)] = new FindOptionsModelBinder();
@@ -62,7 +61,7 @@ namespace Signum.Web.Controllers
             return Content(Navigator.ViewRoute(type, null));
         }
 
-        public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
+        public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, bool? sfReadOnly, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
             bool isReactive = Navigator.ExtractIsReactive(Request.Form);
@@ -97,11 +96,14 @@ namespace Signum.Web.Controllers
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
+            if (sfReadOnly.HasValue)
+                ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+
             return Navigator.PopupView(this, entity, prefix, sfUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfEmbeddedControl, string sfUrl)
+        public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfEmbeddedControl, bool? sfReadOnly, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
             bool isReactive = Navigator.ExtractIsReactive(Request.Form);
@@ -134,6 +136,9 @@ namespace Signum.Web.Controllers
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
                 throw new ApplicationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
+
+            if (sfReadOnly.HasValue)
+                ViewData[ViewDataKeys.StyleContext] = new StyleContext(true) { ReadOnly = true };
 
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
@@ -243,8 +248,8 @@ namespace Signum.Web.Controllers
             string newLink = "";
             if (entity == null)
             {
-                EntityInfo ei = EntityInfo.FromFormValue(Request.Form[TypeContext.Compose(prefix, EntityBaseKeys.Info)]);
-                newLink = Navigator.ViewRoute(ei.StaticType, (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+                RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContext.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+                newLink = Navigator.ViewRoute(ei.RuntimeType, (entity as IIdentifiable).TryCS(e => e.IdOrNull));
             }
             else
                 newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));

@@ -35,7 +35,7 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo { StaticType = elementsCleanStaticType, Ticks = ticks }));
+            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo { Ticks = ticks }, new StaticInfo(elementsCleanStaticType) { IsReadOnly = settings.ReadOnly }));
 
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
 
@@ -109,7 +109,7 @@ namespace Signum.Web
 
             if (isIdentifiable || isLite)
             {
-                sb.AppendLine(helper.HiddenSFInfo(indexedPrefix, new EntityInfo<T>(value) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new RuntimeInfo<T>(value) { Ticks = ticks }));
 
                 if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, indexedPrefix))
                     sb.AppendLine(ListBaseHelper.RenderItemContentInEntityDiv(helper, indexedPrefix, typeContext, value, index, settings, cleanRuntimeType, cleanStaticType, isLite, false));
@@ -127,7 +127,7 @@ namespace Signum.Web
             else
             {
                 //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
-                sb.AppendLine(helper.HiddenSFInfo(indexedPrefix, new EmbeddedEntityInfo<T>(value, false) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new EmbeddedRuntimeInfo<T>(value, false) { Ticks = ticks }));
 
                 sb.AppendLine(ListBaseHelper.RenderItemContentInEntityDiv(helper, indexedPrefix, typeContext, value, index, settings, cleanRuntimeType, cleanStaticType, isLite, false));
 

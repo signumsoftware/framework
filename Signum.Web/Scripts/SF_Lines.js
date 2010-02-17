@@ -7,13 +7,17 @@
 
 EBaseLine.prototype = {
 
-    entityInfo: function() {
-        return EntityInfoFor(this.options.prefix);
+    runtimeInfo: function() {
+        return RuntimeInfoFor(this.options.prefix);
+    },
+
+    staticInfo: function() {
+        return StaticInfoFor(this.options.prefix);
     },
 
     setTicks: function() {
         log("EBaseLine setTicks");
-        this.entityInfo().ticks(new Date().getTime());
+        this.runtimeInfo().ticks(new Date().getTime());
     },
 
     pf: function(s) {
@@ -22,7 +26,7 @@ EBaseLine.prototype = {
 
     checkValidation: function(validateUrl, runtimeType) {
         log("EBaseLine checkValidation"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
-        var info = this.entityInfo();
+        var info = this.runtimeInfo();
         var id = (info.find().length > 0) ? info.id() : '';
         var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: this.options.prefix, id: id, type: runtimeType });
         var validatorResult = validator.validate();
@@ -54,7 +58,7 @@ EBaseLine.prototype = {
         log("EBaseLine remove");
         $(this.pf(sfToStr)).val("").removeClass(sfInputErrorClass);
         $(this.pf(sfLink)).val("").html("").removeClass(sfInputErrorClass);
-        this.entityInfo().removeEntity();
+        this.runtimeInfo().removeEntity();
 
         this.removeSpecific();
         this.fireOnEntityChanged(false);
@@ -65,7 +69,7 @@ EBaseLine.prototype = {
         var implSelector = this.pf(sfImplementations);
         var impl = $(implSelector);
         if (impl.length == 0)
-            return _onTypeFound(this.entityInfo().staticType());
+            return _onTypeFound(this.staticInfo().staticType());
 
         var implementations = $(implSelector + " :button");
         if (implementations.length == 1)
@@ -114,8 +118,10 @@ EBaseLine.prototype = {
         log("EBaseLine extraJsonParams");
         var extraParams = new Object();
 
+        var staticInfo = this.staticInfo();
+
         //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
-        if (EntityInfoFor(this.options.prefix).isEmbedded() == "e") {
+        if (staticInfo.isEmbedded() == "e") {
             var pathInfo = FullPathNodesSelector(this.options.prefix);
             for (var i = 0; i < pathInfo.length; i++) {
                 var node = pathInfo[i];
@@ -123,13 +129,14 @@ EBaseLine.prototype = {
             }
         }
 
+        if (staticInfo.isReadOnly() == "r") {
+            extraParams.sfReadOnly = true;
+        }
+
         //If reactive => send reactive flag, tabId, and Id & Runtime of the main entity
         if ($('#' + sfReactive).length > 0) {
             extraParams.sfReactive = true;
             extraParams.sfTabId = $('#' + sfTabId).val();
-            //var mainEntityInfo = EntityInfoFor('');
-            //extraParams.sfRuntimeType = mainEntityInfo.runtimeType();
-            //extraParams.sfId = mainEntityInfo.id();
         }
 
         return extraParams;
@@ -190,7 +197,7 @@ var ELine = function(_elineOptions) {
     this.viewOptionsForViewing = function(_viewOptions) {
         log("ELine viewOptionsForViewing");
         var self = this;
-        var info = this.entityInfo();
+        var info = this.runtimeInfo();
         return $.extend({
             containerDiv: this.options.prefix + sfEntity,
             onOk: function() { return self.onViewingOk(defaultValidateUrl); },
@@ -205,7 +212,7 @@ var ELine = function(_elineOptions) {
 
     this.onViewingOk = function(validateUrl) {
         log("ELine onViewingOk"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
-        var acceptChanges = this.checkValidation(validateUrl, this.entityInfo().runtimeType());
+        var acceptChanges = this.checkValidation(validateUrl, this.runtimeInfo().runtimeType());
         if (acceptChanges)
             this.setTicks();
         return acceptChanges;
@@ -225,7 +232,7 @@ var ELine = function(_elineOptions) {
     };
 
     this.newEntity = function(clonedElements, runtimeType) {
-        var info = this.entityInfo();
+        var info = this.runtimeInfo();
         info.setEntity(runtimeType, '').find()
             .after(hiddenDiv(this.options.prefix + sfEntity, ''));
         $(this.pf(sfEntity)).append(clonedElements);
@@ -255,7 +262,7 @@ var ELine = function(_elineOptions) {
         log("ELine onFindingOk");
         if (selectedItems == null || selectedItems.length != 1)
             throw "No item or more than one item was returned from Find Window";
-        var info = this.entityInfo();
+        var info = this.runtimeInfo();
         info.setEntity(selectedItems[0].type, selectedItems[0].id);
         if ($(this.pf(sfEntity)).length == 0)
             info.find().after(hiddenDiv(this.options.prefix + sfEntity, ''));
@@ -319,7 +326,7 @@ var EDLine = function(_edlineOptions) {
     };
 
     this.newEntity = function(runtimeType) {
-        this.entityInfo().setEntity(runtimeType, '');
+        this.runtimeInfo().setEntity(runtimeType, '');
     };
 
     this.onCreated = function(runtimeType) {
@@ -357,7 +364,7 @@ var EDLine = function(_edlineOptions) {
         log("EDLine onFindingOk");
         if (selectedItems == null || selectedItems.length != 1)
             throw "No item or more than one item was returned from Find Window";
-        this.entityInfo().setEntity(selectedItems[0].type, selectedItems[0].id);
+        this.runtimeInfo().setEntity(selectedItems[0].type, selectedItems[0].id);
 
         //View result in the detailDiv
         var viewOptions = this.viewOptionsForCreating($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }));
@@ -404,10 +411,8 @@ var EList = function(_elistOptions) {
         var extraParams = new Object();
 
         //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
-        var info = EntityInfoFor(itemPrefix);
-        if (info.find().length == 0)
-            info = EntityInfoFor(this.options.prefix); //If new item, there will be no sfInfo for it. Use list sfInfo instead
-        if (info.isEmbedded() == "e") {
+        var staticInfo = this.staticInfo();
+        if (staticInfo.isEmbedded() == "e") {
             var pathInfo = FullPathNodesSelector(itemPrefix);
             for (var i = 0; i < pathInfo.length; i++) {
                 var node = pathInfo[i];
@@ -415,13 +420,17 @@ var EList = function(_elistOptions) {
             }
         }
 
+        if (staticInfo.isReadOnly() == "r") {
+            extraParams.sfReadOnly = true;
+        }
+
         //If reactive => send reactive flag, tabId, and Id & Runtime of the main entity
         if ($('#' + sfReactive).length > 0) {
             extraParams.sfReactive = true;
             extraParams.sfTabId = $('#' + sfTabId).val();
-            var mainEntityInfo = EntityInfoFor('');
-            extraParams.sfRuntimeType = mainEntityInfo.runtimeType();
-            extraParams.sfId = mainEntityInfo.id();
+            var mainRuntimeInfo = RuntimeInfoFor('');
+            extraParams.sfRuntimeType = mainRuntimeInfo.runtimeType();
+            extraParams.sfId = mainRuntimeInfo.id();
         }
 
         return extraParams;
@@ -429,11 +438,11 @@ var EList = function(_elistOptions) {
 
     this.setItemTicks = function(itemPrefix) {
         log("EList setItemTicks");
-        this.itemEntityInfo(itemPrefix).ticks(new Date().getTime());
+        this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
     };
 
-    this.itemEntityInfo = function(itemPrefix) {
-        return EntityInfoFor(itemPrefix);
+    this.itemRuntimeInfo = function(itemPrefix) {
+        return RuntimeInfoFor(itemPrefix);
     };
 
     this.selectedItemPrefix = function() {
@@ -459,7 +468,7 @@ var EList = function(_elistOptions) {
 
     this.checkValidation = function(validateUrl, runtimeType, itemPrefix) {
         log("EList checkValidation"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
-        var info = this.itemEntityInfo(itemPrefix);
+        var info = this.itemRuntimeInfo(itemPrefix);
         var id = (info.find().length > 0) ? info.id() : '';
         var validator = new PartialValidator({ controllerUrl: validateUrl, prefix: itemPrefix, id: id, type: runtimeType });
         var validatorResult = validator.validate();
@@ -500,9 +509,9 @@ var EList = function(_elistOptions) {
 
     this.newListItem = function(clonedElements, runtimeType, itemPrefix) {
         log("EList newListItem");
-        var listInfo = this.entityInfo();
-        var itemInfoValue = new EntityInfo(itemPrefix).createValue(listInfo.staticType(), runtimeType, '', listInfo.isEmbedded(), 'n', '');
-        listInfo.find().after(hiddenInput(itemPrefix + sfInfo, itemInfoValue))
+        var listInfo = this.staticInfo();
+        var itemInfoValue = new RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
+        listInfo.find().after(hiddenInput(itemPrefix + sfRuntimeInfo, itemInfoValue))
                 .after(hiddenDiv(itemPrefix + sfEntity, ''));
         $('#' + itemPrefix + sfEntity).append(clonedElements);
 
@@ -530,7 +539,7 @@ var EList = function(_elistOptions) {
     this.viewOptionsForViewing = function(_viewOptions, itemPrefix) {
         log("EList viewOptionsForViewing");
         var self = this;
-        var info = this.itemEntityInfo(itemPrefix);
+        var info = this.itemRuntimeInfo(itemPrefix);
         return $.extend({
             containerDiv: itemPrefix + sfEntity,
             onOk: function() { return self.onViewingOk(defaultValidateUrl, itemPrefix); },
@@ -545,7 +554,7 @@ var EList = function(_elistOptions) {
 
     this.onViewingOk = function(validateUrl, itemPrefix) {
         log("EList onViewingOk"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
-        var acceptChanges = this.checkValidation(validateUrl, this.itemEntityInfo(itemPrefix).runtimeType(), itemPrefix);
+        var acceptChanges = this.checkValidation(validateUrl, this.itemRuntimeInfo(itemPrefix).runtimeType(), itemPrefix);
         if (acceptChanges)
             this.setItemTicks(itemPrefix);
         return acceptChanges;
@@ -574,7 +583,7 @@ var EList = function(_elistOptions) {
             var itemPrefix = this.options.prefix + "_" + lastIndex;
 
             this.newListItem('', item.type, itemPrefix);
-            this.itemEntityInfo(itemPrefix).setEntity(item.type, item.id);
+            this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
             $('#' + itemPrefix + sfToStr).html(item.toStr);
 
             this.fireOnEntityChanged();
@@ -593,7 +602,7 @@ var EList = function(_elistOptions) {
 
     this.removeInIndex = function(selectedItemPrefix) {
         log("EList removeInIndex");
-        $('#' + selectedItemPrefix + sfInfo).remove();
+        $('#' + selectedItemPrefix + sfRuntimeInfo).remove();
         $('#' + selectedItemPrefix + sfToStr).remove();
         $('#' + selectedItemPrefix + sfEntity).remove();
         $('#' + selectedItemPrefix + sfIndex).remove();
@@ -642,10 +651,6 @@ var ERep = function(_erepOptions) {
                 return false;
         }
         return true;
-    };
-
-    this.itemEntityInfo = function(itemPrefix) {
-        return EntityInfoFor(itemPrefix);
     };
 
     this.getLastIndex = function() {
@@ -709,12 +714,12 @@ var ERep = function(_erepOptions) {
 
     this.newRepItem = function(newHtml, runtimeType, itemPrefix) {
         log("ERep newRepItem");
-        var listInfo = this.entityInfo();
-        var itemInfoValue = this.itemEntityInfo(itemPrefix).createValue(listInfo.staticType(), runtimeType, '', listInfo.isEmbedded(), 'n', '');
+        var listInfo = this.staticInfo();
+        var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
         $(this.pf(sfItemsContainer)).append("\n" +
         "<div id='" + itemPrefix + sfRepeaterItem + "' name='" + itemPrefix + sfRepeaterItem + "' class='repeaterElement'>\n" +
         "<a id='" + itemPrefix + "_btnRemove' title='" + this.options.removeItemLinkText + "' href=\"javascript:ERepOnRemoving(new ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (empty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}), '" + itemPrefix + "');\" class='lineButton remove'>" + this.options.removeItemLinkText + "</a>\n" +
-        hiddenInput(itemPrefix + sfInfo, itemInfoValue) +
+        hiddenInput(itemPrefix + sfRuntimeInfo, itemInfoValue) +
         //hiddenInput(itemPrefix + sfIndex, (parseInt(lastIndex)+1) + "\" />\n" +
         "<div id='" + itemPrefix + sfEntity + "' name='" + itemPrefix + sfEntity + "'>\n" +
         newHtml + "\n" +
@@ -775,7 +780,7 @@ var ERep = function(_erepOptions) {
             var itemPrefix = this.options.prefix + "_" + lastIndex;
 
             this.newRepItem('', item.type, itemPrefix);
-            this.itemEntityInfo(itemPrefix).setEntity(item.type, item.id);
+            this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
 
             //View results in the repeater
             var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }), itemPrefix);
@@ -894,7 +899,7 @@ var EDList = function(_edlistOptions) {
     this.viewOptionsForViewing = function(_viewOptions, itemPrefix) {
         log("EDList viewOptionsForCreating");
         var self = this;
-        var info = this.itemEntityInfo(itemPrefix);
+        var info = this.itemRuntimeInfo(itemPrefix);
         return $.extend({
             containerDiv: this.options.detailDiv,
             controllerUrl: this.defaultViewUrl,
@@ -956,7 +961,7 @@ var EDList = function(_edlistOptions) {
             var itemPrefix = this.options.prefix + "_" + lastIndex;
 
             this.newListItem('', item.type, itemPrefix);
-            this.itemEntityInfo(itemPrefix).setEntity(item.type, item.id);
+            this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
             $('#' + itemPrefix + sfToStr).html(item.toStr);
 
             //View result in the detailDiv
@@ -1026,17 +1031,18 @@ var ECombo = function(_ecomboOptions) {
         var newId = this.selectedId();
         var newRuntimeType = "";
         var newEntity = false;
-        var info = this.entityInfo();
+        var staticInfo = this.staticInfo();
         if (empty(newId))
             newId = ""; //Avoid setting null value
         else {
-            newRuntimeType = info.staticType();
+            newRuntimeType = staticInfo.staticType();
             newEntity = true;
         }
-        var oldId = info.id();
+        var runtimeInfo = this.runtimeInfo();
+        var oldId = runtimeInfo.id();
         if (empty(oldId))
             oldId = ""; //Avoid setting null value
-        info.setEntity(newRuntimeType, newId);
+        runtimeInfo.setEntity(newRuntimeType, newId);
         $(this.pf(sfEntity)).html(''); //Clean
         this.fireOnEntityChanged(newEntity);
     };
@@ -1066,7 +1072,7 @@ var FLine = function(_flineOptions) {
 
     this.download = function() {
         log("FLine download");
-        var id = this.entityInfo().id();
+        var id = this.runtimeInfo().id();
         if (empty(id))
             return;
         window.open(downloadControllerUrl + "?filePathID=" + id);
@@ -1117,7 +1123,7 @@ function hiddenDiv(id, innerHTML) {
 
 function FullPathNodesSelector(prefix) {
     var pathPrefixes = GetPathPrefixes(prefix);
-    var nodes = $("#" + sfInfo);
+    var nodes = $("#" + sfRuntimeInfo);
     for (var entry in pathPrefixes) {
         var current = pathPrefixes[entry];
         if (!empty(current))
@@ -1127,16 +1133,17 @@ function FullPathNodesSelector(prefix) {
 };
 
 function GetSFInfoParams(prefix) {
-    return $("#" + prefix + sfInfo + ", #" + prefix + sfIndex);
+    return $("#" + prefix + sfRuntimeInfo + ", #" + prefix + sfIndex);
 }
 
 function AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, hasEntity) {
     var prefix = extendedControlName.substr(0, extendedControlName.indexOf(sfToStr));
     var _index = newIdAndType.indexOf("_");
-    var info = EntityInfoFor(prefix);
+    var info = RuntimeInfoFor(prefix);
     info.setEntity(newIdAndType.substr(_index + 1, newIdAndType.length), newIdAndType.substr(0, _index))
         .ticks(new Date().getTime());
-        
+    info.find().after(hiddenDiv(prefix + sfEntity, ''));
+               
     //$('#' + prefix + sfId).val(newIdAndType.substr(0, _index));
     //$('#' + prefix + sfRuntimeType).val(newIdAndType.substr(_index + 1, newIdAndType.length));
     $('#' + prefix + sfLink).html($('#' + extendedControlName).val());

@@ -13,7 +13,7 @@ namespace Signum.Web
         public const string ResourcesRoute = "sfResourcesRoute";
         public const string SearchResourcesRoute = "sfSearchResourcesRoute";
         public const string PopupPrefix = "sfPrefix";
-        public const string WriteSFInfo = "sfEmbeddedControl";
+        public const string WriteSFInfo = "sfWriteSFInfo";
         public const string PopupSufix = "sfSufix";
         //public const string DivASustituir = "sfDivASustituir";
         public const string LoadAll = "sfLoadAll";

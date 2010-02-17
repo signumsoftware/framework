@@ -76,8 +76,8 @@ namespace Signum.Web
             if (settings.ReloadOnChange)
                 vdd[ViewDataKeys.Reactive] = true;
 
-            using (var sc = StyleContext.RegisterCleanStyleContext(true))
-                sb.AppendLine(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
+            //using (var sc = StyleContext.RegisterCleanStyleContext(true))
+            sb.AppendLine(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
 
             return sb.ToString();
         }

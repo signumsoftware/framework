@@ -130,7 +130,7 @@ FindNavigator.prototype = {
         var valBool = $("input:checkbox[id=" + this.findOptions.prefix + "value_" + index + "]"); //it's a checkbox
         if (valBool.length > 0) value = valBool[0].checked;
 
-        var info = EntityInfoFor(this.findOptions.prefix + "value_" + index);
+        var info = RuntimeInfoFor(this.findOptions.prefix + "value_" + index);
         if (info.find().length > 0) //If it's a Lite, the value is the Id
             value = info.id() + ";" + info.runtimeType();
 

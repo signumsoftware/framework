@@ -205,8 +205,8 @@ var PartialValidator = function(_pvalOptions) {
 
         requestData += qp(sfPrefix, this.valOptions.prefix);
 
-        if (formChildren.filter(this.pf(sfInfo)).length == 0)
-            requestData += qp(this.valOptions.prefix + sfInfo, new EntityInfo(this.valOptions.prefix).createValue(this.valOptions.type, this.valOptions.type, '', 'i', 'n', ''));
+        if (formChildren.filter(this.pf(sfRuntimeInfo)).length == 0)
+            requestData += qp(this.valOptions.prefix + sfRuntimeInfo, new RuntimeInfo(this.valOptions.prefix).createValue(this.valOptions.type, '', 'n', ''));
 
         if (!empty(this.valOptions.prefixToIgnore))
             requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
@@ -264,22 +264,21 @@ var PartialValidator = function(_pvalOptions) {
         formChildren = formChildren.not(".searchControl *");
         var requestData = formChildren.serialize();
         if (!isReactive) {
-            if (formChildren.filter(this.pf(sfInfo)).length == 0) {
-                var info = new EntityInfo(this.valOptions.prefix);
+            if (formChildren.filter(this.pf(sfRuntimeInfo)).length == 0) {
+                var info = new RuntimeInfo(this.valOptions.prefix);
                 if (empty(this.valOptions.type))
-                    requestData += qp(this.valOptions.prefix + sfInfo, info.val());
+                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.val());
                 else {
                     var infoField = info.find();
                     if (infoField.length == 0)
-                        requestData += qp(this.valOptions.prefix + sfInfo, info.createValue(this.valOptions.type, this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'i', 'n', ''));
+                        requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
                     else {
                         var infoVal = infoField.val();
                         var index = infoVal.indexOf(";");
                         var index2 = infoVal.indexOf(";", index + 1);
-                        var index3 = infoVal.indexOf(";", index2 + 1);
-                        var mixedVal = infoVal.substring(0, index) + ";" + this.valOptions.type + ";" + (empty(!this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index3, infoVal.length);
+                        var mixedVal = this.valOptions.type + ";" + (empty(!this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index2, infoVal.length);
 
-                        requestData += qp(this.valOptions.prefix + sfInfo, mixedVal);
+                        requestData += qp(this.valOptions.prefix + sfRuntimeInfo, mixedVal);
                     }
                 }
             }

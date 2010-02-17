@@ -11,8 +11,9 @@ using Signum.Web.Properties;
 namespace Signum.Web
 {
     public static class EntityBaseKeys
-    {
-        public const string Info = "sfInfo";
+    { 
+        public const string RuntimeInfo = "sfRuntimeInfo";
+        public const string StaticInfo = "sfStaticInfo";
         public const string Implementations = "sfImplementations";
         public const string Entity = "sfEntity";
         public const string Template = "sfTemplate";

@@ -518,6 +518,21 @@ namespace Signum.Web
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
+            if (!es.IsNavigable(false))
+                throw new ApplicationException("View for type {0} is not allowed".Formato(obj.GetType()));
+
+            if (es.IsReadOnly(false))
+            {
+                if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
+                {
+                    StyleContext sc = (StyleContext)controller.ViewData[ViewDataKeys.StyleContext];
+                    sc.ReadOnly = true;
+                    controller.ViewData[ViewDataKeys.StyleContext] = sc;
+                }
+                else
+                    controller.ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+            }
+
             if (GraphExplorer.FromRoot(entity).Any(m => m.GetType().HasAttribute<Reactive>()))
             {
                 controller.ViewData[ViewDataKeys.Reactive] = true;
@@ -568,15 +583,31 @@ namespace Signum.Web
                 cleanType = Reflector.ExtractLite(entityTC.Type) ?? entityTC.Type;
             }
 
-            string url = partialViewName ??
-                Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType)).PartialViewName;
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
+
+            if (!es.IsViewable(false))
+                throw new ApplicationException("View for type {0} is not allowed".Formato(cleanType.Name));
+
+            string url = partialViewName ?? es.PartialViewName;
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = url;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             if (changeTicks != null)
                 controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
 
-            controller.ViewData[ViewDataKeys.StyleContext] = StyleContext.RegisterCleanStyleContext(false);
+            if (es.IsReadOnly(false))
+            {
+                if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
+                {
+                    StyleContext sc = (StyleContext)controller.ViewData[ViewDataKeys.StyleContext];
+                    sc.ReadOnly = true;
+                    controller.ViewData[ViewDataKeys.StyleContext] = sc;
+                }
+                else
+                    controller.ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+            }
+
+            //controller.ViewData[ViewDataKeys.StyleContext] = StyleContext.RegisterCleanStyleContext(false);
 
             controller.ViewData.Model = entity;
             
@@ -597,13 +628,29 @@ namespace Signum.Web
                 cleanType = Reflector.ExtractLite(entityTC.Type) ?? entityTC.Type;
             }
 
-            string url = partialViewName ??
-                Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType)).PartialViewName;
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
+
+            if (!es.IsViewable(false))
+                throw new ApplicationException("View for type {0} is not allowed".Formato(cleanType.Name));
+
+            string url = partialViewName ?? es.PartialViewName;
 
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;
             if (changeTicks != null)
                 controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
+
+            if (es.IsReadOnly(false))
+            {
+                if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
+                {
+                    StyleContext sc = (StyleContext)controller.ViewData[ViewDataKeys.StyleContext];
+                    sc.ReadOnly = true;
+                    controller.ViewData[ViewDataKeys.StyleContext] = sc;
+                }
+                else
+                    controller.ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+            }
 
             //if (controller.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
             //    controller.Response.Write("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(TypeContext.Compose(prefix, EntityBaseKeys.IsNew))); 
@@ -955,38 +1002,9 @@ namespace Signum.Web
             return errors;
         }
  
-        //public virtual Modification GenerateModification(Controller controller, Modifiable obj, string prefix)
-        //{
-        //    return GenerateModification(controller, obj, prefix, "");
-        //}
-
-        //public virtual Modification GenerateModification(Controller controller, Modifiable obj, string prefix, string prefixToIgnore)
-        //{
-        //    var formValues = Navigator.ToSortedList(controller.Request.Form, prefix, prefixToIgnore);
-
-        //    Interval<int> interval = Modification.FindSubInterval(formValues, prefix);
-
-        //    return Modification.Create(obj.GetType(), formValues, interval, prefix);
-        //}
-
         protected internal virtual ModifiableEntity ExtractEntity(Controller controller, NameValueCollection form, string prefix, bool? clone)
         {
-            EntityInfo entityInfo = EntityInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.Info)]);
-            //string typeName = null; 
-            //string typeNameKey = TypeContext.Compose(prefix ?? "", TypeContext.RuntimeType);
-            //if (form.AllKeys.Contains(typeNameKey))
-            //    typeName = form[typeNameKey];
-            //else
-            //    typeName = controller.Request.Params[TypeContext.RuntimeType];
-                
-            //Type type = Navigator.NameToType.GetOrThrow(typeName, Resources.Type0NotFoundInTheSchema);
-
-            //string id = null;
-            //string idKey = TypeContext.Compose(prefix ?? "", TypeContext.Id);
-            //if (form.AllKeys.Contains(idKey))
-            //    id = form[idKey];
-            //else
-            //    id = controller.Request.Params[TypeContext.Id];
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             
             if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive))
             {
@@ -996,12 +1014,9 @@ namespace Signum.Web
                 if (mod == null)
                     throw new ApplicationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
 
-                EntityInfo parentEntityInfo = EntityInfo.FromFormValue(form[TypeContext.Separator + EntityBaseKeys.Info]);
-                //string parentTypeName = form[TypeContext.Separator + TypeContext.RuntimeType];
-                //string parentId = form[TypeContext.Separator + TypeContext.Id];
-                //Type parentType = Navigator.NameToType.GetOrThrow(parentTypeName, Resources.Type0NotFoundInTheSchema);
-                if (mod.GetType() == parentEntityInfo.RuntimeType &&
-                    (parentEntityInfo.IsEmbedded || ((IIdentifiable)mod).IdOrNull == parentEntityInfo.IdOrNull))
+                RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Separator + EntityBaseKeys.RuntimeInfo]);
+                if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
+                    (typeof(EmbeddedEntity).IsAssignableFrom(mod.GetType()) || ((IIdentifiable)mod).IdOrNull == parentRuntimeInfo.IdOrNull))
                 {
                     if (clone == null || clone.Value) 
                         return (ModifiableEntity)((ICloneable)mod).Clone();
@@ -1011,10 +1026,10 @@ namespace Signum.Web
                     throw new ApplicationException(Resources.IncorrectEntityInSession);
             }
 
-            if (entityInfo.IdOrNull != null)
-                return Database.Retrieve(entityInfo.RuntimeType, entityInfo.IdOrNull.Value);
+            if (runtimeInfo.IdOrNull != null)
+                return Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
             else
-                return (ModifiableEntity)Constructor.Construct(entityInfo.RuntimeType, controller);
+                return (ModifiableEntity)Constructor.Construct(runtimeInfo.RuntimeType, controller);
         }
 
         protected internal virtual bool IsViewable(Type type, bool admin)

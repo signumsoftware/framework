@@ -65,7 +65,7 @@ ViewNavigator.prototype = {
         if (this.isLoaded())
             return this.showViewSave();
         else {
-            if (empty(this.viewOptions.type) && EntityInfoFor(this.viewOptions.prefix).find().length == 0)
+            if (empty(this.viewOptions.type) && RuntimeInfoFor(this.viewOptions.prefix).find().length == 0)
                 throw "Type must be specified to Navigator on viewSave mode";
             var self = this;
             this.callServer(function(controlHtml) { self.showViewSave(controlHtml); });
@@ -262,7 +262,7 @@ function typeSelector(_prefix, onTypeClicked) {
 
 function RelatedEntityCreate(viewOptions) {
     var extraJsonData = new Object();
-    var info = EntityInfoFor('');
+    var info = RuntimeInfoFor('');
     extraJsonData.sfIdRelated = info.id();
     extraJsonData.sfRuntimeTypeRelated = info.runtimeType();
     

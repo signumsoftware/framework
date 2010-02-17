@@ -9,7 +9,8 @@ var sfGlobalErrorsKey = "sfGlobalErrors";
 var sfGlobalValidationSummary = "sfGlobalValidationSummary";
 var sfDivASustituir = "divASustituir";
 
-var sfInfo = "_sfInfo";
+var sfRuntimeInfo = "_sfRuntimeInfo";
+var sfStaticInfo = "_sfStaticInfo";
 var sfStaticType = "_sfStaticType";
 var sfRuntimeType = "_sfRuntimeType";
 var sfImplementations = "_sfImplementations";
@@ -57,17 +58,14 @@ var lang = {
     "popupErrorsStop": "Hay errores en la entidad"
 };
 
-var EntityInfo = function(_prefix) {
+var StaticInfo = function(_prefix) {
     this.prefix = _prefix;
     this._staticType = 0;
-    this._runtimeType = 1;
-    this._id = 2;
-    this._isEmbedded = 3;
-    this._isNew = 4;
-    this._ticks = 5;
+    this._isEmbedded = 1;
+    this._isReadOnly = 2;
 
     this.find = function() {
-        return $('#' + this.prefix + sfInfo);
+        return $('#' + this.prefix + sfStaticInfo);
     };
     this.value = function() {
         return this.find().val();
@@ -76,7 +74,51 @@ var EntityInfo = function(_prefix) {
         return this.value().split(";")
     };
     this.toValue = function(array) {
-        return array[0] + ";" + array[1] + ";" + array[2] + ";" + array[3] + ";" + array[4] + ";" + array[5];
+        return array[0] + ";" + array[1] + ";" + array[2];
+    };
+    this.getValue = function(key) {
+        var array = this.toArray();
+        return array[key];
+    };
+    this.staticType = function() {
+        return this.getValue(this._staticType);
+    };
+    this.isEmbedded = function() {
+        return this.getValue(this._isEmbedded);
+    };
+    this.isReadOnly = function() {
+        return this.getValue(this._isReadOnly);
+    };
+    this.createValue = function(staticType, isEmbedded, isReadOnly) {
+        var array = new Array();
+        array[this._staticType] = staticType;
+        array[this._isEmbedded] = isEmbedded;
+        array[this._isReadOnly] = isReadOnly;
+        return this.toValue(array);
+    };
+}
+function StaticInfoFor(prefix) {
+    return new StaticInfo(prefix);
+}
+
+var RuntimeInfo = function(_prefix) {
+    this.prefix = _prefix;
+    this._runtimeType = 0;
+    this._id = 1;
+    this._isNew = 2;
+    this._ticks = 3;
+
+    this.find = function() {
+    return $('#' + this.prefix + sfRuntimeInfo);
+    };
+    this.value = function() {
+        return this.find().val();
+    };
+    this.toArray = function() {
+        return this.value().split(";")
+    };
+    this.toValue = function(array) {
+        return array[0] + ";" + array[1] + ";" + array[2] + ";" + array[3];
     };
     this.getSet = function(key, val) {
         var array = this.toArray();
@@ -87,9 +129,6 @@ var EntityInfo = function(_prefix) {
         this.find().val(this.toValue(array));
         return this;
     };
-    this.staticType = function() {
-        return this.getSet(this._staticType, null);
-    };
     this.runtimeType = function() {
         return this.getSet(this._runtimeType, null);
     };
@@ -98,9 +137,6 @@ var EntityInfo = function(_prefix) {
     };
     this.isNew = function() {
         return this.getSet(this._isNew, null);
-    };
-    this.isEmbedded = function() {
-        return this.getSet(this._isEmbedded, null);
     };
     this.ticks = function(val) {
         return this.getSet(this._ticks, val);
@@ -119,19 +155,17 @@ var EntityInfo = function(_prefix) {
         this.getSet(this._isNew, 'o');
         return this;
     };
-    this.createValue = function(staticType, runtimeType, id, isEmbedded, isNew, ticks) {
+    this.createValue = function(runtimeType, id, isNew, ticks) {
         var array = new Array();
-        array[this._staticType] = staticType;
         array[this._runtimeType] = runtimeType;
         array[this._id] = id;
-        array[this._isEmbedded] = isEmbedded;
         array[this._isNew] = isNew;
         array[this._ticks] = ticks;
         return this.toValue(array);
     };
 }
-function EntityInfoFor(prefix) {
-    return new EntityInfo(prefix);
+function RuntimeInfoFor(prefix) {
+    return new RuntimeInfo(prefix);
 }
 
 $(function() {

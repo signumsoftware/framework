@@ -26,7 +26,7 @@ namespace Signum.Web
             idValueField = helper.GlobalName(idValueField);
 
             long? ticks = EntityBaseHelper.GetTicks(helper, idValueField, settings);
-            if (ticks != null) //TODO Anto: Sustituir por sfInfo
+            if (ticks != null) //TODO Anto: Sustituir por sfRuntimeInfo
                 sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), ticks.Value));
 
             if (StyleContext.Current.LabelVisible)

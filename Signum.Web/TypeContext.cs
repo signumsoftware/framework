@@ -150,40 +150,17 @@ namespace Signum.Web
         {
             if (helper.WriteIdAndRuntime(tc))
             {
-                EntityInfo entityInfo = null;
+                RuntimeInfo runtimeInfo = null;
                 if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
-                {
-                    entityInfo = new EntityInfo<T>(tc.Value);
-                    
-                    //IdentifiableEntity id = (IdentifiableEntity)(object)tc.Value;
-                    //if (tc.Value != null)
-                    //    helper.ViewContext.HttpContext.Response.Write(
-                    //        helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
-                    //else
-                    //{
-                    //    //helper.ViewContext.HttpContext.Response.Write(
-                    //    //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), "") + "\n");
-                    //    helper.ViewContext.HttpContext.Response.Write(
-                    //        helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.StaticType), typeof(T).Name) + "\n");
-                    //}
-
-                    //helper.ViewContext.HttpContext.Response.Write(
-                    //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.Id), id.TryCS(i => i.IdOrNull)) + "\n");
-                }
+                    runtimeInfo = new RuntimeInfo<T>(tc.Value);
                 else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
-                {
-                    entityInfo = new EmbeddedEntityInfo<T>(tc.Value, false);
-                    
-                    //helper.ViewContext.HttpContext.Response.Write(
-                    //    helper.Hidden(helper.GlobalPrefixedName(Signum.Web.TypeContext.Separator + Signum.Web.TypeContext.RuntimeType), typeof(T).Name) + "\n");
-                }
+                    runtimeInfo = new EmbeddedRuntimeInfo<T>(tc.Value, false);
                 else if (Reflector.IsMList(typeof(T)))
-                {
-                    entityInfo = new EntityInfo { StaticType = typeof(T), RuntimeType = typeof(T), IsNew = false };
-                }
-                helper.ViewContext.HttpContext.Response.Write(
-                    helper.HiddenSFInfo(helper.GlobalName(tc.Name), entityInfo));
+                    runtimeInfo = new RuntimeInfo { RuntimeType = typeof(T), IsNew = false };
+                
+                helper.WriteEntityInfo(helper.GlobalName(tc.Name), runtimeInfo, new StaticInfo(typeof(T)));
             }
+
             //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them
             if (helper.ViewData.ContainsKey(ViewDataKeys.WriteSFInfo))
                 helper.ViewData.Remove(ViewDataKeys.WriteSFInfo);

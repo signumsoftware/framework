@@ -50,11 +50,11 @@ namespace Signum.Web
             if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
                 vdd[ViewDataKeys.Reactive] = true;
 
-            string contents;
-            using (var sc = StyleContext.RegisterCleanStyleContext(true))
-                contents= helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd);
+            //string contents;
+            //using (var sc = StyleContext.RegisterCleanStyleContext(true))
+               return helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd);
 
-            return contents;
+            //return contents;
         }
 
         public static string RenderItemContentInEntityDiv<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite, bool visibleDiv)

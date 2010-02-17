@@ -45,7 +45,7 @@ namespace Signum.Web
 
             if (isIdentifiable || isLite)
             {
-                sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(value) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo<T>(value) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
 
                 sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
 
@@ -81,7 +81,7 @@ namespace Signum.Web
             }
             else
             {
-                sb.AppendLine(helper.HiddenSFInfo(prefix, new EmbeddedEntityInfo<T>(value, false) { Ticks = ticks }));
+                sb.AppendLine(helper.HiddenEntityInfo(prefix, new EmbeddedRuntimeInfo<T>(value, false) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
 
                 typeContext.Value = (T)(object)Constructor.ConstructStrict(cleanRuntimeType ?? cleanStaticType);
                 sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
