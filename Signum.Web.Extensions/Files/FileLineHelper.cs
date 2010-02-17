@@ -46,7 +46,7 @@ namespace Signum.Web.Files
 
             sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
 
-            sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo<T>(value) { Ticks = ticks }));
+            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo<T>(value) { Ticks = ticks }, new StaticInfo(cleanStaticType)));
 
             sb.AppendLine(helper.Hidden(TypeContext.Compose(prefix, FileLineKeys.FileType),
                 EnumDN.UniqueKey((value != null) ?

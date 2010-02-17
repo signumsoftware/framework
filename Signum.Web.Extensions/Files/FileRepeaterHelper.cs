@@ -34,7 +34,7 @@ namespace Signum.Web.Files
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(helper.HiddenSFInfo(prefix, new EntityInfo { StaticType = elementsCleanStaticType, Ticks = ticks }));
+            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo { Ticks = ticks }, new StaticInfo(elementsCleanStaticType)));
 
             sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
 
