@@ -294,12 +294,12 @@ namespace Signum.Web.Extensions
 
             // Replacing lists
             postLinks = Regex.Replace(postLinks,
-     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*]?)",
+     "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*]?)[\\n]*",
      "<li>${content}</li>",
      RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
-     "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#]?)",
+     "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#]?)[\\n]*",
      "<oli>${content}</oli>",
      RegexOptions.Compiled);
 
@@ -324,7 +324,7 @@ namespace Signum.Web.Extensions
 
             // Replacing titles
             postLinks = Regex.Replace(postLinks,
-            "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})",
+            "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})[\\n]*",
             meTitle,
             RegexOptions.Compiled);
 
