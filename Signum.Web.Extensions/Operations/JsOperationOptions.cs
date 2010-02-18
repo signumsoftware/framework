@@ -15,6 +15,7 @@ namespace Signum.Web.Operations
         public Type ReturnType { get; set; }
         public string ControllerUrl { get; set; }
         public string ValidationControllerUrl { get; set; }
+        public bool? AvoidValidation { get; set; }
         public string OnOk { get; set; }
         public string OnOperationSuccess { get; set; }
         public string OnCancelled { get; set; }
@@ -46,6 +47,9 @@ namespace Signum.Web.Operations
                 
                 if (ValidationControllerUrl.HasText())
                     sb.Append("validationControllerUrl:'{0}',".Formato(ValidationControllerUrl));
+
+                if (AvoidValidation == true)
+                    sb.Append("avoidValidation:'{0}',".Formato(AvoidValidation.Value));
 
                 if (OnOk.HasText())
                     sb.Append("onOk:{0},".Formato(OnOk));
