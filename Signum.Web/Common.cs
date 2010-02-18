@@ -26,6 +26,7 @@ namespace Signum.Web
             CommonTask += new CommonTask(TaskSetLabelText);
             CommonTask += new CommonTask(TaskSetImplementations);
             CommonTask += new CommonTask(TaskSetReadOnly);
+            CommonTask += new CommonTask(TaskSetAccess);
             CommonTask += new CommonTask(TaskSetValueLineType);
             CommonTask += new CommonTask(TaskSetHtmlProperties);
             CommonTask += new CommonTask(TaskSetReloadOnChange);
@@ -73,6 +74,40 @@ namespace Signum.Web
                     bl.ReadOnly = true;
                     bl.SetReadOnly();
                 }
+            }
+        }
+
+        public static void TaskSetAccess(BaseLine bl, TypeContext context)
+        {
+            EntityBase eb = bl as EntityBase;
+            if (eb != null && context.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            {
+                Type cleanType = ReflectionTools.CollectionType(context.Type) ?? context.Type;
+                cleanType = Reflector.ExtractLite(cleanType) ?? cleanType;
+
+                if (cleanType.IsAbstract || cleanType.IsInterface)
+                {
+                    if (context.UntypedValue == null)
+                        return; //No access control possible
+                    cleanType = context.UntypedValue.GetType();
+                    cleanType = ReflectionTools.CollectionType(cleanType) ?? cleanType;
+                    cleanType = Reflector.ExtractLite(cleanType) ?? cleanType;
+                    if (cleanType.IsAbstract || cleanType.IsInterface)
+                        return; //No access control possible
+                }
+
+                if (!Navigator.IsViewable(cleanType, false))
+                    eb.View = false;
+
+                if (!Navigator.IsCreable(cleanType, false))
+                    eb.Create = false;
+
+                if (!Navigator.IsFindable(cleanType))
+                    eb.Find = false;
+
+                EntityLine el = eb as EntityLine;
+                if (el != null && !Navigator.IsNavigable(cleanType, false))
+                    el.Navigate = false;
             }
         }
 

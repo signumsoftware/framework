@@ -41,7 +41,7 @@ namespace Signum.Web
             {
                 if (value != null && typeof(T).UnNullify() == typeof(Boolean))
                 {
-                    settings.ValueHtmlProps.Add("readonly", "readonly");
+                    settings.ValueHtmlProps.Add("disabled", "disabled");
                     sb.AppendLine(helper.CheckBox(idValueField,
                         Convert.ToBoolean(value),
                         settings));
@@ -213,8 +213,8 @@ namespace Signum.Web
                 else
                     settings.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
             }
-            
-            return System.Web.Mvc.Html.InputExtensions.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, settings.ValueHtmlProps);
+
+            return HtmlHelperExtenders.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, !settings.ReadOnly, settings.ValueHtmlProps);
         }
 
         public static string ValueLine<T>(this HtmlHelper helper, T value, string idValueField, ValueLine options)

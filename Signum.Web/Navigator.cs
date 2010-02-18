@@ -424,16 +424,18 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings;
         public Dictionary<object, QuerySettings> QuerySettings;
 
-        public string AjaxErrorPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.AjaxError.ascx";
-        public string ErrorPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.Error.aspx";
-        public string NormalPageUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.NormalPage.aspx";
-        public string PopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.PopupControl.ascx";
-        public string ChooserPopupUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.ChooserPopup.ascx";
-        public string SearchPopupControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchPopupControl.ascx";
-        public string SearchWindowUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchWindow.aspx";
-        public string SearchControlUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchControl.ascx";
-        public string SearchResultsUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.SearchResults.ascx";
-        public string FilterBuilderUrl = "~/Plugin/Signum.Web.dll/Signum.Web.Views.FilterBuilder.ascx";
+        public static string ViewsPrefix = "~/Plugin/Signum.Web.dll/Signum.Web.Views.";
+
+        public string AjaxErrorPageUrl = ViewsPrefix + "AjaxError.ascx";
+        public string ErrorPageUrl = ViewsPrefix + "Error.aspx";
+        public string NormalPageUrl = ViewsPrefix + "NormalPage.aspx";
+        public string PopupControlUrl = ViewsPrefix + "PopupControl.ascx";
+        public string ChooserPopupUrl = ViewsPrefix + "ChooserPopup.ascx";
+        public string SearchPopupControlUrl = ViewsPrefix + "SearchPopupControl.ascx";
+        public string SearchWindowUrl = ViewsPrefix + "SearchWindow.aspx";
+        public string SearchControlUrl = ViewsPrefix + "SearchControl.ascx";
+        public string SearchResultsUrl = ViewsPrefix + "SearchResults.ascx";
+        public string FilterBuilderUrl = ViewsPrefix + "FilterBuilder.ascx";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
@@ -688,7 +690,11 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.Create] =
                 (findOptions.Create.HasValue) ?
                     findOptions.Create.Value :
-                    Navigator.IsCreable(entitiesType, true); ;
+                    Navigator.IsCreable(entitiesType, true);
+            controller.ViewData[ViewDataKeys.View] =
+                            (findOptions.View.HasValue) ?
+                                findOptions.View.Value :
+                                Navigator.IsNavigable(entitiesType, true);
 
             return new ViewResult()
             {
@@ -766,7 +772,11 @@ namespace Signum.Web
                 (findOptions.Create.HasValue) ?
                     findOptions.Create.Value :
                     Navigator.IsCreable(entitiesType, true);
-
+            controller.ViewData[ViewDataKeys.View] =
+                            (findOptions.View.HasValue) ?
+                                findOptions.View.Value :
+                                Navigator.IsNavigable(entitiesType, true);
+            
             return new PartialViewResult
             {
                 ViewName = SearchPopupControlUrl,
@@ -789,6 +799,9 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
         {
+            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
+
             var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
             var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
 
@@ -798,6 +811,10 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.Results] = queryResult;
             controller.ViewData[ViewDataKeys.AllowMultiple] = findOptions.AllowMultiple;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+            controller.ViewData[ViewDataKeys.View] =
+                            (findOptions.View.HasValue) ?
+                                findOptions.View.Value :
+                                Navigator.IsNavigable(entitiesType, true);
 
             if (queryResult != null && queryResult.Rows != null && queryResult.Rows.Length > 0 && queryResult.VisibleColumns.Count() > 0)
             {

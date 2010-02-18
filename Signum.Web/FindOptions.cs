@@ -66,6 +66,8 @@ namespace Signum.Web
 
         public bool? Create { get; set; }
 
+        public bool? View { get; set; }
+
         public bool? Async { get; set; }
 
         public string ToString(bool writeQueryUrlName, bool writeAllowMultiple, string firstCharacter)
@@ -79,6 +81,9 @@ namespace Signum.Web
 
             if (Create == false)
                 sb.Append("&sfCreate=false");
+            
+            if (View == false)
+                sb.Append("&sfView=false");
 
             if (Async == true)
                 sb.Append("$sfAsync=true");

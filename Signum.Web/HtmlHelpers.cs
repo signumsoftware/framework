@@ -35,31 +35,31 @@ namespace Signum.Web
                    "</div>";
         }
 
-
         public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled)
         {
-            if (enabled)
-                return html.CheckBox(name, value);
-            else {
-                StringBuilder sb = new StringBuilder();
+            return CheckBox(html, name, value, enabled, null);
+        }
 
-	            var tagBuilder = new TagBuilder("input");
-    		    tagBuilder.MergeAttribute("type", HtmlHelper.GetInputTypeString(InputType.CheckBox));
-                tagBuilder.MergeAttribute("id", name, true);
-                tagBuilder.MergeAttribute("name", name, true);
-                tagBuilder.MergeAttribute("value", value ? "true" : "flase");
-                tagBuilder.MergeAttribute("disabled", "disabled");
-    		    if (value)
-    		    {
-    			    tagBuilder.MergeAttribute("checked", "checked");
-    		    }
-                sb.Append(tagBuilder.ToString(TagRenderMode.SelfClosing));
-                TagBuilder hiddenInput = new TagBuilder("input");
-                hiddenInput.MergeAttribute("type", HtmlHelper.GetInputTypeString(InputType.Hidden));
-                tagBuilder.MergeAttribute("id", name, true);
-                hiddenInput.MergeAttribute("name", name);
-                hiddenInput.MergeAttribute("value", value ? "true" : "flase");
-                sb.Append(hiddenInput.ToString(TagRenderMode.SelfClosing));
+        public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled, Dictionary<string, object> htmlAttributes)
+        {
+            if (htmlAttributes == null)
+                htmlAttributes = new Dictionary<string, object>();
+
+            if (enabled)
+                return html.CheckBox(name, value, htmlAttributes);
+            else 
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("<input type='checkbox' id='{0}' name='{0}' value='{1}' disabled='disabled'{2}{3} />".Formato(
+                    name, 
+                    value ? "true" : "false", 
+                    htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), 
+                    value ? "checked='checked'" : ""));
+
+                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}' />".Formato(
+                    name,
+                    value ? "true" : "false"
+                    ));
                 return sb.ToString();
             }
         }

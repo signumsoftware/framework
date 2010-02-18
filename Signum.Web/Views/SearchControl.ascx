@@ -8,7 +8,8 @@
 <% FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];%>
 <div id="<%=Html.GlobalName("divSearchControl") %>" class="searchControl">
 <%=Html.Hidden(Html.GlobalName("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName)%>
-<%=Html.Hidden(Html.GlobalName("sfAllowMultiple"), findOptions.AllowMultiple.ToString())%>
+<%=Html.Hidden(Html.GlobalName(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString())%>
+<%=Html.Hidden(Html.GlobalName(ViewDataKeys.View), (bool)ViewData[ViewDataKeys.View])%>
 <% 
     string popupPrefix = (string)ViewData[ViewDataKeys.PopupPrefix]; %>
 
@@ -26,7 +27,8 @@
     <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new Dictionary<string, object>{{"size","5"},{"class","OperationDiv"}})%>
 
     <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
-    <% if ((bool)ViewData[ViewDataKeys.Create]){ %>
+    <% if ((bool)ViewData[ViewDataKeys.Create] && (bool)ViewData[ViewDataKeys.View])
+       { %>
         <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(popupPrefix ?? "")%>" />
     <%} %>
     <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], popupPrefix)%> 

@@ -29,7 +29,8 @@
 <table id="<%=Html.GlobalName("tblResults")%>" class="tblResults">
     <thead>
         <tr>
-            <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
+            
+            <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1 && (bool)ViewData[ViewDataKeys.View])
               {
                   if (allowMultiple.HasValue)
                   {%>
@@ -80,14 +81,13 @@
                  %>
                  </td>
                  <%} %>
-                <td id="<%=Html.GlobalName("tdResults")%>">
-                <% if (entityField != null) { %>
+                <% if (entityField != null && (bool)ViewData[ViewDataKeys.View])
+                   { %>
+                   <td id="<%=Html.GlobalName("tdResults")%>">
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Ver">Ver</a>
-                <% } %>
                 </td>
+                <% } %>
                 <%
-                   
-                    
                     for (int col = 0; col < queryResult.Columns.Length; col++)
                 {
                     if (colVisibility[col])

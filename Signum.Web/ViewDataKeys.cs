@@ -42,6 +42,7 @@ namespace Signum.Web
         public const string EntityType = "sfEntityType";
         public const string AllowMultiple = "sfAllowMultiple";
         public const string Create = "sfCreate";
+        public const string View = "sfView";
         public const string Formatters = "sfFormatters";
         public const string ChangeTicks = "sfChangeTicks";
         public const string Reactive = "sfReactive";

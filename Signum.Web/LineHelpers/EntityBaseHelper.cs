@@ -70,7 +70,8 @@ namespace Signum.Web
 
             ViewDataDictionary vdd = new ViewDataDictionary(tc)
             { 
-                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName}
+                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName},
+                { ViewDataKeys.PopupPrefix, helper.ParentPrefix() }
             };
             helper.PropagateSFKeys(vdd);
             if (settings.ReloadOnChange)
@@ -94,7 +95,8 @@ namespace Signum.Web
 
             ViewDataDictionary vdd = new ViewDataDictionary(tc)
             { 
-                { ViewDataKeys.MainControlUrl, helper.ParentPrefix() }
+                { ViewDataKeys.MainControlUrl, helper.ParentPrefix() },
+                { ViewDataKeys.PopupPrefix, helper.ParentPrefix() }
             };
             helper.PropagateSFKeys(vdd);
             if (settings.ReloadOnChange)

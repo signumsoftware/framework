@@ -37,6 +37,7 @@ var sfQueryUrlName = "sfQueryUrlName";
 var sfTop = "sfTop";
 var sfAllowMultiple = "sfAllowMultiple";
 var sfSearchOnLoad = "sfSearchOnLoad";
+var sfView = "sfView";
 var sfEntityTypeName = "sfEntityTypeName";
 var sfSuffix = "sfSuffix";
 

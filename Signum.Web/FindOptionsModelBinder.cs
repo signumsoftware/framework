@@ -57,6 +57,9 @@ namespace Signum.Web
             if (parameters.AllKeys.Any(k => k == "sfCreate"))
                 fo.Create = bool.Parse(parameters["sfCreate"]);
 
+            if (parameters.AllKeys.Any(k => k == "sfView"))
+                fo.View = bool.Parse(parameters["sfView"]);
+
             if (parameters.AllKeys.Any(k => k == "sfSearchOnLoad"))
                 fo.SearchOnLoad = bool.Parse(parameters["sfSearchOnLoad"]);
 

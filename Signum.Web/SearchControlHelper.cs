@@ -109,6 +109,10 @@ namespace Signum.Web
                     (findOptions.Create.HasValue) ?
                     findOptions.Create.Value :
                     Navigator.IsCreable(entitiesType, false);
+                helper.ViewData[ViewDataKeys.View] =
+                                (findOptions.View.HasValue) ?
+                                    findOptions.View.Value :
+                                    Navigator.IsNavigable(entitiesType, true);
             }
             else
             {
