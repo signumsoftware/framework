@@ -5,6 +5,7 @@
         isLite: false,
         controllerUrl: null,
         validationControllerUrl: null,
+        avoidValidation: false,
         onOk: null,
         onCancelled: null,
         onOperationSuccess: null,
@@ -57,9 +58,9 @@ OperationManager.prototype = {
         var info = this.runtimeInfo();
         var isValid = null;
         if (empty(this.options.prefix))
-            isValid = new Validator({controllerUrl:this.options.validationControllerUrl}).validate();
+            isValid = new Validator({ controllerUrl: this.options.validationControllerUrl }).validate();
         else
-            isValid = new PartialValidator({ controllerUrl:this.options.validationControllerUrl, prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).validate().isValid;
+            isValid = new PartialValidator({ controllerUrl: this.options.validationControllerUrl, prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).validate().isValid;
         if (!isValid) {
             window.alert(lang['popupErrorsStop']);
             return false;
@@ -90,9 +91,11 @@ OperationManager.prototype = {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.entityIsValid())
-            return;
-
+        if (!this.options.avoidValidation) {
+            if (!this.entityIsValid())
+                return;
+        }
+        
         var info = this.runtimeInfo();
         $("form").append(hiddenInput('sfRuntimeType', info.runtimeType()) +
             hiddenInput('sfId', info.id()) +
@@ -116,9 +119,11 @@ var OperationExecutor = function(_options) {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.entityIsValid()) {
-            NotifyInfo(lang['error'], 2000);
-            return;
+        if (!this.options.avoidValidation) {
+            if (!this.entityIsValid()) {
+                NotifyInfo(lang['error'], 2000);
+                return;
+            }
         }
 
         var newPrefix = (isFalse(this.options.multiStep)) ? this.options.prefix : this.newPrefix();
@@ -204,9 +209,11 @@ var ConstructorFrom = function(_options) {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.entityIsValid()) {
-            NotifyInfo(lang['error'], 2000);
-            return;
+        if (!this.options.avoidValidation) {
+            if (!this.entityIsValid()) {
+                NotifyInfo(lang['error'], 2000);
+                return;
+            }
         }
 
         var self = this;
@@ -271,9 +278,11 @@ var DeleteExecutor = function(_options) {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.entityIsValid()) {
-            NotifyInfo(lang['error'], 2000);
-            return;
+        if (!this.options.avoidValidation) {
+            if (!this.entityIsValid()) {
+                NotifyInfo(lang['error'], 2000);
+                return;
+            }
         }
 
         var self = this;

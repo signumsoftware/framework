@@ -138,7 +138,7 @@ namespace Signum.Web.Controllers
                 throw new ApplicationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
 
             if (sfReadOnly.HasValue)
-                ViewData[ViewDataKeys.StyleContext] = new StyleContext(true) { ReadOnly = true };
+                ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
 
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }

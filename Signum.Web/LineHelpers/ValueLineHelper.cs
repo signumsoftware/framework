@@ -41,7 +41,7 @@ namespace Signum.Web
             {
                 if (value != null && typeof(T).UnNullify() == typeof(Boolean))
                 {
-                    settings.ValueHtmlProps.Add("disabled", "disabled");
+                    settings.ValueHtmlProps.Add("readonly", "readonly");
                     sb.AppendLine(helper.CheckBox(idValueField,
                         Convert.ToBoolean(value),
                         settings));
@@ -51,7 +51,7 @@ namespace Signum.Web
                     if (value != null && typeof(T).UnNullify() == typeof(DateTime) && settings.ValueLineType != null && settings.ValueLineType == ValueLineType.Date)
                         sb.AppendLine(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
                     else
-                        if (typeof(T).UnNullify().BaseType == typeof(Enum))
+                        if (typeof(T).UnNullify().BaseType == typeof(Enum) && value != null)
                             sb.AppendLine(helper.Span(idValueField, ((Enum)(object)value).NiceToString(), "valueLine", typeof(T)));
                         else
                             sb.AppendLine(helper.Span(idValueField, value, "valueLine", typeof(T)));

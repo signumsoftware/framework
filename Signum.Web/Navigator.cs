@@ -542,7 +542,7 @@ namespace Signum.Web
             return new ViewResult()
             {
                 ViewName = NormalPageUrl,
-                MasterName = controller.Request.UserAgent.Contains("iPhone") ? "Mobile" : null,
+                MasterName = null,
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };

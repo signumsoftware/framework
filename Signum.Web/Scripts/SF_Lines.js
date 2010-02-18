@@ -137,6 +137,7 @@ EBaseLine.prototype = {
         if ($('#' + sfReactive).length > 0) {
             extraParams.sfReactive = true;
             extraParams.sfTabId = $('#' + sfTabId).val();
+            extraParams._sfRuntimeInfo = RuntimeInfoFor('').value();
         }
 
         return extraParams;
@@ -428,9 +429,7 @@ var EList = function(_elistOptions) {
         if ($('#' + sfReactive).length > 0) {
             extraParams.sfReactive = true;
             extraParams.sfTabId = $('#' + sfTabId).val();
-            var mainRuntimeInfo = RuntimeInfoFor('');
-            extraParams.sfRuntimeType = mainRuntimeInfo.runtimeType();
-            extraParams.sfId = mainRuntimeInfo.id();
+            extraParams._sfRuntimeInfo = RuntimeInfoFor('').value();
         }
 
         return extraParams;

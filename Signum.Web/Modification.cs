@@ -635,11 +635,12 @@ namespace Signum.Web
                     item.First.Validate(controller, list[item.Second.Value], errors, prefix);
                 else
                 {
-                    //object newValue = typeof(Lite).IsAssignableFrom(item.First.StaticType) ?
-                    //    ((IdentifiableEntity)Constructor.Construct(Reflector.ExtractLite(item.First.StaticType), null)).ToLiteFat() :
-                    //    Constructor.Construct(item.First.StaticType, null);
-                    //Modifiable mod = (Modifiable)item.First.ApplyChanges(controller, newValue, null);
-                    item.First.Validate(controller, null, errors, prefix);
+                    //TODO Anto: If an MList of Lite of an abstract type, the following construct will fail
+                    object newValue = typeof(Lite).IsAssignableFrom(item.First.StaticType) ?
+                        ((IdentifiableEntity)Constructor.Construct(Reflector.ExtractLite(item.First.StaticType), null)).ToLiteFat() :
+                        Constructor.Construct(item.First.StaticType, null);
+                    Modifiable mod = (Modifiable)item.First.ApplyChanges(controller, newValue, null);
+                    item.First.Validate(controller, mod, errors, prefix);
                 }
             }
         }
