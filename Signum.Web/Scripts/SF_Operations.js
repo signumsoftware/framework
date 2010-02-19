@@ -39,6 +39,9 @@ OperationManager.prototype = {
             else //PopupWindow
                 formChildren = $(this.pf("panelPopup *") + ", #" + sfReactive + ", #" + sfTabId).serialize();
         }
+        else {
+            formChildren = qp(sfTabId, $('#' + sfTabId).val());
+        }
 
         var info = this.runtimeInfo();
 
@@ -95,7 +98,7 @@ OperationManager.prototype = {
             if (!this.entityIsValid())
                 return;
         }
-        
+
         var info = this.runtimeInfo();
         $("form").append(hiddenInput('sfRuntimeType', info.runtimeType()) +
             hiddenInput('sfId', info.id()) +
