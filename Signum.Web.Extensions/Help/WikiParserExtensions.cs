@@ -126,7 +126,7 @@ namespace Signum.Web.Extensions
                         Type type = HelpLogic.GetNameToType(parts[0], false);
                         //TODO: NiceToString de la propiedad
                         result = new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
-                            text.HasText() ? text.NiceName() : parts[1],
+                            text.HasText() ? text : parts[1].NiceName(),
                             type != null ? "" : "unavailable");
                         break;
 
@@ -218,7 +218,7 @@ namespace Signum.Web.Extensions
                         Type type = HelpLogic.GetNameToType(parts[0], false);
                         //TODO: NiceToString de la propiedad
                         result = linkParser(new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
-                            text.HasText() ? text : parts[1],
+                            text.HasText() ? text : parts[1].NiceName(),
                             type != null ? "" : "unavailable"));
                         break;
 
@@ -300,22 +300,22 @@ namespace Signum.Web.Extensions
             // Replacing lists
             postLinks = Regex.Replace(postLinks,
      "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*]?)[\\n]*",
-     processFormat ? "<li>${content}</li>" : "${content}",
+     processFormat ? "<li>${content}</li>" : "${content} ",
      RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
      "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#]?)[\\n]*",
-     processFormat ? "<oli>${content}</oli>" : "${content}",
+     processFormat ? "<oli>${content}</oli>" : "${content} ",
      RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
             "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
-            processFormat ? "<ul>${content}</ul>" : "${content}",
+            processFormat ? "<ul>${content}</ul>" : "${content} ",
             RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
        "(?<content>\\<oli\\>{1}.+\\<\\/oli\\>)",
-        processFormat ? "<ol>${content}</ol>" : "${content}",
+        processFormat ? "<ol>${content}</ol>" : "${content} ",
        RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
@@ -336,7 +336,7 @@ namespace Signum.Web.Extensions
             else
                 postLinks = Regex.Replace(postLinks,
                 "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})[\\n]*",
-                "${content}",
+                "${content} ",
                 RegexOptions.Compiled);
 
 
