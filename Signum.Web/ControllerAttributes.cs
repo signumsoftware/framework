@@ -204,7 +204,7 @@ namespace Signum.Web
                     ViewData = new ViewDataDictionary<HandleErrorInfo>(model),
                     TempData = filterContext.Controller.TempData
                 };
-                ((ViewResult)filterContext.Result).ViewData[ViewDataKeys.PageTitle] = model.Exception.InnerException.Message.HasText() ? model.Exception.InnerException.Message : model.Exception.Message;
+                ((ViewResult)filterContext.Result).ViewData[ViewDataKeys.PageTitle] = model.Exception.InnerException != null ? model.Exception.InnerException.Message : model.Exception.Message;
             }
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.Clear();
