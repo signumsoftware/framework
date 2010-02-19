@@ -353,6 +353,12 @@
     <value>[Num]</value>
   </data>
   <data name="HaveAPrecisionOf" xml:space="preserve">
-    <value>tener una precision de</value>
+    <value>tener una precisión de</value>
+  </data>
+  <data name="Lowercase" xml:space="preserve">
+    <value>Minúsculas</value>
+  </data>
+  <data name="Uppercase" xml:space="preserve">
+    <value>Mayúsculas</value>
   </data>
 </root>

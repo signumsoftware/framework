@@ -557,6 +557,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to lowercase.
+        /// </summary>
+        internal static string Lowercase {
+            get {
+                return ResourceManager.GetString("Lowercase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Millisecond.
         /// </summary>
         internal static string Millisecond {
@@ -751,6 +760,15 @@ namespace Signum.Entities.Properties {
         internal static string TypeIsNotSmallerThan {
             get {
                 return ResourceManager.GetString("TypeIsNotSmallerThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to uppercase.
+        /// </summary>
+        internal static string Uppercase {
+            get {
+                return ResourceManager.GetString("Uppercase", resourceCulture);
             }
         }
         

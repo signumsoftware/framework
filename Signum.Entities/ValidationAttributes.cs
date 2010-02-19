@@ -519,7 +519,7 @@ namespace Signum.Entities
         {
             get
             {
-                return Resources.HaveAPrecisionOf + Precision.NiceToString();
+                return Resources.HaveAPrecisionOf + " " + Precision.NiceToString().ToLower();
             }
         }
     }
@@ -555,7 +555,7 @@ namespace Signum.Entities
 
         public override string HelpMessage
         {
-            get { return Resources.Be + textCase.NiceToString(); }
+            get { return Resources.Be + (textCase == Case.Uppercase ? Resources.Uppercase : Resources.Lowercase); }
         }
     }
 

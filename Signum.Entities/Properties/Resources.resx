@@ -352,4 +352,10 @@
   <data name="HaveAPrecisionOf" xml:space="preserve">
     <value>have a precision of </value>
   </data>
+  <data name="Lowercase" xml:space="preserve">
+    <value>lowercase</value>
+  </data>
+  <data name="Uppercase" xml:space="preserve">
+    <value>uppercase</value>
+  </data>
 </root>
