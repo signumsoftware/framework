@@ -171,7 +171,6 @@ function RuntimeInfoFor(prefix) {
 
 $(function() {
     $(document).ajaxError(function(event, XMLHttpRequest, ajaxOptions, thrownError) {
-    console.log("General error");
     ShowError(XMLHttpRequest, ajaxOptions, thrownError);
 });
 });
