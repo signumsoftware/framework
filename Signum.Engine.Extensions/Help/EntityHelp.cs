@@ -287,7 +287,7 @@ namespace Signum.Engine.Help
                 m = regex.Match(Description);
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.TypeDescription, Description, Extract(Description, m), Type, m);
+                yield return new SearchResult(TypeSearchResult.TypeDescription, "", Extract(Description, m), Type, m);
                 yield break;
             }
 
