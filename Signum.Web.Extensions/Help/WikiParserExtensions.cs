@@ -21,7 +21,7 @@ namespace Signum.Web.Extensions
     {
         public static string WikiUrl = "http://192.168.0.5:8085/";
         public static string ImagesFolder = "HelpImagenes/";
-        
+
         public class WikiLink
         {
             public string Text { get; set; }
@@ -126,7 +126,7 @@ namespace Signum.Web.Extensions
                         Type type = HelpLogic.GetNameToType(parts[0], false);
                         //TODO: NiceToString de la propiedad
                         result = new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
-                            text.HasText() ? text : parts[1],
+                            text.HasText() ? text.NiceName() : parts[1],
                             type != null ? "" : "unavailable");
                         break;
 
@@ -174,6 +174,11 @@ namespace Signum.Web.Extensions
 
         public static string WikiParse(this HtmlHelper html, string content)
         {
+            return WikiParse(html, content, w => w.ToHtmlString(), true);
+        }
+
+        public static string WikiParse(this HtmlHelper html, string content, Func<WikiLink, string> linkParser, bool processFormat)
+        {
             StringBuilder sb = new StringBuilder();
             int firstIndex = 0;
 
@@ -191,30 +196,30 @@ namespace Signum.Web.Extensions
                 {
                     case WikiFormat.EntityLink:
                         Type t = HelpLogic.GetNameToType(link, false);
-                        result = new WikiLink(t != null ? HelpLogic.EntityUrl(t) : link,
+                        result = linkParser(new WikiLink(t != null ? HelpLogic.EntityUrl(t) : link,
                             text.HasText() ? text : t != null ? t.NiceName() : link,
-                            t != null ? "" : "unavailable").ToHtmlString();
+                            t != null ? "" : "unavailable"));
                         break;
 
                     case WikiFormat.HyperLink:
-                        result = new WikiLink(link, text).ToHtmlString();
+                        result = linkParser(new WikiLink(link, text));
                         break;
 
                     case WikiFormat.OperationLink:
                         Enum operation = EnumLogic<OperationDN>.TryToEnum(link);
-                        result = new WikiLink(operation != null ?
+                        result = linkParser(new WikiLink(operation != null ?
                             HelpLogic.EntityUrl(OperationLogic.FindType(operation)) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_') : link,
                             text.HasText() ? text : (operation != null ? operation.NiceToString() : link),
-                            operation != null ? "" : "unavailable").ToHtmlString();
+                            operation != null ? "" : "unavailable"));
                         break;
 
                     case WikiFormat.PropertyLink:
                         string[] parts = link.Split('.');
                         Type type = HelpLogic.GetNameToType(parts[0], false);
                         //TODO: NiceToString de la propiedad
-                        result = new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
+                        result = linkParser(new WikiLink(type != null ? HelpLogic.EntityUrl(type) + "#" + "p-" + parts[1] : link,
                             text.HasText() ? text : parts[1],
-                            type != null ? "" : "unavailable").ToHtmlString();
+                            type != null ? "" : "unavailable"));
                         break;
 
                     case WikiFormat.QueryLink:
@@ -222,33 +227,33 @@ namespace Signum.Web.Extensions
                         if (o as Enum != null)
                         {
                             Enum query = (Enum)o;
-                            result = new WikiLink(
+                            result = linkParser(new WikiLink(
                                 query != null ? (HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_")) : link,
                                 text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
-                                query != null ? "" : "unavailable").ToHtmlString();
+                                query != null ? "" : "unavailable"));
                         }
                         else
                         {
                             Type query = (Type)o;
-                            result = new WikiLink(
+                            result = linkParser(new WikiLink(
                                 query != null ? (HelpLogic.EntityUrl(query) + "#" + "q-" + query.FullName.Replace(".", "_")) : link,
                                 text.HasText() ? text : (query != null ? QueryUtils.GetNiceQueryName(query) : link),
-                                query != null ? "" : "unavailable").ToHtmlString();
+                                query != null ? "" : "unavailable"));
 
                             //Treat as entity
                         }
                         break;
 
                     case WikiFormat.WikiLink:
-                        result = new WikiLink(WikiUrl + link, text.HasText() ? text : "Enlace a wiki").ToHtmlString();
+                        result = linkParser(new WikiLink(WikiUrl + link, text.HasText() ? text : "Enlace a wiki"));
                         break;
 
                     case WikiFormat.NameSpaceLink:
                         NamespaceHelp nameSpace = HelpLogic.GetNamespace(link);
-                        result = new WikiLink(
+                        result = linkParser(new WikiLink(
                             HelpLogic.BaseUrl + "/Namespace/" + link,
                             text.HasText() ? text : link,
-                            nameSpace != null ? "" : "unavailable").ToHtmlString();
+                            nameSpace != null ? "" : "unavailable"));
                         break;
                 }
 
@@ -260,57 +265,57 @@ namespace Signum.Web.Extensions
             sb.Append(content.Substring(firstIndex, content.Length - firstIndex));
 
             string postLinks = sb.ToString();
-            postLinks = ProcessImages(postLinks);
+            if (processFormat) postLinks = ProcessImages(postLinks);
 
             // Replacing both
             postLinks = Regex.Replace(postLinks,
             "(?<begin>'''''{1})(?<content>.+?)(?<end>'''''{1})",
-            "<b><i>${content}</i></b>",
+            processFormat ? "<b><i>${content}</i></b>" : "${content}",
             RegexOptions.Compiled);
 
             // Replacing bolds
             postLinks = Regex.Replace(postLinks,
             "(?<begin>'''{1})(?<content>.+?)(?<end>'''{1})",
-            "<b>${content}</b>",
+            processFormat ? "<b>${content}</b>" : "${content}",
             RegexOptions.Compiled);
 
             // Replacing italics
             postLinks = Regex.Replace(postLinks,
             "(?<begin>''{1})(?<content>.+?)(?<end>''{1})",
-            "<i>${content}</i>",
+            processFormat ? "<i>${content}</i>" : "${content}",
             RegexOptions.Compiled);
 
             // Replacing underlined
             postLinks = Regex.Replace(postLinks,
             "(?<begin>__{1})(?<content>.+?)(?<end>__{1})",
-            "<u>${content}</u>",
+            processFormat ? "<u>${content}</u>" : "${content}",
             RegexOptions.Compiled);
 
             // Replacing strike
             postLinks = Regex.Replace(postLinks,
             "(?<begin>\\-\\-{1})(?<content>.+?)(?<end>\\-\\-{1})",
-            "<s>${content}</s>",
+            processFormat ? "<s>${content}</s>" : "${content}",
             RegexOptions.Compiled);
 
             // Replacing lists
             postLinks = Regex.Replace(postLinks,
      "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*]?)[\\n]*",
-     "<li>${content}</li>",
+     processFormat ? "<li>${content}</li>" : "${content}",
      RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
      "(?<begin>\\#{1}[ ]{1})(?<content>.+)(?<end>[^#]?)[\\n]*",
-     "<oli>${content}</oli>",
+     processFormat ? "<oli>${content}</oli>" : "${content}",
      RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
             "(?<content>\\<li\\>{1}.+\\<\\/li\\>)",
-            "<ul>${content}</ul>",
+            processFormat ? "<ul>${content}</ul>" : "${content}",
             RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
        "(?<content>\\<oli\\>{1}.+\\<\\/oli\\>)",
-       "<ol>${content}</ol>",
+        processFormat ? "<ol>${content}</ol>" : "${content}",
        RegexOptions.Compiled);
 
             postLinks = Regex.Replace(postLinks,
@@ -323,15 +328,22 @@ namespace Signum.Web.Extensions
 
 
             // Replacing titles
-            postLinks = Regex.Replace(postLinks,
-            "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})[\\n]*",
-            meTitle,
-            RegexOptions.Compiled);
+            if (processFormat)
+                postLinks = Regex.Replace(postLinks,
+                "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})[\\n]*",
+                meTitle,
+                RegexOptions.Compiled);
+            else
+                postLinks = Regex.Replace(postLinks,
+                "(?<begin>={2,})(?<content>[^\\n]+?)(?<end>={2,})[\\n]*",
+                "${content}",
+                RegexOptions.Compiled);
 
-            //Remove multiple breakline
-            postLinks = Regex.Replace(postLinks,
-           "(?<content>\n{2,})", "\n",
-           RegexOptions.Compiled);
+
+            //Remove multiple breakline  
+                postLinks = Regex.Replace(postLinks,
+               "(?<content>\n{2,})", "\n",
+               RegexOptions.Compiled);
 
             /*     postLinks = Regex.Replace(postLinks,
                  "(?<begin>\\*{1}[ ]{1})(?<content>.+)(?<end>[^*])",
