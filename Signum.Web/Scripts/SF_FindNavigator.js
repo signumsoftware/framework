@@ -92,7 +92,8 @@ FindNavigator.prototype = {
         var requestData = sfQueryUrlName + "=" + ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName);
         requestData += qp(sfTop, empty(this.findOptions.top) ? $(this.pf(sfTop)).val() : this.findOptions.top);
         requestData += qp(sfAllowMultiple, (this.findOptions.allowMultiple == undefined) ? $(this.pf(sfAllowMultiple)).val() : this.findOptions.allowMultiple);
-        requestData += qp(sfView, (!this.findOptions.view) ? false : $(this.pf(sfView)).val());
+        var canView = $(this.pf(sfView)).val();
+        requestData += qp(sfView, (!this.findOptions.view) ? false : (empty(canView) ? this.findOptions.view : canView));
         requestData += qp(sfSearchOnLoad, this.findOptions.searchOnLoad);
 
         if (this.findOptions.async)
@@ -103,7 +104,7 @@ FindNavigator.prototype = {
 
         if (!this.findOptions.create)
             requestData += qp("sfCreate", this.findOptions.create);
-            
+
         var currentfilters = (empty(this.findOptions.filters)) ? this.serializeFilters() : this.findOptions.filters;
         if (!empty(currentfilters))
             requestData += currentfilters
