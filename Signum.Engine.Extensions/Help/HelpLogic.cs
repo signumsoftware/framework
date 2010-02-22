@@ -30,17 +30,19 @@ namespace Signum.Engine.Help
     {       
         public static string HelpDirectory = "HelpXml";
         public static string BaseUrl = "Help";
-        static Dictionary<Type, EntityHelp> TypeToHelpFiles;
+
+        static Dictionary<Type, EntityHelp> TypeToHelpFiles
+        {
+            get { return HelpLogic._TypeToHelpFiles.ThrowIfNullC("No se ha cargado Help"); }
+            set { HelpLogic._TypeToHelpFiles = value; }
+        }
+
+        static Dictionary<Type, EntityHelp> _TypeToHelpFiles;
         static Dictionary<string, Type> CleanNameToType;
         static Dictionary<string, Type> NameToType;
 
         static Dictionary<string, NamespaceHelp> Namespaces;
         static Dictionary<string, AppendixHelp> Appendices;
-
-        public static bool IsLoaded()
-        {
-            return TypeToHelpFiles != null;
-        }
 
         public static Type ToType(string s)
         {
