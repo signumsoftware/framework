@@ -639,7 +639,9 @@ namespace Signum.Web
                     object newValue = typeof(Lite).IsAssignableFrom(item.First.StaticType) ?
                         ((IdentifiableEntity)Constructor.Construct(Reflector.ExtractLite(item.First.StaticType), null)).ToLiteFat() :
                         Constructor.Construct(item.First.StaticType, null);
-                    Modifiable mod = (Modifiable)item.First.ApplyChanges(controller, newValue, null);
+                    ModificationState modState = new ModificationState();
+                    Modifiable mod = (Modifiable)item.First.ApplyChanges(controller, newValue, modState);
+                    modState.Finish();
                     item.First.Validate(controller, mod, errors, prefix);
                 }
             }
