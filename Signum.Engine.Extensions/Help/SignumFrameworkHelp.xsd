@@ -98,5 +98,36 @@
       <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>
-  
+
+  <xs:element name="Query">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="Description">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:string" />
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="Fields">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" name="Field">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="Name" type="xs:string" use="required" />
+                      <xs:attribute name="Info" type="xs:string" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="FullName" type="xs:string" use="required" />
+      <xs:attribute name="Language" type="xs:language" use="required" />
+    </xs:complexType>
+  </xs:element>
 </xs:schema>

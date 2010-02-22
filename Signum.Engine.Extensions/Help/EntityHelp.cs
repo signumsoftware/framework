@@ -395,7 +395,7 @@ namespace Signum.Engine.Help
 
         public override string ToString()
         {
-            return Info + " | " + UserDescription;
+            return Info + (UserDescription.HasText() ? " | " + UserDescription : "");
         }
     }
 
@@ -420,7 +420,7 @@ namespace Signum.Engine.Help
 
         public override string ToString()
         {
-            return Info + " | " + UserDescription;
+            return Info + (UserDescription.HasText() ? " | " + UserDescription : "");
         }
     }
 
@@ -445,7 +445,7 @@ namespace Signum.Engine.Help
 
         public override string ToString()
         {
-            return Info + " | " + UserDescription;
+            return Info + (UserDescription.HasText() ? " | " + UserDescription : "");
         }
     }
 
