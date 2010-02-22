@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.Globalization;
 using System.IO;
 using Signum.Utilities;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Help
 {
@@ -15,7 +16,7 @@ namespace Signum.Engine.Help
         public string Name;
         public string Title;
         public string Description;
-        public string Language; 
+        public string Language;
 
         public XDocument ToXDocument()
         {
@@ -40,7 +41,7 @@ namespace Signum.Engine.Help
                 Language = ns.Attribute(_Language).Value,
                 Description = ns.Element(_Description).Value,
                 FileName = sourceFile,
-            }; 
+            };
         }
 
         internal static string GetApendixName(XDocument document)
@@ -79,5 +80,28 @@ namespace Signum.Engine.Help
         static readonly XName _Title = "Title";
         static readonly XName _Description = "Description";
         static readonly XName _Language = "Language";
+
+        const int etcLength = 300;
+
+        public IEnumerable<SearchResult> Search(Regex regex)
+        {
+            //Types
+            Match m=null;
+            /*m = regex.Match(Title);
+            if (m.Success)
+            {
+                yield return new SearchResult(TypeSearchResult.Appendix, Title, " | ".Combine(Title, Description.Etc(etcLength)), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
+                yield break;
+            }*/
+
+            //Types description
+            if (Description.HasText())
+                m = regex.Match(Description);
+            if (m.Success)
+            {
+                yield return new SearchResult(TypeSearchResult.AppendixDescription, "", Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
+                yield break;
+            }
+        }
     }
 }

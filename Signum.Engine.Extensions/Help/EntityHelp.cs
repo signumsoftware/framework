@@ -238,7 +238,6 @@ namespace Signum.Engine.Help
         static readonly XName _Info = "Info";
         static readonly XName _Language = "Language";
 
-
         public string Extract(string s, Match m)
         {
             return Extract(s, m.Index, m.Index + m.Length);
@@ -265,7 +264,6 @@ namespace Signum.Engine.Help
             return (limMin != 0 ? "..." : "") 
             + s.Substring(limMin, limMax - limMin)
             + (limMax != high ? "..." : "");
-
         }
 
         const int etcLength = 300;
@@ -460,7 +458,9 @@ namespace Signum.Engine.Help
         Query,
         QueryDescription,
         Operation,
-        OperationDescription
+        OperationDescription,
+        Appendix,
+        AppendixDescription
     }
 
     public enum MatchType
