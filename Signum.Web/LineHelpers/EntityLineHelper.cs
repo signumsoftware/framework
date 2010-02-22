@@ -103,7 +103,7 @@ namespace Signum.Web
             {
                 sb.AppendLine(
                     helper.Href(TypeContext.Compose(prefix, EntityBaseKeys.ToStrLink),
-                        value.ToString(), Navigator.ViewRoute(cleanRuntimeType, int.Parse(id)), "View", "valueLine",
+                        value.ToString(), Navigator.ViewRoute(cleanRuntimeType, int.Parse(id)), Resources.View, "valueLine",
                         new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
             }
             else if (isIdentifiable || isLite)

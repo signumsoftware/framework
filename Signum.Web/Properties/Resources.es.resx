@@ -231,4 +231,7 @@
   <data name="TypeSubContextCanNotBeCreated0" xml:space="preserve">
     <value>TypeSubContext can not be created: {0}</value>
   </data>
+  <data name="View" xml:space="preserve">
+    <value>Ver</value>
+  </data>
 </root>

@@ -249,4 +249,7 @@
   <data name="EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0" xml:space="preserve">
     <value>EntityCombo can only be done for an identifiable or a lite, not for {0}</value>
   </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
 </root>
