@@ -278,7 +278,7 @@ namespace Signum.Engine.Help
             m = regex.Match(Type.NiceName());
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.Type, Type.NiceName(), "|".Combine(Type.NiceName(), Description.Etc(etcLength)), Type, m);
+                yield return new SearchResult(TypeSearchResult.Type, Type.NiceName(), "|".Combine(Type.NiceName(), Description.Etc(etcLength)), Type, m, HelpLogic.EntityUrl(Type));
                 yield break;
             }
 
@@ -287,7 +287,7 @@ namespace Signum.Engine.Help
                 m = regex.Match(Description);
             if (m.Success)
             {
-                yield return new SearchResult(TypeSearchResult.TypeDescription, "", Extract(Description, m), Type, m);
+                yield return new SearchResult(TypeSearchResult.TypeDescription, "", Extract(Description, m), Type, m, HelpLogic.EntityUrl(Type));
                 yield break;
             }
 
@@ -297,12 +297,12 @@ namespace Signum.Engine.Help
                 {
                     m = regex.Match(p.Key);
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Property, p.Key.NiceName(), p.Value.ToString().Etc(etcLength), Type, m);
+                        yield return new SearchResult(TypeSearchResult.Property, p.Key.NiceName(), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(Type) + "#" + "p-" + p.Key);
                     else
                     {
                         m = regex.Match(p.Value.ToString());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.PropertyDescription, p.Key.NiceName(), Extract(p.Value.ToString(), m), Type, m);
+                            yield return new SearchResult(TypeSearchResult.PropertyDescription, p.Key.NiceName(), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(Type) + "#" + "p-" + p.Key);
                     }
                 }
 
@@ -312,12 +312,12 @@ namespace Signum.Engine.Help
                 {
                     m = regex.Match(QueryUtils.GetNiceQueryName(p.Key));
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Value.ToString().Etc(etcLength), Type, m);
+                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p).ToString().Replace(".", "_"));
                     else
                     {
                         m = regex.Match(p.Value.ToString());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Value.ToString(), m), Type, m);
+                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p).ToString().Replace(".", "_"));
                     }
                 }
 
@@ -327,12 +327,12 @@ namespace Signum.Engine.Help
                 {
                     m = regex.Match(p.Key.NiceToString());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Operation, p.Key.NiceToString(), p.Value.ToString().Etc(etcLength), Type, m);
+                        yield return new SearchResult(TypeSearchResult.Operation, p.Key.NiceToString(), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(OperationLogic.FindType(p.Key)) + "#o-" + OperationDN.UniqueKey(p.Key).Replace('.', '_'));
                     else
                     {
                         m = regex.Match(p.Value.ToString());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.OperationDescription, p.Key.NiceToString(), Extract(p.Value.ToString(), m), Type, m);
+                            yield return new SearchResult(TypeSearchResult.OperationDescription, p.Key.NiceToString(), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(OperationLogic.FindType(p.Key)) + "#o-" + OperationDN.UniqueKey(p.Key).Replace('.', '_'));
                     }
                 }
         }
@@ -478,16 +478,18 @@ namespace Signum.Engine.Help
         public Match Match { get; set; }
         public MatchType MatchType { get; set; }
         public string Description { get; set; }
+        public string Link { get; set; }
 
         public string Content { get { return ObjectName + " | " + Description; } }
 
-        public SearchResult(TypeSearchResult typeSearchResult, string objectName, string description,  Type type, Match match)
+        public SearchResult(TypeSearchResult typeSearchResult, string objectName, string description, Type type, Match match, string link)
         {
             this.ObjectName = objectName;
             this.TypeSearchResult = typeSearchResult;
             this.Description = description;
             this.Type = type;
             this.Match = match;
+            this.Link = link;
 
             if (Match.Index == 0)
             {
