@@ -273,7 +273,7 @@ namespace Signum.Engine.Help
         {
             //Types
             Match m;
-            m = regex.Match(Type.NiceName());
+            m = regex.Match(Type.NiceName().RemoveDiacritics());
             if (m.Success)
             {
                 yield return new SearchResult(TypeSearchResult.Type, Type.NiceName(), "|".Combine(Type.NiceName(), Description.Etc(etcLength)), Type, m, HelpLogic.EntityUrl(Type));
@@ -282,7 +282,7 @@ namespace Signum.Engine.Help
 
             //Types description
             if (Description.HasText())
-                m = regex.Match(Description);
+                m = regex.Match(Description.RemoveDiacritics());
             if (m.Success)
             {
                 yield return new SearchResult(TypeSearchResult.TypeDescription, "", Extract(Description, m), Type, m, HelpLogic.EntityUrl(Type));
@@ -293,12 +293,12 @@ namespace Signum.Engine.Help
             if (Properties != null)
                 foreach (var p in Properties)
                 {
-                    m = regex.Match(p.Key);
+                    m = regex.Match(p.Key.RemoveDiacritics());
                     if (m.Success)
                         yield return new SearchResult(TypeSearchResult.Property, p.Key.NiceName(), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(Type) + "#" + "p-" + p.Key);
                     else
                     {
-                        m = regex.Match(p.Value.ToString());
+                        m = regex.Match(p.Value.ToString().RemoveDiacritics());
                         if (m.Success)
                             yield return new SearchResult(TypeSearchResult.PropertyDescription, p.Key.NiceName(), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(Type) + "#" + "p-" + p.Key);
                     }
@@ -308,14 +308,14 @@ namespace Signum.Engine.Help
             if (Queries != null)
                 foreach (var p in Queries)
                 {
-                    m = regex.Match(QueryUtils.GetNiceQueryName(p.Key));
+                    m = regex.Match(QueryUtils.GetNiceQueryName(p.Key).RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p).ToString().Replace(".", "_"));
+                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p.Key].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
                     else
                     {
-                        m = regex.Match(p.Value.ToString());
+                        m = regex.Match(p.Value.ToString().RemoveDiacritics());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p).ToString().Replace(".", "_"));
+                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p.Key].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
                     }
                 }
 
@@ -323,12 +323,12 @@ namespace Signum.Engine.Help
             if (Operations != null)
                 foreach (var p in Operations)
                 {
-                    m = regex.Match(p.Key.NiceToString());
+                    m = regex.Match(p.Key.NiceToString().RemoveDiacritics());
                     if (m.Success)
                         yield return new SearchResult(TypeSearchResult.Operation, p.Key.NiceToString(), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(OperationLogic.FindType(p.Key)) + "#o-" + OperationDN.UniqueKey(p.Key).Replace('.', '_'));
                     else
                     {
-                        m = regex.Match(p.Value.ToString());
+                        m = regex.Match(p.Value.ToString().RemoveDiacritics());
                         if (m.Success)
                             yield return new SearchResult(TypeSearchResult.OperationDescription, p.Key.NiceToString(), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(OperationLogic.FindType(p.Key)) + "#o-" + OperationDN.UniqueKey(p.Key).Replace('.', '_'));
                     }

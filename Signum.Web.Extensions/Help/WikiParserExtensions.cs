@@ -445,13 +445,12 @@ namespace Signum.Web.Extensions
 
             var matchesTags = rTags.Matches(content);
 
-
-            Regex r = new Regex(regex, RegexOptions.IgnoreCase);
+            Regex r = new Regex(regex.RemoveDiacritics(), RegexOptions.IgnoreCase);
             
             int lastIndex = 0;
             StringBuilder sb = new StringBuilder(content.Length);
 
-            foreach (Match m in r.Matches(content)){
+            foreach (Match m in r.Matches(content.RemoveDiacritics())){
                 bool skip = false;
                 foreach (Match mt in matchesTags)
                 {
@@ -467,7 +466,7 @@ namespace Signum.Web.Extensions
                 {
                     sb.Append(content.Substring(lastIndex, m.Index - lastIndex));
                     sb.Append(firstTag);
-                    sb.Append(m.Value);
+                    sb.Append(content.Substring(m.Index, m.Length));
                 }
                 sb.Append(lastTag);
                 lastIndex = m.Index+m.Length;

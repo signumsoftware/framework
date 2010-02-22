@@ -8,6 +8,7 @@ namespace Signum.Engine.Help
 {
     public static class HelpUtilities
     {
+
         public static string Extract(this string s, Match m)
         {
             return Extract(s, m.Index, m.Index + m.Length);
