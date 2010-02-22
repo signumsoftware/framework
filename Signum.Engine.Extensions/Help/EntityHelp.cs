@@ -156,7 +156,7 @@ namespace Signum.Engine.Help
                 (k, c, l) =>
                 {
                     c.Value = l.Value;
-                    return Distict(l.Attribute(_Info), c.Attribute(_Info));
+                    return Distinct(l.Attribute(_Info), c.Attribute(_Info));
                 },
                 (action, prop) =>
                 {
@@ -171,7 +171,7 @@ namespace Signum.Engine.Help
                 (k, c, l) =>
                 {
                     c.Value = l.Value;
-                    return Distict(l.Attribute(_Info), c.Attribute(_Info));
+                    return Distinct(l.Attribute(_Info), c.Attribute(_Info));
                 },
                 (action, qn) =>
                 {
@@ -186,7 +186,7 @@ namespace Signum.Engine.Help
                 (k, c, l) =>
                 {
                     c.Value = l.Value;
-                    return Distict(l.Attribute(_Info), c.Attribute(_Info));
+                    return Distinct(l.Attribute(_Info), c.Attribute(_Info));
                 },
                 (action, op) =>
                 {
@@ -213,7 +213,7 @@ namespace Signum.Engine.Help
                 Console.WriteLine();
         }
 
-        static bool Distict(XAttribute a1, XAttribute a2)
+        static bool Distinct(XAttribute a1, XAttribute a2)
         {
             if (a1 == null && a2 == null)
                 return true;
