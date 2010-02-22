@@ -37,6 +37,11 @@ namespace Signum.Engine.Help
         static Dictionary<string, NamespaceHelp> Namespaces;
         static Dictionary<string, AppendixHelp> Appendices;
 
+        public static bool IsLoaded()
+        {
+            return TypeToHelpFiles != null;
+        }
+
         public static Type ToType(string s)
         {
             return ToType(s, true);
