@@ -420,4 +420,7 @@
   <data name="ContinueAnyway" xml:space="preserve">
     <value>Continuar de todas formas?</value>
   </data>
+  <data name="TheDataContextIsA0ButTypeContextIs1" xml:space="preserve">
+    <value>El DataContext es un {0} pero el TypeContext es {1}</value>
+  </data>
 </root>

@@ -56,17 +56,27 @@ namespace Signum.Windows
 
         void ChangeDataContext_DataContextChanged(object sender, ChangeDataContextEventArgs e)
         {
-            if (e.NewDataContext == null)
-                throw new ArgumentNullException("DataContext");
+            if (e.Refresh)
+            {
+                var l = ((IdentifiableEntity)this.DataContext).ToLite().Retrieve();
+                this.DataContext = null;
+                this.DataContext = l;
+                e.Handled = true;
+            }
+            else
+            {
+                if (e.NewDataContext == null)
+                    throw new ArgumentNullException("NewDataContext");
 
-            Type type = Common.GetTypeContext(MainControl).Type;
-            Type entityType = e.NewDataContext.GetType();
-            if (type != null && !type.IsAssignableFrom(entityType))
-                throw new InvalidCastException("The DataContext is a {0} but TypeContext is {1}".Formato(entityType.Name, type.Name));
+                Type type = Common.GetTypeContext(MainControl).Type;
+                Type entityType = e.NewDataContext.GetType();
+                if (type != null && !type.IsAssignableFrom(entityType))
+                    throw new InvalidCastException(Properties.Resources.TheDataContextIsA0ButTypeContextIs1.Formato(entityType.Name, type.Name));
 
-            DataContext = null;
-            DataContext = e.NewDataContext;
-            e.Handled = true;
+                DataContext = null;
+                DataContext = e.NewDataContext;
+                e.Handled = true;
+            }
         }
 
         void NormalWindow_Loaded(object sender, RoutedEventArgs e)

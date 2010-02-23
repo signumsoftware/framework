@@ -377,11 +377,18 @@ namespace Signum.Windows
     public class ChangeDataContextEventArgs : RoutedEventArgs
     {
         public object NewDataContext { get; set; }
+        public bool Refresh { get; set; }
 
         public ChangeDataContextEventArgs(object newDataContext)
             : base(Common.ChangeDataContextEvent)
         {
             this.NewDataContext = newDataContext;
+        }
+
+        public ChangeDataContextEventArgs()
+            : base(Common.ChangeDataContextEvent)
+        {
+            this.Refresh = true;
         }
     }
 

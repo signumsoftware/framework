@@ -416,4 +416,7 @@ Lose changes?</value>
   <data name="ContinueAnyway" xml:space="preserve">
     <value>Continue anyway?</value>
   </data>
+  <data name="TheDataContextIsA0ButTypeContextIs1" xml:space="preserve">
+    <value>The DataContext is a {0} but TypeContext is {1}</value>
+  </data>
 </root>
