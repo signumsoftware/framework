@@ -453,8 +453,8 @@ namespace Signum.Utilities.DataStructures
         {
             //http://en.wikipedia.org/wiki/Dijkstra's_algorithm
 
-            Dictionary<T, int> distance = this.ToDictionary(e => e, e => int.MaxValue);
-            Dictionary<T, T> previous = new Dictionary<T, T>();
+            Dictionary<T, int> distance = this.ToDictionary(e => e, e => int.MaxValue, Comparer);
+            Dictionary<T, T> previous = new Dictionary<T, T>(Comparer);
 
             distance[from] = 0;
             PriorityQueue<T> queue = new PriorityQueue<T>((a, b) => distance[a].CompareTo(distance[b]));
@@ -478,7 +478,7 @@ namespace Signum.Utilities.DataStructures
                 }
                 queue.Pop();
 
-                if (EqualityComparer<T>.Default.Equals(u, to))
+                if (Comparer.Equals(u, to))
                     break;
             }
 

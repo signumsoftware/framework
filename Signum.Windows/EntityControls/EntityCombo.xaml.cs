@@ -140,7 +140,11 @@ namespace Signum.Windows
         {
             IEnumerable<Lite> data;
             if (LoadData != null)
+            {
                 data = LoadData();
+                if (data == null)
+                    return;
+            }
             else
             {
                 data = Server.RetrieveAllLite(CleanType, safeImplementations);
