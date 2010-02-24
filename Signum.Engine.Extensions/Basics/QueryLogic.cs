@@ -14,7 +14,12 @@ namespace Signum.Engine.Basics
 {
     public static class QueryLogic
     {
-        public static Dictionary<string, object> QueryNames { get; private set; }
+        static Dictionary<string, object> queryNames;
+        public static Dictionary<string, object> QueryNames
+        {
+            get { return queryNames ?? (queryNames = CreateQueryNames()); }
+            private set { queryNames = value; }
+        }
 
         public static void Start(SchemaBuilder sb)
         {

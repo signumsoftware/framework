@@ -44,6 +44,8 @@ namespace Signum.Engine.Authorization
 
         static bool dqm_AllowQuery(object queryName)
         {
+            if (!AuthLogic.IsEnabled) return true;
+
             return GetAllowed(RoleDN.Current, QueryUtils.GetQueryName(queryName));
         }
 

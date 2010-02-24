@@ -163,7 +163,7 @@ namespace Signum.Engine.Help
             return "";
         }
 
-        public static string GetQueryHelp(Type type, IDynamicQuery dynamicQuery)
+        public static string GetQueryHelp(IDynamicQuery dynamicQuery)
         {
             Type entityType = dynamicQuery.EntityColumn().DefaultEntityType();
 
@@ -188,7 +188,6 @@ namespace Signum.Engine.Help
 
             return Resources.QueryOf0.Formato(entityType.NicePluralName());
         }
-
     }
 
     internal class TableGatherer : ExpressionVisitor

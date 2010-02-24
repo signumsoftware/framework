@@ -26,7 +26,11 @@ namespace Signum.Engine.Help
         public string Description;
         public Dictionary<string, PropertyHelp> Properties;
         public Dictionary<Enum, OperationHelp> Operations;
-        public Dictionary<object, QueryHelp> Queries;
+        public Dictionary<object, QueryHelp> Queries
+        {
+            get { return HelpLogic.GetQueryHelps(this.Type)
+                .TryCC(qhs=>qhs.ToDictionary(qh=>qh.Key));}
+        }
         public string FileName;
         public string Language;
 
@@ -47,10 +51,10 @@ namespace Signum.Engine.Help
                                 oi => oi.Key,
                                 oi => new OperationHelp(oi.Key, HelpGenerator.GetOperationHelp(t, oi))),
 
-                Queries = DynamicQueryManager.Current.GetQueryNames(t)
+             /*   Queries = DynamicQueryManager.Current.GetQueryNames(t)
                            .ToDictionary(
                                 kvp => kvp.Key,
-                                kvp => new QueryHelp(kvp.Key, HelpGenerator.GetQueryHelp(t, kvp.Value)))
+                                kvp => new QueryHelp(kvp.Key, HelpGenerator.GetQueryHelp(t, kvp.Value)))*/
             };
         }
 
@@ -77,7 +81,7 @@ namespace Signum.Engine.Help
                                    new XAttribute(_Info, o.Value.Info),
                                    o.Value.UserDescription))
                            )
-                       ),
+                       )/*,
                        Queries.Map(qs => qs == null || qs.Count == 0 ? null : 
                            new XElement(_Queries,
                                qs.Select(q => new XElement(_Query, 
@@ -85,7 +89,7 @@ namespace Signum.Engine.Help
                                    new XAttribute(_Info, q.Value.Info),
                                    q.Value.UserDescription))
                            )
-                       )
+                       )*/
                    )
                );
         }
@@ -121,7 +125,7 @@ namespace Signum.Engine.Help
                         new OperationHelp(oi.Key,x.Attribute(_Info).Value, x.Value)),
                     "Loading Operations for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
 
-                Queries = EnumerableExtensions.JoinStrict(
+                /*Queries = EnumerableExtensions.JoinStrict(
                     element.Element(_Queries).TryCC(qs => qs.Elements(_Query)) ?? new XElement[0],
                     DynamicQueryManager.Current.GetQueryNames(type),
                     x => x.Attribute(_Key).Value,
@@ -129,7 +133,7 @@ namespace Signum.Engine.Help
                     (x, qn) => new KeyValuePair<object, QueryHelp>(
                         qn.Key, 
                         new QueryHelp(qn.Key, x.Attribute(_Info).Value, x.Value)),
-                    "Loading Queries for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary()
+                    "Loading Queries for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary()*/
             };
         }
 
@@ -167,7 +171,7 @@ namespace Signum.Engine.Help
                         Console.WriteLine("  Property {0}: {1}".Formato(action, prop));
                 });
 
-            HelpTools.Syncronize(created, loaded, _Queries, _Query, _Key, "Queries of {0}".Formato(type.Name),
+           /* HelpTools.Syncronize(created, loaded, _Queries, _Query, _Key, "Queries of {0}".Formato(type.Name),
                 (k, c, l) =>
                 {
                     c.Value = l.Value;
@@ -180,7 +184,7 @@ namespace Signum.Engine.Help
                         Console.WriteLine("  Queries {0}".Formato(action));
                     else
                         Console.WriteLine("  Query {0}: {1}".Formato(action, qn));
-                });
+                });*/
 
             HelpTools.Syncronize(created, loaded, _Operations, _Operation, _Key, "Operations of {0}".Formato(type.Name),
                 (k, c, l) =>
@@ -213,7 +217,7 @@ namespace Signum.Engine.Help
                 Console.WriteLine();
         }
 
-        static bool Distinct(XAttribute a1, XAttribute a2)
+        internal static bool Distinct(XAttribute a1, XAttribute a2)
         {
             if (a1 == null && a2 == null)
                 return true;
@@ -305,17 +309,19 @@ namespace Signum.Engine.Help
                 }
 
             //Queries (key)
-            if (Queries != null)
-                foreach (var p in Queries)
+            //TODO: Añadir UserDescriptions a las búsquedas + campos
+            List<QueryHelp> qh = HelpLogic.GetQueryHelps(Type);
+            if (qh != null)
+                foreach (var p in qh)
                 {
                     m = regex.Match(QueryUtils.GetNiceQueryName(p.Key).RemoveDiacritics());
                     if (m.Success)
-                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Value.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p.Key].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
+                        yield return new SearchResult(TypeSearchResult.Query, QueryUtils.GetNiceQueryName(p.Key), p.Info.ToString().Etc(etcLength), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p.Key].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
                     else
                     {
-                        m = regex.Match(p.Value.ToString().RemoveDiacritics());
+                        m = regex.Match(p.Info.ToString().RemoveDiacritics());
                         if (m.Success)
-                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Value.ToString(), m), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p.Key].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
+                            yield return new SearchResult(TypeSearchResult.QueryDescription, QueryUtils.GetNiceQueryName(p.Key), Extract(p.Info.ToString(), m), Type, m, HelpLogic.EntityUrl(DynamicQueryManager.Current[p.Key].EntityColumn().DefaultEntityType()) + "#" + "q-" + QueryUtils.GetQueryName(p.Key).ToString().Replace(".", "_"));
                     }
                 }
 
@@ -360,7 +366,7 @@ namespace Signum.Engine.Help
 
         static string DefaultFileName(Type type)
         {
-            return Path.Combine(HelpLogic.HelpDirectory, "{0}.help".Formato(type.FullName));
+            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.EntitiesFolder), "{0}.help".Formato(type.FullName));
         }
 
         internal static string GetEntityFullName(XDocument document)
@@ -424,7 +430,7 @@ namespace Signum.Engine.Help
         }
     }
 
-    public class QueryHelp
+  /*  public class QueryHelp
     {
         public QueryHelp(object queryKey, string info)
         {
@@ -447,7 +453,7 @@ namespace Signum.Engine.Help
         {
             return Info + (UserDescription.HasText() ? " | " + UserDescription : "");
         }
-    }
+    }*/
 
     public enum TypeSearchResult
     {

@@ -22,12 +22,18 @@ using System.Resources;
 using Signum.Engine.Extensions.Properties;
 using Signum.Utilities.Reflection;
 using System.Diagnostics;
+using Signum.Entities.DynamicQuery;
+using Signum.Engine.Basics;
 
 
 namespace Signum.Engine.Help
 {
     public static class HelpLogic
-    {       
+    {
+        public static string EntitiesFolder = "";
+        public static string QueriesFolder = "Query";
+        public static string NamespacesFolder = "Namespace";
+        public static string AppendicesFolder = "Appendix";
         public static string HelpDirectory = "HelpXml";
         public static string BaseUrl = "Help";
 
@@ -43,6 +49,9 @@ namespace Signum.Engine.Help
 
         static Dictionary<string, NamespaceHelp> Namespaces;
         static Dictionary<string, AppendixHelp> Appendices;
+
+        static Dictionary<Type, List<object>> TypeToQueryFiles;
+        static Dictionary<object, QueryHelp> QueryColumns;
 
         public static Type ToType(string s)
         {
@@ -87,35 +96,53 @@ namespace Signum.Engine.Help
 
         public static string EntityUrl(Type entityType)
         {
-            return BaseUrl + "/" + Reflector.CleanTypeName(entityType); 
+            return BaseUrl + "/" + Reflector.CleanTypeName(entityType);
         }
 
         public static EntityHelp GetEntityHelp(Type entityType)
         {
-            return TypeToHelpFiles[entityType]; 
+            return TypeToHelpFiles[entityType];
         }
 
-        public static List<KeyValuePair<Type,EntityHelp>> GetEntitiesHelp()
+        public static List<KeyValuePair<Type, EntityHelp>> GetEntitiesHelp()
         {
             return TypeToHelpFiles.ToList();
         }
 
+        public static QueryHelp GetQueryHelp(string query)
+        {
+            return QueryColumns[QueryLogic.TryToQueryName(query)];
+        }
+
+        public static List<QueryHelp> GetQueryHelps(Type type)
+        {
+            return TypeToQueryFiles.TryGetC(type) != null ?
+                (from o in TypeToQueryFiles.TryGetC(type)
+                     select QueryColumns[o]).ToList()
+                : null;
+        }
+
         public static Type FromCleanName(string cleanName)
         {
-            return CleanNameToType.GetOrThrow(cleanName, "No help for " + cleanName); 
+            return CleanNameToType.GetOrThrow(cleanName, "No help for " + cleanName);
         }
 
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_Initialize); 
+                sb.Schema.Initializing(InitLevel.Level4BackgroundProcesses, Schema_Initialize);
             }
         }
 
-        public static void ReloadDocument(EntityHelp entityHelp)
+        public static void ReloadDocumentEntity(EntityHelp entityHelp)
         {
             TypeToHelpFiles[entityHelp.Type] = EntityHelp.Load(entityHelp.Type, XDocument.Load(entityHelp.FileName), entityHelp.FileName);
+        }
+
+        public static void ReloadDocumentQuery(QueryHelp queryHelp)
+        {
+            QueryColumns[queryHelp.Key] = QueryHelp.Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
         }
 
         public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
@@ -141,11 +168,14 @@ namespace Signum.Engine.Help
             }
 
 
-            var documents = LoadDocuments();
+            var entitiesDocuments = LoadDocuments(EntitiesFolder);
+            var namespacesDocuments = LoadDocuments(NamespacesFolder);
+            var queriesDocuments = LoadDocuments(QueriesFolder);
+            var appendicesDocuments = LoadDocuments(AppendicesFolder);
 
             //Scope
             {
-                var typeHelpInfo = from doc in documents
+                var typeHelpInfo = from doc in entitiesDocuments
                                    let typeName = EntityHelp.GetEntityFullName(doc.Document)
                                    where typeName != null
                                    select EntityHelp.Load(typesDic.GetOrThrow(typeName, "No Type with FullName {0} found in the schema"), doc.Document, doc.File);
@@ -160,33 +190,54 @@ namespace Signum.Engine.Help
 
             //Scope
             {
-                var nameSpaceInfo = from doc in documents
-                                   let namespaceName = NamespaceHelp.GetNamespaceName(doc.Document)
-                                   where namespaceName != null
-                                   select NamespaceHelp.Load(doc.Document, doc.File);
+                var nameSpaceInfo = from doc in namespacesDocuments
+                                    let namespaceName = NamespaceHelp.GetNamespaceName(doc.Document)
+                                    where namespaceName != null
+                                    select NamespaceHelp.Load(doc.Document, doc.File);
 
                 Namespaces = nameSpaceInfo.ToDictionary(a => a.Name);
             }
 
             //Scope
             {
-                var appendixInfo = from doc in documents
-                                    let namespaceName = AppendixHelp.GetApendixName(doc.Document)
-                                    where namespaceName != null
-                                    select AppendixHelp.Load(doc.Document, doc.File);
+                var appendixInfo = from doc in appendicesDocuments
+                                   let namespaceName = AppendixHelp.GetAppendixName(doc.Document)
+                                   where namespaceName != null
+                                   select AppendixHelp.Load(doc.Document, doc.File);
 
                 Appendices = appendixInfo.ToDictionary(a => a.Name);
             }
 
+            //Scope
+            {
+                var queriesInfo = from doc in queriesDocuments
+                                  let queryName = QueryHelp.GetQueryFullName(doc.Document)
+                                  where queryName != null
+                                  select QueryHelp.Load(doc.Document, doc.File);
+
+
+                TypeToQueryFiles = queriesInfo.GroupToDictionary(qh=>GetQueryType(qh.Key), qh=>qh.Key);
+                
+                QueryColumns = queriesInfo.ToDictionary(a => a.Key);
+            }
         }
 
-        private static List<FileXDocument> LoadDocuments()
+        public static Type GetQueryType (object query)
+        {
+            if (query as Enum != null)
+            {
+                return DynamicQueryManager.Current[(Enum)query].EntityColumn().DefaultEntityType();
+            }
+            return (Type)query;
+        }
+
+        private static List<FileXDocument> LoadDocuments(string subdirectory)
         {
             XmlSchemaSet schemas = new XmlSchemaSet();
             Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
             schemas.Add("", XmlReader.Create(str));
 
-            var documents = Directory.GetFiles(HelpDirectory, "*.help").Select(f => new FileXDocument { File = f, Document = XDocument.Load(f) }).ToList();
+            var documents = Directory.GetFiles(Path.Combine(HelpDirectory,subdirectory), "*.help").Select(f => new FileXDocument { File = f, Document = XDocument.Load(f) }).ToList();
 
             List<Tuple<XmlSchemaException, string>> exceptions = new List<Tuple<XmlSchemaException, string>>();
             foreach (var doc in documents)
@@ -207,7 +258,7 @@ namespace Signum.Engine.Help
         class FileXDocument
         {
             public XDocument Document;
-            public string File; 
+            public string File;
         }
 
 
@@ -241,9 +292,15 @@ namespace Signum.Engine.Help
                 EntityHelp.Create(type).Save();
             }
 
-            foreach (var ns in types.Select(a=>a.Namespace).Distinct())
+            foreach (var ns in types.Select(a => a.Namespace).Distinct())
             {
                 NamespaceHelp.Create(ns).Save();
+            }
+
+            foreach (Type type in types)
+            {
+                foreach (var v in DynamicQueryManager.Current.GetQueryNames(type))
+                    QueryHelp.Create(v.Key).Save();
             }
         }
 
@@ -255,14 +312,17 @@ namespace Signum.Engine.Help
             }
 
             Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
-            var documents = LoadDocuments();
+            var entitiesDocuments = LoadDocuments(EntitiesFolder);
+            var namespacesDocuments = LoadDocuments(NamespacesFolder);
+            var queriesDocuments = LoadDocuments(QueriesFolder);
+            //var appendicesDocuments = LoadDocuments(AppendicesFolder);
 
             Replacements replacements = new Replacements();
             //Scope
             {
                 var should = types.Select(type => type.Namespace).Distinct().ToDictionary(a => a);
 
-                var current = (from doc in documents
+                var current = (from doc in namespacesDocuments
                                let name = NamespaceHelp.GetNamespaceName(doc.Document)
                                where name != null
                                select new
@@ -292,14 +352,14 @@ namespace Signum.Engine.Help
             {
                 var should = types.ToDictionary(type => type.FullName);
 
-                var current = (from doc in documents 
+                var current = (from doc in entitiesDocuments 
                                let name = EntityHelp.GetEntityFullName(doc.Document)
                                where name != null
                                select new
                                {
-                                   TypeName = name,
+                                   QueryName = name,
                                    File = doc.File,
-                               }).ToDictionary(a => a.TypeName, a => a.File);
+                               }).ToDictionary(a => a.QueryName, a => a.File);
 
              
                 HelpTools.SynchronizeReplacing(replacements, "Type", current, should,
@@ -319,8 +379,42 @@ namespace Signum.Engine.Help
                     });
             }
 
-         
-        }
+            //Queries
+            {
+                var should = (from type in types
+                              let keys = DynamicQueryManager.Current.GetQueryNames(type).Keys
+                              from key in keys
+                              select key).ToDictionary(q => QueryUtils.GetQueryName(q));
+
+                var current = (from doc in queriesDocuments 
+                               let name = QueryHelp.GetQueryFullName(doc.Document)
+                               where name != null
+                               select new
+                               {
+                                   QueryName = name,
+                                   File = doc.File,
+                               }).ToDictionary(a => a.QueryName, a => a.File);
+
+                HelpTools.SynchronizeReplacing(replacements, "Query", current, should,
+                    (fullName, oldFile) =>
+                    {
+                        File.Delete(oldFile);
+                        Console.WriteLine("Deleted {0}".Formato(oldFile));
+                    },
+                    (fullName, query) =>
+                    {
+                        string fileName = QueryHelp.Create(query).Save();
+                        Console.WriteLine("Created {0}".Formato(fileName));
+                    },
+                    (fullName, oldFile, query) =>
+                    {
+                        QueryHelp.Synchronize(oldFile, QueryUtils.GetQueryName(query));
+
+
+                    });
+
+    }
+}
 
     }
 }

@@ -75,6 +75,7 @@
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
+    <Compile Include="Help\QueryHelp.cs" />
     <Compile Include="Help\EntityHelp.cs" />
     <Compile Include="Help\HelpGenerator.cs" />
     <Compile Include="Help\HelpLogic.cs" />

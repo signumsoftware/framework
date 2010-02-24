@@ -67,7 +67,8 @@ namespace Signum.Engine.Help
 
         static string DefaultFileName(string nameSpace)
         {
-            return Path.Combine(HelpLogic.HelpDirectory, "{0}.help".Formato(nameSpace));
+            return Path.Combine(
+                Path.Combine(HelpLogic.HelpDirectory, HelpLogic.NamespacesFolder), "{0}.help".Formato(nameSpace));
         }
 
         static readonly XName _Namespace = "Namespace";

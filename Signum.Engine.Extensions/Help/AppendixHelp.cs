@@ -44,7 +44,7 @@ namespace Signum.Engine.Help
             };
         }
 
-        internal static string GetApendixName(XDocument document)
+        internal static string GetAppendixName(XDocument document)
         {
             if (document.Root.Name == _Appendix)
                 return document.Root.Attribute(_Name).Value;
@@ -64,7 +64,7 @@ namespace Signum.Engine.Help
 
         static string DefaultFileName(string name)
         {
-            return Path.Combine(HelpLogic.HelpDirectory, "{0}.help".Formato(name));
+            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.AppendicesFolder), "{0}.help".Formato(name));
         }
 
         public string Save()

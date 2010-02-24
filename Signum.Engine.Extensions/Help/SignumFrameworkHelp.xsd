@@ -44,7 +44,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element minOccurs="0" name="Queries">
+       <!-- <xs:element minOccurs="0" name="Queries">
           <xs:complexType>
             <xs:sequence>
               <xs:element maxOccurs="unbounded" name="Query">
@@ -59,7 +59,7 @@
               </xs:element>
             </xs:sequence>
           </xs:complexType>
-        </xs:element>
+        </xs:element>-->
       </xs:sequence>
       <xs:attribute name="FullName" type="xs:string" use="required" />
       <xs:attribute name="Language" type="xs:language" use="required" />
@@ -109,10 +109,10 @@
             </xs:simpleContent>
           </xs:complexType>
         </xs:element>
-        <xs:element minOccurs="0" name="Fields">
+        <xs:element minOccurs="0" name="Columns">
           <xs:complexType>
             <xs:sequence>
-              <xs:element maxOccurs="unbounded" name="Field">
+              <xs:element maxOccurs="unbounded" name="Column">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
@@ -126,7 +126,8 @@
           </xs:complexType>
         </xs:element>
       </xs:sequence>
-      <xs:attribute name="FullName" type="xs:string" use="required" />
+      <xs:attribute name="Key" type="xs:string" use="required" />
+      <xs:attribute name="Info" type="xs:string" use="required" />
       <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>
