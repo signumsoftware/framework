@@ -24,7 +24,7 @@
 
 <div id="<%=Html.GlobalName("divMenuItems") %>" class="buttonBar">
     <label class="OperationDiv" for="<%=Html.GlobalName(ViewDataKeys.Top)%>">Núm.registros</label> 
-    <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new Dictionary<string, object>{{"size","5"},{"class","OperationDiv"}})%>
+    <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top), ViewData[ViewDataKeys.Top] ?? "", new Dictionary<string, object>{{"size","5"},{"class","OperationDiv"}, {"onkeydown", "return validator.number(event)"}})%>
 
     <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "") %>" value="Buscar" /> 
     <% if ((bool)ViewData[ViewDataKeys.Create] && (bool)ViewData[ViewDataKeys.View])

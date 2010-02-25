@@ -1,13 +1,4 @@
-﻿/**
-* EasyDrag 1.5 - Drag & Drop jQuery Plug-in
-*
-* Thanks for the community that is helping the improvement
-* of this little piece of code.
-*
-* For usage instructions please visit http://fromvega.com/scripts
-*/
-
-(function($){
+﻿(function($){
 
 	var allowInitiallyOutside = true;
 	
