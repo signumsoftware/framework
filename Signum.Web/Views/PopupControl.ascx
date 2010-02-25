@@ -19,6 +19,13 @@
         typeNiceName = Model.GetType().NiceName();
     }
 %>
+<script type ="text/javascript">
+    $(function(){
+        $("#<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>").easydrag(false)
+        .setHandler("<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>");
+    });
+</script>
+
 <div id="<%=Html.GlobalPrefixedName("externalPopupDiv" + sufix)%>">
 <div id="<%=Html.GlobalPrefixedName("modalBackground" + sufix)%>" class="transparent popupBackground"></div>
   
@@ -28,7 +35,7 @@
     <%} else { %>
         <div class="closebox" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
-    <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>');" class="dragHandle">
+    <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" class="dragHandle">
         <span class="popupEntityName"><%= typeNiceName%></span><span class="popupTitle"><%= popupTitle %></span>
     </div>
     <div class="buttonBar">

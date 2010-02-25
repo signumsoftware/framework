@@ -1,7 +1,12 @@
 <%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 
-
+<script type ="text/javascript">
+    $(function(){
+        $("#<%=Html.GlobalName("panelPopup")%>").easydrag(false)
+        .setHandler("<%=Html.GlobalName("divPopupDragHandle")%>");
+    });
+</script>
 <div id="<%=Html.GlobalName("externalPopupDiv")%>">
 <div id="<%=Html.GlobalName("modalBackground")%>" class="transparent popupBackground"></div>
     
@@ -11,7 +16,7 @@
     <%} else { %>
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
-    <div id="<%=Html.GlobalName("divPopupDragHandle")%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup")%>');">
+    <div id="<%=Html.GlobalName("divPopupDragHandle")%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalName("panelPopup")%>');">
         &nbsp;
     </div>
     
