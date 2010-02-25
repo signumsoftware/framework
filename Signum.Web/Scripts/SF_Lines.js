@@ -1017,30 +1017,32 @@ var ECombo = function(_ecomboOptions) {
         $(this.pf(sfCombo) + " option:selected").html(newToStr);
     };
 
-    this.selectedId = function() {
-        log("ECombo selectedId");
+    this.selectedValue = function() {
+        log("ECombo selectedValue");
         var selected = $(this.pf(sfCombo + " > option:selected"));
         if (selected.length == 0)
             return null;
-        return selected.val();
+        var fullValue = selected.val();
+        var separator = fullValue.indexOf(";");
+        if (separator == -1)
+            return null;
+        var value = new Object();
+        value.runtimeType = fullValue.substring(0, separator);
+        value.id = fullValue.substring(separator + 1, fullValue.length);
+        return value;
     };
 
     this.setSelected = function() {
         log("ECombo setSelected");
-        var newId = this.selectedId();
+        var newValue = this.selectedValue();
         var newRuntimeType = "";
-        var newEntity = false;
-        var staticInfo = this.staticInfo();
-        if (empty(newId))
-            newId = ""; //Avoid setting null value
-        else {
-            newRuntimeType = staticInfo.staticType();
-            newEntity = true;
+        var newId = "";
+        var newEntity = newValue != null && !empty(newValue.id);
+        if (newEntity) {
+            newRuntimeType = newValue.runtimeType;
+            newId = newValue.id;
         }
         var runtimeInfo = this.runtimeInfo();
-        var oldId = runtimeInfo.id();
-        if (empty(oldId))
-            oldId = ""; //Avoid setting null value
         runtimeInfo.setEntity(newRuntimeType, newId);
         $(this.pf(sfEntity)).html(''); //Clean
         this.fireOnEntityChanged(newEntity);

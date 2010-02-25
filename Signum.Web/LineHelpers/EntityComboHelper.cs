@@ -31,6 +31,9 @@ namespace Signum.Web
             bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(typeof(T));
             bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
 
+            if (settings.Implementations != null && settings.Implementations.IsByAll)
+                throw new ApplicationException("ImplementedByAll types are not allowed in EntityCombo");
+
             if (!isIdentifiable && !isLite)
                 throw new ApplicationException(Resources.EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0.Formato(cleanStaticType));
 
@@ -44,15 +47,14 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings, TypeContext.Compose(prefix, EntityComboKeys.Combo)));
 
+            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
+
             sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo<T>(value) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
 
             if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
                 sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
             else if (value != null)
                 sb.AppendLine(helper.Div(TypeContext.Compose(prefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
-
-            if (settings.Implementations != null)
-                throw new ApplicationException("Types with Implementations are not allowed for EntityCombo yet");
 
             if (StyleContext.Current.ReadOnly)
                 sb.AppendLine(helper.Span(prefix, (value != null) ? value.ToString() : "", "valueLine"));
@@ -68,19 +70,22 @@ namespace Signum.Web
                             settings.Data.Select(lite => new SelectListItem()
                                 {
                                     Text = lite.ToString(),
-                                    Value = lite.Id.ToString(),
+                                    Value = lite.RuntimeType.Name + ";" + lite.Id.ToString(),
                                     Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
                                 })
                             );
                     }
                     else
                     {
+                        if (settings.Implementations != null)
+                            throw new ApplicationException("Types with Implementations must provide Data to EntityCombo");
+
                         items.AddRange(
                             Database.RetrieveAllLite(cleanStaticType)
                                 .Select(lite => new SelectListItem()
                                 {
                                     Text = lite.ToString(),
-                                    Value = lite.Id.ToString(),
+                                    Value = lite.RuntimeType.Name + ";" + lite.Id.ToString(),
                                     Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
                                 })
                             );
