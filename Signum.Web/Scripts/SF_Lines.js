@@ -1024,11 +1024,15 @@ var ECombo = function(_ecomboOptions) {
             return null;
         var fullValue = selected.val();
         var separator = fullValue.indexOf(";");
-        if (separator == -1)
-            return null;
         var value = new Object();
-        value.runtimeType = fullValue.substring(0, separator);
-        value.id = fullValue.substring(separator + 1, fullValue.length);
+        if (separator == -1) {
+            value.runtimeType = this.staticInfo().staticType();
+            value.id = fullValue;
+        }
+        else {
+            value.runtimeType = fullValue.substring(0, separator);
+            value.id = fullValue.substring(separator + 1, fullValue.length);
+        }
         return value;
     };
 

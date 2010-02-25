@@ -70,7 +70,7 @@ namespace Signum.Web
                             settings.Data.Select(lite => new SelectListItem()
                                 {
                                     Text = lite.ToString(),
-                                    Value = lite.RuntimeType.Name + ";" + lite.Id.ToString(),
+                                    Value = settings.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
                                     Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
                                 })
                             );
@@ -85,7 +85,7 @@ namespace Signum.Web
                                 .Select(lite => new SelectListItem()
                                 {
                                     Text = lite.ToString(),
-                                    Value = lite.RuntimeType.Name + ";" + lite.Id.ToString(),
+                                    Value = settings.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
                                     Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
                                 })
                             );

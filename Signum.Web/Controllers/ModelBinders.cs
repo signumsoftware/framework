@@ -21,7 +21,13 @@ namespace Signum.Web.Controllers
                  if (string.IsNullOrEmpty(value))
                      return null;
 
-                 return Lite.Create(cleanType, int.Parse(value));
+                 int separatorIndex = value.IndexOf(";");
+                 string id = (separatorIndex < 0) ? value : value.Substring(separatorIndex + 1, value.Length - separatorIndex - 1);
+
+                 if (string.IsNullOrEmpty(id))
+                     return null;
+
+                 return Lite.Create(cleanType, int.Parse(id));
              }
              return base.BindModel(controllerContext, bindingContext);
         }
