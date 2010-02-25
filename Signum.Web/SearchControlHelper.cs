@@ -31,50 +31,51 @@ namespace Signum.Web
                 WebMenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(queryName)).NotNull().ToArray();
                 foreach (WebMenuItem mi in menus)
                 {
-                    string onclick = "";
-                    string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
+                    throw new NotImplementedException("ConstructorFromMany operations are not supported yet");
+                   // string onclick = "";
+                   // string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
                         
-                    //Add prefix to onclick
-                    if (!string.IsNullOrEmpty(mi.OnClick))
-                    {
-                        if (!string.IsNullOrEmpty(mi.OnServerClickAjax) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                            throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(mi.Id));
+                   // //Add prefix to onclick
+                   // if (!string.IsNullOrEmpty(mi.OnClick))
+                   // {
+                   //     if (!string.IsNullOrEmpty(mi.OnServerClickAjax) || !string.IsNullOrEmpty(mi.OnServerClickPost))
+                   //         throw new ArgumentException(Resources.MenuItem0HasOnClickAndAnotherClickDefined.Formato(mi.Id));
 
-                        int lastEnd = mi.OnClick.LastIndexOf(")");
-                        int lastStart = mi.OnClick.LastIndexOf("(");
-                        if (lastStart == lastEnd -1)
-                            onclick = mi.OnClick.Insert(lastEnd, strPrefix);
-                        else
-                            onclick = mi.OnClick.Insert(lastEnd, ", " + strPrefix);
-                    }
+                   //     int lastEnd = mi.OnClick.LastIndexOf(")");
+                   //     int lastStart = mi.OnClick.LastIndexOf("(");
+                   //     if (lastStart == lastEnd -1)
+                   //         onclick = mi.OnClick.Insert(lastEnd, strPrefix);
+                   //     else
+                   //         onclick = mi.OnClick.Insert(lastEnd, ", " + strPrefix);
+                   // }
                     
-                    //Constructo OnServerClick
-                    if (!string.IsNullOrEmpty(mi.OnServerClickAjax))
-                    {
-                        if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
-                            throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(mi.Id));
-                        onclick = "CallServer('{0}',{1});".Formato(mi.OnServerClickAjax, strPrefix);
-                    }
+                   // //Constructo OnServerClick
+                   // if (!string.IsNullOrEmpty(mi.OnServerClickAjax))
+                   // {
+                   //     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickPost))
+                   //         throw new ArgumentException(Resources.MenuItem0HasOnServerClickAjaxAndAnotherClickDefined.Formato(mi.Id));
+                   //     onclick = "CallServer('{0}',{1});".Formato(mi.OnServerClickAjax, strPrefix);
+                   // }
 
-                    //Constructo OnServerClick
-                    if (!string.IsNullOrEmpty(mi.OnServerClickPost))
-                    {
-                        if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
-                            throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(mi.Id));
-                        onclick = "PostServer('{0}');".Formato(mi.OnServerClickPost);
-                    }
+                   // //Constructo OnServerClick
+                   // if (!string.IsNullOrEmpty(mi.OnServerClickPost))
+                   // {
+                   //     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
+                   //         throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(mi.Id));
+                   //     onclick = "PostServer('{0}');".Formato(mi.OnServerClickPost);
+                   // }
 
-                    //Add cursor pointer to the htmlProps
-                    if (!mi.HtmlProps.ContainsKey("style"))
-                        mi.HtmlProps.Add("style", "cursor: pointer");
-                    else if (mi.HtmlProps["style"].ToString().IndexOf("cursor")==-1)
-                        mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
+                   // //Add cursor pointer to the htmlProps
+                   // if (!mi.HtmlProps.ContainsKey("style"))
+                   //     mi.HtmlProps.Add("style", "cursor: pointer");
+                   // else if (mi.HtmlProps["style"].ToString().IndexOf("cursor")==-1)
+                   //     mi.HtmlProps["style"] = "cursor:pointer; " + mi.HtmlProps["style"].ToString();
 
-                    if(!mi.HtmlProps.ContainsKey("title"))
-                        mi.HtmlProps["title"] = mi.AltText ?? "";
+                   // if(!mi.HtmlProps.ContainsKey("title"))
+                   //     mi.HtmlProps["title"] = mi.AltText ?? "";
 
-                   // sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
-                    sb.Append(helper.Button(mi.Id, mi.Text, onclick, "", mi.HtmlProps));
+                   //// sb.Append(helper.ImageButton(mi.Id, mi.ImgSrc, mi.AltText, onclick, mi.HtmlProps));
+                   // sb.Append(helper.Button(mi.Id, mi.Text, onclick, "", mi.HtmlProps));
                 }
             }
             return sb.ToString();

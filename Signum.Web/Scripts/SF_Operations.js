@@ -12,7 +12,8 @@
         multiStep: false,
         navigateOnSuccess: false,
         closePopupOnSuccess: false,
-        confirmMsg: null
+        confirmMsg: null,
+        requestExtraJsonData: null,
     }, _options);
 };
 
@@ -53,6 +54,12 @@ OperationManager.prototype = {
                      + qp("sfOldPrefix", this.options.prefix)
                      + qp("sfOnOk", singleQuote(this.options.onOk));
 
+        if (!empty(this.options.requestExtraJsonData)) {
+            for (var key in this.options.requestExtraJsonData) {
+                formChildren += qp(key, this.options.requestExtraJsonData[key]);
+            }
+        }
+        
         return formChildren;
     },
 

@@ -118,7 +118,7 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.WriteBreakLine());
 
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+            helper.Write(sb.ToString());
         }
 
         public static void EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 

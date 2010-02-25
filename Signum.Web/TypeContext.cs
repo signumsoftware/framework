@@ -168,12 +168,20 @@ namespace Signum.Web
 
         public static TypeContext<S> TypeContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
-            helper.ViewData[ViewDataKeys.WriteSFInfo] = true;
-            WriteRuntimeAndId(helper, typeContext);
-            return typeContext;
+            return TypeContext<T, S>(helper, parent, property, true);
         }
 
+        public static TypeContext<S> TypeContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property, bool writeSFInfo)
+        {
+            TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
+            if (writeSFInfo)
+            {
+                helper.ViewData[ViewDataKeys.WriteSFInfo] = true;
+                WriteRuntimeAndId(helper, typeContext);
+            }
+            return typeContext;
+        }
+        
         public static IEnumerable<TypeElementContext<S>> TypeElementContext<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, IList<S>>> property)
         {
             using (TypeContext<IList<S>> context = (TypeContext<IList<S>>)Common.WalkExpression(parent, property))

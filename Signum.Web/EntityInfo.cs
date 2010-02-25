@@ -96,7 +96,7 @@ namespace Signum.Web
 
         public static void WriteEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            helper.HiddenEntityInfo<T, S>(parent, property);
+            helper.Write(helper.HiddenEntityInfo<T, S>(parent, property));
         }
 
         public static void WriteRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
