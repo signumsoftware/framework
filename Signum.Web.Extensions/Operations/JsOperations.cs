@@ -40,6 +40,11 @@ namespace Signum.Web.Operations
         {
             return new JsRenderer(() => "OperationDelete({0})".Formato(executor.ToJS()));
         }
+
+        public static JsRenderer AvoidDefaultOk(JsRenderer body)
+        {
+            return new JsRenderer(() => "function(){{{0} return false;}}".Formato(body != null ? body.ToJS() : ""));
+        }
     }
 
     public class JsOperationExecutor : JsOperationBase

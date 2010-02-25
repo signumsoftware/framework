@@ -5,7 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
-namespace Signum.Entities.Basics
+namespace Signum.Entities
 {
     [Serializable]
     public class HourMinuteDN : EmbeddedEntity

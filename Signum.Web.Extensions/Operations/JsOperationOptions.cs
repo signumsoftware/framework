@@ -16,6 +16,7 @@ namespace Signum.Web.Operations
         public string ControllerUrl { get; set; }
         public string ValidationControllerUrl { get; set; }
         public bool? AvoidValidation { get; set; }
+        public bool AvoidDefaultOk { get; set; }
         public string OnOk { get; set; }
         public string OnOperationSuccess { get; set; }
         public string OnCancelled { get; set; }
@@ -23,6 +24,7 @@ namespace Signum.Web.Operations
         public bool? NavigateOnSuccess { get; set; }
         public bool? ClosePopupOnSuccess { get; set; }
         public string ConfirmMessage { get; set; }
+        public string RequestExtraJsonData { get; set; }
         
         public JsOperationOptions()
         {
@@ -51,8 +53,14 @@ namespace Signum.Web.Operations
                 if (AvoidValidation == true)
                     sb.Append("avoidValidation:'{0}',".Formato(AvoidValidation.Value));
 
+                if (AvoidDefaultOk && OnOk.HasText())
+                    throw new ArgumentException("JsOperationOptions cannot have both AvoidDefaultOk and OnOk specified");
+
                 if (OnOk.HasText())
                     sb.Append("onOk:{0},".Formato(OnOk));
+
+                if (AvoidDefaultOk)
+                    sb.Append("onOk:{0},".Formato(JsOperationBase.AvoidDefaultOk(null).ToJS()));
 
                 if (OnOperationSuccess.HasText())
                     sb.Append("onOperationSuccess:{0},".Formato(OnOperationSuccess));
@@ -71,6 +79,9 @@ namespace Signum.Web.Operations
 
                 if (ConfirmMessage.HasText())
                     sb.Append("confirmMsg:'{0}',".Formato(ConfirmMessage));
+
+                if (RequestExtraJsonData.HasText())
+                    sb.Append("requestExtraJsonData:{0},".Formato(RequestExtraJsonData));
 
                 string result = sb.ToString();
 
