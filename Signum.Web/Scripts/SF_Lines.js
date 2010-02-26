@@ -33,11 +33,10 @@ EBaseLine.prototype = {
         if (!validatorResult.isValid) {
             if (!confirm(lang['popupErrors']))
                 return false;
-            else {
-                this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
+            else 
                 validator.showErrors(validatorResult.modelState, true);
-            }
         }
+        this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
         return true;
     },
 
