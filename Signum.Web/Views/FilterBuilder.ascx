@@ -8,7 +8,7 @@
 
 <% bool visible = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterMode == FilterMode.Visible;%>
 
-<%= Html.Hidden(Html.GlobalName(ViewDataKeys.EntityTypeName), ViewData[ViewDataKeys.EntityTypeName].ToString())%>
+<%= Html.Hidden(Html.GlobalName(ViewDataKeys.EntityTypeName), ViewData[ViewDataKeys.EntityTypeName].ToString(), new { disbled = "disabled" })%>
 
 <div id="<%=Html.GlobalName("fields-search")%>">
     <div id="<%=Html.GlobalName("fields-list")%>" class="fields-list">

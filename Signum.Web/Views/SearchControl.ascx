@@ -7,9 +7,9 @@
 
 <% FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];%>
 <div id="<%=Html.GlobalName("divSearchControl") %>" class="searchControl">
-<%=Html.Hidden(Html.GlobalName("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName)%>
-<%=Html.Hidden(Html.GlobalName(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString())%>
-<%=Html.Hidden(Html.GlobalName(ViewDataKeys.View), (bool)ViewData[ViewDataKeys.View])%>
+<%=Html.Hidden(Html.GlobalName("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disbled = "disabled" })%>
+<%=Html.Hidden(Html.GlobalName(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disbled = "disabled" })%>
+<%=Html.Hidden(Html.GlobalName(ViewDataKeys.View), (bool)ViewData[ViewDataKeys.View], new { disbled = "disabled" })%>
 <% 
     string popupPrefix = (string)ViewData[ViewDataKeys.PopupPrefix]; %>
 
@@ -35,5 +35,4 @@
 </div>
 <div class="clearall"></div>
 <div id="<%=Html.GlobalName("divResults")%>" class="divResults"></div>
-<div id="<%=Html.GlobalName("divASustituir")%>"></div>
 </div>

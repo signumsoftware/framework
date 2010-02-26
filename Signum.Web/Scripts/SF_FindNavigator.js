@@ -14,6 +14,7 @@
         searchControllerUrl: "Signum/Search",
         onOk: null,
         onCancelled: null,
+        onOkClosed: null,
         async: false
     }, _findOptions);
 };
@@ -146,8 +147,11 @@ FindNavigator.prototype = {
         if (selected.length == 0)
             return;
         var doDefault = (this.findOptions.onOk != null) ? this.findOptions.onOk(selected) : true;
-        if (doDefault != false)
+        if (doDefault != false) {
             $('#' + this.tempDivId()).remove();
+            if (this.findOptions.onOkClosed != null)
+                this.findOptions.onOkClosed();
+        }
     },
 
     onSearchCancel: function() {

@@ -958,7 +958,7 @@ namespace Signum.Web
         {
             SortedList<string, object> formValues;
             Modification modification;
-            if (form.AllKeys.Contains(ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("_New")))
+            if (form.AllKeys.Contains(ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.Contains("_New")))
             {
                 formValues = Navigator.ToSortedList(form, "", prefixToIgnore); //Apply modifications to the entity and all the path
                 Interval<int> interval = Modification.FindSubInterval(formValues, "");
@@ -1023,7 +1023,7 @@ namespace Signum.Web
         {
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             
-            if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.StartsWith("_New")))
+            if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.Contains("_New")))
             {
                 string tabID = ExtractTabID(form);
                 controller.ViewData[ViewDataKeys.Reactive] = true;

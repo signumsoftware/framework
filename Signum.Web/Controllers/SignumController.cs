@@ -214,7 +214,7 @@ namespace Signum.Web.Controllers
             if (parentEntity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0))
                 Database.Save((IdentifiableEntity)parentEntity);
 
-            Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.StartsWith("_New")) ? 
+            Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
                 Modification.GetPropertyValue(parentEntity, prefix) : 
                 parentEntity;
 
@@ -245,7 +245,7 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
 
-            Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.StartsWith("_New")) ? 
+            Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
                 Modification.GetPropertyValue(parentEntity, prefix) : 
                 parentEntity;
 

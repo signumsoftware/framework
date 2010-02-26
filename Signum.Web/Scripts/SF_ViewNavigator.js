@@ -2,7 +2,7 @@
     this.viewOptions = $.extend({
         containerDiv: null,
         onOk: null,
-        onOkSuccess: null,
+        onOkClosed: null,
         onCancelled: null,
         controllerUrl: "Signum/PopupView",
         type: null,
@@ -182,8 +182,8 @@ ViewNavigator.prototype = {
         if (doDefault != false) {
             this.backup = null;
             $('#' + this.viewOptions.containerDiv).hide();
-            if (this.viewOptions.onOkSuccess != null)
-                this.viewOptions.onOkSuccess();
+            if (this.viewOptions.onOkClosed != null)
+                this.viewOptions.onOkClosed();
         }
     },
 
@@ -200,8 +200,8 @@ ViewNavigator.prototype = {
         var doDefault = (this.viewOptions.onOk != null) ? this.viewOptions.onOk(cloneContents(this.tempDivId())) : true;
         if (doDefault != false) {
             $('#' + this.tempDivId()).remove();
-            if (this.viewOptions.onOkSuccess != null)
-                this.viewOptions.onOkSuccess();
+            if (this.viewOptions.onOkClosed != null)
+                this.viewOptions.onOkClosed();
         }
     },
 
@@ -218,8 +218,8 @@ ViewNavigator.prototype = {
                 $('#' + this.tempDivId()).remove();
             else
                 $('#' + this.viewOptions.containerDiv).remove();
-            if (this.viewOptions.onOkSuccess != null)
-                this.viewOptions.onOkSuccess();
+            if (this.viewOptions.onOkClosed != null)
+                this.viewOptions.onOkClosed();
         }
     },
 

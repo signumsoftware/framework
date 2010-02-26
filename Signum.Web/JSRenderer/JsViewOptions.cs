@@ -13,7 +13,7 @@ namespace Signum.Web
         public string ContainerDiv { get; set; }
         public string ControllerUrl { get; set; }
         public string OnOk { get; set; }
-        public string OnOkSuccess { get; set; }
+        public string OnOkClosed { get; set; }
         public string OnCancelled { get; set; }
         public string Type { get; set; }
         public int? Id { get; set; }
@@ -38,8 +38,8 @@ namespace Signum.Web
                 if (OnOk.HasText())
                     sb.Append("onOk:{0},".Formato(OnOk));
 
-                if (OnOkSuccess.HasText())
-                    sb.Append("onOkSuccess:{0},".Formato(OnOkSuccess));
+                if (OnOkClosed.HasText())
+                    sb.Append("onOkClosed:{0},".Formato(OnOkClosed));
 
                 if (OnCancelled.HasText())
                     sb.Append("onCancelled:{0},".Formato(OnCancelled));

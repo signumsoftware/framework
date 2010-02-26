@@ -36,17 +36,19 @@ OperationManager.prototype = {
         var formChildren = "";
         if (isFalse(this.options.isLite)) {
             if (empty(this.options.prefix)) //NormalWindow 
-                formChildren = $("form").serialize();
+                formChildren = $("form *");
             else //PopupWindow
-                formChildren = $(this.pf("panelPopup *") + ", #" + sfReactive + ", #" + sfTabId).serialize();
+                formChildren = $(this.pf("panelPopup *") + ", #" + sfReactive + ", #" + sfTabId);
         }
         else {
-            formChildren = qp(sfTabId, $('#' + sfTabId).val());
+            formChildren = $('#' + sfTabId);
         }
-
+        formChildren = formChildren.not(".searchControl *");
+        var requestData = formChildren.serialize();
+        
         var info = this.runtimeInfo();
 
-        formChildren += qp("isLite", this.options.isLite)
+        requestData += qp("isLite", this.options.isLite)
                      + qp("sfRuntimeType", info.runtimeType())
                      + qp("sfId", info.id())
                      + qp("sfOperationFullKey", this.options.operationKey)
@@ -56,11 +58,11 @@ OperationManager.prototype = {
 
         if (!empty(this.options.requestExtraJsonData)) {
             for (var key in this.options.requestExtraJsonData) {
-                formChildren += qp(key, this.options.requestExtraJsonData[key]);
+                requestData += qp(key, this.options.requestExtraJsonData[key]);
             }
         }
         
-        return formChildren;
+        return requestData;
     },
 
     entityIsValid: function() {
@@ -354,7 +356,7 @@ function ReloadEntity(urlController, prefix, parentDiv) {
     $.ajax({
         type: "POST",
         url: urlController,
-        data: $("form").serialize() + qp(sfPrefix, prefix),
+        data: $("form *").not(".searchControl *").serialize() + qp(sfPrefix, prefix),
         async: false,
         dataType: "html",
         success:

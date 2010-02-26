@@ -55,7 +55,6 @@
     <div id="<%=Html.GlobalPrefixedName("divMainControl" + sufix)%>" class="divMainControl">
         <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
     </div>
-    <div id="<%=Html.GlobalPrefixedName("divASustituir" + sufix)%>"></div>
 </div>
 </div>
 

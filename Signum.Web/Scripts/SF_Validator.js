@@ -199,8 +199,8 @@ var PartialValidator = function(_pvalOptions) {
 
     this.constructRequestDataForSaving = function() {
         log("PartialValidator constructRequestDataForSaving");
-        var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive).add(GetSFInfoParams(this.valOptions.prefix));
-        formChildren = formChildren.not(".searchControl *");
+        var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId).add(GetSFInfoParams(this.valOptions.prefix));
+        formChildren = formChildren.not(".searchControl *, #" + sfReactive);
         var requestData = formChildren.serialize();
 
         requestData += qp(sfPrefix, this.valOptions.prefix);
@@ -260,29 +260,32 @@ var PartialValidator = function(_pvalOptions) {
     this.constructRequestDataForValidating = function() {
         log("PartialValidator constructRequestDataForValidating");
         var isReactive = ($('#' + sfReactive).length > 0);
-        var formChildren = isReactive ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive);
-        formChildren = formChildren.not(".searchControl *");
+        //var formChildren = isReactive ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive);
+        var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId);
+        formChildren = formChildren.not(".searchControl *, #" + sfReactive);
         var requestData = formChildren.serialize();
-        if (!isReactive) {
-            if (formChildren.filter(this.pf(sfRuntimeInfo)).length == 0) {
-                var info = new RuntimeInfo(this.valOptions.prefix);
-                if (empty(this.valOptions.type))
-                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.val());
-                else {
-                    var infoField = info.find();
-                    if (infoField.length == 0)
-                        requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
-                    else {
-                        var infoVal = infoField.val();
-                        var index = infoVal.indexOf(";");
-                        var index2 = infoVal.indexOf(";", index + 1);
-                        var mixedVal = this.valOptions.type + ";" + (empty(!this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index2, infoVal.length);
 
-                        requestData += qp(this.valOptions.prefix + sfRuntimeInfo, mixedVal);
-                    }
+        //if (!isReactive) {
+        if (requestData.indexOf(this.valOptions.prefix + sfRuntimeInfo) < 0) {
+            var info = new RuntimeInfo(this.valOptions.prefix);
+            if (empty(this.valOptions.type))
+                requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.val());
+            else {
+                var infoField = info.find();
+                if (infoField.length == 0)
+                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
+                else {
+                    var infoVal = infoField.val();
+                    var index = infoVal.indexOf(";");
+                    var index2 = infoVal.indexOf(";", index + 1);
+                    var index3 = infoVal.indexOf(";", index2 + 1);
+                    var mixedVal = this.valOptions.type + ";" + (empty(!this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index2, index3 + 1) + new Date().getTime();
+
+                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, mixedVal);
                 }
             }
         }
+        //}
 
         requestData += qp(sfPrefix, this.valOptions.prefix);
 

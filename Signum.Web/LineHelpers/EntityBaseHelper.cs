@@ -40,7 +40,13 @@ namespace Signum.Web
 
         public static bool RequiresLoadAll<T>(HtmlHelper helper, bool isIdentifiable, bool isLite, T value, string prefix)
         {
-            return (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null && helper.GetChangeTicks(prefix) > 0) ||
+            bool hasChanged = helper.GetChangeTicks(prefix) > 0;
+            
+            //To pre-load an entity in a Line, it has to have changed and also at least one of its properties
+            Dictionary<string, long> ticks = (Dictionary<string, long>)helper.ViewData[ViewDataKeys.ChangeTicks];
+            bool propertyHasChanged = ticks != null && ticks.Any(kvp => kvp.Key.StartsWith(prefix) && kvp.Key != prefix && kvp.Value > 0);
+            
+            return (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null && hasChanged && propertyHasChanged) ||
                     (isIdentifiable && value != null && (value as IIdentifiable).IsNew == true) ||
                     (isLite && value != null && (value as Lite).IdOrNull == null);
         }

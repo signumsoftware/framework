@@ -225,6 +225,7 @@ var ELine = function(_elineOptions) {
         return $.extend({
             containerDiv: "",
             onOk: function(clonedElements) { return self.onCreatingOk(clonedElements, defaultValidateUrl, _viewOptions.type); },
+            onOkClosed: function() { self.fireOnEntityChanged(true); },
             onCancelled: null,
             controllerUrl: defaultViewUrl,
             prefix: this.options.prefix,
@@ -244,7 +245,6 @@ var ELine = function(_elineOptions) {
         var acceptChanges = this.checkValidation(validateUrl, runtimeType);
         if (acceptChanges) {
             this.newEntity(clonedElements, runtimeType);
-            this.fireOnEntityChanged(true);
         }
         return acceptChanges;
     };
@@ -255,6 +255,7 @@ var ELine = function(_elineOptions) {
         return $.extend({
             prefix: this.options.prefix,
             onOk: function(selectedItems) { return self.onFindingOk(selectedItems); },
+            onOkClosed: function() { self.fireOnEntityChanged(true); },
             allowMultiple: false
         }, _findOptions);
     };
@@ -269,7 +270,6 @@ var ELine = function(_elineOptions) {
             info.find().after(hiddenDiv(this.options.prefix + sfEntity, ''));
         $(this.pf(sfToStr)).val(''); //Clean
         $(this.pf(sfLink)).html(selectedItems[0].toStr).attr('href', selectedItems[0].link);
-        this.fireOnEntityChanged(true);
         return true;
     };
 
@@ -357,6 +357,7 @@ var EDLine = function(_edlineOptions) {
         return $.extend({
             prefix: this.options.prefix,
             onOk: function(selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
+            onOkClosed: function() { self.fireOnEntityChanged(true); },
             allowMultiple: false
         }, _findOptions);
     };
@@ -371,7 +372,6 @@ var EDLine = function(_edlineOptions) {
         var viewOptions = this.viewOptionsForCreating($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }));
         new ViewNavigator(viewOptions).viewEmbedded();
 
-        this.fireOnEntityChanged(true);
         return true;
     };
 
@@ -488,6 +488,7 @@ var EList = function(_elistOptions) {
         var itemPrefix = this.options.prefix + "_" + newIndex;
         return $.extend({
             onOk: function(clonedElements) { return self.onCreatingOk(clonedElements, defaultValidateUrl, _viewOptions.type, itemPrefix); },
+            onOkClosed: function() { self.fireOnEntityChanged(); },
             onCancelled: null,
             controllerUrl: defaultViewUrl,
             prefix: itemPrefix,
@@ -500,7 +501,6 @@ var EList = function(_elistOptions) {
         var acceptChanges = this.checkValidation(validateUrl, runtimeType, itemPrefix);
         if (acceptChanges) {
             this.newListItem(clonedElements, runtimeType, itemPrefix);
-            this.fireOnEntityChanged();
             this.setItemTicks(itemPrefix);
         }
         return acceptChanges;
@@ -567,6 +567,7 @@ var EList = function(_elistOptions) {
         return $.extend({
             prefix: itemPrefix,
             onOk: function(selectedItems) { return self.onFindingOk(selectedItems); },
+            onOkClosed: function() { self.fireOnEntityChanged(); },
             allowMultiple: true
         }, _findOptions);
     };
@@ -585,7 +586,6 @@ var EList = function(_elistOptions) {
             this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
             $('#' + itemPrefix + sfToStr).html(item.toStr);
 
-            this.fireOnEntityChanged();
             this.setItemTicks(itemPrefix);
         }
         return true;
@@ -761,6 +761,7 @@ var ERep = function(_erepOptions) {
         return $.extend({
             prefix: itemPrefix,
             onOk: function(selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
+            onOkClosed: function() { self.fireOnEntityChanged(); },
             allowMultiple: true
         }, _findOptions);
     };
@@ -785,7 +786,6 @@ var ERep = function(_erepOptions) {
             var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }), itemPrefix);
             new ViewNavigator(viewOptions).viewEmbedded();
 
-            this.fireOnEntityChanged();
             this.setItemTicks(itemPrefix);
         }
         return true;
@@ -945,6 +945,7 @@ var EDList = function(_edlistOptions) {
         return $.extend({
             prefix: itemPrefix,
             onOk: function(selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
+            onOkClosed: function() { self.fireOnEntityChanged(); },
             allowMultiple: true
         }, _findOptions);
     };
@@ -966,7 +967,6 @@ var EDList = function(_edlistOptions) {
             //View result in the detailDiv
             $('#' + this.options.prefix).dblclick();
 
-            this.fireOnEntityChanged();
             this.setItemTicks(itemPrefix);
         }
         return true;
