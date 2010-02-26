@@ -19,13 +19,6 @@
         typeNiceName = Model.GetType().NiceName();
     }
 %>
-<script type ="text/javascript">
-    $(function(){
-        $("#<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>").easydrag(false)
-        .setHandler("<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>");
-    });
-</script>
-
 <div id="<%=Html.GlobalPrefixedName("externalPopupDiv" + sufix)%>">
 <div id="<%=Html.GlobalPrefixedName("modalBackground" + sufix)%>" class="transparent popupBackground"></div>
   

@@ -1,14 +1,8 @@
-﻿$(document).ready(function () {
-    if (navigator.userAgent.indexOf("MSIE") >= 0) navegador = 0;
-    else navegador = 1;
-});
-
-var elemWidth, elemHeight, clientWidth, clientHeight, outside = false;
+﻿var elemWidth, elemHeight, clientWidth, clientHeight, outside = false;
 var element = null;
 var lastMouseX;
 var lastMouseY;
 var allowInitiallyOutside = true;
-
 
 function isOutside() {
     return element.offsetLeft < 0 || element.offsetTop < 0 || element.offsetLeft + elemWidth > clientWidth || element.offsetTop + elemHeight > clientHeight;
@@ -70,8 +64,6 @@ function comienzoMovimiento(event, id) {
         element.css.cursor = "auto";
     });
 
-    // Actualizo el posicion del elemento
-    ////elMovimiento.style.zIndex = ++posicion;
     evitaEventos(event);
 }
 

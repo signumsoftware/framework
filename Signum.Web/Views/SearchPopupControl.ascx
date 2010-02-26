@@ -6,12 +6,6 @@
     Type entityType = (Type)ViewData[ViewDataKeys.EntityType];
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
 %>
-<script type ="text/javascript">
-    $(function(){
-        $("#<%=Html.GlobalName("panelPopup" + sufix)%>").easydrag(false)
-        .setHandler("<%=Html.GlobalName("divPopupDragHandle" + sufix)%>");
-    });
-</script>
 <div id="<%=Html.GlobalName("externalPopupDiv" + sufix)%>">
 <div id="<%=Html.GlobalName("modalBackground" + sufix)%>" class="transparent popupBackground"></div>
   
@@ -21,7 +15,7 @@
     <%} else { %>
         <div class="closebox" id="<%=Html.GlobalName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
-    <div id="<%=Html.GlobalName("divPopupDragHandle" + sufix)%>" class="dragHandle">
+    <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>');" class="dragHandle">
         <%if (Navigator.Manager.ShowSearchOkButton(findOptions.QueryName, false) && findOptions.AllowMultiple != null)
           { %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>

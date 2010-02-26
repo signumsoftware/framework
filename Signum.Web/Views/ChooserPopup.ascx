@@ -1,12 +1,7 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 
-<script type ="text/javascript">
-    $(function(){
-        $("#<%=Html.GlobalName("panelPopup")%>").easydrag(false)
-        .setHandler("<%=Html.GlobalName("divPopupDragHandle")%>");
-    });
-</script>
+
 <div id="<%=Html.GlobalName("externalPopupDiv")%>">
 <div id="<%=Html.GlobalName("modalBackground")%>" class="transparent popupBackground"></div>
     
