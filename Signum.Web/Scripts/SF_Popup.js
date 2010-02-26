@@ -23,7 +23,6 @@
         var panelPopup = $("#" + idExternalPopupDiv + " .popupWindow");
         //panelPopup.attr('z-index', parseInt(maxZindex) + 2);
         var popup2 = panelPopup[0];
-        log(popup2.id);
         var parentDiv = externalPopupDiv.parent();
         var popupWidth = popup2.offsetWidth;
         var bodyWidth = document.body.clientWidth;

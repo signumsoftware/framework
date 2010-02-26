@@ -1,4 +1,4 @@
-<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
+﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 
 <script type ="text/javascript">
@@ -21,7 +21,6 @@
     </div>
     
     <%= ViewData[ViewDataKeys.CustomHtml].ToString() %>
-    <div id="<%=Html.GlobalName("divASustituir")%>"></div>
 </div>
 </div>
 
