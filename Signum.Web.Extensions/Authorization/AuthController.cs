@@ -178,7 +178,7 @@ namespace Signum.Web.Authorization
                     if (authCookie == null || !authCookie.Value.HasText())
                         return false;
                     var ticket = FormsAuthentication.Decrypt(authCookie.Value);
-                    string idUsuario = ticket.UserData;//Name;
+                    string idUsuario = ticket.TryCC(t=>t.UserData);//Name;
                     //string idUsuario = authCookie["Id"];
                     int id;
                     if (!string.IsNullOrEmpty(idUsuario) && int.TryParse(idUsuario, out id))
