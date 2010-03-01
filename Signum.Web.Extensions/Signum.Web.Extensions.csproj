@@ -197,9 +197,6 @@
     <EmbeddedResource Include="Basic\DateSpanIU.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
-    <Content Include="Files\FilePathIU.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
     <EmbeddedResource Include="ViewsChecker\ViewsChecker.aspx">
       <SubType>ASPXCodeBehind</SubType>
