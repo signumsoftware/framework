@@ -42,17 +42,16 @@ namespace Signum.Windows.Reports
             string filename = "";
             foreach (Lite<ExcelReportDN> erl in cr.ExcelReports)
             {
-
                 try
                 {
                     // 1º nos taremos la plantilla y la guardamos
                     ExcelReportDN er = erl.RetrieveAndForget();
-                    filename = di.FullName + "\\" + cr.Name + " - " + er.QueryName + ".xlsx";
+                    filename = di.FullName + "\\" + cr.Name + " - " + er.Query.Key + ".xlsx";
                     File.WriteAllBytes(filename, er.File.BinaryFile);
 
                     // pedimos la consulta y traemos los datos
-                    ResultTable queryResult = Server.Return((IQueryServer s) => s.GetQueryResult(ReportClient.QueryNames[er.QueryName], null, null, null, null)); 
-                    ExcelReportPivotTablesGenerator.GenerarInforme(filename, queryResult);
+                    ResultTable queryResult = Server.Return((IDynamicQueryServer s) => s.GetQueryResult(QueryClient.GetQueryName(er.Query.Key), null, null, null, null)); 
+                    ExcelReportGenerator.GenerarInforme(filename, queryResult);
                     filename = "";
 
                 }
@@ -61,7 +60,6 @@ namespace Signum.Windows.Reports
                     errores += 1;
                     mensajes += filename + " mensaje:" + ex.Message + "\n\r";
                 }
-
             }
 
             if (errores > 0)
@@ -72,6 +70,5 @@ namespace Signum.Windows.Reports
             Process.Start(ruta);
 
         }
-
     }
 }

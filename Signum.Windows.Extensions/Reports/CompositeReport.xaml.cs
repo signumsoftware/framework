@@ -27,11 +27,8 @@ namespace Signum.Windows.Reports
             InitializeComponent();
         }
 
-       
-
         private void btGenerar_Click(object sender, RoutedEventArgs e)
         {
-
             CompositeReportDN cr = (CompositeReportDN)this.DataContext;
             ExcelCompositeReportGenerator.GenerateCompositeReport(cr);
         }

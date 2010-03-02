@@ -268,11 +268,11 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Query Name.
+        ///   Looks up a localized string similar to Query.
         /// </summary>
-        internal static string ExcelReportDN_QueryName {
+        internal static string ExcelReportDN_Query {
             get {
-                return ResourceManager.GetString("ExcelReportDN_QueryName", resourceCulture);
+                return ResourceManager.GetString("ExcelReportDN_Query", resourceCulture);
             }
         }
         
@@ -898,6 +898,33 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Query.
+        /// </summary>
+        internal static string QueryDN {
+            get {
+                return ResourceManager.GetString("QueryDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display Name.
+        /// </summary>
+        internal static string QueryDN_DisplayName {
+            get {
+                return ResourceManager.GetString("QueryDN_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key.
+        /// </summary>
+        internal static string QueryDN_Key {
+            get {
+                return ResourceManager.GetString("QueryDN_Key", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Role.
         /// </summary>
         internal static string RoleDN {
@@ -1308,6 +1335,60 @@ namespace Signum.Entities.Extensions.Properties {
         internal static string UserOperation_SaveNew {
             get {
                 return ResourceManager.GetString("UserOperation_SaveNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Query.
+        /// </summary>
+        internal static string UserQueryDN {
+            get {
+                return ResourceManager.GetString("UserQueryDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Columns.
+        /// </summary>
+        internal static string UserQueryDN_Columns {
+            get {
+                return ResourceManager.GetString("UserQueryDN_Columns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display Name.
+        /// </summary>
+        internal static string UserQueryDN_DisplayName {
+            get {
+                return ResourceManager.GetString("UserQueryDN_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filters.
+        /// </summary>
+        internal static string UserQueryDN_Filters {
+            get {
+                return ResourceManager.GetString("UserQueryDN_Filters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max Items.
+        /// </summary>
+        internal static string UserQueryDN_MaxItems {
+            get {
+                return ResourceManager.GetString("UserQueryDN_MaxItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Orders.
+        /// </summary>
+        internal static string UserQueryDN_Orders {
+            get {
+                return ResourceManager.GetString("UserQueryDN_Orders", resourceCulture);
             }
         }
     }

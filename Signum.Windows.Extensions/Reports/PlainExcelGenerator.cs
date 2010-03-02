@@ -9,7 +9,7 @@ using Signum.Excel;
 namespace Signum.Windows.Reports
 {
     
-    public static class ExcelReportGenerator
+    public static class PlainExcelGenerator
     {
         static DataType Integer = (DataType)923; 
 
@@ -155,8 +155,6 @@ namespace Signum.Windows.Reports
                 {
                     DefaultRowHeight = 15F,
                     DefaultColumnWidth = 60F,
-                    ExpandedColumnCount = 9,
-                    ExpandedRowCount = 33,
                     FullColumns = 1,
                     FullRows = 1,
                     Columns = new ColumnCollection 

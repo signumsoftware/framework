@@ -18,7 +18,7 @@
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <ExpressionBlendVersion>3.0.1938.0</ExpressionBlendVersion>
+    <ExpressionBlendVersion>3.0.1927.0</ExpressionBlendVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -67,10 +67,6 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
-    <ProjectReference Include="..\..\Framework\Signum.Windows\Signum.Windows.csproj">
-      <Project>{76278145-7CCD-4411-9B8A-078708128571}</Project>
-      <Name>Signum.Windows</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authorization\AuthClient.cs" />
@@ -112,7 +108,8 @@
     <Compile Include="Basic\DateSpan.xaml.cs">
       <DependentUpon>DateSpan.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Basic\BasicClient.cs" />
+    <Compile Include="Basic\DateSpanClient.cs" />
+    <Compile Include="Basic\QueryClient.cs" />
     <Compile Include="Calendars\CalendarStrip.cs" />
     <Compile Include="Calendars\CalendarStripHeader.xaml.cs">
       <DependentUpon>CalendarStripHeader.xaml</DependentUpon>
@@ -168,14 +165,18 @@
     <Compile Include="Reports\CompositeReport.xaml.cs">
       <DependentUpon>CompositeReport.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\ExcelCompositeReportGenerator.cs" />
+    <Compile Include="Reports\UserQueryMenuItem.cs" />
+    <Compile Include="Reports\UserQuery.xaml.cs">
+      <DependentUpon>UserQuery.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\CompositeReportGenerator.cs" />
     <Compile Include="Reports\ExcelReport.xaml.cs">
       <DependentUpon>ExcelReport.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Reports\PlainExcelGenerator.cs" />
+    <Compile Include="Reports\PlainExcelMenuItem.cs" />
+    <Compile Include="Reports\ReportMenuItem.cs" />
     <Compile Include="Reports\ExcelReportGenerator.cs" />
-    <Compile Include="Reports\ExcelReportMenuItem.cs" />
-    <Compile Include="Reports\ExcelReportPivotTableMenuItem.cs" />
-    <Compile Include="Reports\ExcelReportPivotTablesGenerator.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Panels\TreeMapPanel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -357,6 +358,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Reports\UserQuery.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Reports\ExcelReport.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -403,6 +408,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Signum.Windows\Signum.Windows.csproj">
+      <Project>{76278145-7CCD-4411-9B8A-078708128571}</Project>
+      <Name>Signum.Windows</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
       <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
       <Name>Signum.Entities.Extensions</Name>
@@ -502,6 +511,22 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\download.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\column.png" />
+    <Resource Include="Images\filter.png" />
+    <Resource Include="Images\order.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\favorite.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\add.png" />
+    <Resource Include="Images\edit.png" />
+    <Resource Include="Images\remove.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\excelPlain.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

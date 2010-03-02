@@ -66,6 +66,7 @@ namespace Signum.Windows.Authorization
                     propertyRules = Server.Return((IPropertyAuthServer s)=>s.AuthorizedProperties()); 
                     Common.RouteTask += Common_RouteTask;
                     Common.PseudoRouteTask += Common_RouteTask;
+                    PropertyRoute.SetIsAllowedCallback(pr => GetPropertyAccess(pr) >= Access.Read);
                 }
 
                 if (types)
@@ -175,6 +176,9 @@ namespace Signum.Windows.Authorization
 
         static Access GetPropertyAccess(PropertyRoute route)
         {
+            if (route.PropertyRouteType == PropertyRouteType.MListItems)
+                return GetPropertyAccess(route.Parent);
+
             return propertyRules.TryGetC(route.IdentifiableType).TryGetS(route.PropertyString()) ?? Access.Modify;
         }
 

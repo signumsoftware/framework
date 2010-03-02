@@ -1,0 +1,83 @@
+﻿<UserControl x:Class="Signum.Windows.Reports.UserQuery"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:m2="clr-namespace:Signum.Windows.Files"
+    xmlns:dq="clr-namespace:Signum.Entities.Reports;assembly=Signum.Entities.Extensions"
+    m:Common.TypeContext="dq:UserQueryDN" MinWidth="450">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <StackPanel>
+        <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
+        <m:ValueLine m:Common.Route="DisplayName" />
+        <m:EntityRepeater m:Common.Route="Filters" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png">
+            <m:EntityRepeater.EntityTemplate>
+                <DataTemplate>
+                    <Grid m:Common.LabelVisible="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
+                            <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
+                            <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <m:QueryTokenBuilder Token="{Binding Token}" Loaded="QueryTokenBuilderFilters_Loaded"/>
+                        <ComboBox Grid.Column="1" VerticalAlignment="Center"
+                                  SelectedItem="{Binding Operation}" 
+                                  ItemsSource="{Binding Token, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <m:ValueLine m:Common.Route="ValueString" Grid.Column="2"/>
+                    </Grid>
+                </DataTemplate>
+            </m:EntityRepeater.EntityTemplate>
+        </m:EntityRepeater>
+        
+        <m:EntityRepeater m:Common.Route="Columns" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/column.png">
+            <m:EntityRepeater.EntityTemplate>
+                <DataTemplate>
+                    <Grid m:Common.LabelVisible="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="displayName" MinWidth="100" Width="Auto"/>
+                            <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <m:ValueLine m:Common.Route="DisplayName" />
+                        <m:QueryTokenBuilder Token="{Binding Token}" Loaded="QueryTokenBuilderColumns_Loaded" Grid.Column="1"/>
+                    </Grid>
+                </DataTemplate>
+            </m:EntityRepeater.EntityTemplate>
+        </m:EntityRepeater>
+
+        <GroupBox Margin="4" Style="{StaticResource EntityGroupBox}">
+            <GroupBox.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="../Images/order.png" Stretch="None"/>
+                    <TextBlock m:Common.Route="$Orders"/>
+                </StackPanel>
+            </GroupBox.Header>
+            <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >
+                <m:EntityList.EntityTemplate>
+                    <DataTemplate>
+                        <Grid m:Common.LabelVisible="False" m:Common.TypeContext="{m:ContinueRoute /}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
+                                <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <m:QueryTokenBuilder Token="{Binding Token}" Loaded="QueryTokenBuilderOrders_Loaded"/>
+                            <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </m:EntityList.EntityTemplate>
+            </m:EntityList>
+        </GroupBox>
+
+        <m:ValueLine m:Common.Route="MaxItems" />
+    </StackPanel>
+</UserControl>

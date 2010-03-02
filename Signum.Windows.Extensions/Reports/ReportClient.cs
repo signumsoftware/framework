@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,21 +12,18 @@ namespace Signum.Windows.Reports
 {
     public class ReportClient
     {
-        public static Dictionary<string, object> QueryNames; 
-
         public static void Start(bool toExcel, bool excelReport, bool compositeReport)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                if (toExcel)
-                {
-                    SearchControl.GetCustomMenuItems += (qn, type) => new ExcelReportMenuItem();
-                }
                 if (excelReport)
                 {
-                    QueryNames = Server.Return((IQueryServer s)=>s.GetQueryNames().ToDictionary(a => a.ToString())); 
+                    if (toExcel)
+                        SearchControl.GetCustomMenuItems += (qn, type) => qn == typeof(ExcelReportDN) ? null : new ReportMenuItem() { PlainExcelMenuItem = new PlainExcelMenuItem() };
+                    else
+                        SearchControl.GetCustomMenuItems += (qn, type) => new PlainExcelMenuItem();
 
-                    SearchControl.GetCustomMenuItems += (qn, type) => qn == typeof(ExcelReportDN) ? null : new ExcelReportPivotTableMenuItem();
+                    QueryClient.Start();
 
                     Navigator.Manager.Settings.Add(typeof(ExcelReportDN), new EntitySettings(EntityType.Default) { View = e => new ExcelReport() });
 
@@ -35,8 +33,16 @@ namespace Signum.Windows.Reports
                     }
                 }
                 else
+                {
+                    if (toExcel)
+                    {
+                        SearchControl.GetCustomMenuItems += (qn, type) => new PlainExcelMenuItem();
+                    }
+
                     if (compositeReport)
                         throw new InvalidOperationException();
+
+                }
             }
         }
     }

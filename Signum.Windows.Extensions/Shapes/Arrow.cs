@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Shapes;
 using System.Windows.Media;
 
-namespace Signum.Windows.Extensions
+namespace Signum.Windows.Shapes
 {
     public sealed class Arrow : Shape
     {

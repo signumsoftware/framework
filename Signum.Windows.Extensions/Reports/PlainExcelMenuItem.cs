@@ -8,16 +8,17 @@ using Signum.Entities.DynamicQuery;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Prop = Signum.Windows.Extensions.Properties;
+using Signum.Utilities;
 
 namespace Signum.Windows.Reports
 {
-    public class ExcelReportMenuItem : SearchControlMenuItem
+    internal class PlainExcelMenuItem : SearchControlMenuItem
     {
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
             Header = Prop.Resources.ExcelReport;
-            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/excel.png", typeof(ExcelReportMenuItem))) };
+            Icon = GetImage(ExtensionsImageLoader.GetImageSortName("excelPlain.png"));
         }
 
         protected override void OnClick()
@@ -28,16 +29,17 @@ namespace Signum.Windows.Reports
                 DefaultExt = ".xml",
                 Filter = Prop.Resources.Excel2003XmlSpreadsheet,
                 OverwritePrompt = true,
+                FileName = "{0}.xml".Formato(QueryUtils.GetNiceQueryName(SearchControl.QueryName)),
                 Title = Prop.Resources.FindLocationFoExcelReport
             };
 
             if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
             {
-                ExcelReportGenerator.GenerateReport(sfd.FileName, SearchControl.ResultTable);
+                PlainExcelGenerator.GenerateReport(sfd.FileName, SearchControl.ResultTable);
             }
         }
 
-        protected override void QueryResultChanged()
+        public override void QueryResultChanged()
         {
             ResultTable qr = SearchControl.ResultTable;
             IsEnabled = (qr != null && qr.Rows.Length > 0);

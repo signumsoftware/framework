@@ -10,9 +10,12 @@ using Signum.Entities.Reports;
 namespace Signum.Services
 {
     [ServiceContract]
-    public interface IExcelReportServer
+    public interface IUserQueryServer
     {
         [OperationContract, NetDataContract]
-        List<Lite<ExcelReportDN>> GetExcelReports(object queryName);
+        List<Lite<UserQueryDN>> GetUserQueries(object queryName);
+
+        [OperationContract, NetDataContract]
+        void RemoveUserQuery(Lite<UserQueryDN> lite);
     }
 }

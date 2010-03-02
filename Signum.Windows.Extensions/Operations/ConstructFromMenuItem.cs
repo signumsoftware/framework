@@ -28,10 +28,10 @@ namespace Signum.Windows.Operations
         {
             base.OnInitialized(e);
             Header = "Construir";
-            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/factory.png", typeof(ConstructFromMenuItem))) };
+            Icon = GetImage( ExtensionsImageLoader.GetImageSortName("factory.png"));
         }
 
-        protected override void Initialize()
+        public override void Initialize()
         {
             Items.Clear();
 

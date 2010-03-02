@@ -120,8 +120,8 @@
   <data name="ConstructorSelector" xml:space="preserve">
     <value>Selector de Constructor</value>
   </data>
-  <data name="CustomReport" xml:space="preserve">
-    <value>Informe Personalizado</value>
+  <data name="Reports" xml:space="preserve">
+    <value>Informe</value>
   </data>
   <data name="Days" xml:space="preserve">
     <value>Dias</value>
@@ -169,7 +169,7 @@
     <value>Por favor, seleccione un constructor</value>
   </data>
   <data name="QueryName" xml:space="preserve">
-    <value>Nombre vista</value>
+    <value>Consulta</value>
   </data>
   <data name="Removed" xml:space="preserve">
     <value>Eliminado</value>
@@ -194,5 +194,14 @@
   </data>
   <data name="FileTypes" xml:space="preserve">
     <value>Tipos de archivo</value>
+  </data>
+  <data name="MyQueries" xml:space="preserve">
+    <value>Mis Queries</value>
+  </data>
+  <data name="RemoveUserQuery" xml:space="preserve">
+    <value>¿Eliminar consulta personalizada?</value>
+  </data>
+  <data name="AreYouSureToRemove0" xml:space="preserve">
+    <value>¿Estás seguro de eliminar '{0}'?</value>
   </data>
 </root>

@@ -13,15 +13,14 @@ namespace Signum.Entities.Reports
     [Serializable]
     public class ExcelReportDN : IdentifiableEntity
     {
-        [NotNullable]
-        string queryName;
-        [StringLengthValidator(Min = 3)]
-        public string QueryName
+        QueryDN query;
+        [NotNullValidator]
+        public QueryDN Query
         {
-            get { return queryName; }
-            set { Set(ref queryName, value, () => QueryName); }
+            get { return query; }
+            set { Set(ref query, value, () => Query); }
         }
-
+  
         [NotNullable]
         string displayName;
         [StringLengthValidator(Min = 3)]

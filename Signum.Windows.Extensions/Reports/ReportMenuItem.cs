@@ -14,52 +14,60 @@ using Signum.Entities.Reports;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
+using Signum.Utilities;
 
 namespace Signum.Windows.Reports
 {
-    public class ExcelReportPivotTableMenuItem : SearchControlMenuItem
+    public class ReportMenuItem : SearchControlMenuItem
     {
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            Header = Prop.Resources.CustomReport;
-            Icon = new Image { Width = 16, Height = 16, Source = new BitmapImage(PackUriHelper.Reference("Images/excelDoc.png", typeof(ExcelReportPivotTableMenuItem))) };
+            Header = Prop.Resources.Reports;
+            Icon = GetImage(ExtensionsImageLoader.GetImageSortName("excel.png"));
         }
 
-        protected override void Initialize()
+        internal PlainExcelMenuItem PlainExcelMenuItem; 
+
+        public override void Initialize()
         {
             Items.Clear();
 
             this.AddHandler(MenuItem.ClickEvent, new RoutedEventHandler(MenuItem_Clicked));
 
-            List<Lite<ExcelReportDN>> reports = Server.Return((IExcelReportServer s)=>s.GetExcelReports(SearchControl.QueryName.ToString())); 
-            
+            List<Lite<ExcelReportDN>> reports = Server.Return((IExcelReportServer s)=>s.GetExcelReports(SearchControl.QueryName));
+
+            if (PlainExcelMenuItem != null)
+            {
+                Items.Add(PlainExcelMenuItem);
+                PlainExcelMenuItem.SearchControl = SearchControl;
+                PlainExcelMenuItem.Initialize();
+                Items.Add(new Separator());
+            }
+
+            Header = new TextBlock { Inlines = { new Run(Prop.Resources.Reports), reports.Count == 0? (Inline)new Run(): new Bold(new Run(" (" + reports.Count + ")")) } };
+
             if (reports.Count > 0)
             {
-                Header = new TextBlock { Inlines = { new Run(Prop.Resources.CustomReport), new Bold(new Run(" (" + reports.Count + ")")) } };
-
                 foreach (Lite<ExcelReportDN> report in reports)
                 {
                     MenuItem mi = new MenuItem()
                     {
                         Header = report.ToStr,
+                        Icon = GetImage(ExtensionsImageLoader.GetImageSortName("excelDoc.png")),
                         Tag = report,
                     };
                     Items.Add(mi);
                 }
             }          
-           
-
-            Items.Add(new Separator());
 
             MenuItem miAdmin = new MenuItem()
             {
                 Header = "Administrar",
-                Icon = new Image { Source = BitmapFrame.Create(new Uri("pack://application:,,,/Signum.Windows.Extensions;component/Images/folderedit.png", UriKind.Absolute)) }
+                Icon = GetImage( ExtensionsImageLoader.GetImageSortName("folderedit.png"))
             };
             miAdmin.Click += new RoutedEventHandler(MenuItemAdmin_Clicked);
             Items.Add(miAdmin);
-
         }
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)
@@ -81,6 +89,7 @@ namespace Signum.Windows.Reports
                     AddExtension = true,
                     DefaultExt = extension, //".xls", //".xlsx",
                     Filter = (extension == ".xls") ? Prop.Resources.Excel97_2003Spreadsheet : Prop.Resources.Excel2007Spreadsheet, //.Excel2007Spreadsheet,
+                    FileName = "{0}-{1}{2}".Formato(report.DisplayName, DateTime.Today, extension),
                     OverwritePrompt = true,
                     Title = Prop.Resources.FindLocationFoExcelReport
                 };
@@ -89,7 +98,7 @@ namespace Signum.Windows.Reports
                 {
                     File.WriteAllBytes(sfd.FileName, report.File.BinaryFile);
 
-                    ExcelReportPivotTablesGenerator.GenerarInforme(sfd.FileName, SearchControl.ResultTable);
+                    ExcelReportGenerator.GenerarInforme(sfd.FileName, SearchControl.ResultTable);
 
                     System.Diagnostics.Process.Start(sfd.FileName);
                 }
@@ -99,6 +108,8 @@ namespace Signum.Windows.Reports
 
         private void MenuItemAdmin_Clicked(object sender, RoutedEventArgs e)
         {
+            var query = QueryClient.GetQuery(SearchControl.QueryName);
+
             Navigator.Explore(new ExploreOptions(typeof(ExcelReportDN))
             {
                 ShowFilters = false,
@@ -107,9 +118,9 @@ namespace Signum.Windows.Reports
                 {
                     new FilterOption 
                     { 
-                        Path = "QueryName", 
+                        Path = "Query", 
                         Operation = FilterOperation.EqualTo, 
-                        Value = SearchControl.QueryName.ToString(),
+                        Value = query.ToLite(query.IsNew),
                         Frozen = true
                     }
                 },
@@ -119,6 +130,11 @@ namespace Signum.Windows.Reports
             e.Handled = true;
         }
 
-    }
+        public override void QueryResultChanged()
+        {
+            if (PlainExcelMenuItem != null)
+                PlainExcelMenuItem.QueryResultChanged(); 
+        }
 
+    }
 }

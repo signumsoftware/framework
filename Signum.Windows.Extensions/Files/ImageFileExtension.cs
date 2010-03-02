@@ -6,8 +6,9 @@ using System.Windows.Media.Imaging;
 using Signum.Utilities;
 using System.IO;
 using System.Windows.Data;
+using Signum.Windows.Extensions;
 
-namespace Signum.Windows.Extensions.Files
+namespace Signum.Windows.Files
 {
     public static class ImageFileExtension
     {

@@ -9,6 +9,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics
 {
@@ -19,6 +20,11 @@ namespace Signum.Engine.Basics
         {
             get { return queryNames ?? (queryNames = CreateQueryNames()); }
             private set { queryNames = value; }
+        }
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(sb)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -61,34 +67,47 @@ namespace Signum.Engine.Basics
 
             string[] queryNames = DynamicQueryManager.Current.GetQueryNames(type).Keys.Select(qn => QueryUtils.GetQueryName(qn)).ToArray();
 
-            var current = Database.RetrieveAll<QueryDN>().Where(a => queryNames.Contains(a.Name)).ToDictionary(a => a.Name);
-            var total = queryNames.Select(un => new QueryDN { Name = un }).ToDictionary(a => a.Name);
+            var current = Database.RetrieveAll<QueryDN>().Where(a => queryNames.Contains(a.Key)).ToDictionary(a => a.Key);
+            var total = DynamicQueryManager.Current.GetQueryNames(type).Keys.Select(qn => CreateQuery(qn)).ToDictionary(a => a.Key);
 
             total.SetRange(current);
             return total.Values.ToList();
+        }
+
+        public static QueryDN RetrieveOrGenerateQuery(object queryName)
+        {
+            return Database.RetrieveAll<QueryDN>().SingleOrDefault(a => a.Key == QueryUtils.GetQueryName(queryName)) ??
+                CreateQuery(queryName);
+        }
+
+        static QueryDN CreateQuery(object queryName)
+        {
+            return new QueryDN { 
+                Key = QueryUtils.GetQueryName(queryName), 
+                DisplayName = QueryUtils.GetNiceQueryName(queryName) };
         }
 
         const string QueriesKey = "Queries";
 
         static SqlPreCommand SynchronizeQueries(Replacements replacements)
         {
-            var should = CreateQueryNames().Select(kvp => new QueryDN { Name = kvp.Key });
+            var should = DynamicQueryManager.Current.GetQueryNames().Select(qn => CreateQuery(qn));
 
             var current = Administrator.TryRetrieveAll<QueryDN>(replacements);
 
             Table table = Schema.Current.Table<QueryDN>();
 
             return Synchronizer.SynchronizeReplacing(replacements, QueriesKey,
-                current.ToDictionary(a => a.Name),
-                should.ToDictionary(a => a.Name),
+                current.ToDictionary(a => a.Key),
+                should.ToDictionary(a => a.Key),
                 (n, c) => table.DeleteSqlSync(c),
                  null,
                  (fn, c, s) =>
                  {
-                     c.Name = s.Name;
+                     c.Key = s.Key;
+                     c.DisplayName = s.DisplayName;
                      return table.UpdateSqlSync(c);
                  }, Spacing.Double);
         }
     }
-
 }

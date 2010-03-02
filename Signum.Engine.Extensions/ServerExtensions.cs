@@ -16,10 +16,11 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Utilities;
+using Signum.Engine.Basics;
 
 namespace Signum.Services
 {
-    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer,
+    public abstract class ServerExtensions : ServerBasic, ILoginServer, IOperationServer, IQueryServer,
         IQueryAuthServer, IPropertyAuthServer, ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer 
     {
         protected UserDN currentUser;
@@ -129,6 +130,16 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(), "ConstructFromMany {0}".Formato(operationKey),
               () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
+        #endregion
+
+        #region IQueryServer Members
+
+        public QueryDN RetrieveOrGenerateQuery(object queryName)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => QueryLogic.RetrieveOrGenerateQuery(queryName));
+        }
+
         #endregion
 
         #region IPropertyAuthServer Members
@@ -251,5 +262,6 @@ namespace Signum.Services
         }
 
         #endregion
+
     }
 }

@@ -97,10 +97,10 @@ namespace Signum.Engine.Authorization
             Type type = TypeLogic.DnToType[typeDN]; 
 
             var queries = QueryLogic.RetrieveOrGenerateQueries(typeDN);
-            return queries.Select(q => new AllowedRule(GetBaseAllowed(role, q.Name))
+            return queries.Select(q => new AllowedRule(GetBaseAllowed(role, q.Key))
                    {
                        Resource = q,
-                       Allowed = GetAllowed(role, q.Name),
+                       Allowed = GetAllowed(role, q.Key),
                    }).ToList();    
         }
 
@@ -130,7 +130,7 @@ namespace Signum.Engine.Authorization
                 List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
 
                 Dictionary<RoleDN, Dictionary<string, bool>> realRules = Database.RetrieveAll<RuleQueryDN>()
-                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => a.Query.Name, a => a.Allowed));
+                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => a.Query.Key, a => a.Allowed));
 
                 Dictionary<RoleDN, Dictionary<string, bool>> newRules = new Dictionary<RoleDN, Dictionary<string, bool>>();
                 foreach (var role in roles)

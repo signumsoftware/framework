@@ -58,6 +58,9 @@ namespace Signum.Engine.Authorization
 
         static Access GetAccess(RoleDN role, PropertyRoute propertyPath)
         {
+            if (propertyPath.PropertyRouteType == PropertyRouteType.MListItems)
+                return GetAccess(role, propertyPath.Parent);
+
             return RuntimeRules.TryGetC(role).TryGetC(propertyPath.IdentifiableType).TryGetS(propertyPath.PropertyString()) ?? Access.Modify; 
         }
 

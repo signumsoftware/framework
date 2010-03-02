@@ -201,7 +201,7 @@
   <data name="ExcelReportDN_File" xml:space="preserve">
     <value>Fichero</value>
   </data>
-  <data name="ExcelReportDN_QueryName" xml:space="preserve">
+  <data name="ExcelReportDN_Query" xml:space="preserve">
     <value>Consulta</value>
   </data>
   <data name="HolidayDN" xml:space="preserve">
@@ -518,5 +518,32 @@
   </data>
   <data name="LogOperationDN_Plural" xml:space="preserve">
     <value>Logs de operaciones</value>
+  </data>
+  <data name="UserQueryDN" xml:space="preserve">
+    <value>Consulta de Usuario</value>
+  </data>
+  <data name="UserQueryDN_Columns" xml:space="preserve">
+    <value>Columnas</value>
+  </data>
+  <data name="UserQueryDN_DisplayName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="UserQueryDN_Filters" xml:space="preserve">
+    <value>Filtros</value>
+  </data>
+  <data name="UserQueryDN_Orders" xml:space="preserve">
+    <value>Ordenes</value>
+  </data>
+  <data name="UserQueryDN_MaxItems" xml:space="preserve">
+    <value>Max. Resultados</value>
+  </data>
+  <data name="QueryDN" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="QueryDN_DisplayName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="QueryDN_Key" xml:space="preserve">
+    <value>Clave</value>
   </data>
 </root>

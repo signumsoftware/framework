@@ -13,7 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Utilities;
 
-namespace Signum.Windows.Extensions.ExecutionInfo
+namespace Signum.Windows.ExecutionInfo
 {
     /// <summary>
     /// Interaction logic for ElapsedTime.xaml
@@ -39,7 +39,8 @@ namespace Signum.Windows.Extensions.ExecutionInfo
         }
     }
 
-    class ElapsedNode {
+    class ElapsedNode
+    {
         public string Name { get; set; }
         public string EntityName { get; set; }
         public ElapsedTimeEntity ElapsedTimeEnty { get; set; }

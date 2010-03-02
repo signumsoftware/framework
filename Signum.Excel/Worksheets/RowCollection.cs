@@ -12,12 +12,10 @@
 
     public sealed class RowCollection : OffsetCollection<Row>
     {
-        internal int PreWrite()
+        internal void PreWrite()
         {
-            if (this.Count() == 0)
-                return 0;
-
-            return this.Max(r => r.Cells.UpdateIndices());
+            foreach (var r in this)
+                r.Cells.UpdateIndices();
         }
     }
 }

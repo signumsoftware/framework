@@ -22,7 +22,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 
-namespace Signum.Windows.Extensions.Files
+namespace Signum.Windows.Files
 {
     /// <summary>
     /// Interaction logic for FilePath.xaml
@@ -63,7 +63,7 @@ namespace Signum.Windows.Extensions.Files
         {
             ToolBarButton button = new ToolBarButton()
             {
-                Content = Properties.Resources.Open,
+                Content = Extensions.Properties.Resources.Open,
                 Image = ExtensionsImageLoader.GetImageSortName("document_view.png"),
             };
 

@@ -6,9 +6,9 @@
     xmlns:dq="clr-namespace:Signum.Entities.Reports;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="dq:ExcelReportDN" MinWidth="300">
     <StackPanel>
-        <m:ValueLine LabelText="{m:Loc QueryName}" m:Common.Route="QueryName"  m:Common.IsReadOnly="true" />
-        <m:ValueLine LabelText="{m:Loc Name}" m:Common.Route="DisplayName" />
-		<m2:FileLine LabelText="{m:Loc File}" m:Common.Route="File" />
-        <m:ValueLine LabelText="{m:Loc Removed}" m:Common.Route="Deleted" />
+        <m:EntityLine m:Common.Route="Query"  m:Common.IsReadOnly="true" />
+        <m:ValueLine m:Common.Route="DisplayName" />
+		<m2:FileLine m:Common.Route="File" />
+        <m:ValueLine m:Common.Route="Deleted" />
 	</StackPanel>
 </UserControl>

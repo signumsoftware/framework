@@ -15,7 +15,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services; 
 
-namespace Signum.Windows.Extensions.Basics
+namespace Signum.Windows.Basics
 {
     /// <summary>
     /// Interaction logic for Usuario.xaml
@@ -38,6 +38,5 @@ namespace Signum.Windows.Extensions.Basics
         {
             get { return ((RoleDN)DataContext).ToLite(); }
         }
-
    }
 }

@@ -120,8 +120,8 @@
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
-  <data name="CustomReport" xml:space="preserve">
-    <value>Custom Report</value>
+  <data name="Reports" xml:space="preserve">
+    <value>Reports</value>
   </data>
   <data name="Days" xml:space="preserve">
     <value>Days</value>
@@ -203,5 +203,14 @@
   </data>
   <data name="FileTypes" xml:space="preserve">
     <value>FileTypes</value>
+  </data>
+  <data name="MyQueries" xml:space="preserve">
+    <value>My Queries</value>
+  </data>
+  <data name="RemoveUserQuery" xml:space="preserve">
+    <value>Remove User Query?</value>
+  </data>
+  <data name="AreYouSureToRemove0" xml:space="preserve">
+    <value>Are you sure to remove '{0}'?</value>
   </data>
 </root>

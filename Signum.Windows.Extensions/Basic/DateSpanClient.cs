@@ -8,16 +8,16 @@ using Signum.Entities;
 using Signum.Services;
 using System.Reflection;
 using Signum.Entities.Extensions.Basics;
-using Signum.Windows.Extensions.Basics;
 using Signum.Utilities.Reflection;
+using Signum.Windows.Basics;
 
-namespace Signum.Windows.Processes
+namespace Signum.Windows
 {
-    public static class BasicClient
+    public static class DateSpanClient
     {
         internal static void AsserIsStarted()
         {
-            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => BasicClient.Start()));
+            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => DateSpanClient.Start()));
         }
 
         public static void Start()

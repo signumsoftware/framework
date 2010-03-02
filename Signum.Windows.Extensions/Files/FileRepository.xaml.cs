@@ -15,7 +15,7 @@ using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.Files;
 
-namespace Signum.Windows.Extensions.Files
+namespace Signum.Windows.Files
 {
     /// <summary>
     /// Interaction logic for FileRepository.xaml

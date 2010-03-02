@@ -12,8 +12,8 @@
         private ColumnCollection _columns;
         private float _defaultColumnWidth = 48f;
         private float _defaultRowHeight = 12.75f;
-        private int _expandedColumnCount = Namespaces.NullValue;
-        private int _expandedRowCount = Namespaces.NullValue;
+        //private int _expandedColumnCount = Namespaces.NullValue;
+        //private int _expandedRowCount = Namespaces.NullValue;
         private int _fullColumns = Namespaces.NullValue;
         private int _fullRows = Namespaces.NullValue;
         private RowCollection _rows;
@@ -26,8 +26,8 @@
             {
                 {12.75f,_defaultRowHeight, w=>w.DefaultRowHeight},
                 {48f,_defaultColumnWidth,w=>w.DefaultColumnWidth},
-                {Namespaces.NullValue,_expandedColumnCount,w=>w.ExpandedColumnCount},
-                {Namespaces.NullValue,_expandedRowCount,w=>w.ExpandedRowCount},
+                //{Namespaces.NullValue,_expandedColumnCount,w=>w.ExpandedColumnCount},
+                //{Namespaces.NullValue,_expandedRowCount,w=>w.ExpandedRowCount},
                 {Namespaces.NullValue,_fullColumns,w=>w.FullColumns},
                 {Namespaces.NullValue,_fullRows,w=>w.FullRows},
 
@@ -45,8 +45,8 @@
             }
             this._defaultRowHeight = UtilXml.GetAttribute(element, "DefaultRowHeight", Namespaces.SpreadSheet, (float) 12.75f);
             this._defaultColumnWidth = UtilXml.GetAttribute(element, "DefaultColumnWidth", Namespaces.SpreadSheet, (float) 48f);
-            this._expandedColumnCount = UtilXml.GetAttribute(element, "ExpandedColumnCount", Namespaces.SpreadSheet, Namespaces.NullValue);
-            this._expandedRowCount = UtilXml.GetAttribute(element, "ExpandedRowCount", Namespaces.SpreadSheet, Namespaces.NullValue);
+            //this._expandedColumnCount = UtilXml.GetAttribute(element, "ExpandedColumnCount", Namespaces.SpreadSheet, Namespaces.NullValue);
+            //this._expandedRowCount = UtilXml.GetAttribute(element, "ExpandedRowCount", Namespaces.SpreadSheet, Namespaces.NullValue);
             this._fullColumns = UtilXml.GetAttribute(element, "FullColumns", Namespaces.Excel, Namespaces.NullValue);
             this._fullRows = UtilXml.GetAttribute(element, "FullRows", Namespaces.Excel, Namespaces.NullValue);
             this._fullRows = UtilXml.GetAttribute(element, "FullRows", Namespaces.Excel, Namespaces.NullValue);
@@ -88,14 +88,14 @@
             {
                 writer.WriteAttributeString(Namespaces.SchemaPrefix, "DefaultColumnWidth", Namespaces.SpreadSheet, this._defaultColumnWidth.ToString(CultureInfo.InvariantCulture));
             }
-            if (this._expandedColumnCount != Namespaces.NullValue)
-            {
-                writer.WriteAttributeString(Namespaces.SchemaPrefix, "ExpandedColumnCount", Namespaces.SpreadSheet, this._expandedColumnCount.ToString(CultureInfo.InvariantCulture));
-            }
-            if (this._expandedRowCount != Namespaces.NullValue)
-            {
-                writer.WriteAttributeString(Namespaces.SchemaPrefix, "ExpandedRowCount", Namespaces.SpreadSheet, this._expandedRowCount.ToString(CultureInfo.InvariantCulture));
-            }
+            //if (this._expandedColumnCount != Namespaces.NullValue)
+            //{
+            //    writer.WriteAttributeString(Namespaces.SchemaPrefix, "ExpandedColumnCount", Namespaces.SpreadSheet, this._expandedColumnCount.ToString(CultureInfo.InvariantCulture));
+            //}
+            //if (this._expandedRowCount != Namespaces.NullValue)
+            //{
+            //    writer.WriteAttributeString(Namespaces.SchemaPrefix, "ExpandedRowCount", Namespaces.SpreadSheet, this._expandedRowCount.ToString(CultureInfo.InvariantCulture));
+            //}
             if (this._fullColumns != Namespaces.NullValue)
             {
                 writer.WriteAttributeString(Namespaces.ExcelPrefix, "FullColumns", Namespaces.Excel, this._fullColumns.ToString(CultureInfo.InvariantCulture));
@@ -121,14 +121,16 @@
 
         private void PreWrite()
         {
-            ExpandedColumnCount = _rows.PreWrite();
+            _rows.PreWrite();
             if (this._columns != null)
             {
-                ExpandedColumnCount = Math.Max(ExpandedColumnCount, _columns.UpdateIndices()); 
+                //ExpandedColumnCount = Math.Max(ExpandedColumnCount, ); 
+                _columns.UpdateIndices();
             }
             if (this._rows != null)
             {
-                ExpandedRowCount = _rows.UpdateIndices();
+                //ExpandedRowCount = 
+                _rows.UpdateIndices();
             }
         }
 
@@ -178,29 +180,29 @@
             }
         }
 
-        public int ExpandedColumnCount
-        {
-            get
-            {
-                return this._expandedColumnCount;
-            }
-            set
-            {
-                this._expandedColumnCount = value;
-            }
-        }
+        //public int ExpandedColumnCount
+        //{
+        //    get
+        //    {
+        //        return this._expandedColumnCount;
+        //    }
+        //    set
+        //    {
+        //        this._expandedColumnCount = value;
+        //    }
+        //}
 
-        public int ExpandedRowCount
-        {
-            get
-            {
-                return this._expandedRowCount;
-            }
-            set
-            {
-                this._expandedRowCount = value;
-            }
-        }
+        //public int ExpandedRowCount
+        //{
+        //    get
+        //    {
+        //        return this._expandedRowCount;
+        //    }
+        //    set
+        //    {
+        //        this._expandedRowCount = value;
+        //    }
+        //}
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int FullColumns

@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Media.Imaging;
 using System.Windows;
 
-namespace Signum.Windows.Extensions
+namespace Signum.Windows
 {
     public static class ExtensionsImageLoader
     {

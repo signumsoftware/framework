@@ -104,6 +104,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Reports\ReportsLogic.cs" />
+    <Compile Include="Reports\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\CustomTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />

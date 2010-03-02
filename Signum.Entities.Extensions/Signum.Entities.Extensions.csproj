@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7D851227-5294-4BEB-990E-56B4FBB7A148}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -68,7 +68,7 @@
     <Compile Include="Basics\DateSpanDN.cs" />
     <Compile Include="Basics\EntityGroupDN.cs" />
     <Compile Include="Basics\EnumDN.cs" />
-    <Compile Include="Basics\PropertyPathDN.cs" />
+    <Compile Include="Basics\PropertyDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
@@ -82,6 +82,7 @@
     <Compile Include="Processes\Process.cs" />
     <Compile Include="Processes\Package.cs" />
     <Compile Include="Reports\CompositeReportDN.cs" />
+    <Compile Include="Reports\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.es.Designer.cs">
@@ -94,7 +95,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Reports\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
+    <Compile Include="Reports\UserQueryDN.cs" />
     <Compile Include="Scheduler\CalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
     <Compile Include="Scheduler\ScheduleRule.cs" />

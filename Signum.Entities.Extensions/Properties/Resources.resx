@@ -201,8 +201,8 @@
   <data name="ExcelReportDN_File" xml:space="preserve">
     <value>File</value>
   </data>
-  <data name="ExcelReportDN_QueryName" xml:space="preserve">
-    <value>Query Name</value>
+  <data name="ExcelReportDN_Query" xml:space="preserve">
+    <value>Query</value>
   </data>
   <data name="HolidayDN" xml:space="preserve">
     <value>Holidays</value>
@@ -533,5 +533,32 @@
   </data>
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
     <value>Process Start is null but Process End is not</value>
+  </data>
+  <data name="UserQueryDN" xml:space="preserve">
+    <value>User Query</value>
+  </data>
+  <data name="UserQueryDN_Columns" xml:space="preserve">
+    <value>Columns</value>
+  </data>
+  <data name="UserQueryDN_DisplayName" xml:space="preserve">
+    <value>Display Name</value>
+  </data>
+  <data name="UserQueryDN_Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="UserQueryDN_Orders" xml:space="preserve">
+    <value>Orders</value>
+  </data>
+  <data name="UserQueryDN_MaxItems" xml:space="preserve">
+    <value>Max Items</value>
+  </data>
+  <data name="QueryDN" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="QueryDN_DisplayName" xml:space="preserve">
+    <value>Display Name</value>
+  </data>
+  <data name="QueryDN_Key" xml:space="preserve">
+    <value>Key</value>
   </data>
 </root>

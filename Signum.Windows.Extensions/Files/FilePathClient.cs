@@ -8,7 +8,7 @@ using Signum.Entities.Files;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
 
-namespace Signum.Windows.Extensions.Files
+namespace Signum.Windows.Files
 {
     public static class FilePathClient
     {
