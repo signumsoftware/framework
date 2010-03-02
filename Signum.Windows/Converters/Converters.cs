@@ -109,12 +109,26 @@ namespace Signum.Windows
         public static readonly IValueConverter ToStringConverter = ConverterFactory.New(
             (object d) => d.TryCC(a => a.ToString()));
 
+        public static readonly IValueConverter TokenOperations = ConverterFactory.New(
+            (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));
+
         static readonly ColorConverter cc = new ColorConverter();
         public static readonly IValueConverter ColorConverter = ConverterFactory.New(
             (ColorDN c) => c == null ? null : (Color?)(System.Windows.Media.ColorConverter.ConvertFromString(c.Hex)),
             (Color? c) => c == null ? null : new ColorDN { Hex = cc.ConvertToString(c) });
 
-        public static readonly IValueConverter FilterOperation = ConverterFactory.New((FilterOperation fo) => fo.NiceToString());
+
+        public static readonly IMultiValueConverter And = ConverterFactory.New(
+            (bool a, bool b) => a && b);
+
+        public static readonly IMultiValueConverter AndToVisibility = ConverterFactory.New(
+            (bool a, bool b) => a && b ? Visibility.Visible : Visibility.Collapsed);
+
+        public static readonly IMultiValueConverter Or = ConverterFactory.New(
+            (bool a, bool b) => a || b);
+
+        public static readonly IMultiValueConverter OrToVisibility = ConverterFactory.New(
+                (bool a, bool b) => a || b ? Visibility.Visible : Visibility.Collapsed);
     }
 
     public static class ColorExtensions

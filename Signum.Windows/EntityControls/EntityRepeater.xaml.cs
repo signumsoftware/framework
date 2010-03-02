@@ -100,14 +100,14 @@ namespace Signum.Windows
             return Remove && !Common.GetIsReadOnly(this);
         }
 
-        private void Grid_Initialized(object sender, EventArgs e)
-        {
-            Grid grid = (Grid)sender;
+        //private void Grid_Initialized(object sender, EventArgs e)
+        //{
+        //    Grid grid = (Grid)sender;
 
-            PropertyRoute tc = Common.GetTypeContext(grid);
+        //    PropertyRoute tc = Common.GetTypeContext(grid);
 
-            Common.SetTypeContext(grid, tc.Add("Item"));
-        }
+        //    Common.SetTypeContext(grid, tc.Add("Item"));
+        //}
     }
 
     [StyleTypedPropertyAttribute(Property = "ItemContainerStyle", StyleTargetType = typeof(ContentControl))]

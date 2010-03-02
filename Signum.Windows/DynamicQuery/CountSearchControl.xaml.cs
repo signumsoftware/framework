@@ -91,7 +91,7 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            Navigator.Manager.SetTokens(QueryName, FilterOptions);
+            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
 
             Search();
         }
@@ -107,7 +107,7 @@ namespace Signum.Windows
             Async.Do(this.FindCurrentWindow(),
                 () =>
 
-                    queryCount = Server.Return((IQueryServer s)=>s.GetQueryCount(vn, lf)),
+                    queryCount = Server.Return((IDynamicQueryServer s)=>s.GetQueryCount(vn, lf)),
                 () =>
                 {
                     ItemsCount = queryCount;

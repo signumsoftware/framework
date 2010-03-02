@@ -128,6 +128,14 @@ namespace Signum.Utilities.DataStructures
             return new Tuple<F, S, T>(first, second, third);
         }    
     }
+
+    public static class KVP
+    {
+        public static KeyValuePair<F, S> New<F, S>(F first, S second)
+        {
+            return new KeyValuePair<F, S>(first, second);
+        }
+    }
 }
 
 

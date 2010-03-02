@@ -10,7 +10,12 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="..\Resources.xaml"/>
+                <ResourceDictionary Source="..\BlueMenu.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <ContextMenu x:Key="contextMenu">
+                <MenuItem Header="{m:Loc Rename}" Click="renameMenu_Click"/>
+                <MenuItem Header="{m:Loc Remove}" Click="removeMenu_Click"/>
+            </ContextMenu>
             <Style x:Key="FilterButtonStyle" TargetType="{x:Type ToggleButton}">
                 <Style.BasedOn>
                     <Style TargetType="{x:Type ButtonBase}">
@@ -69,55 +74,70 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" x:Name="rowFilters"/>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"  />
+            <RowDefinition Height="*" MinHeight="100"/>
+            <RowDefinition Height="32"  />
         </Grid.RowDefinitions>
-        <StackPanel Visibility="{Binding ShowHeader, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" >
-            <Grid Background="#FFC9E4FF" 
-                Visibility="{Binding ShowFilters, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
-                    <m:QueryTokenBuilder x:Name="tokenBuilder" />
-                    <m:ImageButton Image="..\Images\newFilter.png" Content="{m:Loc NewFilter}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" />
-                    <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc NewColumn}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click"
+        <Grid Background="#FFC9E4FF" >
+            <Grid.Visibility>
+                <MultiBinding Converter="{x:Static m:Converters.AndToVisibility}">
+                    <Binding Path="ShowHeader" ElementName="me"/>
+                    <Binding Path="ShowFilters" ElementName="me"/>
+                </MultiBinding>
+            </Grid.Visibility>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" x:Name="nuevoFiltro">
+                <m:QueryTokenBuilder x:Name="tokenBuilder" />
+                <m:ImageButton Image="..\Images\newFilter.png" Content="{m:Loc NewFilter}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" />
+                <m:ImageButton Image="..\Images\newColumn.png" Content="{m:Loc NewColumn}" x:Name="btCreateColumn" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateColumn_Click"
                                    Visibility="{Binding AllowUserColumns, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}"/>
-                </StackPanel>
-                <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
-            </Grid>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent">
-                <StackPanel.Resources>
-                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
-                        <Setter Property="Width" Value="24"/>
-                        <Setter Property="Height" Value="24"/>
-                        <Setter Property="Margin" Value="3"/>
-                        <Setter Property="VerticalAlignment" Value="Center"/>
-                    </Style>
-                </StackPanel.Resources>
-                <ToggleButton x:Name="btFilters" 
+            </StackPanel>
+            <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
+        </Grid>
+        <GridSplitter HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Grid.Row="0" Height="3" Background="#FFC9E4FF">
+            <GridSplitter.Visibility>
+                <MultiBinding Converter="{x:Static m:Converters.AndToVisibility}">
+                    <Binding Path="ShowHeader" ElementName="me"/>
+                    <Binding Path="ShowFilters" ElementName="me"/>
+                </MultiBinding>
+            </GridSplitter.Visibility>
+
+        </GridSplitter>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Height="30" Background="Transparent"
+                    Visibility="{Binding ShowHeader, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Grid.Row="1">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type Button}" BasedOn="{StaticResource RoundButton}" x:Key="big">
+                    <Setter Property="Width" Value="24"/>
+                    <Setter Property="Height" Value="24"/>
+                    <Setter Property="Margin" Value="3"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+            </StackPanel.Resources>
+            <ToggleButton x:Name="btFilters" 
+                          Unchecked="btFilters_Unchecked"
                               IsChecked="{Binding ShowFilters, ElementName=me}"
                               Visibility="{Binding ShowFilterButton, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Margin="0,0,5,0" Style="{DynamicResource FilterButtonStyle}" Padding="5,1" >
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Filtros" VerticalAlignment="Center" Margin="3,0,0,0"/>
-                    </StackPanel>
-                </ToggleButton>
-                <Button x:Name="btFind" Click="FilterBuilder_SearchClicked"  ToolTip="{m:Loc Find}" Style="{DynamicResource RoundBigButton}" >
-                    <StackPanel Orientation="Horizontal">
-                        <Border Child="{StaticResource Find}" Width="20" Height="20"/>
-                        <TextBlock Text="{m:Loc Find}" TextWrapping="Wrap" Margin="3,0,0,0" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-                <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" ToolTip="{m:Loc CreateNew}" Style="{StaticResource big}"/>
-                <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
-                <Menu IsMainMenu="False" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="menu"/>
-            </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Filtros" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                </StackPanel>
+            </ToggleButton>
+            <Button x:Name="btFind" Click="FilterBuilder_SearchClicked"  ToolTip="{m:Loc Find}" Style="{DynamicResource RoundBigButton}" >
+                <StackPanel Orientation="Horizontal">
+                    <Border Child="{StaticResource Find}" Width="20" Height="20"/>
+                    <TextBlock Text="{m:Loc Find}" TextWrapping="Wrap" Margin="3,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" ToolTip="{m:Loc CreateNew}" Style="{StaticResource big}"/>
+            <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc ViewSelected}" Style="{StaticResource big}"/>
+            <Menu IsMainMenu="False" x:Name="menu" VerticalAlignment="Center" Background="Transparent"/>
         </StackPanel>
         <ListView x:Name="lvResult"
-                  Grid.Row="1" 
-                  MinHeight="100"
+                Grid.Row="2" 
+                MinHeight="100"
                   IsSynchronizedWithCurrentItem="True" 
                   Background="WhiteSmoke"
                   SelectionChanged="lvResult_SelectionChanged" 
@@ -143,7 +163,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <StackPanel Height="24" Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Orientation="Horizontal" Grid.Row="2" Margin="6,4,6,4" HorizontalAlignment="Left"  >
+        <StackPanel Height="24" Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}" Orientation="Horizontal" Grid.Row="3" Margin="6,4,6,4" HorizontalAlignment="Left"  >
             <TextBlock TextWrapping="Wrap" x:Name="tbResultados" Visibility="Hidden" VerticalAlignment="Center" Margin="0,0,5,0">
                 <InlineUIContainer>
         		    <TextBlock Text="{Binding Items.Count, ElementName=lvResult, Mode=Default}" TextWrapping="Wrap" FontWeight="Bold" />

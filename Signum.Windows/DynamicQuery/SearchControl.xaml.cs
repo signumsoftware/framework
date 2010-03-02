@@ -226,8 +226,8 @@ namespace Signum.Windows
         Column entityColumn;
         ResultTable resultTable;
         public ResultTable ResultTable { get { return resultTable; } }
-        QuerySettings settings;
-        QueryDescription description;
+        public QuerySettings Settings { get; private set; }
+        public QueryDescription Description { get; private set; }
 
         public static readonly RoutedEvent QueryResultChangedEvent = EventManager.RegisterRoutedEvent(
             "QueryResultChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SearchControl));
@@ -244,14 +244,14 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            settings = Navigator.GetQuerySettings(QueryName);
+            Settings = Navigator.GetQuerySettings(QueryName);
 
-            description = Navigator.Manager.GetQueryDescription(QueryName);
+            Description = Navigator.Manager.GetQueryDescription(QueryName);
 
             tokenBuilder.Token = null;
-            tokenBuilder.Columns = description.StaticColumns;
+            tokenBuilder.StaticColumns = Description.StaticColumns.Where(sc => sc.Filterable);
 
-            entityColumn = description.StaticColumns.SingleOrDefault(a => a.IsEntity);
+            entityColumn = Description.StaticColumns.SingleOrDefault(a => a.IsEntity);
             if (entityColumn != null)
             {
                 SetValue(EntityTypeKey, Reflector.ExtractLite(entityColumn.Type));
@@ -267,7 +267,7 @@ namespace Signum.Windows
 
             GenerateListViewColumns();
 
-            Navigator.Manager.SetTokens(QueryName, FilterOptions);
+            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
 
             foreach (var fo in FilterOptions)
             {
@@ -276,21 +276,9 @@ namespace Signum.Windows
 
             filterBuilder.Filters = FilterOptions;
 
-            Navigator.Manager.SetTokens(QueryName, OrderOptions);
+            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
 
-            for (int i = 0; i < OrderOptions.Count; i++)
-            {
-                OrderOption item = OrderOptions[i];
-                QueryToken token = item.Token as QueryToken;
-                if (token != null)
-                {
-                    GridViewColumnHeader header = gvResults.Columns
-                        .Select(c => (GridViewColumnHeader)c.Header)
-                        .Single(c => ((StaticColumn)c.Tag).Name == item.Path);
-                    if (header != null)
-                        item.ColumnOrderInfo = new ColumnOrderInfo(header, item.OrderType, i);
-                }
-            }
+            CompleteOrderColumns();
 
 
             if (GetCustomMenuItems != null)
@@ -309,6 +297,21 @@ namespace Signum.Windows
                     Search();
                 else
                     IsVisibleChanged += SearchControl_IsVisibleChanged;
+            }
+        }
+
+        private void CompleteOrderColumns()
+        {
+            for (int i = 0; i < OrderOptions.Count; i++)
+            {
+                OrderOption item = OrderOptions[i];
+                QueryToken token = (QueryToken)item.Token;
+
+                GridViewColumnHeader header = gvResults.Columns
+                    .Select(c => (GridViewColumnHeader)c.Header)
+                    .FirstOrDefault(c => ((Column)c.Tag).GetQueryToken().FullKey() == token.FullKey());
+                if (header != null)
+                    item.ColumnOrderInfo = new ColumnOrderInfo(header, item.OrderType, i);
             }
         }
 
@@ -374,12 +377,12 @@ namespace Signum.Windows
         {
             gvResults.Columns.Clear();
 
-            foreach (var c in this.description.StaticColumns.Where(c => c.Visible))
+            foreach (var c in Description.StaticColumns.Where(c => c.Visible))
             {
                 AddListViewColumn(c);
             }
 
-            int num = this.description.StaticColumns.Count;
+            int num = Description.StaticColumns.Count;
             foreach (var uco in UserColumns)
             {
                 uco.GridViewColumn = AddListViewColumn(uco.UserColumn);
@@ -403,7 +406,12 @@ namespace Signum.Windows
         {
             GridViewColumn column = new GridViewColumn
             {
-                Header = new GridViewColumnHeader { Content = c.DisplayName, Tag = c },
+                Header = new GridViewColumnHeader
+                {
+                    Content = c.DisplayName,
+                    Tag = c,
+                    ContextMenu = c is UserColumn ? (ContextMenu)FindResource("contextMenu") : null
+                },
                 CellTemplate = CreateDataTemplate(c),
             };
             gvResults.Columns.Add(column);
@@ -413,7 +421,7 @@ namespace Signum.Windows
         DataTemplate CreateDataTemplate(Column c)
         {
             Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
-            DataTemplate dt = settings.GetFormatter(c)(b);
+            DataTemplate dt = Settings.GetFormatter(c)(b);
             return dt;
         }
 
@@ -438,7 +446,7 @@ namespace Signum.Windows
             int? limit = MaxItemsCount;
 
             Async.Do(this.FindCurrentWindow(),
-                () => resultTable = Server.Return((IQueryServer s) => s.GetQueryResult(vn, userColumns, filters, orders, limit)),
+                () => resultTable = Server.Return((IDynamicQueryServer s) => s.GetQueryResult(vn, userColumns, filters, orders, limit)),
                 () =>
                 {
                     if (resultTable != null)
@@ -465,7 +473,7 @@ namespace Signum.Windows
             OnQueryResultChanged(false);
         }
 
-        private void ClearResults()
+        public void ClearResults()
         {
             OnQueryResultChanged(true);
             resultTable = null;
@@ -600,11 +608,13 @@ namespace Signum.Windows
                 ResultRow row = (ResultRow)lvResult.SelectedItem;
                 if (row != null)
                 {
+                    object value = row[column];
+
                     return new FilterOption
                     {
                         Token = column.GetQueryToken(),
                         Operation = FilterOperation.EqualTo,
-                        Value = row[column]
+                        Value = value is EmbeddedEntity ? null : value
                     };
                 }
             }
@@ -636,11 +646,11 @@ namespace Signum.Windows
             }
 
             string result = token.NiceName();
-            if (ValueLineBox.Show<string>(ref result, "New Column's Name", "Choose the display name of the new column", "Column Name", null, null, this.FindCurrentWindow()))
+            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
             {
                 ClearResults();
 
-                UserColumn col = new UserColumn(description.StaticColumns.Count, token) { UserColumnIndex = UserColumns.Count, DisplayName = result };
+                UserColumn col = new UserColumn(Description.StaticColumns.Count, token) { UserColumnIndex = UserColumns.Count, DisplayName = result };
 
                 var gridViewColumn = AddListViewColumn(col);
 
@@ -670,16 +680,61 @@ namespace Signum.Windows
                 AddColumn(filter.Token);
             }
         }
+
+        private void renameMenu_Click(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+
+            UserColumn col = (UserColumn)gvch.Tag; 
+            string result = col.DisplayName;
+            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, this.FindCurrentWindow()))
+            {
+                col.DisplayName = result;
+                gvch.Content = result;
+            }
+        }
+
+        private void removeMenu_Click(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader gvch = (GridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
+
+            GridViewColumn column = gvResults.Columns.Single(a => a.Header == gvch);
+
+            gvResults.Columns.Remove(column);
+            UserColumns.Remove(UserColumns.Single(a => a.GridViewColumn == column));
+        }
+
+        public void Reinitialize(IEnumerable<FilterOption> filters, IEnumerable<UserColumnOption> columns, IEnumerable<OrderOption> orders)
+        {
+            UserColumns.Clear();
+            UserColumns.AddRange(columns);
+            Navigator.Manager.SetUserColumns(QueryName, UserColumns);
+            GenerateListViewColumns();
+
+            FilterOptions.Clear();
+            FilterOptions.AddRange(filters);
+            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+
+            OrderOptions.Clear();
+            OrderOptions.AddRange(orders);
+            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
+            CompleteOrderColumns();
+        }
+
+        private void btFilters_Unchecked(object sender, RoutedEventArgs e)
+        {
+            rowFilters.Height = new GridLength(); //Auto
+        }
     }
 
     public delegate SearchControlMenuItem MenuItemForQueryName(object queryName, Type entityType);
 
     public class SearchControlMenuItem : MenuItem
     {
-        protected SearchControl SearchControl;
+        public SearchControl SearchControl { get; set; }
 
         public SearchControlMenuItem() { }
-        public SearchControlMenuItem(RoutedEventHandler onClick) 
+        public SearchControlMenuItem(RoutedEventHandler onClick)
         {
             this.Click += onClick;
         }
@@ -695,17 +750,16 @@ namespace Signum.Windows
             this.Loaded -= SearchControlMenuItem_Loaded;
             if (this.Parent != null)
             {
-                // TODO: olmo el error cansino de los buscadore al iniciar
-                var result = this.Parents().OfType<SearchControl>().FirstOrDefault();
-                if (result != null)
+                SearchControl result = this.LogicalParents().OfType<SearchControl>().First();
+             
+                if (result is SearchControl)
                 {
-                    SearchControl = result;
+                    SearchControl = (SearchControl)result;
 
                     SearchControl.QueryResultChanged += new RoutedEventHandler(searchControl_QueryResultChanged);
 
                     Initialize();
                 }
-
             }
         }
 
@@ -714,14 +768,35 @@ namespace Signum.Windows
             QueryResultChanged();
         }
 
-        protected virtual void Initialize()
+        public virtual void Initialize()
         {
-
+            foreach (var item in Items.OfType<SearchControlMenuItem>())
+            {
+                item.SearchControl = this.SearchControl;
+                item.Initialize();
+            }
         }
 
-        protected virtual void QueryResultChanged()
+        public virtual void QueryResultChanged()
         {
+            foreach (var item in Items.OfType<SearchControlMenuItem>())
+            {
+                item.QueryResultChanged();
+            }
+        }
 
+        public Image GetImage(ImageSource source)
+        {
+            var result = new Image
+            {
+                Width = 16,
+                Height = 16,
+                SnapsToDevicePixels = true,
+                Source = source
+            };
+
+            RenderOptions.SetBitmapScalingMode(result, BitmapScalingMode.NearestNeighbor);
+            return result;
         }
     }
 }

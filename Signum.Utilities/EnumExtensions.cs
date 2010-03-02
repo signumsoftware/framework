@@ -57,5 +57,28 @@ namespace Signum.Utilities
                 result >>= 1;
             return result;
         }
+
+        public static bool TryParse(string value, Type enumType, bool ignoreCase, out Enum result)
+        {
+            if (!Enum.IsDefined(enumType, value))
+            {
+                result = null;
+                return false;
+            }
+            result = (Enum)Enum.Parse(enumType, value);
+            return true;
+        }
+
+        public static bool TryParse<T>(string value, bool ignoreCase, out T result)
+            where T:struct
+        {
+            if (!Enum.IsDefined(typeof(T), value))
+            {
+                result = default(T);
+                return false;
+            }
+            result = (T)(object)Enum.Parse(typeof(T), value);
+            return true;
+        }
     }
 }

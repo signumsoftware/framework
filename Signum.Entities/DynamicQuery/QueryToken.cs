@@ -20,7 +20,7 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Unit { get; }
         public abstract Type Type { get; }
         public abstract string Key { get; }
-        public abstract QueryToken[] SubTokens();
+        protected abstract QueryToken[] SubTokensInternal();
      
         public abstract Expression BuildExpression(Expression expression);
 
@@ -40,7 +40,17 @@ namespace Signum.Entities.DynamicQuery
             return new ColumnToken(column);
         }
 
-        protected QueryToken[] SubTokens(Type type, Implementations implementations)
+        public QueryToken[] SubTokens()
+        {
+            var result = this.SubTokensInternal();
+
+            if (result == null)
+                return null;
+
+            return result.Where(t => t.IsAllowed()).ToArray();
+        }
+
+        protected QueryToken[] SubTokensBase(Type type, Implementations implementations)
         {
             if (type.UnNullify() == typeof(DateTime))
             {
@@ -63,6 +73,10 @@ namespace Signum.Entities.DynamicQuery
 
                 return new[] { EntityPropertyToken.IdProperty(this), EntityPropertyToken.ToStrProperty(this) }
                     .Concat(EntityProperties(cleanType)).ToArray();
+            }
+            else if(typeof(EmbeddedEntity).IsAssignableFrom(cleanType))
+            {
+                return EntityProperties(cleanType).ToArray();
             }
 
             return null;
@@ -115,23 +129,23 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
-        public static QueryToken Parse(object queryName, QueryDescription queryDescription, string tokenString)
+        public static QueryToken Parse(QueryDescription queryDescription, string tokenString)
         {
             string[] tokens = tokenString.Split('.');
 
             string first = tokens.First();
 
             StaticColumn column = queryDescription.StaticColumns.Where(a => a.Name == first).Single(
-                "Column {0} not found on query {1}".Formato(first, QueryUtils.GetNiceQueryName(queryName)),
-                "More than one column named {0} on query {1}".Formato(first, QueryUtils.GetNiceQueryName(queryName)));
+                Resources.Column0NotFoundOnQuery1.Formato(first, QueryUtils.GetNiceQueryName(queryDescription.QueryName)),
+                Resources.MoreThanOneColumnNamed0OnQuery1.Formato(first, QueryUtils.GetNiceQueryName(queryDescription.QueryName)));
 
             var result = QueryToken.NewColumn(column);
 
             foreach (var token in tokens.Skip(1))
             {
-                result = result.SubTokens().Where(k => k.Key == token).Single(
-                      "Token {0} not compatible with {1}".Formato(first, result),
-                      "More than one token with key {0} found on {1}".Formato(first, result));
+                result = result.SubTokensInternal().Where(k => k.Key == token).Single(
+                      Resources.Token0NotCompatibleWith1.Formato(first, result),
+                      Resources.MoreThanOneTokenWithKey0FoundOn1.Formato(first, result));
             }
 
             return result;
@@ -183,10 +197,12 @@ namespace Signum.Entities.DynamicQuery
         public override Expression BuildExpression(Expression expression)
         {
             var result = Parent.BuildExpression(expression);
+            if (Nullable.GetUnderlyingType(result.Type) != null)
+                result = Expression.Property(result, "Value");
             return Expression.Property(result, PropertyInfo);
         }
 
-        public override QueryToken[] SubTokens()
+        protected override QueryToken[] SubTokensInternal()
         {
             return null;
         }
@@ -308,7 +324,7 @@ namespace Signum.Entities.DynamicQuery
             return BuildLite(result);
         }
 
-        public override QueryToken[] SubTokens()
+        protected override QueryToken[] SubTokensInternal()
         {
             if (PropertyInfo.PropertyType.UnNullify() == typeof(DateTime))
             {
@@ -328,7 +344,7 @@ namespace Signum.Entities.DynamicQuery
                 return NetPropertyToken.CollectionProperties(this);
             }
 
-            return SubTokens(PropertyInfo.PropertyType, implementations);
+            return SubTokensBase(PropertyInfo.PropertyType, implementations);
         }
 
         public override Implementations Implementations()
@@ -348,12 +364,14 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool IsAllowed()
         {
-            return Parent.IsAllowed() && GetPropertyRoute().IsAllowed();
+            PropertyRoute route = GetPropertyRoute();
+
+            return Parent.IsAllowed() && (route == null || route.IsAllowed());
         }
 
         public override PropertyRoute GetPropertyRoute()
         {
-            return Parent.GetPropertyRoute().Add(PropertyInfo);
+            return Parent.GetPropertyRoute().TryCC(pr => pr.Add(PropertyInfo));
         }
 
         public override string NiceName()
@@ -402,9 +420,9 @@ namespace Signum.Entities.DynamicQuery
             return BuildLite(result);
         }
 
-        public override QueryToken[] SubTokens()
+        protected override QueryToken[] SubTokensInternal()
         {
-            return SubTokens(type, null);
+            return SubTokensBase(type, null);
         }
 
         public override string Format
@@ -483,7 +501,7 @@ namespace Signum.Entities.DynamicQuery
             return Expression.Property(expression, Column.Name);
         }
 
-        public override QueryToken[] SubTokens()
+        protected override QueryToken[] SubTokensInternal()
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
@@ -500,7 +518,7 @@ namespace Signum.Entities.DynamicQuery
 
             }
 
-            return SubTokens(Column.Type, Column.Implementations);
+            return SubTokensBase(Column.Type, Column.Implementations);
         }
 
         public override Implementations Implementations()
@@ -515,8 +533,11 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
+            if (Column.PropertyRoute != null)
+                return Column.PropertyRoute;
+
             Type type = Reflector.ExtractLite(Type);
-            if (type != null)
+            if (type != null && typeof(IdentifiableEntity).IsAssignableFrom(type))
                 return PropertyRoute.Root(type);
 
             return null;

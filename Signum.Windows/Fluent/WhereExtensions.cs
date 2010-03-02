@@ -12,11 +12,15 @@ namespace Signum.Windows
     public static class WhereExtensions
     {
 
-        public static IEnumerable<DependencyObject> Parents(this DependencyObject child)
+        public static IEnumerable<DependencyObject> VisualParents(this DependencyObject child)
         {
             return child.FollowC(VisualTreeHelper.GetParent);
         }
 
+        public static IEnumerable<DependencyObject> LogicalParents(this DependencyObject child)
+        {
+            return child.FollowC(LogicalTreeHelper.GetParent);
+        }
 
         public static IEnumerable<DependencyObject> BreathFirstVisual(DependencyObject parent, bool recursive, Func<DependencyObject, bool> predicate)
         {

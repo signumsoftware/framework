@@ -120,7 +120,7 @@ namespace Signum.Windows
         {
             Dictionary<string, string> dic = new Dictionary<string, string>();
 
-            List<object> queryNames =  Server.Return((IQueryServer s)=>s.GetQueryNames()); 
+            List<object> queryNames =  Server.Return((IDynamicQueryServer s)=>s.GetQueryNames()); 
 
             string menuItems = queryNames.ToString(o => GetMenuItem(o, dic), "\r\n");
             string nameSpaces = dic.ToString(kvp => "xmlns:{0}=\"clr-namespace:{1};assembly={2}\"".Formato(kvp.Value, kvp.Key.Split(';')[0], kvp.Key.Split(';')[1]), "\r\n");

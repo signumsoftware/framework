@@ -268,6 +268,7 @@ namespace Signum.Windows
             DependencyProperty labelText =
                fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
                fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
+               fe is TextBlock ? TextBlock.TextProperty:
                null;
 
             if (labelText != null && fe.NotSet(labelText))
@@ -317,8 +318,7 @@ namespace Signum.Windows
 
                 if (entityContext != null)
                 {
-
-                    if (Navigator.Manager.ServerTypes.ContainsKey(entityContext.IdentifiableType))
+                    if (Server.ServerTypes.ContainsKey(entityContext.IdentifiableType))
                         eb.Implementations = Server.Return((IBaseServer s) => s.FindImplementations(context));
                 }
             }

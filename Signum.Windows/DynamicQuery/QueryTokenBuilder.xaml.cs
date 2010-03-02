@@ -24,38 +24,48 @@ namespace Signum.Windows
             PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
         }
 
-        List<QueryToken> tokens; 
+        public static readonly DependencyProperty TokenProperty =
+              DependencyProperty.Register("Token", typeof(QueryToken), typeof(QueryTokenBuilder), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                  (d, e) => ((QueryTokenBuilder)d).UpdateTokenList((QueryToken)e.NewValue)));
         public QueryToken Token
         {
-            get { return tokens.LastOrDefault(); }
-            set
-            {
-                if (value == null)
-                    tokens = new List<QueryToken>();
-                else
-                    tokens = value.FollowC(a => a.Parent).Reverse().ToList();
-                UpdateTokens();
-            }
+            get { return (QueryToken)GetValue(TokenProperty); }
+            set { SetValue(TokenProperty, value); }
         }
 
-        public static readonly DependencyProperty ColumnsProperty =
-            DependencyProperty.Register("Columns", typeof(List<StaticColumn>), typeof(QueryTokenBuilder), new UIPropertyMetadata((d, e) => ((QueryTokenBuilder)d).UpdateTokens()));
-        public List<StaticColumn> Columns
+        List<QueryToken> tokens = new List<QueryToken>(); 
+        private void UpdateTokenList(QueryToken queryToken)
         {
-            get { return (List<StaticColumn>)GetValue(ColumnsProperty); }
-            set { SetValue(ColumnsProperty, value); }
+            if (tokens.LastOrDefault() == queryToken)
+                return;
+
+            if (queryToken == null)
+                tokens = new List<QueryToken>();
+            else
+                tokens = queryToken.FollowC(a => a.Parent).Reverse().ToList();
+            UpdateCombo();
         }
 
-        
-        void UpdateTokens()
+
+        public static readonly DependencyProperty StaticColumnsProperty =
+            DependencyProperty.Register("StaticColumns", typeof(IEnumerable<StaticColumn>), typeof(QueryTokenBuilder), new UIPropertyMetadata(null,
+                (d, e) => ((QueryTokenBuilder)d).UpdateCombo()));
+        public IEnumerable<StaticColumn> StaticColumns
         {
-            if (Columns == null)
+            get { return (IEnumerable<StaticColumn>)GetValue(StaticColumnsProperty); }
+            set { SetValue(StaticColumnsProperty, value); }
+        }
+
+
+        void UpdateCombo()
+        {
+            if (StaticColumns == null)
                 return; 
 
             sp.Children.Clear(); 
             for (int i = 0; i < tokens.Count + 1; i++)
 			{
-                QueryToken[] subTokens = i == 0? Columns.Select(c=>QueryToken.NewColumn(c)).ToArray():
+                QueryToken[] subTokens = i == 0 ? StaticColumns.Select(c => QueryToken.NewColumn(c)).ToArray() :
                                                  tokens[i-1].SubTokens();
 
                 if (i == tokens.Count && subTokens == null || subTokens.Length == 0)
@@ -81,12 +91,12 @@ namespace Signum.Windows
             QueryToken[] subTokens = newToken.SubTokens();
 
             sp.Children.RemoveRange(index + 1, sp.Children.Count - (index + 1)); //all
-            if(subTokens != null && subTokens.Length != 0)
+            if (subTokens != null && subTokens.Length != 0)
                 sp.Children.Add(new ComboBox
                 {
                     Tag = index + 1,
                     ItemsSource = subTokens,
-                    SelectedIndex =-1,
+                    SelectedIndex = -1,
                 });
 
             if (tokens.Count <= index)
@@ -96,6 +106,8 @@ namespace Signum.Windows
                 tokens[index] = newToken;
                 tokens.RemoveRange(index + 1, tokens.Count - (index + 1)); //all
             }
+
+            Token = tokens.LastOrDefault();
         }
 
         public QueryTokenBuilder()

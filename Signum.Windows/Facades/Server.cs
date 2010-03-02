@@ -27,11 +27,22 @@ namespace Signum.Windows
 
         public static void Connect()
         {
-            if (current == null || (current is ICommunicationObject) && ((ICommunicationObject)current).State == CommunicationState.Faulted)
+            if (!Connected)
+            {
                 current = getServer();
+                ServerTypes = current.ServerTypes(); 
+            }
 
             if (current == null)
                 throw new InvalidOperationException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+        }
+
+        public static bool Connected
+        {
+            get
+            {
+                return (current is ICommunicationObject) && ((ICommunicationObject)current).State != CommunicationState.Faulted;
+            }
         }
        
         public static void Execute<S>(Action<S> action)
@@ -236,6 +247,28 @@ namespace Signum.Windows
             }
 
             return false;
+        }
+
+        public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
+
+        private static Type TryGetType(string typeName)
+        {
+            return ServerTypes.Keys.Where(t => t.Name == typeName).SingleOrDefault();
+        }
+
+        private static Type GetType(string typeName)
+        {
+            return ServerTypes.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the Server".Formato(typeName));
+        }
+
+        public static Lite ParseLite(Type liteType, string liteKey)
+        {
+            return Lite.ParseLite(liteType, liteKey, TryGetType);
+        }
+
+        public static string TryParseLite(Type liteType, string liteKey, out Lite result)
+        {
+            return Lite.TryParseLite(liteType, liteKey, TryGetType, out result);
         }
     }
 }

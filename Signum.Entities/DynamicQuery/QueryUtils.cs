@@ -62,6 +62,9 @@ namespace Signum.Entities.DynamicQuery
                     if (typeof(IIdentifiable).IsAssignableFrom(type))
                         return FilterType.Entity;
 
+                    if (typeof(EmbeddedEntity).IsAssignableFrom(type))
+                        return FilterType.Embedded;
+
                     goto default;
                 default:
                     throw new ApplicationException(Resources.Type0NotSupported.Formato(type));
@@ -116,6 +119,13 @@ namespace Signum.Entities.DynamicQuery
             },
             { 
                 FilterType.Entity, new List<FilterOperation>
+                {
+                    FilterOperation.EqualTo,
+                    FilterOperation.DistinctTo,
+                }
+            },
+            { 
+                FilterType.Embedded, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,

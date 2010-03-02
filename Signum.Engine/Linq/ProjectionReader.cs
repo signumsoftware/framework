@@ -70,7 +70,7 @@ namespace Signum.Engine.Linq
                 {
                     return ReflectionTools.ChangeType<S>(value);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw new InvalidCastException("Impossible to convert the value of {0}.{1} ({2}) to {3}".Formato(alias, name, value.TryToString() ?? "null", typeof(S)));
                 }

@@ -53,11 +53,6 @@ namespace Signum.Windows
         }
 
 
-        public static void Explore(object queryName)
-        {
-            Manager.Explore(new ExploreOptions(queryName));
-        }
-
         public static void Explore(ExploreOptions options)
         {
             Manager.Explore(options);
@@ -284,7 +279,6 @@ namespace Signum.Windows
     {
         public Dictionary<Type, EntitySettings> Settings { get; set; }
         public Dictionary<object, QuerySettings> QuerySetting { get; set; }
-        public Dictionary<Type, TypeDN> ServerTypes { get; private set; }
 
         public event Func<Type, bool> GlobalIsCreable;
         public event Func<Type, bool> GlobalIsReadOnly; //IsNew
@@ -374,13 +368,10 @@ namespace Signum.Windows
             if (Settings == null)
                 Settings = new Dictionary<Type, EntitySettings>();
 
-            var dic = Server.Return((IQueryServer s) => s.GetQueryNames()).ToDictionary(a => a, a => new QuerySettings()); 
+            var dic = Server.Return((IDynamicQueryServer s) => s.GetQueryNames()).ToDictionary(a => a, a => new QuerySettings()); 
             if (QuerySetting != null)
                 dic.SetRange(QuerySetting);
             QuerySetting = dic;
-
-            ServerTypes = Server.Return((IBaseServer s)=>s.ServerTypes()); 
-
         }
 
         public virtual string SearchTitle(object queryName)
@@ -460,44 +451,44 @@ namespace Signum.Windows
         {
             AssertFindable(options.QueryName);
 
-            SetTokens(options.QueryName, options.FilterOptions);
-            SetTokens(options.QueryName, options.OrderOptions);
+            SetFilterTokens(options.QueryName, options.FilterOptions);
+            SetOrderTokens(options.QueryName, options.OrderOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
             var orders = options.OrderOptions.Select(f => f.ToOrder()).ToList();
 
-            return Server.Return((IQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, orders, options.UniqueType));
+            return Server.Return((IDynamicQueryServer s) => s.GetUniqueEntity(options.QueryName, filters, orders, options.UniqueType));
         }
 
         public int QueryCount(CountOptions options)
         {
             AssertFindable(options.QueryName);
 
-            SetTokens(options.QueryName, options.FilterOptions);
+            SetFilterTokens(options.QueryName, options.FilterOptions);
 
             var filters = options.FilterOptions.Select(f => f.ToFilter()).ToList();
 
-            return Server.Return((IQueryServer s) => s.GetQueryCount(options.QueryName, filters));
+            return Server.Return((IDynamicQueryServer s) => s.GetQueryCount(options.QueryName, filters));
         }
 
-        public void SetTokens(object queryName, IEnumerable<FilterOption> filters)
+        public void SetFilterTokens(object queryName, IEnumerable<FilterOption> filters)
         {
             QueryDescription description = GetQueryDescription(queryName);
 
             foreach (var f in filters)
             {
-                f.Token = QueryToken.Parse(queryName, description, f.Path); 
+                f.Token = QueryToken.Parse(description, f.Path); 
                 f.RefreshRealValue();
             }
         }
 
-        public void SetTokens(object queryName, IEnumerable<OrderOption> orders)
+        public void SetOrderTokens(object queryName, IEnumerable<OrderOption> orders)
         {
             QueryDescription description = GetQueryDescription(queryName);
 
             foreach (var o in orders)
             {
-                o.Token = QueryToken.Parse(queryName, description, o.Path);
+                o.Token = QueryToken.Parse(description, o.Path);
             }
         }
 
@@ -508,7 +499,7 @@ namespace Signum.Windows
             for (int i = 0; i < userColumns.Count; i++)
             {
                 UserColumnOption uco = userColumns[i];
-                QueryToken token = QueryToken.Parse(queryName, description, uco.Path);
+                QueryToken token = QueryToken.Parse(description, uco.Path);
                 uco.UserColumn = new UserColumn(description.StaticColumns.Count, token) { UserColumnIndex = i, DisplayName = uco.DisplayName.DefaultText(token.FullKey()) };
             }
         }
@@ -517,7 +508,7 @@ namespace Signum.Windows
         {
             QuerySettings settings = GetQuerySettings(queryName);
             return settings.QueryDescription ??
-                (settings.QueryDescription = Server.Return((IQueryServer s) => s.GetQueryDescription(queryName))); 
+                (settings.QueryDescription = Server.Return((IDynamicQueryServer s) => s.GetQueryDescription(queryName))); 
         }
 
         protected virtual SearchWindow CreateSearchWindow(FindOptionsBase options)

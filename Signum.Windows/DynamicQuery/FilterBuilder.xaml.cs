@@ -41,15 +41,6 @@ namespace Signum.Windows
             this.InitializeComponent();
         }
 
-        private void ComboBox_Loaded(object sender, RoutedEventArgs e)
-        {
-            ComboBox cb = (ComboBox)sender;
-            FilterOption f = (FilterOption)cb.DataContext;
-            FilterType ft = QueryUtils.GetFilterType(f.Token.Type);
-            cb.ItemsSource = QueryUtils.GetFilterOperations(ft);
-            cb.IsEnabled = !f.Frozen;
-        }
-
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
             Grid g = (Grid)sender;
@@ -105,6 +96,8 @@ namespace Signum.Windows
                 {
                     Type = type,
                     Create = false,
+                    AutoComplete = false,
+                    Find = false,
                     HideAutoCompleteOnLostFocus = false,
                     Implementations = implementations
                 };

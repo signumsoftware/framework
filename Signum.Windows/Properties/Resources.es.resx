@@ -150,9 +150,6 @@
   <data name="CollapseIfNullHasToBeSetBeforeRoute" xml:space="preserve">
     <value>CollapseIfNull debe establecerse antes de Route</value>
   </data>
-  <data name="IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' is not a valid identifier</value>
-  </data>
   <data name="ChooseAValue" xml:space="preserve">
     <value>Elige un valor</value>
   </data>
@@ -422,5 +419,17 @@
   </data>
   <data name="TheDataContextIsA0ButTypeContextIs1" xml:space="preserve">
     <value>El DataContext es un {0} pero el TypeContext es {1}</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Renombrar</value>
+  </data>
+  <data name="NewColumnSName" xml:space="preserve">
+    <value>Nombre de la nueva columna</value>
+  </data>
+  <data name="ChooseTheDisplayNameOfTheNewColumn" xml:space="preserve">
+    <value>Elige el nombre que se verá en la nueva columna </value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nombre</value>
   </data>
 </root>

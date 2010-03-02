@@ -361,4 +361,25 @@
   <data name="Uppercase" xml:space="preserve">
     <value>Mayúsculas</value>
   </data>
+  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
+    <value>La columna {0} no se ha encontrado en la query {1}</value>
+  </data>
+  <data name="MoreThanOneColumnNamed0OnQuery1" xml:space="preserve">
+    <value>Más de una columna llamada {0} en la query {1}</value>
+  </data>
+  <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
+    <value>Más de un token con clave {0} en {1}</value>
+  </data>
+  <data name="Token0NotCompatibleWith1" xml:space="preserve">
+    <value>Token {0} no compatible con {1}</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value> de </value>
+  </data>
+  <data name="_0As1" xml:space="preserve">
+    <value>({0} como {1})</value>
+  </data>
+  <data name="_0IsNotAValidIdentifier" xml:space="preserve">
+    <value>'{0}' no es un identificador válido</value>
+  </data>
 </root>

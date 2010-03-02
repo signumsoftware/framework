@@ -675,7 +675,7 @@ namespace Signum.Web
 
             foreach (FilterOption opt in findOptions.FilterOptions)
             {
-                opt.Token = QueryToken.Parse(findOptions.QueryName, queryDescription, opt.ColumnName);
+                opt.Token = QueryToken.Parse(queryDescription, opt.ColumnName);
             }
 
             //controller.ViewData[ViewDataKeys.SearchResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.SearchResourcesRoute] ?? "../../";
@@ -733,7 +733,7 @@ namespace Signum.Web
 
             foreach (var f in filters)
             {
-                f.Token = QueryToken.Parse(queryName, queryDescription, f.ColumnName);
+                f.Token = QueryToken.Parse(queryDescription, f.ColumnName);
             }
         }
 
@@ -743,7 +743,7 @@ namespace Signum.Web
 
             foreach (var o in orders)
             {
-                o.Token = QueryToken.Parse(queryName, queryDescription, o.ColumnName);
+                o.Token = QueryToken.Parse(queryDescription, o.ColumnName);
             }
         }
 
@@ -883,7 +883,7 @@ namespace Signum.Web
 
                 result.Add(new Filter
                 {
-                    Token = QueryToken.Parse(queryName, queryDescription, name),
+                    Token = QueryToken.Parse(queryDescription, name),
                     Operation = filterOperation,
                     Value = value,
                 });

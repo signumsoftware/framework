@@ -8,6 +8,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine.Properties;
 using Signum.Utilities;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine
 {
@@ -109,6 +110,34 @@ namespace Signum.Engine
         public static List<Lite<TypeDN>> TypesAssignableFrom(Type type)
         {
             return TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLite()).ToList();
+        }
+
+
+        public static string TryParseLite(Type liteType, string liteKey, out Lite lite)
+        {
+            string error = Lite.TryParseLite(liteType, liteKey, TryGetType, out lite);
+            if (error != null)
+                return error;
+
+            lite = Database.RetrieveLite(liteType, lite.RuntimeType, lite.Id);
+            return null;
+        }
+
+        public static Lite ParseLite(Type liteType, string liteKey)
+        {
+            Lite lite = Lite.ParseLite(liteType, liteKey, TryGetType);
+
+            return Database.RetrieveLite(liteType, lite.RuntimeType, lite.Id);
+        }
+
+        private static Type GetType(string typeName)
+        {
+            return typeToDN.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the Schema".Formato(typeName));
+        }
+
+        private static Type TryGetType(string typeName)
+        {
+            return typeToDN.Keys.Where(t => t.Name == typeName).SingleOrDefault();
         }
     }
 }

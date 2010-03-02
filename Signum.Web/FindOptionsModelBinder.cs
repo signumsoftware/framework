@@ -96,7 +96,7 @@ namespace Signum.Web
                 result.Add(new FilterOption
                 {
                     ColumnName = name,
-                    Token = QueryToken.Parse(queryName, queryDescription, name),
+                    Token = QueryToken.Parse(queryDescription, name),
                     Operation = EnumExtensions.ToEnum<FilterOperation>(operation),
                     Frozen = frozen,
                     Value = valueObject,

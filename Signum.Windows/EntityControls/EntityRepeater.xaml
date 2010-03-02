@@ -14,14 +14,22 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ContentControl}">
                             <Border BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Padding="1">
-                                <Grid Loaded="Grid_Loaded" Initialized="Grid_Initialized">
-                                    <ContentPresenter 
+                                <Grid Loaded="Grid_Loaded" m:Common.TypeContext="{m:ContinueRoute /}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition  Width="*"/>
+                                        <ColumnDefinition  Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                        <ContentPresenter 
 						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
 						                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
 						                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                                    <Button x:Name="btRemove" Click="btRemove_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"
+                                    <Button x:Name="btRemove" Click="btRemove_Click" 
+                                        Style="{StaticResource RoundButton}" 
+                                        Content="{StaticResource Remove}" 
+                                        ToolTip="{m:Loc Remove}"
                                         HorizontalAlignment="Right"
-                                        VerticalAlignment="Top"/>
+                                        VerticalAlignment="Top"
+                                        Grid.Column="1"/>
                                 </Grid>
                             </Border>
                         </ControlTemplate>
@@ -38,7 +46,7 @@
 		</Grid.RowDefinitions>
 		<Grid Background="{DynamicResource LightBlueBackground}">
 			<StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-				<Image Stretch="None" Source="{Binding Icon, ElementName=me, Mode=Default}" />
+				<Image Stretch="None" Source="{Binding Icon, ElementName=me, Mode=Default}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" />
 				<Label Content="{Binding LabelText, ElementName=me, Mode=Default}" VerticalAlignment="Center" />
 			</StackPanel>
             <StackPanel HorizontalAlignment="Right" Margin="0,1.5" Orientation="Horizontal">

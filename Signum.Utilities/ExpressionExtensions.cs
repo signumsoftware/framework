@@ -26,6 +26,15 @@ namespace Signum.Utilities
         /// Invoke expression (compile & invoke). If you want to be able to expand
         /// call to expression you have to use this method for invocation.
         /// </summary>
+        public static T Invoke<T>(this Expression<Func<T>> expr)
+        {
+            return expr.CompileAndStore()();
+        }
+
+        /// <summary>
+        /// Invoke expression (compile & invoke). If you want to be able to expand
+        /// call to expression you have to use this method for invocation.
+        /// </summary>
         public static T Invoke<A0, T>(this Expression<Func<A0, T>> expr, A0 a0)
         {
             return expr.CompileAndStore()(a0);

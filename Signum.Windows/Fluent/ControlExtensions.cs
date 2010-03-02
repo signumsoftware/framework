@@ -20,6 +20,12 @@ namespace Signum.Windows
             return depObj;
         }
 
+        public static T Handle<T>(this T uiElement, RoutedEvent routedEvent, RoutedEventHandler handler) where T : UIElement
+        {
+            uiElement.AddHandler(routedEvent, handler);
+            return uiElement; 
+        }
+
         public static Visibility ToVisibility(this bool val)
         {
             return val ? Visibility.Visible : Visibility.Collapsed;

@@ -14,7 +14,7 @@ using Signum.Utilities;
 
 namespace Signum.Services
 {
-    public abstract class ServerBasic : IBaseServer, IQueryServer
+    public abstract class ServerBasic : IBaseServer, IDynamicQueryServer
     {
         protected T Return<T>(MethodBase mi, Func<T> function)
         {

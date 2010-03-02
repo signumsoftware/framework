@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
 using System.Windows;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows
 {
@@ -48,18 +49,21 @@ namespace Signum.Windows
     [MarkupExtensionReturnType(typeof(PropertyRoute))]
     public class ContinueRouteExtension : MarkupExtension
     {
-        private string continuation;
+        [ConstructorArgument("continuation")]
+        private string Continuation { get; set; }
+
+        public ContinueRouteExtension() { }
 
         public ContinueRouteExtension(string continuation)
         {
-            if (string.IsNullOrEmpty(continuation))
-                throw new Exception("continuation is null");
-
-            this.continuation = continuation;
+            this.Continuation = continuation;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
+            if (string.IsNullOrEmpty(Continuation))
+                throw new Exception("continuation is null");
+
             IProvideValueTarget provider = (IProvideValueTarget)serviceProvider.GetService(typeof(IProvideValueTarget));
             
             if (!(provider.TargetObject is DependencyObject))
@@ -72,10 +76,9 @@ namespace Signum.Windows
             if (route == null)
                 throw new FormatException("ContinueRoute is only available with a previous TypeContext");
 
-            return Continue(route, continuation);
+            return Continue(route, Continuation);
         }
 
-        static readonly Regex validIdentifier = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
         public static PropertyRoute Continue(PropertyRoute route, string continuation)
         {
             string[] steps = continuation.Replace("/", ".Item.").Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
@@ -84,8 +87,7 @@ namespace Signum.Windows
 
             foreach (var step in steps)
             {
-                if (!validIdentifier.IsMatch(step))
-                    throw new ApplicationException(Resources.IsNotAValidIdentifier.Formato(step));
+                Reflector.AssertValidIdentifier(step);
 
                 context = context.Add(step);
             }

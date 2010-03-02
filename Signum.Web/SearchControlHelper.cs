@@ -87,7 +87,7 @@ namespace Signum.Web
 
             foreach (FilterOption opt in findOptions.FilterOptions)
             {
-                opt.Token = QueryToken.Parse(findOptions.QueryName, queryDescription, opt.ColumnName);
+                opt.Token = QueryToken.Parse(queryDescription, opt.ColumnName);
             }
 
             Column entityColumn = queryDescription.StaticColumns.SingleOrDefault(a => a.IsEntity);

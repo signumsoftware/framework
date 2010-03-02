@@ -15,7 +15,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid  Grid.Row="1" x:Name="filtros" Height="120" Margin="2,0,0,0">
+    <Grid  Grid.Row="1" x:Name="filtros" MinHeight="60" Margin="2,0,0,0">
         <ListView IsSynchronizedWithCurrentItem="True" 
                       x:Name="lvFilters" 
                       m:Common.LabelVisible="False" 
@@ -44,10 +44,13 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid MinWidth="80" HorizontalAlignment="Stretch">
-                                    <ComboBox SelectedItem="{Binding Path=Operation}" Loaded="ComboBox_Loaded">
+                                    <ComboBox 
+                                        SelectedItem="{Binding Operation}" 
+                                        ItemsSource="{Binding Token, Converter={x:Static m:Converters.TokenOperations}}"
+                                        IsEnabled="{Binding Frozen, Converter={x:Static m:Converters.Not}}">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Converter={x:Static m:Converters.FilterOperation}}"/>
+                                                <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"/>
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>

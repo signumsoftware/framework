@@ -51,6 +51,7 @@ namespace Signum.Entities.DynamicQuery
         DateTime,
         Lite,
         Entity, //Just for complex tokens, not columns
+        Embedded,
         Boolean, 
         Enum,
     }

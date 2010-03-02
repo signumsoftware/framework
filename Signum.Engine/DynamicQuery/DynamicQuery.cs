@@ -21,7 +21,7 @@ namespace Signum.Engine.DynamicQuery
     public interface IDynamicQuery
     {
         StaticColumn EntityColumn();
-        QueryDescription GetDescription();
+        QueryDescription GetDescription(object queryName);
         ResultTable ExecuteQuery(List<UserColumn> userColumns, List<Filter> filters, List<Order> orders, int? limit);
         int ExecuteQueryCount(List<Filter> filters);
         Lite ExecuteUniqueEntity(List<Filter> filters, List<Order> orders, UniqueType uniqueType);
@@ -45,9 +45,13 @@ namespace Signum.Engine.DynamicQuery
             StaticColumns.Where(a => a.IsEntity).Single("Entity column not found", "More than one Entity column"); 
         }
 
-        public QueryDescription GetDescription()
+        public QueryDescription GetDescription(object queryName)
         {
-            return new QueryDescription { StaticColumns = StaticColumns.Where(a => a.IsAllowed()).ToList() };
+            return new QueryDescription
+            {
+                QueryName = queryName,
+                StaticColumns = StaticColumns.Where(a => a.IsAllowed()).ToList()
+            };
         }
 
         protected ResultTable ToQueryResult(Expandable<T>[] result, List<UserColumn> userColumns)
@@ -146,7 +150,14 @@ namespace Signum.Engine.DynamicQuery
             ParameterExpression param = Expression.Parameter(typeof(T), "p");
 
             NewArrayExpression newArray = Expression.NewArrayInit(typeof(object),
-                userColumns.Select(uc => (Expression)Expression.Convert(uc.Token.BuildExpression(param), typeof(object))));
+                userColumns.Select(uc =>
+                {
+                    Expression build = uc.Token.BuildExpression(param);
+                    if (build.Type.IsValueType && !build.Type.IsNullable())
+                        build = Expression.Convert(build, build.Type.Nullify());
+
+                    return (Expression)Expression.Convert(build, typeof(object));
+                }));
 
             var ctor = typeof(Expandable<T>).GetConstructor(new[] { typeof(T), typeof(object[]) });
 

@@ -187,6 +187,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid identifier.
+        /// </summary>
+        internal static string _0IsNotAValidIdentifier {
+            get {
+                return ResourceManager.GetString("_0IsNotAValidIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} not supported.
         /// </summary>
         internal static string _0NotSupported {
@@ -255,6 +264,15 @@ namespace Signum.Entities.Properties {
         internal static string BeNotNull {
             get {
                 return ResourceManager.GetString("BeNotNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Column {0} not found on query {1}.
+        /// </summary>
+        internal static string Column0NotFoundOnQuery1 {
+            get {
+                return ResourceManager.GetString("Column0NotFoundOnQuery1", resourceCulture);
             }
         }
         
@@ -593,6 +611,24 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More than one column named {0} on query {1}.
+        /// </summary>
+        internal static string MoreThanOneColumnNamed0OnQuery1 {
+            get {
+                return ResourceManager.GetString("MoreThanOneColumnNamed0OnQuery1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More than one token with key {0} found on {1}.
+        /// </summary>
+        internal static string MoreThanOneTokenWithKey0FoundOn1 {
+            get {
+                return ResourceManager.GetString("MoreThanOneTokenWithKey0FoundOn1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New.
         /// </summary>
         internal static string New {
@@ -733,6 +769,15 @@ namespace Signum.Entities.Properties {
         internal static string TheNumberOfElementsOf0HasToBe01 {
             get {
                 return ResourceManager.GetString("TheNumberOfElementsOf0HasToBe01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Token {0} not compatible with {1}.
+        /// </summary>
+        internal static string Token0NotCompatibleWith1 {
+            get {
+                return ResourceManager.GetString("Token0NotCompatibleWith1", resourceCulture);
             }
         }
         

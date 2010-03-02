@@ -81,8 +81,8 @@ namespace Signum.Engine.Maps
         {
             string oldToStr = ident.ToStr;
 
-            bool dirty = false; 
-            ident.PreSaving(ref dirty); 
+            bool dirty = false;
+            ident.PreSaving(ref dirty);
 
             if (!ident.SelfModified)
                 return null;
@@ -246,7 +246,7 @@ namespace Signum.Engine.Maps
                 if (HasValue != null)
                     parameters.Add(HasValueParameter(false));
                 else
-                    throw new InvalidOperationException("Impossible to save null not-nullable embedded field, use Nullable Attribute over the field");
+                    throw new InvalidOperationException("Impossible to save null on a not-nullable embedded field, use Nullable Attribute over the field");
                 
                 foreach (var v in EmbeddedFields.Values)
                     v.Field.CreateParameter(parameters, null, type, forbidden);

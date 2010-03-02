@@ -18,6 +18,7 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class QueryDescription
     {
+        public object QueryName { get; set; }
         public List<StaticColumn> StaticColumns { get; set; }
     }
 
@@ -100,8 +101,8 @@ namespace Signum.Entities.DynamicQuery
                 propertyRoute = value;
                 if (propertyRoute != null)
                 {
-                    if (propertyRoute.PropertyRouteType != PropertyRouteType.Property)
-                        throw new InvalidOperationException("propertyRoute has to be a Property");
+                    if (propertyRoute.PropertyRouteType == PropertyRouteType.Root)
+                        throw new InvalidOperationException("PropertyRoute can not be of type Root");
 
                     PropertyInfo pi = propertyRoute.PropertyInfo;
 
@@ -149,7 +150,7 @@ namespace Signum.Entities.DynamicQuery
             if (IsEntity &&  cleanType == null)
                 throw new InvalidOperationException("Entity must be a Lite");
 
-            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType != PropertyRouteType.Root)
                 PropertyRoute = ((CleanMeta)meta).PropertyRoute;
 
             if (DisplayName == null)

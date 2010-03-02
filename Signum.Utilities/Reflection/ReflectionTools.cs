@@ -337,6 +337,215 @@ namespace Signum.Utilities.Reflection
                 return Convert.ChangeType(value, utype);
         }
 
+        public static bool TryParse<T>(string value, out T result)
+        {
+            object objResult;
+            if (TryParse(value, typeof(T), out objResult))
+            {
+                result = (T)objResult;
+                return true;
+            }
+            else
+            {
+                result = default(T);
+                return false;
+            }
+        }
+
+        public static bool TryParse(string value, Type type, out object result)
+        {
+            if (type == typeof(string))
+            {
+                result = value;
+                return true;
+            }
+
+            result = null;
+
+            if (string.IsNullOrEmpty(value))
+            {
+                if (Nullable.GetUnderlyingType(type) == null && type.IsValueType)
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            Type utype = type.UnNullify();
+            if (utype.IsEnum)
+            {
+                Enum _result;
+                if (EnumExtensions.TryParse(value, utype, true, out _result))
+                {
+                    result = _result;
+                    return true; 
+                }
+                else return false; 
+            }
+            else if (utype == typeof(bool))
+            {
+                bool _result;
+                if (bool.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(char))
+            {
+                char _result;
+                if (char.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(SByte))
+            {
+                SByte _result;
+                if (SByte.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(byte))
+            {
+                byte _result;
+                if (byte.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(Int16))
+            {
+                Int16 _result;
+                if (Int16.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(UInt16))
+            {
+                UInt16 _result;
+                if (UInt16.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(Int32))
+            {
+                Int32 _result;
+                if (Int32.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(UInt32))
+            {
+                UInt32 _result;
+                if (UInt32.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(Int64))
+            {
+                Int64 _result;
+                if (Int64.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(UInt64))
+            {
+                UInt64 _result;
+                if (UInt64.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(float))
+            {
+                float _result;
+                if (float.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(double))
+            {
+                double _result;
+                if (double.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(decimal))
+            {
+                decimal _result;
+                if (decimal.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(DateTime))
+            {
+                DateTime _result;
+                if (DateTime.TryParse(value, out _result))
+                {
+                    result = _result;
+                    return true;
+                }
+                else return false; 
+            }
+            else if (utype == typeof(object))
+            {
+                result = value;
+                return true;
+            }
+            else
+            {
+                TypeConverter converter = TypeDescriptor.GetConverter(utype);
+                if(converter.CanConvertFrom(typeof(string)))
+                {
+                    try
+                    {
+                        result = converter.ConvertFromString(value);
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                }
+                else return false;
+            }
+        }
+
         public static T ChangeType<T>(object value)
         {
             if (value == null)

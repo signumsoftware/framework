@@ -13,7 +13,7 @@ namespace Signum.Entities
     public abstract class Modifiable
     {
         [Ignore]
-        protected bool modified = false;
+        bool modified = false;
 
         [HiddenProperty]
         public bool Modified

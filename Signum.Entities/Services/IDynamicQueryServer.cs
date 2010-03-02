@@ -9,7 +9,7 @@ using Signum.Entities;
 namespace Signum.Services
 {
     [ServiceContract]
-    public interface IQueryServer
+    public interface IDynamicQueryServer
     {
         [OperationContract, NetDataContract]
         QueryDescription GetQueryDescription(object queryName);

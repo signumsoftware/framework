@@ -9,6 +9,7 @@ using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities
 {
@@ -178,11 +179,14 @@ namespace Signum.Entities
             return "{0}({1})".Formato(this.RuntimeType, this.id);
         }
 
-        public string ToStringLong()
+        public string Key()
         {
-            if (this.UntypedEntityOrNull == null)
-                return "[({0}:{1}) ToStr:{2}]".Formato(this.runtimeType.Name, this.id, this.toStr);
-            return "[{0}]".Formato(this.UntypedEntityOrNull);
+            return "{0};{1}".Formato(this.RuntimeType.Name, this.Id);
+        }
+
+        public string KeyLong()
+        {
+            return "{0};{1};{2}".Formato(this.RuntimeType.Name, this.Id, this.ToStr);
         }
 
         public static Lite Create(Type type, int id)
@@ -251,6 +255,43 @@ namespace Signum.Entities
             return this.id == null ?
                 UntypedEntityOrNull.GetHashCode() ^ MagicMask :
                 this.RuntimeType.FullName.GetHashCode() ^ this.Id.GetHashCode() ^ MagicMask;
+        }
+
+        static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
+
+        public static Lite ParseLite(Type liteType, string liteKey, Func<string, Type> resolveType)
+        {
+            Lite result;
+            string error = TryParseLite(liteType, liteKey, resolveType, out result);
+            if (error == null)
+            {
+                return result;
+            }
+            else
+            {
+                throw new FormatException(error);
+            }
+        }
+
+        public static string TryParseLite(Type liteType, string liteKey, Func<string, Type> resolveType, out Lite result)
+        {
+            result = null;
+            Match match = regex.Match(liteKey);
+            if (!match.Success)
+                return "Invalid Format";
+
+            Type type = resolveType(match.Groups["type"].Value);
+            if (type == null)
+                return "Type not found";
+
+            int id;
+            if (!int.TryParse(match.Groups["id"].Value, out id))
+                return "Id not valid";
+
+            string toStr = match.Groups["toStr"].Value; //maybe null
+
+            result = Lite.Create(liteType, id, type, toStr);
+            return null;
         }
     }
 

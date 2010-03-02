@@ -90,6 +90,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="BlueMenu.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ButtonBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

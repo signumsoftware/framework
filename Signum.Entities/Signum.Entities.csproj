@@ -93,7 +93,7 @@
     <Compile Include="Reflection\Reflector.cs" />
     <Compile Include="Validator.cs" />
     <Compile Include="Services\IBaseServer.cs" />
-    <Compile Include="Services\IQueryServer.cs" />
+    <Compile Include="Services\IDynamicQueryServer.cs" />
     <Compile Include="Services\NetDataContractAttribute.cs" />
     <Compile Include="Services\Security.cs" />
     <Compile Include="TypeDN.cs" />

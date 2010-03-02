@@ -75,7 +75,7 @@ namespace Signum.Windows
 
         public bool AssertErrors()
         {
-            var graph = GraphExplorer.PreSaving(()=>Graph());
+            var graph = GraphExplorer.PreSaving(() => Graph());
             string error = GraphExplorer.Integrity(graph);
 
             if (error.HasText())

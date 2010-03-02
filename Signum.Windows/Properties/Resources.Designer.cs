@@ -178,6 +178,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choose the display name of the new column.
+        /// </summary>
+        internal static string ChooseTheDisplayNameOfTheNewColumn {
+            get {
+                return ResourceManager.GetString("ChooseTheDisplayNameOfTheNewColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Close.
         /// </summary>
         internal static string Close {
@@ -396,15 +405,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid identifier.
-        /// </summary>
-        internal static string IsNotAValidIdentifier {
-            get {
-                return ResourceManager.GetString("IsNotAValidIdentifier", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Limitation:.
         /// </summary>
         internal static string Limitation {
@@ -451,6 +451,15 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        internal static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New.
         /// </summary>
         internal static string New {
@@ -474,6 +483,15 @@ namespace Signum.Windows.Properties {
         internal static string NewColumn {
             get {
                 return ResourceManager.GetString("NewColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New Column&apos;s Name.
+        /// </summary>
+        internal static string NewColumnSName {
+            get {
+                return ResourceManager.GetString("NewColumnSName", resourceCulture);
             }
         }
         
@@ -699,6 +717,15 @@ namespace Signum.Windows.Properties {
         internal static string Remove {
             get {
                 return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rename.
+        /// </summary>
+        internal static string Rename {
+            get {
+                return ResourceManager.GetString("Rename", resourceCulture);
             }
         }
         

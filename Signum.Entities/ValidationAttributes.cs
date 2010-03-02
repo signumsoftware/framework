@@ -630,6 +630,15 @@ namespace Signum.Entities
             return null;
         }
 
+        public bool? Necessary(S state, PropertyInfo pi)
+        {
+            int index = propertyNames.IndexOf(pi.Name);
+            if (index == -1)
+                throw new ArgumentException("The property is not registered"); 
+
+            return dictionary[state][index];
+        }
+
         public IEnumerator GetEnumerator() //just to use object initializer
         {
             throw new NotImplementedException();

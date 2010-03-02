@@ -510,6 +510,11 @@ namespace Signum.Engine.Maps
             Getter = ReflectionTools.CreateGetterUntyped(type, fi);
             Setter = ReflectionTools.CreateSetterUntyped(type, fi);
         }
+
+        public override string ToString()
+        {
+            return FieldInfo.FieldName();
+        }
     }
 
     public abstract partial class Field
