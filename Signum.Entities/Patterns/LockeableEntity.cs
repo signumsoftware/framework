@@ -34,6 +34,9 @@ namespace Signum.Entities.Patterns
 
         protected override bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
         {
+            if (EqualityComparer<T>.Default.Equals(variable, value))
+                return false;
+
             if (this.locked)
                 throw new ApplicationException(Resources.LockedModificationException + " "+ this.ToString());
             

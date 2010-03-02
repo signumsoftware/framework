@@ -28,7 +28,7 @@
     <%} else { %>
         <div class="closebox" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
-    <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" class="dragHandle">
+    <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>');">
         <span class="popupEntityName"><%= typeNiceName%></span><span class="popupTitle"><%= popupTitle %></span>
     </div>
     <div class="buttonBar">
