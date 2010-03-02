@@ -23,24 +23,24 @@ namespace Signum.Entities.Patterns
             }
         }
 
-        protected bool UnsafeSet<T>(ref T variable, T value, Expression<Func<T>> property)
+        protected bool UnsafeSet<T>(ref T field, T value, Expression<Func<T>> property)
         { 
-            return base.Set<T>(ref variable, value, property);
+            return base.Set<T>(ref field, value, property);
         }
 
         protected virtual void ItemLockedChanged(bool locked)
         {
         }
 
-        protected override bool Set<T>(ref T variable, T value, Expression<Func<T>> property)
+        protected override bool Set<T>(ref T field, T value, Expression<Func<T>> property)
         {
-            if (EqualityComparer<T>.Default.Equals(variable, value))
+            if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
             if (this.locked)
                 throw new ApplicationException(Resources.LockedModificationException + " "+ this.ToString());
             
-            return base.Set<T>(ref variable, value, property);
+            return base.Set<T>(ref field, value, property);
         }
 
         protected internal override void PreSaving(ref bool graphModified)

@@ -56,15 +56,18 @@ namespace Signum.Entities
             internal set { isNew = value; }
         }
 
-        protected bool SetIfNew<T>(ref T variable, T value, Expression<Func<T>> property)
+        protected bool SetIfNew<T>(ref T field, T value, Expression<Func<T>> property)
         {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return false;
+
             if (!IsNew)
             {
                 PropertyInfo pi = ReflectionTools.BasePropertyInfo(property);
                 throw new ApplicationException(Resources.AttemptToModify0WhenTheEntityIsNotNew.Formato(pi.Name));
             }
 
-            return base.Set<T>(ref variable, value, property);
+            return base.Set<T>(ref field, value, property);
         }
 
         protected internal override void PreSaving(ref bool graphModified)
