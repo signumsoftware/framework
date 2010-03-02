@@ -31,7 +31,7 @@
     <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>');">
         <span class="popupEntityName"><%= typeNiceName%></span><span class="popupTitle"><%= popupTitle %></span>
     </div>
-    <div class="buttonBar">
+    <div id="<%=Html.GlobalPrefixedName("divButtonBar" + sufix)%>" class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
             <input type="button" class="OperationDiv" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />

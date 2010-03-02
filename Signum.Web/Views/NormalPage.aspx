@@ -31,7 +31,7 @@
         <span class="typeNiceName"><%= ViewData[ViewDataKeys.EntityTypeNiceName]%></span>
         <span class="title"><%= ViewData[ViewDataKeys.PageTitle] ?? "" %></span>
      </h2>
-     <div class="operations">
+     <div id="divButtonBar" class="operations">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
             <div id="btnSave" class="OperationDiv" onclick="javascript:TrySave({});">Guardar</div>  
         <%} %>

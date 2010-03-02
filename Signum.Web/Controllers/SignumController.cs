@@ -143,29 +143,7 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult ReloadEntity(string prefix)
-        {
-            ModifiableEntity entity = Navigator.ExtractEntity(this, Request.Form, prefix)
-                .ThrowIfNullC("Type was not possible to extract");
-
-            Modification modification = Navigator.GenerateModification(this, entity, prefix);
-            ModificationState modState = Navigator.ApplyChanges(this, modification, ref entity);
-            
-            if (Navigator.ExtractIsReactive(Request.Form))
-            {
-                string tabID = Navigator.ExtractTabID(Request.Form);
-                Session[tabID] = entity;
-                this.ViewData[ViewDataKeys.Reactive] = true;
-                if (prefix.HasText())
-                    entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
-            }
-            
-            this.ViewData[ViewDataKeys.LoadAll] = true; //Prevents losing unsaved changes of the UI when reloading control
-            return Navigator.PartialView(this, entity, prefix, ModificationState.ToDictionary(modState.Actions));
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
+       [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult TrySave(string prefixToIgnore)
         {   
             Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
@@ -364,6 +342,51 @@ namespace Signum.Web.Controllers
             ViewData[ViewDataKeys.CustomHtml] = strButtons;
             ViewData[ViewDataKeys.PopupPrefix] = prefix;
             return PartialView(Navigator.Manager.ChooserPopupUrl);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult ReloadEntity(string prefix)
+        {
+            ModifiableEntity entity = Navigator.ExtractEntity(this, Request.Form, prefix)
+                .ThrowIfNullC("Type was not possible to extract");
+
+            Modification modification = Navigator.GenerateModification(this, entity, prefix);
+            ModificationState modState = Navigator.ApplyChanges(this, modification, ref entity);
+
+            if (Navigator.ExtractIsReactive(Request.Form))
+            {
+                string tabID = Navigator.ExtractTabID(Request.Form);
+                Session[tabID] = entity;
+                this.ViewData[ViewDataKeys.Reactive] = true;
+                if (prefix.HasText())
+                    entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
+            }
+
+            this.ViewData[ViewDataKeys.LoadAll] = true; //Prevents losing unsaved changes of the UI when reloading control
+            return Navigator.PartialView(this, entity, prefix, ModificationState.ToDictionary(modState.Actions));
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ContentResult GetButtonBar(string sfRuntimeType, int? sfId, string prefix)
+        {
+            Type type = Navigator.ResolveType(sfRuntimeType);
+            IdentifiableEntity entity = null;
+
+            if (Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
+            {
+                entity = (IdentifiableEntity)Session[Request.Form[ViewDataKeys.TabId]];
+                entity = (IdentifiableEntity)Modification.GetPropertyValue(entity, prefix);
+            }
+            else
+            {
+                if (sfId.HasValue)
+                    entity = Database.Retrieve(Lite.Create(type, sfId.Value));
+                else
+                    entity = (IdentifiableEntity)Constructor.Construct(type, this);
+            }
+
+            HtmlHelper helper = CreateHtmlHelper(this);
+            return Content(ButtonBarHelper.GetButtonBarElements(helper, entity, Navigator.Manager.EntitySettings[type].PartialViewName, prefix));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

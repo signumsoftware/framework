@@ -359,13 +359,15 @@ function ReloadEntity(urlController, prefix, parentDiv) {
         data: $("form *").not(".searchControl *").serialize() + qp(sfPrefix, prefix),
         async: false,
         dataType: "html",
-        success:
-                   function(msg) {
-                       if (!empty(parentDiv))
-                           $('#' + parentDiv).html(msg);
-                       else
-                           $('#' + prefix + "divMainControl").html(msg);
-                   }
+        success: function(msg) {
+           if (!empty(parentDiv))
+               $('#' + parentDiv).html(msg);
+           else
+               $('#' + prefix + "divMainControl").html(msg);
+           
+           var info = RuntimeInfoFor(prefix);
+           $.post('Signum/GetButtonBar', { sfRuntimeType: info.runtimeType(), sfId: info.id(), prefix: prefix, sfTabId: $("#" + sfTabId).val() } ,function(data){ $('#' + prefix + "divButtonBar").html(data) });
+        }
     });
 }
 
