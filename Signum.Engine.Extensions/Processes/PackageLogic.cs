@@ -184,7 +184,7 @@ namespace Signum.Engine.Processes
             PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
 
             if (args != null && args.Length > 0)
-                package.Name = args.TryGetArg<string>(0);
+                package.Name = args.TryGetArgC<string>(0);
             return package;
         }
     }
@@ -220,7 +220,7 @@ namespace Signum.Engine.Processes
             PackageDN package = new PackageDN { Operation = EnumLogic<OperationDN>.ToEntity(OperationKey) };
 
             if (args != null && args.Length > 0)
-                package.Name = args.TryGetArg<string>(0);
+                package.Name = args.TryGetArgC<string>(0);
             return package;
         }
     }

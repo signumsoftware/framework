@@ -379,7 +379,7 @@ namespace Signum.Engine.Operations
             return (T)args[pos];
         }
 
-        public static T TryGetArg<T>(this object[] args, int pos) where T:class
+        public static T TryGetArgC<T>(this object[] args, int pos) where T:class
         {
             if (pos < 0)
                 throw new ArgumentException("pos");
@@ -392,6 +392,21 @@ namespace Signum.Engine.Operations
 
             return (T)args[pos];
         }
+
+        public static T? TryGetArgS<T>(this object[] args, int pos) where T : struct
+        {
+            if (pos < 0)
+                throw new ArgumentException("pos");
+
+            if (args == null || args.Length <= pos || args[pos] == null)
+                return null;
+
+            if (!(args[pos] is T))
+                throw new ApplicationException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
+
+            return (T)args[pos];
+        }
+
 
         public static Type FindType(Enum operation)
         {
