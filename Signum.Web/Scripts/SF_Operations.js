@@ -47,9 +47,17 @@ OperationManager.prototype = {
         var requestData = formChildren.serialize();
         
         var info = this.runtimeInfo();
+        var runtimeType = info.runtimeType();
 
+        if (requestData.indexOf(this.options.prefix + sfRuntimeInfo) < 0)
+        {
+            if (empty(runtimeType))
+                requestData += qp(this.options.prefix + sfRuntimeInfo, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
+            else
+                requestData += qp(this.options.prefix + sfRuntimeInfo, info.find().val());
+        }
         requestData += qp("isLite", this.options.isLite)
-                     + qp("sfRuntimeType", info.runtimeType())
+                     + qp("sfRuntimeType", empty(runtimeType) ? StaticInfoFor(this.options.prefix).staticType() : runtimeType)
                      + qp("sfId", info.id())
                      + qp("sfOperationFullKey", this.options.operationKey)
                      + qp(sfPrefix, newPrefix)

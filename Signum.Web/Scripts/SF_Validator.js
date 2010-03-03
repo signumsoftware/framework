@@ -268,10 +268,15 @@ var PartialValidator = function(_pvalOptions) {
         //if (!isReactive) {
         if (requestData.indexOf(this.valOptions.prefix + sfRuntimeInfo) < 0) {
             var info = new RuntimeInfo(this.valOptions.prefix);
+            var infoField = info.find();
             if (empty(this.valOptions.type))
-                requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.val());
+            {
+                if (empty(info.runtimeType()))
+                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', ''));
+                else
+                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, infoField.val());
+            }
             else {
-                var infoField = info.find();
                 if (infoField.length == 0)
                     requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
                 else {

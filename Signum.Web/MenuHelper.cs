@@ -16,6 +16,7 @@ namespace Signum.Web
         public FindOptions FindOptions { get; set; }
         public string ManualA {get; set;} //Specify all the tag string <a href='http://www.signumframework.com'>Signum</a>
         public string ManualHref {get; set;} //Specify the href element to be inserted in an A tag with the specified Title and Text
+        public string Class { get; set; }
         /// <summary>
         /// Shortcut for "FindOptions = new FindOptions {QueryName = value}"
         /// </summary>
@@ -60,6 +61,13 @@ namespace Signum.Web
             return ManualHref.HasText() || ManualA.HasText();
         }
 
+        public bool CurrentPage(string link, string currentUrl)
+        {
+            if (!link.HasText() || !currentUrl.HasText())
+                return false;
+            return currentUrl.EndsWith(link);
+        }
+
         public string ToString(string currentUrl)
         {
             StringBuilder sb = new StringBuilder();
@@ -68,21 +76,23 @@ namespace Signum.Web
                 sb.AppendLine("<li>");
                 if (ManualHref.HasText())
                 {
-                    if (ManualHref == currentUrl) { sb.Append("<b>"); }
-                    sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(ManualHref, Title, Text));
-                    if (ManualHref == currentUrl) { sb.Append("/<b>"); }
+                    sb.AppendLine("<a href=\"{0}\" title=\"{1}\" class=\"{2}\">{3}</a>".Formato(
+                        ManualHref,
+                        Title,
+                        CurrentPage(ManualHref, currentUrl) ? Class + " active": Class,
+                        Text));
                 }
                 else if (ManualA.HasText())
                 {
-                    if (ManualHref == currentUrl) { sb.Append("<b>"); }
                     sb.AppendLine(ManualA);
-                    if (ManualHref == currentUrl) { sb.Append("</b>"); }
                 }
                 else
                 {
-                    if (Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?") == currentUrl) { sb.Append("<b>"); }
-                    sb.AppendLine("<a href='{0}' title='{1}'>{2}</a>".Formato(Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?"), Title, Text));
-                    if (Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?") == currentUrl) { sb.Append("<b>"); }
+                    sb.AppendLine("<a href=\"{0}\" title=\"{1}\" class=\"{2}\">{3}</a>".Formato(
+                        Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?"),
+                        Title,
+                        CurrentPage(Navigator.FindRoute(FindOptions.QueryName) + FindOptions.ToString(false, true, "?"), currentUrl) ? Class + " active" : Class,
+                        Text));
                 }
             }
             else
@@ -117,7 +127,7 @@ namespace Signum.Web
             if (children != null && children.Count > 0)
             {
                 if (i == 0)
-                    sb.AppendLine("<ul id='nav'>");
+                    sb.AppendLine("<ul class='nav'>");
                 else
                     sb.AppendLine("<ul{0}>".Formato((i > 0) ? " class='submenu'" : ""));
                 foreach (OrderedMenu menu in children)
@@ -135,15 +145,15 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
             if (node.IsVisible() && children>0) {
-                sb.AppendLine("<li class='{0}'>".Formato(i));
-                sb.AppendLine("<span title='{0}'>{1}</span>".Formato(node.Title, node.Text));
+                sb.AppendLine("<li class='l{0}'>".Formato(i));
+                sb.AppendLine("<span title='{0}' class=\"{1}\">{2}</span>".Formato(node.Title, node.Class, node.Text));
               //  sb.AppendLine("</li>");
             }
             else
             {
                 if (node.IsVisible())
                 {
-                    sb.AppendLine("<li class='{0}'>".Formato(i));
+                    sb.AppendLine("<li class='l{0}'>".Formato(i));
                     if (node.ManualHref.HasText())
                     {
                         if (node.ManualHref == currentUrl) { sb.Append("<b>"); }

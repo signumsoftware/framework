@@ -476,6 +476,13 @@ namespace Signum.Entities
         { }
     }
 
+    public class MinutesPrecissionValidatorAttribute : DateTimePrecissionValidatorAttribute
+    {
+        public MinutesPrecissionValidatorAttribute()
+            : base(DateTimePrecision.Minutes)
+        { }
+
+    }
     public class DateTimePrecissionValidatorAttribute : ValidatorAttribute
     {
 
