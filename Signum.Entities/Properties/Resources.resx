@@ -373,4 +373,7 @@
   <data name="_0IsNotAValidIdentifier" xml:space="preserve">
     <value>'{0}' is not a valid identifier</value>
   </data>
+  <data name="ImmutableEntity_AllowChange" xml:space="preserve">
+    <value>Allow Change</value>
+  </data>
 </root>

@@ -382,4 +382,7 @@
   <data name="_0IsNotAValidIdentifier" xml:space="preserve">
     <value>'{0}' no es un identificador válido</value>
   </data>
+  <data name="ImmutableEntity_AllowChange" xml:space="preserve">
+    <value>Permitir cambios</value>
+  </data>
 </root>

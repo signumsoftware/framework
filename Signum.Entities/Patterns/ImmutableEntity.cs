@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using System.ComponentModel;
+using Signum.Entities.Properties;
 
 namespace Signum.Entities
 {
@@ -11,6 +13,7 @@ namespace Signum.Entities
     {
         [Ignore]
         bool allowTemporaly = false;
+        
         public bool AllowChange
         {
             get { return allowTemporaly || IsNew; }
