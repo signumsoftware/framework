@@ -44,7 +44,7 @@ namespace Signum.Web.Files
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
+           // sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
 
             sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo<T>(value) { Ticks = ticks }, new StaticInfo(cleanStaticType)));
 
