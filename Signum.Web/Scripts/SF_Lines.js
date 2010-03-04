@@ -1079,7 +1079,7 @@ var FLine = function(_flineOptions) {
         var id = this.runtimeInfo().id();
         if (empty(id))
             return;
-        window.open(downloadControllerUrl + "?filePathID=" + id);
+        window.open($("base").attr("href") + downloadControllerUrl + "?filePathID=" + id);
     };
 
     this.removeSpecific = function() {
