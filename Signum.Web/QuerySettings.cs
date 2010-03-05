@@ -42,6 +42,7 @@ namespace Signum.Web
                     if (o != null && o.GetType().BaseType == typeof(Enum)) h.Write(((Enum)o).NiceToString());
                     else h.Write(o.TryToString());}),
                 new FormatterRule(c=>typeof(Lite).IsAssignableFrom(c.Type), (h,o)=>h.LightEntityLine((Lite)o, false)),
+                new FormatterRule(c=>c.Type == typeof(bool), (h,o) => h.Write("<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>"))
             };
         }
 
