@@ -110,7 +110,9 @@ namespace Signum.Web
         string currentUrl;
         string @class;
         public OrderedMenu() {
+        
         }
+
         public string ToString(string currentUrl)
         {
             return this.ToString(currentUrl, "");
