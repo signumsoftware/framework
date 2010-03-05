@@ -259,7 +259,11 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
             if (filterType == FilterType.Lite)
             {
-                EntityLine el = new EntityLine(id);
+                EntityLine el = new EntityLine(id)
+                {
+                    LabelVisible = false,
+                    BreakLine = false
+                };
                 Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(columnType) ?? columnType, false);
                 el.Create = false;
 

@@ -41,7 +41,8 @@ namespace Signum.Web
             
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
+            if (settings.LabelVisible)
+                sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
 
             if (isIdentifiable || isLite)
             {

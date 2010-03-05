@@ -43,6 +43,7 @@
                     <th>Campo</th>
                     <th>Operación</th>
                     <th>Valor</th>
+                    <th></th>
                 </tr>  
             </thead>  
             <tbody>
