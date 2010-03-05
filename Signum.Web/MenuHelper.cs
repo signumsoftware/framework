@@ -108,11 +108,18 @@ namespace Signum.Web
 
     public class OrderedMenu {
         string currentUrl;
+        string @class;
         public OrderedMenu() {
         }
-        public string ToString(string currentUrl) {
+        public string ToString(string currentUrl)
+        {
+            return this.ToString(currentUrl, "");
+        }
+
+        public string ToString(string currentUrl, string @class) {
             StringBuilder sb = new StringBuilder();
             this.currentUrl = currentUrl;
+            this.@class = @class;
             sb.Append(this.ToString(0));
             return sb.ToString();
         }
@@ -127,7 +134,7 @@ namespace Signum.Web
             if (children != null && children.Count > 0)
             {
                 if (i == 0)
-                    sb.AppendLine("<ul class='nav'>");
+                    sb.AppendLine("<ul class='{0}'>".Formato(this.@class));
                 else
                     sb.AppendLine("<ul{0}>".Formato((i > 0) ? " class='submenu'" : ""));
                 foreach (OrderedMenu menu in children)
