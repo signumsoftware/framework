@@ -74,7 +74,7 @@ EBaseLine.prototype = {
         if (implementations.length == 1)
             return _onTypeFound(implementations[0].id);
 
-        typeSelector(this.options.prefix, _onTypeFound);
+        openChooser(this.options.prefix, _onTypeFound);
     },
 
     create: function(_viewOptions) {

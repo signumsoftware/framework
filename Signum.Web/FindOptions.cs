@@ -203,7 +203,7 @@ namespace Signum.Web
                 }
             }
 
-            throw new ApplicationException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
+            throw new InvalidOperationException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
         }
 
         public string ToString(int filterIndex)

@@ -252,4 +252,31 @@
   <data name="View" xml:space="preserve">
     <value>View</value>
   </data>
+  <data name="InvalidResultTypeForADirectConstructor" xml:space="preserve">
+    <value>Invalid result type for a Direct Constructor</value>
+  </data>
+  <data name="InvalidResultTypeForAConstructor" xml:space="preserve">
+    <value>Invalid result type for a Constructor</value>
+  </data>
+  <data name="PartialViewTypeWasNotPossibleToExtract" xml:space="preserve">
+    <value>PartialView: Type was not possible to extract</value>
+  </data>
+  <data name="PopupViewCannotBeCalledForEmbeddedType0" xml:space="preserve">
+    <value>PopupView cannot be called for Embedded type {0}</value>
+  </data>
+  <data name="ImplementedByAllTypesAreNotAllowedInEntityCombo" xml:space="preserve">
+    <value>ImplementedByAll types are not allowed in EntityCombo</value>
+  </data>
+  <data name="TypesWithImplementationsMustProvideDataToEntityCombo" xml:space="preserve">
+    <value>Types with Implementations must provide Data to EntityCombo</value>
+  </data>
+  <data name="EntityComboCannotHaveOnchangeHtmlPropertyUseOnEntityChangedInstead" xml:space="preserve">
+    <value>EntityCombo cannot have onchange html property, use onEntityChanged instead</value>
+  </data>
+  <data name="ViewForType0IsNotAllowed" xml:space="preserve">
+    <value>View for type {0} is not allowed</value>
+  </data>
+  <data name="GetChooserNeedsAListOfOptions" xml:space="preserve">
+    <value>GetChooser needs a list of options</value>
+  </data>
 </root>

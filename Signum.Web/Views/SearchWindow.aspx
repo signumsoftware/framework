@@ -19,4 +19,5 @@
         <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString()); %>
         <%= Html.ValidationSummaryAjax() %>
  <%}%>
+ <div id="divASustituir"></div>
 </asp:Content>

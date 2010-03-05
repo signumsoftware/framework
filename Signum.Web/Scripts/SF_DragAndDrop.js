@@ -9,7 +9,6 @@ function isOutside() {
 }
 
 function getMousePosition(e) {
-    log("getMousePosition");
     var posx = 0;
     var posy = 0;
 
@@ -28,7 +27,6 @@ function getMousePosition(e) {
 }
 
 function comienzoMovimiento(event, id) {
-    log("comienzoMovimiento");
     element = document.getElementById(id);
     element.style.cursor = "move";
     elemWidth = element.offsetWidth;
@@ -44,7 +42,6 @@ function comienzoMovimiento(event, id) {
     lastElemLeft = element.offsetLeft;
 
     $(document).bind("mousemove", function (e) {
-    log("mousemove");
         var pos = getMousePosition(e);
 
         var left = ((allowInitiallyOutside && !outside) || !allowInitiallyOutside) ? Math.min(Math.max(lastElemLeft + pos.x - lastMouseX, 0), clientWidth - elemWidth) : lastElemLeft + pos.x - lastMouseX;

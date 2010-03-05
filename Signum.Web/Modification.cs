@@ -138,7 +138,7 @@ namespace Signum.Web
             }
             catch (Exception)
             {
-                throw new ApplicationException(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
+                throw new Exception(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
             }
 
             return (Modifiable)currentEntity;

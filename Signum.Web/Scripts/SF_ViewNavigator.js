@@ -234,14 +234,21 @@ ViewNavigator.prototype = {
     }
 }
 
-function typeSelector(_prefix, onTypeClicked) {
-    log("typeSelector");
+function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat) {
+    log("openChooser");
     //Construct popup
     var tempDivId = _prefix + "Temp";
+    var requestData = "prefix=" + tempDivId;
+    if (empty(jsonOptionsListFormat))
+        requestData += "&sfImplementations=" + $('#' + _prefix + sfImplementations).val();
+    else {
+        for (var i = 0; i < jsonOptionsListFormat.length; i++)
+            requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
+    }
     $.ajax({
         type: "POST",
         url: "Signum/GetChooser",
-        data: "prefix=" + tempDivId + "&sfImplementations=" + $('#' + _prefix + sfImplementations).val(),
+        data: requestData,
         async: false,
         dataType: "html",
         success: function(chooserHTML) {
@@ -249,9 +256,9 @@ function typeSelector(_prefix, onTypeClicked) {
             //Set continuation for each type button
             $('#' + tempDivId + " :button").each(function() {
                 $('#' + this.id).unbind('click').click(function() {
-                    var type = this.id;
+                    var option = this.id;
                     $('#' + tempDivId).remove();
-                    onTypeClicked(type);
+                    onOptionClicked(option);
                 });
             });
             new popup({ prefix: _prefix }).show(tempDivId);

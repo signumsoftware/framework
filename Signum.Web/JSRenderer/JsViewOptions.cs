@@ -64,4 +64,23 @@ namespace Signum.Web
             };
         }
     }
+
+    public class JsViewNavigator
+    {
+        public static JsRenderer JsOpenChooser(string prefix, string onOptionChosen, string[] optionNames)
+        {
+            return new JsRenderer(() =>
+            {
+                StringBuilder sb = new StringBuilder();
+
+                sb.Append("openChooser('{0}', {1}, [{2}]);".Formato(
+                    prefix,
+                    onOptionChosen,
+                    optionNames.ToString(on => "'{0}'".Formato(on), ",")
+                    ));
+
+                return sb.ToString();
+            });
+        }
+    }
 }

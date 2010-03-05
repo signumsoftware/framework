@@ -41,8 +41,8 @@ FindNavigator.prototype = {
             success: function(popupHtml) {
                 $('#divASustituir').after(hiddenDiv(self.tempDivId(), popupHtml));
                 new popup().show(self.tempDivId());
-                $('#' + self.findOptions.prefix + sfBtnOkS).unbind('click').click(function() { self.onSearchOk(); });
-                $('#' + self.findOptions.prefix + sfBtnCancelS).unbind('click').click(function() { self.onSearchCancel(); });
+                $('#' + self.findOptions.prefix + sfBtnOk + self.findOptions.suffix).unbind('click').click(function() { self.onSearchOk(); });
+                $('#' + self.findOptions.prefix + sfBtnCancel + self.findOptions.suffix).unbind('click').click(function() { self.onSearchCancel(); });
             }
         });
     },

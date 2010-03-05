@@ -521,7 +521,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
             if (!es.IsNavigable(false))
-                throw new ApplicationException("View for type {0} is not allowed".Formato(obj.GetType()));
+                throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(obj.GetType()));
 
             if (es.IsReadOnly(false))
             {
@@ -569,10 +569,10 @@ namespace Signum.Web
         protected internal string ExtractTabID(NameValueCollection form)
         {
             if (!form.AllKeys.Contains(ViewDataKeys.TabId))
-                throw new ApplicationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
+                throw new Exception(Resources.RequestDoesntHaveNecessaryTabIdentifier);
             string tabID = (string)form[ViewDataKeys.TabId];
             if (!tabID.HasText())
-                throw new ApplicationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
+                throw new Exception(Resources.RequestDoesntHaveNecessaryTabIdentifier);
             return tabID;
         }
 
@@ -588,7 +588,7 @@ namespace Signum.Web
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
 
             if (!es.IsViewable(false))
-                throw new ApplicationException("View for type {0} is not allowed".Formato(cleanType.Name));
+                throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
             string url = partialViewName ?? es.PartialViewName;
 
@@ -633,7 +633,7 @@ namespace Signum.Web
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
 
             if (!es.IsViewable(false))
-                throw new ApplicationException("View for type {0} is not allowed".Formato(cleanType.Name));
+                throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
             string url = partialViewName ?? es.PartialViewName;
 
@@ -1040,7 +1040,7 @@ namespace Signum.Web
                     return mod;
                 }
                 else
-                    throw new ApplicationException(Resources.IncorrectEntityInSession);
+                    throw new Exception(Resources.IncorrectEntityInSession);
             }
 
             if (runtimeInfo.IdOrNull != null)

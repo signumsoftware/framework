@@ -40,7 +40,7 @@ namespace Signum.Web.Controllers
             if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
                 entity = (IIdentifiable)result;
             else
-                throw new ApplicationException("Invalid result type for a Direct Constructor");
+                throw new Exception(Resources.InvalidResultTypeForADirectConstructor);
 
             return Navigator.View(this, entity);
         }
@@ -56,7 +56,7 @@ namespace Signum.Web.Controllers
             else if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
                 entity = (IIdentifiable)result;
             else
-                throw new ApplicationException("Invalid result type for a Constructor");
+                throw new Exception(Resources.InvalidResultTypeForAConstructor);
 
             return Content(Navigator.ViewRoute(type, null));
         }
@@ -71,7 +71,7 @@ namespace Signum.Web.Controllers
             {
                 //NameValueCollection nvc = new NameValueCollection();
                 entity = Navigator.ExtractEntity(this, Request.Form)
-                    .ThrowIfNullC("PartialView: Type was not possible to extract");
+                    .ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
                 entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
@@ -86,12 +86,12 @@ namespace Signum.Web.Controllers
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
                         entity = (ModifiableEntity)result;
                     else
-                        throw new ApplicationException("Invalid result type for a Constructor");
+                        throw new Exception(Resources.InvalidResultTypeForAConstructor);
                 }
             }
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-                throw new ApplicationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
+                throw new InvalidOperationException(Resources.PopupViewCannotBeCalledForEmbeddedType0.Formato(entity.GetType()));
 
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
@@ -112,7 +112,7 @@ namespace Signum.Web.Controllers
             if (isReactive)
             {
                 entity = Navigator.ExtractEntity(this, Request.Form, "")
-                    .ThrowIfNullC("PartialView: Type was not possible to extract");
+                    .ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
                 entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
@@ -127,7 +127,7 @@ namespace Signum.Web.Controllers
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
                         entity = (ModifiableEntity)result;
                     else
-                        throw new ApplicationException("Invalid result type for a Constructor");
+                        throw new Exception(Resources.InvalidResultTypeForAConstructor);
                 }
             }
 
@@ -135,7 +135,7 @@ namespace Signum.Web.Controllers
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-                throw new ApplicationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
+                throw new InvalidOperationException(Resources.PopupViewCannotBeCalledForEmbeddedType0.Formato(entity.GetType()));
 
             if (sfReadOnly.HasValue)
                 ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
@@ -331,13 +331,27 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult GetChooser(Implementations sfImplementations, string prefix)
+        public PartialViewResult GetTypeChooser(Implementations sfImplementations, string prefix)
         {
             if (sfImplementations == null || sfImplementations.IsByAll)
-                throw new InvalidOperationException("GetChooser needs an ImplementedBy");
+                throw new InvalidOperationException("GetTypeChooser needs an ImplementedBy");
 
             string strButtons = ((ImplementedByAttribute)sfImplementations).ImplementedTypes
                 .ToString(type => "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(type.Name, type.NiceName()), "");
+
+            ViewData[ViewDataKeys.CustomHtml] = strButtons;
+            ViewData[ViewDataKeys.PopupPrefix] = prefix;
+            return PartialView(Navigator.Manager.ChooserPopupUrl);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult GetChooser(List<string> buttons, string prefix)
+        {
+            if (buttons == null || buttons.Count==0)
+                throw new InvalidOperationException(Resources.GetChooserNeedsAListOfOptions);
+
+            string strButtons = buttons
+                .ToString(b => "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(b.Replace(" ", ""), b), "");
 
             ViewData[ViewDataKeys.CustomHtml] = strButtons;
             ViewData[ViewDataKeys.PopupPrefix] = prefix;
