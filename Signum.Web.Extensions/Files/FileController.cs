@@ -77,7 +77,7 @@ namespace Signum.Web.Files
 
                 string fileType = (string)Request.Form[TypeContext.Compose(file, FileLineKeys.FileType)];
                 if (!fileType.HasText())
-                    throw new ApplicationException(Resources.CouldntCreateFilePathWithUnknownFileTypeForField0.Formato(file));
+                    throw new Exception(Resources.CouldntCreateFilePathWithUnknownFileTypeForField0.Formato(file));
 
                 formFieldId = file; //This is the uploaded file
 
