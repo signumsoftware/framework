@@ -92,7 +92,6 @@
     <Compile Include="Controllers\WidgetsController.cs" />
     <Compile Include="WebMenuItem.cs" />
     <Compile Include="EntityInfo.cs" />
-    <Compile Include="Help\HelpModels.cs" />
     <Compile Include="JSRenderer\JsValidatorOptions.cs" />
     <Compile Include="JSRenderer\JsFindOptions.cs" />
     <Compile Include="JSRenderer\JsViewOptions.cs" />
