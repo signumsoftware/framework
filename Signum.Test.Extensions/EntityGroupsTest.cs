@@ -29,7 +29,7 @@ namespace Signum.Test.Extensions
 
             DynamicQueryManager dqm = new DynamicQueryManager();
             SchemaBuilder sb = new SchemaBuilder();
-            sb.Settings.OverrideTypeAttributes<IEmployeeDN>(new ImplementedByAttribute());
+            sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
             TypeLogic.Start(sb); 
             AuthLogic.Start(sb, dqm, "System");
             sb.Include<ResourceDN>();

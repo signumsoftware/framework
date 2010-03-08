@@ -33,11 +33,11 @@ namespace Signum.Entities.Authorization
             set { Set(ref passwordHash, value, () => PasswordHash); }
         }
 
-        Lite<IEmployeeDN> employee;
-        public Lite<IEmployeeDN> Employee
+        Lite<IUserRelatedDN> related;
+        public Lite<IUserRelatedDN> Related
         {
-            get { return employee; }
-            set { Set(ref employee, value, () => Employee); }
+            get { return related; }
+            set { Set(ref related, value, () => Related); }
         }
 
         RoleDN role;
@@ -120,7 +120,7 @@ namespace Signum.Entities.Authorization
         Disable,
     }
 
-    public interface IEmployeeDN:IIdentifiable
+    public interface IUserRelatedDN:IIdentifiable
     {
 
     }

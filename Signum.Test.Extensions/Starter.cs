@@ -28,7 +28,7 @@ namespace Signum.Test.Extensions
 
                 Signum.Test.Starter.InternalStart(sb, dqm);
 
-                sb.Settings.OverrideTypeAttributes<IEmployeeDN>(new ImplementedByAttribute());
+                sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
             
                 OperationLogic.Start(sb, dqm);
             
