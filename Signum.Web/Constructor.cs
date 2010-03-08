@@ -20,6 +20,7 @@ namespace Signum.Web
         public static void Start(ConstructorManager constructorManager)
         {
             ConstructorManager = constructorManager;
+            constructorManager.Initialize();
         }
 
         public static object Construct(Type type, Controller controller)
@@ -49,6 +50,12 @@ namespace Signum.Web
         public event Func<Type, Controller, object> GeneralConstructor;
 
         public Dictionary<Type, Func<Controller, object>> Constructors;
+
+        internal void Initialize()
+        {
+            if (Constructors == null)
+                Constructors = new Dictionary<Type, Func<Controller, object>>();
+        }
 
         public virtual object Construct(Type type, Controller controller)
         {

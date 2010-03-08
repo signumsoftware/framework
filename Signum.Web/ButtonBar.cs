@@ -9,8 +9,8 @@ using Signum.Web.Properties;
 
 namespace Signum.Web
 {
-    public delegate List<WebMenuItem> GetButtonBarElementDelegate(HttpContextBase httpContext, object entity, string mainControlUrl);
-    public delegate List<WebMenuItem> GetButtonBarForQueryNameDelegate(HttpContextBase httpContext, object queryName, Type entityType); 
+    public delegate List<ToolBarButton> GetButtonBarElementDelegate(HttpContextBase httpContext, object entity, string mainControlUrl);
+    public delegate List<ToolBarButton> GetButtonBarForQueryNameDelegate(HttpContextBase httpContext, object queryName, Type entityType); 
 
     public static class ButtonBarHelper
     {
@@ -19,13 +19,13 @@ namespace Signum.Web
 
         public static string GetButtonBarElements(this HtmlHelper helper, object entity, string mainControlUrl, string prefix)
         {
-            List<WebMenuItem> elements = GetButtonBarElements(helper.ViewContext.HttpContext, entity, mainControlUrl, prefix);
+            List<ToolBarButton> elements = GetButtonBarElements(helper.ViewContext.HttpContext, entity, mainControlUrl, prefix);
             return ListMenuItemsToString(helper, elements, prefix);
         }
 
-        public static List<WebMenuItem> GetButtonBarElements(HttpContextBase httpContext, object entity, string mainControlUrl, string prefix)
+        public static List<ToolBarButton> GetButtonBarElements(HttpContextBase httpContext, object entity, string mainControlUrl, string prefix)
         {
-            List<WebMenuItem> elements = new List<WebMenuItem>();
+            List<ToolBarButton> elements = new List<ToolBarButton>();
             if (GetButtonBarElement != null)
                 elements.AddRange(GetButtonBarElement.GetInvocationList()
                     .Cast<GetButtonBarElementDelegate>()
@@ -36,7 +36,7 @@ namespace Signum.Web
 
         public static string GetButtonBarElementsForQuery(this HtmlHelper helper, object queryName, Type entityType, string prefix)
         {
-            List<WebMenuItem> elements = new List<WebMenuItem>();
+            List<ToolBarButton> elements = new List<ToolBarButton>();
             if (GetButtonBarElement != null)
                 elements.AddRange(GetButtonBarForQueryName.GetInvocationList()
                     .Cast<GetButtonBarForQueryNameDelegate>()
@@ -46,11 +46,11 @@ namespace Signum.Web
             return ListMenuItemsToString(helper, elements, prefix);
         }
 
-        private static string ListMenuItemsToString(HtmlHelper helper, List<WebMenuItem> elements, string prefix)
+        private static string ListMenuItemsToString(HtmlHelper helper, List<ToolBarButton> elements, string prefix)
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach (WebMenuItem mi in elements)
+            foreach (ToolBarButton mi in elements)
                 sb.AppendLine(mi.ToString(helper, prefix));
             
             return sb.ToString();

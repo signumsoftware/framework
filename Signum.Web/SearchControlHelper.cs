@@ -19,7 +19,7 @@ namespace Signum.Web
 {
     public static class SearchControlHelper
     {
-        public delegate WebMenuItem MenuItemForQueryName(object queryName);
+        public delegate ToolBarButton MenuItemForQueryName(object queryName);
 
         public static event MenuItemForQueryName GetCustomMenuItems;
 
@@ -28,8 +28,8 @@ namespace Signum.Web
             StringBuilder sb = new StringBuilder();
             if (GetCustomMenuItems != null)
             {
-                WebMenuItem[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(queryName)).NotNull().ToArray();
-                foreach (WebMenuItem mi in menus)
+                ToolBarButton[] menus = GetCustomMenuItems.GetInvocationList().Cast<MenuItemForQueryName>().Select(d => d(queryName)).NotNull().ToArray();
+                foreach (ToolBarButton mi in menus)
                 {
                     throw new NotImplementedException("ConstructorFromMany operations are not supported yet");
                    // string onclick = "";
@@ -106,14 +106,8 @@ namespace Signum.Web
             if (entitiesType != null)
             {
                 helper.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
-                helper.ViewData[ViewDataKeys.Create] =
-                    (findOptions.Create.HasValue) ?
-                    findOptions.Create.Value :
-                    Navigator.IsCreable(entitiesType, false);
-                helper.ViewData[ViewDataKeys.View] =
-                                (findOptions.View.HasValue) ?
-                                    findOptions.View.Value :
-                                    Navigator.IsNavigable(entitiesType, true);
+                helper.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, false);
+                helper.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
             }
             else
             {

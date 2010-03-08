@@ -234,4 +234,7 @@
   <data name="View" xml:space="preserve">
     <value>Ver</value>
   </data>
+  <data name="Query0HasNoUrlName" xml:space="preserve">
+    <value>Query {0} has no UrlName</value>
+  </data>
 </root>

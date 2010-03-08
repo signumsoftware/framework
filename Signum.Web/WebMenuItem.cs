@@ -9,7 +9,7 @@ using Signum.Web.Properties;
 
 namespace Signum.Web
 {
-    public class WebMenuItem
+    public class ToolBarButton
     {
         public string Id { get; set; }
         public string ImgSrc { get; set; }

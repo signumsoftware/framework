@@ -40,7 +40,7 @@ namespace Signum.Web.Controllers
             if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
                 entity = (IIdentifiable)result;
             else
-                throw new Exception(Resources.InvalidResultTypeForADirectConstructor);
+                throw new InvalidOperationException("Invalid result type for a Direct Constructor");
 
             return Navigator.View(this, entity);
         }
@@ -56,7 +56,7 @@ namespace Signum.Web.Controllers
             else if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
                 entity = (IIdentifiable)result;
             else
-                throw new Exception(Resources.InvalidResultTypeForAConstructor);
+                throw new InvalidOperationException("Invalid result type for a Constructor");
 
             return Content(Navigator.ViewRoute(type, null));
         }
@@ -86,12 +86,12 @@ namespace Signum.Web.Controllers
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
                         entity = (ModifiableEntity)result;
                     else
-                        throw new Exception(Resources.InvalidResultTypeForAConstructor);
+                        throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
             }
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-                throw new InvalidOperationException(Resources.PopupViewCannotBeCalledForEmbeddedType0.Formato(entity.GetType()));
+                throw new InvalidOperationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
 
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
@@ -127,7 +127,7 @@ namespace Signum.Web.Controllers
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
                         entity = (ModifiableEntity)result;
                     else
-                        throw new Exception(Resources.InvalidResultTypeForAConstructor);
+                        throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
             }
 
@@ -135,7 +135,7 @@ namespace Signum.Web.Controllers
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-                throw new InvalidOperationException(Resources.PopupViewCannotBeCalledForEmbeddedType0.Formato(entity.GetType()));
+                throw new InvalidOperationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
 
             if (sfReadOnly.HasValue)
                 ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };

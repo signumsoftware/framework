@@ -32,10 +32,10 @@ namespace Signum.Web
             bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
 
             if (settings.Implementations != null && settings.Implementations.IsByAll)
-                throw new Exception(Resources.ImplementedByAllTypesAreNotAllowedInEntityCombo);
+                throw new InvalidOperationException("ImplementedByAll types are not allowed in EntityCombo");
 
             if (!isIdentifiable && !isLite)
-                throw new Exception(Resources.EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0.Formato(cleanStaticType));
+                throw new InvalidOperationException(Resources.EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0.Formato(cleanStaticType));
 
             Type cleanRuntimeType = null;
             if (value != null)
@@ -78,7 +78,7 @@ namespace Signum.Web
                     else
                     {
                         if (settings.Implementations != null)
-                            throw new Exception(Resources.TypesWithImplementationsMustProvideDataToEntityCombo);
+                            throw new InvalidOperationException("Types with Implementations must provide Data to EntityCombo");
 
                         items.AddRange(
                             Database.RetrieveAllLite(cleanStaticType)
@@ -95,7 +95,7 @@ namespace Signum.Web
                 settings.ComboHtmlProperties.Add("class","valueLine");
 
                 if (settings.ComboHtmlProperties.ContainsKey("onchange"))
-                    throw new Exception(Resources.EntityComboCannotHaveOnchangeHtmlPropertyUseOnEntityChangedInstead);
+                    throw new InvalidOperationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
 
                 settings.ComboHtmlProperties.Add("onchange", "EComboOnChanged({0});".Formato(settings.ToJS()));
 

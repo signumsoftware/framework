@@ -138,7 +138,7 @@ namespace Signum.Web
             }
             catch (Exception)
             {
-                throw new Exception(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
+                throw new InvalidOperationException(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
             }
 
             return (Modifiable)currentEntity;
@@ -212,7 +212,7 @@ namespace Signum.Web
                     if (PropertyPack.SetValue == null)
                     {
                         if (PropertyPack.PropertyInfo.PropertyType != typeof(bool))
-                            throw new ApplicationException("Binding Error");
+                            throw new InvalidOperationException("Binding Error");
                         return; //MVC Helper will send the hidden field even if the checkbox was disabled
                     }
                     PropertyPack.SetValue(entity, value);

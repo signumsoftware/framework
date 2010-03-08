@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Engine;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Web
 {
@@ -64,43 +65,38 @@ namespace Signum.Web
             set { this.filterMode = value; }
         }
 
-        public bool? Create { get; set; }
-
-        public bool? View { get; set; }
-
-        public bool? Async { get; set; }
-
-        public string ToString(bool writeQueryUrlName, bool writeAllowMultiple, string firstCharacter)
+        bool create = true;
+        public bool Create
         {
-            StringBuilder sb = new StringBuilder();
-            if (writeQueryUrlName)
-                sb.Append("&sfQueryUrlName=" + Navigator.Manager.QuerySettings[QueryName].UrlName);
+            get { return create; }
+            set { create = value; }
+        }
 
-            if (SearchOnLoad)
-                sb.Append("&sfSearchOnLoad=true");
+        bool view = true;
+        public bool View
+        {
+            get { return view; }
+            set { view = value; }
+        }
 
-            if (Create == false)
-                sb.Append("&sfCreate=false");
-            
-            if (View == false)
-                sb.Append("&sfView=false");
+        public bool Async { get; set; }
 
-            if (Async == true)
-                sb.Append("$sfAsync=true");
-
-            if (writeAllowMultiple && AllowMultiple.HasValue)
-                sb.Append("&sfAllowMultiple="+AllowMultiple.ToString());
-
-            if (FilterOptions != null && FilterOptions.Count > 0)
+        public override string ToString()
+        {
+            string options = new Sequence<string>
             {
-                for (int i = 0; i < FilterOptions.Count; i++)
-                    sb.Append(FilterOptions[i].ToString(i));
-            }
-            string result = sb.ToString();
-            if (result.HasText())
-                return firstCharacter + result.RemoveLeft(1);
+                SearchOnLoad ? "sfSearchOnLoad=true" : null,
+                !Create ? "sfCreate=false": null, 
+                !View ? "sfView=false": null, 
+                Async ? "sfAsync=true": null, 
+                AllowMultiple.HasValue ? "sfAllowMultiple=" + AllowMultiple.ToString() : null,
+                FilterOptions.Select((fi,i)=>fi.ToString(i)),
+            }.NotNull().ToString("&");
+
+            if (options.HasText())
+                return Navigator.FindRoute(QueryName) + "?" + options;
             else
-                return result;
+                return Navigator.FindRoute(QueryName); 
         }
     }
 

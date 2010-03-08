@@ -279,4 +279,7 @@
   <data name="GetChooserNeedsAListOfOptions" xml:space="preserve">
     <value>GetChooser needs a list of options</value>
   </data>
+  <data name="TextNotSetForMenuItem0" xml:space="preserve">
+    <value>Text not set for menu item {0}</value>
+  </data>
 </root>

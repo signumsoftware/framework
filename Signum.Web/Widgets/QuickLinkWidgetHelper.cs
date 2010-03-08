@@ -54,7 +54,7 @@ namespace Signum.Web
         }
 
     }
-    public class QuickLinkItem : WebMenuItem
+    public class QuickLinkItem : ToolBarButton
     {
         public QuickLinkItem(object queryName, List<FilterOption> filterOptions)
         {

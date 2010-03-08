@@ -521,7 +521,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
             if (!es.IsNavigable(false))
-                throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(obj.GetType()));
+                throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(obj.GetType()));
 
             if (es.IsReadOnly(false))
             {
@@ -569,10 +569,10 @@ namespace Signum.Web
         protected internal string ExtractTabID(NameValueCollection form)
         {
             if (!form.AllKeys.Contains(ViewDataKeys.TabId))
-                throw new Exception(Resources.RequestDoesntHaveNecessaryTabIdentifier);
+                throw new InvalidOperationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
             string tabID = (string)form[ViewDataKeys.TabId];
             if (!tabID.HasText())
-                throw new Exception(Resources.RequestDoesntHaveNecessaryTabIdentifier);
+                throw new InvalidOperationException(Resources.RequestDoesntHaveNecessaryTabIdentifier);
             return tabID;
         }
 
@@ -588,7 +588,7 @@ namespace Signum.Web
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
 
             if (!es.IsViewable(false))
-                throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
+                throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(cleanType.Name));
 
             string url = partialViewName ?? es.PartialViewName;
 
@@ -687,14 +687,8 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
             controller.ViewData[ViewDataKeys.EntityType] = entitiesType;
-            controller.ViewData[ViewDataKeys.Create] =
-                (findOptions.Create.HasValue) ?
-                    findOptions.Create.Value :
-                    Navigator.IsCreable(entitiesType, true);
-            controller.ViewData[ViewDataKeys.View] =
-                            (findOptions.View.HasValue) ?
-                                findOptions.View.Value :
-                                Navigator.IsNavigable(entitiesType, true);
+            controller.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, true);
+            controller.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
 
             return new ViewResult()
             {
@@ -768,14 +762,8 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
             controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
             controller.ViewData[ViewDataKeys.EntityType] = entitiesType;
-            controller.ViewData[ViewDataKeys.Create] =
-                (findOptions.Create.HasValue) ?
-                    findOptions.Create.Value :
-                    Navigator.IsCreable(entitiesType, true);
-            controller.ViewData[ViewDataKeys.View] =
-                            (findOptions.View.HasValue) ?
-                                findOptions.View.Value :
-                                Navigator.IsNavigable(entitiesType, true);
+            controller.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, true);
+            controller.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
             
             return new PartialViewResult
             {
@@ -811,10 +799,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.Results] = queryResult;
             controller.ViewData[ViewDataKeys.AllowMultiple] = findOptions.AllowMultiple;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            controller.ViewData[ViewDataKeys.View] =
-                            (findOptions.View.HasValue) ?
-                                findOptions.View.Value :
-                                Navigator.IsNavigable(entitiesType, true);
+            controller.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
 
             if (queryResult != null && queryResult.Rows != null && queryResult.Rows.Length > 0 && queryResult.VisibleColumns.Count() > 0)
             {
@@ -1029,7 +1014,7 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.Reactive] = true;
                 ModifiableEntity mod = (ModifiableEntity)controller.Session[tabID];
                 if (mod == null)
-                    throw new ApplicationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
+                    throw new InvalidOperationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
 
                 RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Separator + EntityBaseKeys.RuntimeInfo]);
                 if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
@@ -1040,7 +1025,7 @@ namespace Signum.Web
                     return mod;
                 }
                 else
-                    throw new Exception(Resources.IncorrectEntityInSession);
+                    throw new InvalidOperationException(Resources.IncorrectEntityInSession);
             }
 
             if (runtimeInfo.IdOrNull != null)
