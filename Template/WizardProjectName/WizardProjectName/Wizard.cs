@@ -72,7 +72,7 @@ namespace WizardProjectName
 
         static Dictionary<string, string> projectGuids = new Dictionary<string,string>(); 
 
-        static string[] postNames = new[] { ".Entities", ".Load", ".Logic", ".Services", ".Web", ".Windows" };
+        static string[] postNames = new[] { ".Entities", ".Load", ".Logic", ".Web", ".Windows" };
 
         public void RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
         {
