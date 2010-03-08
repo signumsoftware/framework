@@ -222,7 +222,7 @@ namespace Signum.Windows
                 }
             }
 
-            throw new ApplicationException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
+            throw new InvalidCastException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
         }
 
         public static bool CanConvert(object obj, Type type)

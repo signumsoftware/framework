@@ -70,10 +70,10 @@ namespace Signum.Engine.Maps
         Table PreCreate(Type type)
         {
             if (type.IsAbstract)
-                throw new ApplicationException(Resources.ImpossibleToIncludeInTheSchema + " " +  Resources.Type0IsAbstract.Formato(type));
+                throw new InvalidOperationException(Resources.ImpossibleToIncludeInTheSchema + " " + Resources.Type0IsAbstract.Formato(type));
 
             if (!Reflector.IsIdentifiableEntity(type) && !type.IsEnum)
-                throw new ApplicationException(Resources.ImpossibleToIncludeInTheSchema + " " + Resources.Type0IsNotAnIdentifiableEntityOrAnEnum.Formato(type));
+                throw new InvalidOperationException(Resources.ImpossibleToIncludeInTheSchema + " " + Resources.Type0IsNotAnIdentifiableEntityOrAnEnum.Formato(type));
             
             return new Table(type);
         }
@@ -164,7 +164,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.MList:
                     return GenerateFieldMList(type, fi, table, name);
                 default:
-                    throw new ApplicationException(Resources.NoWayOfMappingType0Found.Formato(fieldType));
+                    throw new NotSupportedException(Resources.NoWayOfMappingType0Found.Formato(fieldType));
             }
         }
 

@@ -9,6 +9,11 @@ namespace Signum.Windows
 {
     public static class ControlExtensions
     {
+        public static bool IsSet(this DependencyObject depObj, DependencyProperty prop)
+        {
+            return DependencyPropertyHelper.GetValueSource(depObj, prop).BaseValueSource == BaseValueSource.Local;
+        }
+
         public static bool NotSet(this DependencyObject depObj, DependencyProperty prop)
         {
             return DependencyPropertyHelper.GetValueSource(depObj, prop).BaseValueSource != BaseValueSource.Local;

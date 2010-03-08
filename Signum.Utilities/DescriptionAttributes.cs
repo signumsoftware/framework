@@ -61,7 +61,7 @@ namespace Signum.Utilities
             static Dictionary<Enum, FieldInfo> Create(Type type)
             {
                 if (!type.IsEnum)
-                    throw new ApplicationException(Resources.IsNotAnEnum.Formato(type));
+                    throw new ArgumentException(Resources.IsNotAnEnum.Formato(type));
 
                 lock (enumCache)
                     return enumCache.GetOrCreate(type, () => type.GetFields().Skip(1).ToDictionary(

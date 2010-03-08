@@ -60,9 +60,7 @@ namespace Signum.Windows
                 return;
 
             if (this.Type == null)
-            {
-                throw new ApplicationException(Properties.Resources.TypePropertyItsNotDeterminedForControl0.Formato(LabelText));
-            }
+                throw new InvalidOperationException(Properties.Resources.TypePropertyItsNotDeterminedForControl0.Formato(LabelText));
         }
     }
 

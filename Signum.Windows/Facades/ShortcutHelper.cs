@@ -12,9 +12,9 @@ namespace Signum.Windows
     {
         public static void SetLabelShortcuts(Window windows)
         {
-            List<Label> labels = windows.Children<Label>(l=>l.Content is string).ToList();
+            List<LineBase> labels = windows.Children<LineBase>(l => l.IsSet(LineBase.LabelTextProperty)).ToList();
 
-            SetShortcuts(labels, l => (string)l.Content, (l, s) => l.Content = s);
+            SetShortcuts(labels, l => l.LabelText, (l, s) => l.LabelText = s);
         }
 
         public static void SetMenuItemShortcuts(MenuItem menuItem)

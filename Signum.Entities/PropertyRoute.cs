@@ -48,10 +48,10 @@ namespace Signum.Entities
         PropertyRoute(PropertyRoute parent, PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
-                throw new ApplicationException("propertyInfo");
+                throw new ArgumentNullException("propertyInfo");
 
             if (parent == null)
-                throw new ApplicationException("parent");
+                throw new ArgumentNullException("parent");
 
             if (!parent.Type.FollowC(a => a.BaseType).Contains(propertyInfo.DeclaringType))
                 throw new ArgumentException("propertyInfo '{0}' not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
@@ -62,7 +62,7 @@ namespace Signum.Entities
             if (Reflector.IsMList(parent.Type))
             {
                 if (propertyInfo.Name != "Item")
-                    throw new ApplicationException("{0} PropertyInfo is not supported".Formato(propertyInfo.Name)); 
+                    throw new NotSupportedException("{0} PropertyInfo is not supported".Formato(propertyInfo.Name)); 
 
                 PropertyRouteType = PropertyRouteType.MListItems;
             }
@@ -71,7 +71,7 @@ namespace Signum.Entities
                 PropertyRouteType = PropertyRouteType.Property;
             }
             else
-                throw new ApplicationException("Properties of type {0} not supported".Formato(parent.Type));
+                throw new NotSupportedException("Properties of type {0} not supported".Formato(parent.Type));
 
             this.PropertyInfo = propertyInfo;
             this.Parent = parent;

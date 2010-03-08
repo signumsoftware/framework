@@ -67,7 +67,7 @@ namespace Signum.Entities.DynamicQuery
 
                     goto default;
                 default:
-                    throw new ApplicationException(Resources.Type0NotSupported.Formato(type));
+                    throw new NotSupportedException(Resources.Type0NotSupported.Formato(type));
             }
         }
 

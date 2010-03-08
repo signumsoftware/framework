@@ -40,7 +40,7 @@ namespace Signum.Windows
                 case Location.LocalAssembly: return PackUriHelper.Local(Path);
                 case Location.ReferencedAssembly: return PackUriHelper.Reference(Path, AssemblyName);
                 case Location.SiteOfOrigin: return PackUriHelper.SiteOfOrigin(Path);
-                default: throw new ApplicationException();
+                default: throw new NotSupportedException();
             }
         }
     }

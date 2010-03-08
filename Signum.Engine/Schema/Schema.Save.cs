@@ -67,7 +67,7 @@ namespace Signum.Engine.Maps
             if (Identity)
             {
                 if (ident.IdOrNull != null)
-                    throw new ApplicationException("{0} is New, but has Id ({1}) and Identity is true".Formato(ident, ident.IdOrNull)); 
+                    throw new InvalidOperationException("{0} is New, but has Id ({1}) and Identity is true".Formato(ident, ident.IdOrNull)); 
 
                 return SqlBuilder.InsertSaveId(Name, parameters, ident);
             }

@@ -44,7 +44,7 @@ namespace Signum.Engine
             SqlPreCommand comando = DeleteCommand(type, ids);
 
             if (Executor.ExecuteNonQuery(comando.ToSimple()) != ids.Count)
-                throw new ApplicationException(Resources.NotAllEntitiesOfType0AndIds1Removed.Formato(type.Name, ids.ToString(", ")));
+                throw new InvalidOperationException(Resources.NotAllEntitiesOfType0AndIds1Removed.Formato(type.Name, ids.ToString(", ")));
 
             Schema.Current.OnDeleted(type, ids); 
         }

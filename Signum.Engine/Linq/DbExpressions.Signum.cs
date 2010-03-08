@@ -132,7 +132,7 @@ namespace Signum.Engine.Linq
         public FieldBinding(FieldInfo fieldInfo, Expression binding)
         {
             if (!fieldInfo.FieldType.IsAssignableFrom(binding.Type))
-                throw new ApplicationException(Resources.TypeOfExpressionIs0ButTypeOfFieldIs1.Formato(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
+                throw new ArgumentException(Resources.TypeOfExpressionIs0ButTypeOfFieldIs1.Formato(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
             
             this.FieldInfo = fieldInfo;
             this.Binding = binding;
@@ -152,7 +152,7 @@ namespace Signum.Engine.Linq
         public PropertyBinding(PropertyInfo propertyInfo, Expression binding)
         {
             if (!propertyInfo.PropertyType.UnNullify().IsAssignableFrom(binding.Type.UnNullify()))
-                throw new ApplicationException(Resources.TypeOfExpressionIs0ButTypeOfFieldIs1.Formato(binding.Type.TypeName(), propertyInfo.PropertyType.TypeName()));
+                throw new ArgumentException(Resources.TypeOfExpressionIs0ButTypeOfFieldIs1.Formato(binding.Type.TypeName(), propertyInfo.PropertyType.TypeName()));
 
             //if (Reflector.FindFieldInfo(propertyInfo.DeclaringType, (PropertyInfo)propertyInfo, false) != null)
             //    throw new ArgumentException("{0} is a PropertyInfo, when a FieldInfo is available".Formato(propertyInfo.Name));
@@ -261,7 +261,7 @@ namespace Signum.Engine.Linq
                 Type cleanType = Reflector.ExtractLite(type);
 
                 if (!cleanType.IsAssignableFrom(reference.Type) && !(cleanType == typeof(IdentifiableEntity) && reference.Type.IsInterface))
-                    throw new ApplicationException(Resources.TheType0IsNotTheLiteVersionOf1.Formato(type.TypeName(), reference.Type.TypeName()));
+                    throw new ArgumentException(Resources.TheType0IsNotTheLiteVersionOf1.Formato(type.TypeName(), reference.Type.TypeName()));
             }
 
             this.Reference = reference;

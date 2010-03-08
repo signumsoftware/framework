@@ -325,7 +325,7 @@ namespace Signum.Utilities.ExpressionTrees
                 case MemberBindingType.Assignment:
                     return VisitMemberAssignment((MemberAssignment)binding);
                 default:
-                    throw new ApplicationException("Unexpected {0}".Formato(binding.BindingType));
+                    throw new NotSupportedException("Unexpected {0}".Formato(binding.BindingType));
             }
         }
 

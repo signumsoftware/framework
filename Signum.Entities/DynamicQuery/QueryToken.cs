@@ -371,7 +371,15 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            return Parent.GetPropertyRoute().TryCC(pr => pr.Add(PropertyInfo));
+            PropertyRoute parent = Parent.GetPropertyRoute();
+            if (parent == null)
+                return null;
+
+            Type type = Reflector.ExtractLite(parent.Type);
+            if (type != null)
+                return PropertyRoute.Root(type).Add(PropertyInfo);
+
+            return parent.Add(PropertyInfo);
         }
 
         public override string NiceName()

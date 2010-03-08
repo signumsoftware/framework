@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Properties;
 using Signum.Engine.Maps;
+using System.Globalization;
 
 
 namespace Signum.Engine
@@ -32,11 +33,11 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(table.SqlScape(), campos.ToString(",\r\n").Indent(2)));
         }
 
-        static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpper()).ToHashSet();
+        static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpper(CultureInfo.InvariantCulture)).ToHashSet();
 
         public static string SqlScape(this string ident)
         {
-            if (Keywords.Contains(ident.ToUpper()))
+            if (Keywords.Contains(ident.ToUpper(CultureInfo.InvariantCulture)))
                 return "[" + ident + "]";
 
             return ident;
@@ -213,7 +214,7 @@ namespace Signum.Engine
         {
             return "{0} {1}{2} {3}{4}{5}".Formato(
                 name.SqlScape(),
-                type.ToString().ToUpper(),
+                type.ToString().ToUpper(CultureInfo.InvariantCulture),
                 GetSizeScale(size, scale),
                 identity ? "IDENTITY " : "",
                 nullable ? "NULL" : "NOT NULL",

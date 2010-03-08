@@ -489,7 +489,7 @@ namespace Signum.Engine.Maps
 
             if (field == null)
                 if (throws)
-                    throw new ApplicationException(Resources.Field0NotInType1.Formato(value.Name, Type.TypeName()));
+                    throw new InvalidOperationException(Resources.Field0NotInType1.Formato(value.Name, Type.TypeName()));
                 else
                     return null;
 
@@ -548,7 +548,7 @@ namespace Signum.Engine.Maps
         public static void AssertImplements(this Field field, Type type)
         {
             if (!Implements(field, type))
-                throw new ApplicationException("{0} does not implement {1}".Formato(field.ToString(), type.Name)); 
+                throw new InvalidOperationException("{0} does not implement {1}".Formato(field.ToString(), type.Name)); 
         }
     }
 
@@ -671,7 +671,7 @@ namespace Signum.Engine.Maps
 
             if (field == null)
                 if (throws)
-                    throw new ApplicationException(Resources.Field0NotInType1.Formato(value.Name, FieldType.TypeName()));
+                    throw new InvalidOperationException(Resources.Field0NotInType1.Formato(value.Name, FieldType.TypeName()));
                 else
                     return null;
 
@@ -790,7 +790,7 @@ namespace Signum.Engine.Maps
                 return RelationalTable.Field;
 
             if (throws)
-                throw new ApplicationException(Resources.MemberInfo0NotSupportedByCollectionField.Formato(value));
+                throw new InvalidOperationException(Resources.MemberInfo0NotSupportedByCollectionField.Formato(value));
 
             return null;
         }

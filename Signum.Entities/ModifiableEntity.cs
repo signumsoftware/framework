@@ -253,7 +253,7 @@ namespace Signum.Entities
 
         #region IDataErrorInfo Members
         [HiddenProperty]
-        string IDataErrorInfo.Error
+        public string Error
         {
             get { return IntegrityCheck(); }
         }

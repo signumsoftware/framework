@@ -34,7 +34,7 @@ namespace Signum.Entities
                 base.PreSaving(ref graphModified);
             else
                 if (SelfModified)
-                    throw new ApplicationException(Properties.Resources.AttemptToSaveANotNewModifiedImmutableEntity);
+                    throw new InvalidOperationException(Properties.Resources.AttemptToSaveANotNewModifiedImmutableEntity);
         }
     }
 

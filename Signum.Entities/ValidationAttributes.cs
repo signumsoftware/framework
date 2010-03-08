@@ -605,7 +605,7 @@ namespace Signum.Entities
         public void Add(S state, params bool?[] necessary)
         {
             if (necessary == null && necessary.Length != propertyNames.Length)
-                throw new ApplicationException("The state Validator {0} for state {1} has {2} values insted of {3}"
+                throw new ArgumentException("The state Validator {0} for state {1} has {2} values insted of {3}"
                     .Formato(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
 
             dictionary.Add(state, necessary);

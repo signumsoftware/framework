@@ -45,7 +45,7 @@ namespace Signum.Utilities
                 return;
             DateTime d = date.Value;
             if (d.Hour != 0 || d.Minute != 0 || d.Second != 0 || d.Millisecond != 0)
-                throw new ApplicationException(Resources.TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond);
+                throw new InvalidOperationException(Resources.TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond);
         }
 
         /// <summary>

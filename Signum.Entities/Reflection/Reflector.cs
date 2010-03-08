@@ -261,7 +261,7 @@ namespace Signum.Entities.Reflection
         public static bool IsLowPopulation(Type type)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                throw new ApplicationException(Resources._0DoesNotInheritFromIdentifiableEntity.Formato(type));
+                throw new ArgumentException(Resources._0DoesNotInheritFromIdentifiableEntity.Formato(type));
 
             LowPopulationAttribute lpa = type.SingleAttribute<LowPopulationAttribute>();
             if (lpa != null)
@@ -375,7 +375,7 @@ namespace Signum.Entities.Reflection
         public static void AssertValidIdentifier(string step)
         {
             if (!ValidIdentifier(step))
-                throw new ApplicationException(Resources._0IsNotAValidIdentifier.Formato(step));
+                throw new FormatException(Resources._0IsNotAValidIdentifier.Formato(step));
         }
     }
 }

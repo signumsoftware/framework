@@ -133,7 +133,7 @@ namespace Signum.Engine
             {
                 DataTable dt = ds.Tables[0];
                 if (dt.Rows.Count != insertedEntities.Count)
-                    throw new ApplicationException(Resources._0ObjectsInsertedButOnly1IdsAreGenerated.Formato(insertedEntities.Count, dt.Rows.Count));
+                    throw new InvalidOperationException(Resources._0ObjectsInsertedButOnly1IdsAreGenerated.Formato(insertedEntities.Count, dt.Rows.Count));
 
                 dt.Rows.Cast<DataRow>().ZipForeach(insertedEntities, (dr, ei) => ei.id = (int)dr[0]);
 

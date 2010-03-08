@@ -906,7 +906,7 @@ namespace Signum.Engine.Linq
                     }
 
                     if (fi == null)
-                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
+                        throw new InvalidOperationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
 
                     Expression result = fie.GetOrCreateFieldBinding(fie.Token, fi, this);
                     return result;
@@ -917,7 +917,7 @@ namespace Signum.Engine.Linq
                     FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
 
                     if (fi == null)
-                        throw new ApplicationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, efie.Type.TypeName()));
+                        throw new InvalidOperationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, efie.Type.TypeName()));
 
                     Expression result = efie.GetBinding(fi);
                     return result;
@@ -933,10 +933,14 @@ namespace Signum.Engine.Linq
                         if (pi.Name == "EntityOrNull" || pi.Name == "Entity")
                             return liteRef.Reference;
                         if (pi.Name == "ToStr")
-                            return liteRef.ToStr.ThrowIfNullC("ToStr is no accesible on queries in ImplementedByAll");
+                        {
+                            if (liteRef.ToStr == null)
+                                throw new InvalidOperationException("ToStr is no accesible on queries in ImplementedByAll");
+                            return liteRef.ToStr;
+                        }
                     }
 
-                    throw new ApplicationException("The member {0} of Lite is no accesible on queries, use EntityOrNull instead".Formato(m.Member));
+                    throw new InvalidOperationException("The member {0} of Lite is no accesible on queries, use EntityOrNull instead".Formato(m.Member));
                 }
                 case (ExpressionType)DbExpressionType.ImplementedBy:
                 {
@@ -965,7 +969,7 @@ namespace Signum.Engine.Linq
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                         return iba.Id;
 
-                    throw new ApplicationException("The member {0} of ImplementedByAll is no accesible on queries".Formato(m.Member));
+                    throw new InvalidOperationException("The member {0} of ImplementedByAll is no accesible on queries".Formato(m.Member));
                 }
             }
       
@@ -1034,7 +1038,7 @@ namespace Signum.Engine.Linq
             }
 
             if(list.Any(e=>e is MListExpression))
-                throw new ApplicationException("MList on ImplementedBy are not supported jet");
+                throw new InvalidOperationException("MList on ImplementedBy are not supported jet");
 
             return Coalesce(returnType.Nullify(), list);
         }
@@ -1277,7 +1281,8 @@ namespace Signum.Engine.Linq
             {
                 MemberMemberBinding mmb = (MemberMemberBinding)m;
                 if(!typeof(EmbeddedEntity).IsAssignableFrom(m.Member.ReturningType()))
-                    throw new ApplicationException("{0} does not inherit from EmbeddedEntity".Formato(m.Member.ReturningType()));
+                    throw new InvalidOperationException("{0} does not inherit from EmbeddedEntity".Formato(m.Member.ReturningType()));
+
                 Expression obj2 = Expression.MakeMemberAccess(obj, mmb.Member);
 
                 return mmb.Bindings.SelectMany(m2 => ColumnAssigments(obj2, m2)).ToArray();
@@ -1332,7 +1337,7 @@ namespace Signum.Engine.Linq
                     FieldInitExpression fie = (FieldInitExpression)expression; 
 
                     if(!colIb.Implementations.Any(i=>i.Type == fie.Type))
-                        throw new ApplicationException("Type {0} is not in {1}".Formato(fie.Type.Name, colIb.Implementations.ToString(i=>i.Type.Name, ", ")));
+                        throw new InvalidOperationException("Type {0} is not in {1}".Formato(fie.Type.Name, colIb.Implementations.ToString(i => i.Type.Name, ", ")));
 
                     return colIb.Implementations.Select(imp => (AssignColumn(imp.Field.ExternalId,
                        imp.Type == fie.Type ? fie.ExternalId : NullId))).ToArray();
@@ -1343,7 +1348,7 @@ namespace Signum.Engine.Linq
 
                     Type[] types = ib.Implementations.Select(i=>i.Type).Except(colIb.Implementations.Select(i=>i.Type)).ToArray(); 
                     if(types.Any())
-                        throw new ApplicationException("No implementation for type(s) {0}".Formato(types.ToString(t=>t.Name, ", ")));
+                        throw new InvalidOperationException("No implementation for type(s) {0}".Formato(types.ToString(t => t.Name, ", ")));
 
                     return colIb.Implementations.Select(cImp => AssignColumn(cImp.Field.ExternalId,
                             ib.Implementations.SingleOrDefault(imp => imp.Type == cImp.Type).TryCC(imp => imp.Field.ExternalId) ?? NullId)).ToArray();

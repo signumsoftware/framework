@@ -297,7 +297,7 @@ namespace Signum.Engine
             BaseConnection bc = ConnectionScope.Current;
 
             if (bc == null)
-                throw new ApplicationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
+                throw new InvalidOperationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
 
             ICoreTransaction parent = currents.TryGetC(bc);
             if (parent == null || forceNew)
@@ -322,7 +322,7 @@ namespace Signum.Engine
             BaseConnection bc = ConnectionScope.Current;
 
             if (bc == null)
-                throw new ApplicationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
+                throw new InvalidOperationException(Resources.NoCurrentConnectionEstablishedUseConnectionScopeDefaultToDoIt);
 
             ICoreTransaction parent = GetCurrent();
             if (bc.IsMock)

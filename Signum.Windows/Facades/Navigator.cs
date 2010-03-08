@@ -768,7 +768,7 @@ namespace Signum.Windows
             string name = methodBase.DeclaringType.TypeName() + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
-                throw new ApplicationException(Resources.Call0First.Formato(name));
+                throw new InvalidOperationException(Resources.Call0First.Formato(name));
         }
 
  

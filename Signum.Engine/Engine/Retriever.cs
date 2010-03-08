@@ -122,7 +122,7 @@ namespace Signum.Engine
                 DataTable dt = Executor.ExecuteDataTable(preComand);
 
                 if (array.Length != dt.Rows.Count)
-                    throw new ApplicationException(Resources.TheProperty0ForType1IsnotFound.Formato(table.Type.Name,
+                    throw new InvalidOperationException(Resources.TheProperty0ForType1IsnotFound.Formato(table.Type.Name,
                         array.Except(dt.Rows.Cast<DataRow>().Select(row => (int)row[SqlBuilder.PrimaryKeyName])).ToString(",")));
 
                 foreach (DataRow row in dt.Rows)

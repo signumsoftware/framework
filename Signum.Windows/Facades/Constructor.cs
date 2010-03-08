@@ -18,7 +18,8 @@ namespace Signum.Windows
 
         public static void Start(ConstructorManager constructorManager)
         {
-            ConstructorManager = constructorManager; 
+            ConstructorManager = constructorManager;
+            constructorManager.Initialize();
         }
 
         public static object Construct(Type type, Window window)
@@ -37,6 +38,12 @@ namespace Signum.Windows
         public event Func<Type, Window, object> GeneralConstructor; 
 
         public Dictionary<Type, Func<Window, object>> Constructors;
+
+        internal void Initialize()
+        {
+            if (Constructors == null)
+                Constructors = new Dictionary<Type, Func<Window, object>>();
+        }
 
         public virtual object Construct(Type type, Window window)
         {

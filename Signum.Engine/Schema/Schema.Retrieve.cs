@@ -156,7 +156,7 @@ namespace Signum.Engine.Maps
                 return null;
             
             if (columns.Length > 1)
-                throw new ApplicationException(Resources.Fields0AreSetAtTheSameTime.Formato(columns.ToString(c=>c.Value.Name, ", ")));
+                throw new InvalidOperationException(Resources.Fields0AreSetAtTheSameTime.Formato(columns.ToString(c => c.Value.Name, ", ")));
 
             ImplementationColumn col = columns[0].Value;
 
@@ -177,7 +177,7 @@ namespace Signum.Engine.Maps
             int? idTipo = (int?)row.Cell(ColumnTypes.Name);
 
             if (id.HasValue != idTipo.HasValue)
-                throw new ApplicationException("ImplementedByAll {0} = {1} but {2} = {3}".Formato(Column.Name, id, ColumnTypes.Name, idTipo));
+                throw new InvalidOperationException("ImplementedByAll {0} = {1} but {2} = {3}".Formato(Column.Name, id, ColumnTypes.Name, idTipo));
 
             if (id == null)
                 return null;
