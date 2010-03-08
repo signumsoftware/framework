@@ -22,9 +22,8 @@
         <ProjectItem ReplaceParameters="true" TargetFileName="Settings.settings">Settings.settings</ProjectItem>
         <ProjectItem ReplaceParameters="true" TargetFileName="Settings.Designer.cs">Settings.Designer.cs</ProjectItem>
       </Folder>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Queries.cs">Queries.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc">ServerBugs.svc</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc.cs">ServerBugs.svc.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc">Server.svc</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.svc.cs">Server.svc.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="Web.config">Web.config</ProjectItem>
     </Project>
   </TemplateContent>

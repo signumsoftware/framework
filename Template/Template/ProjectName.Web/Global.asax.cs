@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
+using Signum.Engine.Maps;
 using $custommessage$.Web.Properties;
 using $custommessage$.Web;
 using $custommessage$.Logic;
@@ -17,7 +18,7 @@ namespace $custommessage$.Web
         {
             Starter.Start(Settings.Default.ConnectionString);
 
-            Queries.Initialize();
+            Schema.Current.Initialize();
         }
 
         protected void Session_Start(object sender, EventArgs e)

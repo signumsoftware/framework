@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Windows;
+using System.ServiceModel;
 using System.Windows;
 using System.ServiceModel.Security;
-using Signum.Utilities;
 using System.Threading;
 using System.Globalization;
+using Signum.Utilities;
+using Signum.Windows;
+using Signum.Services;
+using $custommessage$.Services;
 
 namespace $custommessage$.Windows
 {
@@ -18,13 +21,12 @@ namespace $custommessage$.Windows
         {
             try
             {
-                Server.SetServerFunction(Server$custommessage$.GetCurrent);
+                Server.SetNewServerCallback(NewServer);
 
-                if (Server$custommessage$.NewServer())
-                {
-                    App app = new App() { ShutdownMode = ShutdownMode.OnMainWindowClose };
-                    app.Run(new Main());
-                }
+                Server.Connect();
+
+                App app = new App() { ShutdownMode = ShutdownMode.OnMainWindowClose };
+                app.Run(new Main());              
             }
             catch (Exception e)
             {
@@ -48,6 +50,18 @@ namespace $custommessage$.Windows
                     errorTitle + ":",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        static ChannelFactory<IServer$custommessage$> channelFactory;
+
+        public static IBaseServer NewServer()
+        {
+            if (channelFactory == null)
+                channelFactory = new ChannelFactory<IServer$custommessage$>("server");
+
+            IServer$custommessage$ result = channelFactory.CreateChannel();
+
+            return result; 
         }
     }
 }

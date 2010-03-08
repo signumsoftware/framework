@@ -38,10 +38,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Signum Software\Signum Framework\Signum.Entities.dll</HintPath>
     </Reference>
-    <Reference Include="Signum.Services, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6f529cd3458096d, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Signum Software\Signum Framework\Signum.Services.dll</HintPath>
-    </Reference>
     <Reference Include="Signum.Utilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6f529cd3458096d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Signum Software\Signum Framework\Signum.Utilities.dll</HintPath>
@@ -88,17 +84,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Queries.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server$custommessage$.svc.cs">
       <DependentUpon>Server$custommessage$.svc</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\$custommessage$.Services\$custommessage$.Services.csproj">
-      <Project>{$guidServices$}</Project>
-      <Name>$custommessage$.Services</Name>
-    </ProjectReference>
     <ProjectReference Include="..\$custommessage$.Entities\$custommessage$.Entities.csproj">
       <Project>{$guidEntities$}</Project>
       <Name>$custommessage$.Entities</Name>

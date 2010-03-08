@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Signum.Engine;
+using Signum.Engine.Maps;
 using Signum.Utilities;
 using $custommessage$.Load.Properties;
 using $custommessage$.Logic;
@@ -12,22 +13,6 @@ namespace $custommessage$.Load
 {
     class Program
     {
-        public enum LoadCommand
-        {
-            CreateNewDatabase = 1,
-            GenerateSyncronizationScript = 2,
-            LoadData = 3, 
-
-            Exit = 99
-        }
-
-        static Dictionary<LoadCommand, Action> actions = new Dictionary<LoadCommand, Action>
-        {
-            {LoadCommand.CreateNewDatabase,CreateNewDatabase },
-            {LoadCommand.GenerateSyncronizationScript,CreateSincroizationScript },
-            {LoadCommand.LoadData,LoadData },
-        }; 
-
         static void Main(string[] args)
         {
             Starter.Start(Settings.Default.ConnectionString);
@@ -38,63 +23,71 @@ namespace $custommessage$.Load
 
             while(true)
             {
-                Console.WriteLine("Choose one of the following options:");
-                EnumExtensions.GetValues<LoadCommand>().ToConsole(a => " {0,2} {1}".Formato( (int)a, EnumExtensions.NiceToString(a)));
-
-                int val;
-                if(!int.TryParse(Console.ReadLine(), out val))
+                 Action action = new ConsoleSwitch<string, Action>
                 {
-                    Console.WriteLine("Invalid Format"); 
-                    continue; 
-                }
+                    {"N", NewDatabase},
+                    {"S", Synchronize},
+                    {"L", null},
+                }.Choose();
 
-                if ((LoadCommand)val == LoadCommand.Exit)
+                if (action == null)
                     break;
 
-                Action act = actions.TryGetC((LoadCommand)val);
+                action();
+            }
 
-                if (act == null)
+            Schema.Current.Initialize(InitLevel.Level0SyncEntities );
+
+            while (true)
+            {
+                Action[] actions = new ConsoleSwitch<int, Action>
                 {
-                    Console.WriteLine("No action with number {0}", val);
-                    continue; 
-                }
+                    {0, LoadXXX},
+                }.ChooseMultiple();
 
-                act(); 
+                if (actions == null)
+                    return;
+
+                foreach (var acc in actions)
+                {
+                    Console.WriteLine("------- Ejecutando {0} ".Formato(acc.Method.Name.SpacePascal(true)).PadRight(Console.WindowWidth - 2, '-'));
+                    acc();
+                }
             }
         }
 
-        static void CreateNewDatabase()
+        public static void NewDatabase()
         {
             Console.WriteLine("You will lose all your data. Sure? (Y/N)");
-            string val = Console.ReadLine(); 
-            if(!val.StartsWith("y")  && !val.StartsWith("Y"))
+            string val = Console.ReadLine();
+            if (!val.StartsWith("y") && !val.StartsWith("Y"))
                 return;
 
             Console.WriteLine("Creating new database...");
-            Administrator.NewDatabaseBasic();
-            Console.WriteLine("Done."); 
+            Administrator.TotalGeneration();
+            Console.WriteLine("Done.");
         }
 
-        static void CreateSincroizationScript()
+
+        static void Synchronize()
         {
             Console.WriteLine("Check and Modify the synchronization script before");
             Console.WriteLine("executing it in SQL Server Management Studio: ");
             Console.WriteLine();
 
-            SqlPreCommand command = Administrator.SynchronizeAllScript(); 
+            SqlPreCommand command = Administrator.TotalSynchronizeScript();
+            command.OpenSqlFile();
+            Console.WriteLine("Open again?");
+            string val = Console.ReadLine();
+            if (!val.StartsWith("y") && !val.StartsWith("Y"))
+                return;
 
-            Console.WriteLine(command.PlainSql());
+            command.OpenSqlFile();
         }
 
-        static void LoadData()
+        static void LoadXXX()
         {
-            Console.Write("Loading some example data..."); 
-            new[]
-            {
-                "Example 1" , 
-                "Example 2" 
-            }.Select(s=>new MyEntityDN{ Name = s}).SaveList();
-            Console.WriteLine("Done"); 
+
         }
     }
 

@@ -4,9 +4,9 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:$custommessage$.Entities;assembly=$custommessage$.Entities"
     Title="$custommessage$ Application"  SizeToContent="WidthAndHeight">
-    <Menu MaxHeight ="{x:Static SystemParameters.MenuBarHeight}">
+    <Menu MaxHeight ="{x:Static SystemParameters.MenuBarHeight}" x:Name="menu">
         <MenuItem Header="Entities">
-            <MenuItem Header="_$custommessage$" Tag="{m:FindOptions QueryName={x:Type d:MyEntityDN}}"/>
+            <MenuItem Header="_$custommessage$" Tag="{m:Explore QueryName={x:Type d:MyEntityDN}}"/>
         </MenuItem>
     </Menu>
 </Window>

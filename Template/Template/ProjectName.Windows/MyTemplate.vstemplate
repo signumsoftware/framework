@@ -18,7 +18,6 @@
       <ProjectItem ReplaceParameters="true" TargetFileName="app.config">app.config</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="App.xaml">App.xaml</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="App.xaml.cs">App.xaml.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Server$custommessage$.cs">ServerBugs.cs</ProjectItem>
       <Folder Name="Controls" TargetFolderName="Controls">
         <ProjectItem ReplaceParameters="true" TargetFileName="MyEntity.xaml">MyEntity.xaml</ProjectItem>
         <ProjectItem ReplaceParameters="true" TargetFileName="MyEntity.xaml.cs">MyEntity.xaml.cs</ProjectItem>

@@ -11,9 +11,9 @@ namespace $custommessage$.Services
 {
     //Defines the WPF contract between client and server applications
     [ServiceContract(SessionMode = SessionMode.Required)]
-    public interface IServer$custommessage$ : IBaseServer, IQueryServer //ILoginServer, 
+    public interface IServer$custommessage$ : IBaseServer, IDynamicQueryServer //ILoginServer, 
     {
         [OperationContract, NetDataContract]
-        List<Lazy<INoteDN>> RetrieveNotes(Lazy<IdentifiableEntity> lite);
+        List<Lite<INoteDN>> RetrieveNotes(Lite<IdentifiableEntity> lite);
     }
 }

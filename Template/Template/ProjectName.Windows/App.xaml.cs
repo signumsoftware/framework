@@ -47,24 +47,19 @@ namespace $custommessage$.Windows
             e.Handled = true;
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs args)
         {
-            Navigator.NavigationManager = new NavigationManager
+            Navigator.Start(new NavigationManager
             {
                 Settings = new Dictionary<Type, EntitySettings>()
                 {
-                    {typeof(MyEntityDN), new EntitySettings(false){ View = ()=> new MyEntity()} },
-                    {typeof(NoteDN), new EntitySettings(false){ View = ()=>new Note(), IsCreable = admin=>false}},
-                },
-                QuerySetting = ((IQueryServer)Server.ServerProxy).GetQueryNames().ToDictionary(a => a, a => new QuerySetting()),
-                ServerTypes = Server.RetrieveAll<TypeDN>().ToDictionary(a=>a.ClassName)                 
-            };
+                    {typeof(MyEntityDN), new EntitySettings(EntityType.Default){ View = e => new MyEntity() } },
+                },            
+            });
 
-            NotesProvider.Manager = new NotesProviderManager
-            {
-                CreateNote = ei => ei.IsNew ? null : new NoteDN { Entity = ei.ToLazy() },
-                RetrieveNotes = ei => ei is INoteDN || ei.IsNew ? null : Server$custommessage$.Current.RetrieveNotes(ei.ToLazy())
-            };
+            Constructor.Start(new ConstructorManager());
+
+            Note.Start();
         }
     }
 }

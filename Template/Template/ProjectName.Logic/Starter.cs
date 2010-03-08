@@ -6,6 +6,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Engine;
+using Signum.Engine.DynamicQuery;
 using $custommessage$.Entities;
 
 namespace $custommessage$.Logic
@@ -17,12 +18,17 @@ namespace $custommessage$.Logic
         public static void Start(string connectionString)
         {
             SchemaBuilder sb = new SchemaBuilder();
+            DynamicQueryManager dqm = new DynamicQueryManager();
+
             sb.Include<MyEntityDN>();
-            sb.Include<TypeDN>(); //Necessary if ImplementedByAll is used
+
+            TypeLogic.Start(sb);
             sb.Include<NoteDN>();  
             Schema s = sb.Schema;
 
-            ConnectionScope.Default = new Connection(connectionString, sb.Schema);
+            Queries.Initialize(dqm); 
+
+            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
         }
     }
 }

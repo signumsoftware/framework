@@ -19,6 +19,7 @@
         <ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
       </Folder>
       <ProjectItem ReplaceParameters="true" TargetFileName="Starter.cs">Starter.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Queries.cs">Queries.cs</ProjectItem>
     </Project>
   </TemplateContent>
   <WizardExtension>

@@ -16,7 +16,6 @@
       <ProjectTemplateLink ProjectName="$projectname$.Entities" >.\ProjectName.Entities\MyTemplate.vstemplate</ProjectTemplateLink>
       <ProjectTemplateLink ProjectName="$projectname$.Logic">.\ProjectName.Logic\MyTemplate.vstemplate</ProjectTemplateLink>
       <ProjectTemplateLink ProjectName="$projectname$.Load">.\ProjectName.Load\MyTemplate.vstemplate</ProjectTemplateLink>
-      <ProjectTemplateLink ProjectName="$projectname$.Services">.\ProjectName.Services\MyTemplate.vstemplate</ProjectTemplateLink>
       <ProjectTemplateLink ProjectName="$projectname$.Web">.\ProjectName.Web\MyTemplate.vstemplate</ProjectTemplateLink>
       <ProjectTemplateLink ProjectName="$projectname$.Windows">.\ProjectName.Windows\MyTemplate.vstemplate</ProjectTemplateLink>
     </ProjectCollection>
