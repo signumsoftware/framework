@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{86EE7792-96CF-4420-997B-8C811E2B166D}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -107,6 +107,9 @@
     <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Files\FileController.cs" />
     <Compile Include="Files\FilePathModification.cs" />
+    <Compile Include="Help\HelpClient.cs" />
+    <Compile Include="Help\HelpController.cs" />
+    <Compile Include="Help\HelpModels.cs" />
     <Compile Include="Help\WikiParserExtensions.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Operations\JsOperations.cs" />
@@ -159,6 +162,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="Files\app.config" />
     <None Include="ScriptCombiner\csCombiner.cd" />
   </ItemGroup>
@@ -170,6 +174,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\ChangePassword.aspx">
+      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\ChangePasswordSuccess.aspx" />
     <EmbeddedResource Include="Authorization\Login.aspx">
@@ -195,6 +200,33 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Basic\DateSpanIU.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\EntityProperty.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\Index.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\Menu.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\NamespaceControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\Search.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\ViewAppendix.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\ViewEntity.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\ViewNamespace.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help\ViewTodo.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />

@@ -139,7 +139,7 @@ namespace Signum.Engine.Help
         static string DefaultFileName(string key)
         {
             return Path.Combine(
-                Path.Combine(HelpLogic.HelpDirectory,HelpLogic.QueriesFolder), "{0}.help".Formato(key));
+                Path.Combine(HelpLogic.HelpDirectory,HelpLogic.QueriesDirectory), "{0}.help".Formato(key));
         }
 
         static readonly XName _Name = "Name";

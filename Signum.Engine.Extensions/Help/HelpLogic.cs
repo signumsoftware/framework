@@ -30,20 +30,20 @@ namespace Signum.Engine.Help
 {
     public static class HelpLogic
     {
-        public static string EntitiesFolder = "";
-        public static string QueriesFolder = "Query";
-        public static string NamespacesFolder = "Namespace";
-        public static string AppendicesFolder = "Appendix";
+        public static string EntitiesDirectory = "";
+        public static string QueriesDirectory = "Query";
+        public static string NamespacesDirectory = "Namespace";
+        public static string AppendicesDirectory = "Appendix";
         public static string HelpDirectory = "HelpXml";
         public static string BaseUrl = "Help";
 
         static Dictionary<Type, EntityHelp> TypeToHelpFiles
         {
-            get { return HelpLogic._TypeToHelpFiles.ThrowIfNullC("No se ha cargado Help"); }
-            set { HelpLogic._TypeToHelpFiles = value; }
+            get { return HelpLogic.typeToHelpFiles.ThrowIfNullC("No se ha cargado Help"); }
+            set { HelpLogic.typeToHelpFiles = value; }
         }
 
-        static Dictionary<Type, EntityHelp> _TypeToHelpFiles;
+        static Dictionary<Type, EntityHelp> typeToHelpFiles;
         static Dictionary<string, Type> CleanNameToType;
         static Dictionary<string, Type> NameToType;
 
@@ -168,10 +168,10 @@ namespace Signum.Engine.Help
             }
 
 
-            var entitiesDocuments = LoadDocuments(EntitiesFolder);
-            var namespacesDocuments = LoadDocuments(NamespacesFolder);
-            var queriesDocuments = LoadDocuments(QueriesFolder);
-            var appendicesDocuments = LoadDocuments(AppendicesFolder);
+            var entitiesDocuments = LoadDocuments(EntitiesDirectory);
+            var namespacesDocuments = LoadDocuments(NamespacesDirectory);
+            var queriesDocuments = LoadDocuments(QueriesDirectory);
+            var appendicesDocuments = LoadDocuments(AppendicesDirectory);
 
             //Scope
             {
@@ -267,6 +267,18 @@ namespace Signum.Engine.Help
             if (!Directory.Exists(HelpDirectory))
             {
                 Directory.CreateDirectory(HelpDirectory);
+
+                if (!Directory.Exists(Path.Combine(HelpDirectory, AppendicesDirectory)))
+                    Directory.CreateDirectory(Path.Combine(HelpDirectory, AppendicesDirectory));
+
+                if (!Directory.Exists(Path.Combine(HelpDirectory, EntitiesDirectory)))
+                    Directory.CreateDirectory(Path.Combine(HelpDirectory, EntitiesDirectory));
+
+                if (!Directory.Exists(Path.Combine(HelpDirectory, QueriesDirectory)))
+                    Directory.CreateDirectory(Path.Combine(HelpDirectory, QueriesDirectory));
+
+                if (!Directory.Exists(Path.Combine(HelpDirectory, NamespacesDirectory)))
+                    Directory.CreateDirectory(Path.Combine(HelpDirectory, NamespacesDirectory));
             }
             else
             {
@@ -312,9 +324,9 @@ namespace Signum.Engine.Help
             }
 
             Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumProxy()).ToArray();
-            var entitiesDocuments = LoadDocuments(EntitiesFolder);
-            var namespacesDocuments = LoadDocuments(NamespacesFolder);
-            var queriesDocuments = LoadDocuments(QueriesFolder);
+            var entitiesDocuments = LoadDocuments(EntitiesDirectory);
+            var namespacesDocuments = LoadDocuments(NamespacesDirectory);
+            var queriesDocuments = LoadDocuments(QueriesDirectory);
             //var appendicesDocuments = LoadDocuments(AppendicesFolder);
 
             Replacements replacements = new Replacements();

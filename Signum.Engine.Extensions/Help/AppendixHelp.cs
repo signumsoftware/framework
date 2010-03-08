@@ -64,7 +64,7 @@ namespace Signum.Engine.Help
 
         static string DefaultFileName(string name)
         {
-            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.AppendicesFolder), "{0}.help".Formato(name));
+            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.AppendicesDirectory), "{0}.help".Formato(name));
         }
 
         public string Save()

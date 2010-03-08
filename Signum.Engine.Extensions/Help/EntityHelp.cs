@@ -366,7 +366,7 @@ namespace Signum.Engine.Help
 
         static string DefaultFileName(Type type)
         {
-            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.EntitiesFolder), "{0}.help".Formato(type.FullName));
+            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.EntitiesDirectory), "{0}.help".Formato(type.FullName));
         }
 
         internal static string GetEntityFullName(XDocument document)
