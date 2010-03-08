@@ -177,12 +177,12 @@ namespace Signum.Engine.Operations
         public virtual void Register()
         {
             if (Registered)
-                throw new ApplicationException(Resources.A0HaveAlreadyBeenRegistered.Formato(typeof(Graph<E, S>).TypeName()));
+                throw new InvalidOperationException(Resources.A0HaveAlreadyBeenRegistered.Formato(typeof(Graph<E, S>).TypeName()));
 
             var errors = Operations.GroupCount(a => a.Key).Where(kvp => kvp.Value > 1).ToList();
 
             if (errors.Count != 0)
-                throw new ApplicationException(Resources.TheFollowingKeysHaveBeenRepeatedIn01.Formato(GetType(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
+                throw new InvalidOperationException(Resources.TheFollowingKeysHaveBeenRepeatedIn01.Formato(GetType(), errors.ToString(a => " - {0} ({1})".Formato(a.Key, a.Value), "\r\n")));
 
             foreach (var operation in Operations)
 	        {
@@ -241,7 +241,7 @@ namespace Signum.Engine.Operations
             S state = GetState(entity);
 
             if (!state.Equals(operation.TargetState))
-                throw new ApplicationException(Resources.AfterTheOperationTheStateShouldBe0ButIs1.Formato(operation.TargetState, state));
+                throw new InvalidOperationException(Resources.AfterTheOperationTheStateShouldBe0ButIs1.Formato(operation.TargetState, state));
 
             OnEnterState(state, entity);
         }

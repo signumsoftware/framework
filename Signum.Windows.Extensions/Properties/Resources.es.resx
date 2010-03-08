@@ -204,4 +204,10 @@
   <data name="AreYouSureToRemove0" xml:space="preserve">
     <value>¿Estás seguro de eliminar '{0}'?</value>
   </data>
+  <data name="Operation0IsDisabled1" xml:space="preserve">
+    <value>La Operación  {0} está desabilitada: {1}</value>
+  </data>
+  <data name="NoRows" xml:space="preserve">
+    <value>No rows</value>
+  </data>
 </root>

@@ -166,7 +166,7 @@ namespace Signum.Windows.Files
                 Process.Start(filePath);
             }
             else
-                throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.ViewingHasNotDefaultImplementationFor0
+                throw new InvalidOperationException(Signum.Windows.Extensions.Properties.Resources.ViewingHasNotDefaultImplementationFor0
                     .Formato(Type));
         }
 
@@ -193,7 +193,7 @@ namespace Signum.Windows.Files
                 }                
             }
             else
-                throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.SavingHasNotDefaultImplementationFor0.Formato(Type)); 
+                throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.SavingHasNotDefaultImplementationFor0.Formato(Type)); 
         }
 
 
@@ -232,7 +232,7 @@ namespace Signum.Windows.Files
                 return null;
             }
 
-            throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OpeningHasNotDefaultImplementationFor0.Formato(Type)); 
+            throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.OpeningHasNotDefaultImplementationFor0.Formato(Type)); 
         }
 
         protected bool OnRemoving(object entity)

@@ -14,7 +14,7 @@ using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Operations
 {
-    public class OperationMenuItem : WebMenuItem
+    public class OperationButton : ToolBarButton
     {
         public OperationInfo OperationInfo { get; set; }
         public OperationSettings Settings { get; set; }
@@ -54,7 +54,7 @@ namespace Signum.Web.Operations
             else if (OperationInfo.OperationType == OperationType.Delete)
                 return JsOperationBase.Delete(new JsOperationDelete(CreateJsOperationOptions(httpContext))).ToJS();
 
-            throw new Exception(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(OperationInfo.Key)));
+            throw new InvalidOperationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(OperationInfo.Key)));
         }
 
         protected internal virtual string GetServerClickPost(HttpContextBase httpContext)
@@ -92,7 +92,7 @@ namespace Signum.Web.Operations
             else if (OperationInfo.OperationType == OperationType.Delete)
                 return null;
 
-            throw new Exception(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(OperationInfo.Key)));
+            throw new InvalidOperationException(Resources.InvalidOperationType0inTheConstructionOfOperation1.Formato(OperationInfo.OperationType.ToString(), EnumDN.UniqueKey(OperationInfo.Key)));
         }
 
         private JsOperationOptions CreateJsOperationOptions(HttpContextBase httpContext)

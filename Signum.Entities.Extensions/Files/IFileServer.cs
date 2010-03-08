@@ -21,7 +21,7 @@ namespace Signum.Services
                 {
                     if (file is FilePathDN)
                         return Signum.Engine.Files.FilePathLogic.GetByteArray((FilePathDN)file);
-                    throw new ApplicationException("The file type is not known or this method must not be invoked for it");
+                    throw new InvalidOperationException("The file type is not known or this method must not be invoked for it");
                 });
         }       
         */

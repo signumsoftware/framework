@@ -107,7 +107,7 @@ namespace Signum.Engine.Operations
         public void AssertIsValid()
         {
             if (Construct == null)
-                throw new ApplicationException(Resources.Operation0DoesNotHaveConstructInitialized.Formato(Key));
+                throw new InvalidOperationException(Resources.Operation0DoesNotHaveConstructInitialized.Formato(Key));
         }
     }
 }

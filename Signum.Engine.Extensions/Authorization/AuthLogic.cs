@@ -101,7 +101,7 @@ namespace Signum.Engine.Authorization
                     var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
 
                     if (problems.Count > 0)
-                        throw new ApplicationException(
+                        throw new InvalidOperationException(
                             Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
                             problems.ToString("\r\n"));
                 }
@@ -131,7 +131,7 @@ namespace Signum.Engine.Authorization
                 var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
 
                 if (problems.Count > 0)
-                    throw new ApplicationException(
+                    throw new InvalidOperationException(
                         Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
                         problems.ToString("\r\n"));
 

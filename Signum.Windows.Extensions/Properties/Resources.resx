@@ -213,4 +213,10 @@
   <data name="AreYouSureToRemove0" xml:space="preserve">
     <value>Are you sure to remove '{0}'?</value>
   </data>
+  <data name="Operation0IsDisabled1" xml:space="preserve">
+    <value>Operation {0} is disabled: {1}</value>
+  </data>
+  <data name="NoRows" xml:space="preserve">
+    <value>No hay filas</value>
+  </data>
 </root>

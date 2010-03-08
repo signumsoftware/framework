@@ -28,17 +28,7 @@ namespace Signum.Windows.Extensions
             (double d) => Math.Log10(d) / 2,
             (double d) => Math.Pow(10, d * 2));
 
-        public static readonly IValueConverter OperationText =
-            ConverterFactory.New((Enum key) => OperationClient.GetText(key));
-
-        public static readonly IValueConverter OperationImage =
-            ConverterFactory.New((Enum key) => OperationClient.GetImage(key));
-
-        public static readonly IValueConverter OperationBackground =
-           ConverterFactory.New((Enum key) => OperationClient.GetBackground(key));
-
         public static readonly IValueConverter DecimalOrZero =
             ConverterFactory.New((decimal? val) => val ?? 0);
-
     }
 }

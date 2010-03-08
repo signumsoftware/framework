@@ -126,7 +126,7 @@ namespace Signum.Engine.Operations
         public void AssertIsValid()
         {
             if (Execute == null)
-                throw new ApplicationException(Resources.Operation0DoesNotHaveExecuteInitialized.Formato(Key));
+                throw new InvalidOperationException(Resources.Operation0DoesNotHaveExecuteInitialized.Formato(Key));
         }
     }
 }

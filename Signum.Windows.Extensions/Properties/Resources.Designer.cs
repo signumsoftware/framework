@@ -205,6 +205,15 @@ namespace Signum.Windows.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No hay filas.
+        /// </summary>
+        public static string NoRows {
+            get {
+                return ResourceManager.GetString("NoRows", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open.
         /// </summary>
         public static string Open {
@@ -219,6 +228,15 @@ namespace Signum.Windows.Extensions.Properties {
         public static string OpeningHasNotDefaultImplementationFor0 {
             get {
                 return ResourceManager.GetString("OpeningHasNotDefaultImplementationFor0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation {0} is disabled: {1}.
+        /// </summary>
+        public static string Operation0IsDisabled1 {
+            get {
+                return ResourceManager.GetString("Operation0IsDisabled1", resourceCulture);
             }
         }
         

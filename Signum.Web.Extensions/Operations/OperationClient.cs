@@ -33,9 +33,9 @@ namespace Signum.Web.Operations
 
     public class OperationManager
     {
-        public Dictionary<Enum, OperationMenuItem> Settings = new Dictionary<Enum, OperationMenuItem>();
+        public Dictionary<Enum, OperationButton> Settings = new Dictionary<Enum, OperationButton>();
 
-        internal List<WebMenuItem> ButtonBar_GetButtonBarElement(HttpContextBase httpContext, object entity, string mainControlUrl)
+        internal List<ToolBarButton> ButtonBar_GetButtonBarElement(HttpContextBase httpContext, object entity, string mainControlUrl)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -55,13 +55,13 @@ namespace Signum.Web.Operations
             if (dic.Count == 0)
                 return null;
 
-            List<WebMenuItem> items = new List<WebMenuItem>();
+            List<ToolBarButton> items = new List<ToolBarButton>();
 
             foreach (OperationInfo oi in list)
             {
                 if (dic.ContainsKey(oi.Key))
                 {
-                    OperationMenuItem item = new OperationMenuItem
+                    OperationButton item = new OperationButton
                     {
                         OperationInfo = oi,
                         Settings = dic[oi.Key].OperationMenuItem.TryCC(set => set.Settings)
@@ -86,7 +86,7 @@ namespace Signum.Web.Operations
             return items;
         }
 
-        internal List<WebMenuItem> ButtonBar_GetButtonBarForQueryName(HttpContextBase httpContext, object queryName, Type entityType)
+        internal List<ToolBarButton> ButtonBar_GetButtonBarForQueryName(HttpContextBase httpContext, object queryName, Type entityType)
         {
             if (entityType == null || queryName == null)
                 return null;
@@ -104,13 +104,13 @@ namespace Signum.Web.Operations
             if (dic.Count == 0)
                 return null;
 
-            List<WebMenuItem> items = new List<WebMenuItem>();
+            List<ToolBarButton> items = new List<ToolBarButton>();
 
             foreach (OperationInfo oi in list)
             {
                 if (dic.ContainsKey(oi.Key))
                 {
-                    WebMenuItem item = new OperationMenuItem
+                    ToolBarButton item = new OperationButton
                     {
                         OperationInfo = oi,
                         Settings = dic[oi.Key].OperationMenuItem.TryCC(set => set.Settings)
@@ -134,7 +134,7 @@ namespace Signum.Web.Operations
             return items;
         }
 
-        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, OperationMenuItem omi, object queryName, Type entityType)
+        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, OperationButton omi, object queryName, Type entityType)
         {
             if (omi == null || omi.TryCC(om => om.Settings).TryCS(set => set.Post) == true)
                 return null;

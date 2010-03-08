@@ -89,7 +89,7 @@ namespace Signum.Engine.Processes
                 getLazies != null? getLazies(): null;
 
             if (lites == null)
-                throw new ApplicationException("No entities to process found");
+                throw new InvalidOperationException("No entities to process found");
 
             package.NumLines = lites.Count; 
             

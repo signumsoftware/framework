@@ -122,7 +122,7 @@ namespace Signum.Engine.Operations
         public void AssertIsValid()
         {
             if (Delete == null)
-                throw new ApplicationException(Resources.Operation0DoesNotHaveDeleteInitialized.Formato(Key));
+                throw new InvalidOperationException(Resources.Operation0DoesNotHaveDeleteInitialized.Formato(Key));
         }
     }
 }

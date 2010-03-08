@@ -88,7 +88,7 @@ namespace Signum.Windows.Authorization
         private void btLogin_Click(object sender, RoutedEventArgs e)
         {
             if (LoginClicked == null)
-                throw new ApplicationException("LoginClicked not attached");
+                throw new InvalidOperationException("LoginClicked not attached");
 
             LoginClicked(this, null);
         }

@@ -50,12 +50,12 @@ namespace Signum.Web.Authorization
                     var settings = OperationClient.Manager.Settings;
 
                     Func<IdentifiableEntity, bool> creada = (IdentifiableEntity entity) => !entity.IsNew;
-                    settings.Add(UserOperation.SaveNew, new OperationMenuItem
+                    settings.Add(UserOperation.SaveNew, new OperationButton
                     {
                         OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth/RegisterUserValidate", "Auth/RegisterUserPost"),
                         Settings = new EntityOperationSettings { IsVisible = (IdentifiableEntity entity) => entity.IsNew }
                     });
-                    settings.Add(UserOperation.Save, new OperationMenuItem
+                    settings.Add(UserOperation.Save, new OperationButton
                     {
                         Settings = new EntityOperationSettings
                         {
@@ -63,8 +63,8 @@ namespace Signum.Web.Authorization
                             IsVisible = creada
                         }
                     });
-                    settings.Add(UserOperation.Disable, new OperationMenuItem { Settings = new EntityOperationSettings { IsVisible = creada } });
-                    settings.Add(UserOperation.Enable, new OperationMenuItem { Settings = new EntityOperationSettings { IsVisible = creada } });
+                    settings.Add(UserOperation.Disable, new OperationButton { Settings = new EntityOperationSettings { IsVisible = creada } });
+                    settings.Add(UserOperation.Enable, new OperationButton { Settings = new EntityOperationSettings { IsVisible = creada } });
                 }
 
                 AuthenticationRequiredAttribute.Authenticate = context =>

@@ -299,10 +299,10 @@ namespace Signum.Engine.Operations
         {
             IOperation result = TryFind(type, operationKey);
             if (result == null)
-                throw new ApplicationException(Resources.Operation0NotFoundForType1.Formato(operationKey, type));
+                throw new InvalidOperationException(Resources.Operation0NotFoundForType1.Formato(operationKey, type));
 
             if (!(result is T))
-                throw new ApplicationException(Resources.Operation0IsA1NotA2Use3Instead.Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
+                throw new InvalidOperationException(Resources.Operation0IsA1NotA2Use3Instead.Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
                     result is IDeleteOperation ? "Delete" :
                     result is IConstructorOperation ? "Construct" :
@@ -316,10 +316,10 @@ namespace Signum.Engine.Operations
              where T : IEntityOperation
         {
             if (isLite && !result.Lite)
-                throw new ApplicationException(Resources.Operation0IsNotAllowedForLites.Formato(result.Key));
+                throw new InvalidOperationException(Resources.Operation0IsNotAllowedForLites.Formato(result.Key));
 
             if (!isLite && result.Lite)
-                throw new ApplicationException(Resources.Operation0NeedsALite.Formato(result.Key));
+                throw new InvalidOperationException(Resources.Operation0NeedsALite.Formato(result.Key));
 
             return result; 
         }
@@ -327,7 +327,7 @@ namespace Signum.Engine.Operations
         static IOperation TryFind(Type type, Enum operationKey)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                throw new ApplicationException(Resources.Type0HasToImplement1AtLeast.Formato(type, typeof(IIdentifiable)));
+                throw new InvalidOperationException(Resources.Type0HasToImplement1AtLeast.Formato(type, typeof(IIdentifiable)));
 
             IOperation result = type.FollowC(t => t.BaseType)
                 .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
@@ -341,7 +341,7 @@ namespace Signum.Engine.Operations
                 .ToList();
 
             if (interfaces.Count > 1)
-                throw new ApplicationException(Resources.AmbiguityBetweenInterfaces0.Formato(interfaces.ToString(", ")));
+                throw new InvalidOperationException(Resources.AmbiguityBetweenInterfaces0.Formato(interfaces.ToString(", ")));
 
             if (interfaces.Count < 1)
                 return null;
@@ -352,7 +352,7 @@ namespace Signum.Engine.Operations
         static List<IOperation> TypeOperations(Type type)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                throw new ApplicationException(Resources.Type0HasToImplement1AtLeast.Formato(type, typeof(IIdentifiable)));
+                throw new InvalidOperationException(Resources.Type0HasToImplement1AtLeast.Formato(type, typeof(IIdentifiable)));
 
             HashSet<Enum> result = type.FollowC(t => t.BaseType)
                     .TakeWhile(t => typeof(IdentifiableEntity).IsAssignableFrom(t))
@@ -374,7 +374,7 @@ namespace Signum.Engine.Operations
             bool acceptsNulls = typeof(T).IsByRef || Nullable.GetUnderlyingType(typeof(T)) != null;
 
             if (args == null || args.Length <= pos || (args[pos] == null ? !acceptsNulls : !(args[pos] is T)))
-                throw new ApplicationException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
+                throw new ArgumentException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
 
             return (T)args[pos];
         }
@@ -388,7 +388,7 @@ namespace Signum.Engine.Operations
                  return null;
 
             if(!(args[pos] is T))
-                throw new ApplicationException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
+                throw new ArgumentException(Resources.TheOperationNeedsA0InTheArgumentNumber1.Formato(typeof(T), pos));
 
             return (T)args[pos];
         }
