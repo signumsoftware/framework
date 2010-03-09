@@ -507,7 +507,7 @@ namespace Signum.Web
         {
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(obj.GetType()));
 
-            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? es.PartialViewName;
+            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? es.PartialViewName((ModifiableEntity)obj);
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
             controller.ViewData[ViewDataKeys.EntityTypeNiceName] = obj.GetType().NiceName();
@@ -590,7 +590,7 @@ namespace Signum.Web
             if (!es.IsViewable(false))
                 throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(cleanType.Name));
 
-            string url = partialViewName ?? es.PartialViewName;
+            string url = partialViewName ?? es.PartialViewName((ModifiableEntity)(object)entity);
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = url;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
@@ -635,7 +635,7 @@ namespace Signum.Web
             if (!es.IsViewable(false))
                 throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
-            string url = partialViewName ?? es.PartialViewName;
+            string url = partialViewName ?? es.PartialViewName((ModifiableEntity)(object)entity);
 
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
             controller.ViewData.Model = entity;

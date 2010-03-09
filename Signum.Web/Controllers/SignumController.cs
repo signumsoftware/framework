@@ -400,7 +400,7 @@ namespace Signum.Web.Controllers
             }
 
             HtmlHelper helper = CreateHtmlHelper(this);
-            return Content(ButtonBarHelper.GetButtonBarElements(helper, entity, Navigator.Manager.EntitySettings[type].PartialViewName, prefix));
+            return Content(ButtonBarHelper.GetButtonBarElements(helper, entity, Navigator.Manager.EntitySettings[type].PartialViewName(entity), prefix));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

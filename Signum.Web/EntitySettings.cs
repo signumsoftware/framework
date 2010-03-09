@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Entities;
 
 namespace Signum.Web
 {
     public class EntitySettings
     {
-        public string PartialViewName;
+        public Func<ModifiableEntity, string> PartialViewName;
         public string UrlName;
 
         public Func<bool, bool> IsCreable { get; set; }

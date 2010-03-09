@@ -43,7 +43,7 @@ namespace Signum.Web
 
             ViewDataDictionary vdd = new ViewDataDictionary(tc)
             { 
-                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName},
+                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName((IdentifiableEntity)tc.UntypedValue)},
                 //{ ViewDataKeys.PopupPrefix, indexedPrefix} //Now prefix is in TypeElementContext 
             };
             helper.PropagateSFKeys(vdd);
@@ -91,7 +91,7 @@ namespace Signum.Web
                 vdd[ViewDataKeys.Reactive] = true;
 
             sb.AppendLine(
-                helper.RenderPartialToString(settings.PartialViewName ?? es.PartialViewName, vdd));
+                helper.RenderPartialToString(settings.PartialViewName ?? es.PartialViewName((ModifiableEntity)tc.UntypedValue), vdd));
             
             return sb.ToString();
         }
