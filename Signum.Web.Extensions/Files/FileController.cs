@@ -37,7 +37,6 @@ namespace Signum.Web.Files
             int? sfId)
         {
             Type type = typeof(FilePathDN);
-            string sfUrl = Navigator.Manager.EntitySettings[type].PartialViewName;
             FilePathDN entity = null;
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
@@ -51,6 +50,8 @@ namespace Signum.Web.Files
             ViewData["IdValueField"] = prefix;
             ViewData["FileType"] = fileType;
 
+            string sfUrl = Navigator.Manager.EntitySettings[type].PartialViewName(entity);
+            
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
 

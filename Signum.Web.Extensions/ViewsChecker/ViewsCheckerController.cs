@@ -37,14 +37,16 @@ namespace Signum.Web.ViewsChecker
 
             foreach (var entry in Navigator.Manager.EntitySettings)
             {
-                if (!entry.Value.PartialViewName.HasText())
+                if (entry.Value.PartialViewName == null)
                     continue;
 
                 string result = "";
+                ModifiableEntity entity = null;
                 try
                 {
                     Response.Clear();
-                    result = helper.RenderPartialToString(entry.Value.PartialViewName, new ViewDataDictionary(Constructor.Construct(entry.Key, this)));
+                    entity = (ModifiableEntity)Constructor.Construct(entry.Key, this);
+                    result = helper.RenderPartialToString(entry.Value.PartialViewName(entity), new ViewDataDictionary(entity));
                 }
                 catch (Exception ex)
                 {
@@ -52,7 +54,7 @@ namespace Signum.Web.ViewsChecker
 
                     ViewError error = new ViewError
                     {
-                        ViewName = entry.Value.PartialViewName,
+                        ViewName = entry.Value.PartialViewName(entity),
                         Message = ex.Message,
                         Source = ex.Source,
                         StackTrace = ex.StackTrace,
