@@ -29,34 +29,9 @@ namespace Signum.Web.Authorization
         public static event Action<UserDN> OnUserLogged;
         public const string SessionUserKey = "user";
 
-        public AuthController()
-            : this(null, null)
-        {
-        }
-
-        public AuthController(IFormsAuthentication formsAuth, Provider provider)
-        {
-            FormsAuth = formsAuth ?? new FormsAuthenticationService();
-            Provider = provider ?? new Provider();
-        }
-
-        public IFormsAuthentication FormsAuth
-        {
-            get;
-            private set;
-        }
-
-        public Provider Provider
-        {
-            get;
-            private set;
-        }
-
         public ActionResult ChangePassword()
         {
             ViewData["Title"] = Resources.ChangePassword;
-            ViewData["PasswordLength"] = Provider.MinRequiredPasswordLength;
-
             return View(AuthClient.ChangePasswordUrl);
         }
 
@@ -64,44 +39,40 @@ namespace Signum.Web.Authorization
         public ActionResult ChangePassword(string currentPassword, string newPassword, string confirmPassword)
         {
             ViewData["Title"] = Resources.ChangePassword;
-            ViewData["PasswordLength"] = Provider.MinRequiredPasswordLength;
+            ViewData["PasswordLength"] = AuthLogic.MinRequiredPasswordLength;
 
-            if (String.IsNullOrEmpty(currentPassword))
-                ModelState.AddModelError("currentPassword", Resources.YouMustEnterTheCurrentPassword);
-            
-            if (newPassword == null || newPassword.Length < Provider.MinRequiredPasswordLength)
+            try
             {
-                ModelState.AddModelError("newPassword",
-                    String.Format(CultureInfo.CurrentCulture,
-                         Resources.PasswordMustHave0orMoreCharacters,
-                         Provider.MinRequiredPasswordLength));
-            }
-            if (!String.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
-                ModelState.AddModelError("_FORM", Resources.TheSpecifiedPasswordsDontMatch);
-            
-            if (ModelState.IsValid)
-            {
-                UserDN usr = null;
-                try
-                {
-                    if (Provider.ValidarUsuario((UserDN.Current).UserName, currentPassword, out usr))
-                    {
-                        usr.PasswordHash = Security.EncodePassword(newPassword);
-                        Database.Save(usr);
-                        Session[SessionUserKey] = usr;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("_FORM", ex);
-                }
 
+                if (string.IsNullOrEmpty(currentPassword))
+                    return ChangePasswordError("currentPassword", Resources.YouMustEnterTheCurrentPassword);
+
+                if (newPassword == null || newPassword.Length < AuthLogic.MinRequiredPasswordLength)
+                    return ChangePasswordError("newPassword",
+                         Resources.PasswordMustHave0orMoreCharacters.Formato(AuthLogic.MinRequiredPasswordLength));
+
+                if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
+                    return ChangePasswordError("_FORM", Resources.TheSpecifiedPasswordsDontMatch);
+
+                UserDN usr = AuthLogic.Login((UserDN.Current).UserName, Security.EncodePassword(currentPassword));
                 if (usr == null)
-                    ModelState.AddModelError("_FORM", Resources.InvalidNewPassword);
-                else
-                    return RedirectToAction("ChangePasswordSuccess");
+                    return ChangePasswordError("_FORM", "Invalid current password");
+
+                usr.PasswordHash = Security.EncodePassword(newPassword);
+                Database.Save(usr);
+                Session[SessionUserKey] = usr;
+                return RedirectToAction("ChangePasswordSuccess");
+            }
+            catch (Exception ex)
+            {
+                return ChangePasswordError("_FORM", ex.Message);
             }
 
+        }
+
+        ViewResult ChangePasswordError(string key, string error)
+        {
+            ModelState.AddModelError("_FORM", error);
             return View(AuthClient.ChangePasswordUrl);
         }
 
@@ -121,54 +92,51 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Login(string username, string password, bool? rememberMe, string returnUrl)
         {
-            FormsAuth.SignOut();
+            FormsAuthentication.SignOut();
 
             ViewData["Title"] = "Login";
+            ViewData["rememberMe"] = rememberMe;
 
             // Basic parameter validation
             if (!username.HasText())
-                ModelState.AddModelError("username", Resources.UserNameMustHaveAValue);
+                return LoginError("username", Resources.UserNameMustHaveAValue);
 
-            if (String.IsNullOrEmpty(password))
-                ModelState.AddModelError("password", Resources.PasswordMustHaveAValue);
-            
-            if (ViewData.ModelState.IsValid)
+            if (string.IsNullOrEmpty(password))
+                return LoginError("password", Resources.PasswordMustHaveAValue);
+
+            // Attempt to login
+            UserDN usr = AuthLogic.Login(username, Security.EncodePassword(password));
+            if (usr == null)
+                return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
+
+            //guardamos una cookie persistente si se ha seleccionado
+            if (rememberMe.HasValue && (bool)rememberMe)
             {
-                // Attempt to login
-                UserDN usuario;
-                bool loginSuccessful = Provider.ValidarUsuario(username, password, out usuario);
-
-                if (loginSuccessful)
-                {
-                    //guardamos una cookie persistente si se ha seleccionado
-                    if (rememberMe.HasValue && (bool)rememberMe)
+                var ticket = new FormsAuthenticationTicket(1, "Id", DateTime.Now, DateTime.Now.AddMonths(2), true, usr.Id.ToString());
+                var encryptedTicket = FormsAuthentication.Encrypt(ticket);
+                var authCookie = new HttpCookie(AuthClient.CookieName, encryptedTicket)
                     {
-                        var ticket = new FormsAuthenticationTicket(1, "Id", DateTime.Now, DateTime.Now.AddMonths(2), true, usuario.Id.ToString());
-                        var encryptedTicket = FormsAuthentication.Encrypt(ticket);
-                        var authCookie = new HttpCookie(AuthClient.CookieName, encryptedTicket)
-                            {
-                                Expires = ticket.Expiration,
-                            };
-                        HttpContext.Response.Cookies.Add(authCookie);
-                    }
-
-                    AddUserSession(username, rememberMe, usuario);
-
-                    if (!String.IsNullOrEmpty(returnUrl))
-                        return Redirect(returnUrl);
-                    else
-                        return RedirectToAction("Index", "Home");
-                }
-                else
-                    ModelState.AddModelError("_FORM", Resources.InvalidUsernameOrPassword);
+                        Expires = ticket.Expiration,
+                    };
+                HttpContext.Response.Cookies.Add(authCookie);
             }
 
-            // If we got this far, something failed, redisplay form
-            ViewData["rememberMe"] = rememberMe;
+            AddUserSession(username, rememberMe, usr);
+
+            if (!string.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
+            else
+                return RedirectToAction("Index", "Home");
+        }
+
+        ViewResult LoginError(string key, string error)
+        {
+            ModelState.AddModelError("_FORM", error);
             return View(AuthClient.LoginUrl);
         }
 
-        public bool LoginFromCookie()
+
+        public static bool LoginFromCookie()
         {
             using (AuthLogic.Disable())
             {
@@ -176,22 +144,26 @@ namespace Signum.Web.Authorization
                 {
                     var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
                     if (authCookie == null || !authCookie.Value.HasText())
-                        return false;
-                    var ticket = FormsAuthentication.Decrypt(authCookie.Value);
-                    string idUsuario = ticket.TryCC(t=>t.UserData);//Name;
-                    //string idUsuario = authCookie["Id"];
-                    int id;
-                    if (!string.IsNullOrEmpty(idUsuario) && int.TryParse(idUsuario, out id))
+                        return false;   //there is no cookie
+
+                    string ticketText = authCookie.Value;
+                    
+                    UserDN user = UserTicketLogic.UpdateTicket(
+                           System.Web.HttpContext.Current.Request.UserHostAddress,
+                           ref ticketText);
+
+                    System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
                     {
-                        UserDN usuario = Database.Retrieve<UserDN>(id);
-                        AddUserSession(usuario.UserName, true, usuario);
-                        return true;
-                    }
+                        Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
+                    });
+
+                    AddUserSession(user.UserName, true, user);
+                    return true;
                 }
                 catch
-                { }
-                return false;
-
+                {
+                    return false;
+                }
             }
         }
 
@@ -320,66 +292,26 @@ namespace Signum.Web.Authorization
                 return Navigator.View(this, entity);
         }
 
-        private void AddUserSession(string username, bool? rememberMe, UserDN usuario)
+        static void AddUserSession(string userName, bool? rememberMe, UserDN user)
         {
-            System.Web.HttpContext.Current.Session.Add(SessionUserKey, usuario);
-            Thread.CurrentPrincipal = usuario;
+            System.Web.HttpContext.Current.Session.Add(SessionUserKey, user);
+            Thread.CurrentPrincipal = user;
 
-            FormsAuth.SetAuthCookie(username, rememberMe ?? false);
+            FormsAuthentication.SetAuthCookie(userName, rememberMe ?? false);
 
             if (OnUserLogged != null)
-                OnUserLogged(usuario);
+                OnUserLogged(user);
         }
 
         public ActionResult Logout()
         {
-            FormsAuth.SignOut();
+            FormsAuthentication.SignOut();
             Session.RemoveAll();
             var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
             if (authCookie != null && authCookie.Value.HasText())
                 Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-1);
 
             return RedirectToAction("Index", "Home");
-        }
-    }
-
-    public interface IFormsAuthentication
-    {
-        void SetAuthCookie(string userName, bool createPersistentCookie);
-        void SignOut();
-    }
-
-    public class FormsAuthenticationService : IFormsAuthentication
-    {
-        public void SetAuthCookie(string userName, bool createPersistentCookie)
-        {
-            FormsAuthentication.SetAuthCookie(userName, createPersistentCookie);
-        }
-        public void SignOut()
-        {
-            FormsAuthentication.SignOut();
-        }
-    }
-
-    public class Provider
-    {
-        public int MinRequiredPasswordLength
-        {
-            get { return 6; }
-        }
-
-        public bool ValidarUsuario(string username, string password, out UserDN usuario)
-        {
-            try
-            {
-                usuario = AuthLogic.Login(username, Security.EncodePassword(password));
-                return true;
-            }
-            catch
-            {
-                usuario = null;
-                return false;
-            }
         }
     }
 }

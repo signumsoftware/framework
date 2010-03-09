@@ -21,8 +21,14 @@ namespace Signum.Engine.Authorization
 {
     public static class AuthLogic
     {
+
+        public static int MinRequiredPasswordLength = 6;
+
         public static UserDN SystemUser { get; set; }
         public static string SystemUserName { get; set; }
+
+        public static UserDN AnonymousUser { get; set; }
+        public static string AnonymousUserName { get; set; }
 
         static DirectedGraph<RoleDN> _roles;
         static DirectedGraph<RoleDN> Roles
@@ -34,14 +40,15 @@ namespace Signum.Engine.Authorization
 
         public static void AssertIsStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string systemUserName, string anonymousUserName)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SystemUserName = systemUserName; 
+                SystemUserName = systemUserName;
+                AnonymousUserName = anonymousUserName; 
 
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
@@ -69,17 +76,20 @@ namespace Signum.Engine.Authorization
             }
         }
 
-  
+
         static void Schema_Initializing(Schema schema)
         {
             _roles = Cache();
 
-            if (SystemUserName != null)
+            if (SystemUserName != null || AnonymousUserName != null)
+            {
                 using (new EntityCache())
                 using (AuthLogic.Disable())
                 {
                     SystemUser = Database.Query<UserDN>().SingleOrDefault(a => a.UserName == SystemUserName);
+                    AnonymousUser = Database.Query<UserDN>().SingleOrDefault(a => a.UserName == AnonymousUserName);
                 }
+            }
         }
 
         static void Schema_Saving(RoleDN role, bool isRoot, ref bool graphModified)

@@ -31,7 +31,7 @@ namespace Signum.Test.Extensions
             SchemaBuilder sb = new SchemaBuilder();
             sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
             TypeLogic.Start(sb); 
-            AuthLogic.Start(sb, dqm, "System");
+            AuthLogic.Start(sb, dqm, "System", "Anonymous");
             sb.Include<ResourceDN>();
             EntityGroupAuthLogic.Start(sb);
 

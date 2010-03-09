@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\UserTicketLogic.cs" />
     <Compile Include="Authorization\AuthUtils.cs" />
     <Compile Include="Authorization\AuthLogic.cs" />
     <Compile Include="Authorization\EntityGroupAuthLogic.cs" />
