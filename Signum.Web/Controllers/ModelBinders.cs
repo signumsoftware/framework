@@ -16,7 +16,7 @@ namespace Signum.Web.Controllers
              Type cleanType = Reflector.ExtractLite(bindingContext.ModelType);
              if (cleanType != null)
              {
-                 string value = controllerContext.HttpContext.Request[bindingContext.ModelName];
+                 string value = controllerContext.HttpContext.Request[bindingContext.ModelName] ?? (string)controllerContext.RouteData.Values[bindingContext.ModelName];
 
                  if (string.IsNullOrEmpty(value))
                      return null;
