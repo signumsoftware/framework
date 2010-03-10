@@ -154,14 +154,14 @@ namespace Signum.Engine.Files
     {
         public Func<FilePathDN, FileRepositoryDN> GetRepository { get; set; }
         public Func<FilePathDN, string> CalculateSufix { get; set; }
-        private bool renameOnCollision = true;
+        
+        bool renameOnCollision = true;
         public bool RenameOnCollision
         {
-            get
-            { return renameOnCollision; }
-            set
-            { renameOnCollision = value; }
+            get { return renameOnCollision; }
+            set { renameOnCollision = value; }
         }
+
         public Func<string, int, string> RenameAlgorithm { get; set; }
 
         public FileTypeAlgorithm()
@@ -176,7 +176,7 @@ namespace Signum.Engine.Files
               "{0}({1}){2}".Formato(Path.GetFileNameWithoutExtension(sufix), num, Path.GetExtension(sufix)));
 
         public static readonly Func<FilePathDN, FileRepositoryDN> DefaultGetRepository = (FilePathDN fp) =>
-            Database.Query<FileRepositoryDN>().Where(r => r.Active && r.FileTypes.Contains(fp.FileType)).FirstOrDefault();
+            Database.Query<FileRepositoryDN>().FirstOrDefault(r => r.Active && r.FileTypes.Contains(fp.FileType));
 
         public static readonly Func<FilePathDN, string> DefaultCalculateSufix = (FilePathDN fp) =>
             Path.Combine(DateTime.Now.ToString("yyyy-MM-dd"), fp.FileName);
