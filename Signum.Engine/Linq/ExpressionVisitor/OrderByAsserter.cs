@@ -29,7 +29,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitSelect(SelectExpression select)
         {
             if (select.OrderBy != null && !AllowedSelects.Contains(select))
-                throw new InvalidOperationException("OrderBy should allways be the last operation");
+                throw new InvalidOperationException("OrderBy should always be the last operation");
 
             return base.VisitSelect(select);
         }

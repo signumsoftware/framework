@@ -296,6 +296,8 @@ namespace Signum.Engine
         public static void Delete<T>(IEnumerable<T> collection)
             where T : IdentifiableEntity
         {
+            if (collection.Empty()) return;
+
             Delete(
                 collection.Select(a => a.GetType()).Single("There are entities of different types"), 
                 collection.Select(i => i.Id));
@@ -304,8 +306,10 @@ namespace Signum.Engine
         public static void Delete<T>(IEnumerable<Lite<T>> collection)
             where T : class, IIdentifiable
         {
+            if (collection.Empty()) return;
+
             Delete(
-                collection.Select(a => a.RuntimeType).Single("There are entities of different types"), 
+                collection.Select(a => a.RuntimeType).Single("There are entities of different types"),
                 collection.Select(i => i.Id));
         }
         #endregion
