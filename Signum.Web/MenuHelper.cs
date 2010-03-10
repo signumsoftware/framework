@@ -87,7 +87,8 @@ namespace Signum.Web
             if(!Visible)
                 return;
 
-            sb.AppendLine("<li class='l{0}'>".Formato(depth));
+            if (depth != 0)
+                sb.AppendLine("<li class='l{0}'>".Formato(depth));
 
             string fullClass = Class != null? " class='{1}'".Formato(Class): "";
 
@@ -119,7 +120,8 @@ namespace Signum.Web
                 if (link == currentUrl) { sb.Append("/<b>"); }
             }
 
-            sb.Append("</li>");
+            if (depth != 0)
+                sb.Append("</li>");
         }
     }
 }
