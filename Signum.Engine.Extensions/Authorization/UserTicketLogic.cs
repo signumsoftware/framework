@@ -107,7 +107,7 @@ namespace Signum.Engine.Authorization
             DateTime min = DateTime.Now.Subtract(ExpirationInterval);
             int result = user.Tickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
 
-            List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderBy(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
+            List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
 
             if (tooMuch.Empty()) return result;
 
