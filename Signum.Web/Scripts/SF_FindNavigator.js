@@ -50,7 +50,7 @@ FindNavigator.prototype = {
     selectedItems: function() {
         log("FindNavigator selectedItems");
         var items = new Array();
-        var selected = $("input:radio[name=" + this.findOptions.prefix + "rowSelection]:checked, #" + this.findOptions.prefix + "tdRowSelection input:checked");
+        var selected = $("input:radio[name=" + this.findOptions.prefix + "rowSelection]:checked, input:checkbox[name^=" + this.findOptions.prefix + "rowSelection]:checked");
         if (selected.length == 0)
             return items;
 

@@ -62,7 +62,7 @@
                        if (allowMultiple.HasValue)
                        {
                 %>
-                <td id="<%=Html.GlobalName("tdRowSelection")%>">
+                <td class="<%=Html.GlobalName("tdRowSelection")%>">
                     <%
                         if (entityField != null)
                         {
@@ -70,7 +70,7 @@
                     if (allowMultiple.Value)
                     { 
                         %>
-                        <input type="checkbox" name="<%=Html.GlobalName("check_" + row.ToString())%>" id="<%=Html.GlobalName("check_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="checkbox" name="<%=Html.GlobalName("rowSelection_" + row.ToString())%>" id="<%=Html.GlobalName("rowSelection_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                     <%}
                     else
                     { %>
