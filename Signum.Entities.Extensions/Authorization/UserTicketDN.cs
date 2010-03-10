@@ -27,7 +27,7 @@ namespace Signum.Entities.Authorization
 
         [NotNullable, SqlDbType(Size = 38)]
         string ticket;
-        [StringLengthValidator(AllowNulls = false, Min = 38, Max = 38)]
+        [StringLengthValidator(AllowNulls = false, Min = 36, Max = 36)]
         public string Ticket
         {
             get { return ticket; }
@@ -51,12 +51,13 @@ namespace Signum.Entities.Authorization
 
         public string StringTicket()
         {
-            return "{0};{1}".Formato(user.Id, ticket);
+            return "{0}|{1}".Formato(user.Id, ticket);
         }
 
         public static Tuple<int, string> ParseTicket(string ticket)
         {
-            Match m = Regex.Match(ticket, @"^(?<id>\d+);(?<ticket>.*)$");
+            Match m = Regex.Match(ticket, @"^(?<id>\d+)\|(?<ticket>.*)$");
+            if (!m.Success) throw new FormatException("The content of the ticket has an invalid format");
             return new Tuple<int, string>(int.Parse(m.Groups["id"].Value), m.Groups["ticket"].Value);
         }
     }

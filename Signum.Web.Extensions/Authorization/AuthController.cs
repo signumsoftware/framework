@@ -105,23 +105,23 @@ namespace Signum.Web.Authorization
                 return LoginError("password", Resources.PasswordMustHaveAValue);
 
             // Attempt to login
-            UserDN usr = AuthLogic.Login(username, Security.EncodePassword(password));
-            if (usr == null)
+            UserDN user = AuthLogic.Login(username, Security.EncodePassword(password));
+            if (user == null)
                 return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
 
+            Thread.CurrentPrincipal = user;
             //guardamos una cookie persistente si se ha seleccionado
             if (rememberMe.HasValue && (bool)rememberMe)
             {
-                var ticket = new FormsAuthenticationTicket(1, "Id", DateTime.Now, DateTime.Now.AddMonths(2), true, usr.Id.ToString());
-                var encryptedTicket = FormsAuthentication.Encrypt(ticket);
-                var authCookie = new HttpCookie(AuthClient.CookieName, encryptedTicket)
-                    {
-                        Expires = ticket.Expiration,
-                    };
-                HttpContext.Response.Cookies.Add(authCookie);
-            }
+                string ticketText = UserTicketLogic.NewTicket(
+                       System.Web.HttpContext.Current.Request.UserHostAddress);
 
-            AddUserSession(username, rememberMe, usr);
+                System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
+                {
+                    Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
+                });
+            }
+            AddUserSession(user.UserName, true, user);
 
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);

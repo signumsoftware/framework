@@ -28,6 +28,7 @@ namespace Signum.Engine.Authorization
                 dqm[typeof(UserTicketDN)] = (from ut in Database.Query<UserTicketDN>()
                                              select new
                                              {
+                                                 Entity = ut.ToLite(),
                                                  ut.IdOrNull,
                                                  ut.User,
                                                  ut.Ticket,
@@ -62,7 +63,7 @@ namespace Signum.Engine.Authorization
                     User = UserDN.Current.ToLite(),
                     Device = device,
                     ConnectionDate = DateTime.Now,
-                    Ticket = new Guid().ToString(),
+                    Ticket = Guid.NewGuid().ToString(),
                 };
 
                 result.Save();
@@ -85,10 +86,12 @@ namespace Signum.Engine.Authorization
                 if (userTicket == null)
                     throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
 
-                userTicket.Ticket = ticket = new Guid().ToString();
+                userTicket.Ticket = Guid.NewGuid().ToString();
                 userTicket.Device = device;
                 userTicket.ConnectionDate = DateTime.Now;
                 userTicket.Save();
+
+                ticket = userTicket.StringTicket(); 
 
                 return tr.Commit(result);
             }
@@ -104,7 +107,9 @@ namespace Signum.Engine.Authorization
             DateTime min = DateTime.Now.Subtract(ExpirationInterval);
             int result = user.Tickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
 
-            List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderBy(t => t.ConnectionDate).Skip(MaxTicketsPerUser).Select(t => t.ToLite()).ToList();
+            List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderBy(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
+
+            if (tooMuch.Empty()) return result;
 
             Database.Delete<UserTicketDN>(tooMuch);
 
