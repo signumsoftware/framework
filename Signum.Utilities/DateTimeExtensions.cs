@@ -197,7 +197,24 @@ namespace Signum.Utilities
                 return DateTimePrecision.Hours;
 
             return DateTimePrecision.Days;
-        }   
+        }
+
+        public static string SmartDatePattern(this DateTime date)
+        {
+            DateTime now = DateTime.Now;
+
+            string pattern = CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+
+            if (date.Year == now.Year)
+                pattern = pattern.Replace("y", "");
+
+            if (date.Month == now.Month)
+                pattern = pattern.Replace("M", "");
+
+            pattern = pattern.Trim(' ', ',', '.');
+
+            return date.ToString(pattern);
+        }
     }
 
     public enum DateTimePrecision

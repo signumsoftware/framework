@@ -56,6 +56,16 @@ namespace Signum.Utilities
             return new string(0.To(length).Select(i => r.NextChar()).ToArray());
         }
 
+        public static string NextSubstring(this Random r, string text, int minLength, int maxLength)
+        {
+            int length = r.Next(minLength, maxLength); 
+
+            if(length > text.Length)
+                return text;
+
+            return text.Substring(r.Next(text.Length - length), length);
+        }
+
         public static int NextAlphaColor(this Random r)
         {
             return Color(r.Next(256), r.Next(256), r.Next(256), r.Next(256));
