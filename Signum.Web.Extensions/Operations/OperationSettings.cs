@@ -28,7 +28,7 @@ namespace Signum.Web.Operations
         {
             if (Text == null)
                 Text = OperationInfo.Key.NiceToString();
-            AltText = OperationInfo.CanExecute ?? Text ?? OperationInfo.Key.NiceToString();
+            AltText = OperationInfo.TryCC(oi => oi.CanExecute) ?? Text ?? OperationInfo.Key.NiceToString();
 
             if (Id == null)
                 Id = Settings.TryCC(set => set.Options).TryCC(opt => opt.OperationKey) ?? EnumDN.UniqueKey(OperationInfo.Key);
