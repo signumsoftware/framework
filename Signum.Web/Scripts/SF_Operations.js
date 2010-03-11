@@ -111,7 +111,7 @@ OperationManager.prototype = {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.options.avoidValidation) {
+        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
             if (!this.entityIsValid())
                 return;
         }
@@ -139,7 +139,7 @@ var OperationExecutor = function(_options) {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.options.avoidValidation) {
+        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
             if (!this.entityIsValid()) {
                 NotifyInfo(lang['error'], 2000);
                 return;
@@ -175,7 +175,8 @@ var OperationExecutor = function(_options) {
                     return;
                 }
 
-                if (empty(self.options.prefix)) //NormalWindow
+                //if (empty(self.options.prefix)) //NormalWindow
+                if (operationResult.indexOf("<form") >= 0) //NormalWindow: It might have prefix but the operation returns a full page reload
                     $("#content").html(operationResult.substring(operationResult.indexOf("<form"), operationResult.indexOf("</form>") + 7));
                 else { //PopupWindow
                     if (self.options.closePopupOnSuccess) {
@@ -229,7 +230,7 @@ var ConstructorFrom = function(_options) {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.options.avoidValidation) {
+        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
             if (!this.entityIsValid()) {
                 NotifyInfo(lang['error'], 2000);
                 return;
@@ -298,7 +299,7 @@ var DeleteExecutor = function(_options) {
 
         NotifyInfo(lang['executingOperation']);
 
-        if (!this.options.avoidValidation) {
+        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
             if (!this.entityIsValid()) {
                 NotifyInfo(lang['error'], 2000);
                 return;
