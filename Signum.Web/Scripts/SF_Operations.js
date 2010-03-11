@@ -117,11 +117,24 @@ OperationManager.prototype = {
         }
 
         var info = this.runtimeInfo();
-        $("form").append(hiddenInput('sfRuntimeType', info.runtimeType()) +
-            hiddenInput('sfId', info.id()) +
-            hiddenInput('isLite', this.options.isLite) +
+        if (info.find().length > 0)
+        {
+            $("form").append(hiddenInput('sfRuntimeType', info.runtimeType()) +
+                hiddenInput('sfId', info.id()));
+        }
+        $("form").append(hiddenInput('isLite', this.options.isLite) +
             hiddenInput('sfOperationFullKey', this.options.operationKey) +
             hiddenInput(sfPrefix, this.options.prefix));
+            
+        if (!empty(this.options.requestExtraJsonData)) {
+            for (var key in this.options.requestExtraJsonData) {
+                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
+                    $("form").append(hiddenInput(key, this.options.requestExtraJsonData[key]()));
+                else
+                    $("form").append(hiddenInput(key, this.options.requestExtraJsonData[key]));
+            }
+        }
+            
         document.forms[0].action = this.options.controllerUrl;
         document.forms[0].submit();
     }
