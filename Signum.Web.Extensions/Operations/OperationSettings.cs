@@ -63,31 +63,12 @@ namespace Signum.Web.Operations
                 return null;
 
             if (OperationInfo.OperationType == OperationType.Execute)
-                return JsOperationBase.ExecutePost(new JsOperationExecutor(CreateJsOperationOptions(httpContext)
-                    //{
-                    //    OperationKey = EnumDN.UniqueKey(oi.Key),
-                    //    IsLite = oi.Lite,
-                    //    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
-                    //    //ControllerUrl = os.TryCC(set => set.OnServerClickPost),
-                    //    ////Type = ident.GetType().Name,
-                    //    ////Id = ident.IdOrNull
-                    //}
-                )).ToJS();
+                return JsOperationBase.ExecutePost(new JsOperationExecutor(CreateJsOperationOptions(httpContext))).ToJS();
             else if (OperationInfo.OperationType == OperationType.ConstructorFrom)
             {
                 JsOperationOptions options = CreateJsOperationOptions(httpContext);
                 options.ReturnType = Settings.TryCC(sett => sett.Options).TryCC(opt => opt.ReturnType) ?? OperationInfo.ReturnType;
-                return JsOperationBase.ConstructFromPost(new JsOperationConstructorFrom(options
-                    //{
-                    //    OperationKey = EnumDN.UniqueKey(oi.Key),
-                    //    IsLite = oi.Lite,
-                    //    Prefix = httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : "",
-                    //    //ControllerUrl = os.TryCC(set => set.OnServerClickPost),
-                    //    ReturnType = oi.ReturnType,
-                    //    ////Type = ident.GetType().Name,
-                    //    ////Id = ident.IdOrNull
-                    //}
-                )).ToJS();
+                return JsOperationBase.ConstructFromPost(new JsOperationConstructorFrom(options)).ToJS();
             }
             else if (OperationInfo.OperationType == OperationType.Delete)
                 return null;

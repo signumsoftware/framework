@@ -65,19 +65,7 @@ namespace Signum.Web.Operations
                     {
                         OperationInfo = oi,
                         Settings = dic[oi.Key].OperationMenuItem.TryCC(set => set.Settings)
-                        //Text = GetText(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //AltText = dic[oi.Key].OperationInfo.CanExecute ?? GetText(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //Id = GetId(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //OnClick = dic[oi.Key].OperationMenuItem.TryCC(os => os.OnClick) ?? 
-                        //          GetServerClickAjax(httpContext, oi, dic[oi.Key].OperationMenuItem, ident) ?? 
-                        //          GetServerClickPost(httpContext, oi, dic[oi.Key].OperationMenuItem, ident),
-                        //Enabled = dic[oi.Key].OperationInfo.CanExecute == null,
                     };
-
-                    //Dictionary<string, object> settings = dic[oi.Key].OperationMenuItem.TryCC(os => os.HtmlProps);
-                    //if (settings != null) 
-                    //    item.HtmlProps.AddRange(settings);
 
                     items.Add(item);
                 }
@@ -114,19 +102,8 @@ namespace Signum.Web.Operations
                     {
                         OperationInfo = oi,
                         Settings = dic[oi.Key].OperationMenuItem.TryCC(set => set.Settings)
-                        //Text = GetText(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //AltText = dic[oi.Key].OperationInfo.CanExecute ?? GetText(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //Id = GetId(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //ImgSrc = GetImage(oi.Key, dic[oi.Key].OperationMenuItem),
-                        //OnClick = dic[oi.Key].OperationMenuItem.TryCC(os => os.OnClick) ??
-                        //          GetServerClickAjax(httpContext, oi.Key, dic[oi.Key].OperationMenuItem, queryName, entityType),
-                        //Enabled = dic[oi.Key].OperationInfo.CanExecute == null
                     };
                     
-                    //Dictionary<string, object> settings = dic[oi.Key].OperationMenuItem.TryCC(os => os.HtmlProps);
-                    //if (settings != null)
-                    //    item.HtmlProps.AddRange(settings);
-
                     items.Add(item);
                 }
             }
