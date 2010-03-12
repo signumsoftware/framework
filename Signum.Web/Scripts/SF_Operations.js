@@ -377,7 +377,7 @@ function ConstructFromManyExecute(urlController, typeName, operationKey, prefix,
     });
 }
 
-function ReloadEntity(urlController, prefix, parentDiv) {
+function ReloadEntity(urlController, prefix, parentDiv, reloadButtonBar) {
     $.ajax({
         type: "POST",
         url: urlController,
@@ -390,8 +390,11 @@ function ReloadEntity(urlController, prefix, parentDiv) {
            else
                $('#' + prefix + "divMainControl").html(msg);
            
-           var info = RuntimeInfoFor(prefix);
-           $.post('Signum/GetButtonBar', { sfRuntimeType: info.runtimeType(), sfId: info.id(), prefix: prefix, sfTabId: $("#" + sfTabId).val() } ,function(data){ $('#' + prefix + "divButtonBar").html(data) });
+           if (!isFalse(reloadButtonBar))
+           {
+               var info = RuntimeInfoFor(prefix);
+               $.post('Signum/GetButtonBar', { sfRuntimeType: info.runtimeType(), sfId: info.id(), prefix: prefix, sfTabId: $("#" + sfTabId).val() } ,function(data){ $('#' + prefix + "divButtonBar").html(data) });
+           }
         }
     });
 }

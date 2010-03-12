@@ -389,12 +389,9 @@ namespace Signum.Web
                 eb.View = Navigator.IsViewable(entityType, admin);
                 eb.Find = Navigator.IsFindable(entityType);
             }
-            if (typeof(EmbeddedEntity).IsAssignableFrom(entityType))
-            {
-                EntityLine el = eb as EntityLine;
-                if (el != null)
-                    el.Navigate = false;
-            }
+            EntityLine el = eb as EntityLine;
+            if (el != null)
+                el.Navigate = Navigator.IsNavigable(entityType, admin);
         }
 
         public static bool IsNavigable(Type type, bool admin)
@@ -405,9 +402,9 @@ namespace Signum.Web
         {
             return Manager.IsViewable(type, admin);
         }
-        public static bool IsReadOnly(Type type, bool admin)
+        public static bool IsReadOnly(Type type)
         {
-            return Manager.IsReadOnly(type, admin);
+            return Manager.IsReadOnly(type);
         }
         public static bool IsCreable(Type type, bool admin)
         {
@@ -505,12 +502,13 @@ namespace Signum.Web
 
         protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
         {
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(obj.GetType()).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(obj.GetType()));
+            Type type = obj.GetType();
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(obj.GetType()));
 
             controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? es.PartialViewName((ModifiableEntity)obj);
             IdentifiableEntity entity = (IdentifiableEntity)obj;
             controller.ViewData.Model = entity;
-            controller.ViewData[ViewDataKeys.EntityTypeNiceName] = obj.GetType().NiceName();
+            controller.ViewData[ViewDataKeys.EntityTypeNiceName] = type.NiceName();
             controller.ViewData[TypeContext.Id] = entity.IdOrNull != null ? entity.Id.ToString() : "";
 
             if (controller.ViewData.Keys.Count(s => s==ViewDataKeys.PageTitle)==0)
@@ -520,10 +518,10 @@ namespace Signum.Web
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
-            if (!es.IsNavigable(false))
-                throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(obj.GetType()));
+            if (!Navigator.IsNavigable(type, false))
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(obj.GetType()));
 
-            if (es.IsReadOnly(false))
+            if (Navigator.IsReadOnly(type))
             {
                 if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
                 {
@@ -587,7 +585,7 @@ namespace Signum.Web
 
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
 
-            if (!es.IsViewable(false))
+            if (!Navigator.IsViewable(cleanType, false))
                 throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(cleanType.Name));
 
             string url = partialViewName ?? es.PartialViewName((ModifiableEntity)(object)entity);
@@ -597,7 +595,7 @@ namespace Signum.Web
             if (changeTicks != null)
                 controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
 
-            if (es.IsReadOnly(false))
+            if (Navigator.IsReadOnly(cleanType))
             {
                 if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
                 {
@@ -632,7 +630,7 @@ namespace Signum.Web
 
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
 
-            if (!es.IsViewable(false))
+            if (!Navigator.IsViewable(cleanType, false))
                 throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
             string url = partialViewName ?? es.PartialViewName((ModifiableEntity)(object)entity);
@@ -642,7 +640,7 @@ namespace Signum.Web
             if (changeTicks != null)
                 controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
 
-            if (es.IsReadOnly(false))
+            if (Navigator.IsReadOnly(cleanType))
             {
                 if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
                 {
@@ -1039,23 +1037,44 @@ namespace Signum.Web
             if (GlobalIsViewable != null && !GlobalIsViewable(type))
                 return false;
 
-            return EntitySettings[type].IsViewable(admin);
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es == null)
+                return false;
+
+            if (es.IsViewable == null)
+                return true;
+
+            return es.IsViewable(admin);
         }
 
         protected internal virtual bool IsNavigable(Type type, bool admin)
         {
+            if (typeof(EmbeddedEntity).IsAssignableFrom(type))
+                return false;
+
             if (GlobalIsNavigable != null && !GlobalIsNavigable(type))
                 return false;
 
-            return EntitySettings[type].IsNavigable(admin);
-        }
-
-        protected internal virtual bool IsReadOnly(Type type, bool admin)
-        {
-            if (GlobalIsReadOnly != null && !GlobalIsReadOnly(type))
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es == null)
                 return false;
 
-            return EntitySettings[type].IsReadOnly(admin);
+            if (es.IsNavigable == null)
+                return true;
+
+            return es.IsNavigable(admin);
+        }
+
+        protected internal virtual bool IsReadOnly(Type type)
+        {
+            if (GlobalIsReadOnly != null && GlobalIsReadOnly(type))
+                return true;
+
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es == null || es.IsReadOnly == null)
+                return false;
+
+            return es.IsReadOnly;
         }
 
         protected internal virtual bool IsCreable(Type type, bool admin)
@@ -1063,7 +1082,11 @@ namespace Signum.Web
             if (GlobalIsCreable != null && !GlobalIsCreable(type))
                 return false;
 
-            return EntitySettings[type].IsCreable(admin);
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es == null || es.IsCreable == null)
+                return true;
+
+            return es.IsCreable(admin);
         }
 
         protected internal virtual bool IsFindable(object queryName)

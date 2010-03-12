@@ -64,6 +64,9 @@ namespace Signum.Web
                 items.Add(new SelectListItem() { Text = "-", Value = "" });
                 if (settings.Preload)
                 {
+                    int? id = (isIdentifiable) ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull) :
+                              (isLite) ? ((Lite)(object)value).TryCS(i => i.IdOrNull) : null;
+
                     if (settings.Data != null)
                     {
                         items.AddRange(
@@ -71,7 +74,7 @@ namespace Signum.Web
                                 {
                                     Text = lite.ToString(),
                                     Value = settings.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
-                                    Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
+                                    Selected = (value != null) && (lite.Id == id)
                                 })
                             );
                     }
@@ -86,7 +89,7 @@ namespace Signum.Web
                                 {
                                     Text = lite.ToString(),
                                     Value = settings.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
-                                    Selected = (value != null) && (lite.Id == ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull))
+                                    Selected = (value != null) && (lite.Id == id)
                                 })
                             );
                     }

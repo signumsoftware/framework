@@ -106,7 +106,7 @@ namespace Signum.Web
             if (entitiesType != null)
             {
                 helper.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
-                helper.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, false);
+                helper.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, true);
                 helper.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
             }
             else

@@ -14,25 +14,56 @@ namespace Signum.Web
         public Func<bool, bool> IsCreable { get; set; }
         public Func<bool, bool> IsViewable { get; set; }
         public Func<bool, bool> IsNavigable { get; set; }
-        public Func<bool, bool> IsReadOnly { get; set; }
+        public bool IsReadOnly { get; set; }
         public Func<bool, bool> ShowOkSave { get; set; }
 
-        public EntitySettings(bool isSimpleType)
+        public EntitySettings(EntityType entityType)
         {
-            if (isSimpleType)
+            switch (entityType)
             {
-                IsCreable = admin => admin;
-                IsNavigable = admin => admin;
-                IsViewable = admin => admin;
-                IsReadOnly = admin => !admin;
-            }
-            else
-            {
-                IsCreable = admin => true;
-                IsNavigable = admin => true;
-                IsViewable = admin => true;
-                IsReadOnly = admin => false;
+                case EntityType.Default:
+                    ShowOkSave = _ => true;
+                    break;
+                case EntityType.Admin:
+                    ShowOkSave = _ => true;
+                    //IsReadOnly = admin => !admin;
+                    IsCreable = admin => admin;
+                    IsViewable = admin => admin;
+                    IsNavigable = admin => admin;
+                    break;
+                case EntityType.NotSaving:
+                    ShowOkSave = _ => false;
+                    break;
+                case EntityType.ServerOnly:
+                    ShowOkSave = _ => false;
+                    IsReadOnly = true;
+                    IsCreable = admin => false;
+                    break;
+                case EntityType.Content:
+                    ShowOkSave = _ => false;
+                    IsCreable = admin => false;
+                    IsViewable = admin => false;
+                    IsNavigable = admin => false;
+                    break;
+                default:
+                    break;
             }
         }
+    }
+
+    public enum WindowType
+    {
+        View,
+        Find,
+        Admin
+    }
+
+    public enum EntityType
+    {
+        Admin,
+        Default,
+        NotSaving,
+        ServerOnly,
+        Content,
     }
 }
