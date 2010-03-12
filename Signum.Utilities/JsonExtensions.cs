@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities.Reflection;
+using System.Collections;
 
 namespace Signum.Utilities
 {
@@ -44,6 +46,19 @@ namespace Signum.Utilities
                 "{0} : {1}".Formato(
                    keyQuoted(kvp.Key),
                    value(kvp.Value)), ",\r\n").Indent(3) + "\r\n}";
-        }    
+        }
+
+        static Dictionary<Type, IList> cache = new Dictionary<Type, IList>();
+
+        public static string ToJSonObject<T>(this T element, Func<object, string> value)
+        {
+            List<MemberEntry<T>> entries = (List<MemberEntry<T>>)cache.GetOrCreate(typeof(T), () => MemberEntryFactory.GenerateList<T>());
+
+            return "{\r\n" + entries.ToString(m =>
+                "{0}:{1}".Formato(
+                   Quote(m.Name),
+                   value(m.Getter(element))), ",\r\n").Indent(3) + "\r\n}";
+            
+        }
     }
 }
