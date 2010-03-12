@@ -237,4 +237,7 @@
   <data name="Query0HasNoUrlName" xml:space="preserve">
     <value>Query {0} has no UrlName</value>
   </data>
+  <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
+    <value>Los datos de Sesión son incorrectos. Debe refrescar la página antes de continuar</value>
+  </data>
 </root>

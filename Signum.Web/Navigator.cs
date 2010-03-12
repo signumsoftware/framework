@@ -1025,7 +1025,7 @@ namespace Signum.Web
                     return mod;
                 }
                 else
-                    throw new InvalidOperationException(Resources.IncorrectEntityInSession);
+                    throw new InvalidOperationException(Resources.IncorrectEntityInSessionYouMustReloadThePageToContinue);
             }
 
             if (runtimeInfo.IdOrNull != null)

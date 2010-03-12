@@ -282,4 +282,7 @@
   <data name="TextNotSetForMenuItem0" xml:space="preserve">
     <value>Text not set for menu item {0}</value>
   </data>
+  <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
+    <value>Incorrect data in Session. You must reload the page to continue</value>
+  </data>
 </root>
