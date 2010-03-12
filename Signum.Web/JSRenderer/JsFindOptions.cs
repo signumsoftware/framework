@@ -95,4 +95,23 @@ namespace Signum.Web
             };
         }
     }
+
+    public class JsFindNavigator : JsRenderer
+    {
+        public JsFindNavigator(Func<string> renderer) : base(renderer)
+        { 
+        }
+
+        public static JsFindNavigator JsSelectedItems(JsFindOptions options)
+        {
+            return new JsFindNavigator(() =>
+                "SelectedItems({0})".Formato(options.ToJS()));
+        }
+
+        public static JsFindNavigator JsSplitSelectedIds(JsFindOptions options)
+        {
+            return new JsFindNavigator(() =>
+                "SplitSelectedIds({0})".Formato(options.ToJS()));
+        }
+    }
 }

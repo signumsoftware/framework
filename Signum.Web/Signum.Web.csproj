@@ -99,7 +99,6 @@
     <Compile Include="JSRenderer\JsFindOptions.cs" />
     <Compile Include="JSRenderer\JsViewOptions.cs" />
     <Compile Include="JSRenderer\JsBaseLineOptions.cs" />
-    <Compile Include="JSRenderer\JsLines.cs" />
     <Compile Include="Lines\BaseLine.cs" />
     <Compile Include="Lines\EntityRepeater.cs" />
     <Compile Include="Lines\EntityListDetail.cs" />

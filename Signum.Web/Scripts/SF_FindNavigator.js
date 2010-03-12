@@ -70,6 +70,18 @@ FindNavigator.prototype = {
         return items;
     },
 
+    splitSelectedIds: function() {
+        log("FindNavigator splitSelectedIds");
+        var selected = this.selectedItems();
+        var result = "";
+        $(selected).each(function(i, value) {
+            result += value.id + ",";
+        });
+        if (!empty(result))
+            result = result.substring(0, result.length - 1);
+        return result;
+    },
+
     search: function() {
         //	var async = concurrentSearch[prefix + "btnSearch"];
         //	if (async) concurrentSearch[prefix + "btnSearch"]=false;
@@ -287,6 +299,14 @@ function OpenFinder(_findOptions) {
 
 function Search(_findOptions) {
     new FindNavigator(_findOptions).search();
+}
+
+function SelectedItems(_findOptions) {
+    return new FindNavigator(_findOptions).selectedItems();
+}
+
+function SplitSelectedIds(_findOptions) {
+    return new FindNavigator(_findOptions).splitSelectedIds();
 }
 
 function AddFilter(prefix) {

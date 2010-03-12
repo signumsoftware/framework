@@ -39,9 +39,14 @@ namespace Signum.Web
 
     public static class JSnippetExtensions
     {
-        public static JsRenderer SurroundWithFunction(this JsRenderer js)
+        public static JsRenderer SurroundFunction(this JsRenderer js)
         {
             return new JsRenderer(() => "function(){ " + js.ToJS() + " }");
+        }
+
+        public static JsRenderer SurroundReturnFunction(this JsRenderer js)
+        {
+            return new JsRenderer(() => "function(){ return " + js.ToJS() + " }");
         }
     }
 }

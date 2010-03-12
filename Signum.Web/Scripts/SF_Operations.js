@@ -66,7 +66,10 @@ OperationManager.prototype = {
 
         if (!empty(this.options.requestExtraJsonData)) {
             for (var key in this.options.requestExtraJsonData) {
-                requestData += qp(key, this.options.requestExtraJsonData[key]);
+                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
+                    requestData += qp(key, this.options.requestExtraJsonData[key]());
+                else
+                    requestData += qp(key, this.options.requestExtraJsonData[key]);
             }
         }
         
