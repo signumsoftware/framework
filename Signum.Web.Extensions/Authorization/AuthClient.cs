@@ -26,8 +26,8 @@ namespace Signum.Web.Authorization
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(true)); //{ PartialViewName= ViewPrefix + "UserIU.ascx" }); 
-                manager.EntitySettings.Add(typeof(RoleDN), new EntitySettings(false)); //{ View = () => new Role() });
+                manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin)); //{ PartialViewName= ViewPrefix + "UserIU.ascx" }); 
+                manager.EntitySettings.Add(typeof(RoleDN), new EntitySettings(EntityType.Default)); //{ View = () => new Role() });
 
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
@@ -35,7 +35,7 @@ namespace Signum.Web.Authorization
                 if (types)
                 {
                     Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccessRule.CreateKey);
-                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccessRule.ModifyKey);
+                    Navigator.Manager.GlobalIsReadOnly += type => !TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccessRule.ModifyKey);
                     Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccess.Read);
                     Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccess.Read);
                 }
