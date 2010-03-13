@@ -142,7 +142,10 @@ namespace Signum.Engine.Scheduler
             lock (priorityQueue)
             {
                 if (priorityQueue.Empty)
+                {
                     OnError("Inconstency in SchedulerLogic PriorityQueue", null);
+                    return; 
+                }
 
                 ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
                 if (st.NextDate.HasValue && (st.NextDate - DateTime.Now) > MinimumSpan)
@@ -151,15 +154,21 @@ namespace Signum.Engine.Scheduler
                     return;
                 }
 
-                priorityQueue.Pop();
                 using (SafeSaving())
                     st.Save();
                 priorityQueue.Push(st);
 
                 new Thread(() =>
                 {
-                    using (AuthLogic.User(AuthLogic.SystemUser))
-                        st.Task.ToLite().ExecuteLite(TaskOperation.ExecutePrivate);
+                    try
+                    {
+                        using (AuthLogic.User(AuthLogic.SystemUser))
+                            st.Task.ToLite().ExecuteLite(TaskOperation.ExecutePrivate);
+                    }
+                    catch (Exception e)
+                    {
+                        OnError("Error executing task '{0}' with rule '{1}'".Formato(st.Task, st.Rule), e); 
+                    }
                 }).Start();
 
                 SetTimer(); 

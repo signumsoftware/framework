@@ -31,11 +31,6 @@ namespace Signum.Engine.Processes
                 sb.Include<PackageDN>();
                 sb.Include<PackageLineDN>();
 
-                OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
-                {
-                    Execute = (pc, _) => ProcessLogic.Create(pc).Execute(ProcessOperation.Execute)
-                });
-
                 dqm[typeof(PackageDN)] =
                      (from p in Database.Query<PackageDN>()
                       select new
