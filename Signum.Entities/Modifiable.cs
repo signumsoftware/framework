@@ -25,14 +25,16 @@ namespace Signum.Entities
                     modified = true;
                 else
                 {
-                    SelfModified = false;
+                    CleanSelfModified();
                     modified = false;
                 }
             }
         }
 
         [HiddenProperty]
-        public abstract bool SelfModified { get; internal set; }
+        public abstract bool SelfModified { get; }
+
+        public abstract void CleanSelfModified();
 
         protected internal virtual void PreSaving(ref bool graphModified)
         {

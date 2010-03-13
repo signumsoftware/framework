@@ -29,7 +29,11 @@ namespace Signum.Entities
         public override bool SelfModified
         {
             get { return selfModified; }
-            internal set { selfModified = value; }
+        }
+
+        public override void CleanSelfModified()
+        {
+            selfModified = false;
         }
 
         protected virtual bool Set<T>(ref T field, T value, Expression<Func<T>> property)

@@ -167,7 +167,10 @@ namespace Signum.Entities
         public override bool SelfModified
         {
             get { return false; }
-            internal set { }
+        }
+
+        public override void CleanSelfModified()
+        {
         }
 
         public override string ToString()

@@ -72,13 +72,11 @@ namespace Signum.Entities
             {
                 return hashCode != HashCodeSum();
             }
-            internal set
-            {
-                if (value == false)
-                {
-                    hashCode = HashCodeSum();
-                }
-            }
+        }
+
+        public override void CleanSelfModified()
+        {
+            hashCode = HashCodeSum();
         }
 
         int HashCodeSum()
