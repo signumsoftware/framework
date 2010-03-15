@@ -141,6 +141,7 @@ namespace Signum.Web.Operations
 
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
 
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, entity, prefix);
         }
     }

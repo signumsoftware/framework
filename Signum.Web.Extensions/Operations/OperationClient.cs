@@ -111,25 +111,25 @@ namespace Signum.Web.Operations
             return items;
         }
 
-        protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, OperationButton omi, object queryName, Type entityType)
-        {
-            if (omi == null || omi.TryCC(om => om.Settings).TryCS(set => set.Post) == true)
-                return null;
+        //protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, OperationButton omi, object queryName, Type entityType)
+        //{
+        //    if (omi == null || omi.TryCC(om => om.Settings).TryCS(set => set.Post) == true)
+        //        return null;
 
-            throw new NotImplementedException("ConstructorFromMany operations not supported yet");
-            //string controllerUrl = "Operation/ConstructFromManyExecute";
-            //if (omi.Settings.TryCC(set => set.Options).TryCC(opt => opt.ControllerUrl).HasText())
-            //    controllerUrl = omi.Settings.Options.ControllerUrl;
+        //    throw new NotImplementedException("ConstructorFromMany operations not supported yet");
+        //    //string controllerUrl = "Operation/ConstructFromManyExecute";
+        //    //if (omi.Settings.TryCC(set => set.Options).TryCC(opt => opt.ControllerUrl).HasText())
+        //    //    controllerUrl = omi.Settings.Options.ControllerUrl;
 
-            //return "javascript:ConstructFromManyExecute('{0}','{1}','{2}','{3}',{4},{5});".Formato(
-            //    controllerUrl,
-            //    entityType.Name,
-            //    EnumDN.UniqueKey(key),
-            //    httpContext.Request.Params["prefix"] ?? "",
-            //    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"","'") : "''",
-            //    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''"
-            //    );
-        }
+        //    //return "javascript:ConstructFromManyExecute('{0}','{1}','{2}','{3}',{4},{5});".Formato(
+        //    //    controllerUrl,
+        //    //    entityType.Name,
+        //    //    EnumDN.UniqueKey(key),
+        //    //    httpContext.Request.Params["prefix"] ?? "",
+        //    //    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"","'") : "''",
+        //    //    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''"
+        //    //    );
+        //}
 
         internal object ConstructorManager_GeneralConstructor(Type type, Controller controller)
         {
@@ -148,9 +148,7 @@ namespace Signum.Web.Operations
 
             Enum selected = null;
             if (list.Count == 1)
-            {
                 selected = dic.Keys.Single();
-            }
             else
             {
                 StringBuilder sb = new StringBuilder();

@@ -51,6 +51,8 @@ namespace Signum.Web.Operations
                 return JsOperationBase.Execute(new JsOperationExecutor(CreateJsOperationOptions(httpContext))).ToJS();
             else if (OperationInfo.OperationType == OperationType.ConstructorFrom)
                 return JsOperationBase.ConstructFrom(new JsOperationConstructorFrom(CreateJsOperationOptions(httpContext))).ToJS();
+            else if (OperationInfo.OperationType == OperationType.ConstructorFromMany)
+                return JsOperationBase.ConstructFromMany(new JsOperationConstructorFromMany(CreateJsOperationOptions(httpContext))).ToJS();
             else if (OperationInfo.OperationType == OperationType.Delete)
                 return JsOperationBase.Delete(new JsOperationDelete(CreateJsOperationOptions(httpContext))).ToJS();
 

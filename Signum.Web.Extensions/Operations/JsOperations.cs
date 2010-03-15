@@ -36,6 +36,11 @@ namespace Signum.Web.Operations
             return new JsRenderer(() => "OperationConstructFromPost({0})".Formato(executor.ToJS()));
         }
 
+        public static JsRenderer ConstructFromMany(JsOperationConstructorFromMany executor)
+        {
+            return new JsRenderer(() => "OperationConstructFromMany({0})".Formato(executor.ToJS()));
+        }
+
         public static JsRenderer Delete(JsOperationDelete executor)
         {
             return new JsRenderer(() => "OperationDelete({0})".Formato(executor.ToJS()));
@@ -70,6 +75,19 @@ namespace Signum.Web.Operations
         public override string ToJS()
         {
             return "new ConstructorFrom(" + this.options.ToJS() + ")";
+        }
+    }
+
+    public class JsOperationConstructorFromMany : JsOperationBase
+    {
+        public JsOperationConstructorFromMany(JsOperationOptions jsOptions)
+        {
+            this.options = jsOptions;
+        }
+
+        public override string ToJS()
+        {
+            return "new ConstructorFromMany(" + this.options.ToJS() + ")";
         }
     }
 
