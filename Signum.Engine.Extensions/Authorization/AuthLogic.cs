@@ -16,6 +16,7 @@ using Signum.Services;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Engine.Extensions.Properties;
+using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Engine.Authorization
 {
@@ -112,7 +113,7 @@ namespace Signum.Engine.Authorization
 
                     if (problems.Count > 0)
                         throw new InvalidOperationException(
-                            Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                            Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
                             problems.ToString("\r\n"));
                 }
             }
@@ -142,7 +143,7 @@ namespace Signum.Engine.Authorization
 
                 if (problems.Count > 0)
                     throw new InvalidOperationException(
-                        Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                        Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
                         problems.ToString("\r\n"));
 
                 return newRoles;
@@ -156,7 +157,7 @@ namespace Signum.Engine.Authorization
             {
                 user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
                 if (user == null)
-                    throw new ApplicationException(Resources.Username0IsNotValid.Formato(username));
+                    throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
             }
 
             return User(user);
@@ -206,10 +207,10 @@ namespace Signum.Engine.Authorization
             {
                 UserDN user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
                 if (user == null)
-                    throw new ApplicationException(Resources.Username0IsNotValid.Formato(username));
+                    throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
 
                 if (user.PasswordHash != passwordHash)
-                    throw new ApplicationException(Resources.IncorrectPassword);
+                    throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.IncorrectPassword);
 
                 return user;
             }
@@ -222,10 +223,10 @@ namespace Signum.Engine.Authorization
             {
                 user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
                 if (user == null)
-                    throw new ApplicationException(Resources.Username0IsNotValid.Formato(username));
+                    throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
 
                 if (user.EMail != email)
-                    throw new ApplicationException(Resources.EmailIsNotValid);
+                    throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.EmailIsNotValid);
             }
             return user;
         }
