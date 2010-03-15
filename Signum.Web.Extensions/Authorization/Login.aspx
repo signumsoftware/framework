@@ -8,10 +8,6 @@
 <asp:Content ID="loginContent" ContentPlaceHolderID="MainContent" runat="server">
     <script type="text/javascript">
         $(function(){$("#username").focus();});
-        function sending()
-        {
-            $("#login").val("Enviando...");
-        }
     </script>
     <h2>
         Login</h2>
@@ -61,7 +57,7 @@
                     &nbsp
                 </td>
                 <td>
-                    <input id="login" type="submit" value="Entrar" onclick="sending();" />
+                    <input id="login" type="submit" value="Entrar" />
                 </td>
             </tr>
         </table>

@@ -315,4 +315,7 @@
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
     <value>{0} es una colección de elementos {1}</value>
   </data>
+  <data name="EmailIsNotValid" xml:space="preserve">
+    <value>El correo electrónico es diferente del almacenado en el sistema</value>
+  </data>
 </root>

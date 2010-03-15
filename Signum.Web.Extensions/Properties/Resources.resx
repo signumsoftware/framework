@@ -163,13 +163,13 @@
     <value>The provided User Name is already registered, please choose another one</value>
   </data>
   <data name="UserNameMustHaveAValue" xml:space="preserve">
-    <value>The Username must have a value</value>
+    <value>The user name must have a value</value>
   </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
     <value>You must enter the current password</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
-    <value>You must repeat the new Password</value>
+    <value>You must repeat the new password</value>
   </data>
   <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
     <value>Couldn't create FilePath with unknown FileType for field {{0}}</value>
@@ -193,12 +193,39 @@
     <value>Target site</value>
   </data>
   <data name="ViewName" xml:space="preserve">
-    <value>Nombre vista</value>
+    <value>View name</value>
   </data>
   <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
     <value>Invalid Operation Type {{0}} in the construction of the operation {{1}}</value>
   </data>
   <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
     <value>Are you sure of deleting from the system the entity {0} ({1}:{2})?</value>
+  </data>
+  <data name="ChangePasswordExplanation" xml:space="preserve">
+    <value>Use this form to change your password</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Current password</value>
+  </data>
+  <data name="EmailIsNotValid" xml:space="preserve">
+    <value>The email is different from the stored email</value>
+  </data>
+  <data name="EmailMustHaveAValue" xml:space="preserve">
+    <value>The email must have a value</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="PasswordHasBeenSent" xml:space="preserve">
+    <value>The password has been sent to the provided mail account {0}</value>
+  </data>
+  <data name="RememberPassword" xml:space="preserve">
+    <value>Remember password</value>
+  </data>
+  <data name="RememberPasswordExplanation" xml:space="preserve">
+    <value>Type your username and your email address to receive an email message with the password</value>
   </data>
 </root>

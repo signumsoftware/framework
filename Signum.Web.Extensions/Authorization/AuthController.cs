@@ -19,6 +19,10 @@ using Signum.Web.Extensions.Properties;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Signum.Entities.Operations;
+using System.Net.Mail;
+using System.Configuration;
+using System.Net;
+using System.Text;
 
 namespace Signum.Web.Authorization
 {
@@ -29,6 +33,7 @@ namespace Signum.Web.Authorization
         public static event Action<UserDN> OnUserLogged;
         public const string SessionUserKey = "user";
 
+        #region "Change password"
         public ActionResult ChangePassword()
         {
             ViewData["Title"] = Resources.ChangePassword;
@@ -39,11 +44,10 @@ namespace Signum.Web.Authorization
         public ActionResult ChangePassword(string currentPassword, string newPassword, string confirmPassword)
         {
             ViewData["Title"] = Resources.ChangePassword;
-            ViewData["PasswordLength"] = AuthLogic.MinRequiredPasswordLength;
+           // ViewData["PasswordLength"] = AuthLogic.MinRequiredPasswordLength;
 
             try
             {
-
                 if (string.IsNullOrEmpty(currentPassword))
                     return ChangePasswordError("currentPassword", Resources.YouMustEnterTheCurrentPassword);
 
@@ -55,9 +59,6 @@ namespace Signum.Web.Authorization
                     return ChangePasswordError("_FORM", Resources.TheSpecifiedPasswordsDontMatch);
 
                 UserDN usr = AuthLogic.Login((UserDN.Current).UserName, Security.EncodePassword(currentPassword));
-                if (usr == null)
-                    return ChangePasswordError("_FORM", "Invalid current password");
-
                 usr.PasswordHash = Security.EncodePassword(newPassword);
                 Database.Save(usr);
                 Session[SessionUserKey] = usr;
@@ -83,6 +84,108 @@ namespace Signum.Web.Authorization
 
             return View(AuthClient.ChangePasswordSuccessUrl);
         }
+
+        #endregion
+
+        #region "Remember password"
+        public ActionResult RememberPassword()
+        {
+            ViewData["Title"] = Resources.RememberPassword;
+            return View(AuthClient.RememberPasswordUrl);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult RememberPassword(string username, string email)
+        {
+            ViewData["Title"] = Resources.RememberPassword;
+            try
+            {
+                if (string.IsNullOrEmpty(username))
+                    return RememberPasswordError("user", Resources.UserNameMustHaveAValue);
+
+                if (string.IsNullOrEmpty(email))
+                    return RememberPasswordError("email", Resources.EmailMustHaveAValue);
+
+                UserDN user = AuthLogic.UserToRememberPassword(username, email);
+                string randomPassword = GenerateRandomPassword(8);
+                using (AuthLogic.Disable())
+                {
+                    user.PasswordHash = Security.EncodePassword(randomPassword);
+                    user.Save();
+                }
+                string texto = @"Le enviamos este correo por haber solicitado que le recordemos su contraseña. Por seguridad, hemos generado una contraseña aleatoria, que luego podrá cambiar.<br/><br/>La contraseña es <b>" + randomPassword + "</b>";
+                MailMessage message = new MailMessage();
+                message.To.Add(user.EMail);
+                message.Subject = "Recordatorio de contraseña";
+                message.From = new MailAddress(AuthClient.RememberPasswordEmailFrom);
+                message.Body = texto;
+                message.IsBodyHtml = true;
+                SmtpClient smtp = new SmtpClient(AuthClient.RememberPasswordEmailSMTP);
+                smtp.Credentials = new NetworkCredential(AuthClient.RememberPasswordEmailUser, AuthClient.RememberPasswordEmailPassword);
+                smtp.Send(message);
+
+                ViewData["email"] = email;
+                return RedirectToAction("RememberPasswordSuccess");
+            }
+            catch (Exception ex)
+            {
+                return RememberPasswordError("_FORM", ex.Message);
+            }
+        }
+
+        ViewResult RememberPasswordError(string key, string error)
+        {
+            ModelState.AddModelError("_FORM", error);
+            return View(AuthClient.RememberPasswordUrl);
+        }
+
+        public ActionResult RememberPasswordSuccess()
+        {
+            ViewData["Message"] = Resources.PasswordHasBeenSent.Formato(ViewData["email"]);
+            ViewData["Title"] = Resources.RememberPassword;
+
+            return View(AuthClient.RememberPasswordSuccessUrl);
+        }
+
+        enum CharType
+        {
+            Number,
+            Upper,
+            Lower
+        }
+
+        public string GenerateRandomPassword(int size)
+        {
+            StringBuilder sb = new StringBuilder();
+            Random random = new Random();
+            int charCode = 0;
+            for (int i = 0; i < size; i++)
+            {
+                CharType type = (CharType)random.Next(3);
+                switch (type)
+                {
+                    case CharType.Number:
+                        {
+                            charCode = random.Next(48, 58);
+                            break;
+                        }
+                    case CharType.Upper:
+                        {
+                            charCode = random.Next(65, 91);
+                            break;
+                        }
+                    case CharType.Lower:
+                        {
+                            charCode = random.Next(97, 123);
+                            break;
+                        }
+                }
+                sb.Append(Convert.ToChar(charCode));
+            }
+            return sb.ToString();
+        }
+
+        #endregion
 
         public ActionResult Login()
         {

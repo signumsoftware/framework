@@ -20,6 +20,15 @@ namespace Signum.Web.Authorization
         public static string LoginUserControlUrl = ViewPrefix + "LoginUserControl.ascx";
         public static string ChangePasswordUrl = ViewPrefix + "ChangePassword.aspx";
         public static string ChangePasswordSuccessUrl = ViewPrefix + "ChangePasswordSuccess.aspx";
+        public static string RememberPasswordUrl = ViewPrefix + "RememberPassword.aspx";
+        public static string RememberPasswordSuccessUrl = ViewPrefix + "RememberPasswordSuccess.aspx";
+
+        /* Settings to send password when 'Remember Password' is used */
+        public static string RememberPasswordEmailFrom;
+        public static string RememberPasswordEmailSMTP;
+        public static string RememberPasswordEmailUser;
+        public static string RememberPasswordEmailPassword;
+
         //public static string RegisterUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Register.aspx";
 
         public static void Start(NavigationManager manager, bool types, bool property, bool queries, bool registerUserGraph)

@@ -188,6 +188,15 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The email is different from the stored email.
+        /// </summary>
+        internal static string EmailIsNotValid {
+            get {
+                return ResourceManager.GetString("EmailIsNotValid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error parsing XML Help files:
         ///.
         /// </summary>

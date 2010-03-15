@@ -291,4 +291,7 @@
   <data name="_0IsACollectionOfElements1" xml:space="preserve">
     <value>{0} is a collection of elements {1}</value>
   </data>
+  <data name="EmailIsNotValid" xml:space="preserve">
+    <value>The email is different from the stored email</value>
+  </data>
 </root>

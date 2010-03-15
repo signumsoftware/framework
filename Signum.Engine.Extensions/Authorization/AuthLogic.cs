@@ -215,6 +215,21 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static UserDN UserToRememberPassword(string username, string email)
+        {
+            UserDN user = null;
+            using (AuthLogic.Disable())
+            {
+                user = Database.Query<UserDN>().SingleOrDefault(u => u.UserName == username);
+                if (user == null)
+                    throw new ApplicationException(Resources.Username0IsNotValid.Formato(username));
+
+                if (user.EMail != email)
+                    throw new ApplicationException(Resources.EmailIsNotValid);
+            }
+            return user;
+        }
+
         public static void StartAllModules(SchemaBuilder sb, Type serviceInterface, DynamicQueryManager dqm)
         {
             TypeAuthLogic.Start(sb);

@@ -71,28 +71,7 @@
   <ItemGroup>
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthClient.cs" />
-    <Compile Include="Authorization\ChangePassword.aspx.cs">
-      <DependentUpon>ChangePassword.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Authorization\ChangePassword.aspx.designer.cs">
-      <DependentUpon>ChangePassword.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Authorization\ChangePasswordSuccess.aspx.cs">
-      <DependentUpon>ChangePasswordSuccess.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Authorization\ChangePasswordSuccess.aspx.designer.cs">
-      <DependentUpon>ChangePasswordSuccess.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Authorization\UserIUModification.cs" />
-    <Compile Include="Authorization\Register.aspx.cs">
-      <DependentUpon>Register.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Authorization\Register.aspx.designer.cs">
-      <DependentUpon>Register.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Basic\BasicClient.cs" />
     <Compile Include="Captcha\CaptchaClient.cs" />
     <Compile Include="Captcha\CaptchaController.cs" />
@@ -176,7 +155,9 @@
     <EmbeddedResource Include="Authorization\ChangePassword.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Authorization\ChangePasswordSuccess.aspx" />
+    <EmbeddedResource Include="Authorization\ChangePasswordSuccess.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Authorization\Login.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
@@ -227,6 +208,12 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Help\ViewTodo.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\RememberPassword.aspx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\RememberPasswordSuccess.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
