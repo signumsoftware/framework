@@ -357,25 +357,113 @@ function OperationDelete(deleteExecutor) {
     deleteExecutor.execute();
 }
 
-function ConstructFromManyExecute(urlController, typeName, operationKey, prefix, onOk, onCancel) {
-    var ids = GetSelectedElements(prefix);
-    if (ids == "") return;
-    var newPrefix = prefix + "_New";
-    var self = this;
-    $.ajax({
-        type: "POST",
-        url: urlController,
-        data: "sfIds=" + ids + qp("sfRuntimeType", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
-        async: false,
-        dataType: "html",
-        success: function(msg) {
-            $('#' + prefix + "divASustituir").html(msg);
-            new popup().show(prefix + "divASustituir");
-            $('#' + newPrefix + sfBtnOk).click(onOk);
-            $('#' + newPrefix + sfBtnCancel).click(function() { $('#' + prefix + "divASustituir").html(""); if (onCancel != null) onCancel(); });
+//ConstructorFromMany options = OperationManager options + returnType
+var ConstructorFromMany = function(_options) {
+    OperationManager.call(this, $.extend({
+        controllerUrl: "Operation/ConstructFromManyExecute",
+        returnType: null
+    }, _options));
+
+    this.requestData = function(newPrefix, items) {
+        log("ConstructorFromMany requestData");
+        var requestData = $('#' + sfTabId).serialize();
+        requestData += qp("sfRuntimeType", $(this.pf(sfEntityTypeName)).val())
+                     + qp("sfOperationFullKey", this.options.operationKey)
+                     + qp(sfPrefix, newPrefix)
+                     + qp("sfOldPrefix", this.options.prefix)
+                     + qp("sfOnOk", singleQuote(this.options.onOk));
+
+        for(var i = 0; i<items.length; i++)
+            requestData += qp("sfIds", items[i].id);
+
+        if (!empty(this.options.requestExtraJsonData)) {
+            for (var key in this.options.requestExtraJsonData) {
+                if (jQuery.isFunction(this.options.requestExtraJsonData[key]))
+                    requestData += qp(key, this.options.requestExtraJsonData[key]());
+                else
+                    requestData += qp(key, this.options.requestExtraJsonData[key]);
+            }
         }
-    });
+        
+        return requestData;
+    },
+
+    this.construct = function() {
+        log("ConstructorFromMany construct");
+
+        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
+            return;
+
+        NotifyInfo(lang['executingOperation']);
+
+        var items = SelectedItems({prefix:this.options.prefix});
+        if (items.length == 0) 
+        {
+            NotifyInfo(lang['noElementsSelected']);
+            return;
+        }
+    
+        var self = this;
+        $.ajax({
+            type: "POST",
+            url: this.options.controllerUrl,
+            data: this.requestData(this.newPrefix(), items),
+            async: false,
+            dataType: "html",
+            success: function(operationResult) {
+                if (!self.executedSuccessfully(operationResult)) {
+                    NotifyInfo(lang['error'], 2000);
+                    return;
+                }
+
+                if (self.options.navigateOnSuccess) {
+                    PostServer(operationResult);
+                    return;
+                }
+
+                var navigator = new ViewNavigator({
+                    prefix: self.newPrefix(),
+                    type: self.options.returnType,
+                    onOk: self.options.onOk,
+                    onCancelled: self.options.onCancelled
+                }).showCreateSave(operationResult);
+                
+                if (!empty(self.options.onOperationSuccess))
+                    self.options.onOperationSuccess();
+
+                NotifyInfo(lang['operationExecuted'], 2000);
+            },
+            error:
+                function() { NotifyInfo(lang['error'], 2000); }
+        });
+    };
+};
+
+ConstructorFromMany.prototype = new OperationManager();
+
+function OperationConstructFromMany(constructorFrom) {
+    constructorFromMany.construct();
 }
+
+//function ConstructFromManyExecute(urlController, typeName, operationKey, prefix, onOk, onCancel) {
+//    var ids = GetSelectedElements(prefix);
+//    if (ids == "") return;
+//    var newPrefix = prefix + "_New";
+//    var self = this;
+//    $.ajax({
+//        type: "POST",
+//        url: urlController,
+//        data: "sfIds=" + ids + qp("sfRuntimeType", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
+//        async: false,
+//        dataType: "html",
+//        success: function(msg) {
+//            $('#' + prefix + "divASustituir").html(msg);
+//            new popup().show(prefix + "divASustituir");
+//            $('#' + newPrefix + sfBtnOk).click(onOk);
+//            $('#' + newPrefix + sfBtnCancel).click(function() { $('#' + prefix + "divASustituir").html(""); if (onCancel != null) onCancel(); });
+//        }
+//    });
+//}
 
 function ReloadEntity(urlController, prefix, parentDiv, reloadButtonBar) {
     $.ajax({

@@ -55,6 +55,7 @@ var lang = {
     "buscar": "Buscar",
     "executingOperation": "Ejecutando operación...",
     "operationExecuted": "Operación ejecutada",
+    "noElementsSelected": "Debe seleccionar algún elemento",
     "popupErrors": "Hay errores en la entidad, ¿desea continuar?",
     "popupErrorsStop": "Hay errores en la entidad"
 };
