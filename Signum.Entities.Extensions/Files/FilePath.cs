@@ -8,6 +8,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using System.Web;
 
 namespace Signum.Entities.Files
 {
@@ -50,7 +51,7 @@ namespace Signum.Entities.Files
             set 
             {
                 if (Set(ref binaryFile, value, () => BinaryFile) && binaryFile != null)
-                    fileLength = binaryFile.Length;
+                    FileLength = binaryFile.Length;
             }
         }
 
@@ -58,7 +59,7 @@ namespace Signum.Entities.Files
         public int FileLength
         {
             get { return fileLength; }
-            private set { SetToStr(ref fileLength, value, () => FileLength); }
+            internal set { SetToStr(ref fileLength, value, () => FileLength); }
         }
 
         public string FileLengthString
@@ -108,16 +109,14 @@ namespace Signum.Entities.Files
         }
 
         static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => 
-            fp.Repository != null && fp.Repository.WebPrefix.HasText() ? 
-                fp.Repository.WebPrefix + "/" + fp.Sufix.Replace("\\", "/").Replace(" ", "") :
+            fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
+                fp.Repository.WebPrefix + "/" + HttpUtility.UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
                 null;
         public string FullWebPath
         {
             get
             {
-                return Repository != null && Repository.WebPrefix.HasText() ?
-                  Repository.WebPrefix + "/" + Sufix.Replace("\\", "/").Replace(" ", "") :
-                  null;
+                return FullWebPathExpression.Invoke(this);
             }
         }
 

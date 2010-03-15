@@ -80,9 +80,33 @@ namespace Signum.Engine.Files
 
         const long ERROR_DISK_FULL = 112L; // see winerror.h
 
+        [ThreadStatic]
+        static bool unsafeMode = false;
+
+        public static IDisposable UnsafeMode()
+        {
+            unsafeMode = true;
+            return new Disposable(() => unsafeMode = false);
+        }
+
+        public static FilePathDN UnsafeLoad(FileRepositoryDN repository, FileTypeDN fileType, string fullPath)
+        {
+            if (!fullPath.StartsWith(repository.PhysicalPrefix))
+                throw new InvalidOperationException("The File {0} doesn't belong to the repository {1}".Formato(fullPath, repository.PhysicalPrefix));
+
+            return new FilePathDN
+            {
+                FileLength = (int)new FileInfo(fullPath).Length,
+                FileType = fileType,
+                Sufix = fullPath.Substring(repository.PhysicalPrefix.Length).TrimStart('\\'),
+                FileName = Path.GetFileName(fullPath),
+                Repository = repository,
+            };
+        }
+
         static void FilePath_Saving(FilePathDN fp, bool isRoot, ref bool graphModified)
         {
-            if (fp.IsNew)
+            if (fp.IsNew && !unsafeMode)
             {
                 //set typedn from enum
                 if (fp.FileType == null)
