@@ -101,7 +101,7 @@ namespace Signum.Utilities
             return (long)(min + r.NextDouble() * (max - min));
         }
 
-        public static T NextOf<T>(this Random r, params T[] elements)
+        public static T NextParams<T>(this Random r, params T[] elements)
         {
             return elements[r.Next(elements.Length)];
         }
