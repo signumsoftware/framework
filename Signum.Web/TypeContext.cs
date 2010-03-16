@@ -150,15 +150,15 @@ namespace Signum.Web
         {
             if (helper.WriteIdAndRuntime(tc))
             {
-                RuntimeInfo runtimeInfo = null;
-                if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
-                    runtimeInfo = new RuntimeInfo<T>(tc.Value);
-                else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
-                    runtimeInfo = new EmbeddedRuntimeInfo<T>(tc.Value, false);
-                else if (Reflector.IsMList(typeof(T)))
-                    runtimeInfo = new RuntimeInfo { RuntimeType = typeof(T), IsNew = false };
-                
-                helper.WriteEntityInfo(helper.GlobalName(tc.Name), runtimeInfo, new StaticInfo(typeof(T)));
+                //RuntimeInfo runtimeInfo = null;
+                //if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
+                //    runtimeInfo = new RuntimeInfo<T>(tc.Value);
+                //else if (typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
+                //    runtimeInfo = new EmbeddedRuntimeInfo<T>(tc.Value, false);
+                //else if (Reflector.IsMList(typeof(T)))
+                //    runtimeInfo = new RuntimeInfo { RuntimeType = typeof(T), IsNew = false };
+
+                    helper.WriteEntityInfo(helper.GlobalName(tc.Name), new RuntimeInfo(tc.Value), new StaticInfo(typeof(T)));
             }
 
             //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them

@@ -35,10 +35,10 @@ namespace Signum.Web
 
         public static string HiddenRuntimeInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
         {
-            if(typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
-                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.RuntimeInfo)), new EmbeddedRuntimeInfo<T>(parent.Value, false).ToString());
-            else
-                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.RuntimeInfo)), new RuntimeInfo<T>(parent.Value).ToString());
+            //if(typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
+            //    return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.RuntimeInfo)), new EmbeddedRuntimeInfo<T>(parent.Value, false).ToString());
+            //else
+                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.RuntimeInfo)), new RuntimeInfo(parent.Value).ToString());
         }
 
         public static string HiddenStaticInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
@@ -148,6 +148,38 @@ namespace Signum.Web
         public bool IsNew { get; set; }
         public long? Ticks { get; set; }
 
+        public RuntimeInfo() { }
+
+        public RuntimeInfo(object value)
+        {
+            if (value == null)
+            {
+                RuntimeType = null;
+                return;
+            }
+
+            if (typeof(Lite).IsAssignableFrom(value.GetType()))
+            {
+                Lite liteValue = value as Lite;
+                RuntimeType = liteValue.RuntimeType;
+                IdOrNull = liteValue.IdOrNull;
+                IsNew = liteValue.IdOrNull == null;
+            }
+            else if (typeof(EmbeddedEntity).IsAssignableFrom(value.GetType()))
+            {
+                RuntimeType = value.GetType();
+            }
+            else if (typeof(IdentifiableEntity).IsAssignableFrom(value.GetType()))
+            {
+                RuntimeType = value.GetType();
+                IIdentifiable identifiable = value as IIdentifiable;
+                IdOrNull = identifiable.IdOrNull;
+                IsNew = identifiable.IdOrNull == null;
+            }
+            else
+                throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite or IdentifiableEntity or EmbeddedEntity".Formato(value.GetType()));
+        }
+
         private string RuntimeTypeStr
         {
             get
@@ -192,62 +224,62 @@ namespace Signum.Web
         }
     }
 
-    public class RuntimeInfo<T> : RuntimeInfo
-    {
-        public RuntimeInfo(T Value)
-        {
-            if (typeof(EmbeddedEntity).IsAssignableFrom(Reflector.ExtractLite(typeof(T)) ?? typeof(T)))
-                throw new ArgumentException("RuntimeInfo<T> cannot be called for an embedded entity. Call EmbeddedRuntimeInfo<T> instead");
+    //public class RuntimeInfo<T> : RuntimeInfo
+    //{
+    //    public RuntimeInfo(T Value)
+    //    {
+    //        if (typeof(EmbeddedEntity).IsAssignableFrom(Reflector.ExtractLite(typeof(T)) ?? typeof(T)))
+    //            throw new ArgumentException("RuntimeInfo<T> cannot be called for an embedded entity. Call EmbeddedRuntimeInfo<T> instead");
 
-            if (Value == null)
-            {
-                RuntimeType = null;
-                return;
-            }
+    //        if (Value == null)
+    //        {
+    //            RuntimeType = null;
+    //            return;
+    //        }
 
-            if (typeof(Lite).IsAssignableFrom(Value.GetType()))
-            {
-                Lite liteValue = Value as Lite;
-                RuntimeType = liteValue.RuntimeType;
-                IdOrNull = liteValue.IdOrNull;
-                IsNew = liteValue.IdOrNull == null;
-            }
-            else
-            {
-                RuntimeType = Value.GetType();
-                IIdentifiable identifiable = Value as IIdentifiable;
-                if (identifiable == null)
-                    throw new ArgumentException("Invalid type {0} for RuntimeInfo<T>. It must be Lite or Identifiable, otherwise call EmbeddedRuntimeInfo<T> or RuntimeInfo".Formato(RuntimeType));
+    //        if (typeof(Lite).IsAssignableFrom(Value.GetType()))
+    //        {
+    //            Lite liteValue = Value as Lite;
+    //            RuntimeType = liteValue.RuntimeType;
+    //            IdOrNull = liteValue.IdOrNull;
+    //            IsNew = liteValue.IdOrNull == null;
+    //        }
+    //        else
+    //        {
+    //            RuntimeType = Value.GetType();
+    //            IIdentifiable identifiable = Value as IIdentifiable;
+    //            if (identifiable == null)
+    //                throw new ArgumentException("Invalid type {0} for RuntimeInfo<T>. It must be Lite or Identifiable, otherwise call EmbeddedRuntimeInfo<T> or RuntimeInfo".Formato(RuntimeType));
                 
-                IdOrNull = identifiable.IdOrNull;
-                IsNew = identifiable.IdOrNull == null;
-            }
-        }
+    //            IdOrNull = identifiable.IdOrNull;
+    //            IsNew = identifiable.IdOrNull == null;
+    //        }
+    //    }
 
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-    }
+    //    public override string ToString()
+    //    {
+    //        return base.ToString();
+    //    }
+    //}
 
-    public class EmbeddedRuntimeInfo<T> : RuntimeInfo
-    {
-        public EmbeddedRuntimeInfo(T value, bool isNew)
-        {
-            if (!typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
-                throw new ArgumentException("EmbeddedRuntimeInfo<T> cannot be called for a non embedded entity. Call RuntimeInfo<T> instead");
+    //public class EmbeddedRuntimeInfo<T> : RuntimeInfo
+    //{
+    //    public EmbeddedRuntimeInfo(T value, bool isNew)
+    //    {
+    //        if (!typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
+    //            throw new ArgumentException("EmbeddedRuntimeInfo<T> cannot be called for a non embedded entity. Call RuntimeInfo<T> instead");
 
-            this.IsNew = isNew;
+    //        this.IsNew = isNew;
             
-            if (value == null)
-                RuntimeType = null;
-            else
-                RuntimeType = value.GetType();
-        }
+    //        if (value == null)
+    //            RuntimeType = null;
+    //        else
+    //            RuntimeType = value.GetType();
+    //    }
 
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-    }
+    //    public override string ToString()
+    //    {
+    //        return base.ToString();
+    //    }
+    //}
 }

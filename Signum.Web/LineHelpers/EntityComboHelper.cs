@@ -49,7 +49,7 @@ namespace Signum.Web
 
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
 
-            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo<T>(value) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
+            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo(value) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
 
             if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
                 sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
