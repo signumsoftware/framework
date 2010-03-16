@@ -153,6 +153,35 @@ FindNavigator.prototype = {
         return qp("cn" + index, columnName) + qp("sel" + index, selector.val()) + qp("val" + index, value);
     },
 
+    serializeFiltersJson: function() {
+        var result = "";
+        var self = this;
+        $(this.pf("tblFilters > tbody > tr")).each(function() {
+            result = $.extend(result, self.serializeFilterJson(this.id.substr(this.id.lastIndexOf("_") + 1, this.id.length)));
+        });
+        return result;
+    },
+
+    serializeFilterJson: function(index) {
+        var tds = $(this.pf("trFilter_") + index + " td");
+        var columnName = tds[0].id.substr(tds[0].id.indexOf("__") + 2, tds[0].id.length);
+        var selector = $(this.pf("ddlSelector_") + index + " option:selected");
+        var value = $(this.pf("value_") + index).val();
+
+        var valBool = $("input:checkbox[id=" + this.findOptions.prefix + "value_" + index + "]"); //it's a checkbox
+        if (valBool.length > 0) value = valBool[0].checked;
+
+        var info = RuntimeInfoFor(this.findOptions.prefix + "value_" + index);
+        if (info.find().length > 0) //If it's a Lite, the value is the Id
+            value = info.id() + ";" + info.runtimeType();
+
+        var filter = new Object();
+        filter["cn" + index] = columnName;
+        filter["sel" + index] =  selector.val();
+        filter["val" + index] = value;
+        return filter;
+    },
+
     onSearchOk: function() {
         log("FindNavigator onSearchOk");
         var selected = this.selectedItems();
@@ -262,6 +291,12 @@ FindNavigator.prototype = {
         });
     },
 
+    requestDataForSearchPopupCreate: function() {
+        var requestData = this.serializeFiltersJson();
+        var requestData = $.extend(requestData, { sfQueryUrlName : ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName)});
+        return requestData;
+    },
+
     viewOptionsForSearchCreate: function(_viewOptions) {
         log("FindNavigator viewOptionsForSearchCreate");
         if (this.findOptions.prefix != _viewOptions.prefix)
@@ -285,6 +320,7 @@ FindNavigator.prototype = {
         return $.extend({
             type: $(this.pf(sfEntityTypeName)).val(),
             containerDiv: null,
+            requestExtraJsonData: this.requestDataForSearchPopupCreate(),
             //onOk: function(clonedElements) { return self.onCreatingOK(clonedElements, defaultValidateUrl, _viewOptions.type); },
             onCancelled: null,
             controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupView"

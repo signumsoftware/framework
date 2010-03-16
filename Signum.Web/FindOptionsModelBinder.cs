@@ -105,7 +105,7 @@ namespace Signum.Web
             return result;
         }
 
-        private static object Convert(string value, Type type)
+        internal static object Convert(string value, Type type)
         {
             if (type == typeof(bool))
             {
