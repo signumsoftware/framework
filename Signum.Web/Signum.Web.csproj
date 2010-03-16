@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{61898D02-521F-49AB-928B-F80615D55CA3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -213,6 +213,9 @@
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
     <Content Include="Scripts\jquery-1.4.min.js" />
+    <EmbeddedResource Include="Views\CountSearchControl.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Scripts\SF_FindNavigator.js" />
     <EmbeddedResource Include="Scripts\SF_Lines.js" />
     <EmbeddedResource Include="Scripts\SF_Mixin.js" />

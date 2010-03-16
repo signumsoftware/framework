@@ -118,6 +118,21 @@ namespace Signum.Web
                 helper.RenderPartialToString(Navigator.Manager.SearchControlUrl, helper.ViewData));
         }
 
+        public static string CountSearchControl(this HtmlHelper helper, FindOptions findOptions)
+        {
+            int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
+            {
+                FilterOptions = findOptions.FilterOptions
+            });            
+
+            JsFindOptions foptions = new JsFindOptions
+            {
+                FindOptions = findOptions
+            };
+
+           return "<a class=\"count-search\" onclick=\"javascript:OpenFinder({0});\">{1}</a>".Formato(foptions.ToJS(), count);
+        }
+
         public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string prefix, FilterOperation? filterOperation, object value)
         {
            // Type searchEntityType = Navigator.NameToType[entityTypeName];

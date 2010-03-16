@@ -440,6 +440,7 @@ namespace Signum.Web
         public string SearchWindowUrl = ViewsPrefix + "SearchWindow.aspx";
         public string SearchControlUrl = ViewsPrefix + "SearchControl.ascx";
         public string SearchResultsUrl = ViewsPrefix + "SearchResults.ascx";
+        public string CountSearchControlUrl = ViewsPrefix + "CountSearchControl.ascx";
         public string FilterBuilderUrl = ViewsPrefix + "FilterBuilder.ascx";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
