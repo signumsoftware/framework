@@ -99,7 +99,7 @@ namespace Signum.Web.Files
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
                 sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.RuntimeInfo), new RuntimeInfo<FilePathDN>(fp).ToString()));
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(fp).ToString()));
                 //sb.AppendLine("parDoc.getElementById('{0}').value='FilePathDN';".Formato(TypeContext.Compose(formFieldId, TypeContext.RuntimeType)));
                 //sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id.ToString()));
                 //sb.AppendLine("parDoc.getElementById('{0}').removeChild(parDoc.getElementById('{1}'));".Formato(TypeContext.Compose(formFieldId, "sfRepeaterElement"), TypeContext.Compose(formFieldId, EntityBaseKeys.IsNew)));
