@@ -119,7 +119,7 @@ namespace Signum.Web
                 int intValue;
                 if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
                 {
-                    Type liteType = Navigator.NameToType[vals[1]];
+                    Type liteType = Navigator.NamesToTypes[vals[1]];
                     if (typeof(Lite).IsAssignableFrom(liteType))
                         liteType = Reflector.ExtractLite(liteType);
                     return Lite.Create(liteType, intValue);

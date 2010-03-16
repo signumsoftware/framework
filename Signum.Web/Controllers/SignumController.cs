@@ -292,7 +292,7 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult Autocomplete(string typeName, Implementations implementations, string input, int limit)
         {
-            Type type = Navigator.NameToType[typeName];
+            Type type = Navigator.NamesToTypes[typeName];
 
             var result = AutoCompleteUtils.FindLiteLike(type, implementations, input, limit)
                 .ToDictionary(l => l.Id.ToString() + "_" + l.RuntimeType.Name, l => l.ToStr);

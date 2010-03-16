@@ -66,6 +66,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Administrator.cs" />
+    <Compile Include="Connection\UserConnections.cs" />
     <Compile Include="Connection\CommandTimeout.cs" />
     <Compile Include="DynamicQuery\AutoDynamicQuery.cs" />
     <Compile Include="DynamicQuery\DynamicQuery.cs" />

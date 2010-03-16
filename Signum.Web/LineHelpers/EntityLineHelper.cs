@@ -69,7 +69,7 @@ namespace Signum.Web
                         { "style", "display:" + ((value==null && !settings.ReadOnly) ? "block" : "none")}
                     }));
 
-                if (settings.Autocomplete && Navigator.NameToType.ContainsKey(cleanStaticType.Name))
+                if (settings.Autocomplete && Navigator.NamesToTypes.ContainsKey(cleanStaticType.Name))
                 {
                     if (settings.Implementations != null && settings.Implementations.IsByAll)
                         throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");

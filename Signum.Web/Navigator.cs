@@ -369,16 +369,24 @@ namespace Signum.Web
             }
         }
 
-        static Dictionary<string, Type> nameToType;
-        public static Dictionary<string, Type> NameToType
+        public static Dictionary<string, Type> URLNamesToTypes
         {
-            get { return nameToType.ThrowIfNullC(Resources.NamesToTypesDictionaryNotInitialized); }
-            internal set { nameToType = value; }
+            get { return Manager.URLNamesToTypes; }
         }
 
         public static Dictionary<Type, string> TypesToURLNames
         {
             get { return Manager.TypesToURLNames; }
+        }
+
+        public static Dictionary<string, Type> NamesToTypes
+        {
+            get { return Manager.NamesToTypes; }
+        }
+
+        public static Dictionary<Type, string> TypesToNames
+        {
+            get { return Manager.TypesToNames; }
         }
 
         internal static void ConfigureEntityBase(EntityBase eb, Type entityType, bool admin)
@@ -436,8 +444,11 @@ namespace Signum.Web
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
+        protected internal Dictionary<string, Type> NamesToTypes { get; private set; }
+        protected internal Dictionary<Type, string> TypesToNames { get; private set; }
+
         protected internal Dictionary<string, object> UrlQueryNames { get; private set; }
-        protected internal Dictionary<string, Type> FullNamesToTypes { get; private set; }
+        //protected internal Dictionary<string, Type> FullNamesToTypes { get; private set; }
 
         public event Func<Type, bool> GlobalIsCreable;
         public event Func<Type, bool> GlobalIsViewable;
@@ -454,11 +465,11 @@ namespace Signum.Web
 
         public void Start()
         {
-            URLNamesToTypes = EntitySettings.ToDictionary(
-                kvp => kvp.Value.UrlName ?? Reflector.CleanTypeName(kvp.Key),
-                kvp => kvp.Key);
-            TypesToURLNames = URLNamesToTypes.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
-            Navigator.NameToType = EntitySettings.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Key);
+            TypesToURLNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UrlName ?? Reflector.CleanTypeName(kvp.Key));
+            URLNamesToTypes = TypesToURLNames.Inverse();
+
+            TypesToNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.TypeName ?? kvp.Key.Name);
+            NamesToTypes = TypesToNames.Inverse(); 
 
             if (DynamicQueryManager.Current != null)
             {
@@ -854,7 +865,7 @@ namespace Signum.Web
                     int intValue;
                     if (vals[0].HasText() && int.TryParse(vals[0], out intValue))
                     {
-                        Type liteType = Navigator.NameToType[vals[1]];
+                        Type liteType = Navigator.NamesToTypes[vals[1]];
                         if (typeof(Lite).IsAssignableFrom(liteType))
                             liteType = Reflector.ExtractLite(liteType);
                         value = Lite.Create(liteType, intValue);
@@ -888,9 +899,9 @@ namespace Signum.Web
                 return UrlQueryNames[queryUrlName];
 
             //If it's the name of a Type
-            if (Navigator.NameToType.ContainsKey(queryUrlName))
-            { 
-                string urlName= TypesToURLNames[Navigator.NameToType[queryUrlName]];
+            if (Navigator.NamesToTypes.ContainsKey(queryUrlName))
+            {
+                string urlName = TypesToURLNames[Navigator.NamesToTypes[queryUrlName]];
                 if (!string.IsNullOrEmpty(urlName))
                     return UrlQueryNames[urlName].ThrowIfNullC(Resources.NoQueryWithName0.Formato(queryUrlName));
             }
@@ -907,12 +918,7 @@ namespace Signum.Web
 
         protected internal virtual Type ResolveType(string typeName)
         {
-            Type type = Navigator.NameToType.TryGetC(typeName) ?? Type.GetType(typeName, false);
-            
-            if (type == null)
-                throw new ArgumentException(Resources.Type0NotFoundInTheSchema.Formato(typeName));
-            
-            return type;
+            return Navigator.NamesToTypes.GetOrThrow(typeName, Resources.Type0NotFoundInTheSchema);
         }
 
         protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, NameValueCollection form, ref T entity, string prefix, string prefixToIgnore) where T : Modifiable

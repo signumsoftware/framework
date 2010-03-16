@@ -16,14 +16,14 @@ namespace Signum.Web.Controllers
         #region Notes
         public PartialViewResult CreateNote(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NamesToTypes[sfRuntimeTypeRelated], sfIdRelated.Value);
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, NoteWidgetHelper.CreateNote(entity), prefix, sfUrl);
         }
 
         public string RefreshNotes(string sfRuntimeTypeRelated, int? sfIdRelated)
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NamesToTypes[sfRuntimeTypeRelated], sfIdRelated.Value);
 
             ViewDataDictionary vdd = new ViewDataDictionary();
             vdd.Add("WidgetNode", NoteWidgetHelper.CreateWidget(entity));
@@ -35,13 +35,13 @@ namespace Signum.Web.Controllers
         #region Alerts
         public PartialViewResult CreateAlert(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NamesToTypes[sfRuntimeTypeRelated], sfIdRelated.Value);
             return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix, sfUrl);
         }
 
         public string RefreshAlerts(string sfRuntimeTypeRelated, int? sfIdRelated)
         {
-            IdentifiableEntity entity = Database.Retrieve(Navigator.NameToType[sfRuntimeTypeRelated], sfIdRelated.Value);
+            IdentifiableEntity entity = Database.Retrieve(Navigator.NamesToTypes[sfRuntimeTypeRelated], sfIdRelated.Value);
 
             ViewDataDictionary vdd = new ViewDataDictionary();
             vdd.Add("WidgetNode", AlertWidgetHelper.CreateWidget(entity));

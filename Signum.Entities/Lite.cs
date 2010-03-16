@@ -182,16 +182,7 @@ namespace Signum.Entities
             return "{0}({1})".Formato(this.RuntimeType, this.id);
         }
 
-        public string Key()
-        {
-            return "{0};{1}".Formato(this.RuntimeType.Name, this.Id);
-        }
-
-        public string KeyLong()
-        {
-            return "{0};{1};{2}".Formato(this.RuntimeType.Name, this.Id, this.ToStr);
-        }
-
+    
         public static Lite Create(Type type, int id)
         {
             return (Lite)Activator.CreateInstance(Reflector.GenerateLite(type), type, id);
@@ -295,6 +286,26 @@ namespace Signum.Entities
 
             result = Lite.Create(liteType, id, type, toStr);
             return null;
+        }
+
+        public string Key()
+        {
+            return "{0};{1}".Formato(this.RuntimeType.Name, this.Id);
+        }
+
+        public string Key(Func<Type, string> typeName)
+        {
+            return "{0};{1}".Formato(typeName(this.RuntimeType), this.Id);
+        }
+
+        public string KeyLong()
+        {
+            return "{0};{1};{2}".Formato(this.RuntimeType.Name, this.Id, this.ToStr);
+        }
+
+        public string KeyLong(Func<Type, string> typeName)
+        {
+            return "{0};{1};{2}".Formato(typeName(this.RuntimeType), this.Id, this.ToStr);
         }
     }
 

@@ -8,11 +8,23 @@ using Signum.Entities;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using System.Linq.Expressions;
+using Signum.Engine;
+using Signum.Web.Controllers;
 
 namespace Signum.Web
 {
     public static class EntityInfoHelper
     {
+        public static string HiddenLite(this HtmlHelper helper, string name, Lite lite)
+        {
+            return helper.Hidden(name, LiteModelBinder.WriteLite(lite, false));
+        }
+
+        public static string HiddenLite(this HtmlHelper helper, string name, Lite lite, bool forceRuntimeType)
+        {
+            return helper.Hidden(name, LiteModelBinder.WriteLite(lite, forceRuntimeType));  
+        }
+
         public static string HiddenEntityInfo(this HtmlHelper helper, string prefix, RuntimeInfo runtimeInfo, StaticInfo staticInfo)
         {
             return helper.HiddenRuntimeInfo(prefix, runtimeInfo) + helper.HiddenStaticInfo(prefix, staticInfo);

@@ -8,8 +8,9 @@ namespace Signum.Web
 {
     public class EntitySettings
     {
-        public Func<ModifiableEntity, string> PartialViewName;
-        public string UrlName;
+        public Func<ModifiableEntity, string> PartialViewName { get; set; }
+        public string UrlName { get; set; }
+        public string TypeName { get; set; }
 
         public Func<bool, bool> IsCreable { get; set; }
         public Func<bool, bool> IsViewable { get; set; }
