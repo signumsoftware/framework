@@ -23,6 +23,7 @@ namespace Signum.Web
        // public const string PopupInnerControlUrl = "sfPopupInnerControlUrl";
         public const string StyleContext = "sfStyleContext";
         public const string PageTitle = "sfTitle";
+        public const string PageDescription = "sfDescription";
         public const string CustomHtml = "sfCustomHtml";
         public const string OnOk = "sfOnOk";
         public const string OnCancel = "sfOnCancel";

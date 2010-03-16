@@ -9,11 +9,53 @@ namespace Signum.Utilities
 {
     public static class JsonExtensions
     {
-        public static string Quote(this string obj)
+        ///  FUNCTION Enquote Public Domain 2002 JSON.org 
+        ///  @author JSON.org 
+        ///  @version 0.1 
+        ///  Ported to C# by Are Bjolseth, teleplan.no 
+        public static string Quote(this string s)
         {
-            return "\"" + obj + "\"";
-        }
+            if (s == null || s.Length == 0)
+                return "\"\"";
 
+            int len = s.Length;
+            
+            StringBuilder sb = new StringBuilder(len + 4);
+            sb.Append('"');
+            for (int i = 0; i < len; i += 1)
+            {
+                char c = s[i];
+                switch (c)
+                {
+                    case '\\':
+                    case '"':
+                    case '>':
+                        sb.Append('\\');
+                        sb.Append(c);
+                        break;
+                    case '\b': sb.Append("\\b"); break;
+                    case '\t': sb.Append("\\t"); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\f': sb.Append("\\f"); break;
+                    case '\r': sb.Append("\\r"); break;
+                    default:
+                        if (c < ' ')
+                        {
+                            //t = "000" + Integer.toHexString(c); 
+                            string tmp = new string(c, 1);
+                            string t = "000" + int.Parse(tmp, System.Globalization.NumberStyles.HexNumber);
+                            sb.Append("\\u" + t.Substring(t.Length - 4));
+                        }
+                        else
+                        {
+                            sb.Append(c);
+                        }
+                        break;
+                }
+            }
+            sb.Append('"');
+            return sb.ToString();
+        } 
         public static string Unquote(this string obj)
         {
             if (obj.Length > 1 && obj[0] == '\"' && obj[obj.Length - 1] == '\"')
