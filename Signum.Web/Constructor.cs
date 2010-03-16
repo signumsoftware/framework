@@ -106,8 +106,11 @@ namespace Signum.Web
             if (obj == null)
                 throw new ArgumentNullException("result");
 
-            Type type = obj.GetType();
+            if (!controller.Request.Params.AllKeys.Contains("sfQueryUrlName"))
+                return obj;
 
+            Type type = obj.GetType();
+            
             object queryName = Navigator.ResolveQueryFromUrlName(controller.Request.Params["sfQueryUrlName"]);
 
             var filters = FindOptionsModelBinder.ExtractFilterOptions(controller.HttpContext, queryName)

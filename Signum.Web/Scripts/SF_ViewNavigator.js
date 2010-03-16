@@ -239,15 +239,19 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat) {
     //Construct popup
     var tempDivId = _prefix + "Temp";
     var requestData = "prefix=" + tempDivId;
+    var url = "Signum/GetChooser";
     if (empty(jsonOptionsListFormat))
+    {
         requestData += "&sfImplementations=" + $('#' + _prefix + sfImplementations).val();
+        url = "Signum/GetTypeChooser";
+        }
     else {
         for (var i = 0; i < jsonOptionsListFormat.length; i++)
             requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
     }
     $.ajax({
         type: "POST",
-        url: "Signum/GetChooser",
+        url: url,
         data: requestData,
         async: false,
         dataType: "html",
