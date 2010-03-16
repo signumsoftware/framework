@@ -90,22 +90,32 @@ namespace Signum.Web
 
         public static ViewResult View(this Controller controller, object obj)
         {
-            return Manager.View(controller, obj, null, null); 
+            return Manager.View(controller, obj, null, false, null); 
+        }
+
+        public static ViewResult View(this Controller controller, object obj, bool admin)
+        {
+            return Manager.View(controller, obj, null, admin, null); 
         }
 
         public static ViewResult View(this Controller controller, object obj, string partialViewName)
         {
-            return Manager.View(controller, obj, partialViewName, null);
+            return Manager.View(controller, obj, partialViewName, false, null);
+        }
+
+        public static ViewResult View(this Controller controller, object obj, string partialViewName, bool admin)
+        {
+            return Manager.View(controller, obj, partialViewName, admin, null);
         }
 
         public static ViewResult View(this Controller controller, object obj, Dictionary<string, long> changeTicks)
         {
-            return Manager.View(controller, obj, null, changeTicks);
+            return Manager.View(controller, obj, null, false, changeTicks);
         }
 
         public static ViewResult View(this Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
         {
-            return Manager.View(controller, obj, partialViewName, changeTicks);
+            return Manager.View(controller, obj, partialViewName, false, changeTicks);
         }
 
         public static string GetOrCreateTabID(Controller c)
@@ -440,7 +450,6 @@ namespace Signum.Web
         public string SearchWindowUrl = ViewsPrefix + "SearchWindow.aspx";
         public string SearchControlUrl = ViewsPrefix + "SearchControl.ascx";
         public string SearchResultsUrl = ViewsPrefix + "SearchResults.ascx";
-        public string CountSearchControlUrl = ViewsPrefix + "CountSearchControl.ascx";
         public string FilterBuilderUrl = ViewsPrefix + "FilterBuilder.ascx";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
@@ -512,7 +521,7 @@ namespace Signum.Web
             return QueryUtils.GetNiceQueryName(queryName); 
         }
 
-        protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
+        protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, bool admin, Dictionary<string, long> changeTicks)
         {
             Type type = obj.GetType();
             EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(obj.GetType()));
@@ -530,7 +539,7 @@ namespace Signum.Web
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
-            if (!Navigator.IsNavigable(type, false))
+            if (!Navigator.IsNavigable(type, admin))
                 throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(obj.GetType()));
 
             if (Navigator.IsReadOnly(type))

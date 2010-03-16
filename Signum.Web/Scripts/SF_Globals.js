@@ -232,7 +232,16 @@ function concat(array, toIndex) {
     return path;
 }
 
-function PostServer(urlController) {
+function PostServer(urlController, requestExtraJsonData) {
+    if (!empty(requestExtraJsonData)) {
+        for (var key in requestExtraJsonData) {
+            if (jQuery.isFunction(requestExtraJsonData[key]))
+                $("form").append(hiddenInput(key, requestExtraJsonData[key]()));
+            else
+                $("form").append(hiddenInput(key, requestExtraJsonData[key]));
+        }
+    }
+
     document.forms[0].action = urlController;
     document.forms[0].submit();
 }

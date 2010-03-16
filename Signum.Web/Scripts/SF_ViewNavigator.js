@@ -90,7 +90,7 @@ ViewNavigator.prototype = {
         if (empty(this.viewOptions.type))
             throw "Type must be specified to Navigator on Navigate mode";
         var self = this;
-        this.callServer(function(url) { PostServer(url); });
+        this.callServer(function(url) { PostServer(url, self.viewOptions.requestExtraJsonData); });
     },
 
     isLoaded: function() {

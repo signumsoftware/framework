@@ -271,7 +271,6 @@ FindNavigator.prototype = {
         return $.extend({
             type: $(this.pf(sfEntityTypeName)).val(),
             containerDiv: null,
-            //onOk: function(clonedElements) { return self.onCreatingOK(clonedElements, defaultValidateUrl, _viewOptions.type); },
             onCancelled: null,
             controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupView"
         }, _viewOptions);

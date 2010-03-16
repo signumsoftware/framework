@@ -33,7 +33,7 @@ namespace Signum.Web.Controllers
             Type t = Navigator.ResolveTypeFromUrlName(typeUrlName);
             
             if (id.HasValue && id.Value > 0)
-                return Navigator.View(this, Database.Retrieve(t, id.Value));
+                return Navigator.View(this, Database.Retrieve(t, id.Value), true); //Always admin
 
             IIdentifiable entity = null;
             object result = Navigator.CreateInstance(this, t);
@@ -42,7 +42,7 @@ namespace Signum.Web.Controllers
             else
                 throw new InvalidOperationException("Invalid result type for a Direct Constructor");
 
-            return Navigator.View(this, entity);
+            return Navigator.View(this, entity, true); //Always admin
         }
 
         public ActionResult Create(string sfRuntimeType, string sfOnOk, string sfOnCancel, string prefix)
