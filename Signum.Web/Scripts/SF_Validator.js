@@ -55,7 +55,10 @@ Validator.prototype = {
                     NotifyInfo(lang['error'], 2000);
                 }
                 else {
-                    $("#" + (!empty(self.valOptions.parentDiv) ? self.valOptions.parentDiv : "content")).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                    if (empty(self.valOptions.parentDiv))
+                        $("form").replaceWith(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                    else
+                        $("#" + self.valOptions.parentDiv).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
                     returnValue = true;
                     NotifyInfo(lang['saved'], 2000);
                     if (self.valOptions.onSuccess != null)

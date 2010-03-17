@@ -43,7 +43,7 @@ namespace Signum.Web
 
             ViewDataDictionary vdd = new ViewDataDictionary(tc)
             { 
-                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName((IdentifiableEntity)tc.UntypedValue)},
+                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName((ModifiableEntity)tc.UntypedValue)},
                 //{ ViewDataKeys.PopupPrefix, indexedPrefix} //Now prefix is in TypeElementContext 
             };
             helper.PropagateSFKeys(vdd);

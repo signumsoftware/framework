@@ -72,7 +72,7 @@ EBaseLine.prototype = {
 
         var implementations = impl.val().split(";");
         if (implementations.length == 1)
-            return _onTypeFound(implementations[0].id);
+            return _onTypeFound(implementations[0]);
 
         openChooser(this.options.prefix, _onTypeFound);
     },
