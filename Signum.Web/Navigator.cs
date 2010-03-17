@@ -928,8 +928,14 @@ namespace Signum.Web
 
         protected internal virtual Type ResolveType(string typeName)
         {
-            return Navigator.NamesToTypes.GetOrThrow(typeName, Resources.Type0NotFoundInTheSchema);
+            Type type = Navigator.NamesToTypes.TryGetC(typeName) ?? Type.GetType(typeName, false);
+
+            if (type == null)
+                throw new ArgumentException(Resources.Type0NotFoundInTheSchema.Formato(typeName));
+
+            return type;
         }
+
 
         protected internal virtual ChangesLog ApplyChangesAndValidate<T>(Controller controller, NameValueCollection form, ref T entity, string prefix, string prefixToIgnore) where T : Modifiable
         {
