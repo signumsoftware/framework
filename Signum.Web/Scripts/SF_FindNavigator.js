@@ -102,28 +102,31 @@ FindNavigator.prototype = {
     },
 
     requestData: function() {
-        var requestData = sfQueryUrlName + "=" + ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName);
-        requestData += qp(sfTop, empty(this.findOptions.top) ? $(this.pf(sfTop)).val() : this.findOptions.top);
-        requestData += qp(sfAllowMultiple, (this.findOptions.allowMultiple == undefined) ? $(this.pf(sfAllowMultiple)).val() : this.findOptions.allowMultiple);
+        var requestData = new Object();
+        requestData[sfQueryUrlName] = ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName);
+        requestData[sfTop] = empty(this.findOptions.top) ? $(this.pf(sfTop)).val() : this.findOptions.top;
+        requestData[sfAllowMultiple] = (this.findOptions.allowMultiple == undefined) ? $(this.pf(sfAllowMultiple)).val() : this.findOptions.allowMultiple;
+
         var canView = $(this.pf(sfView)).val();
-        requestData += qp(sfView, (!this.findOptions.view) ? false : (empty(canView) ? this.findOptions.view : canView));
-        requestData += qp(sfSearchOnLoad, this.findOptions.searchOnLoad);
+        requestData[sfView] = (!this.findOptions.view) ? false : (empty(canView) ? this.findOptions.view : canView);
+        requestData[sfSearchOnLoad] = this.findOptions.searchOnLoad;
 
         if (this.findOptions.async)
-            requestData += qp("sfAsync", this.findOptions.async);
+            requestData["sfAsync"] = this.findOptions.async;
 
         if (this.findOptions.filterMode != null)
-            requestData += qp("sfFilterMode", this.findOptions.filterMode);
+            requestData["sfFilterMode"] = this.findOptions.filterMode;
 
         if (!this.findOptions.create)
-            requestData += qp("sfCreate", this.findOptions.create);
+            requestData["sfCreate"] = this.findOptions.create;
 
-        var currentfilters = (empty(this.findOptions.filters)) ? this.serializeFilters() : this.findOptions.filters;
+        //var currentfilters = (empty(this.findOptions.filters)) ? this.serializeFiltersJson() : this.findOptions.filters;
+        var currentfilters = this.serializeFilters();
         if (!empty(currentfilters))
-            requestData += currentfilters
+            $.extend(requestData, currentfilters); //requestData += currentfilters
 
-        requestData += qp(sfPrefix, this.findOptions.prefix);
-        requestData += qp(sfSuffix, this.findOptions.suffix);
+        requestData[sfPrefix] = this.findOptions.prefix;
+        requestData[sfSuffix] = this.findOptions.suffix;
 
         return requestData;
     },
@@ -132,7 +135,7 @@ FindNavigator.prototype = {
         var result = "";
         var self = this;
         $(this.pf("tblFilters > tbody > tr")).each(function() {
-            result += self.serializeFilter(this.id.substr(this.id.lastIndexOf("_") + 1, this.id.length));
+        result = $.extend(result, self.serializeFilter(this.id.substr(this.id.lastIndexOf("_") + 1, this.id.length)));
         });
         return result;
     },
@@ -150,34 +153,9 @@ FindNavigator.prototype = {
         if (info.find().length > 0) //If it's a Lite, the value is the Id
             value = info.id() + ";" + info.runtimeType();
 
-        return qp("cn" + index, columnName) + qp("sel" + index, selector.val()) + qp("val" + index, value);
-    },
-
-    serializeFiltersJson: function() {
-        var result = "";
-        var self = this;
-        $(this.pf("tblFilters > tbody > tr")).each(function() {
-            result = $.extend(result, self.serializeFilterJson(this.id.substr(this.id.lastIndexOf("_") + 1, this.id.length)));
-        });
-        return result;
-    },
-
-    serializeFilterJson: function(index) {
-        var tds = $(this.pf("trFilter_") + index + " td");
-        var columnName = tds[0].id.substr(tds[0].id.indexOf("__") + 2, tds[0].id.length);
-        var selector = $(this.pf("ddlSelector_") + index + " option:selected");
-        var value = $(this.pf("value_") + index).val();
-
-        var valBool = $("input:checkbox[id=" + this.findOptions.prefix + "value_" + index + "]"); //it's a checkbox
-        if (valBool.length > 0) value = valBool[0].checked;
-
-        var info = RuntimeInfoFor(this.findOptions.prefix + "value_" + index);
-        if (info.find().length > 0) //If it's a Lite, the value is the Id
-            value = info.id() + ";" + info.runtimeType();
-
         var filter = new Object();
         filter["cn" + index] = columnName;
-        filter["sel" + index] =  selector.val();
+        filter["sel" + index] = selector.val();
         filter["val" + index] = value;
         return filter;
     },
@@ -228,7 +206,7 @@ FindNavigator.prototype = {
         $.ajax({
             type: "POST",
             url: "Signum/AddFilter",
-            data: "filterType=" + filterType + qp("columnName", filterName) + qp("displayName", selectedColumn.html()) + qp("index", this.newFilterRowIndex()) + qp(sfPrefix, this.findOptions.prefix),
+            data: { "filterType": filterType, "columnName": filterName, "displayName": selectedColumn.html(), "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
             async: false,
             dataType: "html",
             success: function(filterHtml) {
@@ -244,15 +222,15 @@ FindNavigator.prototype = {
         var tableFilters = $(this.pf("tblFilters") + " tbody");
         if (tableFilters.length == 0)
             return;
-        var params = "";
+        var params;
         var ahref = $('#' + idTD + ' a');
         if (ahref.length == 0)
-            params = qp("isLite", "false") + qp("sfValue", $('#' + idTD).html());
+            params = { "isLite": "false", "sfValue": $('#' + idTD).html() };
         else {
             var route = ahref.attr("href");
             var separator = route.indexOf("/");
             var lastSeparator = route.lastIndexOf("/");
-            params = qp("isLite", "true") + qp("typeUrlName", route.substring(separator + 1, lastSeparator)) + qp("sfId", route.substring(lastSeparator + 1, route.length));
+            params = { "isLite": "true", "typeUrlName": route.substring(separator + 1, lastSeparator), "sfId": route.substring(lastSeparator + 1, route.length) };
         }
         var idTDnoPrefix = idTD.substring(this.findOptions.prefix.length, idTD.length);
         var colIndex = parseInt(idTDnoPrefix.substring(idTDnoPrefix.indexOf("_") + 1, idTDnoPrefix.length)) - 1
@@ -260,7 +238,7 @@ FindNavigator.prototype = {
         $.ajax({
             type: "POST",
             url: "Signum/QuickFilter",
-            data: "sfQueryUrlName=" + $(this.pf("sfQueryUrlName")).val() + qp("sfColIndex", colIndex) + params + qp(sfPrefix, this.findOptions.prefix) + qp("index", this.newFilterRowIndex()),
+            data: $.extend(params, {"sfQueryUrlName" : $(this.pf("sfQueryUrlName")).val(), "sfColIndex": colIndex, "prefix" : this.findOptions.prefix, "index" : this.newFilterRowIndex()}),
             async: false,
             dataType: "html",
             success: function(filterHtml) {
@@ -292,8 +270,8 @@ FindNavigator.prototype = {
     },
 
     requestDataForSearchPopupCreate: function() {
-        var requestData = this.serializeFiltersJson();
-        var requestData = $.extend(requestData, { sfQueryUrlName : ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName)});
+        var requestData = this.serializeFilters();
+        var requestData = $.extend(requestData, { sfQueryUrlName: ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName) });
         return requestData;
     },
 
@@ -307,7 +285,7 @@ FindNavigator.prototype = {
             type: $(this.pf(sfEntityTypeName)).val(),
             containerDiv: null,
             onCancelled: null,
-            controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupView"
+            controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupCreate"
         }, _viewOptions);
     },
 
@@ -321,9 +299,8 @@ FindNavigator.prototype = {
             type: $(this.pf(sfEntityTypeName)).val(),
             containerDiv: null,
             requestExtraJsonData: this.requestDataForSearchPopupCreate(),
-            //onOk: function(clonedElements) { return self.onCreatingOK(clonedElements, defaultValidateUrl, _viewOptions.type); },
             onCancelled: null,
-            controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupView"
+            controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupCreate"
         }, _viewOptions);
     }
 };

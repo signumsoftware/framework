@@ -61,6 +61,34 @@ namespace Signum.Web.Controllers
             return Content(Navigator.ViewRoute(type, null));
         }
 
+        public PartialViewResult PopupCreate(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, bool? sfReadOnly, string sfUrl)
+        {
+            Type type = Navigator.ResolveType(sfRuntimeType);
+            
+            ModifiableEntity entity = null;
+            if (sfId.HasValue)
+                entity = Database.Retrieve(type, sfId.Value);
+            else
+            {
+                object result = Navigator.CreateInstance(this, type);
+                if (result.GetType() == typeof(PartialViewResult))
+                    return (PartialViewResult)result;
+                else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
+                    entity = (ModifiableEntity)result;
+                else
+                    throw new InvalidOperationException("Invalid result type for a Constructor");
+            }
+            
+            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
+                throw new InvalidOperationException("PopupCreate cannot be called for Embedded type {0}".Formato(entity.GetType()));
+
+            if (sfReadOnly.HasValue)
+                ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
+            return Navigator.PopupView(this, entity, prefix, sfUrl);
+        }
+
         public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, bool? sfReadOnly, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
@@ -264,30 +292,6 @@ namespace Signum.Web.Controllers
             else //NormalWindow
                 return Navigator.View(this, entity);
         }
-
-        //[AcceptVerbs(HttpVerbs.Post)]
-        //public ContentResult TrySavePartialStrict(string prefix, string prefixToIgnore)
-        //{
-        //    Modifiable parentEntity = Navigator.ExtractEntity(this, Request.Form, prefix);
-
-        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref parentEntity, prefix, prefixToIgnore);
-
-        //    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-
-        //    if (entity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0) && save.HasValue && save.Value)
-        //        Database.Save((IdentifiableEntity)entity);
-
-        //    string newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
-
-        //    return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
-        //        this.ModelState.ToJsonData(),
-        //        TypeContext.Separator + EntityBaseKeys.ToStr,
-        //        entity.ToString(),
-        //        TypeContext.Separator + EntityBaseKeys.ToStrLink,
-        //        newLink
-        //        ));
-        //    //return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + entity.ToString().Quote() + "}");
-        //}
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult Autocomplete(string typeName, Implementations implementations, string input, int limit)
