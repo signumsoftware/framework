@@ -246,7 +246,7 @@ namespace Signum.Web.Authorization
                 try
                 {
                     var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
-                    if (authCookie == null || !authCookie.Value.HasText())
+                    if (authCookie == null || !authCookie.Value.HasText() || authCookie.Expires < DateTime.Now)
                         return false;   //there is no cookie
 
                     string ticketText = authCookie.Value;
@@ -265,6 +265,8 @@ namespace Signum.Web.Authorization
                 }
                 catch
                 {
+                    //Remove cookie
+                    System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-1);
                     return false;
                 }
             }
