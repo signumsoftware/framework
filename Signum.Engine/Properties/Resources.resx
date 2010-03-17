@@ -496,4 +496,16 @@ WRITETEXT</value>
   <data name="AccessToQuery0IsNotAllowed" xml:space="preserve">
     <value>Access to Query '{0}' is not allowed</value>
   </data>
+  <data name="UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator" xml:space="preserve">
+    <value>UniqueMultiNulls works with only one field. Use Administrator.AddMultiColumnUniqueTriggerNullable instead.</value>
+  </data>
+  <data name="AtLessOneNullableFieldMustBePassed" xml:space="preserve">
+    <value>At less one nullable field must be passed</value>
+  </data>
+  <data name="ThereMustBeMoreThanOneFieldPassedForTheMultiColumnTrigger" xml:space="preserve">
+    <value>There must be more than one field passed for the MultiColumnTrigger</value>
+  </data>
+  <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
+    <value>Cannot insert duplicated fields {0} on {1} table</value>
+  </data>
 </root>

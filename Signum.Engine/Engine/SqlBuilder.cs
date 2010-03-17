@@ -15,6 +15,19 @@ using System.Globalization;
 
 namespace Signum.Engine
 {
+    public static class SqlUtils
+    {
+        static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpper(CultureInfo.InvariantCulture)).ToHashSet();
+
+        public static string SqlScape(this string ident)
+        {
+            if (Keywords.Contains(ident.ToUpper(CultureInfo.InvariantCulture)))
+                return "[" + ident + "]";
+
+            return ident;
+        }
+    }
+
     internal static class SqlBuilder
     {
         public readonly static SqlDbType PrimaryKeyType = SqlDbType.Int;
@@ -33,15 +46,15 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(table.SqlScape(), campos.ToString(",\r\n").Indent(2)));
         }
 
-        static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpper(CultureInfo.InvariantCulture)).ToHashSet();
+        //static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpper(CultureInfo.InvariantCulture)).ToHashSet();
 
-        public static string SqlScape(this string ident)
-        {
-            if (Keywords.Contains(ident.ToUpper(CultureInfo.InvariantCulture)))
-                return "[" + ident + "]";
+        //public static string SqlScape(this string ident)
+        //{
+        //    if (Keywords.Contains(ident.ToUpper(CultureInfo.InvariantCulture)))
+        //        return "[" + ident + "]";
 
-            return ident;
-        }
+        //    return ident;
+        //}
 
         internal static SqlPreCommand UpdateSetIdEntity(string table, List<SqlParameter> parameters, int id, long ticks)
         {
@@ -268,7 +281,7 @@ namespace Signum.Engine
 
             if (index == Index.UniqueMultiNulls)
             {
-                string field = fieldNames.Single("UniqueMultiNulls works with only one field");
+                string field = fieldNames.Single(Resources.UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator);
 
                 string triggerName = "UT_{0}_{1}".Formato(table, fieldNames.ToString("_"));
 
@@ -282,6 +295,57 @@ END".Formato(triggerName.SqlScape(), table.SqlScape(), fieldNames.Single().SqlSc
             }
 
             return null;
+        }
+
+        public static SqlPreCommand CreateMultiColumnUniqueTriggerNullable(string table, string[] nullableFields, 
+            string[] notNullableFields)
+        {
+            if (nullableFields == null)
+                nullableFields = new string[0];
+            if (notNullableFields == null)
+                notNullableFields = new string[0];
+
+            if (nullableFields.Count() == 0)
+            {
+                throw new ArgumentNullException(Resources.AtLessOneNullableFieldMustBePassed);
+            }            
+            
+            string tableName = table.SqlScape();
+
+            IEnumerable<string> allCols = nullableFields.Union(notNullableFields);
+            if (allCols.Count() < 2)
+            {
+                throw new ArgumentNullException(Resources.ThereMustBeMoreThanOneFieldPassedForTheMultiColumnTrigger);
+            }
+
+            string triggerName = "UT_{0}_{1}".Formato(tableName, allCols.Select(c => c.SqlScape()).ToString("_"));
+
+            string columns = allCols.ToString(c => "i.{0} = p.{0}".Formato(c.SqlScape()), " AND ");
+
+            string nullableColumns = nullableFields.ToString(c => 
+                "i.{0} IS NOT NULL ".Formato(c.SqlScape()), " AND ");
+
+            string trigger = 
+@"CREATE TRIGGER {0}
+   ON  {1}
+   AFTER INSERT
+AS 
+BEGIN
+    SET NOCOUNT ON
+
+    IF EXISTS(SELECT 1
+        FROM {1} p
+            JOIN INSERTED i On {2}
+        WHERE {3} 
+    ) 
+    BEGIN
+        RAISERROR ('{4}', 16, 1)
+        ROLLBACK TRANSACTION
+    END 
+END".Formato(triggerName.SqlScape(), tableName, columns, nullableColumns,
+   Resources.CannotInsertDuplicatedFields0On1Table.Formato(allCols.ToString(c => c.SqlScape(), ", "), tableName));
+
+            return new SqlPreCommandSimple(trigger);        
         }
 
         public static string IndexName(string table, params string[] fieldNames)

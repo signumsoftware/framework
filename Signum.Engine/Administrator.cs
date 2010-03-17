@@ -185,11 +185,6 @@ deallocate cur");
         #endregion
 
         #region MultiColumnIndex
-        public static void AddMultiColumnIndex<T>(bool unique, params Expression<Func<T, object>>[] columns) where T : IdentifiableEntity
-        {
-            AddMultiColumnIndexScript<T>(unique, columns).ToSimple().ExecuteNonQuery();
-        }
-
         public static SqlPreCommand AddMultiColumnIndexScript<T>(bool unique, params Expression<Func<T, object>>[] columns) where T : IdentifiableEntity
         {
             Schema schema = ConnectionScope.Current.Schema;
@@ -197,15 +192,29 @@ deallocate cur");
             return AddMultiColumnIndexScript(schema.Table<T>(), unique, columns.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray());
         }
 
-        public static void AddMultiColumnIndex(ITable table, bool unique, params IColumn[] columns)
-        {
-            AddMultiColumnIndexScript(table, unique, columns).ToSimple().ExecuteNonQuery();
-        }
-
         public static SqlPreCommand AddMultiColumnIndexScript(ITable table, bool unique, params IColumn[] columns)
         {
             return SqlBuilder.CreateIndex(unique ? Index.Unique : Index.Multiple, table.Name, columns.Select(c => c.Name).ToArray());
         }
+
+        public static SqlPreCommand AddMultiColumnUniqueTriggerNullable<T>(Expression<Func<T, object>>[] nullableColumns,
+            Expression<Func<T, object>>[] notNullableColumns) where T : IdentifiableEntity
+        {
+            Schema schema = ConnectionScope.Current.Schema;
+
+            return AddMultiColumnUniqueTriggerNullable(schema.Table<T>(),
+                nullableColumns.TryCC(col => col.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray()),
+                notNullableColumns.TryCC(col => col.Select(fun => (IColumn)schema.Field<T>(fun)).ToArray()));
+        }
+
+        public static SqlPreCommand AddMultiColumnUniqueTriggerNullable(ITable table, IColumn[] nullableColumns, 
+            IColumn[] notNullableColumns)
+        {
+            return SqlBuilder.CreateMultiColumnUniqueTriggerNullable(table.Name, 
+                nullableColumns.TryCC(col => col.Select(c => c.Name).ToArray()), 
+                notNullableColumns.TryCC(col => col.Select(c => c.Name).ToArray()));
+        }
+
         #endregion
 
         public static SqlPreCommand TotalSynchronizeScript()
