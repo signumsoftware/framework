@@ -93,6 +93,7 @@
     <Compile Include="Controllers\ModelBinders.cs" />
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="Controllers\WidgetsController.cs" />
+    <Compile Include="ValueLineBoxModel.cs" />
     <Compile Include="WebMenuItem.cs" />
     <Compile Include="EntityInfo.cs" />
     <Compile Include="JSRenderer\JsValidatorOptions.cs" />
@@ -213,6 +214,9 @@
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
     <Content Include="Scripts\jquery-1.4.min.js" />
+    <EmbeddedResource Include="Views\ValueLineBox.ascx">
+      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Scripts\SF_FindNavigator.js" />
     <EmbeddedResource Include="Scripts\SF_Lines.js" />
     <EmbeddedResource Include="Scripts\SF_Mixin.js" />
@@ -227,12 +231,12 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.es.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>

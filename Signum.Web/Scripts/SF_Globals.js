@@ -218,16 +218,30 @@ function isFalse(value) {
 function GetPathPrefixes(prefix) {
     var path = new Array();
     var pathSplit = prefix.split("_");
-    for (var i = 0; i < pathSplit.length; i++)
-        path[i] = concat(pathSplit, i);
-    return path;
+    var length = pathSplit.length;
+    for (var i = 0; i < length; i++)
+        path[i] = concat(pathSplit, i, "_");
+    for (var i = 0; i < length; i++)
+        path[length + i] = concat(pathSplit, i, "");
+    var pathNoReps = new Array();
+    var current = 0;
+    for (var i = 0; i < path.length; i++) { 
+        if ($.inArray(path[i], pathNoReps) == -1) {
+            pathNoReps[current] = path[i];
+            current++;
+        }
+    }
+    return pathNoReps;
 }
 
-function concat(array, toIndex) {
+function concat(array, toIndex, firstChar) {
     var path = "";
+    var charToWrite = firstChar;
     for (var i = 0; i <= toIndex; i++) {
-        if (array[i] != "")
-            path += "_" + array[i];
+        if (array[i] != "") {
+            path += charToWrite + array[i];
+            charToWrite = "_";
+        }
     }
     return path;
 }

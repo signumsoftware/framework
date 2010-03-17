@@ -5,18 +5,27 @@
 <%
     string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
     string prefix = Html.GlobalPrefixedName("");
+    string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
     string popupTitle = "";
     string typeNiceName = "";
-    if(Model is TypeContext)
+    if (pageTitle == null)
     {
-        TypeContext tc = (TypeContext)Model;
-        popupTitle = tc.UntypedValue.TryToString();
-        typeNiceName = tc.UntypedValue.TryCC(uv => uv.GetType()).TryCC(t => t.NiceName());
-    }
-    else
-    { 
-        popupTitle = Model.ToString();
-        typeNiceName = Model.GetType().NiceName();
+        if (Model is ValueLineBoxModel)
+            pageTitle = "Introducción Datos";
+        else
+        {
+            if (Model is TypeContext)
+            {
+                TypeContext tc = (TypeContext)Model;
+                popupTitle = tc.UntypedValue.TryToString();
+                typeNiceName = tc.UntypedValue.TryCC(uv => uv.GetType()).TryCC(t => t.NiceName());
+            }
+            else
+            {
+                popupTitle = Model.ToString();
+                typeNiceName = Model.GetType().NiceName();
+            }
+        }
     }
 %>
 <div id="<%=Html.GlobalPrefixedName("externalPopupDiv" + sufix)%>">
@@ -29,7 +38,14 @@
         <div class="closebox" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnCancel + sufix)%>"></div>
     <%} %>
     <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>');">
-        <span class="popupEntityName"><%= typeNiceName%></span><span class="popupTitle"><%= popupTitle %></span>
+        <%if (pageTitle != null)
+          { %>
+        <span class="popupEntityName"><%= pageTitle%></span>
+        <%}
+          else
+          { %>
+        <span class="popupEntityName"><%= typeNiceName%></span><span class="popupTitle"><%= popupTitle%></span>
+        <%} %>
     </div>
     <div id="<%=Html.GlobalPrefixedName("divButtonBar" + sufix)%>" class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>

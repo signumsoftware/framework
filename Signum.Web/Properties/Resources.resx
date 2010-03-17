@@ -285,4 +285,7 @@
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
     <value>Incorrect data in Session. You must reload the page to continue</value>
   </data>
+  <data name="ValueLineBoxType0DoesNotExist" xml:space="preserve">
+    <value>ValueLineBoxType {0} does not exist</value>
+  </data>
 </root>

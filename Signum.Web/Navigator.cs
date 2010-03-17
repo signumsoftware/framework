@@ -451,6 +451,7 @@ namespace Signum.Web
         public string SearchControlUrl = ViewsPrefix + "SearchControl.ascx";
         public string SearchResultsUrl = ViewsPrefix + "SearchResults.ascx";
         public string FilterBuilderUrl = ViewsPrefix + "FilterBuilder.ascx";
+        public string ValueLineBoxUrl = ViewsPrefix + "ValueLineBox.ascx";
         
         protected internal Dictionary<string, Type> URLNamesToTypes { get; private set; }
         protected internal Dictionary<Type, string> TypesToURLNames { get; private set; }
@@ -475,6 +476,8 @@ namespace Signum.Web
 
         public void Start()
         {
+            EntitySettings.Add(typeof(ValueLineBoxModel), new EntitySettings(EntityType.Default) { PartialViewName = _ => ValueLineBoxUrl });
+
             TypesToURLNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UrlName ?? Reflector.CleanTypeName(kvp.Key));
             URLNamesToTypes = TypesToURLNames.Inverse();
 
