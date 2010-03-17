@@ -70,7 +70,7 @@ EBaseLine.prototype = {
         if (impl.length == 0)
             return _onTypeFound(this.staticInfo().staticType());
 
-        var implementations = $(implSelector + " :button");
+        var implementations = impl.val().split(";");
         if (implementations.length == 1)
             return _onTypeFound(implementations[0].id);
 
