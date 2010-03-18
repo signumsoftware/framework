@@ -198,9 +198,9 @@ namespace Signum.Web
             return Manager.QueryCount(options);
         }
 
-        public static PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
+        public static PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix, string suffix)
         {
-            return Manager.Search(controller, findOptions, top, prefix);
+            return Manager.Search(controller, findOptions, top, prefix, suffix);
         }
 
         internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
@@ -807,7 +807,7 @@ namespace Signum.Web
             return GetNiceQueryName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix)
+        protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix, string suffix)
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
             Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
@@ -821,6 +821,7 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.Results] = queryResult;
             controller.ViewData[ViewDataKeys.AllowMultiple] = findOptions.AllowMultiple;
             controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+            controller.ViewData[ViewDataKeys.PopupSufix] = suffix ?? "";
             controller.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
 
             if (queryResult != null && queryResult.Rows != null && queryResult.Rows.Length > 0 && queryResult.VisibleColumns.Count() > 0)

@@ -92,7 +92,7 @@ namespace Signum.Web
 
             Column entityColumn = queryDescription.StaticColumns.SingleOrDefault(a => a.IsEntity);
             Type entitiesType = entityColumn != null ? Reflector.ExtractLite(entityColumn.Type) : null;
-
+             
             List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
 
             helper.ViewData[ViewDataKeys.PopupPrefix] = prefix;
@@ -133,7 +133,7 @@ namespace Signum.Web
            return "<a class=\"count-search\" onclick=\"javascript:OpenFinder({0});\">{1}</a>".Formato(foptions.ToJS(), count);
         }
 
-        public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string prefix, FilterOperation? filterOperation, object value)
+        public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string prefix, string suffix, FilterOperation? filterOperation, object value)
         {
            // Type searchEntityType = Navigator.NameToType[entityTypeName];
 
@@ -158,14 +158,14 @@ namespace Signum.Web
             FilterType filterType = QueryUtils.GetFilterType(columnType);
             List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
 
-            sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(prefix + "trFilter_" + index.ToString()));
+            sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(prefix + "trFilter_" + index.ToString() + suffix));
             
-            sb.AppendLine("<td id='{0}' name='{0}'>".Formato(prefix + "td" + index.ToString() + "__" + columnName));
+            sb.AppendLine("<td id='{0}' name='{0}'>".Formato(prefix + "td" + index.ToString() + suffix + "__" + columnName));
             sb.AppendLine(displayName);
             sb.AppendLine("</td>");
             
             sb.AppendLine("<td>");
-            sb.AppendLine("<select id='{0}' name='{0}'>".Formato(prefix + "ddlSelector_" + index.ToString()));
+            sb.AppendLine("<select id='{0}' name='{0}'>".Formato(prefix + "ddlSelector_" + index.ToString() + suffix));
             for (int j=0; j<possibleOperations.Count; j++)
                 sb.AppendLine("<option value='{0}'{1}>{2}</option>"
                     .Formato(possibleOperations[j], 
@@ -175,18 +175,18 @@ namespace Signum.Web
             sb.AppendLine("</td>");
             
             sb.Append("<td>");
-            sb.Append(PrintValueField(CreateHtmlHelper(controller), filterType, columnType, prefix + "value_" + index.ToString(), value, columnName));
+            sb.Append(PrintValueField(CreateHtmlHelper(controller), filterType, columnType, prefix + "value_" + index.ToString() + suffix, value, columnName));
             sb.Append("</td>");
             
             sb.AppendLine("<td>");
-            sb.AppendLine("<input type='button' id='{0}' name='{0}' value='X' onclick=\"DeleteFilter('{1}','{2}');\" />".Formato(prefix + "btnDelete_" + index, prefix, index));
+            sb.AppendLine("<input type='button' id='{0}' name='{0}' value='X' onclick=\"DeleteFilter('{1}','{2}','{3}');\" />".Formato(prefix + "btnDelete_" + index + suffix, prefix, suffix, index));
             sb.AppendLine("</td>");
             
             sb.AppendLine("</tr>");
             return sb.ToString();
         }
 
-        public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix)
+        public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix, string suffix)
         {
             object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
@@ -194,7 +194,7 @@ namespace Signum.Web
             FilterOption fo = new FilterOption() { Token = token, ColumnName = null, Operation = FilterOperation.EqualTo, Value = value };
             Type type = Reflector.ExtractLite(fo.Token.Type) ?? fo.Token.Type;
             
-            return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, FilterOperation.EqualTo, value);
+            return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, suffix, FilterOperation.EqualTo, value);
         }
 
 
@@ -205,15 +205,17 @@ namespace Signum.Web
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
             List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
 
-            sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("trFilter_" + index.ToString())));
-            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("td" + index.ToString() + "__" + filterOptions.Token.FullKey())));
+            string sufix = (string)helper.ViewData[ViewDataKeys.PopupSufix];
+
+            sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("trFilter_" + index.ToString() + sufix)));
+            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("td" + index.ToString() + "__" + filterOptions.Token.FullKey() + sufix)));
             sb.Append(filterOptions.Token.FullKey());
             sb.Append("</td>\n");
 
             sb.Append("<td>\n");
             sb.Append("<select{0} id=\"{1}\" name=\"{1}\">\n"
                 .Formato(filterOptions.Frozen ? " disabled=\"disabled\"" : "",
-                        helper.GlobalName("ddlSelector_" + index.ToString())));
+                        helper.GlobalName("ddlSelector_" + index.ToString() + sufix)));
             for (int j = 0; j < possibleOperations.Count; j++)
                 sb.Append("<option value=\"{0}\" {1}>{2}</option>\n"
                     .Formato(
@@ -225,7 +227,7 @@ namespace Signum.Web
             sb.Append("</td>\n");
 
             sb.Append("<td>\n");
-            string txtId = helper.GlobalName("value_" + index.ToString());
+            string txtId = helper.GlobalName("value_" + index.ToString() + sufix);
             string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
             if (filterOptions.Frozen)
                 sb.Append("<input type=\"text\" id=\"{0}\" name=\"{0}\" value=\"{1}\" {2}/>\n".Formato(txtId, txtValue, filterOptions.Frozen ? " readonly=\"readonly\"" : ""));
@@ -235,7 +237,7 @@ namespace Signum.Web
 
             sb.Append("<td>\n");
             if (!filterOptions.Frozen)
-                sb.Append(helper.Button(helper.GlobalName("btnDelete_" + index), "X", "DeleteFilter('{0}','{1}');".Formato(helper.ViewData[ViewDataKeys.PopupPrefix] ?? "", index), "", new Dictionary<string, object>()));
+                sb.Append(helper.Button(helper.GlobalName("btnDelete_" + index + sufix), "X", "DeleteFilter('{0}','{1}','{2}');".Formato(helper.ViewData[ViewDataKeys.PopupPrefix] ?? "", sufix ?? "", index), "", new Dictionary<string, object>()));
             sb.Append("</td>\n");
 
             sb.Append("</tr>\n");

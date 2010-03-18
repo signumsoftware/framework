@@ -26,7 +26,7 @@ FindNavigator.prototype = {
     },
 
     tempDivId: function() {
-        return this.findOptions.prefix + "Temp";
+        return this.findOptions.prefix + "Temp" + this.findOptions.suffix;
     },
 
     openFinder: function() {
@@ -50,7 +50,7 @@ FindNavigator.prototype = {
     selectedItems: function() {
         log("FindNavigator selectedItems");
         var items = new Array();
-        var selected = $("input:radio[name=" + this.findOptions.prefix + "rowSelection]:checked, input:checkbox[name^=" + this.findOptions.prefix + "rowSelection]:checked");
+        var selected = $("input:radio[name=" + this.findOptions.prefix + "rowSelection" + this.findOptions.suffix + "]:checked, input:checkbox[name^=" + this.findOptions.prefix + "rowSelection]:checked").filter("[name$=" + this.findOptions.suffix + "]");
         if (selected.length == 0)
             return items;
 
@@ -63,7 +63,7 @@ FindNavigator.prototype = {
             item.id = currentItem.substring(0, __index);
             item.type = currentItem.substring(__index + 2, __index2);
             item.toStr = currentItem.substring(__index2 + 2, currentItem.length);
-            item.link = $('#' + this.id).parent().next('#' + self.findOptions.prefix + 'tdResults').children('a').attr('href');
+            item.link = $('#' + this.id).parent().next('#' + self.findOptions.prefix + 'tdResults' + self.findOptions.suffix).children('a').attr('href');
             items[i] = item;
         });
 
@@ -85,7 +85,7 @@ FindNavigator.prototype = {
     search: function() {
         //	var async = concurrentSearch[prefix + "btnSearch"];
         //	if (async) concurrentSearch[prefix + "btnSearch"]=false;
-        var btnSearch = $(this.pf("btnSearch"));
+    var btnSearch = $(this.pf("btnSearch") + this.findOptions.suffix);
         btnSearch.toggleClass('loading').val(lang['searching']);
         var self = this;
         $.ajax({
@@ -95,7 +95,7 @@ FindNavigator.prototype = {
             async: this.findOptions.async,
             dataType: "html",
             success: function(resultsHtml) {
-                $('#' + self.findOptions.prefix + "divResults").html(resultsHtml);
+                $('#' + self.findOptions.prefix + "divResults" + self.findOptions.suffix).html(resultsHtml);
             }
         });
         btnSearch.val(lang['buscar']).toggleClass('loading');
@@ -103,11 +103,11 @@ FindNavigator.prototype = {
 
     requestData: function() {
         var requestData = new Object();
-        requestData[sfQueryUrlName] = ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName);
-        requestData[sfTop] = empty(this.findOptions.top) ? $(this.pf(sfTop)).val() : this.findOptions.top;
-        requestData[sfAllowMultiple] = (this.findOptions.allowMultiple == undefined) ? $(this.pf(sfAllowMultiple)).val() : this.findOptions.allowMultiple;
+        requestData[sfQueryUrlName] = ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName") + this.findOptions.suffix).val() : this.findOptions.queryUrlName);
+        requestData[sfTop] = empty(this.findOptions.top) ? $(this.pf(sfTop) + this.findOptions.suffix).val() : this.findOptions.top;
+        requestData[sfAllowMultiple] = (this.findOptions.allowMultiple == undefined) ? $(this.pf(sfAllowMultiple) + this.findOptions.suffix).val() : this.findOptions.allowMultiple;
 
-        var canView = $(this.pf(sfView)).val();
+        var canView = $(this.pf(sfView) + this.findOptions.suffix).val();
         requestData[sfView] = (!this.findOptions.view) ? false : (empty(canView) ? this.findOptions.view : canView);
         requestData[sfSearchOnLoad] = this.findOptions.searchOnLoad;
 
@@ -134,22 +134,22 @@ FindNavigator.prototype = {
     serializeFilters: function() {
         var result = "";
         var self = this;
-        $(this.pf("tblFilters > tbody > tr")).each(function() {
-        result = $.extend(result, self.serializeFilter(this.id.substr(this.id.lastIndexOf("_") + 1, this.id.length)));
+        $(this.pf("tblFilters") + this.findOptions.suffix + " > tbody > tr").each(function() {
+        result = $.extend(result, self.serializeFilter(this.id.substring(this.id.lastIndexOf("_") + 1, this.id.length-self.findOptions.suffix.length)));
         });
         return result;
     },
 
     serializeFilter: function(index) {
-        var tds = $(this.pf("trFilter_") + index + " td");
-        var columnName = tds[0].id.substr(tds[0].id.indexOf("__") + 2, tds[0].id.length);
-        var selector = $(this.pf("ddlSelector_") + index + " option:selected");
-        var value = $(this.pf("value_") + index).val();
+        var tds = $(this.pf("trFilter_") + index + this.findOptions.suffix + " td");
+        var columnName = tds[0].id.substring(tds[0].id.indexOf("__") + 2, tds[0].id.length - this.findOptions.suffix.length);
+        var selector = $(this.pf("ddlSelector_") + index + this.findOptions.suffix + " option:selected");
+        var value = $(this.pf("value_") + index + this.findOptions.suffix).val();
 
-        var valBool = $("input:checkbox[id=" + this.findOptions.prefix + "value_" + index + "]"); //it's a checkbox
+        var valBool = $("input:checkbox[id=" + this.findOptions.prefix + "value_" + index + this.findOptions.suffix + "]"); //it's a checkbox
         if (valBool.length > 0) value = valBool[0].checked;
 
-        var info = RuntimeInfoFor(this.findOptions.prefix + "value_" + index);
+        var info = RuntimeInfoFor(this.findOptions.prefix + "value_" + index + this.findOptions.suffix);
         if (info.find().length > 0) //If it's a Lite, the value is the Id
             value = info.id() + ";" + info.runtimeType();
 
@@ -182,7 +182,7 @@ FindNavigator.prototype = {
 
     newFilterRowIndex: function() {
         log("FindNavigator newFilterRowIndex");
-        var lastRow = $(this.pf("tblFilters") + " tbody tr:last");
+        var lastRow = $(this.pf("tblFilters") + this.findOptions.suffix + " tbody tr:last");
         var lastRowIndex = -1;
         if (lastRow.length == 1)
             lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
@@ -191,10 +191,10 @@ FindNavigator.prototype = {
 
     addFilter: function() {
         log("FindNavigator addFilter");
-        var selectedColumn = $(this.pf("ddlNewFilters") + " option:selected");
+        var selectedColumn = $(this.pf("ddlNewFilters") + this.findOptions.suffix + " option:selected");
         if (selectedColumn.length == 0) return;
 
-        var tableFilters = $(this.pf("tblFilters") + " tbody");
+        var tableFilters = $(this.pf("tblFilters") + this.findOptions.suffix + " tbody");
         if (tableFilters.length == 0)
             throw "Adding filters is not allowed";
 
@@ -206,12 +206,12 @@ FindNavigator.prototype = {
         $.ajax({
             type: "POST",
             url: "Signum/AddFilter",
-            data: { "filterType": filterType, "columnName": filterName, "displayName": selectedColumn.html(), "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix },
+            data: { "filterType": filterType, "columnName": filterName, "displayName": selectedColumn.html(), "index": this.newFilterRowIndex(), "prefix": this.findOptions.prefix, "suffix": this.findOptions.suffix },
             async: false,
             dataType: "html",
             success: function(filterHtml) {
-                $(self.pf("filters-list .explanation")).hide();
-                $(self.pf("filters-list table")).show('fast');
+                $(self.pf("filters-list" + self.findOptions.suffix + " .explanation")).hide();
+                $(self.pf("filters-list" + self.findOptions.suffix + " table")).show('fast');
                 tableFilters.append(filterHtml);
             }
         });
@@ -219,7 +219,7 @@ FindNavigator.prototype = {
 
     quickFilter: function(idTD) {
         log("FindNavigator quickFilter");
-        var tableFilters = $(this.pf("tblFilters") + " tbody");
+        var tableFilters = $(this.pf("tblFilters") + this.findOptions.suffix + " tbody");
         if (tableFilters.length == 0)
             return;
         var params;
@@ -238,12 +238,12 @@ FindNavigator.prototype = {
         $.ajax({
             type: "POST",
             url: "Signum/QuickFilter",
-            data: $.extend(params, {"sfQueryUrlName" : $(this.pf("sfQueryUrlName")).val(), "sfColIndex": colIndex, "prefix" : this.findOptions.prefix, "index" : this.newFilterRowIndex()}),
+            data: $.extend(params, { "sfQueryUrlName": $(this.pf("sfQueryUrlName") + this.findOptions.suffix).val(), "sfColIndex": colIndex, "prefix": this.findOptions.prefix, "suffix": this.findOptions.suffix, "index": this.newFilterRowIndex() }),
             async: false,
             dataType: "html",
             success: function(filterHtml) {
-                $(self.pf("filters-list .explanation")).hide();
-                $(self.pf("filters-list table")).show('fast');
+                $(self.pf("filters-list") + self.findOptions.suffix + " .explanation").hide();
+                $(self.pf("filters-list") + self.findOptions.suffix + " table").show('fast');
                 tableFilters.append(filterHtml);
             }
         });
@@ -251,27 +251,27 @@ FindNavigator.prototype = {
 
     deleteFilter: function(index) {
         log("FindNavigator deleteFilter");
-        var tr = $(this.pf("trFilter_" + index))
+        var tr = $(this.pf("trFilter_" + index) + this.findOptions.suffix)
         if (tr.length == 0) return;
 
-        if ($(this.pf("trFilter_" + index) + " select[disabled]").length == 0) tr.remove();
-        if ($(this.pf("tblFilters tbody tr")).length == 0) {
-            $(this.pf("filters-list .explanation")).show();
-            $(this.pf("filters-list table")).hide('fast');
+        if ($(this.pf("trFilter_" + index) + this.findOptions.suffix + " select[disabled]").length == 0) tr.remove();
+        if ($(this.pf("tblFilters") + this.findOptions.suffix + " tbody tr").length == 0) {
+            $(this.pf("filters-list") + this.findOptions.suffix + " .explanation").show();
+            $(this.pf("filters-list") + this.findOptions.suffix + " table").hide('fast');
         }
     },
 
     clearAllFilters: function() {
         log("FindNavigator clearAllFilters");
         var self = this;
-        $(this.pf("tblFilters > tbody > tr")).each(function(index) {
-            self.deleteFilter(this.id.substr(this.id.lastIndexOf("_") + 1, this.id.length));
+        $(this.pf("tblFilters") + this.findOptions.suffix + " > tbody > tr").each(function(index) {
+            self.deleteFilter(this.id.substring(this.id.lastIndexOf("_") + 1, this.id.length - self.findOptions.suffix.length));
         });
     },
 
     requestDataForSearchPopupCreate: function() {
         var requestData = this.serializeFilters();
-        var requestData = $.extend(requestData, { sfQueryUrlName: ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName")).val() : this.findOptions.queryUrlName) });
+        var requestData = $.extend(requestData, { sfQueryUrlName: ((empty(this.findOptions.queryUrlName)) ? $(this.pf("sfQueryUrlName") + this.findOptions.suffix).val() : this.findOptions.queryUrlName) });
         return requestData;
     },
 
@@ -282,7 +282,7 @@ FindNavigator.prototype = {
         _viewOptions.prefix = _viewOptions.prefix + "New";
         var self = this;
         return $.extend({
-            type: $(this.pf(sfEntityTypeName)).val(),
+            type: $(this.pf(sfEntityTypeName) + this.findOptions.suffix).val(),
             containerDiv: null,
             onCancelled: null,
             controllerUrl: empty(this.findOptions.prefix) ? "Signum/Create" : "Signum/PopupCreate"
@@ -296,7 +296,7 @@ FindNavigator.prototype = {
         _viewOptions.prefix = _viewOptions.prefix + "New";
         var self = this;
         return $.extend({
-            type: $(this.pf(sfEntityTypeName)).val(),
+            type: $(this.pf(sfEntityTypeName) + this.findOptions.suffix).val(),
             containerDiv: null,
             requestExtraJsonData: this.requestDataForSearchPopupCreate(),
             onCancelled: null,
@@ -321,20 +321,20 @@ function SplitSelectedIds(_findOptions) {
     return new FindNavigator(_findOptions).splitSelectedIds();
 }
 
-function AddFilter(prefix) {
-    new FindNavigator({ prefix: prefix }).addFilter();
+function AddFilter(prefix, suffix) {
+    new FindNavigator({ prefix: prefix, suffix: suffix }).addFilter();
 }
 
-function QuickFilter(prefix, idTd) {
-    new FindNavigator({ prefix: prefix }).quickFilter(idTd);
+function QuickFilter(prefix, suffix, idTd) {
+    new FindNavigator({ prefix: prefix, suffix: suffix }).quickFilter(idTd);
 }
 
-function DeleteFilter(prefix, index) {
-    new FindNavigator({ prefix: prefix }).deleteFilter(index);
+function DeleteFilter(prefix, suffix, index) {
+    new FindNavigator({ prefix: prefix, suffix: suffix }).deleteFilter(index);
 }
 
-function ClearAllFilters(prefix) {
-    new FindNavigator({ prefix: prefix }).clearAllFilters();
+function ClearAllFilters(prefix, suffix) {
+    new FindNavigator({ prefix: prefix, suffix: suffix }).clearAllFilters();
 }
 
 function SearchCreate(viewOptions){

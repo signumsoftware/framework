@@ -316,22 +316,22 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(FindOptions findOptions, int? sfTop, string prefix)
+        public PartialViewResult Search(FindOptions findOptions, int? sfTop, string prefix, string sfSuffix)
         {
-            return Navigator.Search(this, findOptions, sfTop, prefix);
+            return Navigator.Search(this, findOptions, sfTop, prefix, sfSuffix);
         }
         
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string prefix)
+        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string prefix, string suffix)
         {
-            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, prefix, null, null));
+            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, prefix, suffix, null, null));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult QuickFilter(string sfQueryUrlName, bool isLite, string typeUrlName, int? sfId, string sfValue, int sfColIndex, int index, string prefix)
+        public ContentResult QuickFilter(string sfQueryUrlName, bool isLite, string typeUrlName, int? sfId, string sfValue, int sfColIndex, int index, string prefix, string suffix)
         {
             object value = (isLite) ? (object)Lite.Create(Navigator.ResolveTypeFromUrlName(typeUrlName), sfId.Value) : (object)sfValue;
-            return Content(SearchControlHelper.QuickFilter(this, sfQueryUrlName, sfColIndex, index, value, prefix));
+            return Content(SearchControlHelper.QuickFilter(this, sfQueryUrlName, sfColIndex, index, value, prefix, suffix));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

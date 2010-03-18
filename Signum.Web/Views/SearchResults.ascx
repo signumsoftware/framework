@@ -6,7 +6,7 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 
-<%
+<% string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
 //TODO Anto: Habilitar quickfilters: Controlar campos no filtrables  (con este método se pueden crear)
 //"<script type=\"text/javascript\">" + 
 //    "$(document).ready(function() {" + 
@@ -26,7 +26,7 @@
         colVisibility.Add(i, queryResult.Columns[i].Visible);
     }
  %>
-<table id="<%=Html.GlobalName("tblResults")%>" class="tblResults">
+<table id="<%=Html.GlobalName("tblResults" + sufix)%>" class="tblResults">
     <thead>
         <tr>
             
@@ -54,7 +54,7 @@
         for (int row=0; row<queryResult.Rows.Length; row++)
         {
             %>
-            <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=Html.GlobalName("trResults_" + row.ToString())%>" name="<%=Html.GlobalName("trResults_" + row.ToString())%>">
+            <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=Html.GlobalName("trResults_" + row.ToString() + sufix)%>" name="<%=Html.GlobalName("trResults_" + row.ToString() + sufix)%>">
                 <% Lite entityField = null;
                    if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
                        entityField = (Lite)queryResult.Rows[row][EntityColumnIndex.Value];
@@ -62,7 +62,7 @@
                        if (allowMultiple.HasValue)
                        {
                 %>
-                <td class="<%=Html.GlobalName("tdRowSelection")%>">
+                <td class="<%=Html.GlobalName("tdRowSelection" + sufix)%>">
                     <%
                         if (entityField != null)
                         {
@@ -70,11 +70,11 @@
                     if (allowMultiple.Value)
                     { 
                         %>
-                        <input type="checkbox" name="<%=Html.GlobalName("rowSelection_" + row.ToString())%>" id="<%=Html.GlobalName("rowSelection_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="checkbox" name="<%=Html.GlobalName("rowSelection_" + row.ToString() + sufix)%>" id="<%=Html.GlobalName("rowSelection_" + row.ToString() + sufix)%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                     <%}
                     else
                     { %>
-                        <input type="radio" name="<%=Html.GlobalName("rowSelection")%>" id="<%=Html.GlobalName("radio_" + row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="radio" name="<%=Html.GlobalName("rowSelection" + sufix)%>" id="<%=Html.GlobalName("radio_" + row.ToString() + sufix)%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                         <%
                     }
                         }
@@ -83,7 +83,7 @@
                  <%} %>
                 <% if (entityField != null && (bool)ViewData[ViewDataKeys.View])
                    { %>
-                   <td id="<%=Html.GlobalName("tdResults")%>">
+                   <td id="<%=Html.GlobalName("tdResults" + sufix)%>">
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Ver">Ver</a>
                 </td>
                 <% } %>
@@ -93,7 +93,7 @@
                     if (colVisibility[col])
                     {
                         %>
-                        <td id="<%=Html.GlobalName("row"+row+"td_" + col.ToString())%>"><%formatters[col](Html, queryResult.Rows[row][col]);%></td>
+                        <td id="<%=Html.GlobalName("row"+row+"td_" + col.ToString() + sufix)%>"><%formatters[col](Html, queryResult.Rows[row][col]);%></td>
                         <%
                     }
                 }
