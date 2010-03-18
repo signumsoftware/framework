@@ -56,7 +56,7 @@ Validator.prototype = {
                 }
                 else {
                     if (empty(self.valOptions.parentDiv))
-                        $("form").replaceWith(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
+                        $("#content").html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
                     else
                         $("#" + self.valOptions.parentDiv).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
                     returnValue = true;

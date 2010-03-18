@@ -13,7 +13,11 @@
         Response.Write(e.Value.TopText + "<div class='clearall'></div>");
     }
 	        Html.WriteEntityInfo(e, f => f.Related);
-            switch (e.Value.BoxType)
+        %>
+        <div style="display:none">
+            <% Html.ValueLine(e, f => f.BoxType);%>
+          </div>
+          <%  switch (e.Value.BoxType)
             {
                 case ValueLineBoxType.Boolean:
                     Html.ValueLine(e, f => f.BoolValue, vl => vl.LabelText = e.Value.FieldName);
