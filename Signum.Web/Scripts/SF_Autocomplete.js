@@ -107,7 +107,8 @@ function AutocompleteOnOk(newValue, newIdAndType, ddlName, extendedControlName, 
 	var id = newIdAndType.substr(0, newIdAndType.indexOf("_"));
 	$('#' + extendedControlName).val(newValue);
 	$('#' + extendedControlName)[0].focus();
-	$('#' + entityIdFieldName).val(id);
+	if (!(entityIdFieldName == "" || entityIdFieldName == undefined || entityIdFieldName == null))
+        $('#' + entityIdFieldName).val(id);
 	$('#' + ddlName).hide();
 	//TODO: Borrar campo _sfEntity
 	AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, true);
