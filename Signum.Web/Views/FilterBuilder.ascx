@@ -52,7 +52,7 @@
                 <% for (int i=0; i<filterOptions.Count; i++)
                 {
                     FilterOption filter = filterOptions[i];
-                    Html.NewFilter(filter, i);            
+                    Html.NewFilter(((FindOptions)ViewData[ViewDataKeys.FindOptions]).QueryName, filter, i);            
                 } 
                 %>
             </tbody>
