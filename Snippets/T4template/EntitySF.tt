@@ -14,7 +14,7 @@
 using (var e = Html.TypeContext<<#= entityType.Name #>>()) 
 {
 <#
-string[] commonProperties = {"Ticks","Id","ToStr","IsNew","SelfModified","ToStringMethod","Error","Item","Modified","AllowChange"};
+string[] commonProperties = {"Ticks","Id", "IdOrNull", "ToStr","IsNew","SelfModified","ToStringMethod","Error","Item","Modified","AllowChange"};
 PropertyInfo[] properties = entityType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 foreach(PropertyInfo pi in properties) {
 if (Array.IndexOf(commonProperties,pi.Name)>-1)
@@ -23,7 +23,7 @@ if (pi.PropertyType.IsValueType || pi.PropertyType == typeof(string)){
 #>
 	Html.ValueLine(e, f => f.<#= pi.Name #>);
 <#} 
-else if (typeof(IList).IsAssignableFrom(entityType)) {
+else if (typeof(IList).IsAssignableFrom(pi.PropertyType)) {
 #>
 	Html.EntityList(e, f => f.<#= pi.Name #>);
 <#}
