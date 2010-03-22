@@ -196,10 +196,20 @@ namespace Signum.Web
             }
             return sb.ToString();
         }
+
+        public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string extendedControlName,
+                                                  string entityTypeName, string implementations, string entityIdFieldName,
+                                                  string controllerUrl, int numCharacters, int numResults, int delayMilliseconds,
+                                                  string AutoKeyDowned)
+        {
+            return AutoCompleteExtender(html, ddlName, extendedControlName, entityTypeName, implementations, entityIdFieldName,
+                controllerUrl, numCharacters, numResults, delayMilliseconds, AutoKeyDowned, string.Empty);
+        }
+
         public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string extendedControlName, 
                                                   string entityTypeName, string implementations, string entityIdFieldName,
-                                                  string controllerUrl, int numCharacters, int numResults, int delayMiliseconds, 
-                                                  string AutoKeyDowned)
+                                                  string controllerUrl, int numCharacters, int numResults, int delayMilliseconds, 
+                                                  string AutoKeyDowned, string extraJsonData)
         {                   
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(html.Div(
@@ -221,8 +231,9 @@ namespace Signum.Web
                                                               "','" + controllerUrl +
                                                               "'," + numCharacters +
                                                               "," + numResults +
-                                                              "," + delayMiliseconds +
+                                                              "," + delayMilliseconds +
                                                               "," + AutoKeyDowned +
+                                                              "," + extraJsonData +
                                                               ");" +
                                                               "</script>"
                                                               );

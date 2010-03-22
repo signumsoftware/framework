@@ -3,10 +3,10 @@ var timerID;
 
 $(function(){$('#form input[type=text]').keypress(function(e){return e.which!=13})})
 
-function CreateAutocomplete(ddlName, extendedControlName, entityTypeName, implementations, entityIdFieldName, controllerUrl, numCharacters, numResults, delay, AutoKeyDowned) {
+function CreateAutocomplete(ddlName, extendedControlName, entityTypeName, implementations, entityIdFieldName, controllerUrl, numCharacters, numResults, delay, AutoKeyDowned, extraJsonData) {
 	$('#' + extendedControlName).bind("keyup", function (e) {
 		clearTimeout(timerID);
-		timerID = setTimeout("Autocomplete('" + ddlName + "','" + extendedControlName + "','" + entityTypeName + "','" + implementations + "','" + entityIdFieldName + "','" + controllerUrl + "'," + numCharacters + "," + numResults + "," + ((e.which) ? e.which : e.keyCode) + ")", delay);
+		timerID = setTimeout("Autocomplete('" + ddlName + "','" + extendedControlName + "','" + entityTypeName + "','" + implementations + "','" + entityIdFieldName + "','" + controllerUrl + "'," + numCharacters + "," + numResults + "," + ((e.which) ? e.which : e.keyCode) + "," + extraJsonData + ")", delay);
 	});
 	$('#' + extendedControlName).bind("keydown", function (e) {
 		clearTimeout(timerID);
@@ -17,7 +17,17 @@ function CreateAutocomplete(ddlName, extendedControlName, entityTypeName, implem
 	});
 }
 
-function Autocomplete(ddlName, extendedControlName, entityTypeName, implementations, entityIdFieldName, controllerUrl, numCharacters, numResults, key) {
+function Autocomplete(
+    ddlName,
+    extendedControlName,
+    entityTypeName,
+    implementations,
+    entityIdFieldName,
+    controllerUrl,
+    numCharacters,
+    numResults,
+    key,
+    extraJsonData) {
 	if (key == 38) {
 		return;
 	} //Arrow up
@@ -33,32 +43,38 @@ function Autocomplete(ddlName, extendedControlName, entityTypeName, implementati
 		return;
 	}
 
+    var params = {typeName: entityTypeName,
+		        implementations: implementations,
+		        input: input,
+		        limit: numResults};
+    
+    params = $.extend(params, eval(extraJsonData));		        
+	
 	$.ajax({
 		type: "POST",
 		url: controllerUrl,
 		async: false,
-		data: "typeName=" + entityTypeName + "&implementations=" + implementations + "&input=" + input + "&limit=" + numResults,
-		success: function (result) {
-			var txtbox = $('#' + extendedControlName);
-			currentText = txtbox.val();
-			eval('var possibleResults=' + result);
-
+		dataType: "json",
+		data: params,
+		success: function (possibleResults) {
+			var $txtbox = $('#' + extendedControlName);
+			currentText = $txtbox.val();
 			var optionStart = "<div id=\"OptOPTVALUEID\" class=\"ddlAuto\" onmouseover=optionOnMouseOver('" + extendedControlName + "',this); >";
 			var optionEnd = "</div>";
 			var resultList = "";
 			for (var id in possibleResults) {
 				resultList += optionStart.replace(/OPTVALUEID/, ddlName + id) + possibleResults[id] + optionEnd;
 			}
-			var ddl = $('#' + ddlName);
-			ddl.html(resultList);
+			var $ddl = $('#' + ddlName);
+			$ddl.html(resultList);
 
-			//var offset = txtbox.offset();
-			var offset = txtbox.position();
-			ddl[0].style.left = offset.left + "px";
-			ddl[0].style.top = offset.top + txtbox.height() + "px";
-			ddl.width(txtbox.width());
-
-			ddl[0].style.display = "block";
+			var offset = $txtbox.position();
+			$ddl.css({
+			    left: offset.left,
+			    top: offset.top + $txtbox.height(),
+			    width: $txtbox.width(),
+			    display: "block"
+			});
 		}
 	});
 }
