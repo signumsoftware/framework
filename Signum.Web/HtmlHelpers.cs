@@ -233,8 +233,8 @@ namespace Signum.Web
                                                               "," + numResults +
                                                               "," + delayMilliseconds +
                                                               "," + AutoKeyDowned +
-                                                              "," + extraJsonData +
-                                                              ");" +
+                                                              (extraJsonData.HasText() ? ("," + extraJsonData) : "")
+                                                              + ");" +
                                                               "</script>"
                                                               );
             return sb.ToString();
