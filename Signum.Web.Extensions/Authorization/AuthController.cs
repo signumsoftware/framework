@@ -189,6 +189,11 @@ namespace Signum.Web.Authorization
 
         public ActionResult Login()
         {
+            //We store the url referrer so that we can go back when logged in
+            string referrer = System.Web.HttpContext.Current.Request.UrlReferrer.TryCC(r=>r.AbsolutePath);
+            string current = System.Web.HttpContext.Current.Request.RawUrl;
+            if (referrer != null && referrer != current)
+                ViewData["referrer"] = System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
             return View(AuthClient.LoginUrl);
         }
 
@@ -229,7 +234,11 @@ namespace Signum.Web.Authorization
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
             else
-                return RedirectToAction("Index", "Home");
+                if (System.Web.HttpContext.Current.Request.Params["referrer"] != null)
+                {
+                    return Redirect(System.Web.HttpContext.Current.Request.Params["referrer"]);
+                }
+            return RedirectToAction("Index", "Home");
         }
 
         ViewResult LoginError(string key, string error)
@@ -266,7 +275,12 @@ namespace Signum.Web.Authorization
                 catch
                 {
                     //Remove cookie
-                    System.Web.HttpContext.Current.Request.Cookies.Remove(AuthClient.CookieName);
+                    HttpCookie cookie = new HttpCookie(AuthClient.CookieName)
+                    {
+                        Expires = DateTime.Now.AddDays(-1) // or any other time in the past
+                    };
+                    System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
+
                     return false;
                 }
             }

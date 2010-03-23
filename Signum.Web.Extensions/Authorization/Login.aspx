@@ -61,6 +61,7 @@
                 </td>
             </tr>
         </table>
+        <% if (ViewData.ContainsKey("referrer")) {%> <%=Html.Hidden("referrer", ViewData["referrer"])%> <% } %>
     </div>
     <% } %>
 </asp:Content>
