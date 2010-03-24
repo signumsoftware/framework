@@ -24,7 +24,7 @@ namespace Signum.Engine
 
             Debug.WriteLine("UserConnections file found on {0}".Formato(FileName));
 
-            return File.ReadAllLines(FileName).Select(s => s.Split('>')).ToDictionary(a => a[0], a => a[1]);          
+            return File.ReadAllLines(FileName).Select(s => s.Split('>')).ToDictionary(a => a[0].ToLowerInvariant(), a => a[1]);          
         }
 
         public static string Replace(string connectionString)
@@ -34,7 +34,7 @@ namespace Signum.Engine
 
             string schemaName = new SqlConnection(connectionString).Database;
 
-            return replacements.TryGetC(schemaName) ?? connectionString;
+            return replacements.TryGetC(schemaName.ToLowerInvariant()) ?? connectionString;
         }
     }
 }
