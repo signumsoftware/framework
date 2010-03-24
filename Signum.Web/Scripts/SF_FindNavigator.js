@@ -337,8 +337,8 @@ function ClearAllFilters(prefix, suffix) {
     new FindNavigator({ prefix: prefix, suffix: suffix }).clearAllFilters();
 }
 
-function SearchCreate(viewOptions){
-    var findNavigator = new FindNavigator({prefix: viewOptions.prefix});
+function SearchCreate(viewOptions, suffix){
+    var findNavigator = new FindNavigator({prefix: viewOptions.prefix, suffix: suffix});
     if (empty(viewOptions.prefix)) {
         var viewOptions = findNavigator.viewOptionsForSearchCreate(viewOptions);
         new ViewNavigator(viewOptions).navigate();

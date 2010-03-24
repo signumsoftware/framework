@@ -31,7 +31,7 @@
     <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch" + sufix)%>" type="button" onclick="<%="Search({{prefix:'{0}',suffix:'{1}'}});".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "", sufix) %>" value="Buscar" /> 
     <% if ((bool)ViewData[ViewDataKeys.Create] && (bool)ViewData[ViewDataKeys.View])
        { %>
-        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}',suffix:'{1}'}});".Formato(popupPrefix ?? "", sufix)%>" />
+        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}},'{1}');".Formato(popupPrefix ?? "", sufix)%>" />
     <%} %>
     <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], popupPrefix)%> 
 </div>
