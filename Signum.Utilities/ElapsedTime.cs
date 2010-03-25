@@ -12,6 +12,12 @@ namespace Signum.Utilities
         public static Dictionary<string, ElapsedTimeEntity> IdentifiedElapseds =
             new Dictionary<string, ElapsedTimeEntity>();
 
+        public static T Start<T>(string identifier, Func<T> func)
+        {
+            using (Start(identifier))
+                return func();            
+        }
+
         public static IDisposable Start(string identifier)
         {
             Stopwatch sp = new Stopwatch();
@@ -20,7 +26,7 @@ namespace Signum.Utilities
             return new Disposable(() => { sp.Stop(); InsertEntity(sp.ElapsedMilliseconds, identifier); });
         }
 
-        static void InsertEntity(long milliseconds, string identifier)
+        public static void InsertEntity(long milliseconds, string identifier)
         {
             lock (IdentifiedElapseds)
             {
