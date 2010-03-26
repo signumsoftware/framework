@@ -23,7 +23,7 @@
        {
            Response.Write("<dl class=\"embedded\">");
            foreach (var v in ep.Children)
-               Html.RenderPartial("EntityProperty", v);
+               Html.RenderPartial(HelpClient.ViewPrefix + HelpClient.ViewEntityPropertyUrl, v);
            Response.Write("</dl>");
        }
 %>    
