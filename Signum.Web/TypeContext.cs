@@ -103,7 +103,7 @@ namespace Signum.Web
             {
                 ParameterExpression pe = Expression.Parameter(typeContext.Type, "p");
                 LambdaExpression lambda = Expression.Lambda(Expression.Convert(pe, typeof(T)), pe);
-                return (TypeContext<T>)Common.UntypedTypeContext(typeContext, lambda, typeof(T));
+                return (TypeContext<T>)Common.UntypedWalkExpression(typeContext, lambda);
             }
 
             return null;
@@ -111,15 +111,18 @@ namespace Signum.Web
 
         static MethodInfo mi = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
 
-        public static TypeContext ExtractLite<T>(this TypeContext<T> liteTypeContext)
+        public static TypeContext ExtractLite(this TypeContext liteTypeContext)
         {
-            if (!typeof(Lite).IsAssignableFrom(liteTypeContext.Type))
-                return null;
+            Type staticType =  Reflector.ExtractLite(liteTypeContext.Type);
+            Lite lite = (Lite)liteTypeContext.UntypedValue;
+
 
             ParameterExpression pe = Expression.Parameter(liteTypeContext.Type, "p");
-            Expression call = Expression.Call(pe, mi.MakeGenericMethod(Reflector.ExtractLite(liteTypeContext.Type)), pe);
-            LambdaExpression lambda = Expression.Lambda(call, pe);
-            return Common.UntypedTypeContext(liteTypeContext, lambda, Reflector.ExtractLite(liteTypeContext.Type));
+            Expression body = Expression.Call(pe, mi.MakeGenericMethod(staticType), pe);
+            if (lite.RuntimeType != staticType)
+                body = Expression.Convert(body, lite.RuntimeType);
+            LambdaExpression lambda = Expression.Lambda(body, pe);
+            return Common.UntypedWalkExpression(liteTypeContext, lambda);
         }
 
         static TypeContext<T> BeginContext<T>(this HtmlHelper helper, T value, string prefix, bool? writeIdAndRuntime)

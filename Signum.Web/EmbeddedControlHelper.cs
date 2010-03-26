@@ -43,7 +43,7 @@ namespace Signum.Web
                 {
                     var s = Expression.Parameter(typeof(S), "s");
                     var lambda = Expression.Lambda(Expression.Convert(s, runtimeType), s);
-                    TypeContext c = Common.UntypedTypeContext(context, lambda, runtimeType);
+                    TypeContext c = Common.UntypedWalkExpression(context, lambda);
                     EmbeddedControl(helper, c, Navigator.Manager.EntitySettings[runtimeType].PartialViewName((ModifiableEntity)c.UntypedValue), null, true);
                     return; 
                 }
@@ -73,7 +73,7 @@ namespace Signum.Web
                 {
                     var s = Expression.Parameter(typeof(S), "s");
                     var lambda = Expression.Lambda(Expression.Convert(s, runtimeType), s);
-                    TypeContext c = Common.UntypedTypeContext(context, lambda, runtimeType);
+                    TypeContext c = Common.UntypedWalkExpression(context, lambda);
                     EmbeddedControl(helper, c, ec.ViewName ?? Navigator.Manager.EntitySettings[runtimeType].PartialViewName((ModifiableEntity)c.UntypedValue), ec.ViewData, ec.WriteSFInfo);
                     return; 
                 }
