@@ -89,7 +89,6 @@
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
-    <Compile Include="Help\WikiParserExtensions.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
@@ -187,10 +186,8 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Help\Index.aspx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Help\Menu.ascx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Help\NamespaceControl.ascx">
       <SubType>ASPXCodeBehind</SubType>

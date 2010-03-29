@@ -6,10 +6,6 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 <div class="grid_16" id="entityContent">
     <h1>Documentación de ayuda</h1>
-    
- <!--   <%= Html.WikiParse(@"Esto es una ''prueba'' de enlace a [e:ReciboMotorDN] o, si quieres, [e:ReciboMotorDN|El recibo]. Hola Dola") %>
-    <%= Html.WikiParse("Esto es una '''''prueba''''' de '''enlace''' a [o:FicheroPagosOperation.ReclutarProceso] o, si quieres, [o:FicheroPagosOperation.ReclutarProceso|Operación]") %>
-    <%= Html.WikiParse("[imageright|icoImpago.png]") %>-->
     <table><tr><td>    
             <%
                 foreach (NamespaceModel item in ((NamespaceModel)Model).Namespaces)

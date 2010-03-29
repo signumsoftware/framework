@@ -200,7 +200,8 @@ namespace Signum.Web.Help
                                     orderby eh.Value.Type.Name
                                     select eh.Value).ToList();
 
-            Dictionary<EntityHelp, HashSet<WikiParserExtensions.WikiLink>> unavailable = new Dictionary<EntityHelp, HashSet<WikiParserExtensions.WikiLink>>();
+
+         /*   Dictionary<EntityHelp, HashSet<WikiParserExtensions.WikiLink>> unavailable = new Dictionary<EntityHelp, HashSet<WikiParserExtensions.WikiLink>>();
             foreach (EntityHelp eh in HelpLogic.GetEntitiesHelp().Select(d=>d.Value))
             {
                 HashSet<WikiParserExtensions.WikiLink> wikiLinks = new HashSet<WikiParserExtensions.WikiLink>();
@@ -233,7 +234,7 @@ namespace Signum.Web.Help
             }
 
             ViewData["EntityCount"] = count;
-            ViewData["UnavailableLinks"] = unavailable;
+            ViewData["UnavailableLinks"] = unavailable;*/
             return View(HelpClient.ViewPrefix + HelpClient.TodoUrl, ehs);
         }
     }

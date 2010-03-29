@@ -14,7 +14,7 @@
         <div class="grid_16" id="entityName">    
             <h1><%=ah.Title%></h1> 
             <%= Html.TextArea("description", ah.Description, 5, 80, new { @class = "editable" })
-                                            + "<span class=\"editor\" id=\"description-editor\">" + Html.WikiParse(ah.Description).Replace("\n", "<p>") + "</span>"%>
+                                                            + "<span class=\"editor\" id=\"description-editor\">" + ah.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>") + "</span>"%>
         </div>
         <div class="clear"></div>
     </form>

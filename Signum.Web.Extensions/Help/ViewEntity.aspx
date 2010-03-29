@@ -18,7 +18,7 @@
     <span class='shortcut'>[e:<%= eh.Type.Name%>]</span>
     <h1 title="<%= eh.Type.Namespace%>"><%=eh.Type.NiceName() %></h1> 
     <%= Html.TextArea("description", eh.Description, 5, 80, new { @class = "editable" })
-                    + "<span class=\"editor\" id=\"description-editor\">" + Html.WikiParse(eh.Description).Replace("\n", "<p>") + "</span>"%>
+                            + "<span class=\"editor\" id=\"description-editor\">" + eh.Description.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>") + "</span>"%>
 </div>
 <div class="clear"></div>
 <div id="entityContent" class="grid_12">
@@ -54,10 +54,10 @@
                 {%>
                 <span class='shortcut'>[q:<%=QueryUtils.GetQueryName(mq.Key).ToString()%>]</span>
                 <dt><%=QueryUtils.GetNiceQueryName(mq.Key)%></dt>
-                <dd><img src='Images/Help/table.gif' title='Ver columnas' style='float:right' onclick="javascript:$(this).siblings('.query-columns').toggle('fast');" /><%=Html.WikiParse(mq.Value.Info)%>
+                <dd><img src='Images/Help/table.gif' title='Ver columnas' style='float:right' onclick="javascript:$(this).siblings('.query-columns').toggle('fast');" /><%=mq.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)%>
                 <%=Html.TextArea("q-" + QueryUtils.GetQueryName(mq.Key).ToString().Replace(".", "_"), mq.Value.UserDescription, new { @class = "editable" })%>
                 <span class="editor" id="q-<%=QueryUtils.GetQueryName(mq.Key).ToString().Replace(".", "_")%>-editor">
-                    <%=Html.WikiParse(mq.Value.UserDescription).Replace("\n", "<p>")%>
+                    <%=mq.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")%>
                 </span>
                 <div class='query-columns'><hr/>
                 <table width="100%">
@@ -66,7 +66,7 @@
                     <tr><td><b><%=qc.Value.Name.NiceName()%></b> <%=qc.Value.Info%></td><td><%=qc.Value.Info %></td></tr>
                     <tr><td></td><td><%=Html.TextArea("c-" + QueryUtils.GetQueryName(mq.Key).ToString().Replace(".", "_") + "." + qc.Key, qc.Value.UserDescription, new { @class = "editable" })%>
                     <span class="editor" id="qc-<%=QueryUtils.GetQueryName(mq.Key).ToString().Replace(".", "_") + "." + qc.Key%>">
-                        <%=Html.WikiParse(qc.Value.UserDescription).Replace("\n", "<p>")%>
+                        <%=qc.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>")%>
                     </span>
                     </td></tr>
                    <%}%>
@@ -87,9 +87,9 @@
                 <%=eh.Operations.ToString(p =>
                    "<span class='shortcut'>[o:" + OperationDN.UniqueKey(p.Key) + "]</span>"
                    + "<dt>" + p.Key.NiceToString() + "</dt>"
-                   + "<dd>" + Html.WikiParse(p.Value.Info)
+                                       + "<dd>" + p.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)
                    + Html.TextArea("o-" + OperationDN.UniqueKey(p.Key), p.Value.UserDescription, new { @class = "editable" })
-                                                           + "<span class=\"editor\" id=\"o-" + OperationDN.UniqueKey(p.Key).Replace(".", "_") + "-editor\">" + Html.WikiParse(p.Value.UserDescription).Replace("\n", "<p>") + "</span>"           
+                                                                               + "<span class=\"editor\" id=\"o-" + OperationDN.UniqueKey(p.Key).Replace(".", "_") + "-editor\">" + p.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings).Replace("\n", "<p>") + "</span>"           
                    +"</dd>", "")%>
             </dl>
         </div>

@@ -14,9 +14,9 @@
         "<span class='shortcut'>[p:" + ViewData["EntityName"] + "." + k.Key + "]</span>"
         
         + "<dt>" + k.Value.PropertyInfo.NiceName() + "</dt>"
-           + "<dd>" + Html.WikiParse(k.Value.Info)
+           + "<dd>" + k.Value.Info.WikiParse(HelpClient.DefaultWikiSettings)
            + Html.TextArea("p-" + k.Key.Replace("/", "_"), k.Value.UserDescription, new { @class = "editable" })
-           + "<span class=\"editor\" id=\"p-" + k.Key.Replace("/", "_") + "-editor\">" + Html.WikiParse(k.Value.UserDescription).Replace("\n", "<p>") + "</span>"
+           + "<span class=\"editor\" id=\"p-" + k.Key.Replace("/", "_") + "-editor\">" + k.Value.UserDescription.WikiParse(HelpClient.DefaultWikiSettings) + "</span>"
            + "</dd>");
 
        if (ep.Children.Count > 0)

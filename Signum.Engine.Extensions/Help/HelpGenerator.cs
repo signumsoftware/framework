@@ -103,7 +103,7 @@ namespace Signum.Engine.Help
 
         static string TypeLink(this Type type)
         {
-            return "[" + WikiFormat.EntityLink + WikiFormat.Separator + type.Name + "]";
+            return "[e:" + type.Name + "]";
         }
 
         static string NaturalTypeDescription(Type type)
@@ -229,18 +229,5 @@ namespace Signum.Engine.Help
 
             return query.ElementType;
         }
-    }
-
-    public static class WikiFormat
-    {
-        public const string EntityLink = "e";
-        public const string PropertyLink = "p";
-        public const string QueryLink = "q";
-        public const string OperationLink = "o";
-        public const string HyperLink = "h";
-        public const string WikiLink = "w";
-        public const string NameSpaceLink = "n";
-
-        public const string Separator = ":";
     }
 }

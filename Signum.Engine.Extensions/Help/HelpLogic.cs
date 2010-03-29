@@ -99,6 +99,27 @@ namespace Signum.Engine.Help
             return BaseUrl + "/" + Reflector.CleanTypeName(entityType);
         }
 
+        public static string OperationUrl(Type entityType, Enum operation)
+        {
+            return HelpLogic.EntityUrl(entityType) + "#" + "o-" + OperationDN.UniqueKey(operation).Replace('.', '_');
+        }
+
+        public static string PropertyUrl(Type entityType, string property)
+        {
+            return HelpLogic.EntityUrl(entityType) + "#" + "p-" + property;
+        }
+
+        public static string QueryUrl(Type entityType)
+        {
+            return HelpLogic.EntityUrl(entityType) + "#" + "q-" + entityType.FullName.Replace(".", "_");
+        }
+        
+        public static string QueryUrl(Enum query)
+        {
+            return HelpLogic.EntityUrl(DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType())
+                + "#" + "q-" + QueryUtils.GetQueryName(query).ToString().Replace(".", "_");
+        }
+
         public static EntityHelp GetEntityHelp(Type entityType)
         {
             return TypeToHelpFiles[entityType];

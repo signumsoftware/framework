@@ -27,7 +27,7 @@
     {
         int currentResults = 0; 
     %>
-        <li class="result"><span class="entityName"><%= Html.AddHtml(v.Key, "<b>", "</b>", q)%></span>
+        <li class="result"><span class="entityName"><%= v.Key.AddHtml("<b>", "</b>", q)%></span>
         <ul>
     <%
     
@@ -38,7 +38,7 @@
             currentResults++;            
      %>       
     <li class="content"><span class="typeSearchResult <%=sr.TypeSearchResult.ToString() %>"><%=sr.TypeSearchResult.ToString()%></span>
-    <a href="<%= sr.Link%>"><%=Html.AddHtml(Html.WikiParse(sr.Content, w => w.Text, false), "<b>", "</b>", q)%></a></li>
+    <a href="<%= sr.Link%>"><%=sr.Content.WikiParse(HelpClient.NoLinkWikiSettings).AddHtml("<b>", "</b>", q)%></a></li>
     <%
         }
         else
@@ -51,7 +51,7 @@
                 <div class="more">
                     <li class="content"><span class="typeSearchResult <%=sr.TypeSearchResult.ToString() %>"><%=sr.TypeSearchResult.ToString()%></span>
 
-                    <a href="<%= HelpLogic.EntityUrl(sr.Type)%>"><%=Html.AddHtml(Html.WikiParse(sr.Content, w => w.Text, false), "<b>", "</b>", q)%></a></li>
+                    <a href="<%= HelpLogic.EntityUrl(sr.Type)%>"><%=sr.Content.WikiParse(HelpClient.NoLinkWikiSettings).AddHtml("<b>", "</b>", q)%></a></li>
                 
           <%  }
         }

@@ -408,11 +408,9 @@ namespace Signum.Engine.Operations
         }
 
 
-        public static Type FindType(Enum operation)
+        public static Type[] FindTypes(Enum operation)
         {
-            return OperationLogic.operations.Where(o => o.Value.ContainsKey(operation)).Single(
-                "Operation '{0}' not registered".Formato(operation),
-                "Operation '{0}' registered for more than one element".Formato(operation)).Key;
+            return operations.Where(o => o.Value.ContainsKey(operation)).Select(a => a.Key).ToArray();
         }
     }
 
