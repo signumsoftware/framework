@@ -49,6 +49,18 @@ namespace Signum.Web
             }
         }
 
+        public string LocalName(string sufix)
+        {
+            return TypeContext.Compose(Prefix, sufix); 
+        }
+
+
+        public string ParentName(string sufix)
+        {
+            return TypeContext.Compose(ParentPrefix, sufix);
+        }
+
+
         public Implementations Implementations { get; set; }
         
         public bool View { get; set; }

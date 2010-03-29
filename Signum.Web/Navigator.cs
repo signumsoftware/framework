@@ -479,7 +479,7 @@ namespace Signum.Web
             EntitySettings.Add(typeof(ValueLineBoxModel), new EntitySettings(EntityType.Default) { PartialViewName = _ => ValueLineBoxUrl });
 
             TypesToURLNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UrlName ?? Reflector.CleanTypeName(kvp.Key));
-            URLNamesToTypes = TypesToURLNames.Inverse();
+            URLNamesToTypes = TypesToURLNames.Inverse(StringComparer.InvariantCultureIgnoreCase);
 
             TypesToNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.TypeName ?? kvp.Key.Name);
             NamesToTypes = TypesToNames.Inverse(); 

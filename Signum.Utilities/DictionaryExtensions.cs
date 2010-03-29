@@ -340,5 +340,10 @@ namespace Signum.Utilities
         {
             return dic.ToDictionary(k => k.Value, k => k.Key);
         }
+
+        public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer)
+        {
+            return dic.ToDictionary(k => k.Value, k => k.Key, comparer);
+        }
     }
 }

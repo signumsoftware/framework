@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -141,6 +141,7 @@
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Properties\Version.cs" />
     <Compile Include="TreeExtensions.cs" />
+    <Compile Include="WikiParserExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.es.resx">
