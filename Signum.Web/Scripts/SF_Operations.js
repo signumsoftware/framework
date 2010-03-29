@@ -127,7 +127,7 @@ OperationManager.prototype = {
         }
         $("form").append(hiddenInput('isLite', this.options.isLite) +
             hiddenInput('sfOperationFullKey', this.options.operationKey) +
-            hiddenInput(sfPrefix, this.options.prefix));
+            hiddenInput("sfOldPrefix", this.options.prefix));
             
         if (!empty(this.options.requestExtraJsonData)) {
             for (var key in this.options.requestExtraJsonData) {
