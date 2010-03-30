@@ -161,7 +161,7 @@ namespace Signum.Web
                 //else if (Reflector.IsMList(typeof(T)))
                 //    runtimeInfo = new RuntimeInfo { RuntimeType = typeof(T), IsNew = false };
 
-                    helper.WriteEntityInfo(helper.GlobalPrefixedName(tc.Name), new RuntimeInfo(tc.Value), new StaticInfo(typeof(T)));
+                    helper.WriteEntityInfo(helper.GlobalName(tc.Name), new RuntimeInfo(tc.Value), new StaticInfo(typeof(T)));
             }
 
             //Avoid subcontexts to write their id and runtime, only the main embedded typecontext must write them
