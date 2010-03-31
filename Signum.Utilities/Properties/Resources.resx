@@ -331,4 +331,22 @@
   <data name="DateTimePrecision_Seconds" xml:space="preserve">
     <value>Seconds</value>
   </data>
+  <data name="DateLast" xml:space="preserve">
+    <value>Last {0}</value>
+  </data>
+  <data name="DateSeparators" xml:space="preserve">
+    <value>,</value>
+  </data>
+  <data name="DateThis" xml:space="preserve">
+    <value>This {0}</value>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="Tomorrow" xml:space="preserve">
+    <value>Tomorrow</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>Yesterday</value>
+  </data>
 </root>

@@ -201,19 +201,38 @@ namespace Signum.Utilities
 
         public static string SmartDatePattern(this DateTime date)
         {
-            DateTime now = DateTime.Now;
+            DateTime currentdate = DateTime.Today;
+            int datediff = (date.Date - currentdate).Days;
 
-            string pattern = CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+            if (-7 <= datediff && datediff <= -2)
+                return Resources.DateLast.Formato(date.DayOfWeek.ToString());
+            
+            if (datediff == -1)
+                return Resources.Yesterday;
+            
+            if (datediff == 0)
+                return Resources.Today;
 
-            if (date.Year == now.Year)
-                pattern = pattern.Replace("y", "");
+            if (datediff == 1)
+                return Resources.Tomorrow;
 
-            if (date.Month == now.Month)
-                pattern = pattern.Replace("M", "");
+            if (2 <= datediff && datediff <= 7)
+                return Resources.DateThis.Formato(date.DayOfWeek.ToString());
 
-            pattern = pattern.Trim(' ', ',', '.');
+            if (date.Year == currentdate.Year)
+            {
+                string pattern = CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+                pattern = pattern.Replace("yy", "");
 
-            return date.ToString(pattern);
+                string dateString = date.ToString(pattern);
+                foreach (string endSeparator in Resources.DateSeparators.Split(';'))
+                {
+                    if (dateString.EndsWith(endSeparator))
+                        dateString = dateString.Substring(0, dateString.Length - endSeparator.Length);
+                }
+                return dateString.Trim();
+            }
+            return date.ToLongDateString();
         }
     }
 

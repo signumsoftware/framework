@@ -232,6 +232,33 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Last {0}.
+        /// </summary>
+        internal static string DateLast {
+            get {
+                return ResourceManager.GetString("DateLast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ,.
+        /// </summary>
+        internal static string DateSeparators {
+            get {
+                return ResourceManager.GetString("DateSeparators", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This {0}.
+        /// </summary>
+        internal static string DateThis {
+            get {
+                return ResourceManager.GetString("DateThis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Days.
         /// </summary>
         internal static string DateTimePrecision_Days {
@@ -677,6 +704,24 @@ namespace Signum.Utilities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Today.
+        /// </summary>
+        internal static string Today {
+            get {
+                return ResourceManager.GetString("Today", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tomorrow.
+        /// </summary>
+        internal static string Tomorrow {
+            get {
+                return ResourceManager.GetString("Tomorrow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unhandled binding type &apos;{0}&apos;.
         /// </summary>
         internal static string UnhandledBindingType0 {
@@ -691,6 +736,15 @@ namespace Signum.Utilities.Properties {
         internal static string UnhandledExpressionType0 {
             get {
                 return ResourceManager.GetString("UnhandledExpressionType0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yesterday.
+        /// </summary>
+        internal static string Yesterday {
+            get {
+                return ResourceManager.GetString("Yesterday", resourceCulture);
             }
         }
     }
