@@ -168,7 +168,7 @@ namespace Signum.Web.Help
                     WikiLink wl = LinkParser(s);
                     if (wl != null) return wl.ToHtmlString();
                 }
-                catch (Exception ex) {
+                catch (Exception) {
                     return new WikiLink("#",s, "unavailable").ToHtmlString();
                 }
                 return null;
@@ -184,7 +184,7 @@ namespace Signum.Web.Help
                     WikiLink wl = LinkParser(s);
                     if (wl != null) return wl.Text;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return new WikiLink("#", s, "unavailable").ToHtmlString();
                 }
@@ -236,7 +236,6 @@ namespace Signum.Web.Help
                                             currentType.NiceName(), operation.NiceToString())).ToList()
                                 };
                             }
-                        break;
 
                     case WikiFormat.PropertyLink:
                         string[] parts = link.Split('.');

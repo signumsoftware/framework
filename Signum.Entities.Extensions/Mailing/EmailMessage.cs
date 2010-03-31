@@ -10,12 +10,20 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailMessageDN : Entity
     {
-        Lite<UserDN> user;
+        Lite<IEmailOwnerDN> recipient;
         [NotNullValidator]
-        public Lite<UserDN> User
+        public Lite<IEmailOwnerDN> Recipient
         {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
+            get { return recipient; }
+            set { Set(ref recipient, value, () => Recipient); }
+        }
+
+        EmailTemplateDN template;
+        [NotNullValidator]
+        public EmailTemplateDN Template
+        {
+            get { return template; }
+            set { Set(ref template, value, () => Template); }
         }
 
         DateTime sent;
@@ -56,5 +64,11 @@ namespace Signum.Entities.Mailing
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
         }        
+    }
+
+    [ImplementedBy(typeof(UserDN))]
+    public interface IEmailOwnerDN : IIdentifiable
+    {
+        string EMail { get; }
     }
 }

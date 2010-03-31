@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7D851227-5294-4BEB-990E-56B4FBB7A148}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -78,6 +78,8 @@
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
+    <Compile Include="Mailing\EmailMessage.cs" />
+    <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Operations\IOperationServer.cs" />
     <Compile Include="Operations\OperationDN.cs" />
     <Compile Include="Operations\LogOperationDN.cs" />

@@ -83,6 +83,7 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Operations\Constructor.cs" />
     <Compile Include="Operations\ConstructorFrom.cs" />
     <Compile Include="Operations\ConstructorFromMany.cs" />

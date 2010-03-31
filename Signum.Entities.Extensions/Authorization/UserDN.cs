@@ -9,11 +9,12 @@ using System.Security.Cryptography;
 using System.ComponentModel;
 using System.Reflection;
 using Signum.Entities.Extensions.Properties;
+using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Authorization
 {
     [Serializable]
-    public class UserDN : Entity, IPrincipal
+    public class UserDN : Entity, IPrincipal, IEmailOwnerDN
     {
         [NotNullable, UniqueIndex, SqlDbType(Size = 100)]
         string userName;
