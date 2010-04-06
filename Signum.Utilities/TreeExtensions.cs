@@ -61,6 +61,18 @@ namespace Signum.Utilities
 
         public static IEnumerable<T> BreathFirst<T>(T root, Func<T, IEnumerable<T>> children)
         {
+            Queue<T> stack = new Queue<T>();
+            stack.Enqueue(root);
+            while (stack.Count > 0)
+            {
+                T elem = stack.Dequeue();
+                yield return elem;
+                stack.EnqueueRange(children(elem));
+            }
+        }
+
+        public static IEnumerable<T> DepthFirst<T>(T root, Func<T, IEnumerable<T>> children)
+        {
             Stack<T> stack = new Stack<T>();
             stack.Push(root);
             while (stack.Count > 0)

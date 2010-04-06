@@ -120,6 +120,33 @@ namespace Signum.Windows
             this.CommandBindings.Add(new CommandBinding(FindCommand, btFind_Click));
             this.CommandBindings.Add(new CommandBinding(RemoveCommand, btRemove_Click));
             this.CommandBindings.Add(new CommandBinding(ViewCommand, btView_Click));
+
+          
+        }
+
+        public bool dynamicReadOnly;
+        public bool DynamicReadOnly
+        {
+            get { return dynamicReadOnly; }
+            set
+            {
+                if (value != dynamicReadOnly)
+                {
+                    DependencyPropertyDescriptor dpd = DependencyPropertyDescriptor.FromProperty(Common.IsReadOnlyProperty, typeof(EntityBase));
+
+                    if (value)
+                        dpd.AddValueChanged(this, IsReadOnlyChanged);
+                    else
+                        dpd.RemoveValueChanged(this, IsReadOnlyChanged);
+
+                    dynamicReadOnly = true;
+                }
+            }
+        }
+
+        void IsReadOnlyChanged(object sender, EventArgs e)
+        {
+            UpdateVisibility();
         }
 
         protected internal override DependencyProperty CommonRouteValue()
