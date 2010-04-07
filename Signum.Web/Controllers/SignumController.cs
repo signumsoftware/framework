@@ -36,7 +36,7 @@ namespace Signum.Web.Controllers
                 return Navigator.View(this, Database.Retrieve(t, id.Value), true); //Always admin
 
             IIdentifiable entity = null;
-            object result = Navigator.CreateInstance(this, t);
+            object result = Constructor.Construct(t);
             if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
                 entity = (IIdentifiable)result;
             else
@@ -50,7 +50,7 @@ namespace Signum.Web.Controllers
             Type type = Navigator.ResolveType(sfRuntimeType);
 
             IIdentifiable entity = null;
-            object result = Navigator.CreateInstance(this, type);
+            object result = Constructor.VisualConstruct(type, this);
             if (result.GetType() == typeof(PartialViewResult))
                 return (PartialViewResult)result;
             else if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
@@ -70,7 +70,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(type, sfId.Value);
             else
             {
-                object result = Navigator.CreateInstance(this, type);
+                object result = Constructor.VisualConstruct(type, this);
                 if (result.GetType() == typeof(PartialViewResult))
                     return (PartialViewResult)result;
                 else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
@@ -92,15 +92,13 @@ namespace Signum.Web.Controllers
         public PartialViewResult PopupView(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, bool? sfReadOnly, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
-            bool isReactive = Navigator.ExtractIsReactive(Request.Form);
+            bool isReactive = this.IsReactive();
             
             ModifiableEntity entity = null;
             if (isReactive)
             {
-                //NameValueCollection nvc = new NameValueCollection();
-                entity = Navigator.ExtractEntity(this, Request.Form)
-                    .ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
-                entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
+                entity = this.UntypedExtractEntity().ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
+                entity = (ModifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
@@ -108,7 +106,7 @@ namespace Signum.Web.Controllers
                     entity = Database.Retrieve(type, sfId.Value);
                 else
                 {
-                    object result = Navigator.CreateInstance(this, type);
+                    object result = Constructor.VisualConstruct(type, this);
                     if (result.GetType() == typeof(PartialViewResult))
                         return (PartialViewResult)result;
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
@@ -134,14 +132,14 @@ namespace Signum.Web.Controllers
         public PartialViewResult PartialView(string sfRuntimeType, int? sfId, string prefix, bool? sfEmbeddedControl, bool? sfReadOnly, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
-            bool isReactive = Navigator.ExtractIsReactive(Request.Form);
+            bool isReactive = this.IsReactive();
 
             ModifiableEntity entity = null;
             if (isReactive)
             {
-                entity = Navigator.ExtractEntity(this, Request.Form, "")
+                entity = this.UntypedExtractEntity()
                     .ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
-                entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
+                entity = (ModifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
@@ -149,7 +147,7 @@ namespace Signum.Web.Controllers
                     entity = Database.Retrieve(type, sfId.Value);
                 else
                 {
-                    object result = Navigator.CreateInstance(this, type);
+                    object result = Constructor.VisualConstruct(type, this);
                     if (result.GetType() == typeof(PartialViewResult))
                         return (PartialViewResult)result;
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
@@ -172,126 +170,110 @@ namespace Signum.Web.Controllers
         }
 
        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult TrySave(string prefixToIgnore)
-        {   
-            Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
+        public ActionResult TrySave()
+        {
+            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal(); 
 
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", prefixToIgnore);
-
-            if (changesLog.Errors != null && changesLog.Errors.Count > 0)
+            if (context.Errors.Count > 0)
             {
-                this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+                this.ModelState.FromContext(context);
                 return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
             }
 
-            if (entity is IdentifiableEntity)
-                Database.Save((IdentifiableEntity)entity);
+            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
+            if (ident != null)
+                Database.Save(ident);
 
-            if (Navigator.ExtractIsReactive(Request.Form))
-            {
-                string tabID = Navigator.ExtractTabID(Request.Form);
-                Session[tabID] = entity;
-            }
-
-            return Navigator.View(this, entity); //changesLog.ChangeTicks);
+            if (this.IsReactive())
+                Session[this.TabID()] = context.UntypedValue;
+            
+            return Navigator.View(this, context.UntypedValue); //changesLog.ChangeTicks);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult Validate(string prefixToIgnore)
+        public ContentResult Validate()
         {
-            Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
+            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
 
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", prefixToIgnore);
-
-            this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+            this.ModelState.FromContext(context);
 
             return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult TrySavePartial(string prefix, string prefixToIgnore)
+        public ContentResult TrySavePartial(string prefix)
         {
-            Modifiable parentEntity = Navigator.ExtractEntity(this, Request.Form, prefix);
-            
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref parentEntity, prefix, prefixToIgnore);
+            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
 
-            this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+            this.ModelState.FromContext(context);
 
-            if (parentEntity is IdentifiableEntity && (changesLog.Errors == null || changesLog.Errors.Count == 0))
-                Database.Save((IdentifiableEntity)parentEntity);
+            IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
+            if (ident != null && context.Errors.Count == 0)
+                Database.Save(ident);
 
-            Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
-                Modification.GetPropertyValue(parentEntity, prefix) : 
-                parentEntity;
+            //Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
+            //    Modification.GetPropertyValue(parentEntity, prefix) : 
+            //    parentEntity;
 
-            string newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+            string newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
 
             return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
                 this.ModelState.ToJsonData(),
                 TypeContext.Separator + EntityBaseKeys.ToStr,
-                entity.ToString(),
+                context.UntypedValue.ToString(),
                 TypeContext.Separator + EntityBaseKeys.ToStrLink,
                 newLink
                 ));
-            //return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult ValidatePartial(string prefix, string prefixToIgnore)
+        public ContentResult ValidatePartial(string prefix)
         {
-            Modifiable parentEntity = Navigator.ExtractEntity(this, Request.Form, prefix);
+            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
 
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref parentEntity, prefix, prefixToIgnore);
+            this.ModelState.FromContext(context);
 
-            /*if (Request.Form.AllKeys.Contains(ViewDataKeys.Reactive)) //Apply changes and update entity in session
-            {
-                //SetPropertyValue(parentEntity, prefix, entity);
-                Session[ViewDataKeys.TabEntity] = parentEntity;
-            }*/
-
-            this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-
-            Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
-                Modification.GetPropertyValue(parentEntity, prefix) : 
-                parentEntity;
+            //Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
+            //    Modification.GetPropertyValue(parentEntity, prefix) : 
+            //    parentEntity;
 
             string newLink = "";
-            if (entity == null)
+            IIdentifiable ident = context.UntypedValue as IIdentifiable;
+            if (context.UntypedValue == null)
             {
                 RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContext.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-                newLink = Navigator.ViewRoute(ei.RuntimeType, (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+                newLink = Navigator.ViewRoute(ei.RuntimeType, ident.TryCS(e => e.IdOrNull));
             }
             else
-                newLink = Navigator.ViewRoute(entity.GetType(), (entity as IIdentifiable).TryCS(e => e.IdOrNull));
+                newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
             
             return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
                 this.ModelState.ToJsonData(),
                 TypeContext.Separator + EntityBaseKeys.ToStr,
-                entity.TryToString(),
+                context.UntypedValue.TryToString(),
                 TypeContext.Separator + EntityBaseKeys.ToStrLink,
                 newLink
                 ));
-            //return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + ",\"" + TypeContext.Separator + EntityBaseKeys.ToStr + "\":" + newToStr.Quote() + "}");
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SavePartial(string prefix, string prefixToIgnore)
-        {
-            Modifiable entity = Navigator.ExtractEntity(this, Request.Form, prefix);
+        //[AcceptVerbs(HttpVerbs.Post)]
+        //public ActionResult SavePartial(string prefix, string prefixToIgnore)
+        //{
+        //    Modifiable entity = this.ExtractEntity(prefix);
 
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, prefixToIgnore);
+        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, prefixToIgnore);
 
-            if (changesLog.Errors != null && changesLog.Errors.Count > 0)
-                throw new ApplicationException(Resources.ItsNotPossibleToSaveAnEntityOfType0WithErrors.Formato(entity.GetType().Name));
+        //    if (changesLog.Errors != null && changesLog.Errors.Count > 0)
+        //        throw new ApplicationException(Resources.ItsNotPossibleToSaveAnEntityOfType0WithErrors.Formato(entity.GetType().Name));
 
-            if (entity is IdentifiableEntity)
-                Database.Save((IdentifiableEntity)entity);
+        //    if (entity is IdentifiableEntity)
+        //        Database.Save((IdentifiableEntity)entity);
 
-            if (prefix.HasText())
-                return Navigator.PopupView(this, entity, prefix);
-            else //NormalWindow
-                return Navigator.View(this, entity);
-        }
+        //    if (prefix.HasText())
+        //        return Navigator.PopupView(this, entity, prefix);
+        //    else //NormalWindow
+        //        return Navigator.View(this, entity);
+        //}
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult Autocomplete(string typeName, Implementations implementations, string input, int limit)
@@ -365,23 +347,22 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult ReloadEntity(string prefix)
         {
-            ModifiableEntity entity = Navigator.ExtractEntity(this, Request.Form, prefix)
-                .ThrowIfNullC("Type was not possible to extract");
+            MappingContext context = this.UntypedExtractEntity(prefix)
+                .ThrowIfNullC("Type was not possible to extract")
+                .UntypedApplyChanges(this.ControllerContext, prefix, true);
 
-            Modification modification = Navigator.GenerateModification(this, entity, prefix);
-            ModificationState modState = Navigator.ApplyChanges(this, modification, ref entity);
+            ModifiableEntity entity = (ModifiableEntity)context.UntypedValue;
 
-            if (Navigator.ExtractIsReactive(Request.Form))
+            if (this.IsReactive())
             {
-                string tabID = Navigator.ExtractTabID(Request.Form);
-                Session[tabID] = entity;
+                Session[this.TabID()] = entity;
                 this.ViewData[ViewDataKeys.Reactive] = true;
                 if (prefix.HasText())
-                    entity = (ModifiableEntity)Modification.GetPropertyValue(entity, prefix);
+                    entity = (ModifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
             }
 
             this.ViewData[ViewDataKeys.LoadAll] = true; //Prevents losing unsaved changes of the UI when reloading control
-            return Navigator.PartialView(this, entity, prefix, ModificationState.ToDictionary(modState.Actions));
+            return Navigator.PartialView(this, entity, prefix, context.GetTicksDictionary());
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -393,30 +374,28 @@ namespace Signum.Web.Controllers
             if (Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
             {
                 entity = (IdentifiableEntity)Session[Request.Form[ViewDataKeys.TabId]];
-                entity = (IdentifiableEntity)Modification.GetPropertyValue(entity, prefix);
+                entity = (IdentifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
             }
             else
             {
                 if (sfId.HasValue)
                     entity = Database.Retrieve(Lite.Create(type, sfId.Value));
                 else
-                    entity = (IdentifiableEntity)Constructor.Construct(type, this);
+                    entity = (IdentifiableEntity)Constructor.Construct(type);
             }
 
             HtmlHelper helper = CreateHtmlHelper(this);
-            return Content(ButtonBarHelper.GetButtonBarElements(helper, entity, Navigator.Manager.EntitySettings[type].PartialViewName(entity), prefix));
+            return Content(ButtonBarEntityHelper.GetForEntity(this.ControllerContext, entity, Navigator.Manager.EntitySettings[type].OnPartialViewName(entity)).ToString(helper, prefix));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult DoPostBack(string prefixToIgnore)
+        public ActionResult DoPostBack()
         {
-            Modifiable entity = Navigator.ExtractEntity(this, Request.Form);
+            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
 
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", prefixToIgnore);
-
-            this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+            this.ModelState.FromContext(context);
             
-            return Navigator.View(this, entity, changesLog.ChangeTicks);
+            return Navigator.View(this, context.UntypedValue, context.GetTicksDictionary());
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)

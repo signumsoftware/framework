@@ -24,43 +24,72 @@ namespace Signum.Web
             constructorManager.Initialize();
         }
 
-        public static object Construct(Type type, Controller controller)
+        public static ModifiableEntity Construct(Type type)
         {
-            return ConstructorManager.Construct(type, controller);
+            return ConstructorManager.Construct(type);
         }
 
-        public static T Construct<T>(Controller controller)
+        public static T Construct<T>() where T : ModifiableEntity
         {
-            return (T)Construct(typeof(T), controller);
+            return (T)ConstructorManager.Construct(typeof(T));
         }
 
-        public static ModifiableEntity ConstructStrict(Type type)
+        public static object VisualConstruct(Type type, ControllerBase controller)
         {
-            return ConstructorManager.ConstructStrict(type);
+            return ConstructorManager.VisualConstruct(type, controller);
         }
 
-        public static T ConstructStrict<T>() where T : ModifiableEntity
+        public static T VisualConstruct<T>(ControllerBase controller) where T : ModifiableEntity
         {
-            return (T)ConstructStrict(typeof(T));
+            return (T)ConstructorManager.VisualConstruct(typeof(T), controller);
         }
 
     }
     
     public class ConstructorManager
     {
-        public event Func<Type, Controller, object> GeneralConstructor;
+        public event Func<Type, ModifiableEntity> GeneralConstructor;
+        public Dictionary<Type, Func<ModifiableEntity>> Constructors;
 
-        public Dictionary<Type, Func<Controller, object>> Constructors;
+        public event Func<Type, ControllerBase, object> VisualGeneralConstructor;
+        public Dictionary<Type, Func<ControllerBase, object>> VisualConstructors;
 
         internal void Initialize()
         {
             if (Constructors == null)
-                Constructors = new Dictionary<Type, Func<Controller, object>>();
+                Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
+            if (VisualConstructors == null)
+                VisualConstructors = new Dictionary<Type, Func<ControllerBase, object>>();
         }
 
-        public virtual object Construct(Type type, Controller controller)
+        public virtual ModifiableEntity Construct(Type type)
         {
-            Func<Controller, object> c = Constructors.TryGetC(type);
+            Func<ModifiableEntity> c = Constructors.TryGetC(type);
+            if (c != null)
+            {
+                ModifiableEntity result = c();
+                if (result != null)
+                    return result;
+            }
+
+            if (GeneralConstructor != null)
+            {
+                ModifiableEntity result = GeneralConstructor(type);
+                if (result != null)
+                    return result;
+            }
+
+            return DefaultContructor(type);
+        }
+
+        public static ModifiableEntity DefaultContructor(Type type)
+        {
+            return (ModifiableEntity)Activator.CreateInstance(type);
+        }
+
+        public virtual object VisualConstruct(Type type, ControllerBase controller)
+        {
+            Func<ControllerBase, object> c = VisualConstructors.TryGetC(type);
             if (c != null)
             {
                 object result = c(controller);
@@ -68,52 +97,32 @@ namespace Signum.Web
                     return result;
             }
 
-            if (GeneralConstructor != null)
+            if (VisualGeneralConstructor != null)
             {
-                object result = GeneralConstructor(type, controller);
+                object result = VisualGeneralConstructor(type, controller);
                 if (result != null)
                     return result;
             }
 
-            return DefaultContructor(type, controller);
+            object o = Constructor.Construct(type);
+            return AddFilterProperties(o, controller);
         }
 
-        public virtual ModifiableEntity ConstructStrict(Type type)
-        {
-            Func<Controller, object> c = Constructors.TryGetC(type);
-            if (c != null)
-            {
-                object result = c(null);
-                if (result != null)
-                    return (ModifiableEntity)result;
-            }
-
-            return (ModifiableEntity)DefaultContructor(type, null);
-        }
-
-        public static object DefaultContructor(Type type, Controller controller)
-        {
-            object result = Activator.CreateInstance(type);
-
-            if (controller != null)
-                result = AddFilterProperties(result, controller);
-
-            return result;
-        }
-
-        public static object AddFilterProperties(object obj, Controller controller)
+        public static object AddFilterProperties(object obj, ControllerBase controller)
         {
             if (obj == null)
                 throw new ArgumentNullException("result");
 
-            if (!controller.Request.Params.AllKeys.Contains("sfQueryUrlName"))
+            HttpContextBase httpContext = controller.ControllerContext.HttpContext;
+
+            if (!httpContext.Request.Params.AllKeys.Contains("sfQueryUrlName"))
                 return obj;
 
             Type type = obj.GetType();
-            
-            object queryName = Navigator.ResolveQueryFromUrlName(controller.Request.Params["sfQueryUrlName"]);
 
-            var filters = FindOptionsModelBinder.ExtractFilterOptions(controller.HttpContext, queryName)
+            object queryName = Navigator.ResolveQueryFromUrlName(httpContext.Request.Params["sfQueryUrlName"]);
+
+            var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryName)
                 .Where(fo => fo.Operation == FilterOperation.EqualTo);
 
             var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)

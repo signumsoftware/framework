@@ -214,6 +214,16 @@ namespace Signum.Utilities.Reflection
             return ((MemberExpression)body).Expression.Type;
         }
 
+        public static Func<T, P> CreateGetter<T, P>(MemberInfo m)
+        {
+            if ((m as PropertyInfo).TryCS(a => !a.CanRead) ?? false)
+                return null;
+
+            ParameterExpression p = Expression.Parameter(typeof(T), "p");
+            var exp = Expression.Lambda(typeof(Func<T,P>), Expression.MakeMemberAccess(p, m), p);
+            return (Func<T, P>)exp.Compile();
+        }
+
         public static Func<T, object> CreateGetter<T>(MemberInfo m)
         {
             if ((m as PropertyInfo).TryCS(a => !a.CanRead) ?? false)
@@ -236,6 +246,22 @@ namespace Signum.Utilities.Reflection
             return (Func<object, object>)exp.Compile();
         }
 
+        public static Action<T, P> CreateSetter<T, P>(MemberInfo m)
+        {
+            if ((m as PropertyInfo).TryCS(a => !a.CanWrite) ?? false)
+                return null;
+
+            DynamicMethod setter = new DynamicMethod(
+                "{0}_Setter".Formato(m.Name),
+                    typeof(void), new[] { typeof(T), typeof(P) },
+                    m.DeclaringType);
+
+            ILGenerator generator = setter.GetILGenerator();
+            GenerateSetterIL(generator, m, null, null);
+
+            return (Action<T, P>)setter.CreateDelegate(typeof(Action<T, P>));
+        }
+
         //Replace when C# 4.0 is available
         public static Action<T, object> CreateSetter<T>(MemberInfo m)
         {
@@ -248,7 +274,7 @@ namespace Signum.Utilities.Reflection
                     m.DeclaringType);
 
             ILGenerator generator = setter.GetILGenerator();
-            GenerateSetterIL(generator, m, null);
+            GenerateSetterIL(generator, m, null, m.ReturningType());
 
             return (Action<T, object>)setter.CreateDelegate(typeof(Action<T, object>));
 
@@ -268,26 +294,27 @@ namespace Signum.Utilities.Reflection
                     m.DeclaringType);
 
             ILGenerator generator = setter.GetILGenerator();
-            GenerateSetterIL(generator, m, type);
+            GenerateSetterIL(generator, m, type, m.ReturningType());
 
             return (Action<object, object>)setter.CreateDelegate(typeof(Action<object, object>));
         }
 
-        static void GenerateSetterIL(ILGenerator generator, MemberInfo m, Type castingType)
+        static void GenerateSetterIL(ILGenerator generator, MemberInfo m, Type castEntityType, Type castPropertyType)
         {
-            Type retType = m.ReturningType();
-
             generator.Emit(OpCodes.Ldarg_0);
 
-            if (castingType != null)
-                generator.Emit(OpCodes.Castclass, castingType);
+            if (castEntityType != null)
+                generator.Emit(OpCodes.Castclass, castEntityType);
 
             generator.Emit(OpCodes.Ldarg_1);
 
-            if (retType.IsClass)
-                generator.Emit(OpCodes.Castclass, retType);
-            else
-                generator.Emit(OpCodes.Unbox_Any, retType);
+            if (castPropertyType != null)
+            {
+                if (castPropertyType.IsClass)
+                    generator.Emit(OpCodes.Castclass, castPropertyType);
+                else
+                    generator.Emit(OpCodes.Unbox_Any, castPropertyType);
+            }
 
             if (m is PropertyInfo)
                 generator.Emit(OpCodes.Callvirt, ((PropertyInfo)m).GetSetMethod(true));

@@ -76,7 +76,7 @@ namespace Signum.Web
 
             ViewDataDictionary vdd = new ViewDataDictionary(tc)
             { 
-                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.PartialViewName((ModifiableEntity)tc.UntypedValue)},
+                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.OnPartialViewName((ModifiableEntity)tc.UntypedValue)},
                 { ViewDataKeys.PopupPrefix, helper.ParentPrefix() }
             };
             helper.PropagateSFKeys(vdd);
@@ -108,7 +108,7 @@ namespace Signum.Web
             if (settings.ReloadOnChange)
                 vdd[ViewDataKeys.Reactive] = true;
 
-            sb.AppendLine(helper.RenderPartialToString(settings.PartialViewName ?? es.PartialViewName((ModifiableEntity)tc.UntypedValue), vdd));
+            sb.AppendLine(helper.RenderPartialToString(settings.PartialViewName ?? es.OnPartialViewName((ModifiableEntity)tc.UntypedValue), vdd));
 
             return sb.ToString();
         }
@@ -125,7 +125,7 @@ namespace Signum.Web
 
             string implementations = ImplementationsModelBinder.Render(settings.Implementations);
 
-            return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.Implementations), implementations);
+            return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.Implementations), implementations, new { disabled = "disabled"});
         }
 
         public static string WriteViewButton<T>(HtmlHelper helper, EntityBase settings, T value)

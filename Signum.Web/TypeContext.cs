@@ -216,9 +216,14 @@ namespace Signum.Web
             set { ownsStyleContext = value; } 
         }
 
-        public static string Compose(string prefix, params string[] namesToAppend)
+        public string Compose(string nameToAppend)
         {
-            return Compose(prefix, (IEnumerable<string>)namesToAppend);
+            return Name + Separator + nameToAppend;
+        }
+
+        public static string Compose(string prefix, string nameToAppend)
+        {
+            return prefix + Separator + nameToAppend;
         }
 
         public static string Compose(string prefix, IEnumerable<string> namesToAppend)

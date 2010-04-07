@@ -142,6 +142,11 @@ namespace Signum.Utilities
             return value == -1 ? null : (int?)value; 
         }
 
+        public static int NotFound(this int value, int defaultValue)
+        {
+            return value == -1 ? defaultValue : value;
+        }
+
         public static T ThrowIfNullS<T>(this T? t, string mensaje)
          where T : struct
         {

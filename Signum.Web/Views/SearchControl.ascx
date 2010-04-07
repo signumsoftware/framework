@@ -33,7 +33,7 @@
        { %>
         <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}},'{1}');".Formato(popupPrefix ?? "", sufix)%>" />
     <%} %>
-    <%= Html.GetButtonBarElementsForQuery(findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType], popupPrefix)%> 
+    <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType]).ToString(Html, popupPrefix)%> 
 </div>
 <div class="clearall"></div>
 <div id="<%=Html.GlobalName("divResults" + sufix)%>" class="divResults"></div>

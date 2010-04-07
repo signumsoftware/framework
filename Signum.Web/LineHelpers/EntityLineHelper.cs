@@ -86,7 +86,7 @@ namespace Signum.Web
             {
                 //sb.AppendLine(helper.HiddenEntityInfo(prefix, new EmbeddedRuntimeInfo<T>(value, false) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
 
-                typeContext.Value = (T)(object)Constructor.ConstructStrict(cleanRuntimeType ?? cleanStaticType);
+                typeContext.Value = (T)(object)Constructor.Construct(cleanRuntimeType ?? cleanStaticType);
                 sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
                         TypeContext.Compose(prefix, EntityBaseKeys.Template),
                         EntityBaseHelper.JsEscape(EntityBaseHelper.RenderPopupContent(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));

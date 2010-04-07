@@ -757,6 +757,27 @@ namespace Signum.Utilities
 
             return oldDictionary.Select(p => resultSelector(p.Value, newDictionary[p.Key]));
         }
+
+        public static IEnumerable<Iteration<T>> Iterate<T>(this IEnumerable<T> collection)
+        {
+            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    yield break;
+                }
+                bool isFirst = true;
+                bool isLast = false;
+                int index = 0;
+                while (!isLast)
+                {
+                    T current = enumerator.Current;
+                    isLast = !enumerator.MoveNext();
+                    yield return new Iteration<T>(current, isFirst, isLast, index++);
+                    isFirst = false;
+                }
+            }
+        }
     }
 
     public enum BiSelectOptions
@@ -766,5 +787,28 @@ namespace Signum.Utilities
         Final,
         InitialAndFinal,
         Circular,
+    }
+
+    public class Iteration<T>
+    {
+        readonly T value;
+        readonly bool isFirst;
+        readonly bool isLast; 
+        readonly int position;
+
+        internal Iteration(T value, bool isFirst, bool isLast, int position)
+        {
+            this.value = value;
+            this.isFirst = isFirst;
+            this.isLast = isLast;
+            this.position = position;
+        }
+
+        public T Value { get { return value; } }
+        public bool IsFirst { get { return isFirst; } }
+        public bool IsLast { get { return isLast; } }
+        public int Position { get { return position; } }
+        public bool IsEven { get { return position % 2 == 0; } }
+        public bool IsOdd { get { return position % 1 == 0; } }
     }
 }

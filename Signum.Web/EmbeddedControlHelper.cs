@@ -44,7 +44,7 @@ namespace Signum.Web
                     var s = Expression.Parameter(typeof(S), "s");
                     var lambda = Expression.Lambda(Expression.Convert(s, runtimeType), s);
                     TypeContext c = Common.UntypedWalkExpression(context, lambda);
-                    EmbeddedControl(helper, c, Navigator.Manager.EntitySettings[runtimeType].PartialViewName((ModifiableEntity)c.UntypedValue), null, true);
+                    EmbeddedControl(helper, c, Navigator.Manager.EntitySettings[runtimeType].OnPartialViewName((ModifiableEntity)c.UntypedValue), null, true);
                     return; 
                 }
             }
@@ -52,7 +52,7 @@ namespace Signum.Web
             {
                 runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
-            EmbeddedControl(helper, context, Navigator.Manager.EntitySettings[runtimeType].PartialViewName((ModifiableEntity)context.UntypedValue), null, true);
+            EmbeddedControl(helper, context, Navigator.Manager.EntitySettings[runtimeType].OnPartialViewName((ModifiableEntity)context.UntypedValue), null, true);
         }
 
        public static void EmbeddedControl<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<EmbeddedControlSettings> settingsModifier)
@@ -74,7 +74,7 @@ namespace Signum.Web
                     var s = Expression.Parameter(typeof(S), "s");
                     var lambda = Expression.Lambda(Expression.Convert(s, runtimeType), s);
                     TypeContext c = Common.UntypedWalkExpression(context, lambda);
-                    EmbeddedControl(helper, c, ec.ViewName ?? Navigator.Manager.EntitySettings[runtimeType].PartialViewName((ModifiableEntity)c.UntypedValue), ec.ViewData, ec.WriteSFInfo);
+                    EmbeddedControl(helper, c, ec.ViewName ?? Navigator.Manager.EntitySettings[runtimeType].OnPartialViewName((ModifiableEntity)c.UntypedValue), ec.ViewData, ec.WriteSFInfo);
                     return; 
                 }
             }
@@ -83,7 +83,7 @@ namespace Signum.Web
                 runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
             }
 
-            EmbeddedControl(helper, context, ec.ViewName ?? Navigator.Manager.EntitySettings[runtimeType].PartialViewName((ModifiableEntity)context.UntypedValue), ec.ViewData, ec.WriteSFInfo);
+            EmbeddedControl(helper, context, ec.ViewName ?? Navigator.Manager.EntitySettings[runtimeType].OnPartialViewName((ModifiableEntity)context.UntypedValue), ec.ViewData, ec.WriteSFInfo);
         }
 
         private static void EmbeddedControl(this HtmlHelper helper, TypeContext tc, string ViewName, Dictionary<string,object> ViewData, bool writeSFInfo)

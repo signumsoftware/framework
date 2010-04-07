@@ -7,6 +7,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
+using Signum.Engine;
 
 namespace Signum.Web.Controllers
 {
@@ -21,7 +22,7 @@ namespace Signum.Web.Controllers
 
                  int id;
                  if (int.TryParse(value, out id))
-                     return Lite.Create(cleanType, id);
+                     return Database.RetrieveLite(cleanType, id);
 
                  return ParseLite(cleanType, value);
              }

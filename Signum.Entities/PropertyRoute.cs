@@ -13,7 +13,7 @@ using Signum.Utilities.ExpressionTrees;
 namespace Signum.Entities
 {
     [Serializable]
-    public class PropertyRoute
+    public class PropertyRoute : IEquatable<PropertyRoute>
     {
         Type type;
         public PropertyRouteType PropertyRouteType { get; private set; } 
@@ -139,6 +139,19 @@ namespace Signum.Entities
             throw new InvalidOperationException();
         }
 
+
+        public static PropertyRoute Parse(Type type, string route)
+        {
+            PropertyRoute result = PropertyRoute.Root(type);
+
+            foreach (var part in route.Replace("/", ".Item.").Split('.'))
+            {
+                result = result.Add(part);
+            }
+
+            return result;
+        }
+
         public static void SetFindImplementationsCallback(Func<PropertyRoute, Implementations> findImplementations)
         {
             FindImplementations = findImplementations;
@@ -207,6 +220,38 @@ namespace Signum.Entities
             }
 
             return result;
+        }
+
+        public bool Equals(PropertyRoute other)
+        {
+            if (other.PropertyRouteType != this.PropertyRouteType)
+                return false;
+
+            if (Type != other.Type)
+                return false;
+
+            if (!ReflectionTools.PropertyEquals(PropertyInfo, other.PropertyInfo))
+                return false;
+
+            return object.Equals(Parent, other.Parent); 
+        }
+
+        public override int GetHashCode()
+        {
+            if (PropertyInfo != null)
+                return PropertyInfo.Name.GetHashCode();
+
+            return type.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            PropertyRoute other = obj as PropertyRoute;
+
+            if (obj == null)
+                return false;
+
+            return Equals(other);
         }
     }
 

@@ -37,7 +37,8 @@ namespace Signum.Web
         public string BindingError { get; set; }
         public long? TicksLastChange { get; set; }
 
-        protected static readonly string[] specialProperties = new[] { 
+        protected static readonly string[] specialProperties = new[] 
+        { 
             TypeContext.Id, 
             TypeContext.Ticks,
             EntityBaseKeys.RuntimeInfo,
@@ -224,7 +225,7 @@ namespace Signum.Web
                         Modification.BindingError = Modification.BindingError.Replace("Binding Error", "");
                         if (Modification.BindingError != null && Modification.BindingError.Contains("\r\n\r\n"))
                             Modification.BindingError = Modification.BindingError.Replace("\r\n\r\n", "");
-                        Modification.BindingError = Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(value, PropertyPack.PropertyInfo.NiceName()));
+                        Modification.BindingError = Modification.BindingError.AddLine(Resources.NotPossibleToAssign0.Formato(PropertyPack.PropertyInfo.NiceName()));
                     }
                     else if (entity != null && value == null && PropertyPack.PropertyInfo.PropertyType.IsValueType && !Modification.BindingError.HasText())
                         Modification.BindingError = Modification.BindingError.AddLine(Resources.ValueMustBeSpecifiedFor0.Formato(PropertyPack.PropertyInfo.NiceName()));
@@ -237,7 +238,7 @@ namespace Signum.Web
                         Modification.BindingError = Modification.BindingError.Replace("Binding Error", "");
                     if (Modification.BindingError != null && Modification.BindingError.Contains("\r\n\r\n"))
                         Modification.BindingError = Modification.BindingError.Replace("\r\n\r\n", "");
-                    Modification.BindingError = Modification.BindingError.AddLine(Resources.NotPossibleToAssign0To1.Formato(value, PropertyPack.PropertyInfo.NiceName()));
+                    Modification.BindingError = Modification.BindingError.AddLine(Resources.NotPossibleToAssign0.Formato(PropertyPack.PropertyInfo.NiceName()));
                 }
             }
         }
@@ -374,7 +375,7 @@ namespace Signum.Web
                         (typeof(IIdentifiable).IsAssignableFrom(entity.GetType()) && ((IIdentifiable)entity).IsNew))
                         return entity;
                 }
-                return (ModifiableEntity)Constructor.Construct(RuntimeType, controller);
+                return Constructor.Construct(RuntimeType);
             }
 
             if (typeof(EmbeddedEntity).IsAssignableFrom(RuntimeType))
@@ -637,8 +638,8 @@ namespace Signum.Web
                 {
                     //TODO Anto: If an MList of Lite of an abstract type, the following construct will fail
                     object newValue = typeof(Lite).IsAssignableFrom(item.First.StaticType) ?
-                        ((IdentifiableEntity)Constructor.Construct(Reflector.ExtractLite(item.First.StaticType), null)).ToLiteFat() :
-                        Constructor.Construct(item.First.StaticType, null);
+                        ((IdentifiableEntity)Constructor.Construct(Reflector.ExtractLite(item.First.StaticType))).ToLiteFat() :
+                        (object)Constructor.Construct(item.First.StaticType);
                     ModificationState modState = new ModificationState();
                     Modifiable mod = (Modifiable)item.First.ApplyChanges(controller, newValue, modState);
                     modState.Finish();

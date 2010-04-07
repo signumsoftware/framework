@@ -31,7 +31,8 @@ namespace Signum.Web
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo { Ticks = ticks }, new StaticInfo(elementsCleanStaticType) { IsReadOnly = settings.ReadOnly }));
+            sb.AppendLine(helper.HiddenStaticInfo(prefix, new StaticInfo(elementsCleanStaticType) { IsReadOnly = settings.ReadOnly }));
+            sb.AppendLine(helper.Hidden(TypeContext.Compose(prefix, TypeContext.Ticks), ticks.TryToString() ?? ""));
             
             sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
 
@@ -41,7 +42,7 @@ namespace Signum.Web
             if (typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanStaticType))
                 sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\";</script>".Formato(
                         TypeContext.Compose(prefix, EntityBaseKeys.Template),
-                        EntityBaseHelper.JsEscape(ListBaseHelper.RenderItemPopupContents(helper, prefix, typeContext, (T)(object)Constructor.ConstructStrict(typeof(T)), 0, settings, elementsCleanStaticType, elementsCleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
+                        EntityBaseHelper.JsEscape(ListBaseHelper.RenderItemPopupContents(helper, prefix, typeContext, (T)(object)Constructor.Construct(typeof(T)), 0, settings, elementsCleanStaticType, elementsCleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
 
             if (settings.ShowFieldDiv)
                 sb.AppendLine("<div class='fieldList'>");

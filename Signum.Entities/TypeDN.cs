@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities;
 
 namespace Signum.Entities
 {
@@ -44,6 +45,23 @@ namespace Signum.Entities
                 throw new ArgumentException("type");
 
             return FullClassName == type.FullName;
+        }
+
+
+        public string Namespace
+        {
+            get
+            {
+                return FullClassName.Substring(0, FullClassName.LastIndexOf('.').NotFound(0));
+            }
+        }
+
+        public string ClassName
+        {
+            get
+            {
+                return FullClassName.Substring(FullClassName.LastIndexOf('.') + 1);
+            }
         }
     }
 }

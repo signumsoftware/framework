@@ -28,7 +28,7 @@ namespace Signum.Web
             
             long? ticks = EntityBaseHelper.GetTicks(helper, idValueField, settings);
             if (ticks != null) 
-                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}'/>".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks), ticks.Value));
+                sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.Ticks), ticks.Value));
 
             if (StyleContext.Current.LabelVisible)
             {

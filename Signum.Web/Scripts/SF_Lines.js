@@ -407,7 +407,7 @@ var EList = function(_elistOptions) {
     };
 
     this.extraJsonParams = function(itemPrefix) {
-    log("EList extraJsonParams");
+        log("EList extraJsonParams");
         var extraParams = new Object();
 
         //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
@@ -436,7 +436,8 @@ var EList = function(_elistOptions) {
 
     this.setItemTicks = function(itemPrefix) {
         log("EList setItemTicks");
-        this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
+        //this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
+        $('#' + itemPrefix + sfTicks).val(new Date().getTime());
     };
 
     this.itemRuntimeInfo = function(itemPrefix) {

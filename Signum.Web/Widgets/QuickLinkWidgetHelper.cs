@@ -10,21 +10,45 @@ using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
-    public delegate List<QuickLinkItem> GetQuickLinksDelegate(HtmlHelper helper, IdentifiableEntity entity, string partialViewName);
+    public delegate QuickLinkItem[] GetQuickLinkItemDelegate<T>(T entity, HtmlHelper helper, string partialViewName);  
 
     public static class QuickLinkWidgetHelper
     {
-        public static event GetQuickLinksDelegate GetQuickLinks;
+        static Dictionary<Type, List<Delegate>> entityLinks = new Dictionary<Type, List<Delegate>>();
+        static List<GetQuickLinkItemDelegate<IdentifiableEntity>> globalLinks = new List<GetQuickLinkItemDelegate<IdentifiableEntity>>();
 
+        public static void RegisterEntityLinks<T>(GetQuickLinkItemDelegate<T> getQuickLinks)
+            where T : IdentifiableEntity
+        {
+            entityLinks.GetOrCreate(typeof(T)).Add(getQuickLinks);
+        }
 
-        public static void Start() {
+        public static void RegisterGlobalLinks(GetQuickLinkItemDelegate<IdentifiableEntity> getQuickLinks)
+        {
+            globalLinks.Add(getQuickLinks);
+        }
+
+        public static List<QuickLinkItem> GetForEntity(IdentifiableEntity ident, HtmlHelper helper, string partialViewName)
+        {
+            List<QuickLinkItem> links = new List<QuickLinkItem>();
+
+            links.AddRange(globalLinks.SelectMany(a => a(ident, helper, partialViewName).NotNull()));
+
+            List<Delegate> list = entityLinks.TryGetC(ident.GetType());
+            if (list != null)
+                links.AddRange(list.SelectMany(a => (QuickLinkItem[])a.DynamicInvoke(ident, helper, partialViewName)));
+
+            return links;
+        }
+
+        public static void Start()
+        {
             WidgetsHelper.GetWidgetsForView += (helper, entity, partialViewName) => CreateWidget(helper, (IdentifiableEntity)entity, partialViewName);
         }
 
         public static WidgetItem CreateWidget(HtmlHelper helper, IdentifiableEntity identifiable, string partialViewName)
         {
-            List<QuickLinkItem> quicklinks = new List<QuickLinkItem>();
-            if (GetQuickLinks != null) quicklinks = GetQuickLinks(helper, identifiable, partialViewName);
+            List<QuickLinkItem> quicklinks = GetForEntity(identifiable, helper, partialViewName);
             if (quicklinks == null || quicklinks.Count == 0) return null;
             return new WidgetItem
             {

@@ -1,6 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="System.Configuration" %>
+<%@ Import Namespace="Signum.Web.Properties" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <!--<link href="System.Web.VirtualPathUtility.ToAbsolute("~/Content/Site.css")" rel="stylesheet" type="text/css" />-->
@@ -33,9 +34,9 @@
      </h2>
      <div id="divButtonBar" class="operations">
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
-            <div id="btnSave" class="OperationDiv" onclick="javascript:TrySave({});">Guardar</div>  
+            <div id="btnSave" class="OperationDiv" onclick="javascript:TrySave({});"><%= Resources.Save %></div>  
         <%} %>
-        <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), "") %>     
+        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, Model, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, "") %>     
      </div>
      <div class="clearall"></div>
      <div class="validationSummaryAjax">

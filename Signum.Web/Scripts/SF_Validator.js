@@ -235,11 +235,12 @@ var PartialValidator = function(_pvalOptions) {
 
     this.trySave = function() {
         log("PartialValidator trySave");
-        if (empty(this.valOptions.type))
-            throw "Type must be specified in PartialValidatorOptions for TrySavePartial";
+        //        if (empty(this.valOptions.type))
+        //            throw "Type must be specified in PartialValidatorOptions for TrySavePartial";
         NotifyInfo(lang['saving']);
         var validatorResult = null;
         var self = this;
+        alert(this.savingControllerUrl);
         $.ajax({
             type: "POST",
             url: this.savingControllerUrl,
@@ -272,8 +273,7 @@ var PartialValidator = function(_pvalOptions) {
         if (requestData.indexOf(this.valOptions.prefix + sfRuntimeInfo) < 0) {
             var info = new RuntimeInfo(this.valOptions.prefix);
             var infoField = info.find();
-            if (empty(this.valOptions.type))
-            {
+            if (empty(this.valOptions.type)) {
                 if (empty(info.runtimeType()))
                     requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', ''));
                 else

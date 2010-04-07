@@ -1,6 +1,7 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Entities.Reflection" %>
 <%
     string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
@@ -56,7 +57,7 @@
          <%} %>    
             
         <%} %>
-        <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), prefix) %>
+        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, prefix)%>
     </div>
     <div class="clearall"></div>
     <%= Html.ValidationSummaryAjax(prefix) %>

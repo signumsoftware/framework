@@ -165,8 +165,8 @@
   <data name="NoQueryWithName0" xml:space="preserve">
     <value>There's no query with name {{{0}}}</value>
   </data>
-  <data name="NotPossibleToAssign0To1" xml:space="preserve">
-    <value>It's not possible to set {0} as {1}</value>
+  <data name="NotPossibleToAssign0" xml:space="preserve">
+    <value>It's not possible to set {0}</value>
   </data>
   <data name="NoTypeForUrlName0" xml:space="preserve">
     <value>There's no type registered for UrlName {{{0}}}</value>
@@ -287,5 +287,8 @@
   </data>
   <data name="ValueLineBoxType0DoesNotExist" xml:space="preserve">
     <value>ValueLineBoxType {0} does not exist</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
   </data>
 </root>

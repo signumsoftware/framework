@@ -137,7 +137,7 @@ namespace Signum.Engine.Maps
             //generacion del nombre del campo
             NameSequence name = preName;
             if (contexto == Contexts.Normal || contexto == Contexts.Embedded || contexto == Contexts.View)
-                name = name.Add(GenerateFieldName(fi, kof));
+                name = name.Add(GenerateFieldName(type, fi, kof));
             else if (contexto == Contexts.MList && (kof == KindOfField.Enum || kof == KindOfField.Reference))
                 name = name.Add(GenerateFieldName(Reflector.ExtractLite(fieldType) ?? fieldType, kof));
 
@@ -343,6 +343,7 @@ namespace Signum.Engine.Maps
         {
             type = Reflector.ExtractLite(type) ?? type;
             type = Reflector.ExtractEnumProxy(type) ?? type;
+
             return type.Name;
         }
 
@@ -366,7 +367,7 @@ namespace Signum.Engine.Maps
             }
         }
 
-        public virtual string GenerateFieldName(FieldInfo fi, KindOfField tipoCampo)
+        public virtual string GenerateFieldName(Type type, FieldInfo fi, KindOfField tipoCampo)
         {
             string name = Reflector.CleanFieldName(fi.Name);
 
@@ -424,15 +425,19 @@ namespace Signum.Engine.Maps
         public override string GenerateTableName(Type type)
         {
             SqlViewNameAttribute vn = type.SingleAttribute<SqlViewNameAttribute>();
+            if (vn != null)
+                return vn.Name;
 
-            return vn.TryCC(a => a.Name) ?? TypeName(type);
+            return TypeName(type);
         }
 
-        public override string GenerateFieldName(FieldInfo fi, KindOfField tipoCampo)
+        public override string GenerateFieldName(Type type, FieldInfo fi, KindOfField tipoCampo)
         {
             SqlViewColumnAttribute vc = fi.SingleAttribute<SqlViewColumnAttribute>();
+            if (vc != null)
+                return vc.Name;
 
-            return vc.TryCC(a => a.Name) ?? base.GenerateFieldName(fi, tipoCampo);
+            return base.GenerateFieldName(type, fi, tipoCampo);
         }
 
         public override string GenerateFieldName(Type type, KindOfField tipoCampo)

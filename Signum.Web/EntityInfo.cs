@@ -219,9 +219,6 @@ namespace Signum.Web
 
         public static RuntimeInfo FromFormValue(string formValue)
         {
-            if (string.IsNullOrEmpty(formValue))
-                return null;
-
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
             if (parts.Length != 4)
                 throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));

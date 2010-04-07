@@ -168,8 +168,8 @@
   <data name="NoQueryWithName0" xml:space="preserve">
     <value>No hay una query asociada al nombre {{{0}}}</value>
   </data>
-  <data name="NotPossibleToAssign0To1" xml:space="preserve">
-    <value>No es posible utilizar el valor indicado como {1}</value>
+  <data name="NotPossibleToAssign0" xml:space="preserve">
+    <value>No es posible utilizar el valor indicado como {0}</value>
   </data>
   <data name="NoTypeForUrlName0" xml:space="preserve">
     <value>No hay un tipo asociado al nombre de url {{{0}}}</value>
@@ -239,5 +239,8 @@
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
     <value>Los datos de Sesión son incorrectos. Debe refrescar la página antes de continuar</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Guardar</value>
   </data>
 </root>
