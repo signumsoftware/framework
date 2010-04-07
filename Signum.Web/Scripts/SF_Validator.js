@@ -240,7 +240,6 @@ var PartialValidator = function(_pvalOptions) {
         NotifyInfo(lang['saving']);
         var validatorResult = null;
         var self = this;
-        alert(this.savingControllerUrl);
         $.ajax({
             type: "POST",
             url: this.savingControllerUrl,

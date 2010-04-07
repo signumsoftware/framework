@@ -33,11 +33,11 @@ namespace Signum.Web
         {
             List<ToolBarButton> links = new List<ToolBarButton>();
 
-            links.AddRange(globalButtons.SelectMany(a => a(controllerContext, entity, mainControlUrl).NotNull()));
+            links.AddRange(globalButtons.SelectMany(a => a(controllerContext, entity, mainControlUrl) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
             List<Delegate> list = entityButtons.TryGetC(entity.GetType());
             if (list != null)
-                links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(controllerContext, entity, mainControlUrl)) ?? Enumerable.Empty<ToolBarButton>()));
+                links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(controllerContext, entity, mainControlUrl)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
             return links;
         }
@@ -56,7 +56,7 @@ namespace Signum.Web
             if (GetButtonBarForQueryName != null)
                 elements.AddRange(GetButtonBarForQueryName.GetInvocationList()
                     .Cast<GetToolBarButtonQueryDelegate>()
-                    .Select(d => d(context, queryName, entityType))
+                    .Select(d => d(context, queryName, entityType) ?? Enumerable.Empty<ToolBarButton>())
                     .NotNull().SelectMany(d => d).ToList());
 
             return elements;

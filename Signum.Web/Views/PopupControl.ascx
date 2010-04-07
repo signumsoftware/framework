@@ -7,27 +7,7 @@
     string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
     string prefix = Html.GlobalPrefixedName("");
     string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
-    string popupTitle = "";
-    string typeNiceName = "";
-    if (pageTitle == null)
-    {
-        if (Model is ValueLineBoxModel)
-            pageTitle = "Introducción Datos";
-        else
-        {
-            if (Model is TypeContext)
-            {
-                TypeContext tc = (TypeContext)Model;
-                popupTitle = tc.UntypedValue.TryToString();
-                typeNiceName = tc.UntypedValue.TryCC(uv => uv.GetType()).TryCC(t => t.NiceName());
-            }
-            else
-            {
-                popupTitle = Model.ToString();
-                typeNiceName = Model.GetType().NiceName();
-            }
-        }
-    }
+    ModifiableEntity entity = (ModifiableEntity)(Model is TypeContext ? ((TypeContext)Model).UntypedValue : Model);
 %>
 <div id="<%=Html.GlobalPrefixedName("externalPopupDiv" + sufix)%>">
 <div id="<%=Html.GlobalPrefixedName("modalBackground" + sufix)%>" class="transparent popupBackground"></div>
@@ -45,7 +25,7 @@
         <%}
           else
           { %>
-        <span class="popupEntityName"><%= typeNiceName%></span><span class="popupTitle"><%= popupTitle%></span>
+        <span class="popupEntityName"><%= entity.GetType().NiceName() %></span><span class="popupTitle"><%= entity.ToString() %></span>
         <%} %>
     </div>
     <div id="<%=Html.GlobalPrefixedName("divButtonBar" + sufix)%>" class="buttonBar">
@@ -57,7 +37,7 @@
          <%} %>    
             
         <%} %>
-        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)Model, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, prefix)%>
+        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, entity, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, prefix)%>
     </div>
     <div class="clearall"></div>
     <%= Html.ValidationSummaryAjax(prefix) %>

@@ -77,9 +77,11 @@ namespace Signum.Web
 
         public string ControlID { get; private set; }
 
+        public abstract SortedList<string, string> GlobalInputs { get; }
+
         public string Input
         {
-            get { return Root.Inputs.TryGetC(ControlID); }
+            get { return Root.GlobalInputs.TryGetC(ControlID); }
         }
         public abstract IDictionary<string, string> Inputs { get; }
 
@@ -267,21 +269,32 @@ namespace Signum.Web
         ControllerContext controllerContext;
         public override ControllerContext ControllerContext { get { return controllerContext; } }
 
-        SortedList<string, string> inputs;
+        SortedList<string, string> globalInputs;
+        public override SortedList<string, string> GlobalInputs
+        {
+            get { return globalInputs; }
+        }
+
+        ContextualSortedList<string> inputs;
         public override IDictionary<string, string> Inputs { get { return inputs; } }
 
         Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
+        // Ticks => ControlID, Action
+        SortedList<long, Tuple<string, Action>> actions = new SortedList<long, Tuple<string, Action>>();
 
-        /// <summary>
-        /// Ticks => ControlID, Action
-        /// </summary>
-        public SortedList<long, Tuple<string, Action>> Actions = new SortedList<long, Tuple<string, Action>>();
+        public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> inputs, ControllerContext controllerContext) :
+            base(prefix, mapping, null)
+        {
+            this.globalInputs = inputs;
+            this.inputs = new ContextualSortedList<string>(inputs, prefix);
+            this.controllerContext = controllerContext;
+        }
 
         public void Finish()
         {
-            foreach (var pair in Actions.Values)
+            foreach (var pair in actions.Values)
                 pair.Second();
         }
 
@@ -292,14 +305,7 @@ namespace Signum.Web
 
         internal override void AddOnFinish(Action action, long ticks, string controlID)
         {
-            Actions.GetOrCreate(ticks, () => new Tuple<string, Action>(controlID, action));
-        }
-
-        public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> inputs, ControllerContext controllerContext ) :
-            base(prefix, mapping, null)
-        {
-            this.inputs = inputs;
-            this.controllerContext = controllerContext;
+            actions.GetOrCreate(ticks, () => new Tuple<string, Action>(controlID, action));
         }
 
         internal override MappingContext Next
@@ -310,7 +316,7 @@ namespace Signum.Web
 
         public override Dictionary<string, long> GetTicksDictionary()
         {
-            return Actions.ToDictionary(kvp => kvp.Value.First, kvp => kvp.Key);
+            return actions.ToDictionary(kvp => kvp.Value.First, kvp => kvp.Key);
         }
     }
 
@@ -334,6 +340,11 @@ namespace Signum.Web
             get { return root.ControllerContext; }
         }
 
+        public override SortedList<string, string> GlobalInputs
+        {
+            get { return root.GlobalInputs; }
+        }
+
         ContextualSortedList<string> inputs;
         public override IDictionary<string, string> Inputs { get { return inputs; } }
 
@@ -355,10 +366,7 @@ namespace Signum.Web
         {
             this.parent = parent;
             this.root = parent.Root;
-            this.inputs = parent.Inputs is SortedList<string, string> ?
-                new ContextualSortedList<string>((SortedList<string, string>)parent.Inputs, controlID) :
-                new ContextualSortedList<string>((ContextualSortedList<string>)parent.Inputs, controlID);
-
+            this.inputs = new ContextualSortedList<string>((ContextualSortedList<string>)parent.Inputs, controlID);
             this.errors = new ContextualDictionary<List<string>>((Dictionary<string, List<string>>)root.Errors, controlID);
         }
 

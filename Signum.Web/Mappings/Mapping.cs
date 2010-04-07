@@ -132,7 +132,11 @@ namespace Signum.Web
 
         public override T DefaultGetValue(MappingContext<T> ctx)
         {
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(ctx.Inputs[EntityBaseKeys.RuntimeInfo]);
+            string strRuntimeInfo;
+            if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
+                return ctx.Value; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
+
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(strRuntimeInfo);
 
             if (runtimeInfo.RuntimeType == null)
             {
@@ -149,7 +153,7 @@ namespace Signum.Web
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
-                return (R)tc.None("Type {0} not allowed".Formato(typeof(R)));
+                return (R)(object)tc.None("Type {0} not allowed".Formato(typeof(R)));
             }
 
             Mapping<R> mapping = ((Mapping<R>)AllowedMappings.TryGetC(typeof(R))) ?? Navigator.EntitySettings<R>().MappingDefault;
@@ -161,7 +165,8 @@ namespace Signum.Web
 
         public override void RecursiveValidation(MappingContext<T> ctx)
         {
-            ctx.FirstChild.ValidateInternal();
+            if (ctx.FirstChild != null)
+                ctx.FirstChild.ValidateInternal();
         }
     }
 
@@ -241,6 +246,8 @@ namespace Signum.Web
 
             if (val == ctx.Value)
                 ctx.SupressChange = true;
+            else
+                ctx.Value = val;
 
             SetProperties(ctx);
 
@@ -251,7 +258,7 @@ namespace Signum.Web
         {
             foreach (PropertyMapping item in Properties.Values)
             {
-                if (ctx.Root.Ticks != null && ctx.Root.Ticks != 0)
+                if (ctx.Root.Ticks != null && ctx.Root.Ticks != 0 && !(ctx.Root is RootContext<T>))
                 {
                     ctx.AddOnFinish(() => item.SetProperty(ctx));
                 }
@@ -411,8 +418,8 @@ namespace Signum.Web
         {
             if (EntityMapping != null && ctx.Value != null && ctx.Value.EntityOrNull != null)
             {
-                MappingContext entityContext = ctx.FirstChild;
-                entityContext.ValidateInternal();
+                if (ctx.FirstChild != null)
+                    ctx.FirstChild.ValidateInternal();
             }
         }
     }
