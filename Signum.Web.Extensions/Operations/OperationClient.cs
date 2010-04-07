@@ -27,7 +27,7 @@ namespace Signum.Web.Operations
 
             Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);
             Constructor.ConstructorManager.VisualGeneralConstructor += new Func<Type, ControllerBase, object>(Manager.ConstructorManager_VisualGeneralConstructor);
-
+            
             ButtonBarQueryHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
         }
     }

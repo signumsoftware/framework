@@ -57,7 +57,7 @@ namespace Signum.Windows.Authorization
         
         private void Load()
         {
-            TypeRulePack trp = Server.Return((ITypeAuthServer s) => s.GetTypesRules(Role))
+            TypeRulePack trp = Server.Return((ITypeAuthServer s) => s.GetTypesRules(Role));
 
             DataContext = trp;
 

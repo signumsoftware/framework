@@ -38,7 +38,7 @@ namespace Signum.Web.Authorization
             {
                 ViewData["Title"] = Resources.ChangePassword;
                 ModelState.FromContext(context);
-                View(AuthClient.ChangePasswordUrl);
+                return View(AuthClient.ChangePasswordUrl);
             }
 
             Database.Save(context.Value);

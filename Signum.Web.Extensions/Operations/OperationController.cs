@@ -38,7 +38,7 @@ namespace Signum.Web.Operations
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity(sfOldPrefix).ApplyChanges(this.ControllerContext, sfOldPrefix, true).ValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity(sfOldPrefix).UntypedApplyChanges(this.ControllerContext, sfOldPrefix, true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.Errors.Any())
@@ -118,7 +118,7 @@ namespace Signum.Web.Operations
         public ActionResult ConstructFromManyExecute(string sfRuntimeType, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
-
+            
             List<Lite> sourceEntities = null;
             if (sfIds.HasText())
             {
