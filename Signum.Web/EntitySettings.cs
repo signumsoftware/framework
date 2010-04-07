@@ -91,28 +91,6 @@ namespace Signum.Web
                     break;
             }
         }
-
-        public void ChangeMappingAdmin(Action<EntityMapping<T>> continuation)
-        {
-            continuation(MappingAdmin);
-        }
-
-        public void ChangeMappingAdmin(EntityMapping<T> mapping, Action<EntityMapping<T>> continuation)
-        {
-            MappingAdmin = mapping;
-            continuation(MappingAdmin);
-        }
-
-        public void ChangeMappingDefault(Action<EntityMapping<T>> continuation)
-        {
-            continuation(MappingDefault);
-        }
-
-        public void ChangeMappingDefault(EntityMapping<T> mapping, Action<EntityMapping<T>> continuation)
-        {
-            MappingDefault = mapping;
-            continuation(MappingDefault);
-        }
     }
 
     public enum WindowType
