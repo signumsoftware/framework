@@ -50,13 +50,13 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Return((IQueryAuthServer s)=>s.GetQueryAllowedRules(Role, Type)); 
+            DataContext = Server.Return((IQueryAuthServer s)=>s.GetQueryRules(Role, Type)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IQueryAuthServer s) => s.SetQueryAllowedRules((List<AllowedRule>)listView.ItemsSource, Role, Type)); 
-            Load(); 
+            Server.Execute((IQueryAuthServer s) => s.SetQueryRules((QueryRulePack)DataContext));
+            Load();
         }
 
         private void btClose_Click(object sender, RoutedEventArgs e)

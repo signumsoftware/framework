@@ -50,7 +50,7 @@ namespace Signum.Web.Files
             ViewData["IdValueField"] = prefix;
             ViewData["FileType"] = fileType;
 
-            string sfUrl = Navigator.Manager.EntitySettings[type].PartialViewName(entity);
+            string sfUrl = Navigator.Manager.EntitySettings[type].OnPartialViewName(entity);
             
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
@@ -130,7 +130,7 @@ namespace Signum.Web.Files
 
             byte[] binaryFile;
 
-            binaryFile = fp.WebPath != null ? new WebClient().DownloadData(fp.WebPath)
+            binaryFile = fp.FullWebPath != null ? new WebClient().DownloadData(fp.FullWebPath)
                 : FilePathLogic.GetByteArray(fp);
 
             return File(binaryFile, GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);

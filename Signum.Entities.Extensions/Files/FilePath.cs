@@ -120,11 +120,6 @@ namespace Signum.Entities.Files
             }
         }
 
-        public Uri WebPath
-        {
-            get { return FullWebPath.HasText() ? new Uri(FullWebPath) : null; }
-        }
-
         public override string ToString()
         {
             return "{0} - {1}".Formato(FileName, ((long)FileLength).ToComputerSize(true));

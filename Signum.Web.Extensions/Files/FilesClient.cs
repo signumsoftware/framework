@@ -22,8 +22,7 @@ namespace Signum.Web.Files
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.EntitySettings.Add(typeof(FilePathDN), new EntitySettings(EntityType.Default) { PartialViewName = _ => ViewPrefix + "FilePathIU.ascx" });
-                CustomModificationBinders.Binders.Add(typeof(FilePathDN), (formValues, interval, controlID) => new FilePathModification(typeof(FilePathDN), formValues, interval, controlID));
+                Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "FilePathIU.ascx" });
             }
         }
     }

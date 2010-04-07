@@ -11,7 +11,7 @@ namespace Signum.Entities.Files
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
-        Uri WebPath { get; }
+        string FullWebPath { get; }
     }
 
     [Serializable]
@@ -34,18 +34,16 @@ namespace Signum.Entities.Files
             get { return binaryFile; }
             set { SetToStr(ref binaryFile, value, () => BinaryFile); }
         }
-
-        public Uri WebPath
-        {
-            get
-            {
-                return null;
-            }
-        }
         
         public override string ToString()
         {
             return "{0} {1}".Formato(fileName, BinaryFile.TryCC(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+        }
+
+        
+        public string FullWebPath
+        {
+            get { return null; }
         }
     }
 }

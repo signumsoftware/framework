@@ -17,11 +17,7 @@ namespace Signum.Engine.Authorization
 {
     public static class FacadeMethodAuthLogic
     {
-        static Dictionary<RoleDN, Dictionary<string, bool>> _runtimeRules;
-        public static Dictionary<RoleDN, Dictionary<string, bool>> RuntimeRules
-        {
-            get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
-        }
+        static AuthCache<RuleFacadeMethodDN, FacadeMethodDN, string, bool> cache; 
 
         public static void Start(SchemaBuilder sb, Type serviceInterface)
         {
@@ -29,96 +25,37 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertIsStarted(sb);
                 FacadeMethodLogic.Start(sb, serviceInterface);
-                sb.Include<RuleFacadeMethodDN>();
-                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
-                sb.Schema.EntityEvents<RuleFacadeMethodDN>().Saved += Schema_Saved;
-                AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
+
+                cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodDN, string, bool>(sb,
+                     fm => fm.Name,
+                     n => FacadeMethodLogic.RetrieveOrGenerateServiceOperations().Single(fm => fm.Name == n),
+                     AuthUtils.MaxAllowed, true); 
             }
         }
 
-        static void Schema_Initializing(Schema sender)
+        public static FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> roleLite)
         {
-            _runtimeRules = NewCache();
+            return new FacadeMethodRulePack
+            {
+                 Role = roleLite,
+                 Rules = cache.GetRules(roleLite, FacadeMethodLogic.RetrieveOrGenerateServiceOperations()).ToMList()
+            };
         }
 
-        static void Schema_Saved(RuleFacadeMethodDN rule, bool isRoot)
+        public static void SetFacadeMethodRules(FacadeMethodRulePack rules)
         {
-            Transaction.RealCommit += () => _runtimeRules = null;
+            cache.SetRules(rules);
         }
 
-        static void UserAndRoleLogic_RolesModified()
+        public static void SetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi, bool allowed)
         {
-            Transaction.RealCommit += () => _runtimeRules = null;
-        }
-
-        static bool GetAllowed(RoleDN role, string queryName)
-        {
-            return RuntimeRules.TryGetC(role).TryGetS(queryName) ?? true;
-        }
-
-        static bool GetBaseAllowed(RoleDN role, string queryName)
-        {
-            return role.Roles.Count == 0 ? true :
-                  role.Roles.Select(r => GetAllowed(r, queryName)).MaxAllowed();
-        }
-
-        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite)
-        {
-            var role = roleLite.Retrieve();
-
-            var operations = FacadeMethodLogic.RetrieveOrGenerateServiceOperations();
-            return operations.Select(o => new AllowedRule(GetBaseAllowed(role, o.Name))
-                    {
-                        Resource = o,
-                        Allowed = GetAllowed(role, o.Name),
-                    }).ToList();
-        }
-
-        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite)
-        {
-            var role = roleLite.Retrieve();
-            var current = Database.Query<RuleFacadeMethodDN>().Where(r => r.Role == role).ToDictionary(a => a.ServiceOperation);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => (FacadeMethodDN)r.Resource);
-
-            Synchronizer.Synchronize(current, should,
-                (s, sr) => sr.Delete(),
-                (s, ar) => new RuleFacadeMethodDN { ServiceOperation = s, Allowed = ar.Allowed, Role = role }.Save(),
-                (s, sr, ar) => { sr.Allowed = ar.Allowed; sr.Save(); });
-
-            _runtimeRules = null; 
+            cache.SetAllowed(role, mi.Name, allowed);
         }
 
         public static void AuthorizeAccess(MethodInfo mi)
         {
-            if (!GetAllowed(RoleDN.Current, mi.Name))
+            if (!cache.GetAllowed(RoleDN.Current, mi.Name))
                 throw new UnauthorizedAccessException(Resources.AccessToFacadeMethod0IsNotAllowed.Formato(mi.Name));
-        }
-
-        public static Dictionary<RoleDN, Dictionary<string, bool>> NewCache()
-        {
-            using (AuthLogic.Disable())
-            using (new EntityCache(true))
-            {
-                List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
-
-                Dictionary<RoleDN, Dictionary<string, bool>> realRules = Database.RetrieveAll<RuleFacadeMethodDN>()
-                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => a.ServiceOperation.Name, a => a.Allowed));
-
-                Dictionary<RoleDN, Dictionary<string, bool>> newRules = new Dictionary<RoleDN, Dictionary<string, bool>>();
-                foreach (var role in roles)
-                {
-                    var permissions = role.Roles.Count == 0 ?
-                         null :
-                         role.Roles.Select(r => newRules.TryGetC(r)).OuterCollapseDictionariesS(vals => vals.MaxAllowed());
-
-                    permissions = permissions.Override(realRules.TryGetC(role)).Simplify(a => a);
-
-                    if (permissions != null)
-                        newRules.Add(role, permissions);
-                }
-
-                return newRules;
-            }
         }
     }
 }

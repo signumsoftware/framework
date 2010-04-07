@@ -6,7 +6,7 @@
     xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     m:Monitors.AdjustToMonitor="true"
     WindowStartupLocation="CenterOwner"
-    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300">
+    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="authdn:TypeRulePack">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -67,11 +67,11 @@
 
             <TreeView.ItemTemplateSelector>
                 <m:TypeDataTemplateSelector>
-                    <HierarchicalDataTemplate  DataType="{x:Type auth:NamespaceNode}" ItemsSource="{Binding SubNodes}">
-                        <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Name}" />
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.GroupType}" ItemsSource="{Binding}">
+                        <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Key}" />
                     </HierarchicalDataTemplate>
 
-                    <HierarchicalDataTemplate DataType="{x:Type authdn:TypeAccessRule}">
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.RuleType}">
                         <Grid ShowGridLines="True">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -86,11 +86,11 @@
                                 <ColumnDefinition Width="58" />
                                 <ColumnDefinition Width="58" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Type.FriendlyName}" Grid.Column="0" />
-                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Create}" Style="{StaticResource SphereRadioButton}" Background="DodgerBlue" Grid.Column="1"/>
-                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Modify}" Style="{StaticResource SphereRadioButton}" Background="Lime" Grid.Column="2" />
-                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" Grid.Column="3"  />
-                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=None}" Style="{StaticResource SphereRadioButton}" Background="Red" Grid.Column="4"  />
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Resource.FriendlyName}" Grid.Column="0" />
+                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Create}}" Style="{StaticResource SphereRadioButton}" Background="Lime" Grid.Column="1"/>
+                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen" Grid.Column="2" />
+                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" Grid.Column="3"  />
+                            <RadioButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" Grid.Column="4"  />
                             <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" Grid.Column="5"  />
                             <Button Click="properties_Click" x:Name="properties" Content="{StaticResource View}" Style="{StaticResource RoundButton}" ToolTip="{m:Loc View}" Grid.Column="6" Visibility="{Binding Properties, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>
                             <Button Click="operations_Click" x:Name="operations" Content="{StaticResource View}" Style="{StaticResource RoundButton}" ToolTip="{m:Loc View}" Grid.Column="7"  Visibility="{Binding Properties, ElementName=me, Converter={x:Static m:Converters.BoolToVisibility}}"/>

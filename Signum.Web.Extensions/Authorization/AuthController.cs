@@ -1,34 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
-using System.Web.UI;
 using System.Threading;
 using Signum.Entities.Authorization;
 using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Entities;
-using System.Collections.Specialized;
 using Signum.Web.Extensions.Properties;
-using Signum.Engine.Operations;
-using Signum.Engine.Basics;
-using Signum.Entities.Operations;
 using System.Net.Mail;
-using System.Configuration;
 using System.Net;
 using System.Text;
+using System.Linq;
 
 namespace Signum.Web.Authorization
 {
-
     [HandleException]
-    public class AuthController : Controller
+    public partial class AuthController : Controller
     {
         public static event Action<UserDN> OnUserLogged;
         public const string SessionUserKey = "user";
@@ -41,41 +30,22 @@ namespace Signum.Web.Authorization
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult ChangePassword(string currentPassword, string newPassword, string confirmPassword)
+        public ActionResult ChangePassword(FormCollection form)
         {
-            ViewData["Title"] = Resources.ChangePassword;
-           // ViewData["PasswordLength"] = AuthLogic.MinRequiredPasswordLength;
+            var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
 
-            try
+            if (context.Errors.Any())
             {
-                if (string.IsNullOrEmpty(currentPassword))
-                    return ChangePasswordError("currentPassword", Resources.YouMustEnterTheCurrentPassword);
-
-                if (newPassword == null || newPassword.Length < AuthLogic.MinRequiredPasswordLength)
-                    return ChangePasswordError("newPassword",
-                         Resources.PasswordMustHave0orMoreCharacters.Formato(AuthLogic.MinRequiredPasswordLength));
-
-                if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
-                    return ChangePasswordError("_FORM", Resources.TheSpecifiedPasswordsDontMatch);
-
-                UserDN usr = AuthLogic.Login((UserDN.Current).UserName, Security.EncodePassword(currentPassword));
-                usr.PasswordHash = Security.EncodePassword(newPassword);
-                Database.Save(usr);
-                Session[SessionUserKey] = usr;
-                return RedirectToAction("ChangePasswordSuccess");
-            }
-            catch (Exception ex)
-            {
-                return ChangePasswordError("_FORM", ex.Message);
+                ViewData["Title"] = Resources.ChangePassword;
+                ModelState.FromContext(context);
+                View(AuthClient.ChangePasswordUrl);
             }
 
+            Database.Save(context.Value);
+
+            return RedirectToAction("ChangePasswordSuccess");
         }
 
-        ViewResult ChangePasswordError(string key, string error)
-        {
-            ModelState.AddModelError("_FORM", error);
-            return View(AuthClient.ChangePasswordUrl);
-        }
 
         public ActionResult ChangePasswordSuccess()
         {
@@ -113,13 +83,17 @@ namespace Signum.Web.Authorization
                     user.PasswordHash = Security.EncodePassword(randomPassword);
                     user.Save();
                 }
+
                 string texto = @"Le enviamos este correo por haber solicitado que le recordemos su contraseña. Por seguridad, hemos generado una contraseña aleatoria, que luego podrá cambiar.<br/><br/>La contraseña es <b>" + randomPassword + "</b>";
-                MailMessage message = new MailMessage();
-                message.To.Add(user.EMail);
-                message.Subject = "Recordatorio de contraseña";
-                message.From = new MailAddress(AuthClient.RememberPasswordEmailFrom);
-                message.Body = texto;
-                message.IsBodyHtml = true;
+                MailMessage message = new MailMessage()
+                {
+                    To = { user.EMail },
+                    Subject = "Recordatorio de contraseña",
+                    From = new MailAddress(AuthClient.RememberPasswordEmailFrom),
+                    Body = texto,
+                    IsBodyHtml = true
+                };
+
                 SmtpClient smtp = new SmtpClient(AuthClient.RememberPasswordEmailSMTP);
                 smtp.Credentials = new NetworkCredential(AuthClient.RememberPasswordEmailUser, AuthClient.RememberPasswordEmailPassword);
                 smtp.Send(message);
@@ -198,7 +172,7 @@ namespace Signum.Web.Authorization
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult Login(string username, string password, bool? rememberMe, string returnUrl)
+        public ActionResult Login(string username, string password, bool rememberMe, string returnUrl)
         {
             FormsAuthentication.SignOut();
 
@@ -219,7 +193,7 @@ namespace Signum.Web.Authorization
 
             Thread.CurrentPrincipal = user;
             //guardamos una cookie persistente si se ha seleccionado
-            if (rememberMe.HasValue && (bool)rememberMe)
+            if (rememberMe)
             {
                 string ticketText = UserTicketLogic.NewTicket(
                        System.Web.HttpContext.Current.Request.UserHostAddress);
@@ -229,7 +203,7 @@ namespace Signum.Web.Authorization
                     Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
                 });
             }
-            AddUserSession(user.UserName, true, user);
+            AddUserSession(user.UserName, user);
 
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
@@ -246,7 +220,6 @@ namespace Signum.Web.Authorization
             ModelState.AddModelError("_FORM", error);
             return View(AuthClient.LoginUrl);
         }
-
 
         public static bool LoginFromCookie()
         {
@@ -269,7 +242,7 @@ namespace Signum.Web.Authorization
                         Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
                     });
 
-                    AddUserSession(user.UserName, true, user);
+                    AddUserSession(user.UserName, user);
                     return true;
                 }
                 catch
@@ -286,137 +259,124 @@ namespace Signum.Web.Authorization
             }
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult RegisterUserValidate(string prefixToIgnore)
+        #region Register User (Commented)
+
+        //[AcceptVerbs(HttpVerbs.Post)]
+        //public ContentResult RegisterUserValidate(string prefixToIgnore)
+        //{
+        //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
+
+        //    ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
+
+        //    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+        //    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+        //}
+
+        //public ActionResult RegisterUserPost()
+        //{
+        //    UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
+
+        //    ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
+        //    if (changesLog.Errors != null && changesLog.Errors.Count > 0)
+        //    {
+        //        this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+        //        return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+        //    }
+
+        //    u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.SaveNew);
+
+        //    if (Navigator.ExtractIsReactive(Request.Form))
+        //    {
+        //        string tabID = Navigator.ExtractTabID(Request.Form);
+        //        Session[tabID] = u;
+        //    }
+
+        //    return Navigator.View(this, u);
+        //}
+
+        //ChangesLog RegisterUserApplyChanges(NameValueCollection form, ref UserDN u)
+        //{
+        //    List<string> fullIntegrityErrors;
+        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
+        //    if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
+        //    {
+        //        fullIntegrityErrors = fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList();
+        //        if (fullIntegrityErrors.Count > 0)
+        //            changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors);
+        //    }
+        //    if (u != null && u.UserName.HasText())
+        //    {
+        //        string username = u.UserName;
+        //        if (Database.Query<UserDN>().Any(us => us.UserName == username))
+        //            changesLog.Errors.Add(ViewDataKeys.GlobalErrors, new List<string> { Resources.UserNameAlreadyExists });
+        //    }
+        //    return changesLog;
+        //}
+
+        //Dictionary<string, List<string>> UserOperationApplyChanges(NameValueCollection form, ref UserDN u)
+        //{
+        //    List<string> fullIntegrityErrors;
+        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
+        //    if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
+        //        changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
+
+        //    return changesLog.Errors;
+        //}
+
+        //public ActionResult UserExecOperation(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
+        //{
+        //    Type type = Navigator.ResolveType(sfRuntimeType);
+
+        //    UserDN entity = null;
+        //    if (isLite)
+        //    {
+        //        if (sfId.HasValue)
+        //        {
+        //            Lite lite = Lite.Create(type, sfId.Value);
+        //            entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+        //        }
+        //        else
+        //            throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
+        //    }
+        //    else
+        //    {
+        //        //if (sfId.HasValue)
+        //        //    entity = Database.Retrieve<UserDN>(sfId.Value);
+        //        //else
+        //        //    entity = (UserDN)Navigator.CreateInstance(type);
+
+        //        entity = (UserDN)Navigator.ExtractEntity(this, Request.Form);
+
+        //        Dictionary<string, List<string>> errors = UserOperationApplyChanges(Request.Form, ref entity);
+
+        //        if (errors != null && errors.Count > 0)
+        //        {
+        //            this.ModelState.FromDictionary(errors, Request.Form);
+        //            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+        //        }
+
+        //        entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
+
+        //        if (Navigator.ExtractIsReactive(Request.Form))
+        //        {
+        //            string tabID = Navigator.ExtractTabID(Request.Form);
+        //            Session[tabID] = entity;
+        //        }
+        //    }
+
+        //    if (prefix.HasText())
+        //        return Navigator.PopupView(this, entity, prefix);
+        //    else //NormalWindow
+        //        return Navigator.View(this, entity);
+        //} 
+        #endregion
+
+        static void AddUserSession(string userName, UserDN user)
         {
-            UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-            ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
-
-            this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
-        }
-
-        public ActionResult RegisterUserPost()
-        {
-            UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-            ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
-            if (changesLog.Errors != null && changesLog.Errors.Count > 0)
-            {
-                this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-                return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
-            }
-
-            u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.SaveNew);
-
-            if (Navigator.ExtractIsReactive(Request.Form))
-            {
-                string tabID = Navigator.ExtractTabID(Request.Form);
-                Session[tabID] = u;
-            }
-
-            return Navigator.View(this, u);
-        }
-
-        public ActionResult RegisterUserPostNoOperation()
-        {
-            UserDN u = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-            ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
-            if (changesLog.Errors != null && changesLog.Errors.Count > 0)
-            {
-                this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-                return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
-            }
-
-            u = Database.Save(u);
-
-            return Navigator.View(this, u);
-        }
-
-        ChangesLog RegisterUserApplyChanges(NameValueCollection form, ref UserDN u)
-        {
-            List<string> fullIntegrityErrors;
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
-            if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-            {
-                fullIntegrityErrors = fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList();
-                if (fullIntegrityErrors.Count > 0)
-                    changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors);
-            }
-            if (u != null && u.UserName.HasText())
-            {
-                string username = u.UserName;
-                if (Database.Query<UserDN>().Any(us => us.UserName == username))
-                    changesLog.Errors.Add(ViewDataKeys.GlobalErrors, new List<string> { Resources.UserNameAlreadyExists });
-            }
-            return changesLog;
-        }
-
-        Dictionary<string, List<string>> UserOperationApplyChanges(NameValueCollection form, ref UserDN u)
-        {
-            List<string> fullIntegrityErrors;
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref u, "", "my", out fullIntegrityErrors);
-            if (fullIntegrityErrors != null && fullIntegrityErrors.Count > 0)
-                changesLog.Errors.Add(ViewDataKeys.GlobalErrors, fullIntegrityErrors.Where(s => !s.Contains("Password Hash")).ToList());
-
-            return changesLog.Errors;
-        }
-
-        public ActionResult UserExecOperation(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOnOk, string sfOnCancel)
-        {
-            Type type = Navigator.ResolveType(sfRuntimeType);
-
-            UserDN entity = null;
-            if (isLite)
-            {
-                if (sfId.HasValue)
-                {
-                    Lite lite = Lite.Create(type, sfId.Value);
-                    entity = (UserDN)OperationLogic.ServiceExecuteLite((Lite)lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
-                }
-                else
-                    throw new ArgumentException(Resources.CouldNotCreateLiteWithoutAnIdToCallOperation0.Formato(sfOperationFullKey));
-            }
-            else
-            {
-                //if (sfId.HasValue)
-                //    entity = Database.Retrieve<UserDN>(sfId.Value);
-                //else
-                //    entity = (UserDN)Navigator.CreateInstance(type);
-
-                entity = (UserDN)Navigator.ExtractEntity(this, Request.Form);
-
-                Dictionary<string, List<string>> errors = UserOperationApplyChanges(Request.Form, ref entity);
-
-                if (errors != null && errors.Count > 0)
-                {
-                    this.ModelState.FromDictionary(errors, Request.Form);
-                    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
-                }
-
-                entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
-
-                if (Navigator.ExtractIsReactive(Request.Form))
-                {
-                    string tabID = Navigator.ExtractTabID(Request.Form);
-                    Session[tabID] = entity;
-                }
-            }
-
-            if (prefix.HasText())
-                return Navigator.PopupView(this, entity, prefix);
-            else //NormalWindow
-                return Navigator.View(this, entity);
-        }
-
-        static void AddUserSession(string userName, bool? rememberMe, UserDN user)
-        {
-            System.Web.HttpContext.Current.Session.Add(SessionUserKey, user);
+            System.Web.HttpContext.Current.Session[SessionUserKey] = user;
             Thread.CurrentPrincipal = user;
 
-            FormsAuthentication.SetAuthCookie(userName, rememberMe ?? false);
+            //FormsAuthentication.SetAuthCookie(userName, rememberMe);
 
             if (OnUserLogged != null)
                 OnUserLogged(user);
@@ -432,5 +392,6 @@ namespace Signum.Web.Authorization
 
             return RedirectToAction("Index", "Home");
         }
+
     }
 }

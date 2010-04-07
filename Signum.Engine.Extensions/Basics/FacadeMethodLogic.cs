@@ -38,7 +38,8 @@ namespace Signum.Engine.Basics
 
         static List<FacadeMethodDN> GenerateServiceOperations()
         {
-            return serviceInterface.GetInterfaces().SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy))
+            return serviceInterface.GetInterfaces()
+                .SelectMany(i => i.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy))
                 .Select(mi => new FacadeMethodDN { Name = mi.Name }).ToList();
         }
 

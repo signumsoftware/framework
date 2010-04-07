@@ -18,8 +18,8 @@ namespace Signum.Windows.Authorization
     public static class AuthClient
     {
         static HashSet<object> authorizedQueries; 
-        static Dictionary<Type, TypeAccess> typeRules; 
-        static Dictionary<Type, Dictionary<string, Access>> propertyRules;
+        static Dictionary<Type, TypeAllowed> typeRules; 
+        static Dictionary<PropertyRoute, PropertyAllowed> propertyRules;
         static Dictionary<Enum, bool> permissionRules; 
 
         public static void UpdateCache()
@@ -66,15 +66,15 @@ namespace Signum.Windows.Authorization
                     propertyRules = Server.Return((IPropertyAuthServer s)=>s.AuthorizedProperties()); 
                     Common.RouteTask += Common_RouteTask;
                     Common.PseudoRouteTask += Common_RouteTask;
-                    PropertyRoute.SetIsAllowedCallback(pr => GetPropertyAccess(pr) >= Access.Read);
+                    PropertyRoute.SetIsAllowedCallback(pr => GetPropertyAllowed(pr) >= PropertyAllowed.Read);
                 }
 
                 if (types)
                 {
-                    typeRules = Server.Return((ITypeAuthServer s)=>s.AuthorizedTypes());
-                    Navigator.Manager.GlobalIsCreable += type => GetTypeAccess(type).HasFlag(TypeAccessRule.CreateKey);
-                    Navigator.Manager.GlobalIsReadOnly += type => !GetTypeAccess(type).HasFlag(TypeAccessRule.ModifyKey);
-                    Navigator.Manager.GlobalIsViewable += type => GetTypeAccess(type).HasFlag(TypeAccess.Read);
+                    typeRules = Server.Return((ITypeAuthServer s) => s.AuthorizedTypes());
+                    Navigator.Manager.GlobalIsCreable += type => GetTypeAllowed(type) == TypeAllowed.Create;
+                    Navigator.Manager.GlobalIsReadOnly += type => GetTypeAllowed(type) <= TypeAllowed.Read;
+                    Navigator.Manager.GlobalIsViewable += type => GetTypeAllowed(type) >= TypeAllowed.Read;
 
                     MenuManager.Tasks += new Action<MenuItem>(MenuManager_TasksTypes);
                 }
@@ -141,7 +141,7 @@ namespace Signum.Windows.Authorization
 
                 if (type != null && Navigator.Manager.Settings.ContainsKey(type))
                 {
-                    if (GetTypeAccess(type) == TypeAccess.None)
+                    if (GetTypeAllowed(type) == TypeAllowed.None)
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }
@@ -169,17 +169,17 @@ namespace Signum.Windows.Authorization
             }
         }
 
-        static TypeAccess GetTypeAccess(Type type)
+        static TypeAllowed GetTypeAllowed(Type type)
         {
-            return typeRules.TryGetS(type) ?? TypeAccess.FullAccess;
+            return typeRules.TryGetS(type) ?? TypeAllowed.Create;
         }
 
-        static Access GetPropertyAccess(PropertyRoute route)
+        static PropertyAllowed GetPropertyAllowed(PropertyRoute route)
         {
             if (route.PropertyRouteType == PropertyRouteType.MListItems)
-                return GetPropertyAccess(route.Parent);
+                return GetPropertyAllowed(route.Parent);
 
-            return propertyRules.TryGetC(route.IdentifiableType).TryGetS(route.PropertyString()) ?? Access.Modify;
+            return propertyRules.TryGetS(route) ?? PropertyAllowed.Modify;
         }
 
         static bool GetQueryAceess(object queryName)
@@ -191,11 +191,11 @@ namespace Signum.Windows.Authorization
         {
             if (context.PropertyRouteType == PropertyRouteType.Property)
             {
-                switch (GetPropertyAccess(context))
+                switch (GetPropertyAllowed(context))
                 {
-                    case Access.None: fe.Visibility = Visibility.Collapsed; break;
-                    case Access.Read: Common.SetIsReadOnly(fe, true); break;
-                    case Access.Modify: break;
+                    case PropertyAllowed.None: fe.Visibility = Visibility.Collapsed; break;
+                    case PropertyAllowed.Read: Common.SetIsReadOnly(fe, true); break;
+                    case PropertyAllowed.Modify: break;
                 } 
             }
         }

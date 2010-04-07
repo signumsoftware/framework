@@ -31,8 +31,8 @@ namespace Signum.Engine.Authorization
         public static UserDN AnonymousUser { get; set; }
         public static string AnonymousUserName { get; set; }
 
-        static DirectedGraph<RoleDN> _roles;
-        static DirectedGraph<RoleDN> Roles
+        static DirectedGraph<Lite<RoleDN>> _roles;
+        static DirectedGraph<Lite<RoleDN>> Roles
         {
             get { return Sync.Initialize(ref _roles, () => Cache()); }
         }
@@ -95,7 +95,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(RoleDN role, bool isRoot, ref bool graphModified)
         {
-            if (!role.IsNew && role.Roles != null && role.Roles.Modified && role.Roles.Except(Roles.RelatedTo(role)).Any())
+            if (!role.IsNew && role.Roles != null && role.Roles.Modified)
             {
                 using (new EntityCache())
                 {
@@ -103,10 +103,10 @@ namespace Signum.Engine.Authorization
 
                     DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
 
-                    newRoles.Expand(role, r1 => r1.Roles);
+                    newRoles.Expand(role, r1 => r1.Roles.Select(a=>a.Retrieve()));
                     foreach (var r in Database.RetrieveAll<RoleDN>())
                     {
-                        newRoles.Expand(r, r1 => r1.Roles);
+                        newRoles.Expand(r, r1 => r1.Roles.Select(a => a.Retrieve()));
                     }
 
                     var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
@@ -127,16 +127,16 @@ namespace Signum.Engine.Authorization
                 RolesModified();
         }
 
-        static DirectedGraph<RoleDN> Cache()
+        static DirectedGraph<Lite<RoleDN>> Cache()
         {
             using (AuthLogic.Disable())
             {
-                DirectedGraph<RoleDN> newRoles = new DirectedGraph<RoleDN>();
+                DirectedGraph<Lite<RoleDN>> newRoles = new DirectedGraph<Lite<RoleDN>>();
 
                 using (new EntityCache(true))
                     foreach (var role in Database.RetrieveAll<RoleDN>())
                     {
-                        newRoles.Expand(role, r => r.Roles);
+                        newRoles.Expand(role.ToLite(), r => r.Retrieve().Roles);
                     }
 
                 var problems = newRoles.FeedbackEdgeSet().Edges.ToList();
@@ -173,11 +173,15 @@ namespace Signum.Engine.Authorization
             });
         }
 
-        public static IEnumerable<RoleDN> RolesInOrder()
+        public static IEnumerable<Lite<RoleDN>> RolesInOrder()
         {
             return Roles.CompilationOrder();
         }
 
+        public static IEnumerable<Lite<RoleDN>> RelatedTo(Lite<RoleDN> role)
+        {
+            return Roles.RelatedTo(role); 
+        }
 
         static bool gloaballyEnabled = true;
         public static bool GloballyEnabled

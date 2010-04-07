@@ -51,13 +51,13 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Return((IOperationAuthServer s)=>s.GetOperationAllowedRules(Role, Type)); 
+            DataContext = Server.Return((IOperationAuthServer s)=>s.GetOperationRules(Role, Type)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IOperationAuthServer s) => s.SetOperationAllowedRules((List<AllowedRule>)listView.ItemsSource, Role, Type)); 
-            Load(); 
+            Server.Execute((IOperationAuthServer s) => s.SetOperationRules((OperationRulePack)DataContext));
+            Load();
         }  
 
         private void btReload_Click(object sender, RoutedEventArgs e)

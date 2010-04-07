@@ -19,11 +19,7 @@ namespace Signum.Engine.Authorization
 {
     public static class TypeAuthLogic
     {
-        public static Dictionary<RoleDN, Dictionary<Type, TypeAccess>> _runtimeRules;
-        static Dictionary<RoleDN, Dictionary<Type, TypeAccess>> RuntimeRules
-        {
-            get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
-        }
+        static AuthCache<RuleTypeDN, TypeDN, Type, TypeAllowed> cache;
 
         public static void Start(SchemaBuilder sb)
         {
@@ -31,29 +27,19 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertIsStarted(sb);
                 TypeLogic.Start(sb);
-                sb.Include<RuleTypeDN>();
-                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
-                sb.Schema.EntityEvents<RuleTypeDN>().Saved += RuleType_Saved;
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving;
                 sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
                 sb.Schema.IsAllowedCallback += new Func<Type, bool>(Schema_IsAllowedCallback);
-                AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
+
+                cache = new AuthCache<RuleTypeDN, TypeDN, Type, TypeAllowed>(sb,
+                    dn => TypeLogic.DnToType[dn],
+                    type => TypeLogic.TypeToDN[type], MaxTypeAllowed, TypeAllowed.Create);
             }
         }
 
-        static void Schema_Initializing(Schema sender)
+        static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
         {
-            _runtimeRules = NewCache();
-        }
-
-        static void RuleType_Saved(RuleTypeDN rule, bool isRoot)
-        {
-            Transaction.RealCommit += () => _runtimeRules = null;
-        }
-
-        static void UserAndRoleLogic_RolesModified()
-        {
-            Transaction.RealCommit += () => _runtimeRules = null;
+            return collection.Max();
         }
 
         static bool Schema_IsAllowedCallback(Type type)
@@ -61,16 +47,16 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled)
                 return true;
 
-            return GetAccess(RoleDN.Current, type) != TypeAccess.None;
+            return cache.GetAllowed(RoleDN.Current, type) != TypeAllowed.None;
         }
 
         static void Schema_Saving(IdentifiableEntity ident, bool isRoot, ref bool graphModified)
         {
             if (AuthLogic.IsEnabled)
             {
-                TypeAccess access = GetAccess(RoleDN.Current, ident.GetType());
+                TypeAllowed access = cache.GetAllowed(RoleDN.Current, ident.GetType());
 
-                if (access == TypeAccess.FullAccess || (ident.IsNew ? access == TypeAccess.CreateOnly : access == TypeAccess.ModifyOnly))
+                if (access == TypeAllowed.Create || (!ident.IsNew && access == TypeAllowed.Modify))
                     return;
 
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToSave0.Formato(ident.GetType()));
@@ -81,84 +67,39 @@ namespace Signum.Engine.Authorization
         {
             if (AuthLogic.IsEnabled)
             {
-                TypeAccess access = GetAccess(RoleDN.Current, type);
-                if (access < TypeAccess.Read)
+                TypeAllowed access = cache.GetAllowed(RoleDN.Current, type);
+                if (access < TypeAllowed.Read)
                     throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type));
             }
         }
 
-        static TypeAccess GetAccess(RoleDN role, Type type)
+        public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)
         {
-            return RuntimeRules.TryGetC(role).TryGetS(type) ?? TypeAccess.FullAccess;
-        }
-
-        static TypeAccess GetBaseAccess(RoleDN role, Type type)
-        {
-            return role.Roles.Count == 0 ? TypeAccess.FullAccess :
-                  role.Roles.Select(r => GetAccess(r, type)).MaxTypeAccess();
-        }
-
-        public static List<TypeAccessRule> GetAccessRule(Lite<RoleDN> roleLite)
-        {
-            var role = roleLite.Retrieve();
-
-            return TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(t => new TypeAccessRule(GetBaseAccess(role, t.Key))
-                    {
-                        Type = t.Value,
-                        Access = GetAccess(role, t.Key),
-                    }).ToList();
-        }
-
-        public static void SetAccessRule(List<TypeAccessRule> rules, Lite<RoleDN> roleLite)
-        {
-            var role = roleLite.Retrieve(); 
-
-            var current = Database.Query<RuleTypeDN>().Where(r => r.Role == role).ToDictionary(a => a.Type);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => r.Type);
-
-            Synchronizer.Synchronize(current, should,
-                (t, tr) => tr.Delete(),
-                (t, ar) => new RuleTypeDN { Type = t, Access = ar.Access, Role = role }.Save(),
-                (t, tr, ar) => { tr.Access = ar.Access; tr.Save(); });
-
-            _runtimeRules = null;
-        }
-
-        public static TypeAccess GetTypeAccess(Type type)
-        {
-            return GetAccess(RoleDN.Current, type);
-        }
-
-        public static Dictionary<Type, TypeAccess> AuthorizedTypes()
-        {
-            return RuntimeRules.TryGetC(RoleDN.Current) ?? new Dictionary<Type, TypeAccess>();
-        }
-
-        public static Dictionary<RoleDN, Dictionary<Type, TypeAccess>> NewCache()
-        {
-            using (AuthLogic.Disable())
-            using (new EntityCache(true))
+            return new TypeRulePack
             {
-                List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
+                Role = roleLite,
+                Rules = cache.GetRules(roleLite, TypeLogic.TypeToDN.Where(t => !t.Key.IsEnumProxy()).Select(a => a.Value)).ToMList()
+            };
+        }
 
-                Dictionary<RoleDN, Dictionary<Type, TypeAccess>> realRules = Database.RetrieveAll<RuleTypeDN>()
-                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => TypeLogic.DnToType[a.Type], a => a.Access));
+        public static void SetTypeRules(TypeRulePack rules)
+        {
+            cache.SetRules(rules);
+        }
 
-                Dictionary<RoleDN, Dictionary<Type, TypeAccess>> newRules = new Dictionary<RoleDN, Dictionary<Type, TypeAccess>>();
-                foreach (var role in roles)
-                {
-                    var permissions = (role.Roles.Count == 0 ?
-                         null :
-                         role.Roles.Select(r => newRules.TryGetC(r)).OuterCollapseDictionariesS(vals => vals.MaxTypeAccess()));
+        public static void SetTypeAllowed(Lite<RoleDN> role, Type type, TypeAllowed allowed)
+        {
+            cache.SetAllowed(role, type, allowed);
+        }
 
-                    permissions = permissions.Override(realRules.TryGetC(role)).Simplify(a => a == TypeAccess.FullAccess);
+        public static TypeAllowed GetTypeAllowed(Type type)
+        {
+            return cache.GetAllowed(RoleDN.Current, type);
+        }
 
-                    if (permissions != null)
-                        newRules.Add(role, permissions);
-                }
-
-                return newRules;
-            }
+        public static Dictionary<Type, TypeAllowed> AuthorizedTypes()
+        {
+            return cache.GetCleanDictionary();
         }
     }
 }

@@ -24,6 +24,9 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class TypeRules : Window
     {
+        public static Type RuleType = typeof(AllowedRule<TypeDN, TypeAllowed>);
+        public static Type GroupType = typeof(IGrouping<string, AllowedRule<TypeDN, TypeAllowed>>);
+
         public Lite<RoleDN> Role
         {
             get { return (Lite<RoleDN>)GetValue(RoleProperty); }
@@ -51,58 +54,23 @@ namespace Signum.Windows.Authorization
             Load();
         }
 
-        List<TypeAccessRule> rules;
-
+        
         private void Load()
         {
-            rules = Server.Return((ITypeAuthServer s) => s.GetTypesAccessRules(Role));
+            TypeRulePack trp = Server.Return((ITypeAuthServer s) => s.GetTypesRules(Role))
 
-            Dictionary<string, List<TypeAccessRule>> nodes = rules.GroupToDictionary(a => TrimLastToken(a.Type.FullClassName));
+            DataContext = trp;
 
-            List<TypeAccessRule> empty = new List<TypeAccessRule>();
-
-            List<Node<string>> root = TreeHelper.ToTreeC(nodes.Keys, TrimLastToken);
-
-            Func<Node<string>, NamespaceNode> toNamespaceNode = null;
-
-            toNamespaceNode = node => new NamespaceNode
-            {
-                Name = LastToken(node.Value),
-                SubNodes = node.Children.Select(toNamespaceNode).OrderBy(ta => ta.Name).Cast<object>().Concat(
-                          (nodes.TryGetC(node.Value) ?? empty).OrderBy(ta => ta.Type.FriendlyName).Cast<object>()).ToList()
-            };
-
-            treeView.ItemsSource = root.Select(toNamespaceNode).ToArray();
+            treeView.ItemsSource = trp.Rules.GroupBy(a => a.Resource.Namespace).OrderBy(a => a.Key).ToList();
         }
 
         public DataTemplateSelector MyDataTemplateSelector;
 
-  
-        public string TrimLastToken(string typeOrNamespace)
-        {
-            int index = typeOrNamespace.LastIndexOf('.');
-            if (index == -1)
-                return null;
-            return typeOrNamespace.Substring(0, index);
-        }
-
-        public string LastToken(string nameSpace)
-        {
-            if (nameSpace == null)
-                return null;
-
-            int index = nameSpace.LastIndexOf('.');
-            if (index == -1)
-                return nameSpace;
-
-            return nameSpace.Substring(index + 1);
-        }
-
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((ITypeAuthServer s) => s.SetTypesAccessRules(rules, Role)); 
-            Load(); 
+            Server.Execute((ITypeAuthServer s) => s.SetTypesRules((TypeRulePack)DataContext));
+            Load();
         }
 
         private void btReload_Click(object sender, RoutedEventArgs e)
@@ -112,36 +80,36 @@ namespace Signum.Windows.Authorization
 
         private void properties_Click(object sender, RoutedEventArgs e)
         {
-            TypeAccessRule rules = (TypeAccessRule)((Button)sender).DataContext;
+            AllowedRule<TypeDN, TypeAllowed> rules = (AllowedRule<TypeDN, TypeAllowed>)((Button)sender).DataContext;
 
             new PropertyRules
             {
                 Owner = this,
-                Type = rules.Type,
+                Type = rules.Resource,
                 Role = Role
             }.Show(); 
         }
 
         private void operations_Click(object sender, RoutedEventArgs e)
         {
-            TypeAccessRule rules = (TypeAccessRule)((Button)sender).DataContext;
+            AllowedRule<TypeDN, TypeAllowed> rules = (AllowedRule<TypeDN, TypeAllowed>)((Button)sender).DataContext;
 
             new OperationRules
             {
                 Owner = this,
-                Type = rules.Type,
+                Type = rules.Resource,
                 Role = Role
             }.Show(); 
         }
 
         private void queries_Click(object sender, RoutedEventArgs e)
         {
-            TypeAccessRule rules = (TypeAccessRule)((Button)sender).DataContext;
+            AllowedRule<TypeDN, TypeAllowed> rules = (AllowedRule<TypeDN, TypeAllowed>)((Button)sender).DataContext;
 
             new QueryRules
             {
                 Owner = this,
-                Type = rules.Type,
+                Type = rules.Resource,
                 Role = Role
             }.Show(); 
         }
@@ -153,12 +121,12 @@ namespace Signum.Windows.Authorization
 
     }
 
-    public class NamespaceNode
-    {
-        public string Name { get; set; }
-        public List<object> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
+    //public class NamespaceNode
+    //{
+    //    public string Name { get; set; }
+    //    public List<object> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
 
-        public bool Expanded { get { return SubNodes.OfType<NamespaceNode>().Any(); } }
-    }
+    //    public bool Expanded { get { return SubNodes.OfType<NamespaceNode>().Any(); } }
+    //}
 
 }

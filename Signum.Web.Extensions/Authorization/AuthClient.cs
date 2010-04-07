@@ -8,6 +8,14 @@ using Signum.Engine.Authorization;
 using System.Reflection;
 using Signum.Web.Operations;
 using Signum.Entities;
+using System.Web.Mvc;
+using Signum.Web.Properties;
+using System.Diagnostics;
+using Signum.Engine;
+using Signum.Entities.Basics;
+using Signum.Entities.Reflection;
+using Signum.Entities.Operations;
+using System.Linq.Expressions;
 
 namespace Signum.Web.Authorization
 {
@@ -31,50 +39,51 @@ namespace Signum.Web.Authorization
 
         //public static string RegisterUrl = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.Register.aspx";
 
-        public static void Start(NavigationManager manager, bool types, bool property, bool queries, bool registerUserGraph)
+        public static void Start(bool types, bool property, bool queries)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                manager.EntitySettings.Add(typeof(UserDN), new EntitySettings(EntityType.Admin)); //{ PartialViewName= ViewPrefix + "UserIU.ascx" }); 
-                manager.EntitySettings.Add(typeof(RoleDN), new EntitySettings(EntityType.Default)); //{ View = () => new Role() });
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<UserDN>(EntityType.Admin), 
+                    new EntitySettings<RoleDN>(EntityType.Default)
+                });
 
                 if (property)
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
 
                 if (types)
                 {
-                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccessRule.CreateKey);
-                    Navigator.Manager.GlobalIsReadOnly += type => !TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccessRule.ModifyKey);
-                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccess.Read);
-                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAccess(type).HasFlag(TypeAccess.Read);
+                    Navigator.Manager.GlobalIsCreable += type => TypeAuthLogic.GetTypeAllowed(type) == TypeAllowed.Create;
+                    Navigator.Manager.GlobalIsReadOnly += type => TypeAuthLogic.GetTypeAllowed(type) <= TypeAllowed.Read;
+                    Navigator.Manager.GlobalIsNavigable += type => TypeAuthLogic.GetTypeAllowed(type) >= TypeAllowed.Read;
+                    Navigator.Manager.GlobalIsViewable += type => TypeAuthLogic.GetTypeAllowed(type) >= TypeAllowed.Read;
                 }
 
                 if (queries)
                     Navigator.Manager.GlobalIsFindable += type => QueryAuthLogic.GetQueryAllowed(type);
 
-                CustomModificationBinders.Binders.Add(typeof(UserDN), (formValues, interval, controlID) => new UserIUModification(typeof(UserDN), formValues, interval, controlID));
+                //if (registerUserGraph)
+                //{
+                //    var settings = OperationClient.Manager.Settings;
 
-                if (registerUserGraph)
-                {
-                    var settings = OperationClient.Manager.Settings;
-
-                    Func<IdentifiableEntity, bool> creada = (IdentifiableEntity entity) => !entity.IsNew;
-                    settings.Add(UserOperation.SaveNew, new OperationButton
-                    {
-                        OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth/RegisterUserValidate", "Auth/RegisterUserPost"),
-                        Settings = new EntityOperationSettings { IsVisible = (IdentifiableEntity entity) => entity.IsNew }
-                    });
-                    settings.Add(UserOperation.Save, new OperationButton
-                    {
-                        Settings = new EntityOperationSettings
-                        {
-                            Options = { ControllerUrl = "Auth/UserExecOperation" },
-                            IsVisible = creada
-                        }
-                    });
-                    settings.Add(UserOperation.Disable, new OperationButton { Settings = new EntityOperationSettings { IsVisible = creada } });
-                    settings.Add(UserOperation.Enable, new OperationButton { Settings = new EntityOperationSettings { IsVisible = creada } });
-                }
+                //    Func<IdentifiableEntity, bool> creada = (IdentifiableEntity entity) => !entity.IsNew;
+                //    settings.Add(UserOperation.SaveNew, new OperationButton
+                //    {
+                //        OnClick = "javascript:ValidateAndPostServer('{0}','{1}', '', 'my', true, '*');".Formato("Auth/RegisterUserValidate", "Auth/RegisterUserPost"),
+                //        Settings = new EntityOperationSettings { IsVisible = (IdentifiableEntity entity) => entity.IsNew }
+                //    });
+                //    settings.Add(UserOperation.Save, new OperationButton
+                //    {
+                //        Settings = new EntityOperationSettings
+                //        {
+                //            Options = { ControllerUrl = "Auth/UserExecOperation" },
+                //            IsVisible = creada
+                //        }
+                //    });
+                //    settings.Add(UserOperation.Disable, new OperationButton { Settings = new EntityOperationSettings { IsVisible = creada } });
+                //    settings.Add(UserOperation.Enable, new OperationButton { Settings = new EntityOperationSettings { IsVisible = creada } });
+                //}
 
                 AuthenticationRequiredAttribute.Authenticate = context =>
                 {
@@ -88,8 +97,62 @@ namespace Signum.Web.Authorization
                         context.HttpContext.Response.Redirect(loginUrl, true);
                     }
                 };
+
+               
             }
         }
+
+        public static void StartAuthAdmin(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods, bool entityGroups)
+        {
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                if (types)
+                    Register<TypeRulePack, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
+
+                if (properties)
+                    Register<PropertyRulePack, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path, "Resource_Path", true);
+
+                if (queries)
+                    Register<QueryRulePack, QueryDN, bool, string>("queries", a => a.Resource.Key, "Resource_Key", true);
+
+                if (operations)
+                    Register<OperationRulePack, OperationDN, bool, OperationDN>("operations", a => a.Resource, "Resource", true);
+
+                if (permissions)
+                    Register<PermissionRulePack, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource, "Resource", false);
+
+                if (facadeMethods)
+                    Register<FacadeMethodRulePack, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.Name, "Resource_Name", false);
+
+                if (entityGroups)
+                    Register<EntityGroupRulePack, EntityGroupDN, EntityGroupAllowed, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
+            }
+        }
+
+        static void Register<T, R, A, K>(string partialViewName, Func<AllowedRule<R, A>, K> getKey, string getKeyRoute, bool embedded)
+            where T : BaseRulePack<R, A>
+            where R : IdentifiableEntity
+            where A : struct
+        {
+            if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(R)))
+                Navigator.AddSetting(new EntitySettings<R>(EntityType.ServerOnly));
+
+            Navigator.AddSetting(new EntitySettings<T>(EntityType.NotSaving)
+            {
+                PartialViewName = e => "Views/Auth/{0}".Formato(partialViewName),
+                MappingAdmin = new EntityMapping<T>(false)
+                    .SetProperty(m => m.Rules,
+                    new MListDictionaryMapping<AllowedRule<R, A>, K>(getKey, getKeyRoute)
+                    {
+                        ElementMapping = new EntityMapping<AllowedRule<R, A>>(false)
+                                .SetProperty(p => p.Allowed, new ValueMapping<A>(), null)
+                    }, null)
+            });
+
+            ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string mainControlUrl) =>
+                new[] { new ToolBarButton { OnClick = (embedded ? "postDialog('{0}')" : "PostServer('{0}')").Formato(new UrlHelper(controllerContext.RequestContext).Action(partialViewName, "Auth")), Text = Resources.Save } });
+        }
+
 
         static void TaskAuthorizeProperties(BaseLine bl, TypeContext context)
         {
@@ -97,13 +160,13 @@ namespace Signum.Web.Authorization
             {
                 switch (PropertyAuthLogic.GetPropertyAccess(context.PropertyRoute))
                 {
-                    case Access.None: 
+                    case PropertyAllowed.None: 
                         bl.Visible = false; 
                         break;
-                    case Access.Read:
+                    case PropertyAllowed.Read:
                         bl.SetReadOnly();
                         break;
-                    case Access.Modify: 
+                    case PropertyAllowed.Modify: 
                         break;
                 }
             }

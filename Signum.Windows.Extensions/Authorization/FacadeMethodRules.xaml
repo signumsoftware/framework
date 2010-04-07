@@ -7,7 +7,7 @@
     m:Monitors.AdjustToMonitor="true"
     WindowStartupLocation="CenterOwner"
     SizeToContent="WidthAndHeight"
-    Title="Facade Method Rules" x:Name="me" MinWidth="500" MinHeight="300">
+    Title="Facade Method Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="authdn:PermissionRulePack">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -17,8 +17,8 @@
 	</Window.Resources>
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
-        <m:EntityLine VerticalAlignment="Top"  LabelText="Role" m:Common.IsReadOnly="True" Type="{m:Lite authdn:RoleDN}" Entity="{Binding Role, ElementName=me}" DockPanel.Dock="Top"/>
-        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
+        <m:EntityLine VerticalAlignment="Top" m:Common.Route="Role" DockPanel.Dock="Top"/>
+        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True" ItemsSource="{Binding Rules}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -30,7 +30,7 @@
                     <GridViewColumn Header="Allow" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed }" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <RadioButton IsChecked="{Binding Path=Allowed}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

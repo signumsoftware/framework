@@ -9,26 +9,28 @@ using Signum.Entities.Operations;
 namespace Signum.Entities.Authorization
 {
     [Serializable]
-    public class RuleQueryDN : IdentifiableEntity
+    public class RuleDN<R, A> : IdentifiableEntity
+        where R: IdentifiableEntity
+        where A : struct 
     {
-        RoleDN role;
+        Lite<RoleDN> role;
         [NotNullValidator]
-        public RoleDN Role
+        public Lite<RoleDN> Role
         {
             get { return role; }
             set { Set(ref role, value, () => Role); }
         }
 
-        QueryDN query;
+        R resource;
         [NotNullValidator]
-        public QueryDN Query
+        public R Resource
         {
-            get { return query; }
-            set { Set(ref query, value, () => Query); }
+            get { return resource; }
+            set { Set(ref resource, value, () => Resource); }
         }
 
-        bool allowed;
-        public bool Allowed
+        A allowed;
+        public A Allowed
         {
             get { return allowed; }
             set { Set(ref allowed, value, () => Allowed); }
@@ -36,187 +38,46 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class RuleFacadeMethodDN : IdentifiableEntity
-    {
-        RoleDN role;
-        [NotNullValidator]
-        public RoleDN Role
-        {
-            get { return role; }
-            set { Set(ref role, value, () => Role); }
-        }
-
-        FacadeMethodDN serviceOperation;
-        [NotNullValidator]
-        public FacadeMethodDN ServiceOperation
-        {
-            get { return serviceOperation; }
-            set { Set(ref serviceOperation, value, () => ServiceOperation); }
-        }
-
-        bool allowed;
-        public bool Allowed
-        {
-            get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
-        }
-    }
+    public class RuleQueryDN : RuleDN<QueryDN, bool> { }
 
     [Serializable]
-    public class RulePermissionDN : IdentifiableEntity
-    {
-        RoleDN role;
-        [NotNullValidator]
-        public RoleDN Role
-        {
-            get { return role; }
-            set { Set(ref role, value, () => Role); }
-        }
-
-        PermissionDN permission;
-        [NotNullValidator]
-        public PermissionDN Permission
-        {
-            get { return permission; }
-            set { Set(ref permission, value, () => Permission); }
-        }
-
-        bool allowed;
-        public bool Allowed
-        {
-            get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
-        }
-    }
+    public class RuleFacadeMethodDN : RuleDN<FacadeMethodDN, bool> { }
 
     [Serializable]
-    public class RuleOperationDN : IdentifiableEntity
-    {
-        RoleDN role;
-        [NotNullValidator]
-        public RoleDN Role
-        {
-            get { return role; }
-            set { Set(ref role, value, () => Role); }
-        }
-
-        OperationDN operation;
-        [NotNullValidator]
-        public OperationDN Operation
-        {
-            get { return operation; }
-            set { Set(ref operation, value, () => Operation); }
-        }
-
-        bool allowed;
-        public bool Allowed
-        {
-            get { return allowed; }
-            set { Set(ref allowed, value, () => Allowed); }
-        }
-    }
+    public class RulePermissionDN : RuleDN<PermissionDN, bool> { }
 
     [Serializable]
-    public class RulePropertyDN : IdentifiableEntity
-    {
-        RoleDN role;
-        [NotNullValidator]
-        public RoleDN Role
-        {
-            get { return role; }
-            set { Set(ref role, value, () => Role); }
-        }
-
-        PropertyDN property;
-        [NotNullValidator]
-        public PropertyDN Property
-        {
-            get { return property; }
-            set { Set(ref property, value, () => Property); }
-        }
-
-        Access access;
-        public Access Access
-        {
-            get { return access; }
-            set { Set(ref access, value, () => Access); }
-        }
-    }
+    public class RuleOperationDN : RuleDN<OperationDN, bool> { }
 
     [Serializable]
-    public class RuleEntityGroupDN : IdentifiableEntity
+    public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
+
+    [Serializable]
+    public class RuleEntityGroupDN : RuleDN<EntityGroupDN, EntityGroupAllowed> { }
+
+    [Serializable]
+    public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> { }
+
+    public enum EntityGroupAllowed
     {
-        RoleDN role;
-        [NotNullValidator]
-        public RoleDN Role
-        {
-            get { return role; }
-            set { Set(ref role, value, () => Role); }
-        }
-
-        EntityGroupDN group;
-        [NotNullValidator]
-        public EntityGroupDN Group
-        {
-            get { return group; }
-            set { Set(ref group, value, () => Group); }
-        }
-
-        bool allowedIn;
-        public bool AllowedIn
-        {
-            get { return allowedIn; }
-            set { Set(ref allowedIn, value, () => AllowedIn); }
-        }
-
-        bool allowedOut;
-        public bool AllowedOut
-        {
-            get { return allowedOut; }
-            set { Set(ref allowedOut, value, () => AllowedOut); }
-        }
+        None = 0,
+        In = 1,
+        Out  = 2,
+        All = 3
     }
 
-    public enum Access
+    public enum PropertyAllowed
     {
         None,
         Read,
         Modify,
     }
 
-    [Serializable]
-    public class RuleTypeDN : IdentifiableEntity
-    {
-        RoleDN role;
-        [NotNullValidator]
-        public RoleDN Role
-        {
-            get { return role; }
-            set { Set(ref role, value, () => Role); }
-        }
-
-        TypeDN type;
-        [NotNullValidator]
-        public TypeDN Type
-        {
-            get { return type; }
-            set { Set(ref type, value, () => Type); }
-        }
-
-        TypeAccess access;
-        public TypeAccess Access
-        {
-            get { return access; }
-            set { Set(ref access, value, () => Access); }
-        }        
-    }
-
-    public enum TypeAccess
+    public enum TypeAllowed
     {
         None = 0,
         Read = 1,
-        ModifyOnly = 3,
-        CreateOnly = 5,
-        FullAccess =7,
+        Modify = 2,
+        Create = 3,
     }
 }

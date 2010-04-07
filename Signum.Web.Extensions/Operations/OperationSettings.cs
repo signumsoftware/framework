@@ -118,7 +118,7 @@ namespace Signum.Web.Operations
 
     public class ConstructorSettings : OperationSettings
     {
-        public Func<OperationInfo, HttpContextBase, IdentifiableEntity> Constructor { get; set; }
+        public Func<OperationInfo, IdentifiableEntity> Constructor { get; set; }
         public Func<OperationInfo, bool> IsVisible { get; set; }
     }
 
@@ -129,7 +129,7 @@ namespace Signum.Web.Operations
 
     public class ConstructorFromManySettings : OperationSettings
     {
-        public Func<ConstructorFromManyEventArgs, HttpContextBase, IdentifiableEntity> Constructor { get; set; }
+        public Func<ConstructorFromManyEventArgs, IdentifiableEntity> Constructor { get; set; }
         public Func<object, OperationInfo, bool> IsVisible { get; set; }
     }
 

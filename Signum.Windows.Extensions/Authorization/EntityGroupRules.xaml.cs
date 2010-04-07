@@ -43,13 +43,13 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Return((IEntityGroupAuthServer s)=>s.GetEntityGroupAllowedRules(Role)); 
+            DataContext = Server.Return((IEntityGroupAuthServer s)=>s.GetEntityGroupAllowedRules(Role)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IEntityGroupAuthServer s) => s.SetEntityGroupAllowedRules((List<EntityGroupRule>)listView.ItemsSource, Role)); 
-            Load(); 
+            Server.Execute((IEntityGroupAuthServer s) => s.SetEntityGroupAllowedRules((EntityGroupRulePack)DataContext));
+            Load();
         }
 
         private void btClose_Click(object sender, RoutedEventArgs e)

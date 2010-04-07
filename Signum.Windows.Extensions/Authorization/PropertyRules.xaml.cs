@@ -52,13 +52,13 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
-            listView.ItemsSource = Server.Return((IPropertyAuthServer s)=>s.GetPropertyAccessRules(Role, Type)); 
+            DataContext = Server.Return((IPropertyAuthServer s)=>s.GetPropertyRules(Role, Type)); 
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IPropertyAuthServer s) => s.SetPropertyAccessRules((List<AccessRule>)listView.ItemsSource, Role, Type)); 
-            Load(); 
+            Server.Execute((IPropertyAuthServer s) => s.SetPropertyRules((PropertyRulePack)DataContext));
+            Load();
         }
 
         private void btReload_Click(object sender, RoutedEventArgs e)

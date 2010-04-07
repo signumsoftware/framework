@@ -23,11 +23,12 @@ namespace Signum.Web.Operations
         {
             Manager = operationManager;
 
-            ButtonBarHelper.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
+            ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
 
-            Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
+            Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);
+            Constructor.ConstructorManager.VisualGeneralConstructor += new Func<Type, ControllerBase, object>(Manager.ConstructorManager_VisualGeneralConstructor);
 
-            ButtonBarHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
+            ButtonBarQueryHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
         }
     }
 
@@ -35,7 +36,7 @@ namespace Signum.Web.Operations
     {
         public Dictionary<Enum, OperationButton> Settings = new Dictionary<Enum, OperationButton>();
 
-        internal List<ToolBarButton> ButtonBar_GetButtonBarElement(HttpContextBase httpContext, object entity, string mainControlUrl)
+        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ControllerContext controllerContext, ModifiableEntity entity, string mainControlUrl)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -70,11 +71,11 @@ namespace Signum.Web.Operations
                     items.Add(item);
                 }
             }
-            
-            return items;
+
+            return items.ToArray();
         }
 
-        internal List<ToolBarButton> ButtonBar_GetButtonBarForQueryName(HttpContextBase httpContext, object queryName, Type entityType)
+        internal ToolBarButton[] ButtonBar_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType)
         {
             if (entityType == null || queryName == null)
                 return null;
@@ -108,7 +109,7 @@ namespace Signum.Web.Operations
                 }
             }
 
-            return items;
+            return items.ToArray();
         }
 
         //protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, OperationButton omi, object queryName, Type entityType)
@@ -131,7 +132,7 @@ namespace Signum.Web.Operations
         //    //    );
         //}
 
-        internal object ConstructorManager_GeneralConstructor(Type type, Controller controller)
+        internal ModifiableEntity ConstructorManager_GeneralConstructor(Type type)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
                 return null;
@@ -150,37 +151,59 @@ namespace Signum.Web.Operations
             if (list.Count == 1)
                 selected = dic.Keys.Single();
             else
-            {
-                StringBuilder sb = new StringBuilder();
-                string onOk = controller.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'");
-                string onCancel = controller.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'");
-                string prefix = controller.Request.Params["prefix"];
-                //string onClick = "";
-                foreach (OperationInfo oi in list)
-                {
-                    throw new NotImplementedException("Constructor operations not supported yet");
-                    //if (dic[oi.Key].OperationMenuItem.OnServerClickAjax != "")
-                    //    onClick = "javascript:CloseChooser('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickAjax, onOk, onCancel, prefix);
-                    //else if (dic[oi.Key].OperationMenuItem.OnServerClickPost != "")
-                    //    onClick= "javascript:PostServer('{0}');".Formato(dic[oi.Key].OperationSettings.OnServerClickPost);
-                    //sb.AppendLine("<input type='button' value='{0}' onclick=\"{1}\"/><br />".Formato(oi.Key.ToString(), onClick));
-                }
-                controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-                controller.ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
-                return new PartialViewResult
-                {
-                    ViewName = Navigator.Manager.ChooserPopupUrl,
-                    ViewData = controller.ViewData,
-                    TempData = controller.TempData
-                };
-            }
-
+                return null;
+            
             var pair = dic[selected];
 
             if (pair.OperationMenuItem != null && ((ConstructorSettings)pair.OperationMenuItem.Settings).Constructor != null)
-                return ((ConstructorSettings)pair.OperationMenuItem.Settings).Constructor(pair.OperationInfo, controller.HttpContext);
+                return ((ConstructorSettings)pair.OperationMenuItem.Settings).Constructor(pair.OperationInfo);
             else
-                return OperationLogic.ServiceConstruct(type, selected);
+                return (ModifiableEntity)OperationLogic.ServiceConstruct(type, selected);
+        }
+
+        internal object ConstructorManager_VisualGeneralConstructor(Type type, ControllerBase controller)
+        {
+            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+                return null;
+
+            List<OperationInfo> list = OperationLogic.ServiceGetConstructorOperationInfos(type);
+
+            var dic = (from oi in list
+                       let omi = Settings.TryGetC(oi.Key)
+                       where omi.TryCC(sett => sett.Settings).TryCC(oset => oset as ConstructorSettings).TryCC(eoset => eoset.IsVisible) == null || ((ConstructorSettings)omi.Settings).IsVisible(oi)
+                       select new { OperationInfo = oi, OperationMenuItem = omi }).ToDictionary(a => a.OperationInfo.Key);
+
+            if (dic.Count == 0)
+                return null;
+
+            if (list.Count == 1)
+                return null;
+            else
+            {
+                throw new NotImplementedException("Constructor operations not supported yet");
+
+                //StringBuilder sb = new StringBuilder();
+                //string onOk = controller.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'");
+                //string onCancel = controller.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'");
+                //string prefix = controller.Request.Params["prefix"];
+                ////string onClick = "";
+                //foreach (OperationInfo oi in list)
+                //{
+                //    //if (dic[oi.Key].OperationMenuItem.OnServerClickAjax != "")
+                //    //    onClick = "javascript:CloseChooser('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickAjax, onOk, onCancel, prefix);
+                //    //else if (dic[oi.Key].OperationMenuItem.OnServerClickPost != "")
+                //    //    onClick= "javascript:PostServer('{0}');".Formato(dic[oi.Key].OperationSettings.OnServerClickPost);
+                //    //sb.AppendLine("<input type='button' value='{0}' onclick=\"{1}\"/><br />".Formato(oi.Key.ToString(), onClick));
+                //}
+                //controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
+                //controller.ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
+                //return new PartialViewResult
+                //{
+                //    ViewName = Navigator.Manager.ChooserPopupUrl,
+                //    ViewData = controller.ViewData,
+                //    TempData = controller.TempData
+                //};
+            }
         }   
     }
 }

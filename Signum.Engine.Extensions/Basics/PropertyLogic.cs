@@ -39,16 +39,17 @@ namespace Signum.Engine.Basics
                 null, null,
                 (tn, dicCurr, dicShould) =>
                     Synchronizer.SynchronizeReplacing(replacements, FieldsForKey.Formato(tn),
-                    dicCurr,
-                    dicShould,
-                    (fn, c) => table.DeleteSqlSync(c),
-                    null,
-                    (fn, c, s) =>
-                    {
-                        c.Path = s.Path;
-                        return table.UpdateSqlSync(c);
-                    },
-                    Spacing.Simple), Spacing.Double);
+                        dicCurr,
+                        dicShould,
+                        (fn, c) => table.DeleteSqlSync(c),
+                        null,
+                        (fn, c, s) =>
+                        {
+                            c.Path = s.Path;
+                            return table.UpdateSqlSync(c);
+                        },
+                        Spacing.Simple),
+                 Spacing.Double);
         }
 
         public static List<PropertyDN> RetrieveOrGenerateProperty(TypeDN typeDN)
@@ -56,18 +57,36 @@ namespace Signum.Engine.Basics
             var retrieve = Database.Query<PropertyDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.DnToType[typeDN], typeDN).ToDictionary(a => a.Path);
 
-            return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDoC(pi => pi.PropertyPath = kvp.Value.PropertyPath) ?? kvp.Value).ToList();
+            return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDoC(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
         }
 
         public static List<PropertyDN> GenerateProperties(Type type, TypeDN typeDN)
         {
-            return PropertyRoute.GenerateRoutes(type).Select(pp =>
+            return PropertyRoute.GenerateRoutes(type).Select(pr =>
                 new PropertyDN
                 {
-                    PropertyPath = pp,
+                    Route = pr,
                     Type = typeDN,
-                    Path = pp.PropertyString()
+                    Path = pr.PropertyString()
                 }).ToList();
+        }
+
+        public static PropertyRoute GetPropertyRoute(PropertyDN route)
+        {
+            return PropertyRoute.Parse(TypeLogic.DnToType[route.Type], route.Path);
+        }
+
+        public static PropertyDN GetEntity(PropertyRoute route)
+        {
+            TypeDN type = TypeLogic.TypeToDN[route.IdentifiableType];
+            string path = route.PropertyString();
+            return Database.Query<PropertyDN>().SingleOrDefault(f => f.Type == type && f.Path == path).TryDoC(pi => pi.Route = route) ??
+                 new PropertyDN
+                 {
+                     Route = route,
+                     Type = type,
+                     Path = path
+                 };
         }
     }
 }

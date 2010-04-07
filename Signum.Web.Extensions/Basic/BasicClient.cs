@@ -18,7 +18,7 @@ namespace Signum.Web.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.EntitySettings.Add(typeof(DateSpanDN), new EntitySettings(EntityType.Default ) { PartialViewName = _ => ViewPrefix + "DateSpanIU.ascx" });
+                Navigator.AddSetting(new EntitySettings<DateSpanDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "DateSpanIU.ascx" });
             }
         }
     }

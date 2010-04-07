@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
+<%@ Import Namespace="Signum.Web.Authorization" %>
 <asp:Content ID="changePasswordContent" ContentPlaceHolderID="MainContent" runat="server">
      <h2>Cambiar contraseña</h2>
      <p>Introduzca su contraseña actual y la nueva contraseña</p>
@@ -10,22 +11,22 @@
                 <tr>
                     <td class="label">Contraseña actual:</td>
                     <td>
-                        <%= Html.Password("currentPassword") %>
-                        <%= Html.ValidationMessage("currentPassword") %>
+                        <%= Html.Password(UserMapping.OldPasswordKey) %>
+                        <%= Html.ValidationMessage(UserMapping.OldPasswordKey)%>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Nueva contraseña:</td>
                     <td>
-                        <%= Html.Password("newPassword") %>
-                        <%= Html.ValidationMessage("newPassword") %>
+                        <%= Html.Password(UserMapping.NewPasswordKey)%>
+                        <%= Html.ValidationMessage(UserMapping.NewPasswordKey)%>
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Confirmar nueva contraseña:</td>
                     <td>
-                        <%= Html.Password("confirmPassword") %>
-                        <%= Html.ValidationMessage("confirmPassword") %>
+                        <%= Html.Password(UserMapping.NewPasswordBisKey)%>
+                        <%= Html.ValidationMessage(UserMapping.NewPasswordBisKey)%>
                     </td>
                 </tr>
                 <tr>

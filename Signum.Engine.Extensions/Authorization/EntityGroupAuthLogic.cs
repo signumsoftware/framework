@@ -17,50 +17,14 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Linq;
-using Signum.Engine.Extensions.Properties; 
+using Signum.Engine.Extensions.Properties;
+using Signum.Entities.Operations; 
 
 namespace Signum.Engine.Authorization
 {
     public static class EntityGroupAuthLogic
     {
-        class AllowedPair
-        {
-            public static readonly AllowedPair True = new AllowedPair(true, true);
-
-            public readonly bool InGroup;
-            public readonly bool OutGroup;
-
-            public AllowedPair(bool inGroup, bool outGroup)
-            {
-                this.InGroup = inGroup;
-                this.OutGroup = outGroup;
-            }
-
-            public static AllowedPair Max(AllowedPair ap1, AllowedPair ap2)
-            {
-                return new AllowedPair(
-                    ap1.InGroup || ap2.InGroup,
-                    ap1.OutGroup || ap2.OutGroup);
-            }
-
-            public static AllowedPair Min(AllowedPair ap1, AllowedPair ap2)
-            {
-                return new AllowedPair(
-                    ap1.InGroup && ap2.InGroup,
-                    ap1.OutGroup && ap2.OutGroup);
-            }
-
-            public bool IsTrue()
-            {
-                return InGroup && OutGroup;
-            }
-        }
-
-        static Dictionary<RoleDN, Dictionary<Enum, AllowedPair>> _runtimeRules;
-        static Dictionary<RoleDN, Dictionary<Enum, AllowedPair>> RuntimeRules
-        {
-            get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
-        }
+        static AuthCache<RuleEntityGroupDN, EntityGroupDN, Enum, EntityGroupAllowed> cache; 
 
         public static void Start(SchemaBuilder sb)
         {
@@ -68,29 +32,19 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertIsStarted(sb);
                 EntityGroupLogic.Start(sb);
-                sb.Include<RuleEntityGroupDN>();
+
+                cache = new AuthCache<RuleEntityGroupDN, EntityGroupDN, Enum, EntityGroupAllowed>(sb,
+                     EnumLogic<EntityGroupDN>.ToEnum,
+                     EnumLogic<EntityGroupDN>.ToEntity,
+                     MaxEntityGroupAllowed, EntityGroupAllowed.All);
+
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_InitializingRegisterEvents);
-                sb.Schema.Initializing(InitLevel.Level1SimpleEntities, Schema_InitializingCache);
-                sb.Schema.EntityEvents<RuleEntityGroupDN>().Saved += Schema_Saved;
-                AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
             }
         }
 
-        static AllowedPair MaxAllowedPair(this IEnumerable<AllowedPair> collection)
+        static EntityGroupAllowed MaxEntityGroupAllowed(this IEnumerable<EntityGroupAllowed> collection)
         {
-            AllowedPair max = new AllowedPair(false, false);
-            foreach (var item in collection)
-            {
-                max = AllowedPair.Max(max, item ?? AllowedPair.True);
-                if (max.IsTrue())
-                    return max;
-            }
-            return max;
-        }
-
-        static void Schema_InitializingCache(Schema sender)
-        {
-            _runtimeRules = NewCache();
+            return collection.Aggregate(EntityGroupAllowed.None, (a, b) => a | b);
         }
 
         static void Schema_InitializingRegisterEvents(Schema sender)
@@ -143,29 +97,6 @@ namespace Signum.Engine.Authorization
                 ident.AssertAllowed();
         }
 
-        
-
-        static void Schema_Saved(RuleEntityGroupDN rule, bool isRoot)
-        {
-            Transaction.RealCommit += () => _runtimeRules = null;
-        }
-
-        static void UserAndRoleLogic_RolesModified()
-        {
-            Transaction.RealCommit += () => _runtimeRules = null;
-        }
-
-        static AllowedPair GetAllowed(RoleDN role, Enum entityGroupKey)
-        {
-            return RuntimeRules.TryGetC(role).TryGetC(entityGroupKey) ?? AllowedPair.True;
-        }
-
-        static AllowedPair GetBaseAllowed(RoleDN role, Enum entityGroupKey)
-        {
-            return role.Roles.Count == 0 ? AllowedPair.True :
-                  role.Roles.Select(r => GetAllowed(r, entityGroupKey)).MaxAllowedPair();
-        }
-
         public static void AssertAllowed(this IIdentifiable ident)
         {
             if (!ident.IsAllowed())
@@ -181,11 +112,11 @@ namespace Signum.Engine.Authorization
 
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
-                    AllowedPair pair = GetAllowed(role, eg);
+                    EntityGroupAllowed access = cache.GetAllowed(role, eg);
                     if (((IdentifiableEntity)ident).IsInGroup(eg))
-                        return pair.InGroup;
+                        return access.HasFlag(EntityGroupAllowed.In);
                     else
-                        return pair.OutGroup;
+                        return access.HasFlag(EntityGroupAllowed.Out);
                 });
         }
 
@@ -202,20 +133,21 @@ namespace Signum.Engine.Authorization
                          select new
                          {
                              Group = eg,
-                             Allowed = GetAllowed(role, eg),
+                             Allowed = cache.GetAllowed(role, eg),
                              Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
-                         }).Where(p => !p.Allowed.InGroup || !p.Allowed.OutGroup).ToList();
+                         }).Where(p => p.Allowed != EntityGroupAllowed.All ).ToList();
 
             if (pairs.Count == 0)
                 return query;
 
-            if (pairs.Any(p => !p.Allowed.InGroup && !p.Allowed.OutGroup))
+            if (pairs.Any(p => p.Allowed == EntityGroupAllowed.None))
                 return query.Where(p => false);
 
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
             Expression body = pairs.Select(p =>
-                            !p.Allowed.InGroup ? Expression.Not(Expression.Invoke(p.Expression, e)) :
-                                                 (Expression)Expression.Invoke(p.Expression, e)).Aggregate((a, b) => Expression.And(a, b));
+                            p.Allowed == EntityGroupAllowed.In ?
+                            (Expression)Expression.Invoke(p.Expression, e) :
+                            Expression.Not(Expression.Invoke(p.Expression, e))).Aggregate((a, b) => Expression.And(a, b));
 
             Expression cleanBody = DbQueryProvider.Clean(body);
 
@@ -239,67 +171,6 @@ namespace Signum.Engine.Authorization
                 IQueryable<T> query = new Query<T>(DbQueryProvider.Single, expression);
                 IQueryable<T> result = WhereAllowed(query);
                 return result.Expression;
-            }
-        }
-
-        public static List<EntityGroupRule> GetEntityGroupRules(Lite<RoleDN> roleLite)
-        {
-            var role = roleLite.Retrieve();
-
-            return EntityGroupLogic.Groups.Select(eg => 
-                {
-                    AllowedPair basePair = GetBaseAllowed(role, eg); 
-                    AllowedPair pair = GetAllowed(role, eg);
-                    return new EntityGroupRule(basePair.InGroup, basePair.OutGroup)
-                    {
-                        Group = EnumLogic<EntityGroupDN>.ToEntity(eg),
-                        AllowedIn = pair.InGroup,
-                        AllowedOut = pair.OutGroup
-                    };
-                }).ToList();
-        }
-
-        public static void SetEntityGroupRules(List<EntityGroupRule> rules, Lite<RoleDN> roleLite)
-        {
-            var role = roleLite.Retrieve();
-
-            var current = Database.Query<RuleEntityGroupDN>().Where(r => r.Role == role).ToDictionary(a => a.Group);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => r.Group);
-
-            Synchronizer.Synchronize(current, should,
-                (p, pr) => pr.Delete(),
-                (p, ar) => new RuleEntityGroupDN { Group = p, Role = role, AllowedIn = ar.AllowedIn, AllowedOut = ar.AllowedOut}.Save(),
-                (p, pr, ar) => { pr.AllowedIn = ar.AllowedIn; pr.AllowedOut = ar.AllowedOut; pr.Save(); });
-
-            _runtimeRules = null;
-        }
-
-        static Dictionary<RoleDN, Dictionary<Enum, AllowedPair>> NewCache()
-        {
-            using (AuthLogic.Disable())
-            using (new EntityCache(true))
-            {
-                List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
-
-                Dictionary<RoleDN, Dictionary<Enum, AllowedPair>> realRules =
-                    Database.RetrieveAll<RuleEntityGroupDN>()
-                      .AgGroupToDictionary(ru => ru.Role, gr => gr
-                          .ToDictionary(ru => EnumLogic<EntityGroupDN>.ToEnum(ru.Group), ru => new AllowedPair(ru.AllowedIn, ru.AllowedOut)));
-
-                Dictionary<RoleDN, Dictionary<Enum, AllowedPair>> newRules = new Dictionary<RoleDN, Dictionary<Enum, AllowedPair>>();
-                foreach (var role in roles)
-                {
-                    var permissions = (role.Roles.Count == 0 ?
-                         null :
-                         role.Roles.Select(r => newRules.TryGetC(r)).OuterCollapseDictionariesC(vals => vals.MaxAllowedPair()));
-
-                    permissions = permissions.Override(realRules.TryGetC(role)).Simplify(a => a.IsTrue());
-
-                    if (permissions != null)
-                        newRules.Add(role, permissions);
-                }
-
-                return newRules;
             }
         }
 
@@ -329,6 +200,25 @@ namespace Signum.Engine.Authorization
                     return base.ExecuteQueryCount(filters);
                 }
             }
+        }
+
+        public static EntityGroupRulePack GetEntityGroupRules(Lite<RoleDN> roleLite)
+        {
+            return new EntityGroupRulePack
+            {
+                Role = roleLite,
+                Rules = cache.GetRules(roleLite, EnumLogic<EntityGroupDN>.AllEntities()).ToMList()
+            };
+        }
+
+        public static void SetEntityGroupRules(EntityGroupRulePack rules)
+        {
+            cache.SetRules(rules); 
+        }
+
+        public static void SetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey, EntityGroupAllowed allowed)
+        {
+            cache.SetAllowed(role, entityGroupKey, allowed); 
         }
     }
 }

@@ -73,9 +73,7 @@ namespace Signum.Test.Extensions
 
             sb.Schema.Initialize();
 
-            var list = EntityGroupAuthLogic.GetEntityGroupRules(role.ToLite());
-            list[0].AllowedOut = false;
-            EntityGroupAuthLogic.SetEntityGroupRules(list, role.ToLite());
+            EntityGroupAuthLogic.SetEntityGroupAllowed(role.ToLite(), EntityGroups.UserResources, EntityGroupAllowed.In);
 
             Connection.CurrentLog = new DebugTextWriter();
 

@@ -20,8 +20,8 @@ namespace Signum.Entities.Authorization
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        MList<RoleDN> roles;
-        public MList<RoleDN> Roles
+        MList<Lite<RoleDN>> roles;
+        public MList<Lite<RoleDN>> Roles
         {
             get { return roles; }
             set { Set(ref roles, value, () => Roles); }

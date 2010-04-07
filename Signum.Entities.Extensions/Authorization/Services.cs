@@ -25,33 +25,33 @@ namespace Signum.Services
     public interface ITypeAuthServer
     {
         [OperationContract, NetDataContract]
-        List<TypeAccessRule> GetTypesAccessRules(Lite<RoleDN> role);
+        TypeRulePack GetTypesRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetTypesAccessRules(List<TypeAccessRule> rules, Lite<RoleDN> role);
+        void SetTypesRules(TypeRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, TypeAccess> AuthorizedTypes(); 
+        Dictionary<Type, TypeAllowed> AuthorizedTypes(); 
     }
 
     [ServiceContract]
     public interface IFacadeMethodAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetFacadeMethodAllowedRules(Lite<RoleDN> role);
+        FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetFacadeMethodAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role); 
+        void SetFacadeMethodRules(FacadeMethodRulePack rules); 
     }
 
     [ServiceContract]
     public interface IPermissionAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetPermissionAllowedRules(Lite<RoleDN> role);
+        PermissionRulePack GetPermissionRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetPermissionAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role);
+        void SetPermissionRules(PermissionRulePack rules);
 
         [OperationContract, NetDataContract]
         Dictionary<Enum, bool> PermissionRules();
@@ -61,23 +61,23 @@ namespace Signum.Services
     public interface IPropertyAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AccessRule> GetPropertyAccessRules(Lite<RoleDN> role, TypeDN typeDN);
+        PropertyRulePack GetPropertyRules(Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
-        void SetPropertyAccessRules(List<AccessRule> rules, Lite<RoleDN> role, TypeDN typeDN);
+        void SetPropertyRules(PropertyRulePack rules);
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, Dictionary<string, Access>> AuthorizedProperties(); 
+        Dictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties(); 
     }
 
     [ServiceContract]
     public interface IQueryAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role, TypeDN typeDN);
+        QueryRulePack GetQueryRules(Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
-        void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN);
+        void SetQueryRules(QueryRulePack rules);
 
         [OperationContract, NetDataContract]
         HashSet<object> AuthorizedQueries();
@@ -87,37 +87,19 @@ namespace Signum.Services
     public interface IOperationAuthServer
     {
         [OperationContract, NetDataContract]
-        List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role, TypeDN typeDN);
+        OperationRulePack GetOperationRules(Lite<RoleDN> role, TypeDN typeDN);
 
         [OperationContract, NetDataContract]
-        void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN);
+        void SetOperationRules(OperationRulePack rules);
     }
 
     [ServiceContract]
     public interface IEntityGroupAuthServer
     {
         [OperationContract, NetDataContract]
-        List<EntityGroupRule> GetEntityGroupAllowedRules(Lite<RoleDN> role);
+        EntityGroupRulePack GetEntityGroupAllowedRules(Lite<RoleDN> role);
 
         [OperationContract, NetDataContract]
-        void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lite<RoleDN> role);
-
-        //   #region IEntityGroupAuthServer Members
-
-        //   public List<EntityGroupRule> GetEntityGroupAllowedRules(Lite<RoleDN> role)
-        //   {
-        //       return Return(MethodInfo.GetCurrentMethod(),
-        //        () => EntityGroupAuthLogic.GetEntityGroupRules(role));
-        //   }
-
-        //   public void SetEntityGroupAllowedRules(List<EntityGroupRule> rules, Lite<RoleDN> role)
-        //   {
-        //       Execute(MethodInfo.GetCurrentMethod(),
-        //          () => EntityGroupAuthLogic.SetEntityGroupRules(rules, role));
-        //   }
-
-        //   #endregion
+        void SetEntityGroupAllowedRules(EntityGroupRulePack rules);
     }
-
-
 }

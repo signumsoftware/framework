@@ -26,7 +26,6 @@ namespace Signum.Web.Operations
             Type type = Navigator.ResolveType(sfRuntimeType);
 
             IdentifiableEntity entity = null;
-            ChangesLog changesLog = null;
             if (isLite)
             {
                 if (sfId.HasValue)
@@ -39,24 +38,19 @@ namespace Signum.Web.Operations
             }
             else
             {
-                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form, sfOldPrefix);
+                MappingContext context = this.UntypedExtractEntity(sfOldPrefix).ApplyChanges(this.ControllerContext, sfOldPrefix, true).ValidateGlobal();
+                entity = (IdentifiableEntity)context.UntypedValue;
 
-                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, sfOldPrefix, "");
-                //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, "", "");
-
-                if (changesLog.Errors != null && changesLog.Errors.Count > 0)
+                if (context.Errors.Any())
                 {
-                    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+                    this.ModelState.FromContext(context);
                     return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
                 }
 
                 entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
 
-                if (Navigator.ExtractIsReactive(Request.Form))
-                {
-                    string tabID = Navigator.ExtractTabID(Request.Form);
-                    Session[tabID] = entity;
-                }
+                if (this.IsReactive())
+                    Session[this.TabID()] = entity;
             }
 
             if (prefix.HasText() && Request.IsAjaxRequest())
@@ -88,7 +82,6 @@ namespace Signum.Web.Operations
             Type type = Navigator.ResolveType(sfRuntimeType);
 
             IdentifiableEntity entity = null;
-            ChangesLog changesLog = null;
             if (isLite)
             {
                 if (sfId.HasValue)
@@ -101,14 +94,12 @@ namespace Signum.Web.Operations
             }
             else
             {
-                entity = (IdentifiableEntity)Navigator.ExtractEntity(this, Request.Form, sfOldPrefix);
+                MappingContext context = this.UntypedExtractEntity(sfOldPrefix).UntypedApplyChanges(this.ControllerContext, sfOldPrefix, true).UntypedValidateGlobal();
+                entity = (IdentifiableEntity)context.UntypedValue;
 
-                //changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, ""); Con prefijo falla para Alta Poliza desde presupuesto
-                changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, sfOldPrefix, "");
-
-                if (changesLog.Errors != null && changesLog.Errors.Count > 0)
+                if (context.Errors.Any())
                 {
-                    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
+                   this.ModelState.FromContext(context);
                     return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
                 }
 

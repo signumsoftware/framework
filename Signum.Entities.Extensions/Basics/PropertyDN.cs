@@ -12,11 +12,11 @@ namespace Signum.Entities.Basics
         public PropertyDN() { }
 
         [field: Ignore]
-        PropertyRoute entityPath;
-        public PropertyRoute PropertyPath
+        PropertyRoute route;
+        public PropertyRoute Route
         {
-            get { return entityPath; }
-            set { entityPath = value; }
+            get { return route; }
+            set { route = value; }
         }
 
         [NotNullable, SqlDbType(Size = 100)]

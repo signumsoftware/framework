@@ -5,166 +5,74 @@ using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities;
+using Signum.Entities.Operations;
 
 namespace Signum.Entities.Authorization
 {
     //Only for client-side communication
     [Serializable]
-    public class AccessRule : EmbeddedEntity
+    public abstract class BaseRulePack<R, A> : IdentifiableEntity
+        where R : IdentifiableEntity
+        where A : struct
     {
-        public AccessRule(Access accessBase)
+        Lite<RoleDN> role;
+        [NotNullValidator]
+        public Lite<RoleDN> Role
         {
-            this.accessBase = accessBase;
+            get { return role; }
+            internal set { Set(ref role, value, () => Role); }
         }
 
-        Access accessBase;
-        public Access AccessBase
+        TypeDN type;
+        [NotNullValidator]
+        public TypeDN Type
         {
-            get { return accessBase; }
+            get { return type; }
+            internal set { Set(ref type, value, () => Type); }
         }
 
-        Access? accessOverride;
-        public Access Access
+        MList<AllowedRule<R, A>> rules;
+        public MList<AllowedRule<R, A>> Rules
         {
-            get { return accessOverride ?? accessBase; }
-            set
-            {
-                Access? val = value == accessBase ? (Access?)null : value;
-
-                if (Set(ref accessOverride, val, () => Access))
-                {
-                    Notify(()=>Overriden);
-                    Notify(()=>Modify);
-                    Notify(()=>Read);
-                    Notify(()=>None);
-                }
-            }
-        }
-
-        public bool Modify
-        {
-            get { return Access == Access.Modify; }
-            set { if (value) Access = Access.Modify; }
-        }
-
-        public bool Read
-        {
-            get { return Access == Access.Read; }
-            set { if (value) Access = Access.Read; }
-        }
-
-        public bool None
-        {
-            get { return Access == Access.None; }
-            set { if (value) Access = Access.None; }
-        }
-
-        public bool Overriden
-        {
-            get { return accessOverride.HasValue; }
-        }
-
-        IdentifiableEntity resource;
-        public IdentifiableEntity Resource
-        {
-            get { return resource; }
-            set { Set(ref resource, value, () => Resource); }
+            get { return rules; }
+            set { Set(ref rules, value, () => Rules); }
         }
     }
 
     [Serializable]
-    public class EntityGroupRule : EmbeddedEntity
+    public class AllowedRule<R, A> : EmbeddedEntity
+        where R : IdentifiableEntity
+        where A : struct
     {
-        public EntityGroupRule(bool allowedInBase, bool allowedOutBase)
-        {
-            this.allowedInBase = allowedInBase;
-            this.allowedOutBase = allowedOutBase; 
-        }
-
-        bool allowedInBase;
-        public bool AllowedInBase
-        {
-            get { return allowedInBase; }
-        }
-
-        bool allowedOutBase;
-        public bool AllowedOutBase
-        {
-            get { return allowedOutBase; }
-        }
-
-        bool? allowedInOverride;
-        public bool AllowedIn
-        {
-            get { return allowedInOverride ?? allowedInBase; }
-            set
-            {
-                bool? val = value == allowedInBase ? (bool?)null : value;
-
-                if (Set(ref allowedInOverride, val, () => AllowedIn))
-                {
-                    Notify(() => Overriden);
-                }
-            }
-        }
-
-        bool? allowedOutOverride;
-        public bool AllowedOut
-        {
-            get { return allowedOutOverride ?? allowedOutBase; }
-            set
-            {
-                bool? val = value == allowedOutBase ? (bool?)null : value;
-
-                if (Set(ref allowedOutOverride, val, () => AllowedOut))
-                {
-                    Notify(() => Overriden);
-                }
-            }
-        }
-
-        public bool Overriden
-        {
-            get { return allowedInOverride.HasValue || allowedOutOverride.HasValue; }
-        }
-
-        EntityGroupDN group;
-        public EntityGroupDN Group
-        {
-            get { return group; }
-            set { Set(ref group, value, () => Group); }
-        }
-    }
-
-
-    //Only for client-side communication
-    [Serializable]
-    public class AllowedRule : EmbeddedEntity
-    {
-        public AllowedRule(bool allowedBase)
+        public AllowedRule(A allowedBase)
         {
             this.allowedBase = allowedBase;
         }
 
-        bool allowedBase;
-        public bool AllowedBase
+        A allowedBase;
+        public A AllowedBase
         {
             get { return allowedBase; }
         }
 
-        bool? allowedOverride;
-        public bool Allowed
+        A? allowedOverride;
+        public A Allowed
         {
             get { return allowedOverride ?? allowedBase; }
             set
             {
-                bool? val = value == allowedBase ? (bool?)null : value;
+                A? val = value.Equals(allowedBase) ? (A?)null : value;
 
                 if (Set(ref allowedOverride, val, () => Allowed))
                 {
-                    Notify(()=>Overriden);
+                    Notify();
                 }
             }
+        }
+
+        protected virtual void Notify()
+        {
+            Notify(() => Overriden);
         }
 
         public bool Overriden
@@ -172,97 +80,37 @@ namespace Signum.Entities.Authorization
             get { return allowedOverride.HasValue; }
         }
 
-        IdentifiableEntity resource;
-        public IdentifiableEntity Resource
+        R resource;
+        public R Resource
         {
             get { return resource; }
             set { Set(ref resource, value, () => Resource); }
         }
+
+        public override string ToString()
+        {
+            return "{0} -> {1}".Formato(resource, Allowed) + (Overriden ? "(overriden from {0})".Formato(AllowedBase) : "");
+        }
     }
 
-
-    //Only for client-side communication
     [Serializable]
-    public class TypeAccessRule : EmbeddedEntity
-    {
-        public TypeAccessRule(TypeAccess accessBase)
-        {
-            this.accessBase = accessBase;
-        }
+    public class TypeRulePack : BaseRulePack<TypeDN, TypeAllowed> { }
 
-        TypeAccess accessBase;
-        public TypeAccess AccessBase
-        {
-            get { return accessBase; }
-        }
+    [Serializable]
+    public class PropertyRulePack : BaseRulePack<PropertyDN, PropertyAllowed> { }
 
-        TypeAccess? accessOverride;
-        public TypeAccess Access
-        {
-            get { return accessOverride ?? accessBase; }
-            set
-            {
-                TypeAccess? val = value == accessBase ? (TypeAccess?)null : value;
+    [Serializable]
+    public class QueryRulePack : BaseRulePack<QueryDN, bool> { }
 
-                if (Set(ref accessOverride, val, () => Access))
-                {
-                    Notify(()=>Overriden);
-                    Notify(()=>Create);
-                    Notify(()=>Modify);
-                    Notify(()=>Read);
-                    Notify(()=>None);
-                }
-            }
-        }
+    [Serializable]
+    public class OperationRulePack : BaseRulePack<OperationDN, bool> { }
 
-        public static readonly TypeAccess CreateKey = (TypeAccess)4; 
-        public bool Create
-        {
-            get { return Access.HasFlag(CreateKey); }
-            set
-            {
-                if (value)
-                    Access = Access | TypeAccess.CreateOnly;
-                else
-                    Access = Access & ~CreateKey;
-            }
-        }
+    [Serializable]
+    public class PermissionRulePack : BaseRulePack<PermissionDN, bool> { }
 
-        public static readonly TypeAccess ModifyKey = (TypeAccess)2; 
-        public bool Modify
-        {
-            get { return Access.HasFlag(ModifyKey); }
-            set
-            {
-                if (value)
-                    Access = Access | TypeAccess.ModifyOnly;
-                else
-                    Access = Access & ~ModifyKey;
-            }
-        }
+    [Serializable]
+    public class FacadeMethodRulePack : BaseRulePack<FacadeMethodDN, bool> { }
 
-        public bool Read
-        {
-            get { return Access.HasFlag(TypeAccess.Read); }
-            set { if (value) Access = Access | TypeAccess.Read; }
-        }
-
-        public bool None
-        {
-            get { return Access == TypeAccess.None; }
-            set { if (value) Access = TypeAccess.None; }
-        }
-
-        public bool Overriden
-        {
-            get { return accessOverride.HasValue; }
-        }
-
-        TypeDN type;
-        public TypeDN Type
-        {
-            get { return type; }
-            set { Set(ref type, value, () => Type); }
-        }
-    }
+    [Serializable]
+    public class EntityGroupRulePack : BaseRulePack<EntityGroupDN, EntityGroupAllowed> { }
 }

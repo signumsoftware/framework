@@ -144,19 +144,19 @@ namespace Signum.Services
 
         #region IPropertyAuthServer Members
 
-        public List<AccessRule> GetPropertyAccessRules(Lite<RoleDN> role, TypeDN typeDN)
+        public PropertyRulePack GetPropertyRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-             () => PropertyAuthLogic.GetAccessRule(role, typeDN));
+             () => PropertyAuthLogic.GetPropertyRules(role, typeDN));
         }
 
-        public void SetPropertyAccessRules(List<AccessRule> rules, Lite<RoleDN> role, TypeDN typeDN)
+        public void SetPropertyRules(PropertyRulePack rules)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-             () => PropertyAuthLogic.SetAccessRule(rules, role, typeDN));
+             () => PropertyAuthLogic.SetPropertyRules(rules));
         }
 
-        public Dictionary<Type, Dictionary<string, Access>> AuthorizedProperties()
+        public Dictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => PropertyAuthLogic.AuthorizedProperties());
@@ -166,19 +166,19 @@ namespace Signum.Services
 
         #region ITypeAuthServer Members
 
-        public List<TypeAccessRule> GetTypesAccessRules(Lite<RoleDN> role)
+        public TypeRulePack GetTypesRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => TypeAuthLogic.GetAccessRule(role));
+              () => TypeAuthLogic.GetTypeRules(role));
         }
 
-        public void SetTypesAccessRules(List<TypeAccessRule> rules, Lite<RoleDN> role)
+        public void SetTypesRules(TypeRulePack rules)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-              () => TypeAuthLogic.SetAccessRule(rules, role));
+              () => TypeAuthLogic.SetTypeRules(rules));
         }
 
-        public Dictionary<Type, TypeAccess> AuthorizedTypes()
+        public Dictionary<Type, TypeAllowed> AuthorizedTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => TypeAuthLogic.AuthorizedTypes());
@@ -188,32 +188,32 @@ namespace Signum.Services
 
         #region IFacadeMethodAuthServer Members
 
-        public List<AllowedRule> GetFacadeMethodAllowedRules(Lite<RoleDN> role)
+        public FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => FacadeMethodAuthLogic.GetAllowedRule(role));
+              () => FacadeMethodAuthLogic.GetFacadeMethodRules(role));
         }
 
-        public void SetFacadeMethodAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
+        public void SetFacadeMethodRules(FacadeMethodRulePack rules)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-              () => FacadeMethodAuthLogic.SetAllowedRule(rules, role));
+              () => FacadeMethodAuthLogic.SetFacadeMethodRules(rules));
         }
 
         #endregion
 
         #region IQueryAuthServer Members
 
-        public List<AllowedRule> GetQueryAllowedRules(Lite<RoleDN> role, TypeDN typeDN)
+        public QueryRulePack GetQueryRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => QueryAuthLogic.GetAllowedRule(role, typeDN));
+              () => QueryAuthLogic.GetQueryRules(role, typeDN));
         }
 
-        public void SetQueryAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN)
+        public void SetQueryRules(QueryRulePack rules)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-               () => QueryAuthLogic.SetAllowedRule(rules, role, typeDN));
+               () => QueryAuthLogic.SetQueryRules(rules));
         }
 
         public HashSet<object> AuthorizedQueries()
@@ -226,16 +226,16 @@ namespace Signum.Services
 
         #region IPermissionAuthServer Members
 
-        public List<AllowedRule> GetPermissionAllowedRules(Lite<RoleDN> role)
+        public PermissionRulePack GetPermissionRules(Lite<RoleDN> role)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => PermissionAuthLogic.GetAllowedRule(role));
+            () => PermissionAuthLogic.GetPermissionRules(role));
         }
 
-        public void SetPermissionAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role)
+        public void SetPermissionRules(PermissionRulePack rules)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-            () => PermissionAuthLogic.SetAllowedRule(rules, role));
+            () => PermissionAuthLogic.SetPermissionRules(rules));
         }
 
         public Dictionary<Enum, bool> PermissionRules()
@@ -247,21 +247,17 @@ namespace Signum.Services
         #endregion
 
         #region IOperationAuthServer Members
-
-        public List<AllowedRule> GetOperationAllowedRules(Lite<RoleDN> role, TypeDN typeDN)
+        public OperationRulePack GetOperationRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => OperationAuthLogic.GetAllowedRule(role, typeDN));
+              () => OperationAuthLogic.GetOperationRules(role, typeDN));
         }
 
-
-        public void SetOperationAllowedRules(List<AllowedRule> rules, Lite<RoleDN> role, TypeDN typeDN)
+        public void SetOperationRules(OperationRulePack rules)
         {
             Execute(MethodInfo.GetCurrentMethod(),
-               () => OperationAuthLogic.SetAllowedRule(rules, role, typeDN));
+               () => OperationAuthLogic.SetOperationRules(rules));
         }
-
         #endregion
-
     }
 }

@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Signum.Web;
+using Signum.Entities.Reflection;
+using Signum.Utilities;
+using Signum.Entities;
+using Signum.Utilities.DataStructures;
+using Signum.Engine;
+using System.Web.Mvc;
+using Signum.Entities.Authorization;
+using Signum.Web.Extensions.Properties;
+using Signum.Services;
+
+namespace Signum.Web.Authorization
+{
+    public static class UserMapping
+    {
+        public static readonly string OldPasswordKey = "OldPassword";
+        public static readonly string NewPasswordKey = "NewPassword";
+        public static readonly string NewPasswordBisKey = "NewPasswordBis"; 
+
+        public static EntityMapping<UserDN> ChangePassword = new EntityMapping<UserDN>(false)
+            .SetProperty(u => u.PasswordHash, new ValueMapping<string>(), m => m.GetValue = ctx =>
+            {
+                string oldPassword = ctx.Parent.Inputs[OldPasswordKey];
+                if (ctx.Value != Security.EncodePassword(oldPassword))
+                    return ctx.ParentNone(OldPasswordKey, Resources.PasswordDoesNotMatchCurrent);
+
+                string newPassword = ctx.Parent.Inputs[NewPasswordKey];
+                if (string.IsNullOrEmpty(newPassword))
+                    return ctx.ParentNone(NewPasswordKey, Resources.PasswordMustHaveAValue);
+
+                string newPasswordBis = ctx.Parent.Inputs[NewPasswordBisKey];
+                if (string.IsNullOrEmpty(newPasswordBis))
+                    return ctx.ParentNone(NewPasswordBisKey, Resources.YouMustRepeatTheNewPassword);
+
+                if (newPassword != newPasswordBis)
+                    return ctx.ParentNone(NewPasswordBisKey, Resources.TheSpecifiedPasswordsDontMatch);
+
+                return Security.EncodePassword(newPassword);
+            });
+    }    
+}

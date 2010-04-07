@@ -20,15 +20,16 @@ namespace Signum.Engine.Authorization
     public static class PermissionAuthLogic
     {
         static List<Type> permissionTypes = new List<Type>();
-        static Dictionary<RoleDN, Dictionary<string, bool>> _runtimeRules;
-        static Dictionary<RoleDN, Dictionary<string, bool>> RuntimeRules
+        public static void RegisterTypes(params Type[] types)
         {
-            get { return Sync.Initialize(ref _runtimeRules, () => NewCache()); }
+            permissionTypes.AddRange(types);
         }
+
+        static AuthCache<RulePermissionDN, PermissionDN, Enum, bool> cache;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null))); 
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -37,41 +38,22 @@ namespace Signum.Engine.Authorization
             {
                 AuthLogic.AssertIsStarted(sb);
 
-                sb.Include<RulePermissionDN>();
                 sb.Include<PermissionDN>();
 
                 EnumLogic<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet());
-                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
-                sb.Schema.EntityEvents<RulePermissionDN>().Saved += Schema_Saved;
-                AuthLogic.RolesModified += UserAndRoleLogic_RolesModified;
+
+                cache = new AuthCache<RulePermissionDN, PermissionDN, Enum, bool>(sb,
+                    EnumLogic<PermissionDN>.ToEnum,
+                    EnumLogic<PermissionDN>.ToEntity,
+                    AuthUtils.MaxAllowed, true);
 
                 RegisterTypes(typeof(BasicPermissions));
             }
         }
 
-        public static void RegisterTypes(params Type[] types)
-        {
-            permissionTypes.AddRange(types);
-        }
-
-        static void Schema_Initializing(Schema sender)
-        {
-            _runtimeRules = NewCache();
-        }
-
-        static void Schema_Saved(RulePermissionDN rule, bool isRoot)
-        {
-            Transaction.RealCommit += () => _runtimeRules = null;
-        }
-
-        static void UserAndRoleLogic_RolesModified()
-        {
-            Transaction.RealCommit += () => _runtimeRules = null;
-        }
-
         public static void Authorize(this Enum permissionKey)
         {
-            if (!GetAllowed(RoleDN.Current, PermissionDN.UniqueKey(permissionKey)))
+            if (!cache.GetAllowed(RoleDN.Current, permissionKey))
                 throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
 
@@ -79,77 +61,33 @@ namespace Signum.Engine.Authorization
         {
             RoleDN role = RoleDN.Current;
 
-            return EnumLogic<PermissionDN>.Keys.ToDictionary(a => a, a => GetAllowed(RoleDN.Current, PermissionDN.UniqueKey(a)));
+            return EnumLogic<PermissionDN>.Keys.ToDictionary(a => a, a => cache.GetAllowed(RoleDN.Current, a));
         }
-        
+
         public static bool IsAuthorized(this Enum permissionKey)
         {
-            return GetAllowed(RoleDN.Current, PermissionDN.UniqueKey(permissionKey));
+            return cache.GetAllowed(RoleDN.Current, permissionKey);
         }
 
-        static bool GetAllowed(RoleDN role, string permissionKey)
-        {
-            return RuntimeRules.TryGetC(role).TryGetS(permissionKey) ?? true;
-        }
-
-        static bool GetBaseAllowed(RoleDN role, string permissionKey)
-        {
-            return role.Roles.Count == 0 ? true :
-                  role.Roles.Select(r => GetAllowed(r, permissionKey)).MaxAllowed();
-        }
-
-        public static List<AllowedRule> GetAllowedRule(Lite<RoleDN> roleLite)
+        public static PermissionRulePack GetPermissionRules(Lite<RoleDN> roleLite)
         {
             var role = roleLite.Retrieve();
 
-            return EnumLogic<PermissionDN>.AllEntities()
-                    .Select(p => new AllowedRule(GetBaseAllowed(role, p.Key))
-                   {
-                       Resource = p,
-                       Allowed = GetAllowed(role, p.Key),
-                   }).ToList();
-        }
-
-        public static void SetAllowedRule(List<AllowedRule> rules, Lite<RoleDN> roleLite)
-        {
-            var role = roleLite.Retrieve();
-
-            var current = Database.Query<RulePermissionDN>().Where(r => r.Role == role).ToDictionary(a => a.Permission);
-            var should = rules.Where(a => a.Overriden).ToDictionary(r => (PermissionDN)r.Resource);
-
-            Synchronizer.Synchronize(current, should,
-                (p, pr) => pr.Delete(),
-                (p, ar) => new RulePermissionDN { Permission = p, Allowed = ar.Allowed, Role = role }.Save(),
-                (p, pr, ar) => { pr.Allowed = ar.Allowed; pr.Save(); });
-
-            _runtimeRules = null;
-        }
-
-        public static Dictionary<RoleDN, Dictionary<string, bool>> NewCache()
-        {
-            using (AuthLogic.Disable())
-            using (new EntityCache(true))
+            return new PermissionRulePack
             {
-                List<RoleDN> roles = AuthLogic.RolesInOrder().ToList();
+                Role = roleLite,
+                Rules = cache.GetRules(roleLite, EnumLogic<PermissionDN>.AllEntities()).ToMList()
+            };
+        }
 
-                Dictionary<RoleDN, Dictionary<string, bool>> realRules = Database.RetrieveAll<RulePermissionDN>()
-                    .AgGroupToDictionary(ru => ru.Role, gr => gr.ToDictionary(a => a.Permission.Key, a => a.Allowed));
+        public static void SetPermissionRules(PermissionRulePack rules)
+        {
+            cache.SetRules(rules);
+        }
 
-                Dictionary<RoleDN, Dictionary<string, bool>> newRules = new Dictionary<RoleDN, Dictionary<string, bool>>();
-                foreach (var role in roles)
-                {
-                    var permissions = (role.Roles.Count == 0 ?
-                         null :
-                         role.Roles.Select(r => newRules.TryGetC(r)).OuterCollapseDictionariesS(vals => vals.MaxAllowed()));
-
-                    permissions = permissions.Override(realRules.TryGetC(role)).Simplify(a => a);
-
-                    if (permissions != null)
-                        newRules.Add(role, permissions);
-                }
-
-                return newRules;
-            }
+        public static void SetPermissionAllowed(Lite<RoleDN> role, Enum permissionKey, bool allowed)
+        {
+            cache.SetAllowed(role, permissionKey, allowed);
         }
     }
 }

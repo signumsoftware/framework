@@ -14,45 +14,45 @@ using Signum.Entities.Files;
 
 namespace Signum.Web.Files
 {
-    public class FilePathModification : EntityModification
-    {
-        public FilePathModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
-            : base(staticType, formValues, interval, controlID)
-        {
+    //public class FilePathModification : EntityModification
+    //{
+    //    public FilePathModification(Type staticType, SortedList<string, object> formValues, Interval<int> interval, string controlID)
+    //        : base(staticType, formValues, interval, controlID)
+    //    {
 
-        }
+    //    }
 
-        protected override int GeneratePropertyModification(SortedList<string, object> formValues, Interval<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
-        {
-            Interval<int> subInterval = FindSubInterval(formValues, new Interval<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
+    //    protected override int GeneratePropertyModification(SortedList<string, object> formValues, Interval<int> interval, string subControlID, string commonSubControlID, string propertyName, int index, Dictionary<string, PropertyPack> propertyValidators)
+    //    {
+    //        Interval<int> subInterval = FindSubInterval(formValues, new Interval<int>(index, interval.Max), ControlID.Length, TypeContext.Separator + propertyName);
 
-            long? propertyIsLastChange = null;
-            if (formValues.ContainsKey(TypeContext.Compose(commonSubControlID, TypeContext.Ticks)))
-            {
-                string changed = (string)formValues.TryGetC(TypeContext.Compose(commonSubControlID, TypeContext.Ticks));
-                if (changed.HasText()) //It'll be null for EmbeddedControls 
-                {
-                    if (changed == "0")
-                        return subInterval.Max - 1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
-                    else
-                        propertyIsLastChange = long.Parse(changed);
-                }
-            }
+    //        long? propertyIsLastChange = null;
+    //        if (formValues.ContainsKey(TypeContext.Compose(commonSubControlID, TypeContext.Ticks)))
+    //        {
+    //            string changed = (string)formValues.TryGetC(TypeContext.Compose(commonSubControlID, TypeContext.Ticks));
+    //            if (changed.HasText()) //It'll be null for EmbeddedControls 
+    //            {
+    //                if (changed == "0")
+    //                    return subInterval.Max - 1; //Don't apply changes, it will affect other properties and it has not been changed in the IU
+    //                else
+    //                    propertyIsLastChange = long.Parse(changed);
+    //            }
+    //        }
 
-            if (propertyName == FileLineKeys.FileType)
-                return subInterval.Max - 1;
+    //        if (propertyName == FileLineKeys.FileType)
+    //            return subInterval.Max - 1;
 
-            return base.GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, index, propertyValidators);
-        }
+    //        return base.GeneratePropertyModification(formValues, interval, subControlID, commonSubControlID, propertyName, index, propertyValidators);
+    //    }
 
-        public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
-        {
-            //if (filePath == null || filePath.IdOrNull == null)
-            //    return null;
-            FilePathDN filePath = (FilePathDN)base.ApplyChanges(controller, obj, onFinish);
-            if (filePath != null && filePath.IdOrNull == null)
-                return null;
-            return filePath;
-        }
-    }
+    //    public override object ApplyChanges(Controller controller, object obj, ModificationState onFinish)
+    //    {
+    //        //if (filePath == null || filePath.IdOrNull == null)
+    //        //    return null;
+    //        FilePathDN filePath = (FilePathDN)base.ApplyChanges(controller, obj, onFinish);
+    //        if (filePath != null && filePath.IdOrNull == null)
+    //            return null;
+    //        return filePath;
+    //    }
+    //}
 }

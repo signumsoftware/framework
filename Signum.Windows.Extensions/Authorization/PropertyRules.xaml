@@ -8,7 +8,7 @@
     SizeToContent="WidthAndHeight"
     m:Monitors.AdjustToMonitor="true"
     WindowStartupLocation="CenterOwner"
-    Title="Property Rules" x:Name="me" MinWidth="300" MinHeight="300">
+    Title="Property Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="authdn:PropertyRulePack">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -18,9 +18,9 @@
     </Window.Resources>
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
-        <m:EntityLine VerticalAlignment="Top"  LabelText="Role" m:Common.IsReadOnly="True" Type="{m:Lite authdn:RoleDN}" Entity="{Binding Role, ElementName=me}" DockPanel.Dock="Top"/>
-        <m:EntityLine VerticalAlignment="Top"  LabelText="Type" m:Common.IsReadOnly="True" Type="{x:Type dn:TypeDN}" Entity="{Binding Type, ElementName=me}" DockPanel.Dock="Top"/>
-        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
+        <m:EntityLine VerticalAlignment="Top"  m:Common.Route="Role" DockPanel.Dock="Top"/>
+        <m:EntityLine VerticalAlignment="Top"  m:Common.Route="Type" DockPanel.Dock="Top"/>
+        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True" ItemsSource="{Binding Rules}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -32,21 +32,21 @@
                     <GridViewColumn Header="Modify" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Modify}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:PropertyAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Read" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:PropertyAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="None" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=None}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:PropertyAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

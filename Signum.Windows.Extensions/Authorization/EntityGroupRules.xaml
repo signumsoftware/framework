@@ -7,7 +7,7 @@
     m:Monitors.AdjustToMonitor="true"
     WindowStartupLocation="CenterOwner"
     SizeToContent="WidthAndHeight"
-    Title="Entity Group Rules" x:Name="me" MinWidth="300" MinHeight="300">
+    Title="Entity Group Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="authdn:EntityGroupRulePack">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -17,8 +17,8 @@
 	</Window.Resources>
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
-        <m:EntityLine VerticalAlignment="Top" LabelText="Role" m:Common.IsReadOnly="True" Type="{m:Lite authdn:RoleDN}" Entity="{Binding Role, ElementName=me}" DockPanel.Dock="Top"/>
-        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True">
+        <m:EntityLine VerticalAlignment="Top" m:Common.Route="Role" DockPanel.Dock="Top"/>
+        <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True" ItemsSource="{Binding Rules}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -27,31 +27,31 @@
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Header="Entity Group" DisplayMemberBinding="{Binding Group}" />
-                    <GridViewColumn Header="Allow In" Width="40">
+                    <GridViewColumn Header="All" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=AllowedIn}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.All}}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Deny In" Width="40">
+                    <GridViewColumn Header="In" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton  IsChecked="{Binding Path=AllowedIn, Converter={x:Static m:Converters.Not}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.In}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Allow Out" Width="40">
+                    <GridViewColumn Header="Out" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=AllowedOut}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.Out}}" Style="{StaticResource SphereRadioButton}" Background="Yellow"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Deny Out" Width="40">
+                    <GridViewColumn Header="None" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton  IsChecked="{Binding Path=AllowedOut, Converter={x:Static m:Converters.Not}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
