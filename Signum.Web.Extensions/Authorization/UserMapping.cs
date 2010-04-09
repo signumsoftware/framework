@@ -28,18 +28,23 @@ namespace Signum.Web.Authorization
                 if (ctx.Value != Security.EncodePassword(oldPassword))
                     return ctx.ParentNone(OldPasswordKey, Resources.PasswordDoesNotMatchCurrent);
 
-                string newPassword = ctx.Parent.Inputs[NewPasswordKey];
-                if (string.IsNullOrEmpty(newPassword))
-                    return ctx.ParentNone(NewPasswordKey, Resources.PasswordMustHaveAValue);
-
-                string newPasswordBis = ctx.Parent.Inputs[NewPasswordBisKey];
-                if (string.IsNullOrEmpty(newPasswordBis))
-                    return ctx.ParentNone(NewPasswordBisKey, Resources.YouMustRepeatTheNewPassword);
-
-                if (newPassword != newPasswordBis)
-                    return ctx.ParentNone(NewPasswordBisKey, Resources.TheSpecifiedPasswordsDontMatch);
-
-                return Security.EncodePassword(newPassword);
+                return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
             });
+
+        public static string GetNewPassword(MappingContext<string> ctx, string newPasswordKey, string newPasswordBisKey)
+        {
+            string newPassword = ctx.Parent.Inputs[newPasswordKey];
+            if (string.IsNullOrEmpty(newPassword))
+                return ctx.ParentNone(newPasswordKey, Resources.PasswordMustHaveAValue);
+
+            string newPasswordBis = ctx.Parent.Inputs[newPasswordBisKey];
+            if (string.IsNullOrEmpty(newPasswordBis))
+                return ctx.ParentNone(newPasswordBisKey, Resources.YouMustRepeatTheNewPassword);
+
+            if (newPassword != newPasswordBis)
+                return ctx.ParentNone(newPasswordBisKey, Resources.TheSpecifiedPasswordsDontMatch);
+
+            return Security.EncodePassword(newPassword);
+        }
     }    
 }
