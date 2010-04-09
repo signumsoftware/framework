@@ -390,9 +390,9 @@ namespace Signum.Engine.Help
                                where name != null
                                select new
                                {
-                                   QueryName = name,
+                                   TypeName = name,
                                    File = doc.File,
-                               }).ToDictionary(a => a.QueryName, a => a.File);
+                               }).ToDictionary(a => a.TypeName, a => a.File);
 
              
                 HelpTools.SynchronizeReplacing(replacements, "Type", current, should,
