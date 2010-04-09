@@ -78,6 +78,7 @@ namespace Signum.Web
         public string ControlID { get; private set; }
 
         public abstract SortedList<string, string> GlobalInputs { get; }
+        public abstract Dictionary<string, List<string>> GlobalErrors { get; }
 
         public string Input
         {
@@ -172,6 +173,12 @@ namespace Signum.Web
 
         internal bool SupressChange;
 
+        public T None()
+        {
+            SupressChange = true;
+            return default(T);
+        }
+
         public T None(string error)
         {
             this.Error.Add(error);
@@ -189,12 +196,6 @@ namespace Signum.Web
         public T ParentNone(string errorKey, string error)
         {
             this.Parent.Errors.GetOrCreate(errorKey).Add(error);
-            SupressChange = true;
-            return default(T);
-        }
-
-        public T None()
-        {
             SupressChange = true;
             return default(T);
         }
@@ -275,10 +276,16 @@ namespace Signum.Web
             get { return globalInputs; }
         }
 
+        Dictionary<string, List<string>> globalErrors = new Dictionary<string,List<string>>();
+        public override Dictionary<string, List<string>> GlobalErrors
+        {
+            get { return globalErrors; }
+        }
+
         ContextualSortedList<string> inputs;
         public override IDictionary<string, string> Inputs { get { return inputs; } }
 
-        Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
+        ContextualDictionary<List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
         // Ticks => ControlID, Action
@@ -289,6 +296,7 @@ namespace Signum.Web
         {
             this.globalInputs = inputs;
             this.inputs = new ContextualSortedList<string>(inputs, prefix);
+            this.errors = new ContextualDictionary<List<string>>(globalErrors, prefix);
             this.controllerContext = controllerContext;
         }
 
@@ -345,6 +353,11 @@ namespace Signum.Web
             get { return root.GlobalInputs; }
         }
 
+        public override Dictionary<string, List<string>> GlobalErrors
+        {
+            get { return root.GlobalErrors; }
+        }
+
         ContextualSortedList<string> inputs;
         public override IDictionary<string, string> Inputs { get { return inputs; } }
 
@@ -367,7 +380,7 @@ namespace Signum.Web
             this.parent = parent;
             this.root = parent.Root;
             this.inputs = new ContextualSortedList<string>((ContextualSortedList<string>)parent.Inputs, controlID);
-            this.errors = new ContextualDictionary<List<string>>((Dictionary<string, List<string>>)root.Errors, controlID);
+            this.errors = new ContextualDictionary<List<string>>(root.GlobalErrors, controlID);
         }
 
         public override Dictionary<string, long> GetTicksDictionary()
