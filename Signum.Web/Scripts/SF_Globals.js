@@ -258,6 +258,7 @@ function PostServer(urlController, requestExtraJsonData) {
 
     document.forms[0].action = urlController;
     document.forms[0].submit();
+    return false;
 }
 
 /*
