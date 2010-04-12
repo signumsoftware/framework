@@ -6,6 +6,8 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Operations;
 using Signum.Entities.Processes;
 using Signum.Utilities;
+using Signum.Entities;
+using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Mailing
 {
@@ -20,11 +22,12 @@ namespace Signum.Entities.Mailing
             set { Set(ref recipient, value, () => Recipient); }
         }
 
-        Enum templateKey;
-        public Enum TemplateKey
+        EmailTemplateDN template;
+        [NotNullValidator]
+        public EmailTemplateDN Template
         {
-            get { return templateKey; }
-            set { Set(ref templateKey, value, () => TemplateKey); }
+            get { return template; }
+            set { Set(ref template, value, () => Template); }
         }
 
         DateTime sent;
@@ -65,10 +68,35 @@ namespace Signum.Entities.Mailing
             get { return exception; }
             set { Set(ref exception, value, () => Exception); }
         }
+
+        EmailState state;
+        public EmailState State
+        {
+            get { return state; }
+            set { Set(ref state, value, () => State); }
+        }
+
+        Lite<EmailPackageDN> package;
+        public Lite<EmailPackageDN> Package
+        {
+            get { return package; }
+            set { Set(ref package, value, () => Package); }
+        }
+
+        static StateValidator<EmailMessageDN, EmailState> validator = new StateValidator<EmailMessageDN,EmailState>(
+            m => m.State, m => m.Body, m=> m.Subject, m=>m.Exception, m=> m.Sent, m=>m.Received, m=>m.Package)
+            {
+               {EmailState.Prepared,    false,      false,          false,      false,          false,          true },
+               {EmailState.SentOk,      true,       true,           false,      true,           false,          null },
+               {EmailState.SentError,   true,       true,           true,       true,           null,           null },
+               {EmailState.Received,    true,       true,           false,      true,           true,           null },
+            };
+        }
     }
 
-    enum EmailState
+    public enum EmailState
     {
+        Prepared,
         SentOk,
         SentError,
         Received
@@ -77,12 +105,13 @@ namespace Signum.Entities.Mailing
     [ImplementedBy(typeof(UserDN))]
     public interface IEmailOwnerDN : IIdentifiable
     {
-        string EMail { get; }
+        string Email { get; }
     }
 
     public enum EmailOperation
     {
-        SendNewsletter
+        SendNewsletter,
+        SendEmailConfirmation
     }
 
     [Serializable]
@@ -123,47 +152,3 @@ namespace Signum.Entities.Mailing
             return "{0} {1} ({2} lines{3})".Formato(Template, Name, numLines, numErrors == 0 ? "" : ", {0} errors".Formato(numErrors));
         }
     }
-
-    [Serializable]
-    public class EmailPackageLineDN : IdentifiableEntity
-    {
-        Lite<EmailPackageDN> package;
-        public Lite<EmailPackageDN> Package
-        {
-            get { return package; }
-            set { Set(ref package, value, () => Package); }
-        }
-
-        [ImplementedByAll]
-        Lite<IIdentifiable> target;
-        public Lite<IIdentifiable> Target
-        {
-            get { return target; }
-            set { Set(ref target, value, () => Target); }
-        }
-
-        [ImplementedByAll]
-        Lite<IIdentifiable> result;
-        public Lite<IIdentifiable> Result //ConstructFrom only!
-        {
-            get { return result; }
-            set { Set(ref result, value, () => Result); }
-        }
-
-        DateTime? finishTime;
-        public DateTime? FinishTime
-        {
-            get { return finishTime; }
-            set { Set(ref finishTime, value, () => FinishTime); }
-        }
-
-
-        [SqlDbType(Size = int.MaxValue)]
-        string exception;
-        public string Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
-        }
-    }
-}

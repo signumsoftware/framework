@@ -51,10 +51,10 @@ namespace Signum.Entities.Authorization
 
         string email;
         [EMailValidator]
-        public string EMail
+        public string Email
         {
             get { return email; }
-            set { Set(ref email, value, () => EMail); }
+            set { Set(ref email, value, () => Email); }
         }
 
         IIdentity IPrincipal.Identity

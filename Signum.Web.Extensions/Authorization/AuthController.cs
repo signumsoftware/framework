@@ -87,7 +87,7 @@ namespace Signum.Web.Authorization
                 string texto = @"Le enviamos este correo por haber solicitado que le recordemos su contraseña. Por seguridad, hemos generado una contraseña aleatoria, que luego podrá cambiar.<br/><br/>La contraseña es <b>" + randomPassword + "</b>";
                 MailMessage message = new MailMessage()
                 {
-                    To = { user.EMail },
+                    To = { user.Email },
                     Subject = "Recordatorio de contraseña",
                     From = new MailAddress(AuthClient.RememberPasswordEmailFrom),
                     Body = texto,
@@ -371,7 +371,7 @@ namespace Signum.Web.Authorization
         //} 
         #endregion
 
-        static void AddUserSession(string userName, UserDN user)
+        public static void AddUserSession(string userName, UserDN user)
         {
             System.Web.HttpContext.Current.Session[SessionUserKey] = user;
             Thread.CurrentPrincipal = user;

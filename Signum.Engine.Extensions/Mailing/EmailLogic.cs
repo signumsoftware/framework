@@ -24,10 +24,27 @@ namespace Signum.Engine.Mailing
         public string Body { get; set; }
     }
 
+    public delegate string BodyRenderer(string viewName, IEmailOwnerDN owner, Dictionary<string, object> args);  
+
     public static class EmailLogic
     {
-        static Dictionary<Enum, Func<IEmailOwnerDN, object[], EmailContent>> EmailTemplates
-            = new Dictionary<Enum, Func<IEmailOwnerDN, object[], EmailContent>>();
+        public static event BodyRenderer BodyRenderer;
+
+        public static EmailContent RenderWebMail(string subject, string viewName, IEmailOwnerDN owner, Dictionary<string, object> args)
+        {
+            string body = BodyRenderer != null ?
+                BodyRenderer(viewName, owner, args) :
+                "An email rendering view {0} for entity {1}".Formato(viewName, owner);
+
+            return new EmailContent
+            {
+                Body = body,
+                Subject = subject
+            };
+        }
+
+        static Dictionary<Enum, Func<IEmailOwnerDN, Dictionary<string, object>, EmailContent>> EmailTemplates
+            = new Dictionary<Enum, Func<IEmailOwnerDN, Dictionary<string, object>, EmailContent>>();
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -36,10 +53,20 @@ namespace Signum.Engine.Mailing
                 sb.Include<EmailMessageDN>();
 
                 EnumLogic<EmailTemplateDN>.Start(sb, () => EmailTemplates.Keys.ToHashSet());
+
+                dqm[typeof(EmailTemplateDN)] = (from e in Database.Query<EmailTemplateDN>()
+                                               select new
+                                               {
+                                                   Entity = e.ToLite(),
+                                                   e.Id,
+                                                   e.Name,
+                                                   e.Key,
+                                               }).ToDynamic();
+         
             }
         }
 
-        public static void RegisterTemplate(Enum templateKey, Func<IEmailOwnerDN, object[], EmailContent> template)
+        public static void RegisterTemplate(Enum templateKey, Func<IEmailOwnerDN, Dictionary<string, object>, EmailContent> template)
         {
             EmailTemplates[templateKey] = template;
         }
@@ -49,66 +76,63 @@ namespace Signum.Engine.Mailing
         {
             SendMail(ComposeMail(recipient, templateKey, args));
         }  */
-        
-        public static EmailMessageDN PrepareMail(this Lite<IEmailOwnerDN> recipient, Enum templateKey)
+
+
+
+        public static EmailMessageDN Send(this IEmailOwnerDN recipient, Enum templateKey, Dictionary<string, object> args)
         {
-            EmailMessageDN emailMessage = new EmailMessageDN
+            EmailContent content = EmailTemplates.GetOrThrow(templateKey, "{0} not registered in EmailLogic")(recipient, args);
+
+            var result = new EmailMessageDN
             {
-                Recipient = recipient,
-                TemplateKey = templateKey,
+                Recipient = recipient.ToLite(),
+                Template = EnumLogic<EmailTemplateDN>.ToEntity(templateKey) ,
+                Subject = content.Subject,
+                Body = content.Body,
             };
 
-            return emailMessage;
+            SendMail(result);
+
+            return result;
         }
 
-        public static EmailMessageDN ComposeMail(this EmailMessageDN emailMessage, params object[] args)
+        public static EmailMessageDN ComposeMail(this EmailMessageDN emailMessage)
         {
             EmailContent content = EmailTemplates.GetOrThrow(
-                emailMessage.TemplateKey, "{0} not registered")(emailMessage.Recipient.Retrieve(), args);
+                EnumLogic<EmailTemplateDN>.ToEnum(emailMessage.Template), "{0} not registered")(emailMessage.Recipient.Retrieve(), null);
             emailMessage.Subject = content.Subject;
             emailMessage.Body = content.Body;
             return emailMessage;
         }
 
-
-        private static void SendMail(EmailMessageDN emailMessageDN)
+        public static void SendMail(EmailMessageDN emailMessage)
         {
-            emailMessageDN.Sent = DateTime.Now;
-            emailMessageDN.Received = null;
+            emailMessage.Sent = DateTime.Now;
+            emailMessage.Received = null;
 
             MailMessage message = new MailMessage()
             {
-                To = { emailMessageDN.Recipient.Retrieve().EMail },
-                Subject = emailMessageDN.Subject,
-                Body = emailMessageDN.Body,
+                To = { emailMessage.Recipient.Retrieve().Email },
+                Subject = emailMessage.Subject,
+                Body = emailMessage.Body,
                 IsBodyHtml = true,
             };
 
             SmtpClient client = new SmtpClient();
-            client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
-            client.SendAsync(message, emailMessageDN);
-            message.Dispose();
-        }
-
-        static void client_SendCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-        {
-            // Get the unique identifier for this asynchronous operation.
-            EmailMessageDN emailMessage = (EmailMessageDN)e.UserState;
-
-            emailMessage.Exception = e.Error.TryCC(ex => ex.Message);
+            client.Send(message);
             emailMessage.Save();
-        }
+        }     
     }
 
-    public class EmailAlgorithm : IProcessAlgorithm
+    public class EmailProcessAlgorithm : IProcessAlgorithm
     {
         Func<List<Lite<IEmailOwnerDN>>> getLazies;
         Enum EmailTemplateKey;
-        public EmailAlgorithm()
+        public EmailProcessAlgorithm()
         {
         }
 
-        public EmailAlgorithm(Enum emailTemplateKey, Func<List<Lite<IEmailOwnerDN>>> getLazies, Enum operationKey)
+        public EmailProcessAlgorithm(Enum emailTemplateKey, Func<List<Lite<IEmailOwnerDN>>> getLazies, Enum operationKey)
         {
             this.getLazies = getLazies;
             this.EmailTemplateKey = emailTemplateKey;
@@ -129,12 +153,14 @@ namespace Signum.Engine.Mailing
 
             package.NumLines = lites.Count;
 
-            lites.Select(lite => new EmailPackageLineDN
+            lites.Select(lite => new EmailMessageDN
             {
                 Package = package.ToLite(),
-                Target = lite.ToLite<IIdentifiable>()
-            }).SaveList();
-
+                Recipient = lite,
+                Template = package.Template,
+                State = EmailState.Prepared
+            });
+                
             return package;
         }
 
@@ -143,29 +169,24 @@ namespace Signum.Engine.Mailing
         {
             EmailPackageDN package = (EmailPackageDN)executingProcess.Data;
 
-            List<Lite<EmailPackageLineDN>> lines =
-                (from pl in Database.Query<EmailPackageLineDN>()
-                 where pl.Package == package.ToLite() && pl.FinishTime == null && pl.Exception == null
-                 select pl.ToLite()).ToList();
+            List<Lite<EmailMessageDN>> emails =
+                (from email in Database.Query<EmailMessageDN>()
+                 where email.Package == package.ToLite() && email.Sent == DateTime.MinValue && email.Exception == null
+                 select email.ToLite()).ToList();
 
             int lastPercentage = 0;
-            for (int i = 0; i < lines.Count; i++)
+            for (int i = 0; i < emails.Count; i++)
             {
                 if (executingProcess.Suspended)
                     return FinalState.Suspended;
 
-                EmailPackageLineDN pl = lines[i].RetrieveAndForget();
+                EmailMessageDN ml = emails[i].RetrieveAndForget();
 
                 try
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        EmailLogic.PrepareMail(pl.Target.ToLite<IEmailOwnerDN>(), EmailTemplateKey);
-
-                        OperationLogic.ExecuteLite<IEmailOwnerDN>(pl.Target.ToLite<IEmailOwnerDN>(), EmailTemplateKey);
-
-                        pl.FinishTime = DateTime.Now;
-                        pl.Save();
+                        EmailLogic.SendMail(ml);
                         tr.Commit();
                     }
                 }
@@ -173,8 +194,8 @@ namespace Signum.Engine.Mailing
                 {
                     using (Transaction tr = new Transaction(true))
                     {
-                        pl.Exception = e.Message;
-                        pl.Save();
+                        ml.Exception = e.Message;
+                        ml.Save();
                         tr.Commit();
 
                         package.NumErrors++;
@@ -182,7 +203,7 @@ namespace Signum.Engine.Mailing
                     }
                 }
 
-                int percentage = (NotificationSteps * i) / lines.Count;
+                int percentage = (NotificationSteps * i) / emails.Count;
                 if (percentage != lastPercentage)
                 {
                     executingProcess.ProgressChanged(percentage * 100 / NotificationSteps);

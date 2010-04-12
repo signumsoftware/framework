@@ -229,7 +229,7 @@ namespace Signum.Engine.Authorization
                 if (user == null)
                     throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
 
-                if (user.EMail != email)
+                if (user.Email != email)
                     throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.EmailIsNotValid);
             }
             return user;
