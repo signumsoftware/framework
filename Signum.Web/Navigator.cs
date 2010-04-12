@@ -1003,10 +1003,10 @@ namespace Signum.Web
     {
         public static void FromContext(this ModelStateDictionary modelState, MappingContext context)
         {
-            if (context.Errors.Count > 0)
-                foreach (var p in context.Errors)
+            if (context.GlobalErrors.Count > 0)
+                foreach (var p in context.GlobalErrors)
                     foreach (var v in p.Value)
-                        modelState.AddModelError(p.Key, v, context.Inputs.TryGetC(p.Key));
+                        modelState.AddModelError(p.Key, v, context.GlobalInputs.TryGetC(p.Key));
         }
 
         public static void FromDictionary(this ModelStateDictionary modelState, Dictionary<string, List<string>> errors, NameValueCollection form)
