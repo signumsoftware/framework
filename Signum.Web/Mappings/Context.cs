@@ -88,13 +88,13 @@ namespace Signum.Web
 
         public List<string> Error
         {
-            get { return Root.Errors.GetOrCreate(ControlID); }
+            get { return Root.GlobalErrors.GetOrCreate(ControlID); }
             set
             {
                 if (value == null)
-                    Root.Error.Remove(ControlID);
+                    Root.GlobalErrors.Remove(ControlID);
                 else
-                    Root.Errors[ControlID] = value;
+                    Root.GlobalErrors[ControlID] = value;
             }
         }
         public abstract IDictionary<string, List<string>> Errors { get; }
