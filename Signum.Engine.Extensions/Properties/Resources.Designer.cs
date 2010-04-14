@@ -107,7 +107,7 @@ namespace Signum.Engine.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to After the operation the state should be {0} but is {1}.
+        ///   Looks up a localized string similar to After the operation {0} the state should be {1} but is {2}.
         /// </summary>
         internal static string AfterTheOperationTheStateShouldBe0ButIs1 {
             get {

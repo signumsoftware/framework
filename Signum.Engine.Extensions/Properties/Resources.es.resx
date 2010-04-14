@@ -205,7 +205,7 @@
 {1}</value>
   </data>
   <data name="AfterTheOperationTheStateShouldBe0ButIs1" xml:space="preserve">
-    <value>Despues de la operación el estado debería ser {0} en lugar de {1}</value>
+    <value>Despues de la operación {0} el estado debería ser {1} en lugar de {2}</value>
   </data>
   <data name="Operation0DoesNotHaveExecuteInitialized" xml:space="preserve">
     <value>La operación {0} no tiene Execute inicializado</value>

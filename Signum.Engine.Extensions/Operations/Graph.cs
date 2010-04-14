@@ -241,7 +241,7 @@ namespace Signum.Engine.Operations
             S state = GetState(entity);
 
             if (!state.Equals(operation.TargetState))
-                throw new InvalidOperationException(Resources.AfterTheOperationTheStateShouldBe0ButIs1.Formato(operation.TargetState, state));
+                throw new InvalidOperationException(Resources.AfterTheOperationTheStateShouldBe0ButIs1.Formato(operation.Key ,operation.TargetState, state));
 
             OnEnterState(state, entity);
         }
