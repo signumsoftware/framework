@@ -497,15 +497,14 @@ namespace Signum.Engine.Processes
             }
             catch (Exception e)
             {
-                using (Transaction tr = new Transaction(true))
-                {
+             
                     Execution.State = ProcessState.Error;
                     Execution.ExceptionDate = DateTime.Today;
                     Execution.Exception = e.Message;
                     Execution.Save();
 
-                    tr.Commit();
-                }
+              
+              
             }
         }
 
