@@ -119,7 +119,6 @@ namespace Signum.Test.LinqProvider
                               select new { Sex = g.Key, Avg = g.Average(a=>a.Name.Length) }).ToList();
         }
 
-
         [TestMethod]
         public void RootCount()
         {
