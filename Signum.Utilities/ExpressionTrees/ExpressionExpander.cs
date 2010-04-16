@@ -62,7 +62,10 @@ namespace Signum.Utilities.ExpressionTrees
 
         protected override Expression VisitInvocation(InvocationExpression iv)
         {
-            return onExpand(ExpressionReplacer.Replace(iv)); 
+            if (iv.Expression is LambdaExpression)
+                return onExpand(ExpressionReplacer.Replace(iv));
+            else
+                return base.VisitInvocation(iv); //Just calling a delegate in the projector
         }
 
 		protected override Expression VisitMethodCall(MethodCallExpression m)

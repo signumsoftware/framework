@@ -73,13 +73,12 @@ namespace Signum.Web
                 {
                     if (settings.Implementations != null && settings.Implementations.IsByAll)
                         throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
-
-                    sb.AppendLine(helper.AutoCompleteExtender(TypeContext.Compose(prefix, EntityLineKeys.DDL),
-                                     TypeContext.Compose(prefix, EntityBaseKeys.ToStr),
+                    
+                    sb.AppendLine(helper.AutoCompleteExtender(TypeContext.Compose(prefix, EntityBaseKeys.ToStr),
                                      cleanStaticType.Name,
                                      ImplementationsModelBinder.Render(settings.Implementations),
                                      TypeContext.Compose(prefix, TypeContext.Id),
-                                     "Signum/Autocomplete", 1, 5, 500, settings.OnChangedTotal.HasText() ? settings.OnChangedTotal : "''"));
+                                     "Signum/Autocomplete", settings.OnChangedTotal.HasText() ? settings.OnChangedTotal : "''"));
                 }
             }
             else

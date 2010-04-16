@@ -855,6 +855,21 @@ namespace Signum.Engine.Linq
         public Expression BindMemberAccess(MemberExpression m)
         {
             Expression source = m.Expression; 
+
+            LambdaExpression lambda = ExpressionExpander.GetExpansion(source.Type, m.Member);
+            if (lambda != null) //new expansions discovered
+            {
+                ParameterExpression temp = Expression.Parameter(source.Type, "temp");
+
+                Expression cleanedLambda = DbQueryProvider.Clean( Expression.Invoke(lambda, temp));
+
+                map.Add(temp, source);
+                Expression result = Visit(cleanedLambda);
+                map.Remove(temp);
+
+                return result;
+            }
+            
             if(source.NodeType ==  (ExpressionType)DbExpressionType.Projection)
             {
                 ProjectionExpression proj = ((ProjectionExpression)source);
@@ -863,7 +878,8 @@ namespace Signum.Engine.Linq
                     source = proj.Projector;
                 }
             }
-
+            
+            
             source = RemoveGroupByConvert(source);
 
             switch (source.NodeType)

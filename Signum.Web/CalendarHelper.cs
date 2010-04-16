@@ -102,7 +102,7 @@ namespace Signum.Web
             sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/ui.core.js",
                 "Scripts/jqueryui/ui.datepicker.js",
                 "Scripts/jqueryui/i18n/ui.datepicker-es.js"));
-            
+
             //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
 
             if (IncludeCss != null)
@@ -113,6 +113,7 @@ namespace Signum.Web
                     "Scripts/jqueryui/ui.core.css",
                     "Scripts/jqueryui/ui.datepicker.css",
                     "Scripts/jqueryui/ui.theme.css"));
+
 
             sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 

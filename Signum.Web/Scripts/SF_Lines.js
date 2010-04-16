@@ -1141,7 +1141,7 @@ function GetSFInfoParams(prefix) {
     return $("#" + prefix + sfRuntimeInfo + ", #" + prefix + sfIndex);
 }
 
-function AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, hasEntity) {
+/*function AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, hasEntity) {
     var prefix = extendedControlName.substr(0, extendedControlName.indexOf(sfToStr));
     var _index = newIdAndType.indexOf("_");
     var info = RuntimeInfoFor(prefix);
@@ -1157,4 +1157,14 @@ function AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, has
     new ELine({ prefix: prefix }).fireOnEntityChanged(true);
     
     //toggleButtonsDisplay(prefix, hasEntity);
+}*/
+
+function AutocompleteOnSelected(controlId, data) {
+    var prefix = controlId.substr(0, controlId.indexOf(sfToStr));
+    var info = RuntimeInfoFor(prefix);
+	info.setEntity(data.type, data.id)
+        .ticks(new Date().getTime());
+    info.find().after(hiddenDiv(prefix + sfEntity, ''));
+	$('#' + prefix + sfLink).html($('#' + controlId).val());
+    new ELine({ prefix: prefix }).fireOnEntityChanged(true);	
 }

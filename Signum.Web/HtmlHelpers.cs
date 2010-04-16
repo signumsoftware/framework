@@ -197,47 +197,15 @@ namespace Signum.Web
             return sb.ToString();
         }
 
-        public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string extendedControlName,
-                                                  string entityTypeName, string implementations, string entityIdFieldName,
-                                                  string controllerUrl, int numCharacters, int numResults, int delayMilliseconds,
-                                                  string AutoKeyDowned)
-        {
-            return AutoCompleteExtender(html, ddlName, extendedControlName, entityTypeName, implementations, entityIdFieldName,
-                controllerUrl, numCharacters, numResults, delayMilliseconds, AutoKeyDowned, string.Empty);
-        }
-
-        public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string extendedControlName, 
-                                                  string entityTypeName, string implementations, string entityIdFieldName,
-                                                  string controllerUrl, int numCharacters, int numResults, int delayMilliseconds, 
-                                                  string AutoKeyDowned, string extraJsonData)
+        public static string AutoCompleteExtender(this HtmlHelper html, string ddlName, string entityTypeName, string implementations, string entityIdFieldName,
+                                                  string controllerUrl, string onSuccess)
         {                   
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine(html.Div(
-                        ddlName,
-                        "",
-                        "AutoCompleteMainDiv",
-                        new Dictionary<string, object>() 
-                        { 
-                            { "onclick", "AutocompleteOnClick('" + ddlName + "','" + 
-                                                              extendedControlName + "','" + 
-                                                              entityIdFieldName + 
-                                                              "', event); {0}".Formato(Utils.Specify(AutoKeyDowned)) }, 
-                        }));
-            sb.AppendLine("<script type=\"text/javascript\">" + "CreateAutocomplete('" + ddlName +
-                                                              "','" + extendedControlName +
-                                                              "','" + entityTypeName +
-                                                              "','" + implementations +
-                                                              "','" + entityIdFieldName +
-                                                              "','" + controllerUrl +
-                                                              "'," + numCharacters +
-                                                              "," + numResults +
-                                                              "," + delayMilliseconds +
-                                                              "," + AutoKeyDowned +
-                                                              (extraJsonData.HasText() ? ("," + extraJsonData) : "")
-                                                              + ");" +
-                                                              "</script>"
-                                                              );
-            return sb.ToString();
+            return  @"<script type='text/javascript'>
+                        new Autocompleter('{0}', '{1}', {{
+	                        entityIdFieldName: '{2}',
+	                        extraParams: {{typeName: '{3}', implementations : '{4}'}}}});
+                     </script>"
+                    .Formato(ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations); 
         }
 
         public static string CssDynamic(this HtmlHelper html, string url) {

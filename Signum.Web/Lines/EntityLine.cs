@@ -18,11 +18,6 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Web
 {
-    public static class EntityLineKeys
-    {
-        public const string DDL = "sfDDL";
-    }
-
     public class EntityLine : EntityBase
     {
         public bool Autocomplete { get; set; }

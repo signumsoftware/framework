@@ -16,6 +16,7 @@ using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Web.Script.Serialization;
 #endregion
 
 namespace Signum.Web.Controllers
@@ -275,15 +276,16 @@ namespace Signum.Web.Controllers
         //        return Navigator.View(this, entity);
         //}
 
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult Autocomplete(string typeName, Implementations implementations, string input, int limit)
+        JavaScriptSerializer jSerializer = new JavaScriptSerializer();
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ContentResult Autocomplete(string typeName, Implementations implementations, string q, int l)
         {
             Type type = Navigator.NamesToTypes[typeName];
 
-            var result = AutoCompleteUtils.FindLiteLike(type, implementations, input, limit)
-                .ToDictionary(l => l.Id.ToString() + "_" + l.RuntimeType.Name, l => l.ToStr);
-
-            return Content(result.ToJSonObject(idAndType => idAndType.Quote(), str => str.Quote()));
+            return(Content(jSerializer.Serialize(
+                AutoCompleteUtils.FindLiteLike(type, implementations, q, l)
+                .Select(o => new { id = o.Id, text = o.ToStr, type = o.RuntimeType.Name }).ToList())));
         }
 
         public ActionResult Find(FindOptions findOptions)
