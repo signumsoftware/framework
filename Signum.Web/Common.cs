@@ -82,7 +82,7 @@ namespace Signum.Web
             EntityBase eb = bl as EntityBase;
             if (eb != null && context.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
             {
-                Type cleanType = ReflectionTools.CollectionType(context.Type) ?? context.Type;
+                Type cleanType = context.Type.ElementType() ?? context.Type;
                 cleanType = Reflector.ExtractLite(cleanType) ?? cleanType;
 
                 if (cleanType.IsAbstract || cleanType.IsInterface)
@@ -90,7 +90,7 @@ namespace Signum.Web
                     if (context.UntypedValue == null)
                         return; //No access control possible
                     cleanType = context.UntypedValue.GetType();
-                    cleanType = ReflectionTools.CollectionType(cleanType) ?? cleanType;
+                    cleanType = cleanType.ElementType() ?? cleanType;
                     cleanType = Reflector.ExtractLite(cleanType) ?? cleanType;
                     if (cleanType.IsAbstract || cleanType.IsInterface)
                         return; //No access control possible

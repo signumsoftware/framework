@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
+using Signum.Engine.Linq;
 
 namespace Signum.Test.LinqProvider
 {
@@ -207,6 +208,19 @@ namespace Signum.Test.LinqProvider
                 .GroupBy(a => a.Sex)
                 .Select(g => g)
                 .Select(g => new { Sex = g.Key, Count = g.Count() }).ToList();
+        }
+
+        [TestMethod]
+        public void JoinGroupPair()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        group new { a, HasBonusTrack = (a.BonusTrack != null).InSql() } by a.Label into g
+                        select new
+                        {
+                            Label = g.Key,
+                            Albums = g.Count(),
+                            BonusTracks = g.Count(a => a.HasBonusTrack)
+                        }).ToList();
         }
 
         [TestMethod]

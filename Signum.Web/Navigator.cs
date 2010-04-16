@@ -373,6 +373,12 @@ namespace Signum.Web
         {
             return Manager.IsFindable(queryName);
         }
+
+        public static ActionResult ModelState(ModelStateDictionary ModelState)
+        {
+            //Remove this
+            return new ContentResult { Content = "{\"ModelState\":" + ModelState.ToJsonData() + "}" };
+        }
     }
     
     public class NavigationManager
@@ -909,6 +915,7 @@ namespace Signum.Web
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
             RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
+
             return new Lite<T>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
         }
 

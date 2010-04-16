@@ -198,7 +198,7 @@ namespace Signum.Entities
 
                 if (Reflector.IsMList(pi.PropertyType))
                 {
-                    Type colType = ReflectionTools.CollectionType(pi.PropertyType);
+                    Type colType = pi.PropertyType.ElementType();
                     if (Reflector.IsEmbeddedEntity(colType))
                         result.AddRange(GenerateEmbeddedProperties(property.Add("Item")));
                 }

@@ -26,7 +26,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         IQueryable IQueryProvider.CreateQuery(Expression expression)
         {
-            Type elementType = ReflectionTools.CollectionType(expression.Type) ?? expression.Type; 
+            Type elementType = expression.Type.ElementType() ?? expression.Type; 
             try
             {
                 return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { this, expression });

@@ -49,40 +49,35 @@ namespace Signum.Entities.Reflection
             return type.Name;
         }
 
-        public static bool IsMList(Type ft)
+        public static bool IsMList(this Type ft)
         {
-            return ReflectionTools.CollectionType(ft) != null && IsModifiable(ft);
+            return ft.ElementType() != null && IsModifiable(ft);
         }
 
-        public static bool IsModifiable(Type t)
+        public static bool IsModifiable(this Type t)
         {
             return typeof(Modifiable).IsAssignableFrom(t);
         }
 
-        public static bool IsIIdentifiable(Type type)
+        public static bool IsIIdentifiable(this Type type)
         {
             return typeof(IIdentifiable).IsAssignableFrom(type);
         }
 
-        public static bool IsModifiableOnly(Type t)
-        {
-            return IsModifiable(t) && !IsIdentifiableEntity(t);
-        }
-
-        public static bool IsModifiableOrInterface(Type t)
+        public static bool IsModifiableOrInterface(this Type t)
         {
             return IsModifiable(t) || IsIIdentifiable(t);
         }
 
-        public static bool IsIdentifiableEntity(Type ft)
+        public static bool IsIdentifiableEntity(this Type ft)
         {
             return typeof(IdentifiableEntity).IsAssignableFrom(ft);
         }
 
-        public static bool IsEmbeddedEntity(Type t)
+        public static bool IsEmbeddedEntity(this Type t)
         {
             return typeof(EmbeddedEntity).IsAssignableFrom(t);
-        }
+        }    
 
         public static FieldInfo[] InstanceFieldsInOrder(Type type)
         {
@@ -134,6 +129,16 @@ namespace Signum.Entities.Reflection
                 return liteType.GetGenericArguments()[0];
             return null;
         }
+
+        public static bool IsLite(this Type t)
+        {
+            return typeof(Lite).IsAssignableFrom(t);
+        }
+
+        public static Type CleanType(this Type t)
+        {
+            return ExtractLite(t) ?? t;
+        }    
 
         public static MemberInfo[] GetMemberList<T>(Expression<Func<T, object>> lambdaToField)
         {
@@ -361,6 +366,22 @@ namespace Signum.Entities.Reflection
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool IsDecimalNumber(Type type)
+        {
+            type = type.UnNullify();
+            if (type.IsEnum)
+                return false;
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
                     return true;
             }
             return false;

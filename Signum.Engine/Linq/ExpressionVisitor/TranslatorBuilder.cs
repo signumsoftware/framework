@@ -21,7 +21,7 @@ namespace Signum.Engine.Linq
     {
         static internal ITranslateResult Build(ProjectionExpression proj, ImmutableStack<string> prevAliases)
         {
-            Type type = proj.UniqueFunction == null ? ReflectionTools.CollectionType(proj.Type) : proj.Type;
+            Type type = proj.UniqueFunction == null ? proj.Type.ElementType() : proj.Type;
 
             return (ITranslateResult)miBuildPrivate.GenericInvoke(new[] { type }, null, new object[] { proj, prevAliases });
         }
@@ -138,7 +138,7 @@ namespace Signum.Engine.Linq
                 Expression call = Expression.Call(Expression.Constant(tr), miExecute, this.row);
 
                 if (typeof(IEnumerable).IsAssignableFrom(proj.Type))
-                    return Expression.Convert(call, typeof(IEnumerable<>).MakeGenericType(ReflectionTools.CollectionType(proj.Type)));
+                    return Expression.Convert(call, typeof(IEnumerable<>).MakeGenericType(proj.Type.ElementType()));
                 else
                     return call;
             }
@@ -164,7 +164,7 @@ namespace Signum.Engine.Linq
             protected override Expression VisitMList(MListExpression ml)
             {
                 HasFullObjects = true;
-                return Expression.Call(row, miGetList.MakeGenericMethod(ReflectionTools.CollectionType(ml.Type)),
+                return Expression.Call(row, miGetList.MakeGenericMethod(ml.Type.ElementType()),
                     Expression.Constant(ml.RelationalTable),
                     Visit(ml.BackID));
             }

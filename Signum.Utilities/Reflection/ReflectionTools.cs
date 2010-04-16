@@ -618,15 +618,5 @@ namespace Signum.Utilities.Reflection
                     return Convert.ChangeType(value, utype);
             }
         }
-
-        public static Type CollectionType(Type ft)
-        {
-            if (!typeof(IEnumerable).IsAssignableFrom(ft))
-                return null;
-
-            return ft.GetInterfaces().PreAnd(ft)
-                .SingleOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                .TryCC(ti => ti.GetGenericArguments()[0]);
-        }
     }
 }

@@ -301,7 +301,7 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldMList(Type type, FieldInfo fi, Table table, NameSequence name)
         {
-            Type elementType = ReflectionTools.CollectionType(fi.FieldType);
+            Type elementType = fi.FieldType.ElementType();
 
             return new FieldMList(fi.FieldType)
             {

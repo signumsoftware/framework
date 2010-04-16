@@ -44,7 +44,7 @@ namespace Signum.Web
                 return (Mapping<T>)Activator.CreateInstance(typeof(LiteMapping<>).MakeGenericType(Reflector.ExtractLite(typeof(T))));
 
             if (Reflector.IsMList(typeof(T)))
-                return (Mapping<T>)Activator.CreateInstance(typeof(MListMapping<>).MakeGenericType(ReflectionTools.CollectionType(typeof(T))));
+                return (Mapping<T>)Activator.CreateInstance(typeof(MListMapping<>).MakeGenericType(typeof(T).ElementType()));
 
             return new ValueMapping<T>();
         }

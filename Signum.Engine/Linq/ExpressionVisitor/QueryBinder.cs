@@ -413,7 +413,7 @@ namespace Signum.Engine.Linq
                 ConstantExpression ce = (ConstantExpression)source;
                 IEnumerable col = (IEnumerable)ce.Value;
 
-                Type colType = ReflectionTools.CollectionType(source.Type);
+                Type colType = source.Type.ElementType();
                 if (typeof(IIdentifiable).IsAssignableFrom(colType))
                     return SmartEqualizer.EntityIn(newItem, col.Cast<IIdentifiable>().Select(ie => ToFieldInitExpression(ie)).ToArray());
                 else if (typeof(Lite).IsAssignableFrom(colType))

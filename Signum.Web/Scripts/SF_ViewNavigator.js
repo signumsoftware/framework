@@ -4,6 +4,7 @@
         onOk: null,
         onOkClosed: null,
         onCancelled: null,
+        onLoaded: null,
         controllerUrl: "Signum/PopupView",
         type: null,
         id: null,
@@ -143,6 +144,11 @@ ViewNavigator.prototype = {
         var self = this;
         $('#' + this.viewOptions.prefix + sfBtnOk).unbind('click').click(function() { self.onCreateSave(); });
         $('#' + this.viewOptions.prefix + sfBtnCancel).unbind('click').click(function() { self.onCreateCancel(); });
+
+        if (this.viewOptions.onLoaded != null)
+            this.viewOptions.onLoaded(this.tempDivId());
+       
+
     },
 
     constructRequestData: function() {

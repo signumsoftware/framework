@@ -200,7 +200,7 @@ namespace Signum.Engine.Linq
                     return (MetaProjectorExpression)nex.Arguments[1]; 
             }
 
-            Type elementType = ReflectionTools.CollectionType(expression.Type);
+            Type elementType = expression.Type.ElementType();
             if (elementType != null)
             {
                 MetaExpression meta = expression as MetaExpression;

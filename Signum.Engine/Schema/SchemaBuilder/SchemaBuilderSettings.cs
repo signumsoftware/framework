@@ -191,7 +191,7 @@ namespace Signum.Engine.Maps
             if (iba != null) return iba;
 
             Type entityType = fi.FieldType;
-            entityType = ReflectionTools.CollectionType(entityType) ?? entityType;
+            entityType = entityType.ElementType() ?? entityType;
             entityType = Reflector.ExtractLite(entityType) ?? entityType; 
 
             var typeAtt = TypeAttributes(entityType);

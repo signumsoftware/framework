@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Reflection.Emit;
+using System.Collections;
 
 namespace Signum.Utilities
 {
@@ -76,6 +77,16 @@ namespace Signum.Utilities
             MethodInfo mi = pi.GetSetMethod();
 
             return mi == null || !mi.IsPublic;
+        }
+
+        public static Type ElementType(this Type ft)
+        {
+            if (!typeof(IEnumerable).IsAssignableFrom(ft))
+                return null;
+
+            return ft.GetInterfaces().PreAnd(ft)
+                .SingleOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .TryCC(ti => ti.GetGenericArguments()[0]);
         }
     }
 }
