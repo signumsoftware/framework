@@ -6,6 +6,8 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Engine.Authorization;
 using Signum.Engine;
+using System.Windows;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
@@ -60,9 +62,9 @@ namespace Signum.Entities.Authorization
                     }).ToList();
         }
 
-        internal void SetRules(BaseRulePack<R, A> rules)
+        internal void SetRules(BaseRulePack<R, A> rules, Expression<Func<R,bool>> filterResources)
         {
-            var current = Database.Query<RT>().Where(r => r.Role == rules.Role).ToDictionary(a => a.Resource);
+            var current = Database.Query<RT>().Where(r => r.Role == rules.Role && filterResources.Invoke(r.Resource)).ToDictionary(a => a.Resource);
             var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
             Synchronizer.Synchronize(current, should,

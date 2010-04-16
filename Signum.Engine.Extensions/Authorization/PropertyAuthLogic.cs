@@ -55,13 +55,13 @@ namespace Signum.Engine.Authorization
             {
                 Role = roleLite,
                 Type = typeDN,
-                Rules = cache.GetRules(roleLite, PropertyLogic.RetrieveOrGenerateProperty(typeDN)).ToMList()
+                Rules = cache.GetRules(roleLite, PropertyLogic.RetrieveOrGenerateProperties(typeDN)).ToMList()
             }; 
         }
 
         public static void SetPropertyRules(PropertyRulePack rules)
         {
-            cache.SetRules(rules); 
+            cache.SetRules(rules, r => r.Type == rules.Type); 
         }
 
         public static void SetPermissionAllowed(Lite<RoleDN> role, PropertyRoute property, PropertyAllowed allowed)

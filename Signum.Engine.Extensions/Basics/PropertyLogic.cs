@@ -52,7 +52,7 @@ namespace Signum.Engine.Basics
                  Spacing.Double);
         }
 
-        public static List<PropertyDN> RetrieveOrGenerateProperty(TypeDN typeDN)
+        public static List<PropertyDN> RetrieveOrGenerateProperties(TypeDN typeDN)
         {
             var retrieve = Database.Query<PropertyDN>().Where(f => f.Type == typeDN).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.DnToType[typeDN], typeDN).ToDictionary(a => a.Path);

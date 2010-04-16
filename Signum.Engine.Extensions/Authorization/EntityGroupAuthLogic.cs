@@ -213,7 +213,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetEntityGroupRules(EntityGroupRulePack rules)
         {
-            cache.SetRules(rules); 
+            cache.SetRules(rules, r => true); 
         }
 
         public static void SetEntityGroupAllowed(Lite<RoleDN> role, Enum entityGroupKey, EntityGroupAllowed allowed)

@@ -150,9 +150,11 @@ namespace Signum.Web.Authorization
             });
 
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string mainControlUrl) =>
-                new[] { new ToolBarButton { OnClick = (embedded ? "postDialog('{0}')" : "PostServer('{0}')").Formato(new UrlHelper(controllerContext.RequestContext).Action(partialViewName, "Auth")), Text = Resources.Save } });
+                new[] { new ToolBarButton { 
+                    OnClick = (embedded ? "postDialog('{0}')" : "PostServer('{0}')").Formato(
+                        new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "Auth")), 
+                    Text = Resources.Save } });
         }
-
 
         static void TaskAuthorizeProperties(BaseLine bl, TypeContext context)
         {
@@ -160,13 +162,13 @@ namespace Signum.Web.Authorization
             {
                 switch (PropertyAuthLogic.GetPropertyAccess(context.PropertyRoute))
                 {
-                    case PropertyAllowed.None: 
-                        bl.Visible = false; 
+                    case PropertyAllowed.None:
+                        bl.Visible = false;
                         break;
                     case PropertyAllowed.Read:
                         bl.SetReadOnly();
                         break;
-                    case PropertyAllowed.Modify: 
+                    case PropertyAllowed.Modify:
                         break;
                 }
             }

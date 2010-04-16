@@ -72,7 +72,9 @@ namespace Signum.Engine.Authorization
 
         public static void SetQueryRules(QueryRulePack rules)
         {
-            cache.SetRules(rules);
+            string[] queryNames = DynamicQueryManager.Current.GetQueryNames(TypeLogic.DnToType[rules.Type]).Keys.Select(qn => QueryUtils.GetQueryName(qn)).ToArray();
+
+            cache.SetRules(rules, r => queryNames.Contains(r.Key));
         }
 
         public static void SetQueryAllowed(Lite<RoleDN> role, object queryName, bool allowed)

@@ -84,7 +84,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetTypeRules(TypeRulePack rules)
         {
-            cache.SetRules(rules);
+            cache.SetRules(rules, r => true);
         }
 
         public static void SetTypeAllowed(Lite<RoleDN> role, Type type, TypeAllowed allowed)

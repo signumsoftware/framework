@@ -275,7 +275,7 @@ namespace Signum.Web.Authorization
         //    ChangesLog changesLog = RegisterUserApplyChanges(Request.Form, ref u);
 
         //    this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-        //    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+        //    return Navigator.ModelState(ModelState);
         //}
 
         //public ActionResult RegisterUserPost()
@@ -286,7 +286,7 @@ namespace Signum.Web.Authorization
         //    if (changesLog.Errors != null && changesLog.Errors.Count > 0)
         //    {
         //        this.ModelState.FromDictionary(changesLog.Errors, Request.Form);
-        //        return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+        //        return Navigator.ModelState(ModelState);
         //    }
 
         //    u = (UserDN)OperationLogic.ServiceExecute(u, UserOperation.SaveNew);
@@ -358,7 +358,7 @@ namespace Signum.Web.Authorization
         //        if (errors != null && errors.Count > 0)
         //        {
         //            this.ModelState.FromDictionary(errors, Request.Form);
-        //            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+        //            return Navigator.ModelState(ModelState);
         //        }
 
         //        entity = (UserDN)OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));

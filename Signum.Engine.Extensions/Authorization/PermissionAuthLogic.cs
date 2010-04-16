@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetPermissionRules(PermissionRulePack rules)
         {
-            cache.SetRules(rules);
+            cache.SetRules(rules, r => true);
         }
 
         public static void SetPermissionAllowed(Lite<RoleDN> role, Enum permissionKey, bool allowed)

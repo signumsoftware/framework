@@ -13,6 +13,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using Signum.Entities;
+using Signum.Web.Controllers;
 
 namespace Signum.Web.Authorization
 {
@@ -89,22 +90,16 @@ namespace Signum.Web.Authorization
             return RedirectToAction("Types", new { role = role.Id });
         }
 
-
-
-        //public PartialViewResult Properties()
-        //{
-        //    return Navigator.PopupView(this, PropertyAuthLogic.GetPropertyRules(role, type.Retrieve()), prefix);
-        //}
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
+        {
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
+            return Navigator.PopupView(this, PropertyAuthLogic.GetPropertyRules(role, type.Retrieve()), prefix);
+        }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult Properties(FormCollection form, Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
+        public ActionResult SaveProperties(FormCollection form, string prefix)
         {
-            if (role != null && type != null)
-            {
-                ViewData[ViewDataKeys.WriteSFInfo] = true;
-                return Navigator.PopupView(this, PropertyAuthLogic.GetPropertyRules(role, type.Retrieve()), prefix);
-            }
-
             Lite<RoleDN> rolePost = this.ExtractLite<RoleDN>(prefix + "_Role");
             TypeDN typePost = this.ExtractEntity<TypeDN>(prefix + "_Type");
 
@@ -112,45 +107,48 @@ namespace Signum.Web.Authorization
 
             PropertyAuthLogic.SetPropertyRules(prp.Value);
 
-            return RedirectToAction("Properties", new { role = rolePost.Id, type = typePost.Id });
-        }
-
-
-        public ViewResult Queries(Lite<RoleDN> role, Lite<TypeDN> type)
-        {
-            return Navigator.View(this, QueryAuthLogic.GetQueryRules(role, type.Retrieve()), true);
+            return Navigator.ModelState(ModelState);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult Queries(FormCollection form)
+        public ActionResult Queries(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("_Role");
-            TypeDN type = this.ExtractEntity<TypeDN>("_Type");
-
-            var prp = PropertyAuthLogic.GetPropertyRules(role, type).ApplyChanges(ControllerContext, "", true); ;
-
-            PropertyAuthLogic.SetPropertyRules(prp.Value);
-
-            return RedirectToAction("Queries", new { role = role.Id, type = type.Id });
-        }
-
-
-        public ViewResult Operations(Lite<RoleDN> role, Lite<TypeDN> type)
-        {
-            return Navigator.View(this, QueryAuthLogic.GetQueryRules(role, type.Retrieve()), true);
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
+            return Navigator.PopupView(this, QueryAuthLogic.GetQueryRules(role, type.Retrieve()), prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult Operations(FormCollection form)
+        public ActionResult SaveQueries(FormCollection form, string prefix)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("_Role");
-            TypeDN type = this.ExtractEntity<TypeDN>("_Type");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>(prefix + "_Role");
+            TypeDN type = this.ExtractEntity<TypeDN>(prefix + "_Type");
 
-            var prp = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, "", true); ;
+            var prp = QueryAuthLogic.GetQueryRules(role, type).ApplyChanges(ControllerContext, prefix, true); ;
+
+            QueryAuthLogic.SetQueryRules(prp.Value);
+
+            return Navigator.ModelState(ModelState);
+        }
+
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult Operations(Lite<RoleDN> role, Lite<TypeDN> type, string prefix)
+        {
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
+            return Navigator.PopupView(this, OperationAuthLogic.GetOperationRules(role, type.Retrieve()), prefix);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult SaveOperations(FormCollection form, string prefix)
+        {
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>(prefix + "_Role");
+            TypeDN type = this.ExtractEntity<TypeDN>(prefix + "_Type");
+
+            var prp = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, prefix, true); ;
 
             OperationAuthLogic.SetOperationRules(prp.Value);
 
-            return RedirectToAction("Operations", new { role = role.Id, type = type.Id });
+            return Navigator.ModelState(ModelState);
         }
     }
 }

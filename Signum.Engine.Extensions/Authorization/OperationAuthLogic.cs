@@ -62,7 +62,10 @@ namespace Signum.Engine.Authorization
 
         public static void SetOperationRules(OperationRulePack rules)
         {
-            cache.SetRules(rules);
+            var keys = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[rules.Type])
+                .Select(a => OperationDN.UniqueKey(a.Key)).ToArray();
+
+            cache.SetRules(rules, r => keys.Contains(r.Key));
         }
 
         public static void SetOperationAllowed(Lite<RoleDN> role, Enum operationKey, bool allowed)

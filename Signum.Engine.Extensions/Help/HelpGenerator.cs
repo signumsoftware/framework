@@ -43,7 +43,7 @@ namespace Signum.Engine.Help
             }
             else if (Reflector.IsMList(pi.PropertyType))
             {
-                Type elemType = ReflectionTools.CollectionType(pi.PropertyType);
+                Type elemType = pi.PropertyType.ElementType();
 
                 if (Reflector.IsIIdentifiable(elemType))
                 {

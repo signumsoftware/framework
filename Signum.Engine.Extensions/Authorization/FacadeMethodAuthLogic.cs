@@ -44,7 +44,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetFacadeMethodRules(FacadeMethodRulePack rules)
         {
-            cache.SetRules(rules);
+            cache.SetRules(rules, r => true);
         }
 
         public static void SetFacadeMethodAllowed(Lite<RoleDN> role, MethodInfo mi, bool allowed)
