@@ -97,7 +97,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static int RemovedTickets(UserDN user)
+        public static int RemoveTickets(UserDN user)
         {
             return user.Tickets().UnsafeDelete(); 
         }

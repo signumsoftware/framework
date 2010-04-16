@@ -20,6 +20,7 @@ namespace Signum.Web.Authorization
     public partial class AuthController : Controller
     {
         public static event Action<UserDN> OnUserLogged;
+        public static event Action<Controller, UserDN> OnUserPreLogin;
         public const string SessionUserKey = "user";
 
         #region "Change password"
@@ -191,7 +192,11 @@ namespace Signum.Web.Authorization
             if (user == null)
                 return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
 
+            if (OnUserPreLogin != null)
+                OnUserPreLogin(this, user);
+
             Thread.CurrentPrincipal = user;
+
             //guardamos una cookie persistente si se ha seleccionado
             if (rememberMe)
             {
@@ -203,6 +208,7 @@ namespace Signum.Web.Authorization
                     Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
                 });
             }
+
             AddUserSession(user.UserName, user);
 
             if (!string.IsNullOrEmpty(returnUrl))
@@ -374,7 +380,6 @@ namespace Signum.Web.Authorization
         public static void AddUserSession(string userName, UserDN user)
         {
             System.Web.HttpContext.Current.Session[SessionUserKey] = user;
-            Thread.CurrentPrincipal = user;
 
             //FormsAuthentication.SetAuthCookie(userName, rememberMe);
 
@@ -385,7 +390,8 @@ namespace Signum.Web.Authorization
         public ActionResult Logout()
         {
             FormsAuthentication.SignOut();
-            Session.RemoveAll();
+            //Session.RemoveAll();
+            Session.Remove(SessionUserKey);
             var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
             if (authCookie != null && authCookie.Value.HasText())
                 Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-1);
