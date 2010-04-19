@@ -107,7 +107,7 @@
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
     <Compile Include="ValueLineBoxModel.cs" />
-    <Compile Include="WebMenuItem.cs" />
+    <Compile Include="ToolBarButtom.cs" />
     <Compile Include="EntityInfo.cs" />
     <Compile Include="JSRenderer\JsValidatorOptions.cs" />
     <Compile Include="JSRenderer\JsFindOptions.cs" />
@@ -188,6 +188,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NormalPage.aspx">
+      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

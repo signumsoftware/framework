@@ -211,6 +211,10 @@ function isFalse(value) {
     return value == false || value == "false" || value == "False";
 }
 
+function isTrue(value) {
+    return value == true || value == "true" || value == "True";
+}
+
 function GetPathPrefixes(prefix) {
     var path = new Array();
     var pathSplit = prefix.split("_");

@@ -15,7 +15,8 @@ namespace Signum.Web
         public string ImgSrc { get; set; }
         public string Text { get; set; }
         public string AltText { get; set; }
-        public string OnClick { get; set; }
+        //Prefix -> JavaScript Event Handler
+        public Func<string, string> OnClick { get; set; }
         
         private string divCssClass = "OperationDiv";
         public string DivCssClass 
@@ -39,23 +40,6 @@ namespace Signum.Web
 
         public virtual string ToString(HtmlHelper helper, string prefix)
         {
-            string onclick = "";
-            string strPrefix = (prefix != null) ? ("'" + prefix.ToString() + "'") : "''";
-
-            if (enabled)
-            {
-                //Add prefix to onclick
-                if (!string.IsNullOrEmpty(OnClick))
-                {
-                    int lastEnd = OnClick.LastIndexOf(")");
-                    int lastStart = OnClick.LastIndexOf("(");
-                    if (lastStart == lastEnd - 1)
-                        onclick = OnClick.Insert(lastEnd, strPrefix);
-                    else
-                        onclick = OnClick.Insert(lastEnd, ", " + strPrefix);
-                }
-            }
-
             HtmlProps.Add("title", AltText ?? "");
 
             if (ImgSrc.HasText())
@@ -66,7 +50,9 @@ namespace Signum.Web
             else
             {
                 if (enabled)
-                    HtmlProps.Add("onclick", onclick);
+                {
+                    HtmlProps.Add("onclick", OnClick);
+                }
                 else
                     DivCssClass = DivCssClass + " disabled"; 
                 return helper.Div(Id, Text, DivCssClass, HtmlProps);

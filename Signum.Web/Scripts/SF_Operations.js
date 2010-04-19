@@ -178,7 +178,7 @@ var OperationExecutor = function(_options) {
 
                 if (self.options.navigateOnSuccess) {
                     PostServer(operationResult);
-                    return false;
+                    return;
                 }
 
                 if (self.options.multiStep) {

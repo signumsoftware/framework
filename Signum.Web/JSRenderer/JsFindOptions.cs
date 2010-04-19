@@ -56,6 +56,12 @@ namespace Signum.Web
         { 
         }
 
+        public static JsFindNavigator JsOpenFinder(JsFindOptions options)
+        {
+            return new JsFindNavigator(() =>
+                "OpenFinder({0})".Formato(options.ToJS()));
+        }
+
         public static JsFindNavigator JsSelectedItems(JsFindOptions options)
         {
             return new JsFindNavigator(() =>
