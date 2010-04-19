@@ -1,19 +1,24 @@
 ﻿<%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
-
+<%@ Import Namespace="Signum.Entities" %>
 <%
-    List<WidgetNode> widgets =
-        Html.GetWidgetsListForViewName(Model,(string)ViewData[ViewDataKeys.MainControlUrl], "");
+    List<WidgetItem> widgets;
+    
+    if (ViewData["WidgetNode"] == null && Model as ModifiableEntity != null)
+        widgets = Html.GetWidgetsListForViewName((ModifiableEntity)Model, (string)ViewData[ViewDataKeys.MainControlUrl]);
+    else {
+        widgets = new List<WidgetItem>();
+        widgets.Add((WidgetItem)ViewData["WidgetNode"]);
+    }
 
-    foreach (WidgetNode wn in widgets)
+    foreach (WidgetItem wn in widgets)
     {
-        if (wn.Show)
+        if (wn != null && wn.Show)
         { %>                     
                 <li class="secondary">
-                    <a id="<%=wn.Id%>" class="tooltipped" <%= (wn.Href != null) ? "href=\"" + wn.Href + "\"" : "" %>><%=wn.Label%><span class="update-number count<%=wn.Count%>"><%=wn.Count%></span></a>
-                    <div id="tt<%=wn.Id%>" class="tooltip">
-                        <%= wn.Content %>
-                    </div>
+                    <%=wn.Label%>
+                    <%=wn.Content%>
+
                 </li>
         <%}
-    }%>
+    }%>  

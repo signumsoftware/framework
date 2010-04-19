@@ -97,7 +97,6 @@
     <Content Include="Views\Shared\Error.aspx" />
     <Content Include="Views\Shared\LogOnUserControl.ascx" />
     <Content Include="Views\Shared\Menu.ascx" />
-    <Content Include="Views\Shared\NormalPage.aspx" />
     <Content Include="Views\Shared\WidgetView.ascx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -146,14 +145,10 @@
     <Content Include="Images\switch_minus.gif" />
     <Content Include="Images\switch_plus.gif" />
     <Content Include="Images\tab.png" />
-    <Content Include="Scripts\jquery-1.3.2-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.3.2.js" />
-    <Content Include="Scripts\jquery-1.3.2.min-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.3.2.min.js" />
+    <Content Include="Scripts\jquery-1.4.min.js" />
     <Content Include="Scripts\jquery.qtip-1.0.0-rc3.min.js" />
     <Content Include="Scripts\jquery.tablesorter.js" />
     <Content Include="Scripts\jquery.tablesorter.min.js" />
-    <Content Include="Scripts\jquery.tabs.pack.js" />
     <Content Include="Scripts\jqueryui\i18n\jquery-ui-i18n.js" />
     <Content Include="Scripts\jqueryui\i18n\ui.datepicker-ar.js" />
     <Content Include="Scripts\jqueryui\i18n\ui.datepicker-bg.js" />
@@ -223,15 +218,8 @@
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.js" />
-    <Content Include="Scripts\SF_FindNavigator.js" />
-    <Content Include="Scripts\SF_Globals.js" />
-    <Content Include="Scripts\SF_Lines.js" />
-    <Content Include="Scripts\SF_Mixin.js" />
-    <Content Include="Scripts\SF_Operations.js" />
-    <Content Include="Scripts\SF_Popup.js" />
-    <Content Include="Scripts\SF_Validator.js" />
-    <Content Include="Scripts\SF_ViewNavigator.js" />
     <Content Include="Scripts\widget.js" />
+    <Content Include="Views\Music\AlbumFromBandModel.ascx" />
     <Content Include="Views\Shared\Site.Master" />
     <Content Include="Views\Web.config" />
   </ItemGroup>

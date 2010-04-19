@@ -21,7 +21,7 @@ namespace Signum.Web.Extensions.Sample
     {
         public ActionResult CreateAlbumFromBand(string prefix)
         {
-            BandDN band = (BandDN)Navigator.ExtractEntity(this, Request.Form);
+            BandDN band = Navigator.ExtractEntity<BandDN>(this);
 
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());
 
@@ -40,10 +40,9 @@ namespace Signum.Web.Extensions.Sample
 
         public ContentResult CreateAlbumFromBandOnOk(string prefix)
         {
-            AlbumFromBandModel model = (AlbumFromBandModel)Navigator.ExtractEntity(this, Request.Form, prefix);
-            ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref model, prefix);
+            MappingContext<AlbumFromBandModel> context = Navigator.ExtractEntity<AlbumFromBandModel>(this, prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
 
-            AlbumDN newAlbum = model.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { model.Name, model.Year, model.Label });
+            AlbumDN newAlbum = context.Value.Band.ConstructFromLite<AlbumDN>(AlbumOperation.CreateFromBand, new object[] { context.Value.Name, context.Value.Year, context.Value.Label });
 
             return Content(Navigator.ViewRoute(typeof(AlbumDN), newAlbum.Id));
         }

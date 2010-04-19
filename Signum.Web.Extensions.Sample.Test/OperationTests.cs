@@ -99,8 +99,8 @@ namespace Signum.Web.Extensions.Sample.Test
             Assert.IsTrue(b.Div(prefix + ViewDataKeys.GlobalValidationSummary).InnerHtml.Contains("<li>"));
 
             //Fill required fields
-            b.TextField(TypeContext.Compose(prefix, "Name")).TypeText("Test");
-            b.TextField(TypeContext.Compose(prefix, "Name")).TypeText("2009");
+            b.TextField(TypeContextUtilities.Compose(prefix, "Name")).TypeText("Test");
+            b.TextField(TypeContextUtilities.Compose(prefix, "Name")).TypeText("2009");
 
             ok.Click();
         }

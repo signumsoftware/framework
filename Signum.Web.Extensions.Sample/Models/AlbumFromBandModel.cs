@@ -9,6 +9,11 @@ namespace Signum.Web.Extensions.Sample
 {
     public class AlbumFromBandModel : Entity
     {
+        public AlbumFromBandModel()
+        { 
+        }
+
+
         public AlbumFromBandModel(Lite<BandDN> band)
         {
             Band = band;

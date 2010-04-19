@@ -13,6 +13,7 @@ using Signum.Entities.Authorization;
 using System.Threading;
 using Signum.Engine;
 using Signum.Engine.Authorization;
+using Signum.Entities;
 
 namespace Signum.Web.Extensions.Sample
 {
@@ -71,26 +72,23 @@ namespace Signum.Web.Extensions.Sample
             {
                 EntitySettings = new Dictionary<Type, EntitySettings>
                 {
-                    // {typeof(EfColaboradoraDN), new EntitySettings(false){PartialViewName="Views/Home/EfColaboradoraIU" }},
                 }
             };
 
             Constructor.Start(new ConstructorManager
             {
-                Constructors = new Dictionary<Type, Func<Controller, object>>
+                Constructors = new Dictionary<Type, Func<ModifiableEntity>>
                 {
-                    //{ typeof(FuturoTomadorDN), c => new FuturoTomadorDN{DatosContacto = new DatosContactoDN().ToLiteFat() }},
                 }
             });
 
             OperationClient.Start(new OperationManager
             {
-                Settings = new Dictionary<Enum, WebMenuItem>()
+                Settings = new Dictionary<Enum, OperationButton>()
             });
 
             MusicClient.Start();
 
-            Navigator.Manager.NormalPageUrl = "Views/Shared/NormalPage";
             Navigator.Start();
         }
 
