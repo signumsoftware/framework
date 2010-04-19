@@ -175,11 +175,6 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Login(string username, string password, bool rememberMe, string returnUrl)
         {
-            FormsAuthentication.SignOut();
-
-            ViewData["Title"] = "Login";
-            ViewData["rememberMe"] = rememberMe;
-
             // Basic parameter validation
             if (!username.HasText())
                 return LoginError("username", Resources.UserNameMustHaveAValue);
@@ -211,6 +206,7 @@ namespace Signum.Web.Authorization
 
             AddUserSession(user.UserName, user);
 
+
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
             else
@@ -223,7 +219,7 @@ namespace Signum.Web.Authorization
 
         ViewResult LoginError(string key, string error)
         {
-            ModelState.AddModelError("_FORM", error);
+            ModelState.AddModelError(key, error);
             return View(AuthClient.LoginUrl);
         }
 
