@@ -45,7 +45,7 @@ namespace Signum.Web.Authorization
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserDN>(EntityType.Admin), 
+                    new EntitySettings<UserDN>(EntityType.Default), 
                     new EntitySettings<RoleDN>(EntityType.Default)
                 });
 
@@ -151,8 +151,8 @@ namespace Signum.Web.Authorization
 
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string mainControlUrl) =>
                 new[] { new ToolBarButton { 
-                    OnClick = (embedded ? "postDialog('{0}')" : "PostServer('{0}')").Formato(
-                        new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "Auth")), 
+                    OnClick = prefix => (embedded ? "postDialog('{0}', '{1}')" : "PostServer('{0}', '{1}')").Formato(
+                        new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "Auth"), prefix), 
                     Text = Resources.Save } });
         }
 

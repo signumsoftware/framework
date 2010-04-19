@@ -178,6 +178,17 @@ namespace Signum.Engine.Authorization
             return Roles.CompilationOrder();
         }
 
+        public static int Compare(Lite<RoleDN> role1, Lite<RoleDN> role2)
+        {
+            if (Roles.IndirectlyRelatedTo(role1).Contains(role2))
+                return -1;
+
+            if (Roles.IndirectlyRelatedTo(role2).Contains(role1))
+                return 1;
+
+            return 0; 
+        }
+
         public static IEnumerable<Lite<RoleDN>> RelatedTo(Lite<RoleDN> role)
         {
             return Roles.RelatedTo(role); 
