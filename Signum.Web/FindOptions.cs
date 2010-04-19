@@ -98,6 +98,16 @@ namespace Signum.Web
             else
                 return Navigator.FindRoute(QueryName); 
         }
+
+        public void Fill(JsOptionsBuilder op)
+        {
+            op.Add("queryUrlName", QueryName.TryCC(qn => Navigator.Manager.QuerySettings[qn].UrlName).TrySingleQuote());
+            op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
+            op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().TrySingleQuote() : null);
+            op.Add("create", !Create ? "false" : null);
+            op.Add("allowMultiple", AllowMultiple.TryToString());
+            op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString(""));
+        }
     }
 
     public class FindUniqueOptions

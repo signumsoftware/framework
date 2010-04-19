@@ -1,5 +1,7 @@
-﻿var sfPrefix = "prefix";
+﻿var sfSeparator = "_";
+var sfPrefix = "prefix";
 var sfPrefixToIgnore = "prefixToIgnore";
+var sfTabId = "sfTabId";
 var sfReactive = "sfReactive";
 var sfFieldErrorClass = "field-validation-error";
 var sfInputErrorClass = "input-validation-error";
@@ -7,42 +9,28 @@ var sfSummaryErrorClass = "validation-summary-errors";
 var sfInlineErrorVal = "inlineVal";
 var sfGlobalErrorsKey = "sfGlobalErrors";
 var sfGlobalValidationSummary = "sfGlobalValidationSummary";
-var sfDivASustituir = "divASustituir";
 
-var sfRuntimeInfo = "_sfRuntimeInfo";
-var sfStaticInfo = "_sfStaticInfo";
-var sfStaticType = "_sfStaticType";
-var sfRuntimeType = "_sfRuntimeType";
-var sfImplementations = "_sfImplementations";
-var sfImplementationsDDL = "_sfImplementationsDDL";
-var sfId = "_sfId";
-var sfEntity = "_sfEntity";
-//var sfEntityTemp = "_sfEntityTemp";
-var sfToStr = "_sfToStr";
-var sfLink = "_sfLink";
-var sfIsNew = "_sfIsNew";
-var sfIndex = "_sfIndex";
-var sfCombo = "_sfCombo";
-var sfTicks = "_sfTicks";
+var sfRuntimeInfo = "sfRuntimeInfo";
+var sfStaticInfo = "sfStaticInfo";
+var sfImplementations = "sfImplementations";
+var sfEntity = "sfEntity";
+var sfToStr = "sfToStr";
+var sfLink = "sfLink";
+var sfIndex = "sfIndex";
+var sfCombo = "sfCombo";
+var sfTicks = "sfTicks";
 
-var sfItemsContainer = "_sfItemsContainer";
-var sfRepeaterItem = "_sfRepeaterItem";
+var sfItemsContainer = "sfItemsContainer";
+var sfRepeaterItem = "sfRepeaterItem";
 
 var sfBtnCancel = "sfBtnCancel";
 var sfBtnOk = "sfBtnOk";
-var sfBtnCancelS = "sfBtnCancelS";
-var sfBtnOkS = "sfBtnOkS";
 
 var sfQueryUrlName = "sfQueryUrlName";
 var sfTop = "sfTop";
 var sfAllowMultiple = "sfAllowMultiple";
-var sfSearchOnLoad = "sfSearchOnLoad";
 var sfView = "sfView";
 var sfEntityTypeName = "sfEntityTypeName";
-var sfSuffix = "sfSuffix";
-
-var sfEmbeddedControl = "sfEmbeddedControl";
-var sfTabId = "sfTabId";
 
 var sfIdRelated = "sfIdRelated";
 var sfRuntimeTypeRelated = "sfRuntimeTypeRelated";
@@ -67,7 +55,7 @@ var StaticInfo = function(_prefix) {
     this._isReadOnly = 2;
 
     this.find = function() {
-        return $('#' + this.prefix + sfStaticInfo);
+        return $('#' + this.prefix.compose(sfStaticInfo));
     };
     this.value = function() {
         return this.find().val();
@@ -111,7 +99,7 @@ var RuntimeInfo = function(_prefix) {
     this._ticks = 3;
 
     this.find = function() {
-    return $('#' + this.prefix + sfRuntimeInfo);
+    return $('#' + this.prefix.compose(sfRuntimeInfo));
     };
     this.value = function() {
         return this.find().val();
@@ -206,10 +194,18 @@ function qp(name, value) {
 }
 
 function empty(myString) {
-    return (myString == undefined || myString == "");
+    return (myString == undefined || myString == null || myString === "" || myString.toString() == "");
 }
 
 String.prototype.hasText = function() { return (this == null || this == undefined || this == '') ? false : true; }
+
+String.prototype.compose = function(name) {
+    if (empty(this))
+        return name;
+    if (empty(name))
+        return this;
+    return this.toString() + sfSeparator + name.toString();
+}
 
 function isFalse(value) {
     return value == false || value == "false" || value == "False";
@@ -225,12 +221,17 @@ function GetPathPrefixes(prefix) {
         path[length + i] = concat(pathSplit, i, "");
     var pathNoReps = new Array();
     var current = 0;
+    var hasEmpty = false;
     for (var i = 0; i < path.length; i++) { 
         if ($.inArray(path[i], pathNoReps) == -1) {
             pathNoReps[current] = path[i];
+            if (path[i] == "")
+                hasEmpty = true;
             current++;
         }
     }
+    if (!hasEmpty)
+        pathNoReps[pathNoReps.length] = "";
     return pathNoReps;
 }
 

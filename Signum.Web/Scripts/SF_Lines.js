@@ -16,12 +16,13 @@ EBaseLine.prototype = {
     },
 
     setTicks: function() {
-        log("EBaseLine setTicks");
-        this.runtimeInfo().ticks(new Date().getTime());
+    log("EBaseLine setTicks");
+        if ($('#' + sfReactive).length > 0)
+            this.runtimeInfo().ticks(new Date().getTime());
     },
 
     pf: function(s) {
-        return "#" + this.options.prefix + s;
+        return "#" + this.options.prefix.compose(s);
     },
 
     checkValidation: function(validateUrl, runtimeType) {
@@ -89,9 +90,9 @@ EBaseLine.prototype = {
         log("EBaseline create");
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EBaseline typedCreate. Call create instead";
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        var template = window[this.options.prefix + "_sfTemplate"];
+        var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded: In case of a list, it will be created with "_0" itemprefix => replace it with the current one
-            template = template.replace(new RegExp("\"" + this.options.prefix + "_0", "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix + "_0", "gi"), "'" + viewOptions.prefix);
+            template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
             new ViewNavigator(viewOptions).showCreateOk(template);
         }
         else
@@ -136,7 +137,7 @@ EBaseLine.prototype = {
         if ($('#' + sfReactive).length > 0) {
             extraParams.sfReactive = true;
             extraParams.sfTabId = $('#' + sfTabId).val();
-            extraParams._sfRuntimeInfo = RuntimeInfoFor('').value();
+            extraParams.sfRuntimeInfo = RuntimeInfoFor('').value();
         }
 
         return extraParams;
@@ -144,10 +145,10 @@ EBaseLine.prototype = {
 
     updateButtonsDisplay: function(hasEntity) {
         log("EBaseLine updateButtonsDisplay");
-        var btnCreate = $(this.pf("_btnCreate"));
-        var btnRemove = $(this.pf("_btnRemove"));
-        var btnFind = $(this.pf("_btnFind"));
-        var btnView = $(this.pf("_btnView"));
+        var btnCreate = $(this.pf("btnCreate"));
+        var btnRemove = $(this.pf("btnRemove"));
+        var btnFind = $(this.pf("btnFind"));
+        var btnView = $(this.pf("btnView"));
         var link = $(this.pf(sfLink));
         var txt = $(this.pf(sfToStr));
 
@@ -184,7 +185,10 @@ var ELine = function(_elineOptions) {
 
     this.updateLinks = function(newToStr, newLink) {
         log("ELine updateLinks");
-        $(this.pf(sfLink)).html(newToStr).attr('href', newLink);
+        var link = $(this.pf(sfLink));
+        link.html(newToStr);
+        if (link.filter('a').length > 0)
+            link.attr('href', newLink);
         $(this.pf(sfToStr)).val(''); //Clean
     };
 
@@ -199,7 +203,7 @@ var ELine = function(_elineOptions) {
         var self = this;
         var info = this.runtimeInfo();
         return $.extend({
-            containerDiv: this.options.prefix + sfEntity,
+            containerDiv: this.options.prefix.compose(sfEntity),
             onOk: function() { return self.onViewingOk(defaultValidateUrl); },
             onCancelled: null,
             controllerUrl: defaultViewUrl,
@@ -235,7 +239,7 @@ var ELine = function(_elineOptions) {
     this.newEntity = function(clonedElements, runtimeType) {
         var info = this.runtimeInfo();
         info.setEntity(runtimeType, '').find()
-            .after(hiddenDiv(this.options.prefix + sfEntity, ''));
+            .after(hiddenDiv(this.options.prefix.compose(sfEntity), ''));
         $(this.pf(sfEntity)).append(clonedElements);
     };
 
@@ -266,14 +270,14 @@ var ELine = function(_elineOptions) {
         var info = this.runtimeInfo();
         info.setEntity(selectedItems[0].type, selectedItems[0].id);
         if ($(this.pf(sfEntity)).length == 0)
-            info.find().after(hiddenDiv(this.options.prefix + sfEntity, ''));
+            info.find().after(hiddenDiv(this.options.prefix.compose(sfEntity), ''));
         $(this.pf(sfToStr)).val(''); //Clean
         $(this.pf(sfLink)).html(selectedItems[0].toStr).attr('href', selectedItems[0].link);
         return true;
     };
 
     this.removeSpecific = function() {
-    log("ELine removeSpecific");
+        log("ELine removeSpecific");
         $(this.pf(sfEntity)).remove();
     };
 }
@@ -305,7 +309,7 @@ var EDLine = function(_edlineOptions) {
     log("EDLine create");
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EDLine typedCreate. Call create instead";
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        var template = window[this.options.prefix + "_sfTemplate"];
+        var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded: EmbeddedEntity
             $('#' + viewOptions.containerDiv).html(template);
         }
@@ -403,7 +407,7 @@ var EList = function(_elistOptions) {
 
     this.updateLinks = function(newToStr, newLink, itemPrefix) {
         log("EList updateLinks");
-        $('#' + itemPrefix + sfToStr).html(newToStr);
+        $('#' + itemPrefix.compose(sfToStr)).html(newToStr);
     };
 
     this.extraJsonParams = function(itemPrefix) {
@@ -428,16 +432,23 @@ var EList = function(_elistOptions) {
         if ($('#' + sfReactive).length > 0) {
             extraParams.sfReactive = true;
             extraParams.sfTabId = $('#' + sfTabId).val();
-            extraParams._sfRuntimeInfo = RuntimeInfoFor('').value();
+            extraParams.sfRuntimeInfo = RuntimeInfoFor('').value();
         }
 
         return extraParams;
     };
 
+    this.setTicks = function() {
+    log("EList setTicks");
+    if ($('#' + sfReactive).length > 0)
+        $(this.pf(sfTicks)).val(new Date().getTime());
+    };
+
     this.setItemTicks = function(itemPrefix) {
-        log("EList setItemTicks");
-        //this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
-        $('#' + itemPrefix + sfTicks).val(new Date().getTime());
+    log("EList setItemTicks");
+    if ($('#' + sfReactive).length > 0)
+        this.itemRuntimeInfo(itemPrefix).ticks(new Date().getTime());
+        //$('#' + itemPrefix.compose(sfTicks)).val(new Date().getTime());
     };
 
     this.itemRuntimeInfo = function(itemPrefix) {
@@ -446,21 +457,21 @@ var EList = function(_elistOptions) {
 
     this.selectedItemPrefix = function() {
         log("EList getSelected");
-        var selected = $(this.pf(" > option:selected"));
+        var selected = $('#' + this.options.prefix + " > option:selected");
         if (selected.length == 0)
             return null;
 
         var nameSelected = selected[0].id;
-        return nameSelected.substr(0, nameSelected.indexOf(sfToStr));
+        return nameSelected.substr(0, nameSelected.indexOf(sfToStr) - 1);
     };
 
     this.getLastIndex = function() {
         log("EList getLastIndex");
-        var lastElement = $(this.pf(" > option:last"));
+        var lastElement = $('#' + this.options.prefix + " > option:last");
         var lastIndex = -1;
         if (lastElement.length > 0) {
             var nameSelected = lastElement[0].id;
-            lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(sfToStr));
+            lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(sfToStr) - 1);
         }
         return lastIndex;
     };
@@ -485,7 +496,7 @@ var EList = function(_elistOptions) {
         log("EList viewOptionsForCreating");
         var self = this;
         var newIndex = parseInt(this.getLastIndex()) + 1;
-        var itemPrefix = this.options.prefix + "_" + newIndex;
+        var itemPrefix = this.options.prefix.compose(newIndex);
         return $.extend({
             onOk: function(clonedElements) { return self.onCreatingOk(clonedElements, defaultValidateUrl, _viewOptions.type, itemPrefix); },
             onOkClosed: function() { self.fireOnEntityChanged(); },
@@ -510,13 +521,13 @@ var EList = function(_elistOptions) {
         log("EList newListItem");
         var listInfo = this.staticInfo();
         var itemInfoValue = new RuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
-        listInfo.find().after(hiddenInput(itemPrefix + sfRuntimeInfo, itemInfoValue))
-                .after(hiddenDiv(itemPrefix + sfEntity, ''));
-        $('#' + itemPrefix + sfEntity).append(clonedElements);
+        listInfo.find().after(hiddenInput(itemPrefix.compose(sfRuntimeInfo), itemInfoValue))
+                .after(hiddenDiv(itemPrefix.compose(sfEntity), ''));
+        $('#' + itemPrefix.compose(sfEntity)).append(clonedElements);
 
         var select = $(this.pf(''));
         //TODO Anto: When validation returns also toStr: put it in the option
-        select.append("\n<option id='" + itemPrefix + sfToStr + "' name='" + itemPrefix + sfToStr + "' value='' class='valueLine'>&nbsp;</option>");
+        select.append("\n<option id='" + itemPrefix.compose(sfToStr) + "' name='" + itemPrefix.compose(sfToStr) + "' value='' class='valueLine'>&nbsp;</option>");
         select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
         select.children('option:last').attr('selected', true);
     };
@@ -540,7 +551,7 @@ var EList = function(_elistOptions) {
         var self = this;
         var info = this.itemRuntimeInfo(itemPrefix);
         return $.extend({
-            containerDiv: itemPrefix + sfEntity,
+            containerDiv: itemPrefix.compose(sfEntity),
             onOk: function() { return self.onViewingOk(defaultValidateUrl, itemPrefix); },
             onCancelled: null,
             controllerUrl: defaultViewUrl,
@@ -562,7 +573,7 @@ var EList = function(_elistOptions) {
     this.createFindOptions = function(_findOptions) {
         log("EList createFindOptions");
         var newIndex = parseInt(this.getLastIndex()) + 1;
-        var itemPrefix = this.options.prefix + "_" + newIndex;
+        var itemPrefix = this.options.prefix.compose(newIndex);
         var self = this;
         return $.extend({
             prefix: itemPrefix,
@@ -580,11 +591,11 @@ var EList = function(_elistOptions) {
         for (var i = 0; i < selectedItems.length; i++) {
             var item = selectedItems[i];
             lastIndex += 1;
-            var itemPrefix = this.options.prefix + "_" + lastIndex;
+            var itemPrefix = this.options.prefix.compose(lastIndex);
 
             this.newListItem('', item.type, itemPrefix);
             this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
-            $('#' + itemPrefix + sfToStr).html(item.toStr);
+            $('#' + itemPrefix.compose(sfToStr)).html(item.toStr);
 
             this.setItemTicks(itemPrefix);
         }
@@ -601,17 +612,17 @@ var EList = function(_elistOptions) {
 
     this.removeInIndex = function(selectedItemPrefix) {
         log("EList removeInIndex");
-        $('#' + selectedItemPrefix + sfRuntimeInfo).remove();
-        $('#' + selectedItemPrefix + sfToStr).remove();
-        $('#' + selectedItemPrefix + sfEntity).remove();
-        $('#' + selectedItemPrefix + sfIndex).remove();
+        $('#' + selectedItemPrefix.compose(sfRuntimeInfo)).remove();
+        $('#' + selectedItemPrefix.compose(sfToStr)).remove();
+        $('#' + selectedItemPrefix.compose(sfEntity)).remove();
+        $('#' + selectedItemPrefix.compose(sfIndex)).remove();
         this.fireOnEntityChanged();
     };
 
     this.updateButtonsDisplay = function() {
         log("EList updateButtonsDisplay");
-        var btnRemove = $(this.pf("_btnRemove"));
-        if ($(this.pf(" > option")).length > 0)
+        var btnRemove = $(this.pf("btnRemove"));
+        if ($('#' + this.options.prefix + " > option").length > 0)
             btnRemove.show();
         else
             btnRemove.hide();
@@ -658,7 +669,7 @@ var ERep = function(_erepOptions) {
         var lastIndex = -1;
         if (lastElement.length > 0) {
             var nameSelected = lastElement[0].id;
-            lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(sfRepeaterItem));
+            lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(sfRepeaterItem)-1);
         }
         return lastIndex;
     };
@@ -675,9 +686,9 @@ var ERep = function(_erepOptions) {
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in ERep typedCreate. Call create instead";
         if (!this.canAddItems()) return;
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        var template = window[this.options.prefix + "_sfTemplate"];
+        var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
-            template = template.replace(new RegExp("\"" + this.options.prefix + "_0", "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix + "_0", "gi"), "'" + viewOptions.prefix);
+            template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
             this.onItemCreated(template, viewOptions);
         }
         else {
@@ -693,7 +704,7 @@ var ERep = function(_erepOptions) {
         log("ERep viewOptionsForCreating");
         var self = this;
         var newIndex = parseInt(this.getLastIndex()) + 1;
-        var itemPrefix = this.options.prefix + "_" + newIndex;
+        var itemPrefix = this.options.prefix.compose(newIndex);
         return $.extend({
             containerDiv: "",
             controllerUrl: defaultViewUrl,
@@ -716,11 +727,10 @@ var ERep = function(_erepOptions) {
         var listInfo = this.staticInfo();
         var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(runtimeType, '', 'n', '');
         $(this.pf(sfItemsContainer)).append("\n" +
-        "<div id='" + itemPrefix + sfRepeaterItem + "' name='" + itemPrefix + sfRepeaterItem + "' class='repeaterElement'>\n" +
-        "<a id='" + itemPrefix + "_btnRemove' title='" + this.options.removeItemLinkText + "' href=\"javascript:ERepOnRemoving(new ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (empty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}), '" + itemPrefix + "');\" class='lineButton remove'>" + this.options.removeItemLinkText + "</a>\n" +
-        hiddenInput(itemPrefix + sfRuntimeInfo, itemInfoValue) +
-        //hiddenInput(itemPrefix + sfIndex, (parseInt(lastIndex)+1) + "\" />\n" +
-        "<div id='" + itemPrefix + sfEntity + "' name='" + itemPrefix + sfEntity + "'>\n" +
+        "<div id='" + itemPrefix.compose(sfRepeaterItem) + "' name='" + itemPrefix.compose(sfRepeaterItem) + "' class='repeaterElement'>\n" +
+        "<a id='" + itemPrefix.compose("btnRemove") + "' title='" + this.options.removeItemLinkText + "' href=\"javascript:ERepOnRemoving(new ERep({prefix:'" + this.options.prefix + "', onEntityChanged:" + (empty(this.options.onEntityChanged) ? "''" : this.options.onEntityChanged) + "}), '" + itemPrefix + "');\" class='lineButton remove'>" + this.options.removeItemLinkText + "</a>\n" +
+        hiddenInput(itemPrefix.compose(sfRuntimeInfo), itemInfoValue) +
+        "<div id='" + itemPrefix.compose(sfEntity) + "' name='" + itemPrefix.compose(sfEntity) + "'>\n" +
         newHtml + "\n" +
         "</div>\n" + //sfEntity
         "</div>\n" //sfRepeaterItem                        
@@ -730,7 +740,7 @@ var ERep = function(_erepOptions) {
     this.viewOptionsForViewing = function(_viewOptions, itemPrefix) { //Used in onFindingOk
         log("ERep viewOptionsForViewing");
         return $.extend({
-            containerDiv: itemPrefix + sfEntity,
+            containerDiv: itemPrefix.compose(sfEntity),
             controllerUrl: defaultViewUrl,
             prefix: itemPrefix,
             requestExtraJsonData: this.extraJsonParams(itemPrefix)
@@ -756,7 +766,7 @@ var ERep = function(_erepOptions) {
     this.createFindOptions = function(_findOptions, _viewOptions) {
         log("ERep createFindOptions");
         var newIndex = parseInt(this.getLastIndex()) + 1;
-        var itemPrefix = this.options.prefix + "_" + newIndex;
+        var itemPrefix = this.options.prefix.compose(newIndex);
         var self = this;
         return $.extend({
             prefix: itemPrefix,
@@ -777,13 +787,13 @@ var ERep = function(_erepOptions) {
 
             var item = selectedItems[i];
             lastIndex += 1;
-            var itemPrefix = this.options.prefix + "_" + lastIndex;
+            var itemPrefix = this.options.prefix.compose(lastIndex);
 
             this.newRepItem('', item.type, itemPrefix);
             this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
 
             //View results in the repeater
-            var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: selectedItems[0].type, id: selectedItems[0].id }), itemPrefix);
+            var viewOptions = this.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
             new ViewNavigator(viewOptions).viewEmbedded();
 
             this.setItemTicks(itemPrefix);
@@ -793,7 +803,7 @@ var ERep = function(_erepOptions) {
 
     this.remove = function(itemPrefix) {
         log("ERep remove");
-        $('#' + itemPrefix + sfRepeaterItem).remove();
+        $('#' + itemPrefix.compose(sfRepeaterItem)).remove();
         this.fireOnEntityChanged();
     };
 };
@@ -824,9 +834,9 @@ var EDList = function(_edlistOptions) {
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EDList typedCreate. Call create instead";
         this.restoreCurrent();
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
-        var template = window[this.options.prefix + "_sfTemplate"];
+        var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded (Embedded Entity): It will be created with "_0" itemprefix => replace it with the current one
-            template = template.replace(new RegExp("\"" + this.options.prefix + "_0", "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix + "_0", "gi"), "'" + viewOptions.prefix);
+            template = template.replace(new RegExp("\"" + this.options.prefix.compose("0"), "gi"), "\"" + viewOptions.prefix).replace(new RegExp("'" + this.options.prefix.compose("0"), "gi"), "'" + viewOptions.prefix);
             $('#' + viewOptions.containerDiv).html(template);
         }
         else {
@@ -838,7 +848,7 @@ var EDList = function(_edlistOptions) {
     this.viewOptionsForCreating = function(_viewOptions) {
         log("EDList viewOptionsForCreating");
         var newIndex = parseInt(this.getLastIndex()) + 1;
-        var itemPrefix = this.options.prefix + "_" + newIndex;
+        var itemPrefix = this.options.prefix.compose(newIndex);
         return $.extend({
             containerDiv: this.options.detailDiv,
             controllerUrl: this.defaultViewUrl,
@@ -862,7 +872,7 @@ var EDList = function(_edlistOptions) {
         log("EDList restoreCurrent");
         var itemPrefix = this.getVisibleItemPrefix();
         if (!empty(itemPrefix)) {
-            $('#' + itemPrefix + sfEntity).html('').append(
+            $('#' + itemPrefix.compose(sfEntity)).html('').append(
             cloneContents(this.options.detailDiv));
         }
     };
@@ -911,14 +921,14 @@ var EDList = function(_edlistOptions) {
 
     this.isLoaded = function(selectedItemPrefix) {
         log("EDList isLoaded");
-        return !empty($('#' + selectedItemPrefix + sfEntity).html());
+        return !empty($('#' + selectedItemPrefix.compose(sfEntity)).html());
     };
 
     this.cloneAndShow = function(selectedItemPrefix) {
         log("EDList cloneAndShow");
         $('#' + this.options.detailDiv).html('').append(
-        cloneContents(selectedItemPrefix + sfEntity));
-        $('#' + selectedItemPrefix + sfEntity).html('');
+        cloneContents(selectedItemPrefix.compose(sfEntity)));
+        $('#' + selectedItemPrefix.compose(sfEntity)).html('');
     };
 
     this.find = function(_findOptions, _viewOptions) {
@@ -940,7 +950,7 @@ var EDList = function(_edlistOptions) {
     this.createFindOptions = function(_findOptions, _viewOptions) {
         log("EDList createFindOptions");
         var newIndex = parseInt(this.getLastIndex()) + 1;
-        var itemPrefix = this.options.prefix + "_" + newIndex;
+        var itemPrefix = this.options.prefix.compose(newIndex);
         var self = this;
         return $.extend({
             prefix: itemPrefix,
@@ -958,11 +968,11 @@ var EDList = function(_edlistOptions) {
         for (var i = 0; i < selectedItems.length; i++) {
             var item = selectedItems[i];
             lastIndex += 1;
-            var itemPrefix = this.options.prefix + "_" + lastIndex;
+            var itemPrefix = this.options.prefix.compose(lastIndex);
 
             this.newListItem('', item.type, itemPrefix);
             this.itemRuntimeInfo(itemPrefix).setEntity(item.type, item.id);
-            $('#' + itemPrefix + sfToStr).html(item.toStr);
+            $('#' + itemPrefix.compose(sfToStr)).html(item.toStr);
 
             //View result in the detailDiv
             $('#' + this.options.prefix).dblclick();
@@ -1138,25 +1148,20 @@ function FullPathNodesSelector(prefix) {
 };
 
 function GetSFInfoParams(prefix) {
-    return $("#" + prefix + sfRuntimeInfo + ", #" + prefix + sfIndex);
+    return $("#" + prefix.compose(sfRuntimeInfo) + ", #" + prefix.compose(sfIndex));
 }
 
 /*function AutocompleteOnSelected(extendedControlName, newIdAndType, newValue, hasEntity) {
-    var prefix = extendedControlName.substr(0, extendedControlName.indexOf(sfToStr));
+    var prefix = extendedControlName.substr(0, extendedControlName.indexOf(sfToStr)-1);
     var _index = newIdAndType.indexOf("_");
     var info = RuntimeInfoFor(prefix);
     info.setEntity(newIdAndType.substr(_index + 1, newIdAndType.length), newIdAndType.substr(0, _index))
         .ticks(new Date().getTime());
-    info.find().after(hiddenDiv(prefix + sfEntity, ''));
+    info.find().after(hiddenDiv(prefix.compose(sfEntity), ''));
                
-    //$('#' + prefix + sfId).val(newIdAndType.substr(0, _index));
-    //$('#' + prefix + sfRuntimeType).val(newIdAndType.substr(_index + 1, newIdAndType.length));
-    $('#' + prefix + sfLink).html($('#' + extendedControlName).val());
-    //$('#' + prefix + sfTicks).val(new Date().getTime());
+    $('#' + prefix.compose(sfLink)).html($('#' + extendedControlName).val());
 
     new ELine({ prefix: prefix }).fireOnEntityChanged(true);
-    
-    //toggleButtonsDisplay(prefix, hasEntity);
 }*/
 
 function AutocompleteOnSelected(controlId, data) {
@@ -1164,7 +1169,7 @@ function AutocompleteOnSelected(controlId, data) {
     var info = RuntimeInfoFor(prefix);
 	info.setEntity(data.type, data.id)
         .ticks(new Date().getTime());
-    info.find().after(hiddenDiv(prefix + sfEntity, ''));
-	$('#' + prefix + sfLink).html($('#' + controlId).val());
+    info.find().after(hiddenDiv(prefix.compose(sfEntity), ''));
+	$('#' + prefix.compose(sfLink)).html($('#' + controlId).val());
     new ELine({ prefix: prefix }).fireOnEntityChanged(true);	
 }

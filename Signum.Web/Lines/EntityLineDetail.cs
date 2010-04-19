@@ -18,24 +18,19 @@ namespace Signum.Web
 {
     public class EntityLineDetail : EntityBase
     {
-        private string defaultDetailDiv;
-        public string DefaultDetailDiv
-        {
-            get { return defaultDetailDiv; }
-        }
-
+        public string DefaultDetailDiv { get; private set; }
         public string DetailDiv { get; set; }
 
-        public EntityLineDetail(string prefix)
+        public EntityLineDetail(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Prefix = prefix;
-            defaultDetailDiv = TypeContext.Compose(prefix, EntityBaseKeys.Detail);
-            DetailDiv = defaultDetailDiv;
+            DefaultDetailDiv = DetailDiv = this.Compose(EntityBaseKeys.Detail);
             View = false;
         }
 
         public override void SetReadOnly()
         {
+            Parent.ReadOnly = true;
             ReadOnly = true;
             Find = false;
             Create = false;
@@ -48,20 +43,11 @@ namespace Signum.Web
             return "new EDLine(" + this.OptionsJS() + ")";
         }
 
-        public override string OptionsJS()
+        protected override JsOptionsBuilder OptionsJSInternal()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("{");
-
-            sb.Append("prefix:'{0}'".Formato(Prefix));
-
-            if (OnChangedTotal.HasText())
-                sb.Append(",onEntityChanged:{0}".Formato(OnChangedTotal));
-
-            sb.Append(",detailDiv:'{0}'".Formato(DetailDiv));
-
-            sb.Append("}");
-            return sb.ToString();
+            var result = base.OptionsJSInternal();
+            result.Add("detailDiv", DetailDiv.TrySingleQuote());
+            return result;
         }
 
         protected override string DefaultViewing()

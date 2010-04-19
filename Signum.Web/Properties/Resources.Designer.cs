@@ -331,6 +331,15 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to no.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There&apos;s not an IdentifiableEntity property in the TypeContext path.
         /// </summary>
         public static string NoIdentifiableEntityPropertyInTypeContextPath {
@@ -570,6 +579,15 @@ namespace Signum.Web.Properties {
         public static string Warned {
             get {
                 return ResourceManager.GetString("Warned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to yes.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
         

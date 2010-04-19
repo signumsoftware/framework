@@ -6,7 +6,12 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 
-<% string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
+<% Context context = (Context)Model;
+   FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+   QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+   Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
+   bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
+    
 //TODO Anto: Habilitar quickfilters: Controlar campos no filtrables  (con este método se pueden crear)
 //"<script type=\"text/javascript\">" + 
 //    "$(document).ready(function() {" + 
@@ -19,20 +24,19 @@
 
 <%  ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
     int? EntityColumnIndex = (int?)ViewData[ViewDataKeys.EntityColumnIndex];
-    bool? allowMultiple = (bool?)ViewData[ViewDataKeys.AllowMultiple];
     Dictionary<int, bool> colVisibility = new Dictionary<int, bool>();
     for (int i = 0; i < queryResult.Columns.Length; i++)
     {
         colVisibility.Add(i, queryResult.Columns[i].Visible);
     }
  %>
-<table id="<%=Html.GlobalName("tblResults" + sufix)%>" class="tblResults">
+<table id="<%=context.Compose("tblResults")%>" class="tblResults">
     <thead>
         <tr>
             
-            <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1 && (bool)ViewData[ViewDataKeys.View])
+            <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1 && viewable)
               {
-                  if (allowMultiple.HasValue)
+                  if (findOptions.AllowMultiple.HasValue)
                   {%>
                   <th></th>
                   <%} %>
@@ -54,36 +58,36 @@
         for (int row=0; row<queryResult.Rows.Length; row++)
         {
             %>
-            <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=Html.GlobalName("trResults_" + row.ToString() + sufix)%>" name="<%=Html.GlobalName("trResults_" + row.ToString() + sufix)%>">
+            <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=context.Compose("trResults", row.ToString())%>" name="<%=context.Compose("trResults", row.ToString())%>">
                 <% Lite entityField = null;
                    if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
                        entityField = (Lite)queryResult.Rows[row][EntityColumnIndex.Value];
                    
-                       if (allowMultiple.HasValue)
+                       if (findOptions.AllowMultiple.HasValue)
                        {
                 %>
-                <td class="<%=Html.GlobalName("tdRowSelection" + sufix)%>">
+                <td class="<%=context.Compose("tdRowSelection")%>">
                     <%
                         if (entityField != null)
                         {
-            
-                    if (allowMultiple.Value)
+
+                            if (findOptions.AllowMultiple.Value)
                     { 
                         %>
-                        <input type="checkbox" name="<%=Html.GlobalName("rowSelection_" + row.ToString() + sufix)%>" id="<%=Html.GlobalName("rowSelection_" + row.ToString() + sufix)%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="checkbox" name="<%=context.Compose("rowSelection", row.ToString())%>" id="<%=context.Compose("rowSelection", row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                     <%}
                     else
                     { %>
-                        <input type="radio" name="<%=Html.GlobalName("rowSelection" + sufix)%>" id="<%=Html.GlobalName("radio_" + row.ToString() + sufix)%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                        <input type="radio" name="<%=context.Compose("rowSelection")%>" id="<%=context.Compose("radio", row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
                         <%
                     }
                         }
                  %>
                  </td>
                  <%} %>
-                <% if (entityField != null && (bool)ViewData[ViewDataKeys.View])
+                <% if (entityField != null && viewable)
                    { %>
-                   <td id="<%=Html.GlobalName("tdResults" + sufix)%>">
+                   <td id="<%=context.Compose("tdResults")%>">
                     <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Ver">Ver</a>
                 </td>
                 <% } %>
@@ -93,7 +97,7 @@
                     if (colVisibility[col])
                     {
                         %>
-                        <td id="<%=Html.GlobalName("row"+row+"td_" + col.ToString() + sufix)%>"><%formatters[col](Html, queryResult.Rows[row][col]);%></td>
+                        <td id="<%=context.Compose("row"+row+"td", col.ToString())%>"><%formatters[col](Html, queryResult.Rows[row][col]);%></td>
                         <%
                     }
                 }

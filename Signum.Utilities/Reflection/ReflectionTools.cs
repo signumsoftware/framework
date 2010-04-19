@@ -357,7 +357,7 @@ namespace Signum.Utilities.Reflection
             if (value == null || value == "")
                 return (object)null;
 
-            Type utype = type.UnNullify();
+            Type utype = type.UnNullify(); 
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
             else

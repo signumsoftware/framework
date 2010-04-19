@@ -109,8 +109,8 @@ ViewNavigator.prototype = {
 
         new popup().show(this.viewOptions.containerDiv);
         var self = this;
-        $('#' + this.viewOptions.prefix + sfBtnOk).unbind('click').click(function() { self.onViewOk(); });
-        $('#' + this.viewOptions.prefix + sfBtnCancel).unbind('click').click(function() { self.onViewCancel(); });
+        $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onViewOk(); });
+        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onViewCancel(); });
     },
 
     showViewSave: function(newHtml) {
@@ -120,8 +120,8 @@ ViewNavigator.prototype = {
 
         new popup().show(this.viewOptions.containerDiv);
         var self = this;
-        $('#' + this.viewOptions.prefix + sfBtnOk).unbind('click').click(function() { self.onCreateSave(); });
-        $('#' + this.viewOptions.prefix + sfBtnCancel).unbind('click').click(function() { self.onCreateCancel(); });
+        $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateSave(); });
+        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onCreateCancel(); });
     },
 
     showCreateOk: function(newHtml) {
@@ -131,8 +131,8 @@ ViewNavigator.prototype = {
 
         new popup().show(this.tempDivId());
         var self = this;
-        $('#' + this.viewOptions.prefix + sfBtnOk).unbind('click').click(function() { self.onCreateOk(); });
-        $('#' + this.viewOptions.prefix + sfBtnCancel).unbind('click').click(function() { self.onCreateCancel(); });
+        $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateOk(); });
+        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onCreateCancel(); });
     },
 
     showCreateSave: function(newHtml) {
@@ -142,13 +142,12 @@ ViewNavigator.prototype = {
 
         new popup().show(this.tempDivId());
         var self = this;
-        $('#' + this.viewOptions.prefix + sfBtnOk).unbind('click').click(function() { self.onCreateSave(); });
-        $('#' + this.viewOptions.prefix + sfBtnCancel).unbind('click').click(function() { self.onCreateCancel(); });
+        
+        $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateSave(); });
+        $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onCreateCancel(); });
 
-        if (this.viewOptions.onLoaded != null)
+		if (this.viewOptions.onLoaded != null)
             this.viewOptions.onLoaded(this.tempDivId());
-       
-
     },
 
     constructRequestData: function() {
@@ -248,7 +247,7 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat) {
     var url = "Signum/GetChooser";
     if (empty(jsonOptionsListFormat))
     {
-        requestData += "&sfImplementations=" + $('#' + _prefix + sfImplementations).val();
+        requestData += "&sfImplementations=" + $('#' + _prefix.compose(sfImplementations)).val();
         url = "Signum/GetTypeChooser";
         }
     else {
@@ -272,7 +271,7 @@ function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat) {
                 });
             });
             new popup({ prefix: _prefix }).show(tempDivId);
-            $('#' + tempDivId + sfBtnCancel).unbind('click').click(function() { $('#' + tempDivId).remove(); });
+            $('#' + tempDivId.compose(sfBtnCancel)).unbind('click').click(function() { $('#' + tempDivId).remove(); });
         }
     });
 }

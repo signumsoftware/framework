@@ -9,108 +9,76 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Web.Properties;
 using Signum.Web.Controllers;
+using Signum.Entities.Reflection;
 #endregion
 
 namespace Signum.Web
 {
     public static class EntityBaseHelper
     { 
-        public static string WriteLabel(HtmlHelper helper, string prefix, BaseLine settings)
+        public static string BaseLineLabel(HtmlHelper helper, BaseLine baseLine)
         {
-            return StyleContext.Current.LabelVisible ?
-                helper.Label(prefix + "lbl", settings.LabelText ?? "", TypeContext.Compose(prefix, EntityBaseKeys.ToStr), TypeContext.CssLineLabel) :
-                "";
+            return BaseLineLabel(helper, baseLine, baseLine.Compose(EntityBaseKeys.ToStr));
         }
 
-        public static string WriteLabel(HtmlHelper helper, string prefix, BaseLine settings, string idLabelFor)
+        public static string BaseLineLabel(HtmlHelper helper, BaseLine baseLine, string idLabelFor)
         {
-            return StyleContext.Current.LabelVisible ?
-                helper.Label(prefix + "lbl", settings.LabelText ?? "", idLabelFor, TypeContext.CssLineLabel) :
-                "";
+            return baseLine.LabelVisible ?
+                           helper.Label(baseLine.Compose("lbl"), baseLine.LabelText ?? "", idLabelFor, TypeContext.CssLineLabel) :
+                           "";
         }
 
-        public static long? GetTicks(HtmlHelper helper, string prefix, BaseLine settings)
+        public static bool RequiresLoadAll(HtmlHelper helper, EntityBase eb)
         {
-            if ((StyleContext.Current.ShowTicks == null || StyleContext.Current.ShowTicks.Value) && 
-                !StyleContext.Current.ReadOnly && 
-                (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange))
-                return helper.GetChangeTicks(prefix) ?? 0;
-            return null;
-        }
-
-        public static bool RequiresLoadAll<T>(HtmlHelper helper, bool isIdentifiable, bool isLite, T value, string prefix)
-        {
-            bool hasChanged = helper.GetChangeTicks(prefix) > 0;
+            bool hasChanged = helper.GetChangeTicks(eb.ControlID) > 0;
             
             //To pre-load an entity in a Line, it has to have changed and also at least one of its properties
             Dictionary<string, long> ticks = (Dictionary<string, long>)helper.ViewData[ViewDataKeys.ChangeTicks];
-            bool propertyHasChanged = ticks != null && ticks.Any(kvp => kvp.Key.StartsWith(prefix) && kvp.Key != prefix && kvp.Value > 0);
+            bool propertyHasChanged = ticks != null && ticks.Any(kvp => kvp.Value > 0 && kvp.Key.StartsWith(eb.ControlID) && kvp.Key != eb.ControlID);
             
-            return (helper.ViewData.ContainsKey(ViewDataKeys.LoadAll) && value != null && hasChanged && propertyHasChanged) ||
-                    (isIdentifiable && value != null && (value as IIdentifiable).IsNew == true) ||
-                    (isLite && value != null && (value as Lite).IdOrNull == null);
+            return (eb.IsNew == true) || 
+                   (eb.UntypedValue != null && hasChanged && propertyHasChanged);
         }
 
-        public static string RenderPopupInEntityDiv<T>(HtmlHelper helper, string prefix, TypeContext<T> typeContext, EntityBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
+        public static string RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, string partialViewName, bool reloadOnChange)
         {
-            StringBuilder sb = new StringBuilder();
+            Type cleanRuntimeType = (typeContext.UntypedValue as Lite).TryCC(l => l.RuntimeType) ?? typeContext.UntypedValue.GetType();
 
-            sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(prefix, EntityBaseKeys.Entity)));
+            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType));
 
-            sb.AppendLine(RenderPopupContent<T>(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
+            TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 
-            sb.AppendLine("</div>");
+            ViewDataDictionary vdd = new ViewDataDictionary(tc);
 
-            return sb.ToString();
-        }
-
-        public static string RenderPopupContent<T>(HtmlHelper helper, string prefix, TypeContext<T> typeContext, EntityBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
-
-            TypeContext tc = typeContext;
-            if (isLite)
-                tc = typeContext.ExtractLite();
-
-            ViewDataDictionary vdd = new ViewDataDictionary(tc)
-            { 
-                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.OnPartialViewName((ModifiableEntity)tc.UntypedValue)},
-                { ViewDataKeys.PopupPrefix, helper.ParentPrefix() }
-            };
             helper.PropagateSFKeys(vdd);
-            if (settings.ReloadOnChange)
+            if (reloadOnChange)
                 vdd[ViewDataKeys.Reactive] = true;
+            
+            if (string.IsNullOrEmpty(partialViewName))
+                partialViewName = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
 
-            //using (var sc = StyleContext.RegisterCleanStyleContext(true))
-            sb.AppendLine(helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd));
-
-            return sb.ToString();
-        }
-
-        public static string RenderContent<T>(HtmlHelper helper, string prefix, TypeContext<T> typeContext, EntityBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
-
-            TypeContext tc = typeContext;
-            if (isLite)
-                tc = typeContext.ExtractLite();
-
-            ViewDataDictionary vdd = new ViewDataDictionary(tc)
-            { 
-                { ViewDataKeys.MainControlUrl, helper.ParentPrefix() },
-                { ViewDataKeys.PopupPrefix, helper.ParentPrefix() }
-            };
-            helper.PropagateSFKeys(vdd);
-            if (settings.ReloadOnChange)
-                vdd[ViewDataKeys.Reactive] = true;
-
-            sb.AppendLine(helper.RenderPartialToString(settings.PartialViewName ?? es.OnPartialViewName((ModifiableEntity)tc.UntypedValue), vdd));
-
-            return sb.ToString();
+            switch (mode)
+            {
+                case RenderMode.Content:
+                    return helper.RenderPartialToString(partialViewName, vdd);
+                case RenderMode.Popup:
+                    vdd.Add(ViewDataKeys.MainControlUrl, partialViewName);
+                    return helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd);
+                case RenderMode.PopupInDiv:
+                    vdd.Add(ViewDataKeys.MainControlUrl, partialViewName);
+                    return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
+                        helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd),
+                        "",
+                        new Dictionary<string, object> { { "style", "display:none" } });
+                case RenderMode.ContentInVisibleDiv:
+                case RenderMode.ContentInInvisibleDiv:
+                    return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
+                        helper.RenderPartialToString(partialViewName, vdd),
+                        "",
+                        (mode == RenderMode.ContentInInvisibleDiv) ? new Dictionary<string, object> { { "style", "display:none" } } : null);
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         public static string JsEscape(string input)
@@ -118,67 +86,83 @@ namespace Signum.Web
             return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
         }
 
-        public static string WriteImplementations(HtmlHelper helper, EntityBase settings, string prefix)
+        public static string WriteImplementations(HtmlHelper helper, EntityBase entityBase)
         {
-            if (settings.Implementations == null)
+            if (entityBase.Implementations == null)
                 return "";
 
-            string implementations = ImplementationsModelBinder.Render(settings.Implementations);
+            string implementations = ImplementationsModelBinder.Render(entityBase.Implementations);
 
-            return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.Implementations), implementations, new { disabled = "disabled"});
+            return helper.Hidden(entityBase.Compose(EntityBaseKeys.Implementations), implementations, new { disabled = "disabled"});
         }
 
-        public static string WriteViewButton<T>(HtmlHelper helper, EntityBase settings, T value)
+        public static string WriteViewButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!settings.View)
+            if (!entityBase.View)
                 return "";
 
-            return helper.Button(TypeContext.Compose(settings.Prefix, "btnView"),
+            return helper.Button(entityBase.Compose("btnView"),
                   "->",
-                  settings.GetViewing(),
+                  entityBase.GetViewing(),
                   "lineButton go",
-                  (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());
+                  (entityBase.UntypedValue == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());
         }
 
-        public static string WriteCreateButton<T>(HtmlHelper helper, EntityBase settings, T value)
+        public static string WriteCreateButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!settings.Create && settings.Implementations == null)
+            if (!entityBase.Create && entityBase.Implementations == null)
                 return "";
 
-            return helper.Button(TypeContext.Compose(settings.Prefix, "btnCreate"),
+            return helper.Button(entityBase.Compose("btnCreate"),
                   "+",
-                  settings.GetCreating(),
+                  entityBase.GetCreating(),
                   "lineButton create",
-                  (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
+                  (entityBase.UntypedValue == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
         }
 
-        public static string WriteFindButton<T>(HtmlHelper helper, EntityBase settings, T value, bool isIdentifiable, bool isLite)
+        public static string WriteFindButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if ((!isIdentifiable && !isLite) || (!settings.Find && settings.Implementations == null))
+            if ((!entityBase.Type.IsIIdentifiable() && !entityBase.Type.IsLite()) || (!entityBase.Find && entityBase.Implementations == null))
                 return "";
 
-            return helper.Button(TypeContext.Compose(settings.Prefix, "btnFind"),
+            return helper.Button(entityBase.Compose("btnFind"),
                  "O",
-                 settings.GetFinding(),
+                 entityBase.GetFinding(),
                  "lineButton find",
-                 (value == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
+                 (entityBase.UntypedValue == null) ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "style", "display:none" } });
         }
 
-        public static string WriteRemoveButton<T>(HtmlHelper helper, EntityBase settings, T value)
+        public static string WriteRemoveButton(HtmlHelper helper, EntityBase entityBase)
         {
-            if (!settings.Remove && settings.Implementations == null)
+            if (!entityBase.Remove && entityBase.Implementations == null)
                 return "";
 
-            return helper.Button(TypeContext.Compose(settings.Prefix, "btnRemove"),
+            return helper.Button(entityBase.Compose("btnRemove"),
                   "x",
-                  settings.GetRemoving(),
+                  entityBase.GetRemoving(),
                   "lineButton remove",
-                  (value == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());        
+                  (entityBase.UntypedValue == null) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());        
         }
 
-        public static string WriteBreakLine()
+        public static string WriteBreakLine(HtmlHelper helper, EntityBase entityBase)
         {
-            return StyleContext.Current.BreakLine ? "<div class='clearall'></div>" : "";
+            return entityBase.BreakLine ? helper.Div("", "", "clearall") : "";
+        }
+
+        internal static string EmbeddedTemplate(EntityBase entityBase, string template)
+        {
+            return "<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
+                                entityBase.Compose(EntityBaseKeys.Template),
+                                EntityBaseHelper.JsEscape(template));
         }
     }
+
+    public enum RenderMode
+    {
+        Popup,
+        PopupInDiv,
+        Content,
+        ContentInVisibleDiv,
+        ContentInInvisibleDiv
+    }   
 }

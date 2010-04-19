@@ -5,41 +5,47 @@
 <%@ Import Namespace="Signum.Entities.Reflection" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="Signum.Engine.DynamicQuery" %>
 
-<%  string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
-    bool visible = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterMode == FilterMode.Visible;
+<%  bool visible = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterMode == FilterMode.Visible;
+    Context context = (Context)Model;
+    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
     %>
 
-<%= Html.Hidden(Html.GlobalName(ViewDataKeys.EntityTypeName + sufix), ViewData[ViewDataKeys.EntityTypeName].ToString(), new { disbled = "disabled" })%>
+<%= Html.Hidden(context.Compose(ViewDataKeys.EntityTypeName), entitiesType.Name, new { disbled = "disabled" })%>
 
-<div id="<%=Html.GlobalName("fields-search" + sufix)%>">
-    <div id="<%=Html.GlobalName("fields-list" + sufix)%>" class="fields-list">
-        <a onclick="javascript:toggleFilters('<%=Html.GlobalName("fields-search" + sufix)%>');" class="filters-header<%= visible ? "" : " close" %>" rev="filters-body"><%= visible ? "Ocultar filtros" : "Mostrar filtros" %></a>
+<div id="<%=context.Compose("fields-search")%>">
+    <div id="<%=context.Compose("fields-list")%>" class="fields-list">
+        <a onclick="javascript:toggleFilters('<%=context.Compose("fields-search")%>');" class="filters-header<%= visible ? "" : " close" %>" rev="filters-body"><%= visible ? "Ocultar filtros" : "Mostrar filtros" %></a>
         <div class="filters" <%= visible ? "" : "style='display:none'"%>>
-            <div id="<%=Html.GlobalName("filters-body" + sufix)%>" class="filters-body">
-                <label for="<%=Html.GlobalName("ddlNewFilters" + sufix)%>">Filtrar por campo</label>
-                <select id="<%=Html.GlobalName("ddlNewFilters" + sufix)%>">
+            <div id="<%=context.Compose("filters-body")%>" class="filters-body">
+                <label for="<%=context.Compose("ddlNewFilters")%>">Filtrar por campo</label>
+                <select id="<%=context.Compose("ddlNewFilters")%>">
 
-                <% foreach (StaticColumn column in (List<StaticColumn>)ViewData[ViewDataKeys.FilterColumns])
+                <% 
+                    List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
+                    foreach (StaticColumn column in columns)
                    {
                        Type type = column.Type.UnNullify();
                        if (typeof(Lite).IsAssignableFrom(type))
                             type = Reflector.ExtractLite(type);
                        string typeName = (Navigator.TypesToURLNames.ContainsKey(type)) ? type.Name : type.AssemblyQualifiedName;
                        %>
-                       <option id="<%=Html.GlobalName("option__" + column.Name + sufix) %>" value="<%=typeName %>"><%=column.DisplayName%></option>
+                       <option id="<%=context.Compose("option__" + column.Name) %>" value="<%=typeName %>"><%=column.DisplayName%></option>
                    <%
                    } 
                 %>
                </select> 
-               <%=Html.Button(Html.GlobalName("btnAddFilter" + sufix), "+", "AddFilter('{0}','{1}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "", sufix ?? ""), "", new Dictionary<string, object>())%>
-               <%=Html.Button(Html.GlobalName("btnClearAllFilters" + sufix), "Eliminar Filtros", "ClearAllFilters('{0}','{1}');".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "", sufix ?? ""), "", new Dictionary<string, object>())%>
+               <%=Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "", null)%>
+               <%=Html.Button(context.Compose("btnClearAllFilters"), "Eliminar Filtros", "ClearAllFilters('{0}');".Formato(context.ControlID), "", null)%>
            </div>
-    <% List<FilterOption> filterOptions = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterOptions; %>
+    <% List<FilterOption> filterOptions = findOptions.FilterOptions; %>
   
-    <div id="<%=Html.GlobalName("filters-list" + sufix)%>" class="filters-list">
+    <div id="<%=context.Compose("filters-list")%>" class="filters-list">
         <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>">No se han especificado filtros</span>
-        <table id="<%=Html.GlobalName("tblFilters" + sufix)%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
+        <table id="<%=context.Compose("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
             <thead>
                 <tr>
                     <th>Campo</th>
@@ -52,7 +58,9 @@
                 <% for (int i=0; i<filterOptions.Count; i++)
                 {
                     FilterOption filter = filterOptions[i];
-                    Html.NewFilter(((FindOptions)ViewData[ViewDataKeys.FindOptions]).QueryName, filter, i);            
+                       %>
+                       <%= Html.NewFilter(findOptions.QueryName, filter, context, i)%>
+                   <%
                 } 
                 %>
             </tbody>

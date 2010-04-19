@@ -14,119 +14,81 @@ using Signum.Engine;
 using System.Configuration;
 using Signum.Web.Properties;
 using System.Web;
+using Signum.Engine.DynamicQuery;
 #endregion
 
 namespace Signum.Web
 {
     public static class EntityComboHelper
     {
-        internal static void InternalEntityCombo<T>(this HtmlHelper helper, TypeContext<T> typeContext, EntityCombo settings)
+        internal static string InternalEntityCombo(this HtmlHelper helper, EntityCombo entityCombo)
         {
-            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
-                return;
+            if (!entityCombo.Visible || entityCombo.HideIfNull && entityCombo.UntypedValue == null)
+                return "";
 
-            string prefix = helper.GlobalName(typeContext.Name);
-            T value = typeContext.Value;
-            Type cleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T); //typeContext.ContextType;
-            bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(typeof(T));
-            bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
-
-            if (settings.Implementations != null && settings.Implementations.IsByAll)
-                throw new InvalidOperationException("ImplementedByAll types are not allowed in EntityCombo");
-
-            if (!isIdentifiable && !isLite)
-                throw new InvalidOperationException(Resources.EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0.Formato(cleanStaticType));
-
-            Type cleanRuntimeType = null;
-            if (value != null)
-                cleanRuntimeType = typeof(Lite).IsAssignableFrom(value.GetType()) ? (value as Lite).RuntimeType : value.GetType();
-
-            long? ticks = EntityBaseHelper.GetTicks(helper, prefix, settings);
+            if (!entityCombo.Type.IsIIdentifiable() && !entityCombo.Type.IsLite())
+                throw new InvalidOperationException(Resources.EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0.Formato(entityCombo.Type.CleanType()));
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings, TypeContext.Compose(prefix, EntityComboKeys.Combo)));
+            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.Compose(EntityComboKeys.Combo)));
 
-            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
+            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityCombo));
 
-            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo(value) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
+            sb.AppendLine(helper.HiddenEntityInfo(entityCombo));
 
-            if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
-                sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
-            else if (value != null)
-                sb.AppendLine(helper.Div(TypeContext.Compose(prefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+            if (EntityBaseHelper.RequiresLoadAll(helper, entityCombo))
+                sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityCombo.Parent, RenderMode.PopupInDiv, entityCombo.PartialViewName, entityCombo.ReloadOnChange));
+            else if (entityCombo.UntypedValue != null)
+                sb.AppendLine(helper.Div(entityCombo.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-            if (StyleContext.Current.ReadOnly)
-                sb.AppendLine(helper.Span(prefix, (value != null) ? value.ToString() : "", "valueLine"));
+            if (entityCombo.ReadOnly)
+                sb.AppendLine(helper.Span(entityCombo.ControlID, entityCombo.UntypedValue.TryToString(), "valueLine"));
             else
             {
                 List<SelectListItem> items = new List<SelectListItem>();
                 items.Add(new SelectListItem() { Text = "-", Value = "" });
-                if (settings.Preload)
+                if (entityCombo.Preload)
                 {
-                    int? id = (isIdentifiable) ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull) :
-                              (isLite) ? ((Lite)(object)value).TryCS(i => i.IdOrNull) : null;
+                    int? id = entityCombo.IdOrNull;
 
-                    if (settings.Data != null)
-                    {
-                        items.AddRange(
-                            settings.Data.Select(lite => new SelectListItem()
-                                {
-                                    Text = lite.ToString(),
-                                    Value = settings.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
-                                    Selected = (value != null) && (lite.Id == id)
-                                })
-                            );
-                    }
-                    else
-                    {
-                        if (settings.Implementations != null)
-                            throw new InvalidOperationException("Types with Implementations must provide Data to EntityCombo");
+                    List<Lite> data = entityCombo.Data ?? AutoCompleteUtils.RetriveAllLite(entityCombo.Type.CleanType(), entityCombo.Implementations);
 
-                        items.AddRange(
-                            Database.RetrieveAllLite(cleanStaticType)
-                                .Select(lite => new SelectListItem()
-                                {
-                                    Text = lite.ToString(),
-                                    Value = settings.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
-                                    Selected = (value != null) && (lite.Id == id)
-                                })
-                            );
-                    }
+                    items.AddRange(
+                        data.Select(lite => new SelectListItem()
+                            {
+                                Text = lite.ToString(),
+                                Value = entityCombo.Implementations != null ? lite.RuntimeType.Name + ";" + lite.Id.ToString() : lite.Id.ToString(),
+                                Selected = lite.IdOrNull == entityCombo.IdOrNull
+                            })
+                        );
                 }
 
-                settings.ComboHtmlProperties.Add("class","valueLine");
+                entityCombo.ComboHtmlProperties.AddCssClass("valueLine");
 
-                if (settings.ComboHtmlProperties.ContainsKey("onchange"))
+                if (entityCombo.ComboHtmlProperties.ContainsKey("onchange"))
                     throw new InvalidOperationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
 
-                settings.ComboHtmlProperties.Add("onchange", "EComboOnChanged({0});".Formato(settings.ToJS()));
+                entityCombo.ComboHtmlProperties.Add("onchange", "EComboOnChanged({0});".Formato(entityCombo.ToJS()));
 
-                if (settings.Size == 0)
+                if (entityCombo.Size > 0)
                 {
-                    sb.AppendLine(helper.DropDownList(
-                        TypeContext.Compose(prefix, EntityComboKeys.Combo),
+                    entityCombo.ComboHtmlProperties.AddCssClass("entityList");
+                    entityCombo.ComboHtmlProperties.Add("size", Math.Min(entityCombo.Size, items.Count - 1));
+                }            
+                
+                sb.AppendLine(helper.DropDownList(
+                        entityCombo.Compose(EntityComboKeys.Combo),
                         items,
-                        settings.ComboHtmlProperties));
-                }
-                else
-                {
-                    settings.Size = Math.Min(settings.Size, items.Count - 1);
-                    string attributes = settings.ComboHtmlProperties != null ? (" " + settings.ComboHtmlProperties.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
-                    sb.AppendLine("<select id='{0}' name='{0}' size='{1}' class='entityList'{2}>".Formato(TypeContext.Compose(prefix, EntityComboKeys.Combo), settings.Size, attributes));
-                    for(int i = 1; i<items.Count; i++)
-                        sb.AppendLine("<option value='{0}'{1}>{2}</option>".Formato(items[i].Value, items[i].Selected ? " selected='selected'" : "", items[i].Text));
-                    sb.AppendLine("</select>");
-                }
+                        entityCombo.ComboHtmlProperties));
             }
 
-            sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, settings, value));
+            sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, entityCombo));
+            sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityCombo));
 
-            sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, settings, value));
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityCombo));
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine());
-
-            helper.Write(sb.ToString());
+            return sb.ToString();
         }
 
         public static void EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
@@ -138,26 +100,15 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            Type runtimeType = typeof(S);
-            if (context.Value != null)
-            {
-                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lite).RuntimeType;
-                else
-                    runtimeType = context.Value.GetType();
-            }
-            else
-                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
+            EntityCombo ec = new EntityCombo(typeof(S), context.Value, context, null, context.PropertyRoute);
 
-            EntityCombo ec = new EntityCombo(helper.GlobalName(context.Name));
-            Navigator.ConfigureEntityBase(ec, runtimeType, false);
-            Common.FireCommonTasks(ec, context);
+            Navigator.ConfigureEntityBase(ec, ec.CleanRuntimeType ?? ec.Type.CleanType(), false);
+            Common.FireCommonTasks(ec);
 
             if (settingsModifier != null)
                 settingsModifier(ec);
 
-            using (ec)
-                helper.InternalEntityCombo(context, ec);
+            helper.Write(helper.InternalEntityCombo(ec));
         }
 
         public static string RenderOption(this SelectListItem item)
@@ -183,7 +134,6 @@ namespace Signum.Web
 
         public static string ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IIdentifiable
         {
-
             List<SelectListItem> list = new List<SelectListItem>();
 
             if (selectedElement == null)

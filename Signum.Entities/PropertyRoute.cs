@@ -39,9 +39,21 @@ namespace Signum.Entities
 
         public PropertyRoute Add(PropertyInfo propertyInfo)
         {
-            if (typeof(IdentifiableEntity).IsAssignableFrom(this.Type))
-                return new PropertyRoute(Root(this.Type), propertyInfo);
+            if (typeof(IIdentifiable).IsAssignableFrom(this.Type))
+            {
+                Implementations imp = GetImplementations();
 
+                ImplementedByAttribute ib = imp as ImplementedByAttribute;
+                if (ib != null && ib.ImplementedTypes.Length == 1)
+                {
+                    return new PropertyRoute(Root(ib.ImplementedTypes.Single()), propertyInfo); 
+                }
+
+                if (imp != null)
+                    throw new InvalidOperationException("Attempt to make a property route on a {0}. Cast first.".Formato(imp.GetType()));
+
+                return new PropertyRoute(Root(this.Type), propertyInfo);
+            }
             return new PropertyRoute(this, propertyInfo);
         }
 
@@ -65,6 +77,13 @@ namespace Signum.Entities
                     throw new NotSupportedException("{0} PropertyInfo is not supported".Formato(propertyInfo.Name)); 
 
                 PropertyRouteType = PropertyRouteType.MListItems;
+            }
+            else if (Reflector.IsLite(parent.Type))
+            {
+                if (propertyInfo.Name != "Entity" && propertyInfo.Name != "EntityOrNull")
+                    throw new NotSupportedException("{0} PropertyInfo is not supported".Formato(propertyInfo.Name));
+
+                PropertyRouteType = PropertyRouteType.LiteEntity;
             }
             else if (typeof(ModifiableEntity).IsAssignableFrom(parent.Type))
             {
@@ -115,6 +134,8 @@ namespace Signum.Entities
                     return Parent.ToString() + (Parent.PropertyRouteType == PropertyRouteType.MListItems ? "" : ".") + PropertyInfo.Name;
                 case PropertyRouteType.MListItems:
                     return Parent.ToString() + "/";
+                case PropertyRouteType.LiteEntity:
+                    return Parent.ToString() + ".Entity";
             }
             throw new InvalidOperationException();
         }
@@ -259,7 +280,8 @@ namespace Signum.Entities
     {
         Root,
         Property,
-        MListItems
+        LiteEntity, 
+        MListItems,
     }
 
    

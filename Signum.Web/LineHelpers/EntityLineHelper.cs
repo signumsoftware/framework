@@ -21,108 +21,86 @@ namespace Signum.Web
 {
     public static class EntityLineHelper
     {
-        // This line returns string instead of void as all the other internalLines because it's used when constructing filters dinamically
-        internal static string InternalEntityLine<T>(this HtmlHelper helper, TypeContext<T> typeContext, EntityLine settings)
+        internal static string InternalEntityLine(this HtmlHelper helper, EntityLine entityLine)
         {
-            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
+            if (!entityLine.Visible || (entityLine.HideIfNull && entityLine.UntypedValue == null))
                 return null;
 
-            string prefix = helper.GlobalName(typeContext.Name);
-            T value = typeContext.Value;
-            Type cleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T); //typeContext.ContextType;
-            bool isIdentifiable = typeof(IIdentifiable).IsAssignableFrom(typeof(T));
-            bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
-            
-            Type cleanRuntimeType = null;
-            if (value != null)
-                cleanRuntimeType = typeof(Lite).IsAssignableFrom(value.GetType()) ? (value as Lite).RuntimeType : value.GetType();
-
-            long? ticks = EntityBaseHelper.GetTicks(helper, prefix, settings);
-            
             StringBuilder sb = new StringBuilder();
 
-            if (settings.LabelVisible)
-                sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
+            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
 
-            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo(value) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
+            sb.AppendLine(helper.HiddenEntityInfo(entityLine));
 
-            if (isIdentifiable || isLite)
+            if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
             {
-                //sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo<T>(value) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
+                sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityLine));
 
-                sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
-
-                if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, prefix))
-                    sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
-                else if (value != null)
-                    sb.AppendLine(helper.Div(TypeContext.Compose(prefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
+                if (EntityBaseHelper.RequiresLoadAll(helper, entityLine))
+                    sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine.PartialViewName, entityLine.ReloadOnChange));
+                else if (entityLine.UntypedValue != null)
+                    sb.AppendLine(helper.Div(entityLine.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
                 
                 sb.AppendLine(helper.TextBox(
-                    TypeContext.Compose(prefix, EntityBaseKeys.ToStr), 
-                    (isIdentifiable) 
-                        ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToStr) 
-                        : ((Lite)(object)value).TryCC(i => i.ToStr), 
+                    entityLine.Compose(EntityBaseKeys.ToStr),
+                    entityLine.ToStr, 
                     new Dictionary<string, object>() 
                     { 
                         { "class", "valueLine" }, 
                         { "autocomplete", "off" }, 
-                        { "style", "display:" + ((value==null && !settings.ReadOnly) ? "block" : "none")}
+                        { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
                     }));
 
-                if (settings.Autocomplete && Navigator.NamesToTypes.ContainsKey(cleanStaticType.Name))
+                if (entityLine.Autocomplete)
                 {
-                    if (settings.Implementations != null && settings.Implementations.IsByAll)
+                    if (entityLine.Implementations != null && entityLine.Implementations.IsByAll)
                         throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
-                    
-                    sb.AppendLine(helper.AutoCompleteExtender(TypeContext.Compose(prefix, EntityBaseKeys.ToStr),
-                                     cleanStaticType.Name,
-                                     ImplementationsModelBinder.Render(settings.Implementations),
-                                     TypeContext.Compose(prefix, TypeContext.Id),
-                                     "Signum/Autocomplete", settings.OnChangedTotal.HasText() ? settings.OnChangedTotal : "''"));
+
+                    sb.AppendLine(helper.AutoCompleteExtender(entityLine.Compose(EntityBaseKeys.ToStr),
+                                     Navigator.TypesToNames.GetOrThrow(entityLine.Type.CleanType(), "{0} not registered. Call Navigator.RegisterTypeName"),
+                                     ImplementationsModelBinder.Render(entityLine.Implementations),
+                                     entityLine.Compose("sfId"),
+                                     "Signum/Autocomplete", entityLine.OnChangedTotal.HasText() ? entityLine.OnChangedTotal : "''"));
+
                 }
             }
             else
             {
-                //sb.AppendLine(helper.HiddenEntityInfo(prefix, new EmbeddedRuntimeInfo<T>(value, false) { Ticks = ticks }, new StaticInfo(cleanStaticType) { IsReadOnly = settings.ReadOnly }));
+                if (entityLine.UntypedValue == null)
+                {
+                    TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
+                    sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityLine.PartialViewName, entityLine.ReloadOnChange)));
+                }
 
-                typeContext.Value = (T)(object)Constructor.Construct(cleanRuntimeType ?? cleanStaticType);
-                sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
-                        TypeContext.Compose(prefix, EntityBaseKeys.Template),
-                        EntityBaseHelper.JsEscape(EntityBaseHelper.RenderPopupContent(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
-                typeContext.Value = value;
+                if (entityLine.UntypedValue != null)
+                    sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine.PartialViewName, entityLine.ReloadOnChange));
 
-                if (value != null)
-                    sb.AppendLine(EntityBaseHelper.RenderPopupInEntityDiv(helper, prefix, typeContext, settings, cleanRuntimeType, cleanStaticType, isLite));
-
-                sb.AppendLine(helper.Span(TypeContext.Compose(prefix, EntityBaseKeys.ToStr), value.TryToString(), "valueLine"));
+                sb.AppendLine(helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink), entityLine.UntypedValue.TryToString(), "valueLine"));
             }
 
-            string id = (isIdentifiable) ? ((IIdentifiable)(object)value).TryCS(i => i.IdOrNull).TryToString() :
-                (isLite) ? ((Lite)(object)value).TryCS(i => i.IdOrNull).TryToString() : 
-                "";
-            
-            if (settings.Navigate && id.HasText())
+            int? id = entityLine.IdOrNull;
+            if (entityLine.Navigate && id != null)
             {
                 sb.AppendLine(
-                    helper.Href(TypeContext.Compose(prefix, EntityBaseKeys.ToStrLink),
-                        value.ToString(), Navigator.ViewRoute(cleanRuntimeType, int.Parse(id)), Resources.View, "valueLine",
-                        new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+                    helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
+                        entityLine.UntypedValue.ToString(), Navigator.ViewRoute(entityLine.CleanRuntimeType, id), Resources.View, "valueLine",
+                        new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
             }
-            else if (isIdentifiable || isLite)
+            else if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
             {
                 sb.AppendLine(
-                    helper.Span(TypeContext.Compose(prefix, EntityBaseKeys.ToStrLink),
-                        (value != null) ? value.ToString() : "&nbsp;",
+                    helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
+                        entityLine.UntypedValue.TryToString() ?? "&nbsp;",
                         "valueLine",
-                        new Dictionary<string, object> { { "style", "display:" + ((value == null) ? "none" : "block") } }));
+                        new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
             }
 
-            sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, settings, value));
-            sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, settings, value));
-            sb.AppendLine(EntityBaseHelper.WriteFindButton(helper, settings, value, isIdentifiable, isLite));
-            sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, settings, value));
+            sb.AppendLine(EntityBaseHelper.WriteViewButton(helper, entityLine));
+            sb.AppendLine(EntityBaseHelper.WriteCreateButton(helper, entityLine));
+            sb.AppendLine(EntityBaseHelper.WriteFindButton(helper, entityLine));
+            sb.AppendLine(EntityBaseHelper.WriteRemoveButton(helper, entityLine));
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine());
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityLine));
 
             return sb.ToString();
         }
@@ -136,27 +114,15 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            Type runtimeType = typeof(S);
-            if (context.Value != null)
-            {
-                if (typeof(Lite).IsAssignableFrom(context.Value.GetType()))
-                    runtimeType = (context.Value as Lite).RuntimeType;
-                else
-                    runtimeType = context.Value.GetType();
-            }
-            else
-                runtimeType = Reflector.ExtractLite(runtimeType) ?? runtimeType;
-            
-            EntityLine el = new EntityLine(helper.GlobalName(context.Name));
-            Navigator.ConfigureEntityBase(el, runtimeType, false);
-            Common.FireCommonTasks(el, context);
+            EntityLine el = new EntityLine(typeof(S), context.Value, context, null, context.PropertyRoute);
+
+            Navigator.ConfigureEntityBase(el, el.CleanRuntimeType ?? el.Type.CleanType(), false);
+            Common.FireCommonTasks(el);
 
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            using (el)
-                helper.ViewContext.HttpContext.Response.Write(
-                    helper.InternalEntityLine(context, el));
+            helper.Write(helper.InternalEntityLine(el));
         }
     }
 }

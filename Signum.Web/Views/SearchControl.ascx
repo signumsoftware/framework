@@ -1,40 +1,45 @@
 <%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
 <%@ Import Namespace="Signum.Web" %>
+<%@ Import Namespace="Signum.Web.Properties" %>
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="Signum.Engine.DynamicQuery" %>
 <%@ Import Namespace="System.Configuration" %>
-
-<% FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
-   string sufix = (string)ViewData[ViewDataKeys.PopupSufix] ?? "";
-    %>
-<div id="<%=Html.GlobalName("divSearchControl" + sufix) %>" class="searchControl">
-<%=Html.Hidden(Html.GlobalName("sfQueryUrlName" + sufix), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disbled = "disabled" })%>
-<%=Html.Hidden(Html.GlobalName(ViewDataKeys.AllowMultiple + sufix), findOptions.AllowMultiple.ToString(), new { disbled = "disabled" })%>
-<%=Html.Hidden(Html.GlobalName(ViewDataKeys.View + sufix), (bool)ViewData[ViewDataKeys.View], new { disbled = "disabled" })%>
+<%@ Import Namespace="Signum.Entities.Reflection" %>
 <% 
-    string popupPrefix = (string)ViewData[ViewDataKeys.PopupPrefix]; %>
+    Context context = (Context)Model;
+    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+    Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
+    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
+%>
+
+<div id="<%=context.Compose("divSearchControl") %>" class="searchControl">
+<%=Html.Hidden(context.Compose("sfQueryUrlName"), Navigator.Manager.QuerySettings[findOptions.QueryName].UrlName, new { disbled = "disabled" })%>
+<%=Html.Hidden(context.Compose(ViewDataKeys.AllowMultiple), findOptions.AllowMultiple.ToString(), new { disbled = "disabled" })%>
+<%=Html.Hidden(context.Compose(ViewDataKeys.View), viewable, new { disbled = "disabled" })%>
 
 <%= (findOptions.SearchOnLoad) ?
-            "<script type=\"text/javascript\">$(document).ready(function() {{ SearchOnLoad('{0}'); }});</script>".Formato(Html.GlobalName("btnSearch" + sufix)) : 
+    "<script type=\"text/javascript\">$(document).ready(function() {{ SearchOnLoad('{0}'); }});</script>".Formato(context.Compose("btnSearch")) : 
     ""
 %>
 
-<div id="<%=Html.GlobalName("divFilters" + sufix) %>" style="display:<%= (findOptions.FilterMode != FilterMode.AlwaysHidden) ? "block" : "none" %>" >
+<div id="<%=context.Compose("divFilters") %>" style="display:<%= (findOptions.FilterMode != FilterMode.AlwaysHidden) ? "block" : "none" %>" >
     <%Html.RenderPartial(Navigator.Manager.FilterBuilderUrl, ViewData); %>
 </div>
 
-<div id="<%=Html.GlobalName("divMenuItems" + sufix) %>" class="buttonBar">
-    <label class="OperationDiv" for="<%=Html.GlobalName(ViewDataKeys.Top + sufix)%>">Núm.registros</label> 
-    <%= Html.TextBox(Html.GlobalName(ViewDataKeys.Top + sufix), ViewData[ViewDataKeys.Top] ?? "", new Dictionary<string, object> { { "size", "5" }, { "class", "OperationDiv" }, { "onkeydown", "return validator.number(event)" } })%>
+<div id="<%=context.Compose("divMenuItems") %>" class="buttonBar">
+    <label class="OperationDiv" for="<%=context.Compose(ViewDataKeys.Top)%>">Núm.registros</label> 
+    <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "class", "OperationDiv" }, { "onkeydown", "return validator.number(event)" } })%>
 
-    <input class="OperationDiv btnSearch" id="<%=Html.GlobalName("btnSearch" + sufix)%>" type="button" onclick="<%="Search({{prefix:'{0}',suffix:'{1}'}});".Formato(ViewData[ViewDataKeys.PopupPrefix] ?? "", sufix) %>" value="Buscar" /> 
-    <% if ((bool)ViewData[ViewDataKeys.Create] && (bool)ViewData[ViewDataKeys.View])
+    <input class="OperationDiv btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="Buscar" /> 
+    <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
-        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}},'{1}');".Formato(popupPrefix ?? "", sufix)%>" />
+        <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
     <%} %>
-    <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, (Type)ViewData[ViewDataKeys.EntityType]).ToString(Html, popupPrefix)%> 
+    <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType).ToString(Html, context.ControlID)%> 
 </div>
 <div class="clearall"></div>
-<div id="<%=Html.GlobalName("divResults" + sufix)%>" class="divResults"></div>
+<div id="<%=context.Compose("divResults")%>" class="divResults"></div>
 </div>

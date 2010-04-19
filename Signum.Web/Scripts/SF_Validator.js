@@ -17,7 +17,7 @@
 Validator.prototype = {
 
     pf: function(s) {
-        return "#" + this.valOptions.prefix + s;
+        return "#" + this.valOptions.prefix.compose(s);
     },
 
     constructRequestData: function() {
@@ -162,11 +162,11 @@ Validator.prototype = {
                 var isEqual = (currPrefix == this.valOptions.prefix);
                 var isMoreInner = !isEqual && (currPrefix.indexOf(this.valOptions.prefix) > -1);
                 if (showPathErrors || isMoreInner) {
-                    $('#' + currPrefix + sfToStr).addClass(sfInputErrorClass);
-                    $('#' + currPrefix + sfLink).addClass(sfInputErrorClass);
+                    $('#' + currPrefix.compose(sfToStr)).addClass(sfInputErrorClass);
+                    $('#' + currPrefix.compose(sfLink)).addClass(sfInputErrorClass);
                 }
-                if ((isMoreInner || isEqual) && $('#' + currPrefix + sfGlobalValidationSummary).length > 0 && !empty(partialErrors)) {
-                    var currentSummary = $('#' + currPrefix + sfGlobalValidationSummary);
+                if ((isMoreInner || isEqual) && $('#' + currPrefix.compose(sfGlobalValidationSummary)).length > 0 && !empty(partialErrors)) {
+                    var currentSummary = $('#' + currPrefix.compose(sfGlobalValidationSummary));
                     var summaryUL = currentSummary.children('.' + sfSummaryErrorClass);
                     if (summaryUL.length == 0)
                         currentSummary.append('<ul class="' + sfSummaryErrorClass + '">\n' + partialErrors + '</ul>');
@@ -192,7 +192,7 @@ function Validate(_valOptions) {
 var PartialValidator = function(_pvalOptions) {
     var self = this;
     Validator.call(this, $.extend({
-        parentDiv: _pvalOptions.prefix + "panelPopup",
+        parentDiv: _pvalOptions.prefix.compose("panelPopup"),
         type: null,
         id: null
     }, _pvalOptions));
@@ -209,7 +209,7 @@ var PartialValidator = function(_pvalOptions) {
         requestData += qp(sfPrefix, this.valOptions.prefix);
 
         if (formChildren.filter(this.pf(sfRuntimeInfo)).length == 0)
-            requestData += qp(this.valOptions.prefix + sfRuntimeInfo, new RuntimeInfo(this.valOptions.prefix).createValue(this.valOptions.type, '', 'n', ''));
+            requestData += qp(this.valOptions.prefix.compose(sfRuntimeInfo), new RuntimeInfo(this.valOptions.prefix).createValue(this.valOptions.type, '', 'n', ''));
 
         if (!empty(this.valOptions.prefixToIgnore))
             requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
@@ -266,33 +266,34 @@ var PartialValidator = function(_pvalOptions) {
         //var formChildren = isReactive ? $("form *") : $("#" + this.valOptions.parentDiv + " *, #" + sfTabId + ", #" + sfReactive);
         var formChildren = $("#" + this.valOptions.parentDiv + " *, #" + sfTabId);
         formChildren = formChildren.not(".searchControl *, #" + sfReactive);
+
         var requestData = formChildren.serialize();
 
-        //if (!isReactive) {
-        if (requestData.indexOf(this.valOptions.prefix + sfRuntimeInfo) < 0) {
+        var myRuntimeInfoKey = this.valOptions.prefix.compose(sfRuntimeInfo);
+        if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length == 0) {
             var info = new RuntimeInfo(this.valOptions.prefix);
             var infoField = info.find();
             if (empty(this.valOptions.type)) {
                 if (empty(info.runtimeType()))
-                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', ''));
+                    requestData += qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.valOptions.prefix).staticType(), info.id(), 'n', ''));
                 else
-                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, infoField.val());
+                    requestData += qp(myRuntimeInfoKey, infoField.val());
             }
             else {
                 if (infoField.length == 0)
-                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
+                    requestData += qp(myRuntimeInfoKey, info.createValue(this.valOptions.type, empty(!this.valOptions.id) ? this.valOptions.id : '', 'n', ''));
                 else {
                     var infoVal = infoField.val();
                     var index = infoVal.indexOf(";");
                     var index2 = infoVal.indexOf(";", index + 1);
                     var index3 = infoVal.indexOf(";", index2 + 1);
-                    var mixedVal = this.valOptions.type + ";" + (empty(!this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index2, index3 + 1) + new Date().getTime();
+                    var currTicks = (($('#' + sfReactive).length > 0) ? new Date().getTime() : "");
+                    var mixedVal = this.valOptions.type + ";" + (!empty(this.valOptions.id) ? this.valOptions.id : '') + infoVal.substring(index2, index3 + 1) + currTicks;
 
-                    requestData += qp(this.valOptions.prefix + sfRuntimeInfo, mixedVal);
+                    requestData += qp(myRuntimeInfoKey, mixedVal);
                 }
             }
         }
-        //}
 
         requestData += qp(sfPrefix, this.valOptions.prefix);
 

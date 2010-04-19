@@ -223,7 +223,7 @@ namespace Signum.Web
 
             public SubContext<P> CreateSubContext(MappingContext<T> parent)
             {
-                SubContext<P> ctx = new SubContext<P>(TypeContext.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name), Mapping, PropertyPack, parent);
+                SubContext<P> ctx = new SubContext<P>(TypeContextUtilities.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name), Mapping, PropertyPack, parent);
                 if (parent.Value != null)
                     ctx.Value = GetValue(parent.Value);
                 return ctx;
@@ -236,7 +236,9 @@ namespace Signum.Web
         {
             if (fillProperties)
             {
-                Properties = Validator.GetPropertyPacks(typeof(T)).SelectDictionary(pn=>pn, pp=> PropertyMapping.Create(pp));
+                Properties = Validator.GetPropertyPacks(typeof(T))
+                    .Where(kvp => !kvp.Value.PropertyInfo.IsReadOnly())
+                    .ToDictionary(kvp=>kvp.Key, kvp=> PropertyMapping.Create(kvp.Value));
             }
         }
 
@@ -446,7 +448,7 @@ namespace Signum.Web
 
                 string index = subControlID.Substring(0, subControlID.IndexOf(TypeContext.Separator));
 
-                SubContext<S> itemCtx = new SubContext<S>(TypeContext.Compose(ctx.ControlID, index), ElementMapping, null, ctx);
+                SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), ElementMapping, null, ctx);
 
                 yield return itemCtx;
 
@@ -541,7 +543,7 @@ namespace Signum.Web
             {
                 Debug.Assert(!itemCtx.Empty());
 
-                SubContext<K> subContext = new SubContext<K>(TypeContext.Compose(itemCtx.ControlID, Route), keyPropertyMapping, null, itemCtx);
+                SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), keyPropertyMapping, null, itemCtx);
 
                 keyPropertyMapping.OnGetValue(subContext);
 

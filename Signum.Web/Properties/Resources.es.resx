@@ -243,4 +243,10 @@
   <data name="Save" xml:space="preserve">
     <value>Guardar</value>
   </data>
+  <data name="No" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>sí</value>
+  </data>
 </root>

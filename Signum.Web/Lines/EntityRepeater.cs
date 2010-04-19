@@ -25,18 +25,14 @@ namespace Signum.Web
 
     public class EntityRepeater : EntityListBase
     {
-        public string removeElementLinkText = "Delete";
-        public string RemoveElementLinkText
-        {
-            get { return removeElementLinkText; }
-            set { removeElementLinkText = value; }
-        }
         public string AddElementLinkText { get; set; }
+        public string RemoveElementLinkText{get;set;}
+
         public int? MaxElements { get; set; }
 
-        public EntityRepeater(string prefix) 
+        public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Prefix = prefix;
             RemoveElementLinkText = Resources.Remove;
             AddElementLinkText = Resources.New;
             Find = false;
@@ -47,24 +43,13 @@ namespace Signum.Web
             return "new ERep(" + this.OptionsJS() + ")";
         }
 
-        public override string OptionsJS()
+
+        protected override JsOptionsBuilder OptionsJSInternal()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("{");
-
-            sb.Append("prefix:'{0}'".Formato(Prefix));
-
-            if (OnChangedTotal.HasText())
-                sb.Append(",onEntityChanged:{0}".Formato(OnChangedTotal));
-
-            if (MaxElements.HasValue)
-                sb.Append(",maxElements:'{0}'".Formato(MaxElements.Value));
-
-            if (RemoveElementLinkText.HasText())
-                sb.Append(",removeItemLinkText:'{0}'".Formato(RemoveElementLinkText));
-
-            sb.Append("}");
-            return sb.ToString();
+            var result = base.OptionsJSInternal();
+            result.Add("maxElements", MaxElements.TryToString());
+            result.Add("removeItemLinkText", RemoveElementLinkText.TrySingleQuote());
+            return result;
         }
 
         protected override string DefaultViewing()

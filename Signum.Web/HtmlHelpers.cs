@@ -23,16 +23,12 @@ namespace Signum.Web
     {
         public static string ValidationSummaryAjax(this HtmlHelper html)
         {
-            return "<div id='sfGlobalValidationSummary'>" + 
-                   //html.ValidationSummary() +
-                   "</div>";
+            return "<div id='sfGlobalValidationSummary'></div>";
         }
 
-        public static string ValidationSummaryAjax(this HtmlHelper html, string prefix)
+        public static string ValidationSummaryAjax(this HtmlHelper html, Context context)
         {
-            return "<div id='{0}sfGlobalValidationSummary'>".Formato(prefix) +
-                   //html.ValidationSummary() +
-                   "</div>";
+            return "<div id='{0}'></div>".Formato(context.Compose("sfGlobalValidationSummary"));
         }
 
         public static void Field(this HtmlHelper html, string label, string value)
@@ -45,7 +41,7 @@ namespace Signum.Web
             return CheckBox(html, name, value, enabled, null);
         }
 
-        public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled, Dictionary<string, object> htmlAttributes)
+        public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled, IDictionary<string, object> htmlAttributes)
         {
             if (htmlAttributes == null)
                 htmlAttributes = new Dictionary<string, object>();
@@ -61,7 +57,7 @@ namespace Signum.Web
                     htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), 
                     value ? "checked='checked'" : ""));
 
-                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}' />".Formato(
+                sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}' disabled='disabled' />".Formato(
                     name,
                     value ? "true" : "false"
                     ));
@@ -78,7 +74,7 @@ namespace Signum.Web
         /// <param name="idField">The id of the field that the label is describing</param>
         /// <param name="cssClass">The class that will be appended to the label</param>
         /// <returns>An HTML string representing a "label" label</returns>
-        public static string Label(this HtmlHelper html, string id, string value, string idField, string cssClass, Dictionary<string, object> htmlAttributes)
+        public static string Label(this HtmlHelper html, string id, string value, string idField, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             if (htmlAttributes == null)
                 htmlAttributes = new Dictionary<string, object>();
@@ -99,7 +95,7 @@ namespace Signum.Web
             return html.Label(id, value, idField, cssClass, null);
         }
 
-        public static string Span(this HtmlHelper html, string id, string value, string cssClass, Dictionary<string, object> htmlAttributes)
+        public static string Span(this HtmlHelper html, string id, string value, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             string idname = id.HasText() ? (" id='" + id + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
@@ -117,22 +113,7 @@ namespace Signum.Web
             return Span(html, name, value, null, null);
         }
 
-        public static string Span(this HtmlHelper html, string name, object value, string cssClass, Type type)
-        {
-            string format = String.Empty;
-            string strValue= String.Empty;
-
-            if (type == typeof(Nullable<Int32>) || type == typeof(Int32)) strValue=(value !=null) ? ((int)value).ToString("N0") : String.Empty;
-            if (type == typeof(Nullable<Double>) || type == typeof(Double)) strValue=String.Format("{0:N}",value);
-            if (type == typeof(Enum)) strValue = strValue.Replace('_', ' ');
-            if (strValue == String.Empty)
-            {
-                strValue = (value != null) ? value.ToString() : "";
-            }
-            return Span(html, name, strValue, cssClass);
-        }
-
-        public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, Dictionary<string, object> htmlAttributes)
+        public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
@@ -141,7 +122,12 @@ namespace Signum.Web
             return "<a{0}{1}{2}{3} href=\"{4}\">{5}</a>".Formato(idname,css,tooltip,attributes,href,text);
         }
 
-        public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass, Dictionary<string, object> htmlAttributes)
+        public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass)
+        {
+            return html.Div(name, innerHTML, cssClass, null);
+        }
+
+        public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
@@ -149,7 +135,7 @@ namespace Signum.Web
             return "<div{0}{1}{2}>{3}</div>".Formato(idname, css, attributes, innerHTML);
         }
 
-        public static string Button(this HtmlHelper html, string name, string value, string onclick, string cssClass, Dictionary<string, object> htmlAttributes)
+        public static string Button(this HtmlHelper html, string name, string value, string onclick, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
@@ -157,7 +143,7 @@ namespace Signum.Web
             return "<input type='button'{0}{1} value='{2}'{3} onclick=\"{4}\" />".Formato(idname, css, value, attributes, onclick);
         }
 
-        public static string ImageButton(this HtmlHelper html, string name, string imgSrc, string altText, string onclick, Dictionary<string, object> htmlAttributes)
+        public static string ImageButton(this HtmlHelper html, string name, string imgSrc, string altText, string onclick, IDictionary<string, object> htmlAttributes)
         {
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
             return "<img id='{0}' src='{1}' alt='{2}' title='{2}' onclick=\"{3}\"{4} />".Formato(name, imgSrc, altText, onclick, attributes);

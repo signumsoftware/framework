@@ -8,6 +8,8 @@ using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Web.Properties;
+using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
 #endregion
 
 namespace Signum.Web
@@ -19,15 +21,24 @@ namespace Signum.Web
 
     public abstract class EntityListBase : EntityBase
     {
-        public EntityListBase() { }
+        public EntityListBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
+        {
+        }
 
         public override void SetReadOnly()
         {
+            Parent.ReadOnly = true;
             ReadOnly = true;
             Find = false;
             Create = false;
             Remove = false;
             Implementations = null;
+        }
+
+        public Type ElementType
+        {
+            get { return Type.ElementType(); }
         }
     }
 }

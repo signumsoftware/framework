@@ -107,7 +107,7 @@ namespace Signum.Web
 
         internal abstract void ValidateInternal();
 
-        public static Modifiable GetPropertyValue(Modifiable entity, string prefix)
+        public static ModifiableEntity FindSubentity(IdentifiableEntity entity, string prefix)
         {
             if (!prefix.HasText())
                 return entity;
@@ -116,28 +116,26 @@ namespace Signum.Web
             if (properties == null || properties.Length == 0)
                 throw new ArgumentException(Resources.InvalidPropertyPrefix);
 
-            List<PropertyInfo> pis = new List<PropertyInfo>();
-            object currentEntity = (entity is Lite) ? Database.Retrieve((Lite)entity) : entity;
+            Modifiable currentEntity = entity;
             try
             {
                 foreach (string property in properties)
-                {
+                {    
                     int index;
                     if (int.TryParse(property, out index))
                     {
-                        IList ilist = (IList)currentEntity;
-                        if (ilist.Count <= index)
+                        IList list = (IList)currentEntity;
+                        if (list.Count <= index)
                             return null;
-                        currentEntity = ilist[index];
+                        currentEntity = (Modifiable)list[index];
                     }
                     else
                     {
                         Type cleanType = (currentEntity as Lite).TryCC(t => t.RuntimeType) ?? currentEntity.GetType();
                         PropertyInfo pi = cleanType.GetProperty(property);
-                        pis.Add(pi);
-                        currentEntity = pi.GetValue(currentEntity, null);
+                        currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
                     }
-
+               
                     if (currentEntity is Lite)
                         currentEntity = Database.Retrieve((Lite)currentEntity);
 
@@ -150,7 +148,7 @@ namespace Signum.Web
                 throw new InvalidOperationException(Resources.InvalidPropertyPrefixOrWrongEntityInSession);
             }
 
-            return (Modifiable)currentEntity;
+            return (ModifiableEntity)currentEntity;
         }
     }
 
@@ -282,21 +280,29 @@ namespace Signum.Web
             get { return globalErrors; }
         }
 
-        ContextualSortedList<string> inputs;
+        IDictionary<string, string> inputs;
         public override IDictionary<string, string> Inputs { get { return inputs; } }
 
-        ContextualDictionary<List<string>> errors;
+        IDictionary<string, List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
         // Ticks => ControlID, Action
         SortedList<long, Tuple<string, Action>> actions = new SortedList<long, Tuple<string, Action>>();
 
-        public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> inputs, ControllerContext controllerContext) :
+        public RootContext(string prefix, Mapping<T> mapping, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
             base(prefix, mapping, null)
         {
-            this.globalInputs = inputs;
-            this.inputs = new ContextualSortedList<string>(inputs, prefix);
-            this.errors = new ContextualDictionary<List<string>>(globalErrors, prefix);
+            this.globalInputs = globalInputs;
+            if (prefix.HasText())
+            {
+                this.inputs = new ContextualSortedList<string>(globalInputs, prefix);
+                this.errors = new ContextualDictionary<List<string>>(globalErrors, prefix);
+            }
+            else
+            {
+                this.inputs = globalInputs;
+                this.errors = globalErrors;
+            }
             this.controllerContext = controllerContext;
         }
 
@@ -379,9 +385,9 @@ namespace Signum.Web
         {
             this.parent = parent;
             this.root = parent.Root;
-            this.inputs = new ContextualSortedList<string>((ContextualSortedList<string>)parent.Inputs, controlID);
+            this.inputs = new ContextualSortedList<string>(parent.Inputs, controlID);
             this.errors = new ContextualDictionary<List<string>>(root.GlobalErrors, controlID);
-        }
+        } 
 
         public override Dictionary<string, long> GetTicksDictionary()
         {
@@ -496,22 +502,19 @@ namespace Signum.Web
         int endIndex;
         string ControlID;
 
-        public ContextualSortedList(SortedList<string, V> global, string controlID) :
-            this(global, controlID, 0, global.Count)
+        public ContextualSortedList(IDictionary<string, V> sortedList, string controlID)
         {
-        }
-
-        public ContextualSortedList(ContextualSortedList<V> csl, string controlID) :
-            this(csl.global, controlID, csl.startIndex, csl.endIndex)
-        {
-        }
-
-
-        public ContextualSortedList(SortedList<string, V> global, string controlID, int startParent, int endParent)
-        {
-            this.global = global;
+            ContextualSortedList<V> csl = sortedList as ContextualSortedList<V>;
+            
+            Debug.Assert(controlID.HasText());
             this.ControlID = controlID + TypeContext.Separator;
 
+            Debug.Assert(csl == null || ControlID.StartsWith(csl.ControlID));
+            int startParent = csl == null ? 0 : csl.startIndex;
+            int endParent = csl == null ? sortedList.Count : csl.endIndex;
+            this.global = csl == null ? (SortedList<string, V>)sortedList : csl.global;
+
+            
             for (int i = startParent; i < endParent; i++)
             {
                 if (global.Keys[i].StartsWith(ControlID))

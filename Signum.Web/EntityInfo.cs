@@ -25,85 +25,52 @@ namespace Signum.Web
             return helper.Hidden(name, LiteModelBinder.WriteLite(lite, forceRuntimeType));  
         }
 
-        public static string HiddenEntityInfo(this HtmlHelper helper, string prefix, RuntimeInfo runtimeInfo, StaticInfo staticInfo)
+        public static string HiddenEntityInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.HiddenRuntimeInfo(prefix, runtimeInfo) + helper.HiddenStaticInfo(prefix, staticInfo);
+            return helper.HiddenRuntimeInfo(tc) + helper.HiddenStaticInfo(tc);
         }
 
-        public static string HiddenRuntimeInfo(this HtmlHelper helper, string prefix, RuntimeInfo runtimeInfo)
+        public static string HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.RuntimeInfo), runtimeInfo.ToString());
+            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), new RuntimeInfo(tc.UntypedValue) { Ticks = GetTicks(helper, tc) }.ToString());
         }
 
-        public static string HiddenStaticInfo(this HtmlHelper helper, string prefix, StaticInfo staticInfo)
+        public static string HiddenStaticInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(TypeContext.Compose(prefix, EntityBaseKeys.StaticInfo), staticInfo.ToString(), new {disabled = "disabled"});
-        }
-
-        public static string HiddenEntityInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
-        {
-            return helper.HiddenRuntimeInfo<T>(parent) + helper.HiddenStaticInfo<T>(parent);
-        }
-
-        public static string HiddenRuntimeInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
-        {
-            //if(typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
-            //    return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.RuntimeInfo)), new EmbeddedRuntimeInfo<T>(parent.Value, false).ToString());
-            //else
-                return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.RuntimeInfo)), new RuntimeInfo(parent.Value).ToString());
-        }
-
-        public static string HiddenStaticInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
-        {
-            return helper.Hidden(helper.GlobalPrefixedName(TypeContext.Compose(parent.Name, EntityBaseKeys.StaticInfo)), new StaticInfo(parent.Type).ToString(), new { disabled = "disabled" });
+            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(tc.Type) { IsReadOnly = tc.ReadOnly }.ToString(), new { disabled = "disabled" });
         }
 
         public static string HiddenEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
-            return helper.HiddenRuntimeInfo<S>(typeContext) + helper.HiddenStaticInfo<S>(typeContext);
+            TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
+            return helper.HiddenRuntimeInfo(typeContext) + helper.HiddenStaticInfo(typeContext);
         }
 
         public static string HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
-            return helper.HiddenRuntimeInfo<S>(typeContext);
+            TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
+            return helper.HiddenRuntimeInfo(typeContext);
         }
 
         public static string HiddenStaticInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
-            TypeSubContext<S> typeContext = (TypeSubContext<S>)Common.WalkExpression(parent, property);
-            return helper.HiddenStaticInfo<S>(typeContext);
+            TypeContext<S> typeContext = (TypeContext<S>)Common.WalkExpression(parent, property);
+            return helper.HiddenStaticInfo(typeContext);
         }
 
-        public static void WriteEntityInfo(this HtmlHelper helper, string prefix, RuntimeInfo runtimeInfo, StaticInfo staticInfo)
+        public static void WriteEntityInfo(this HtmlHelper helper, TypeContext tc)
         {
-            helper.Write(helper.HiddenEntityInfo(prefix, runtimeInfo, staticInfo));
+            helper.Write(helper.HiddenEntityInfo(tc));
         }
 
-        public static void WriteRuntimeInfo(this HtmlHelper helper, string prefix, RuntimeInfo runtimeInfo)
+        public static void WriteRuntimeInfo<T>(this HtmlHelper helper, TypeContext tc)
         {
-            helper.Write(helper.HiddenRuntimeInfo(prefix, runtimeInfo));
+            helper.Write(helper.HiddenRuntimeInfo(tc));
         }
 
-        public static void WriteStaticInfo(this HtmlHelper helper, string prefix, StaticInfo staticInfo)
+        public static void WriteStaticInfo(this HtmlHelper helper, TypeContext tc)
         {
-            helper.Write(helper.HiddenStaticInfo(prefix, staticInfo));
-        }
-
-        public static void WriteEntityInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
-        {
-            helper.Write(helper.HiddenEntityInfo<T>(parent));
-        }
-
-        public static void WriteRuntimeInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
-        {
-            helper.Write(helper.HiddenRuntimeInfo<T>(parent));
-        }
-
-        public static void WriteStaticInfo<T>(this HtmlHelper helper, TypeContext<T> parent)
-        {
-            helper.Write(helper.HiddenStaticInfo<T>(parent));
+            helper.Write(helper.HiddenStaticInfo(tc));
         }
 
         public static void WriteEntityInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
@@ -119,6 +86,14 @@ namespace Signum.Web
         public static void WriteStaticInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
             helper.Write(helper.HiddenStaticInfo<T, S>(parent, property));
+        }
+
+        public static long? GetTicks(HtmlHelper helper, TypeContext tc)
+        {
+            if (tc.ShowTicks && !tc.ReadOnly &&
+                (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || (tc as BaseLine).TryCS(bl => bl.ReloadOnChange) == true))
+                return helper.GetChangeTicks(tc.ControlID) ?? 0;
+            return null;
         }
     }
 
@@ -143,7 +118,7 @@ namespace Signum.Web
 
             Type cleanStaticType = Reflector.ExtractLite(StaticType) ?? StaticType;
 
-            string staticTypeName = (Navigator.TypesToURLNames.ContainsKey(cleanStaticType)) ? cleanStaticType.Name : cleanStaticType.FullName;
+            string staticTypeName = Navigator.TypesToNames[cleanStaticType];
 
             return "{0};{1};{2}".Formato(
                 staticTypeName,
@@ -232,63 +207,4 @@ namespace Signum.Web
             };
         }
     }
-
-    //public class RuntimeInfo<T> : RuntimeInfo
-    //{
-    //    public RuntimeInfo(T Value)
-    //    {
-    //        if (typeof(EmbeddedEntity).IsAssignableFrom(Reflector.ExtractLite(typeof(T)) ?? typeof(T)))
-    //            throw new ArgumentException("RuntimeInfo<T> cannot be called for an embedded entity. Call EmbeddedRuntimeInfo<T> instead");
-
-    //        if (Value == null)
-    //        {
-    //            RuntimeType = null;
-    //            return;
-    //        }
-
-    //        if (typeof(Lite).IsAssignableFrom(Value.GetType()))
-    //        {
-    //            Lite liteValue = Value as Lite;
-    //            RuntimeType = liteValue.RuntimeType;
-    //            IdOrNull = liteValue.IdOrNull;
-    //            IsNew = liteValue.IdOrNull == null;
-    //        }
-    //        else
-    //        {
-    //            RuntimeType = Value.GetType();
-    //            IIdentifiable identifiable = Value as IIdentifiable;
-    //            if (identifiable == null)
-    //                throw new ArgumentException("Invalid type {0} for RuntimeInfo<T>. It must be Lite or Identifiable, otherwise call EmbeddedRuntimeInfo<T> or RuntimeInfo".Formato(RuntimeType));
-                
-    //            IdOrNull = identifiable.IdOrNull;
-    //            IsNew = identifiable.IdOrNull == null;
-    //        }
-    //    }
-
-    //    public override string ToString()
-    //    {
-    //        return base.ToString();
-    //    }
-    //}
-
-    //public class EmbeddedRuntimeInfo<T> : RuntimeInfo
-    //{
-    //    public EmbeddedRuntimeInfo(T value, bool isNew)
-    //    {
-    //        if (!typeof(EmbeddedEntity).IsAssignableFrom(typeof(T)))
-    //            throw new ArgumentException("EmbeddedRuntimeInfo<T> cannot be called for a non embedded entity. Call RuntimeInfo<T> instead");
-
-    //        this.IsNew = isNew;
-            
-    //        if (value == null)
-    //            RuntimeType = null;
-    //        else
-    //            RuntimeType = value.GetType();
-    //    }
-
-    //    public override string ToString()
-    //    {
-    //        return base.ToString();
-    //    }
-    //}
 }

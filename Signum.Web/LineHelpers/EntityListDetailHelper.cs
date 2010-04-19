@@ -18,127 +18,93 @@ namespace Signum.Web
 {
     public static class EntityListDetailHelper
     {
-        private static void InternalEntityListDetail<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityListDetail settings)
+        private static string InternalEntityListDetail<T>(this HtmlHelper helper, EntityListDetail listDetail)
         {
-            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
-                return;
-            
-            string prefix = helper.GlobalName(typeContext.Name);
-            MList<T> value = typeContext.Value;         
-            Type elementsCleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
+            if (!listDetail.Visible || listDetail.HideIfNull && listDetail.UntypedValue == null)
+                return "";
 
-            long? ticks = EntityBaseHelper.GetTicks(helper, prefix, settings);
-            
-            string defaultDetailDiv = TypeContext.Compose(prefix, EntityBaseKeys.Detail);
-            if (!settings.DetailDiv.HasText())
-                settings.DetailDiv = defaultDetailDiv;
+            string defaultDetailDiv = listDetail.Compose(EntityBaseKeys.Detail);
+            if (!listDetail.DetailDiv.HasText())
+                listDetail.DetailDiv = defaultDetailDiv;
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(helper.HiddenStaticInfo(prefix, new StaticInfo(elementsCleanStaticType) { IsReadOnly = settings.ReadOnly }));
-            sb.AppendLine(helper.Hidden(TypeContext.Compose(prefix, TypeContext.Ticks), ticks.TryToString() ?? ""));
-            
-            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
+            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
-            sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
+            sb.AppendLine(helper.Hidden(listDetail.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(listDetail.ElementType.CleanType()) { IsReadOnly = listDetail.ReadOnly }.ToString(), new { disabled = "disabled" }));
+            sb.AppendLine(helper.Hidden(listDetail.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, listDetail).TryToString() ?? ""));
+            
+            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, listDetail));
 
             //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-            if (typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanStaticType))
-                sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\";</script>".Formato(
-                        TypeContext.Compose(prefix, EntityBaseKeys.Template),
-                        EntityBaseHelper.JsEscape(ListBaseHelper.RenderItemContent(helper, prefix, typeContext, (T)(object)Constructor.Construct(typeof(T)), 0, settings, elementsCleanStaticType, elementsCleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
+            if (listDetail.ElementType.IsEmbeddedEntity())
+            {
+                TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
+                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, listDetail.PartialViewName, listDetail.ReloadOnChange)));
+            }
 
-            if (settings.ShowFieldDiv)
+            if (listDetail.ShowFieldDiv)
                 sb.AppendLine("<div class='fieldList'>");
 
             StringBuilder sbSelect = new StringBuilder();
-            sbSelect.AppendLine("<select id='{0}' name='{0}' multiple='multiple' ondblclick=\"{1}\" class='entityList'>".Formato(prefix, settings.GetViewing()));
-            if (value != null)
+            sbSelect.AppendLine("<select id='{0}' name='{0}' multiple='multiple' ondblclick=\"{1}\" class='entityList'>".Formato(listDetail.ControlID, listDetail.GetViewing()));
+            if (listDetail.UntypedValue != null)
             {
-                for (int i = 0; i < value.Count; i++)
-                    sb.Append(InternalListDetailElement(helper, sbSelect, prefix, value[i], i, settings, typeContext));
+                foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)listDetail.Parent))
+                    sb.Append(InternalListDetailElement(helper, sbSelect, itemTC, listDetail));
             }
             sbSelect.AppendLine("</select>");
 
             sb.Append(sbSelect);
 
             StringBuilder sbBtns = new StringBuilder();
-            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteCreateButton(helper, settings, null) + "</td></tr>");
-            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteFindButton(helper, settings, elementsCleanStaticType) + "</td></tr>");
-            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteRemoveButton(helper, settings, value) + "</td></tr>");
+            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteCreateButton(helper, listDetail, null) + "</td></tr>");
+            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteFindButton(helper, listDetail) + "</td></tr>");
+            sbBtns.AppendLine("<tr><td>" + ListBaseHelper.WriteRemoveButton(helper, listDetail) + "</td></tr>");
 
             string sBtns = sbBtns.ToString();
             if (sBtns.HasText())
                 sb.AppendLine("<table>\n" + sBtns + "</table>");
 
-            if (settings.ShowFieldDiv)
+            if (listDetail.ShowFieldDiv)
                 sb.Append("</div>");
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine());
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, listDetail));
 
-            if (settings.DetailDiv == defaultDetailDiv)
-                sb.AppendLine("<div id='{0}' name='{0}'>{1}</div>".Formato(settings.DetailDiv, ""));
-            
-            if (value != null && value.Count > 0)
+            if (listDetail.DetailDiv == defaultDetailDiv)
+                sb.AppendLine(helper.Div(listDetail.DetailDiv, "", ""));
+
+            if (listDetail.UntypedValue != null && ((IList)listDetail.UntypedValue).Count > 0)
                 sb.AppendLine("<script type=\"text/javascript\">\n" +
                         "$(document).ready(function() {" +
-                        "$('#" + prefix + "').dblclick();\n" +
+                        "$('#" + listDetail.ControlID + "').dblclick();\n" +
                         "});" +
                         "</script>");
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine());
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, listDetail));
 
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+            return sb.ToString();
         }
 
-        private static string InternalListDetailElement<T>(this HtmlHelper helper, StringBuilder sbOptions, string idValueField, T value, int index, EntityListDetail settings, TypeContext<MList<T>> typeContext)
+        private static string InternalListDetailElement<T>(this HtmlHelper helper, StringBuilder sbOptions, TypeElementContext<T> itemTC, EntityListDetail listDetail)
         {
-            bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
-            bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
-            string indexedPrefix = TypeContext.Compose(idValueField, index.ToString());
-            Type cleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
-                        
-            Type cleanRuntimeType = null;
-            if (value != null)
-                cleanRuntimeType = typeof(Lite).IsAssignableFrom(value.GetType()) ? (value as Lite).RuntimeType : value.GetType();
-
-            long? ticks = EntityBaseHelper.GetTicks(helper, indexedPrefix, settings);
-
             StringBuilder sb = new StringBuilder();
             
-            sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityListBaseKeys.Index), index.ToString()));
+            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
-            sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new RuntimeInfo(value) { Ticks = ticks }));
+            sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 
-            if (isIdentifiable || isLite)
-            {
-                //sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new RuntimeInfo<T>(value) { Ticks = ticks }));
+            if (typeof(T).IsEmbeddedEntity() || EntityBaseHelper.RequiresLoadAll(helper, listDetail))
+                sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail.PartialViewName, listDetail.ReloadOnChange));
+            else if (itemTC.Value != null)
+                sb.Append(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
 
-                if (EntityBaseHelper.RequiresLoadAll(helper, isIdentifiable, isLite, value, indexedPrefix))
-                    sb.AppendLine(ListBaseHelper.RenderItemContentInEntityDiv(helper, indexedPrefix, typeContext, value, index, settings, cleanRuntimeType, cleanStaticType, isLite, false));
-
-                else if (value != null)
-                    sb.Append(helper.Div(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity), "", "", new Dictionary<string, object> { { "style", "display:none" } }));
-
-                //Note this is added to the sbOptions, not to the result sb
-                sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'{1}>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.ToStr), (index == 0) ? "selected='selected'" : "") +
-                                ((isIdentifiable)
-                                    ? ((IdentifiableEntity)(object)value).TryCC(i => i.ToString())
-                                    : ((Lite)(object)value).TryCC(i => i.ToStr)) +
-                                "</option>");
-            }
-            else
-            {
-                //It's an embedded entity: Render popupcontrol with embedded entity to the _sfEntity hidden div
-                //sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new EmbeddedRuntimeInfo<T>(value, false) { Ticks = ticks }));
-
-                sb.AppendLine(ListBaseHelper.RenderItemContentInEntityDiv(helper, indexedPrefix, typeContext, value, index, settings, cleanRuntimeType, cleanStaticType, isLite, false));
-
-                //Note this is added to the sbOptions, not to the result sb
-                sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.ToStr)) +
-                                ((EmbeddedEntity)(object)value).TryCC(i => i.ToString()) + 
-                                "</option>");
-            }
+            //Note this is added to the sbOptions, not to the result sb
+            sbOptions.AppendLine("<option id='{0}' name='{0}' value='' class='valueLine entityListOption'{1}>{2}</option>".Formato(itemTC.Compose(EntityBaseKeys.ToStr),
+                (itemTC.Index == 0) ? "selected='selected'" : "",                
+                (itemTC.Value as IIdentifiable).TryCC(i => i.ToString()) ??
+                (itemTC.Value as Lite).TryCC(i => i.ToStr) ??
+                (itemTC.Value as EmbeddedEntity).TryCC(i => i.ToString()) ?? ""));
 
             return sb.ToString();
         }
@@ -152,15 +118,15 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            EntityListDetail el = new EntityListDetail(helper.GlobalName(context.Name));
+            EntityListDetail el = new EntityListDetail(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+            
             Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
-            Common.FireCommonTasks(el, context);
+            Common.FireCommonTasks(el);
 
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            using (el)
-                helper.InternalEntityListDetail<S>(context, el);
+            helper.Write(helper.InternalEntityListDetail<S>(el));
         }
     }
 }

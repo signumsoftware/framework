@@ -81,40 +81,22 @@ namespace Signum.Web
             return sb.ToString();
         }
 
-        public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix, string prefixEnd)
+        public static void SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context)
         {
             QueryDescription queryDescription =  DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             foreach (FilterOption opt in findOptions.FilterOptions)
-            {
                 opt.Token = QueryToken.Parse(queryDescription, opt.ColumnName);
-            }
+            
+            helper.ViewData.Model = context;
 
-            Column entityColumn = queryDescription.StaticColumns.SingleOrDefault(a => a.IsEntity);
-            Type entitiesType = entityColumn != null ? Reflector.ExtractLite(entityColumn.Type) : null;
-             
-            List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
-
-            helper.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            helper.ViewData[ViewDataKeys.PopupSufix] = prefixEnd ?? "";
-
-            helper.ViewData[ViewDataKeys.FilterColumns] = columns;
             helper.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            helper.ViewData[ViewDataKeys.Top] = Navigator.Manager.QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC(Resources.MissingQuerySettingsForQueryName0.Formato(findOptions.QueryName.ToString())).Top;
+            helper.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            
             if (helper.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 helper.ViewData[ViewDataKeys.PageTitle] = Navigator.Manager.SearchTitle(findOptions.QueryName);
-            if (entitiesType != null)
-            {
-                helper.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
-                helper.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, true);
-                helper.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
-            }
-            else
-            {
-                helper.ViewData[ViewDataKeys.EntityTypeName] = "";
-                helper.ViewData[ViewDataKeys.Create] = false;
-            }
-            helper.ViewContext.HttpContext.Response.Write(
+            
+            helper.Write(
                 helper.RenderPartialToString(Navigator.Manager.SearchControlUrl, helper.ViewData));
         }
 
@@ -133,72 +115,7 @@ namespace Signum.Web
            return "<a class=\"count-search\" onclick=\"javascript:OpenFinder({0});\">{1}</a>".Formato(foptions.ToJS(), count);
         }
 
-        public static string NewFilter(Controller controller, string filterTypeName, string columnName, string displayName, int index, string prefix, string suffix, FilterOperation? filterOperation, object value)
-        {
-           // Type searchEntityType = Navigator.NameToType[entityTypeName];
-
-            StringBuilder sb = new StringBuilder();
- 
-            Type columnType;
-            if (value != null && value.GetType() != typeof(string)) //No string so ValueTypes are not shown as text
-                columnType = Reflector.ExtractLite(value.GetType()) ?? value.GetType();
-            else
-            {
-                columnType = Navigator.ResolveType(filterTypeName);
-                if (columnType != null && value != null)
-                    value = Convert.ChangeType(value, columnType);
-            }
-
-            if (value != null && typeof(Lite).IsAssignableFrom(value.GetType()))
-                value = Database.Retrieve((Lite)value);
-
-            //Client doesn't know about Lites, check it ourselves
-            if (typeof(IdentifiableEntity).IsAssignableFrom(columnType))
-                columnType = Reflector.GenerateLite(columnType);
-            FilterType filterType = QueryUtils.GetFilterType(columnType);
-            List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
-
-            sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(prefix + "trFilter_" + index.ToString() + suffix));
-            
-            sb.AppendLine("<td id='{0}' name='{0}'>".Formato(prefix + "td" + index.ToString() + suffix + "__" + columnName));
-            sb.AppendLine(displayName);
-            sb.AppendLine("</td>");
-            
-            sb.AppendLine("<td>");
-            sb.AppendLine("<select id='{0}' name='{0}'>".Formato(prefix + "ddlSelector_" + index.ToString() + suffix));
-            for (int j=0; j<possibleOperations.Count; j++)
-                sb.AppendLine("<option value='{0}'{1}>{2}</option>"
-                    .Formato(possibleOperations[j], 
-                    (filterOperation.HasValue && filterOperation.Value == possibleOperations[j]) ? " selected='selected'" : "",
-                    possibleOperations[j].NiceToString()));
-            sb.AppendLine("</select>");
-            sb.AppendLine("</td>");
-            
-            sb.Append("<td>");
-            sb.Append(PrintValueField(CreateHtmlHelper(controller), filterType, columnType, prefix + "value_" + index.ToString() + suffix, value, columnName));
-            sb.Append("</td>");
-            
-            sb.AppendLine("<td>");
-            sb.AppendLine("<input type='button' id='{0}' name='{0}' value='X' onclick=\"DeleteFilter('{1}','{2}','{3}');\" />".Formato(prefix + "btnDelete_" + index + suffix, prefix, suffix, index));
-            sb.AppendLine("</td>");
-            
-            sb.AppendLine("</tr>");
-            return sb.ToString();
-        }
-
-        public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix, string suffix)
-        {
-            object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            QueryToken token = QueryToken.NewColumn(qd.StaticColumns.Where(c => c.Visible == true).ToList()[visibleColumnIndex]);
-            FilterOption fo = new FilterOption() { Token = token, ColumnName = null, Operation = FilterOperation.EqualTo, Value = value };
-            Type type = Reflector.ExtractLite(fo.Token.Type) ?? fo.Token.Type;
-            
-            return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, suffix, FilterOperation.EqualTo, value);
-        }
-
-
-        public static void NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, int index)
+        public static string NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -211,52 +128,59 @@ namespace Signum.Web
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
             List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
 
-            string sufix = (string)helper.ViewData[ViewDataKeys.PopupSufix];
+            sb.AppendLine("<tr id='{0}' name='{0}'>".Formato(context.Compose("trFilter", index.ToString())));
 
-            sb.Append("<tr id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("trFilter_" + index.ToString() + sufix)));
-            sb.Append("<td id=\"{0}\" name=\"{0}\">\n".Formato(helper.GlobalName("td" + index.ToString() + "__" + filterOptions.Token.FullKey() + sufix)));
-            sb.Append(filterOptions.Token.FullKey());
-            sb.Append("</td>\n");
+            sb.AppendLine("<td id='{0}' name='{0}'>".Formato(context.Compose("td" + index.ToString() + "__" + filterOptions.Token.FullKey())));
+            sb.AppendLine(filterOptions.Token.FullKey());
+            sb.AppendLine("</td>");
 
-            sb.Append("<td>\n");
-            sb.Append("<select{0} id=\"{1}\" name=\"{1}\">\n"
-                .Formato(filterOptions.Frozen ? " disabled=\"disabled\"" : "",
-                        helper.GlobalName("ddlSelector_" + index.ToString() + sufix)));
-            for (int j = 0; j < possibleOperations.Count; j++)
-                sb.Append("<option value=\"{0}\" {1}>{2}</option>\n"
-                    .Formato(
-                        possibleOperations[j],
-                        (possibleOperations[j] == filterOptions.Operation) ? "selected=\"selected\"" : "",
-                        possibleOperations[j].NiceToString()));
-            sb.Append("</select>\n");
-
-            sb.Append("</td>\n");
-
-            sb.Append("<td>\n");
-            string txtId = helper.GlobalName("value_" + index.ToString() + sufix);
-            string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
+            sb.AppendLine("<td>");
+            sb.AppendLine(
+                helper.DropDownList(
+                context.Compose("ddlSelector", index.ToString()),
+                possibleOperations.Select(fo =>
+                    new SelectListItem
+                    {
+                        Text = fo.NiceToString(),
+                        Value = fo.ToString(),
+                        Selected = fo == filterOptions.Operation
+                    }),
+                    (filterOptions.Frozen) ? new Dictionary<string, object>{{"disabled","disabled"}} : null));
+            sb.AppendLine("</td>");
+            
+            sb.AppendLine("<td>");
+            Context valueContext = new Context(context, "value_" + index.ToString());
+            
             if (filterOptions.Frozen)
-                sb.Append("<input type=\"text\" id=\"{0}\" name=\"{0}\" value=\"{1}\" {2}/>\n".Formato(txtId, txtValue, filterOptions.Frozen ? " readonly=\"readonly\"" : ""));
+            {
+                string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
+                sb.AppendLine(helper.TextBox(valueContext.ControlID, txtValue, new { @readonly = "readonly" }));
+            }
             else
-                sb.Append(PrintValueField(helper, filterType, filterOptions.Token.Type, txtId, filterOptions.Value, filterOptions.Token.FullKey()));
-            sb.Append("</td>\n");
+                sb.AppendLine(PrintValueField(helper, valueContext, filterOptions));
+            sb.AppendLine("</td>");
 
-            sb.Append("<td>\n");
+            sb.AppendLine("<td>");
             if (!filterOptions.Frozen)
-                sb.Append(helper.Button(helper.GlobalName("btnDelete_" + index + sufix), "X", "DeleteFilter('{0}','{1}','{2}');".Formato(helper.ViewData[ViewDataKeys.PopupPrefix] ?? "", sufix ?? "", index), "", new Dictionary<string, object>()));
-            sb.Append("</td>\n");
+                sb.AppendLine(helper.Button(context.Compose("btnDelete", index.ToString()), "X", "DeleteFilter('{0}','{1}');".Formato(context.ControlID, index), "", null));
+            sb.AppendLine("</td>");
 
-            sb.Append("</tr>\n");
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+            sb.AppendLine("</tr>");
+            
+            return sb.ToString();
         }
 
-        //private static Type GetType(string typeName)
+        //public static string QuickFilter(Controller controller, string queryUrlName, int visibleColumnIndex, int filterRowIndex, object value, string prefix, string suffix)
         //{
-        //    if (Navigator.NameToType.ContainsKey(typeName))
-        //        return Navigator.NameToType[typeName];
-
-        //    return Type.GetType("System." + typeName, false);
+        //    object queryName = Navigator.ResolveQueryFromUrlName(queryUrlName);
+        //    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+        //    QueryToken token = QueryToken.NewColumn(qd.StaticColumns.Where(c => c.Visible == true).ToList()[visibleColumnIndex]);
+        //    FilterOption fo = new FilterOption() { Token = token, ColumnName = null, Operation = FilterOperation.EqualTo, Value = value };
+        //    Type type = Reflector.ExtractLite(fo.Token.Type) ?? fo.Token.Type;
+            
+        //    return NewFilter(controller, type.Name, null, token.FullKey(), filterRowIndex, prefix, suffix, FilterOperation.EqualTo, value);
         //}
+
 
         private static HtmlHelper CreateHtmlHelper(Controller c)
         {
@@ -267,66 +191,45 @@ namespace Signum.Web
                             c.ViewData,
                             c.TempData),
                         new ViewPage()); 
-        }
-        
-        static MethodInfo mi = typeof(EntityLineHelper).GetMethod("InternalEntityLine", BindingFlags.Static | BindingFlags.NonPublic);
+        }        
 
-        private static string PrintValueField(HtmlHelper helper, FilterType filterType, Type columnType, string id, object value, string propertyName)
+        private static string PrintValueField(HtmlHelper helper, Context parent, FilterOption filterOption)
         {
-            StringBuilder sb = new StringBuilder();
-            if (filterType == FilterType.Lite)
+            if (typeof(Lite).IsAssignableFrom(filterOption.Token.Type))
             {
-                EntityLine el = new EntityLine(id)
+                Type cleanType = Reflector.ExtractLite(filterOption.Token.Type);
+                if (Reflector.IsLowPopulation(cleanType) && !(filterOption.Token.Implementations() is ImplementedByAllAttribute))
                 {
-                    LabelVisible = false,
-                    BreakLine = false
-                };
-                Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(columnType) ?? columnType, false);
-                el.Create = false;
-
-                if (helper.ViewData.ContainsKey(ViewDataKeys.PopupPrefix) && ((string)helper.ViewData[ViewDataKeys.PopupPrefix]).HasText())
-                {
-                    string prefix = helper.ViewData[ViewDataKeys.PopupPrefix].ToString();
-                    if (id.StartsWith(prefix))
-                        id = id.RemoveLeft(prefix.Length); //We call GlobalName with it in EntityLine
+                    EntityCombo ec = new EntityCombo(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
+                    {
+                        LabelVisible = false,
+                        BreakLine = false
+                    };
+                    Navigator.ConfigureEntityBase(ec, filterOption.Token.Type.CleanType(), false);
+                    return EntityComboHelper.InternalEntityCombo(helper, ec);
                 }
-
-                if (value != null && (columnType == typeof(IIdentifiable) || Reflector.ExtractLite(columnType) == typeof(IIdentifiable)
-                    || columnType == typeof(IdentifiableEntity) || Reflector.ExtractLite(columnType) == typeof(IdentifiableEntity)))
-                    columnType = Reflector.ExtractLite(value.GetType()) ?? value.GetType();
                 else
-                    columnType = Reflector.ExtractLite(columnType) ?? columnType;
-                if (value != null && typeof(Lite).IsAssignableFrom(value.GetType()))
-                    value = Database.Retrieve((Lite)value);
-                Type t = typeof(TypeContext<>);
-                var tcreator = t.MakeGenericType(new Type[] {columnType});
-                TypeContext tc = (TypeContext)Activator.CreateInstance(tcreator, new object[]{value, id});
+                {
+                    EntityLine el = new EntityLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
+                    {
+                        LabelVisible = false,
+                        BreakLine = false
+                    };
+                    Navigator.ConfigureEntityBase(el, filterOption.Token.Type.CleanType(), false);
+                    el.Create = false;
 
-                bool loadall = helper.ViewData.Keys.Contains(ViewDataKeys.LoadAll);
-                if (loadall)
-                    helper.ViewData.Remove(ViewDataKeys.LoadAll);
-                string result = "";
-                using (el)
-                    result = (string)mi.GenericInvoke(new[] { tc.Type }, null, new object[] { helper, tc, el });
-                //string result = (string)EntityLineHelper.InternalEntityLine(helper, id, columnType, value, el);
-                if (loadall)
-                    helper.ViewData.Add(ViewDataKeys.LoadAll, true);
-
-                sb.Append(result);
+                    return EntityLineHelper.InternalEntityLine(helper, el);
+                }
             }
             else
             {
-                ValueLineType vlType = ValueLineHelper.Configurator.GetDefaultValueLineType(columnType);
-                sb.Append(
-                    ValueLineHelper.Configurator.constructor[vlType](
+                ValueLineType vlType = ValueLineHelper.Configurator.GetDefaultValueLineType(filterOption.Token.Type);
+                return ValueLineHelper.Configurator.Constructor[vlType](
                         helper,
-                        new ValueLineData(
-                            id,
-                            value,
-                            new ValueLine(),
-                            columnType)));
+                        new ValueLine(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute()));
             }
-            return sb.ToString();
+
+            throw new InvalidOperationException("Invalid filter for type {0}".Formato(filterOption.Token.Type.Name));
         }
     }
 }

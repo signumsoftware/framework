@@ -36,10 +36,10 @@ namespace Signum.Web.Controllers
             if (id.HasValue && id.Value > 0)
                 return Navigator.View(this, Database.Retrieve(t, id.Value), true); //Always admin
 
-            IIdentifiable entity = null;
+            IdentifiableEntity entity = null;
             object result = Constructor.Construct(t);
-            if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
-                entity = (IIdentifiable)result;
+            if (typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
+                entity = (IdentifiableEntity)result;
             else
                 throw new InvalidOperationException("Invalid result type for a Direct Constructor");
 
@@ -62,29 +62,21 @@ namespace Signum.Web.Controllers
             return Content(Navigator.ViewRoute(type, null));
         }
 
-        public PartialViewResult PopupCreate(string sfRuntimeType, int? sfId, string sfOnOk, string sfOnCancel, string prefix, bool? sfReadOnly, string sfUrl)
+        public PartialViewResult PopupCreate(string sfRuntimeType, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
-            
-            ModifiableEntity entity = null;
-            if (sfId.HasValue)
-                entity = Database.Retrieve(type, sfId.Value);
-            else
-            {
-                object result = Constructor.VisualConstruct(type, this);
-                if (result.GetType() == typeof(PartialViewResult))
-                    return (PartialViewResult)result;
-                else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                    entity = (ModifiableEntity)result;
-                else
-                    throw new InvalidOperationException("Invalid result type for a Constructor");
-            }
-            
-            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-                throw new InvalidOperationException("PopupCreate cannot be called for Embedded type {0}".Formato(entity.GetType()));
 
-            if (sfReadOnly.HasValue)
-                ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+            object result = Constructor.VisualConstruct(type, this);
+            if (result.GetType() == typeof(PartialViewResult))
+                return (PartialViewResult)result;
+
+            if (typeof(EmbeddedEntity).IsAssignableFrom(result.GetType()))
+                throw new InvalidOperationException("PopupCreate cannot be called for Embedded type {0}".Formato(result.GetType()));
+
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
+                throw new InvalidOperationException("Invalid result type for a Constructor");
+
+            IdentifiableEntity entity = (IdentifiableEntity)result;
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, entity, prefix, sfUrl);
@@ -94,12 +86,12 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
             bool isReactive = this.IsReactive();
-            
-            ModifiableEntity entity = null;
+
+            IdentifiableEntity entity = null;
             if (isReactive)
             {
-                entity = this.UntypedExtractEntity().ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
-                entity = (ModifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
+                IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity().ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
+                entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
@@ -111,22 +103,21 @@ namespace Signum.Web.Controllers
                     if (result.GetType() == typeof(PartialViewResult))
                         return (PartialViewResult)result;
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                        entity = (ModifiableEntity)result;
+                        entity = (IdentifiableEntity)result;
                     else
                         throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
             }
 
-            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-                throw new InvalidOperationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
-
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
-            if (sfReadOnly.HasValue)
-                ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            return Navigator.PopupView(this, entity, prefix, sfUrl);
+            if (sfReadOnly.HasValue)
+                tc.ReadOnly = true;
+
+            return Navigator.PopupView(this, tc, sfUrl);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -135,12 +126,12 @@ namespace Signum.Web.Controllers
             Type type = Navigator.ResolveType(sfRuntimeType);
             bool isReactive = this.IsReactive();
 
-            ModifiableEntity entity = null;
+            IdentifiableEntity entity = null;
             if (isReactive)
             {
-                entity = this.UntypedExtractEntity()
+                IdentifiableEntity parent = (IdentifiableEntity)this.UntypedExtractEntity()
                     .ThrowIfNullC(Resources.PartialViewTypeWasNotPossibleToExtract);
-                entity = (ModifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
+                entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
             }
             if (entity == null || entity.GetType() != type || sfId != (entity as IIdentifiable).TryCS(e => e.IdOrNull))
             {
@@ -152,7 +143,7 @@ namespace Signum.Web.Controllers
                     if (result.GetType() == typeof(PartialViewResult))
                         return (PartialViewResult)result;
                     else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                        entity = (ModifiableEntity)result;
+                        entity = (IdentifiableEntity)result;
                     else
                         throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
@@ -161,13 +152,12 @@ namespace Signum.Web.Controllers
             if (isReactive)
                 this.ViewData[ViewDataKeys.Reactive] = true;
 
-            if (typeof(EmbeddedEntity).IsAssignableFrom(entity.GetType()))
-                throw new InvalidOperationException("PopupView cannot be called for Embedded type {0}".Formato(entity.GetType()));
+            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
             if (sfReadOnly.HasValue)
-                ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
+                tc.ReadOnly = true;
 
-            return Navigator.PartialView(this, entity, prefix, sfUrl);
+            return Navigator.PartialView(this, tc, sfUrl);
         }
 
        [AcceptVerbs(HttpVerbs.Post)]
@@ -175,20 +165,20 @@ namespace Signum.Web.Controllers
         {
             MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal(); 
 
-            if (context.Errors.Count > 0)
+            if (context.GlobalErrors.Any())
             {
                 this.ModelState.FromContext(context);
-                return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+                return Navigator.ModelState(ModelState);
             }
 
             IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident != null)
-                Database.Save(ident);
+            if (ident == null)
+                throw new ArgumentNullException("IdentifiableEntity to save");
+    
+            Database.Save(ident);
 
-            if (this.IsReactive())
-                Session[this.TabID()] = context.UntypedValue;
-            
-            return Navigator.View(this, context.UntypedValue); //changesLog.ChangeTicks);
+            ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
+            return Navigator.View(this, ident);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -197,8 +187,7 @@ namespace Signum.Web.Controllers
             MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
 
             this.ModelState.FromContext(context);
-
-            return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+            return Navigator.ModelState(ModelState);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -209,22 +198,16 @@ namespace Signum.Web.Controllers
             this.ModelState.FromContext(context);
 
             IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
-            if (ident != null && context.Errors.Count == 0)
+            if (ident != null && !context.GlobalErrors.Any())
                 Database.Save(ident);
-
-            //Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
-            //    Modification.GetPropertyValue(parentEntity, prefix) : 
-            //    parentEntity;
 
             string newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
 
-            return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
-                this.ModelState.ToJsonData(),
-                TypeContext.Separator + EntityBaseKeys.ToStr,
-                context.UntypedValue.ToString(),
-                TypeContext.Separator + EntityBaseKeys.ToStrLink,
-                newLink
-                ));
+            return Navigator.ModelState(new ModelStateData(this.ModelState)
+            {
+                  NewToStr = context.UntypedValue.ToString(),
+                  NewtoStrLink = newLink
+            });
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -234,47 +217,22 @@ namespace Signum.Web.Controllers
 
             this.ModelState.FromContext(context);
 
-            //Modifiable entity = (Navigator.ExtractIsReactive(Request.Form) && prefix.HasText() && !prefix.Contains("_New")) ? 
-            //    Modification.GetPropertyValue(parentEntity, prefix) : 
-            //    parentEntity;
-
             string newLink = "";
             IIdentifiable ident = context.UntypedValue as IIdentifiable;
             if (context.UntypedValue == null)
             {
-                RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContext.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+                RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
                 newLink = Navigator.ViewRoute(ei.RuntimeType, ident.TryCS(e => e.IdOrNull));
             }
             else
                 newLink = Navigator.ViewRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
-            
-            return Content("{{\"ModelState\":{0}, \"{1}\":\"{2}\", \"{3}\":\"{4}\"}}".Formato(
-                this.ModelState.ToJsonData(),
-                TypeContext.Separator + EntityBaseKeys.ToStr,
-                context.UntypedValue.TryToString(),
-                TypeContext.Separator + EntityBaseKeys.ToStrLink,
-                newLink
-                ));
+
+            return Navigator.ModelState(new ModelStateData(this.ModelState)
+            {
+                NewToStr = context.UntypedValue.ToString(),
+                NewtoStrLink = newLink
+            });
         }
-
-        //[AcceptVerbs(HttpVerbs.Post)]
-        //public ActionResult SavePartial(string prefix, string prefixToIgnore)
-        //{
-        //    Modifiable entity = this.ExtractEntity(prefix);
-
-        //    ChangesLog changesLog = Navigator.ApplyChangesAndValidate(this, ref entity, prefix, prefixToIgnore);
-
-        //    if (changesLog.Errors != null && changesLog.Errors.Count > 0)
-        //        throw new ApplicationException(Resources.ItsNotPossibleToSaveAnEntityOfType0WithErrors.Formato(entity.GetType().Name));
-
-        //    if (entity is IdentifiableEntity)
-        //        Database.Save((IdentifiableEntity)entity);
-
-        //    if (prefix.HasText())
-        //        return Navigator.PopupView(this, entity, prefix);
-        //    else //NormalWindow
-        //        return Navigator.View(this, entity);
-        //}
 
         JavaScriptSerializer jSerializer = new JavaScriptSerializer();
 
@@ -294,29 +252,39 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult PartialFind(FindOptions findOptions, string prefix, string sfSuffix)
+        public PartialViewResult PartialFind(FindOptions findOptions, string prefix)
         {
-            return Navigator.PartialFind(this, findOptions, prefix, sfSuffix);
+            return Navigator.PartialFind(this, findOptions, prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult Search(FindOptions findOptions, int? sfTop, string prefix, string sfSuffix)
+        public PartialViewResult Search(FindOptions findOptions, int? sfTop, string prefix)
         {
-            return Navigator.Search(this, findOptions, sfTop, prefix, sfSuffix);
+            return Navigator.Search(this, findOptions, sfTop, prefix);
         }
         
         [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult AddFilter(string filterType, string columnName, string displayName, int index, string prefix, string suffix)
+        public ContentResult AddFilter(string sfQueryUrlName, string columnName, int index, string prefix)
         {
-            return Content(SearchControlHelper.NewFilter(this, filterType, columnName, displayName, index, prefix, suffix, null, null));
+            object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);
+
+            FilterOption fo = new FilterOption(columnName, null);
+            if (fo.Token == null)
+            {
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                fo.Token = QueryToken.Parse(qd, fo.ColumnName);
+            }
+            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).First();
+
+            return Content(SearchControlHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index));
         }
 
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult QuickFilter(string sfQueryUrlName, bool isLite, string typeUrlName, int? sfId, string sfValue, int sfColIndex, int index, string prefix, string suffix)
-        {
-            object value = (isLite) ? (object)Lite.Create(Navigator.ResolveTypeFromUrlName(typeUrlName), sfId.Value) : (object)sfValue;
-            return Content(SearchControlHelper.QuickFilter(this, sfQueryUrlName, sfColIndex, index, value, prefix, suffix));
-        }
+        //[AcceptVerbs(HttpVerbs.Post)]
+        //public ContentResult QuickFilter(string sfQueryUrlName, bool isLite, string typeUrlName, int? sfId, string sfValue, int sfColIndex, int index, string prefix, string suffix)
+        //{
+        //    object value = (isLite) ? (object)Lite.Create(Navigator.ResolveTypeFromUrlName(typeUrlName), sfId.Value) : (object)sfValue;
+        //    return Content(SearchControlHelper.QuickFilter(this, sfQueryUrlName, sfColIndex, index, value, prefix, suffix));
+        //}
 
         [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult GetTypeChooser(Implementations sfImplementations, string prefix)
@@ -327,8 +295,9 @@ namespace Signum.Web.Controllers
             string strButtons = ((ImplementedByAttribute)sfImplementations).ImplementedTypes
                 .ToString(type => "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(type.Name, type.NiceName()), "");
 
+            ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = strButtons;
-            ViewData[ViewDataKeys.PopupPrefix] = prefix;
+
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
 
@@ -341,8 +310,9 @@ namespace Signum.Web.Controllers
             string strButtons = buttons
                 .ToString(b => "<input type='button' id='{0}' name='{0}' value='{1}' /><br />\n".Formato(b.Replace(" ", ""), b), "");
 
+            ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = strButtons;
-            ViewData[ViewDataKeys.PopupPrefix] = prefix;
+
             return PartialView(Navigator.Manager.ChooserPopupUrl);
         }
 
@@ -353,18 +323,18 @@ namespace Signum.Web.Controllers
                 .ThrowIfNullC("Type was not possible to extract")
                 .UntypedApplyChanges(this.ControllerContext, prefix, true);
 
-            ModifiableEntity entity = (ModifiableEntity)context.UntypedValue;
+            IdentifiableEntity entity = (IdentifiableEntity)context.UntypedValue;
 
             if (this.IsReactive())
             {
                 Session[this.TabID()] = entity;
                 this.ViewData[ViewDataKeys.Reactive] = true;
                 if (prefix.HasText())
-                    entity = (ModifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
+                    entity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
             }
 
-            this.ViewData[ViewDataKeys.LoadAll] = true; //Prevents losing unsaved changes of the UI when reloading control
-            return Navigator.PartialView(this, entity, prefix, context.GetTicksDictionary());
+            this.ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
+            return Navigator.PartialView(this, entity, prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -375,8 +345,8 @@ namespace Signum.Web.Controllers
 
             if (Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
             {
-                entity = (IdentifiableEntity)Session[Request.Form[ViewDataKeys.TabId]];
-                entity = (IdentifiableEntity)MappingContext.GetPropertyValue(entity, prefix);
+                IdentifiableEntity parent = (IdentifiableEntity)Session[Request.Form[ViewDataKeys.TabId]];
+                entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
             }
             else
             {
@@ -396,8 +366,9 @@ namespace Signum.Web.Controllers
             MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
 
             this.ModelState.FromContext(context);
-            
-            return Navigator.View(this, context.UntypedValue, context.GetTicksDictionary());
+
+            ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
+            return Navigator.View(this, (IdentifiableEntity)context.UntypedValue);
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)

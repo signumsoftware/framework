@@ -8,21 +8,25 @@ using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Web.Properties;
+using System.Web.Routing;
 #endregion
 
 namespace Signum.Web
 {
-    public abstract class BaseLine : StyleContext
+    public abstract class BaseLine : TypeContext
     {
         public abstract void SetReadOnly();
 
-        public void SetReadOnly(bool readOnly)
+        protected BaseLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(parent, controlID, propertyRoute)
         {
-            ReadOnly = readOnly;
+            this.type = type;
+            this.untypedValue = untypedValue; 
         }
 
         public string LabelText { get; set; }
-        public readonly Dictionary<string, object> LabelHtmlProps = new Dictionary<string, object>(0);
+
+        public readonly RouteValueDictionary LabelHtmlProps = new RouteValueDictionary();
 
         public bool visible = true;
         public bool Visible
@@ -53,5 +57,34 @@ namespace Signum.Web
         }
 
         public string ReloadFunction { get; set; }
+
+        object untypedValue;
+        public override object UntypedValue
+        {
+            get { return untypedValue; }
+        }
+
+        Type type;
+        public override Type Type
+        {
+            get { return type; }
+        }
+
+        internal override TypeContext Clone(object newValue)
+        {
+            throw new InvalidOperationException();
+        }
+    }
+
+    public static class RouteValueDictionaryExtensions
+    {
+        public static void AddCssClass(this RouteValueDictionary dic, string newClass)
+        {
+            object value;
+            if (dic.TryGetValue("class", out value))
+                dic["class"] = value + " " + newClass;
+            else
+                dic["class"] = newClass;
+        }
     }
 }

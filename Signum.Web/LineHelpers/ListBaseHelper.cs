@@ -14,122 +14,48 @@ using System.Configuration;
 using Signum.Engine;
 using Signum.Web.Properties;
 using Signum.Utilities.Reflection;
+using System.Collections;
 #endregion
 
 namespace Signum.Web
 {
     public static class ListBaseHelper
     {
-        public static string RenderItemPopupInEntityDiv<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
+        public static string WriteCreateButton(HtmlHelper helper, EntityListBase listBase, Dictionary<string, object> htmlProperties)
         {
-            StringBuilder sb = new StringBuilder();
-
-            sb.AppendLine("<div id='{0}' name='{0}' style='display:none'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
-            sb.AppendLine(RenderItemPopupContents(helper, indexedPrefix, listTypeContext, itemValue, index, settings, cleanRuntimeType, cleanStaticType, isLite));
-            sb.AppendLine("</div>");
-
-            return sb.ToString();
-        }
-
-        public static string RenderItemPopupContents<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
-        {
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
-
-            TypeContext tc;
-            if (isLite)
-                tc = (TypeContext)Activator.CreateInstance(typeof(TypeElementContext<>).MakeGenericType(cleanRuntimeType), new object[] { Database.Retrieve((Lite)(object)itemValue), listTypeContext, index });
-            else
-                tc = new TypeElementContext<T>(itemValue, listTypeContext, index);
-
-            ViewDataDictionary vdd = new ViewDataDictionary(tc)
-            { 
-                { ViewDataKeys.MainControlUrl, settings.PartialViewName ?? es.OnPartialViewName((ModifiableEntity)tc.UntypedValue)},
-                //{ ViewDataKeys.PopupPrefix, indexedPrefix} //Now prefix is in TypeElementContext 
-            };
-            helper.PropagateSFKeys(vdd);
-            if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
-                vdd[ViewDataKeys.Reactive] = true;
-
-            //string contents;
-            //using (var sc = StyleContext.RegisterCleanStyleContext(true))
-               return helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd);
-
-            //return contents;
-        }
-
-        public static string RenderItemContentInEntityDiv<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite, bool visibleDiv)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.AppendLine("<div id='{0}' name='{0}'{1}>".Formato(
-                TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity),
-                visibleDiv ? "" : " style='display:none'"));
-
-            sb.AppendLine(RenderItemContent<T>(helper, indexedPrefix, listTypeContext, itemValue, index, settings, cleanRuntimeType, cleanStaticType, isLite));
-            
-            sb.AppendLine("</div>");
-
-            return sb.ToString();
-        }
-
-        public static string RenderItemContent<T>(HtmlHelper helper, string indexedPrefix, TypeContext<MList<T>> listTypeContext, T itemValue, int index, EntityListBase settings, Type cleanRuntimeType, Type cleanStaticType, bool isLite)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanRuntimeType ?? cleanStaticType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanRuntimeType ?? cleanStaticType));
-
-            TypeContext tc;
-            if (isLite)
-                tc = (TypeContext)Activator.CreateInstance(typeof(TypeElementContext<>).MakeGenericType(cleanRuntimeType), new object[] { Database.Retrieve((Lite)(object)itemValue), listTypeContext, index });
-            else
-                tc = new TypeElementContext<T>(itemValue, listTypeContext, index);
-            
-            ViewDataDictionary vdd = new ViewDataDictionary(tc);
-            helper.PropagateSFKeys(vdd);
-            vdd[ViewDataKeys.PopupPrefix] = helper.ParentPrefix();
-            if (settings.ReloadOnChange || settings.ReloadFunction.HasText())
-                vdd[ViewDataKeys.Reactive] = true;
-
-            sb.AppendLine(
-                helper.RenderPartialToString(settings.PartialViewName ?? es.OnPartialViewName((ModifiableEntity)tc.UntypedValue), vdd));
-            
-            return sb.ToString();
-        }
-
-        public static string WriteCreateButton(HtmlHelper helper, EntityListBase settings, Dictionary<string, object> htmlProperties)
-        {
-            if (!settings.Create && settings.Implementations == null)
+            if (!listBase.Create && listBase.Implementations == null)
                 return "";
 
-            return helper.Button(TypeContext.Compose(settings.Prefix, "btnCreate"),
+            return helper.Button(listBase.Compose("btnCreate"),
                   "+",
-                  settings.GetCreating(),
+                  listBase.GetCreating(),
                   "lineButton create",
-                  htmlProperties ?? new Dictionary<string, object>());
+                  htmlProperties);
         }
 
-        public static string WriteFindButton(HtmlHelper helper, EntityListBase settings, Type elementsCleanStaticType)
+        public static string WriteFindButton(HtmlHelper helper, EntityListBase listBase)
         {
-            if ((!settings.Find && settings.Implementations == null) || typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanStaticType))
+            if ((!listBase.Find && listBase.Implementations == null) || typeof(EmbeddedEntity).IsAssignableFrom(listBase.Type.CleanType()))
                 return "";
-            
-            return helper.Button(TypeContext.Compose(settings.Prefix, "btnFind"),
+
+            return helper.Button(listBase.Compose("btnFind"),
                   "O",
-                  settings.GetFinding(),
+                  listBase.GetFinding(),
                   "lineButton find",
-                  new Dictionary<string, object>());
+                  null);
         }
 
-        public static string WriteRemoveButton<T>(HtmlHelper helper, EntityListBase settings, MList<T> value)
+        public static string WriteRemoveButton(HtmlHelper helper, EntityListBase listBase)
         {
-            if (!settings.Remove && settings.Implementations == null)
+            if (!listBase.Remove && listBase.Implementations == null)
                 return "";
 
-            return helper.Button(TypeContext.Compose(settings.Prefix, "btnRemove"),
+            IList list = (IList)listBase.UntypedValue;
+            return helper.Button(listBase.Compose("btnRemove"),
                   "O",
-                  settings.GetRemoving(),
+                  listBase.GetRemoving(),
                   "lineButton remove",
-                  (value == null || value.Count == 0) ? new Dictionary<string, object>() { { "style", "display:none" } } : new Dictionary<string, object>());
+                  (list == null || list.Count == 0) ? new Dictionary<string, object>() { { "style", "display:none" } } : null);
         }
     }
 }

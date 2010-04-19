@@ -24,7 +24,7 @@ OperationManager.prototype = {
     },
 
     pf: function(s) {
-        return "#" + this.options.prefix + s;
+        return "#" + this.options.prefix.compose(s);
     },
 
     newPrefix: function() {
@@ -49,12 +49,12 @@ OperationManager.prototype = {
         var info = this.runtimeInfo();
         var runtimeType = info.runtimeType();
 
-        if (requestData.indexOf(this.options.prefix + sfRuntimeInfo) < 0)
-        {
+        var myRuntimeInfoKey = this.options.prefix.compose(sfRuntimeInfo);
+        if (formChildren.filter("[name=" + myRuntimeInfoKey + "]").length  == 0) {
             if (empty(runtimeType))
-                requestData += qp(this.options.prefix + sfRuntimeInfo, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
+                requestData += qp(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
             else
-                requestData += qp(this.options.prefix + sfRuntimeInfo, info.find().val());
+                requestData += qp(myRuntimeInfoKey, info.find().val());
         }
         requestData += qp("isLite", this.options.isLite)
                      + qp("sfRuntimeType", empty(runtimeType) ? StaticInfoFor(this.options.prefix).staticType() : runtimeType)
@@ -122,7 +122,7 @@ OperationManager.prototype = {
         var info = this.runtimeInfo();
         if (info.find().length > 0)
         {
-            $("form").append(hiddenInput('sfRuntimeType', info.runtimeType()) +
+            $("form").append(hiddenInput("sfRuntimeType", info.runtimeType()) +
                 hiddenInput('sfId', info.id()));
         }
         $("form").append(hiddenInput('isLite', this.options.isLite) +
@@ -184,7 +184,7 @@ var OperationExecutor = function(_options) {
                 if (self.options.multiStep) {
                     new ViewNavigator({
                         prefix: newPrefix,
-                        containerDiv: newPrefix + "externalPopupDiv",
+                        containerDiv: newPrefix.compose("externalPopupDiv"),
                         onOk: self.options.onOk,
                         onCancelled: self.options.onCancelled
                     }).viewSave(operationResult);
@@ -196,12 +196,12 @@ var OperationExecutor = function(_options) {
                     $("#content").html(operationResult.substring(operationResult.indexOf("<form"), operationResult.indexOf("</form>") + 7));
                 else { //PopupWindow
                     if (self.options.closePopupOnSuccess) {
-                        $('#' + newPrefix + "externalPopupDiv").remove();
+                        $('#' + newPrefix.compose("externalPopupDiv")).remove();
                     }
                     else {
                         new ViewNavigator({
                             prefix: newPrefix,
-                            containerDiv: newPrefix + "externalPopupDiv",
+                            containerDiv: newPrefix.compose("externalPopupDiv"),
                             onOk: self.options.onOk,
                             onCancelled: self.options.onCancelled
                         }).viewSave(operationResult);
@@ -476,12 +476,12 @@ function ReloadEntity(urlController, prefix, parentDiv, reloadButtonBar) {
            if (!empty(parentDiv))
                $('#' + parentDiv).html(msg);
            else
-               $('#' + prefix + "divMainControl").html(msg);
+               $('#' + prefix.compose("divMainControl")).html(msg);
            
            if (!isFalse(reloadButtonBar))
            {
                var info = RuntimeInfoFor(prefix);
-               $.post('Signum/GetButtonBar', { sfRuntimeType: info.runtimeType(), sfId: info.id(), prefix: prefix, sfTabId: $("#" + sfTabId).val() } ,function(data){ $('#' + prefix + "divButtonBar").html(data) });
+               $.post('Signum/GetButtonBar', { sfRuntimeType: info.runtimeType(), sfId: info.id(), prefix: prefix, sfTabId: $("#" + sfTabId).val() } ,function(data){ $('#' + prefix.compose("divButtonBar")).html(data) });
            }
         }
     });

@@ -9,6 +9,14 @@ namespace Signum.Utilities
 {
     public static class JsonExtensions
     {
+        public static string TrySingleQuote(this string s)
+        {
+            if (!s.HasText())
+                return null;
+
+            return "\'" + s.Escape() + "\'";
+        }
+
         ///  FUNCTION Enquote Public Domain 2002 JSON.org 
         ///  @author JSON.org 
         ///  @version 0.1 
@@ -18,10 +26,16 @@ namespace Signum.Utilities
             if (s == null || s.Length == 0)
                 return "\"\"";
 
+            return "\"" + s.Escape() + "\"";
+        }
+        private static string Escape(this string s)
+        {
+            if (s == null || s.Length == 0)
+                return "";
+
             int len = s.Length;
-            
-            StringBuilder sb = new StringBuilder(len + 4);
-            sb.Append('"');
+
+            StringBuilder sb = new StringBuilder(len);
             for (int i = 0; i < len; i += 1)
             {
                 char c = s[i];
@@ -53,7 +67,6 @@ namespace Signum.Utilities
                         break;
                 }
             }
-            sb.Append('"');
             return sb.ToString();
         } 
         public static string Unquote(this string obj)

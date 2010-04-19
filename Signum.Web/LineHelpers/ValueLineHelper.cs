@@ -7,6 +7,8 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Web.Mvc.Html;
 using Signum.Web.Properties;
+using Signum.Entities.Reflection;
+using Signum.Entities;
 
 
 namespace Signum.Web
@@ -15,107 +17,78 @@ namespace Signum.Web
     {
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
 
-        private static string ManualValueLine<T>(this HtmlHelper helper, string idValueField, T value, ValueLine settings)
+        private static string InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (!settings.Visible || settings.HideIfNull && value == null)
+            if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
                 return null;
 
-            idValueField = helper.GlobalName(idValueField);
-
             StringBuilder sb = new StringBuilder();
-            if (settings.ShowFieldDiv)
+            if (valueLine.ShowFieldDiv)
                 sb.AppendLine("<div class='field'>");
-            
-            long? ticks = EntityBaseHelper.GetTicks(helper, idValueField, settings);
-            if (ticks != null) 
-                sb.AppendLine(helper.Hidden(TypeContext.Compose(idValueField, TypeContext.Ticks), ticks.Value));
 
-            if (StyleContext.Current.LabelVisible)
+            long? ticks = EntityInfoHelper.GetTicks(helper, valueLine);
+            if (ticks != null)
+                sb.AppendLine(helper.Hidden(valueLine.Compose(TypeContext.Ticks), ticks.Value));
+
+            if (valueLine.LabelVisible)
             {
-                if (StyleContext.Current.ValueFirst)
+                if (valueLine.ValueFirst)
                     sb.AppendLine("<div class='valueFirst'>");
                 else
-                    sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
+                    sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel, valueLine.LabelHtmlProps));
             }
 
-            string valueStr = (value != null) ? value.ToString() : "";
-            if (StyleContext.Current.ReadOnly)
-            {
-                if (value != null && typeof(T).UnNullify() == typeof(Boolean))
-                {
-                    settings.ValueHtmlProps.Add("disabled", "disabled");
-                    sb.AppendLine(helper.CheckBox(idValueField,
-                        Convert.ToBoolean(value),
-                        settings));
-                }
-                else
-                {
-                    if (value != null && typeof(T).UnNullify() == typeof(DateTime) && settings.ValueLineType != null && settings.ValueLineType == ValueLineType.Date)
-                        sb.AppendLine(helper.Span(idValueField, Convert.ToDateTime(value).ToString("dd/MM/yyyy"), "valueLine", typeof(T)));
-                    else
-                        if (typeof(T).UnNullify().BaseType == typeof(Enum) && value != null)
-                            sb.AppendLine(helper.Span(idValueField, ((Enum)(object)value).NiceToString(), "valueLine", typeof(T)));
-                        else
-                            sb.AppendLine(helper.Span(idValueField, value, "valueLine", typeof(T)));
-                }
-            }
-            else
-            {
-                ValueLineType vltype = (settings.ValueLineType.HasValue) ?
-                    settings.ValueLineType.Value :
-                    Configurator.GetDefaultValueLineType(typeof(T));
+            ValueLineType vltype = valueLine.ValueLineType ?? Configurator.GetDefaultValueLineType(valueLine.Type);
 
-                if (StyleContext.Current.ShowValidationMessage)
-                {
-                    if (settings.ValueHtmlProps.ContainsKey("class"))
-                        settings.ValueHtmlProps["class"] = "valueLine inlineVal " + settings.ValueHtmlProps["class"];
-                    else
-                    {
-                        settings.ValueHtmlProps.Add("class", "valueLine inlineVal"); //inlineVal class tells Javascript code to show Inline Error
-                    }
-                    sb.AppendLine(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings, typeof(T))));
-                    sb.Append("&nbsp;");
-                    sb.AppendLine(helper.ValidationMessage(idValueField));
-                }
-                else
-                {
-                    if (settings.ValueHtmlProps.ContainsKey("class"))
-                        settings.ValueHtmlProps["class"] = "valueLine " + settings.ValueHtmlProps["class"];
-                    else
-                        settings.ValueHtmlProps.Add("class", "valueLine");
-                    sb.AppendLine(Configurator.constructor[vltype](helper, new ValueLineData(idValueField, value, settings, typeof(T))));
-                }
-            }
-            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst)
+            valueLine.ValueHtmlProps.AddCssClass("valueLine");
+
+            if (valueLine.ShowValidationMessage)
+                valueLine.ValueHtmlProps.AddCssClass("inlineVal"); //inlineVal class tells Javascript code to show Inline Error
+            
+            sb.AppendLine(Configurator.Constructor[vltype](helper, valueLine));
+
+            if (valueLine.ShowValidationMessage)
             {
-                if (settings.LabelHtmlProps != null && settings.LabelHtmlProps.Count > 0)
-                    sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel, settings.LabelHtmlProps));
-                else
-                    sb.AppendLine(helper.Label(idValueField + "lbl", settings.LabelText, idValueField, TypeContext.CssLineLabel));
+                sb.Append("&nbsp;");
+                sb.AppendLine(helper.ValidationMessage(valueLine.ControlID));
             }
 
-            if (StyleContext.Current.LabelVisible && StyleContext.Current.ValueFirst) 
+            if (valueLine.LabelVisible && valueLine.ValueFirst)
+            {
+                if (valueLine.LabelHtmlProps != null && valueLine.LabelHtmlProps.Count > 0)
+                    sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel, valueLine.LabelHtmlProps));
+                else
+                    sb.AppendLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, TypeContext.CssLineLabel));
+            }
+
+            if (valueLine.LabelVisible && valueLine.ValueFirst)
                 sb.AppendLine("</div>");
-            if (settings.ShowFieldDiv)
+            if (valueLine.ShowFieldDiv)
                 sb.AppendLine("</div>");
-            if (StyleContext.Current.BreakLine)
-                sb.AppendLine("<div class='clearall'></div>");
 
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+            if (valueLine.BreakLine)
+                sb.AppendLine(helper.Div("", "", "clearall"));
 
-            return idValueField;
+            helper.Write(sb.ToString());
+
+            return valueLine.ControlID;
         }
 
-        public static string EnumComboBox(this HtmlHelper helper, string idValueField, Type enumType, object value, ValueLine settings) 
+        public static string EnumComboBox(this HtmlHelper helper, ValueLine valueLine) 
         {
+            Enum value = (Enum)valueLine.UntypedValue;
+
+            if (valueLine.ReadOnly)
+                return helper.Span(valueLine.ControlID, value != null ? value.NiceToString() : "", "valueLine");
+            
             StringBuilder sb = new StringBuilder();
-            List<SelectListItem> items = settings.EnumComboItems;
+            List<SelectListItem> items = valueLine.EnumComboItems;
             if (items == null)
             {
                 items = new List<SelectListItem>();
                 items.Add(new SelectListItem() { Text = "-", Value = "" });
                 items.AddRange(
-                    Enum.GetValues(enumType.UnNullify())
+                    Enum.GetValues(valueLine.Type.UnNullify())
                         .Cast<Enum>()
                         .Select(v => new SelectListItem()
                             {
@@ -126,167 +99,184 @@ namespace Signum.Web
                     );
             }
 
-            string setTicks = SetTicksFunction(helper, idValueField, settings);
-            string reloadOnChangeFunction = GetReloadFunction(helper, settings);
+            string setTicks = SetTicksFunction(helper, valueLine);
+            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
 
-            if (settings.ValueHtmlProps.ContainsKey("onchange"))
-                settings.ValueHtmlProps["onchange"] = setTicks + settings.ValueHtmlProps["onchange"] + reloadOnChangeFunction;
+            if (valueLine.ValueHtmlProps.ContainsKey("onchange"))
+                valueLine.ValueHtmlProps["onchange"] = setTicks + valueLine.ValueHtmlProps["onchange"] + reloadOnChangeFunction;
             else
-                settings.ValueHtmlProps.Add("onchange", setTicks + reloadOnChangeFunction);
+                valueLine.ValueHtmlProps.Add("onchange", setTicks + reloadOnChangeFunction);
 
-            return helper.DropDownList(idValueField, items, settings.ValueHtmlProps);
+            return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps);
         }
 
-        public static string DateTimePickerTextbox(this HtmlHelper helper, string idValueField, object value, string dateFormat, ValueLine settings)
+        public static string DateTimePickerTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (settings.ValueHtmlProps.ContainsKey("class"))
-                settings.ValueHtmlProps["class"] += " maskedEdit";
-            else
-                settings.ValueHtmlProps["class"] = " maskedEdit";
+            DateTime? value = (DateTime?)valueLine.UntypedValue;
 
-            if (settings.DatePickerOptions != null && settings.DatePickerOptions.ShowAge)
-                settings.ValueHtmlProps["class"] += " hasAge";
-
-            string setTicks = SetTicksFunction(helper, idValueField, settings);
-            string reloadOnChangeFunction = GetReloadFunction(helper, settings);
-           
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
+            if (valueLine.ReadOnly)
             {
-                if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                    settings.ValueHtmlProps["onblur"] = setTicks + settings.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
+                return helper.Span(valueLine.ControlID, 
+                        value.HasValue ? Convert.ToDateTime(valueLine.UntypedValue).ToString(valueLine.Format) : "", 
+                        "valueLine");
+            }
+    
+            valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
+            
+            if (valueLine.DatePickerOptions != null && valueLine.DatePickerOptions.ShowAge)
+                valueLine.ValueHtmlProps.AddCssClass("hasAge");
+
+            string setTicks = SetTicksFunction(helper, valueLine);
+            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
+
+            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText())
+            {
+                if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
+                    valueLine.ValueHtmlProps["onblur"] = setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
                 else
-                    settings.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
+                    valueLine.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
-            settings.ValueHtmlProps["size"] = dateFormat.Length;
-            string returnString = helper.TextBox(idValueField, value != null ? ((DateTime)value).ToString(dateFormat) : "", settings.ValueHtmlProps) +
-                   "\n" +
-                   helper.Calendar(idValueField, settings.DatePickerOptions);
+            valueLine.ValueHtmlProps["size"] = valueLine.Format.TryCS(f => f.Length) ?? 20;
 
-            if (settings.DatePickerOptions != null && settings.DatePickerOptions.ShowAge)
-                returnString += helper.Span(idValueField + "Age", String.Empty, "age");
+            string returnString = helper.TextBox(valueLine.ControlID, value != null ? ((DateTime)value).ToString(valueLine.Format) : "", valueLine.ValueHtmlProps) +
+                   "\n" +
+                   helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions);
+
+            if (valueLine.DatePickerOptions != null && valueLine.DatePickerOptions.ShowAge)
+                returnString += helper.Span(valueLine.ControlID + "Age", String.Empty, "age");
 
             return returnString;
         }
 
-        public static string TextboxInLine(this HtmlHelper helper, string idValueField, string valueStr, ValueLine settings)
+        public static string TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            string setTicks = SetTicksFunction(helper, idValueField, settings);
-            string reloadOnChangeFunction = GetReloadFunction(helper, settings);
+            if (valueLine.ReadOnly)
+                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "valueLine");
 
-            settings.ValueHtmlProps.Add("autocomplete", "off");
-            if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                settings.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + settings.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
+            string setTicks = SetTicksFunction(helper, valueLine);
+            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
+
+            valueLine.ValueHtmlProps.Add("autocomplete", "off");
+            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
+                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
             else
-                settings.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
 
-            return helper.TextBox(idValueField, valueStr, settings.ValueHtmlProps);
+            return helper.TextBox(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
 
-        public static string TextAreaInLine(this HtmlHelper helper, string idValueField, string valueStr, ValueLine settings)
+        public static string NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
-            string setTicks = SetTicksFunction(helper, idValueField, settings);
-            string reloadOnChangeFunction = GetReloadFunction(helper, settings);
+            if (valueLine.ReadOnly)
+                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "valueLine");
 
-            settings.ValueHtmlProps.Add("autocomplete", "off");
-            if (settings.ValueHtmlProps.ContainsKey("onblur"))
-                settings.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + settings.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
-            else
-                settings.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+            valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return validator.decimalNumber(event);" : "return validator.number(event);");
 
-            return helper.TextArea(idValueField, valueStr, settings.ValueHtmlProps);
+            return helper.TextboxInLine(valueLine);
         }
 
-        public static string CheckBox(this HtmlHelper helper, string idValueField, bool? value, ValueLine settings)
+        public static string TextAreaInLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            string setTicks = SetTicksFunction(helper, idValueField, settings);
-            string reloadOnChangeFunction = GetReloadFunction(helper, settings);
+            if (valueLine.ReadOnly)
+                return helper.Span(valueLine.ControlID, (string)valueLine.UntypedValue, "valueLine");
 
-            if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText())
+            string setTicks = SetTicksFunction(helper, valueLine);
+            string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
+
+            valueLine.ValueHtmlProps.Add("autocomplete", "off");
+            if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
+                valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
+            else
+                valueLine.ValueHtmlProps.Add("onblur", "this.setAttribute('value', this.value); " + setTicks + reloadOnChangeFunction);
+
+            return helper.TextArea(valueLine.ControlID, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
+        }
+
+        public static string CheckBox(this HtmlHelper helper, ValueLine valueLine)
+        {
+            if (valueLine.ReadOnly)
+                valueLine.ValueHtmlProps.Add("disabled", "disabled");
+            else
             {
-                if (settings.ValueHtmlProps.ContainsKey("onclick"))
-                    settings.ValueHtmlProps["onclick"] = setTicks + settings.ValueHtmlProps["onclick"] + reloadOnChangeFunction;
-                else
-                    settings.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
-            }
+                string setTicks = SetTicksFunction(helper, valueLine);
+                string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
 
-            return HtmlHelperExtenders.CheckBox(helper, idValueField, value.HasValue ? value.Value : false, !settings.ReadOnly, settings.ValueHtmlProps);
+                if (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText())
+                {
+                    if (valueLine.ValueHtmlProps.ContainsKey("onclick"))
+                        valueLine.ValueHtmlProps["onclick"] = setTicks + valueLine.ValueHtmlProps["onclick"] + reloadOnChangeFunction;
+                    else
+                        valueLine.ValueHtmlProps.Add("onclick", setTicks + reloadOnChangeFunction);
+                }
+            }
+            
+            bool? value = (bool?)valueLine.UntypedValue;
+            return HtmlHelperExtenders.CheckBox(helper, valueLine.ControlID, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
         }
 
-        public static string ValueLine<T>(this HtmlHelper helper, T value, string idValueField, ValueLine options)
+        public static string RadioButtons(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (options == null || options.LabelText == null)
-                throw new ArgumentException(Resources.LabelTextPropertyOfValueLineOptionsMustBeSpecifiedForManualValueLines);
+            bool? value = (bool?)valueLine.UntypedValue;
+            StringBuilder sb = new StringBuilder();
 
-            using (options)
-                return helper.ManualValueLine(idValueField, value, options);
+            if (valueLine.ReadOnly)
+                valueLine.ValueHtmlProps.Add("disabled", "disabled");
+            
+            valueLine.ValueHtmlProps.Add("name", valueLine.ControlID);
+
+            valueLine.ValueHtmlProps.AddCssClass("rbValueLine");
+
+            string rb = helper.RadioButton(valueLine.ControlID, true, value == true, valueLine.ValueHtmlProps);
+            rb = rb.Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_True\"");
+
+            sb.AppendLine(rb);
+            sb.AppendLine(helper.Span("", valueLine.RadioButtonLabelTrue, "lblRadioTrue"));
+            rb = helper.RadioButton(valueLine.ControlID, false, value == false, valueLine.ValueHtmlProps);
+            rb = rb.Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_False\"");
+            sb.AppendLine(rb);
+
+            sb.AppendLine(helper.Span("", valueLine.RadioButtonLabelFalse, "lblRadioFalse"));
+            
+            return sb.ToString();
+        }
+
+        public static string ValueLine<T>(this HtmlHelper helper, ValueLine valueLine)
+        {
+            return helper.InternalValueLine(valueLine);
         }
 
         public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
-            Type t = typeof(S);
-            TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
-
-            ValueLine vl = new ValueLine();
-            Common.FireCommonTasks(vl, context);
-
-            return SetManualValueLineOptions<S>(helper, context, vl);
+            return helper.ValueLine(tc, property, null);
         }
 
         public static string ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<ValueLine> settingsModifier)
         {
-            Type t = typeof(S);
             TypeContext<S> context = (TypeContext<S>)Common.WalkExpression(tc, property);
 
-            ValueLine vl = new ValueLine();
-            Common.FireCommonTasks(vl, context);
+            ValueLine vl = new ValueLine(typeof(S), context.Value, context, null, context.PropertyRoute);
             
-            settingsModifier(vl);
+            Common.FireCommonTasks(vl);
+            
+            if (settingsModifier != null)
+                settingsModifier(vl);
 
-            return SetManualValueLineOptions<S>(helper, context, vl);
+            return InternalValueLine(helper, vl);
         }
 
-        private static string SetManualValueLineOptions<S>(HtmlHelper helper, TypeContext<S> context, ValueLine vl)
+        private static string SetTicksFunction(HtmlHelper helper, ValueLine valueLine)
         {
-            if (vl != null)
-                using (vl)
-                    return helper.ManualValueLine(context.Name, context.Value, vl);
-            else
-                return helper.ManualValueLine(context.Name, context.Value, vl);
-        }
-
-        private static string SetTicksFunction(HtmlHelper helper, string idValueField, ValueLine settings)
-        {
-            return (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || settings.ReloadOnChange || settings.ReloadFunction.HasText()) ? 
-                "$('#{0}').val(new Date().getTime()); ".Formato(TypeContext.Compose(idValueField, TypeContext.Ticks)) : 
+            return (helper.ViewData.ContainsKey(ViewDataKeys.Reactive) || valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ? 
+                "$('#{0}').val(new Date().getTime()); ".Formato(valueLine.Compose(TypeContext.Ticks)) : 
                 "";
         }
 
-        private static string GetReloadFunction(HtmlHelper helper, ValueLine settings)
+        private static string GetReloadFunction(HtmlHelper helper, ValueLine valueLine)
         {
-            return (settings.ReloadOnChange || settings.ReloadFunction.HasText()) ?
-                settings.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.ParentPrefix()) :
+            return (valueLine.ReloadOnChange || valueLine.ReloadFunction.HasText()) ?
+                valueLine.ReloadFunction ?? "ReloadEntity('{0}','{1}'); ".Formato("Signum/ReloadEntity", helper.WindowPrefix()) :
                 "";
-        }
-    }
-
-    public class ValueLine : BaseLine 
-    { 
-        public readonly Dictionary<string, object> ValueHtmlProps = new Dictionary<string, object>(0);
-        public ValueLineType? ValueLineType;
-        public List<SelectListItem> EnumComboItems;
-        public DatePickerOptions DatePickerOptions;
-
-        public ValueLine() { }
-
-        public ValueLine(Dictionary<string, object> valueHtmlProps)
-        {
-            ValueHtmlProps = valueHtmlProps;
-        }
-
-        public override void SetReadOnly()
-        {
-            ReadOnly = true;
         }
     }
 
@@ -309,7 +299,6 @@ namespace Signum.Web
                     case TypeCode.Double:
                     case TypeCode.Decimal:
                     case TypeCode.Single:
-                        return ValueLineType.DecimalNumber;
                     case TypeCode.Byte:
                     case TypeCode.SByte:
                     case TypeCode.Int16:
@@ -330,62 +319,27 @@ namespace Signum.Web
 
         }
 
-        public Dictionary<ValueLineType, Func<HtmlHelper, ValueLineData, string>> constructor = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLineData, string>>()
+        public Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, string>> Constructor = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, string>>()
         {
-            {ValueLineType.TextBox, (helper, valueLineData) => helper.TextboxInLine(valueLineData.IdValueField, (string)valueLineData.Value, valueLineData.ValueLineSettings)},
-            {ValueLineType.TextArea, (helper, valueLineData) => helper.TextAreaInLine(valueLineData.IdValueField, (string)valueLineData.Value, valueLineData.ValueLineSettings)},
-            {ValueLineType.Boolean, (helper, valueLineData) => helper.CheckBox(valueLineData.IdValueField, (bool?)valueLineData.Value, valueLineData.ValueLineSettings)},
-            {ValueLineType.Combo, (helper, valueLineData) => helper.EnumComboBox(valueLineData.IdValueField, valueLineData.EnumType, valueLineData.Value, valueLineData.ValueLineSettings)},
-            {ValueLineType.DateTime, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy HH:mm:ss", valueLineData.ValueLineSettings)},
-            {ValueLineType.Date, (helper, valueLineData) => helper.DateTimePickerTextbox(valueLineData.IdValueField, valueLineData.Value, "dd/MM/yyyy", valueLineData.ValueLineSettings)},
-            {ValueLineType.Number, (helper, valueLineData) => 
-                {
-                    valueLineData.ValueLineSettings.ValueHtmlProps.Add("onkeydown", "return validator.number(event);");
-                    return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.ValueLineSettings);
-                }
-            },
-            {ValueLineType.DecimalNumber, (helper, valueLineData) => 
-                {
-                    valueLineData.ValueLineSettings.ValueHtmlProps.Add("onkeydown", "return validator.decimalNumber(event);");
-                    return helper.TextboxInLine(valueLineData.IdValueField, valueLineData.Value!=null ? valueLineData.Value.ToString() : "", valueLineData.ValueLineSettings);
-                }
-            }
+            {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
+            {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
+            {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
+            {ValueLineType.RadioButtons, (helper, valueLine) => helper.RadioButtons(valueLine)},
+            {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
+            {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePickerTextbox(valueLine)},
+            {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)}
         };
-    }
-
-    public class ValueLineData
-    { 
-        public string IdValueField { get; private set; }
-        public object Value { get; private set; }
-        public ValueLine ValueLineSettings { get; private set; }
-        public Type EnumType { get; private set; }
-
-        public ValueLineData(string idValueField, object value, ValueLine valueLineSettings)
-        {
-            IdValueField = idValueField;
-            Value = value;
-            ValueLineSettings = valueLineSettings;
-        }
-
-        public ValueLineData(string idValueField, object value, ValueLine valueLineSettings, Type enumType)
-        {
-            IdValueField = idValueField;
-            Value = value;
-            EnumType = enumType;
-            ValueLineSettings = valueLineSettings;
-        }
     }
 
     public enum ValueLineType
     {
         Boolean,
+        RadioButtons,
         Combo,
         DateTime,
-        Date,
         TextBox,
         TextArea,
-        Number,
-        DecimalNumber,
+        Number
     };
 
 }

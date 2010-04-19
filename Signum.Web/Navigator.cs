@@ -88,37 +88,27 @@ namespace Signum.Web
             return Manager.ResolveQueryFromToStr(queryNameToStr);
         }
 
-        public static ViewResult View(Controller controller, object obj)
+        public static ViewResult View(ControllerBase controller, IdentifiableEntity entity)
         {
-            return Manager.View(controller, obj, null, false, null); 
+            return Manager.View(controller, entity, null, false); 
         }
 
-        public static ViewResult View(Controller controller, object obj, bool admin)
+        public static ViewResult View(ControllerBase controller, IdentifiableEntity entity, bool admin)
         {
-            return Manager.View(controller, obj, null, admin, null); 
+            return Manager.View(controller, entity, null, admin); 
         }
 
-        public static ViewResult View(Controller controller, object obj, string partialViewName)
+        public static ViewResult View(ControllerBase controller, IdentifiableEntity entity, string partialViewName)
         {
-            return Manager.View(controller, obj, partialViewName, false, null);
+            return Manager.View(controller, entity, partialViewName, false);
         }
 
-        public static ViewResult View(Controller controller, object obj, string partialViewName, bool admin)
+        public static ViewResult View(ControllerBase controller, IdentifiableEntity entity, string partialViewName, bool admin)
         {
-            return Manager.View(controller, obj, partialViewName, admin, null);
+            return Manager.View(controller, entity, partialViewName, admin);
         }
 
-        public static ViewResult View(Controller controller, object obj, Dictionary<string, long> changeTicks)
-        {
-            return Manager.View(controller, obj, null, false, changeTicks);
-        }
-
-        public static ViewResult View(Controller controller, object obj, string partialViewName, Dictionary<string, long> changeTicks)
-        {
-            return Manager.View(controller, obj, partialViewName, false, changeTicks);
-        }
-
-        public static string GetOrCreateTabID(Controller c)
+        public static string GetOrCreateTabID(ControllerBase c)
         {
             return Manager.GetOrCreateTabID(c);
         }
@@ -142,59 +132,68 @@ namespace Signum.Web
             return tabID;
         }
 
-        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix)
+        public static PartialViewResult PopupView(this ControllerBase controller, TypeContext tc)
         {
-            return Manager.PopupView(controller, entity, prefix, null, null);
+            return Manager.PopupView(controller, tc, null);
         }
 
-        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix, string partialViewName)
+        public static PartialViewResult PopupView(this ControllerBase controller, TypeContext tc, string partialViewName)
         {
-            return Manager.PopupView(controller, entity, prefix, partialViewName, null);
+            return Manager.PopupView(controller, tc, partialViewName);
         }
 
-        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix, Dictionary<string, long> changeTicks)
+        public static PartialViewResult PopupView(this ControllerBase controller, IIdentifiable entity, string prefix)
         {
-            return Manager.PopupView(controller, entity, prefix, null, changeTicks);
+            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
+            return Manager.PopupView(controller, tc, null);
         }
 
-        public static PartialViewResult PopupView<T>(this Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
+        public static PartialViewResult PopupView(this ControllerBase controller, IIdentifiable entity, string prefix, string partialViewName)
         {
-            return Manager.PopupView(controller, entity, prefix, partialViewName, changeTicks);
+            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
+            return Manager.PopupView(controller, tc, partialViewName);
         }
 
-        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix)
+        public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc)
         {
-            return Manager.PartialView(controller, entity, prefix, null, null);
+            return Manager.PartialView(controller, tc, null);
         }
 
-        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, string partialViewName)
+        public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc, string partialViewName)
         {
-            return Manager.PartialView(controller, entity, prefix, partialViewName, null);
+            return Manager.PartialView(controller, tc, partialViewName);
         }
 
-        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, Dictionary<string, long> changeTicks)
+        public static PartialViewResult PartialView(this ControllerBase controller, IIdentifiable entity, string prefix)
         {
-            return Manager.PartialView(controller, entity, prefix, null, changeTicks);
+            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
+            return Manager.PartialView(controller, tc, null);
         }
 
-        public static PartialViewResult PartialView<T>(this Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
+        public static PartialViewResult PartialView(this ControllerBase controller, IIdentifiable entity, string prefix, string partialViewName)
         {
-            return Manager.PartialView(controller, entity, prefix, partialViewName, changeTicks);
+            TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
+            return Manager.PartialView(controller, tc, partialViewName);
         }
 
-        public static ViewResult Find(Controller controller, object queryName)
+        public static ViewResult Find(ControllerBase controller, object queryName)
         {
             return Find(controller, new FindOptions(queryName));
         }
 
-        public static ViewResult Find(Controller controller, FindOptions findOptions)
+        public static ViewResult Find(ControllerBase controller, FindOptions findOptions)
         {
             return Manager.Find(controller, findOptions);
         }
 
-        public static PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string suffix)
+        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
         {
-            return Manager.PartialFind(controller, findOptions, prefix, suffix);
+            return Manager.PartialFind(controller, findOptions, context);
+        }
+
+        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, string prefix)
+        {
+            return Manager.PartialFind(controller, findOptions, new Context(null, prefix));
         }
 
         public static Lite FindUnique(FindUniqueOptions options)
@@ -207,9 +206,14 @@ namespace Signum.Web
             return Manager.QueryCount(options);
         }
 
-        public static PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix, string suffix)
+        public static PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, Context context)
         {
-            return Manager.Search(controller, findOptions, top, prefix, suffix);
+            return Manager.Search(controller, findOptions, top, context);
+        }
+
+        public static PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, string prefix)
+        {
+            return Manager.Search(controller, findOptions, top, new Context(null, prefix));
         }
 
         internal static List<Filter> ExtractFilters(HttpContextBase httpContext, object queryName)
@@ -300,7 +304,7 @@ namespace Signum.Web
             return Manager.ExtractEntity(controller, null);
         }
 
-        public static ModifiableEntity UntypedExtractEntity(this Controller controller, string prefix)
+        public static ModifiableEntity UntypedExtractEntity(this ControllerBase controller, string prefix)
         {
             return Manager.ExtractEntity(controller, prefix);
         }
@@ -340,6 +344,21 @@ namespace Signum.Web
             get { return Manager.TypesToNames; }
         }
 
+        public static void RegisterTypeName<T>()
+        {
+            RegisterTypeName(typeof(T));
+        }
+
+        public static void RegisterTypeName(Type type)
+        {
+            RegisterTypeName(type, type.Name);
+        }
+
+        public static void RegisterTypeName(Type type, string name)
+        {
+            TypesToNames.Add(type, name);
+        }
+
         internal static void ConfigureEntityBase(EntityBase eb, Type entityType, bool admin)
         {
             if (Manager.EntitySettings.ContainsKey(entityType))
@@ -373,11 +392,19 @@ namespace Signum.Web
         {
             return Manager.IsFindable(queryName);
         }
-
-        public static ActionResult ModelState(ModelStateDictionary ModelState)
+        public static ContentResult ModelState(ModelStateData modelStateData)
         {
-            //Remove this
-            return new ContentResult { Content = "{\"ModelState\":" + ModelState.ToJsonData() + "}" };
+            return Manager.ModelState(modelStateData);
+        }
+
+        public static ContentResult ModelState(ModelStateDictionary modelState)
+        {
+            return Manager.ModelState(new ModelStateData(modelState));
+        }
+
+        internal static string OnPartialViewName(ModifiableEntity entity)
+        {
+            return Manager.EntitySettings.GetOrThrow(entity.GetType(), Resources.TheresNotAViewForType0).OnPartialViewName(entity); 
         }
     }
     
@@ -414,12 +441,10 @@ namespace Signum.Web
         public event Func<Type, bool> GlobalIsReadOnly;
         public event Func<object, bool> GlobalIsFindable;
 
-
-        //public void AddEntitySettings(Type type, string ViewPrefix)
-        //{
-        //    if (!type.Name.EndsWith("DN")) throw new ApplicationException("This method is only valid for xxxDN entities");
-        //    EntitySettings.Add(type, new EntitySettings(false) { PartialViewName = ViewPrefix + type.Name.RemoveRight(2) + "IU.ascx" });
-        //}
+        public NavigationManager()
+        {
+            TypesToNames = new Dictionary<Type, string>();
+        }
 
         public void Start()
         {
@@ -428,7 +453,7 @@ namespace Signum.Web
             TypesToURLNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UrlName ?? Reflector.CleanTypeName(kvp.Key));
             URLNamesToTypes = TypesToURLNames.Inverse(StringComparer.InvariantCultureIgnoreCase);
 
-            TypesToNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.TypeName ?? kvp.Key.Name);
+            TypesToNames.AddRange(EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.TypeName ?? kvp.Key.Name));
             NamesToTypes = TypesToNames.Inverse(); 
 
             if (DynamicQueryManager.Current != null)
@@ -471,43 +496,42 @@ namespace Signum.Web
             return QueryUtils.GetNiceQueryName(queryName); 
         }
 
-        protected internal virtual ViewResult View(Controller controller, object obj, string partialViewName, bool admin, Dictionary<string, long> changeTicks)
+        protected internal string GetOrCreateTabID(ControllerBase c)
         {
-            Type type = obj.GetType();
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(type).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(obj.GetType()));
+            if (c.ControllerContext.HttpContext.Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
+            {
+                string tabID = c.ControllerContext.HttpContext.Request.Form[ViewDataKeys.TabId];
+                if (tabID.HasText())
+                    return tabID;
+            }
+            return Guid.NewGuid().ToString();
+        }
 
-            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? es.OnPartialViewName((ModifiableEntity)obj);
-            IdentifiableEntity entity = (IdentifiableEntity)obj;
-            controller.ViewData.Model = entity;
-            controller.ViewData[ViewDataKeys.EntityTypeNiceName] = type.NiceName();
-            controller.ViewData[TypeContext.Id] = entity.IdOrNull != null ? entity.Id.ToString() : "";
+        protected internal virtual ViewResult View(ControllerBase controller, IdentifiableEntity entity, string partialViewName, bool admin)
+        {
+            Type type = entity.GetType();
+            
+            TypeContext tc = TypeContextUtilities.UntypedNew(entity, "");
+            controller.ViewData.Model = tc; 
 
-            if (controller.ViewData.Keys.Count(s => s==ViewDataKeys.PageTitle)==0)
+            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? Navigator.OnPartialViewName(entity);
+            
+            if (!controller.ViewData.Keys.Any(s => s==ViewDataKeys.PageTitle))
                 controller.ViewData[ViewDataKeys.PageTitle] = entity.ToStr;
-            if (changeTicks != null)
-                controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
+            
             string tabID = GetOrCreateTabID(controller);
             controller.ViewData[ViewDataKeys.TabId] = tabID;
 
             if (!Navigator.IsNavigable(type, admin))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(obj.GetType()));
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(type));
 
             if (Navigator.IsReadOnly(type))
-            {
-                if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
-                {
-                    StyleContext sc = (StyleContext)controller.ViewData[ViewDataKeys.StyleContext];
-                    sc.ReadOnly = true;
-                    controller.ViewData[ViewDataKeys.StyleContext] = sc;
-                }
-                else
-                    controller.ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
-            }
+                tc.ReadOnly = true;
 
-            if (GraphExplorer.FromRoot(entity).Any(m => m.GetType().HasAttribute<Reactive>()))
+            if (controller.IsReactive() || GraphExplorer.FromRoot(entity).Any(m => m.GetType().HasAttribute<Reactive>()))
             {
                 controller.ViewData[ViewDataKeys.Reactive] = true;
-                controller.Session[tabID] = entity;
+                controller.ControllerContext.HttpContext.Session[tabID] = entity;
             }
 
             return new ViewResult()
@@ -519,53 +543,19 @@ namespace Signum.Web
             };
         }
 
-        protected internal string GetOrCreateTabID(Controller c)
+        protected internal virtual PartialViewResult PopupView(ControllerBase controller, TypeContext tc, string partialViewName)
         {
-            if (c.Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
-            {
-                string tabID = c.Request.Form[ViewDataKeys.TabId];
-                if (tabID.HasText())
-                    return tabID;
-            }
-            return Guid.NewGuid().ToString();
-        }
-
-        protected internal virtual PartialViewResult PopupView<T>(Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
-        {
-            Type cleanType = entity != null ? entity.GetType() : typeof(T);
-            if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
-            {
-                TypeContext entityTC = (TypeContext)(object)entity;
-                cleanType = Reflector.ExtractLite(entityTC.Type) ?? entityTC.Type;
-            }
-
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
+            TypeContext cleanTC = TypeContextUtilities.CleanTypeContext(tc);
+            Type cleanType = cleanTC.UntypedValue.GetType();
 
             if (!Navigator.IsViewable(cleanType, false))
                 throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(cleanType.Name));
 
-            string url = partialViewName ?? es.OnPartialViewName((ModifiableEntity)(object)entity);
-
-            controller.ViewData[ViewDataKeys.MainControlUrl] = url;
-            controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            if (changeTicks != null)
-                controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
-
+            controller.ViewData.Model = cleanTC;
+            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);
+            
             if (Navigator.IsReadOnly(cleanType))
-            {
-                if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
-                {
-                    StyleContext sc = (StyleContext)controller.ViewData[ViewDataKeys.StyleContext];
-                    sc.ReadOnly = true;
-                    controller.ViewData[ViewDataKeys.StyleContext] = sc;
-                }
-                else
-                    controller.ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
-            }
-
-            //controller.ViewData[ViewDataKeys.StyleContext] = StyleContext.RegisterCleanStyleContext(false);
-
-            controller.ViewData.Model = entity;
+                cleanTC.ReadOnly = true;
             
             return new PartialViewResult
             {
@@ -575,75 +565,44 @@ namespace Signum.Web
             };
         }
 
-        protected internal virtual PartialViewResult PartialView<T>(Controller controller, T entity, string prefix, string partialViewName, Dictionary<string, long> changeTicks)
+        protected internal virtual PartialViewResult PartialView(ControllerBase controller, TypeContext tc, string partialViewName)
         {
-            Type cleanType = entity != null ? entity.GetType() : typeof(T);
-            if (entity != null && typeof(TypeContext).IsAssignableFrom(entity.GetType()))
-            {
-                TypeContext entityTC = (TypeContext)(object)entity;
-                cleanType = Reflector.ExtractLite(entityTC.Type) ?? entityTC.Type;
-            }
-
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanType).ThrowIfNullC(Resources.TheresNotAViewForType0.Formato(cleanType));
+            TypeContext cleanTC = TypeContextUtilities.CleanTypeContext(tc);
+            Type cleanType = cleanTC.UntypedValue.GetType();
 
             if (!Navigator.IsViewable(cleanType, false))
                 throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
-            string url = partialViewName ?? es.OnPartialViewName((ModifiableEntity)(object)entity);
-
-            controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            controller.ViewData.Model = entity;
-            if (changeTicks != null)
-                controller.ViewData[ViewDataKeys.ChangeTicks] = changeTicks;
+            controller.ViewData.Model = cleanTC;
 
             if (Navigator.IsReadOnly(cleanType))
-            {
-                if (controller.ViewData.ContainsKey(ViewDataKeys.StyleContext))
-                {
-                    StyleContext sc = (StyleContext)controller.ViewData[ViewDataKeys.StyleContext];
-                    sc.ReadOnly = true;
-                    controller.ViewData[ViewDataKeys.StyleContext] = sc;
-                }
-                else
-                    controller.ViewData[ViewDataKeys.StyleContext] = new StyleContext(false) { ReadOnly = true };
-            }
-
-            //if (controller.ViewData.ContainsKey(ViewDataKeys.EmbeddedControl))
-            //    controller.Response.Write("<input type='hidden' id='{0}' name='{0}' value='' />".Formato(TypeContext.Compose(prefix, EntityBaseKeys.IsNew))); 
+                cleanTC.ReadOnly = true;
 
             return new PartialViewResult
             {
-                ViewName = url,
+                ViewName = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue),
                 ViewData = controller.ViewData,
                 TempData = controller.TempData
             };
         }
 
-        protected internal virtual ViewResult Find(Controller controller, FindOptions findOptions)
+        protected internal virtual ViewResult Find(ControllerBase controller, FindOptions findOptions)
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
-
-            List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
-
             foreach (FilterOption opt in findOptions.FilterOptions)
-            {
                 opt.Token = QueryToken.Parse(queryDescription, opt.ColumnName);
-            }
 
-            //controller.ViewData[ViewDataKeys.SearchResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.SearchResourcesRoute] ?? "../../";
+            controller.ViewData.Model = new Context(null, "");
+
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
-            controller.ViewData[ViewDataKeys.FilterColumns] = columns;
+
+            controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC(Resources.MissingQuerySettingsForQueryName0.Formato(findOptions.QueryName.ToString())).Top;
+
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
-            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
-            controller.ViewData[ViewDataKeys.EntityType] = entitiesType;
-            controller.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, true);
-            controller.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
-
+            
             return new ViewResult()
             {
                 ViewName = SearchWindowUrl,
@@ -695,29 +654,18 @@ namespace Signum.Web
             }
         }
 
-        protected internal virtual PartialViewResult PartialFind(Controller controller, FindOptions findOptions, string prefix, string suffix)
+        protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
-
-            List<StaticColumn> columns = queryDescription.StaticColumns.Where(a => a.Filterable).ToList();
-
-            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            controller.ViewData.Model = context;
             controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
-            controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            controller.ViewData[ViewDataKeys.PopupSufix] = suffix ?? "";
-
-            controller.ViewData[ViewDataKeys.FilterColumns] = columns;
+            
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.Top] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC(Resources.MissingQuerySettingsForQueryName0.Formato(findOptions.QueryName.ToString())).Top;
-            //controller.ViewData[ViewDataKeys.QuerySettings] = QuerySettings.TryGetC(findOptions.QueryName).ThrowIfNullC("QuerySettings not present for QueryName {0}".Formato(findOptions.QueryName.ToString()));
+            controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
+            
             if (controller.ViewData.Keys.Count(s => s == ViewDataKeys.PageTitle) == 0)
                 controller.ViewData[ViewDataKeys.PageTitle] = SearchTitle(findOptions.QueryName);
-            controller.ViewData[ViewDataKeys.EntityTypeName] = entitiesType.Name;
-            controller.ViewData[ViewDataKeys.EntityType] = entitiesType;
-            controller.ViewData[ViewDataKeys.Create] = findOptions.Create && Navigator.IsCreable(entitiesType, true);
-            controller.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
             
             return new PartialViewResult
             {
@@ -739,23 +687,20 @@ namespace Signum.Web
             return GetNiceQueryName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(Controller controller, FindOptions findOptions, int? top, string prefix, string suffix)
+        protected internal virtual PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, Context context)
         {
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-            Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
-
             var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
             var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(findOptions.QueryName, null, filters, orders, top);
 
-            //controller.ViewData[ViewDataKeys.ResourcesRoute] = ConfigurationManager.AppSettings[ViewDataKeys.ResourcesRoute] ?? "../../";
+            controller.ViewData.Model = context;
+            
+            controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
+            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            
             controller.ViewData[ViewDataKeys.Results] = queryResult;
-            controller.ViewData[ViewDataKeys.AllowMultiple] = findOptions.AllowMultiple;
-            controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-            controller.ViewData[ViewDataKeys.PopupSufix] = suffix ?? "";
-            controller.ViewData[ViewDataKeys.View] = findOptions.View && Navigator.IsNavigable(entitiesType, true);
-
+            
             if (queryResult != null && queryResult.Rows != null && queryResult.Rows.Length > 0 && queryResult.VisibleColumns.Count() > 0)
             {
                 int entityColumnIndex = queryResult.Columns.OfType<StaticColumn>().IndexOf(c => c.IsEntity);
@@ -883,7 +828,7 @@ namespace Signum.Web
         protected internal virtual ModifiableEntity ExtractEntity(ControllerBase controller, string prefix)
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             
             if (form.AllKeys.Any(s => s == ViewDataKeys.Reactive) && (string.IsNullOrEmpty(prefix) || !prefix.Contains("_New")))
             {
@@ -892,7 +837,7 @@ namespace Signum.Web
                 if (mod == null)
                     throw new InvalidOperationException(Resources.YourSessionHasTimedOutClickF5ToReloadTheEntity);
 
-                RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Separator + EntityBaseKeys.RuntimeInfo]);
+                RuntimeInfo parentRuntimeInfo = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
                 if (mod.GetType() == parentRuntimeInfo.RuntimeType &&
                     (typeof(EmbeddedEntity).IsAssignableFrom(mod.GetType()) || ((IIdentifiable)mod).IdOrNull == parentRuntimeInfo.IdOrNull))
                 {
@@ -914,8 +859,7 @@ namespace Signum.Web
             where T:class, IIdentifiable
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContext.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
-
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
             return new Lite<T>(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
         }
 
@@ -1004,40 +948,10 @@ namespace Signum.Web
 
             return true;
         }
-    }
 
-    public static class ModelStateExtensions
-    {
-        public static void FromContext(this ModelStateDictionary modelState, MappingContext context)
+        internal ContentResult ModelState(ModelStateData modelStateData)
         {
-            if (context.GlobalErrors.Count > 0)
-                foreach (var p in context.GlobalErrors)
-                    foreach (var v in p.Value)
-                        modelState.AddModelError(p.Key, v, context.GlobalInputs.TryGetC(p.Key));
+            return new ContentResult { Content = modelStateData.ToString() };
         }
-
-        public static void FromDictionary(this ModelStateDictionary modelState, Dictionary<string, List<string>> errors, NameValueCollection form)
-        {
-            if (errors != null)
-                foreach (var p in errors)
-                    foreach (var v in p.Value)
-                        modelState.AddModelError(p.Key, v, form[p.Key]);
-        }
-
-        public static string ToJsonData(this ModelStateDictionary modelState)
-        {
-            return modelState.ToJSonObjectBig(
-                key => key.Quote(),
-                value => value.Errors.ToJSonArray(me => me.ErrorMessage.Quote()));
-        }
-
-        //http://www.crankingoutcode.com/2009/02/01/IssuesWithAddModelErrorSetModelValueWithMVCRC1.aspx
-        //Necesary to set model value if you add a model error, otherwise some htmlhelpers throw exception
-        public static void AddModelError(this ModelStateDictionary modelState, string key, string errorMessage, string attemptedValue)
-        {
-            modelState.AddModelError(key, errorMessage);
-            modelState.SetModelValue(key, new ValueProviderResult(attemptedValue, attemptedValue, null));
-        }
-
     }
 }

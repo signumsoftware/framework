@@ -13,6 +13,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine;
 using System.Configuration;
 using Signum.Web.Properties;
+using System.Web.Routing;
 #endregion
 
 namespace Signum.Web
@@ -24,15 +25,15 @@ namespace Signum.Web
 
     public class EntityCombo : EntityBase
     {
-        public readonly Dictionary<string, object> ComboHtmlProperties = new Dictionary<string, object>(0);
+        public readonly RouteValueDictionary ComboHtmlProperties = new RouteValueDictionary();
         
         public bool Preload { get; set; }
         public List<Lite> Data { get; set; }
         public int Size { get; set; }
 
-        public EntityCombo(string prefix)
+        public EntityCombo(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Prefix = prefix;
             Size = 0;
             Preload = true;
             View = false;
@@ -43,6 +44,7 @@ namespace Signum.Web
 
         public override void SetReadOnly()
         {
+            Parent.ReadOnly = true;
             ReadOnly = true;
             Find = false;
             Create = false;

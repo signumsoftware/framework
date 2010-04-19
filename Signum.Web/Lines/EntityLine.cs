@@ -23,15 +23,16 @@ namespace Signum.Web
         public bool Autocomplete { get; set; }
         public bool Navigate { get; set; }
         
-        public EntityLine(string prefix)
+       public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Prefix = prefix;
             Navigate = true;
             Autocomplete = true;        
         }
 
         public override void SetReadOnly()
         {
+            Parent.ReadOnly = true;
             ReadOnly = true;
             Find = false;
             Create = false;

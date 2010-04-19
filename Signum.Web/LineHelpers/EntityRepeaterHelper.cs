@@ -19,85 +19,64 @@ namespace Signum.Web
 {
     public static class EntityRepeaterHelper
     {
-        private static void InternalEntityRepeater<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, EntityRepeater settings)
+        private static string InternalEntityRepeater<T>(this HtmlHelper helper, EntityRepeater entityRepeater)
         {
-            if (!settings.Visible || settings.HideIfNull && typeContext.Value == null)
-                return;
-
-            string prefix = helper.GlobalName(typeContext.Name);
-            MList<T> value = typeContext.Value;  
-            Type elementsCleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
-
-            long? ticks = EntityBaseHelper.GetTicks(helper, prefix, settings);
+            if (!entityRepeater.Visible || entityRepeater.HideIfNull && entityRepeater.UntypedValue == null)
+                return "";
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(helper.HiddenStaticInfo(prefix, new StaticInfo(elementsCleanStaticType) { IsReadOnly = settings.ReadOnly }));
-            sb.AppendLine(helper.Hidden(TypeContext.Compose(prefix, TypeContext.Ticks), ticks.TryToString() ?? ""));
-            
-            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, settings, prefix));
+            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
 
-            sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
+            sb.AppendLine(helper.Hidden(entityRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(entityRepeater.ElementType.CleanType()) { IsReadOnly = entityRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }));
+            sb.AppendLine(helper.Hidden(entityRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, entityRepeater).TryToString() ?? ""));
+
+            sb.AppendLine(EntityBaseHelper.WriteImplementations(helper, entityRepeater));
 
             //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-            if (typeof(EmbeddedEntity).IsAssignableFrom(elementsCleanStaticType))
-                sb.AppendLine("<script type=\"text/javascript\">var {0} = \"{1}\";</script>".Formato(
-                        TypeContext.Compose(prefix, EntityBaseKeys.Template),
-                        EntityBaseHelper.JsEscape(ListBaseHelper.RenderItemContent(helper, prefix, typeContext, (T)(object)Constructor.Construct(typeof(T)), 0, settings, elementsCleanStaticType, elementsCleanStaticType, typeof(Lite).IsAssignableFrom(typeof(T))))));
-
-            sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, settings, new Dictionary<string, object>{{"title", settings.AddElementLinkText}}));
-            sb.AppendLine(ListBaseHelper.WriteFindButton(helper, settings, elementsCleanStaticType));
+            if (entityRepeater.ElementType.IsEmbeddedEntity())
+            {
+                TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
+                sb.AppendLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, entityRepeater.PartialViewName, entityRepeater.ReloadOnChange)));
+            } 
+            
+            sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, entityRepeater, new Dictionary<string, object>{{"title", entityRepeater.AddElementLinkText}}));
+            sb.AppendLine(ListBaseHelper.WriteFindButton(helper, entityRepeater));
 
             sb.AppendLine(helper.Div("", "", "clearall", null)); //To keep create and find buttons' space
 
-            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(prefix, EntityRepeaterKeys.ItemsContainer)));
-            if (value != null)
+            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer)));
+            if (entityRepeater.UntypedValue != null)
             {
-                for (int i = 0; i < value.Count; i++)
-                    sb.Append(InternalRepeaterElement(helper, prefix, value[i], i, settings, typeContext));
+                foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<T>>)entityRepeater.Parent))
+                    sb.Append(InternalRepeaterElement(helper, itemTC, entityRepeater));
             }
             sb.AppendLine("</div>");
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine());
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, entityRepeater));
 
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+            return sb.ToString();
         }
 
-        private static string InternalRepeaterElement<T>(this HtmlHelper helper, string prefix, T value, int index, EntityRepeater settings, TypeContext<MList<T>> typeContext)
+        private static string InternalRepeaterElement<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityRepeater entityRepeater)
         {
-            string indexedPrefix = TypeContext.Compose(prefix, index.ToString());
-            Type cleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
-            bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
-            bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
-            
-            Type cleanRuntimeType = null;
-            if (value != null)
-                cleanRuntimeType = typeof(Lite).IsAssignableFrom(value.GetType()) ? (value as Lite).RuntimeType : value.GetType();
-
-            long? ticks = EntityBaseHelper.GetTicks(helper, indexedPrefix, settings);
-
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(TypeContext.Compose(indexedPrefix, EntityRepeaterKeys.RepeaterElement)));
-            
-            sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityListBaseKeys.Index), index.ToString()));
+            sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)));
 
-            sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new RuntimeInfo(value) { Ticks = ticks }));
+            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
 
-            //if (isIdentifiable || isLite)
-            //    sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new RuntimeInfo<T>(value) { Ticks = ticks }));
-            //else
-            //    sb.AppendLine(helper.HiddenRuntimeInfo(indexedPrefix, new EmbeddedRuntimeInfo<T>(value, false) { Ticks = ticks }));
+            sb.AppendLine(helper.HiddenRuntimeInfo(itemTC));
 
-            if (settings.Remove)
+            if (entityRepeater.Remove)
                 sb.AppendLine(
-                    helper.Button(TypeContext.Compose(indexedPrefix, "btnRemove"),
+                    helper.Button(entityRepeater.Compose("btnRemove"),
                                   "x",
-                                  "ERepOnRemoving({0}, '{1}');".Formato(settings.ToJS(), indexedPrefix),
+                                  "ERepOnRemoving({0}, '{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID),
                                   "lineButton remove",
-                                  new Dictionary<string, object> { { "title", settings.RemoveElementLinkText } }));
+                                  new Dictionary<string, object> { { "title", entityRepeater.RemoveElementLinkText } }));
 
-            sb.AppendLine(ListBaseHelper.RenderItemContentInEntityDiv(helper, indexedPrefix, typeContext, value, index, settings, cleanRuntimeType, cleanStaticType, isLite, true));
+            sb.AppendLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInVisibleDiv, entityRepeater.PartialViewName, entityRepeater.ReloadOnChange));
 
             sb.AppendLine("</div>");
 
@@ -114,15 +93,15 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            EntityRepeater el = new EntityRepeater(helper.GlobalName(context.Name));
+            EntityRepeater el = new EntityRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+
             Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
-            Common.FireCommonTasks(el, context);
+            Common.FireCommonTasks(el);
 
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            using (el)
-                helper.InternalEntityRepeater<S>(context, el);
+            helper.Write(helper.InternalEntityRepeater<S>(el));
         }
     }
 }

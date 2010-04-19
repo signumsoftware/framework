@@ -18,9 +18,9 @@ namespace Signum.Web
 {
     public class EntityList : EntityListBase
     {
-        public EntityList(string prefix)
+        public EntityList(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Prefix = prefix;
         }
 
         public override string ToJS()

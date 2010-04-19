@@ -4,46 +4,49 @@
 <%@ Import Namespace="Signum.Entities" %>
 <%@ Import Namespace="Signum.Entities.Reflection" %>
 <%
-    string sufix = (string)ViewData[ViewDataKeys.PopupSufix];
-    string prefix = Html.GlobalPrefixedName("");
-    string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
-    ModifiableEntity entity = (ModifiableEntity)(Model is TypeContext ? ((TypeContext)Model).UntypedValue : Model);
+    TypeContext modelTC = (TypeContext)ViewData.Model;
 %>
-<div id="<%=Html.GlobalPrefixedName("externalPopupDiv" + sufix)%>">
-<div id="<%=Html.GlobalPrefixedName("modalBackground" + sufix)%>" class="transparent popupBackground"></div>
+<div id="<%=modelTC.Compose("externalPopupDiv")%>">
+<div id="<%=modelTC.Compose("modalBackground")%>" class="transparent popupBackground"></div>
   
-<div id="<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>" class="popupWindow">
+<div id="<%=modelTC.Compose("panelPopup")%>" class="popupWindow">
     <%if (ViewData[ViewDataKeys.OnCancel] != null){ %>
-        <div class="closebox" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnCancel + sufix)%>" onclick="<%=ViewData[ViewDataKeys.OnCancel]%>"></div>
+        <div class="closebox" id="<%=modelTC.Compose(ViewDataKeys.BtnCancel)%>" onclick="<%=ViewData[ViewDataKeys.OnCancel]%>"></div>
     <%} else { %>
-        <div class="closebox" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnCancel + sufix)%>"></div>
+        <div class="closebox" id="<%=modelTC.Compose(ViewDataKeys.BtnCancel)%>"></div>
     <%} %>
-    <div id="<%=Html.GlobalPrefixedName("divPopupDragHandle" + sufix)%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=Html.GlobalPrefixedName("panelPopup" + sufix)%>');">
-        <%if (pageTitle != null)
-          { %>
+    <div id="<%=modelTC.Compose("divPopupDragHandle")%>" class="dragHandle" onmousedown="comienzoMovimiento(event, '<%=modelTC.Compose("panelPopup")%>');">
+        <%
+            string pageTitle = (string)ViewData[ViewDataKeys.PageTitle];
+            if (pageTitle != null)
+          { 
+                %>
         <span class="popupEntityName"><%= pageTitle%></span>
         <%}
           else
           { %>
-        <span class="popupEntityName"><%= entity.GetType().NiceName() %></span><span class="popupTitle"><%= entity.ToString() %></span>
+        <span class="popupEntityName"><%= modelTC.UntypedValue.GetType().NiceName()%></span><span class="popupTitle"><%= modelTC.UntypedValue.TryToString() %></span>
         <%} %>
     </div>
-    <div id="<%=Html.GlobalPrefixedName("divButtonBar" + sufix)%>" class="buttonBar">
-        <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
+    <div id="<%=modelTC.Compose("divButtonBar")%>" class="buttonBar">
+        <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false)){ %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
-            <input type="button" class="OperationDiv" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
+            <input type="button" class="OperationDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
         <%} else{ %>
-            <input type="button" class="OperationDiv" id="<%=Html.GlobalPrefixedName(ViewDataKeys.BtnOk)%>" value="OK" />
+            <input type="button" class="OperationDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" />
          <%} %>    
             
         <%} %>
-        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, entity, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, prefix)%>
+        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, modelTC.ControlID)%>
     </div>
     <div class="clearall"></div>
-    <%= Html.ValidationSummaryAjax(prefix) %>
+    <%= Html.ValidationSummaryAjax(modelTC) %>
+    <% Html.WritePopupHeader(); %>
     <div class="clearall"></div>
-    <div id="<%=Html.GlobalPrefixedName("divMainControl" + sufix)%>" class="divMainControl">
-        <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
+    <div id="<%=modelTC.Compose("divMainControl")%>" class="divMainControl">
+        <%
+          Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); 
+        %>
     </div>
 </div>
 </div>

@@ -7,6 +7,7 @@ using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Web.Properties;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
@@ -25,41 +26,14 @@ namespace Signum.Web
 
     public abstract class EntityBase : BaseLine, IJSRenderer
     {
-        public EntityBase()
-        { 
+        public EntityBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
+        {
             View = true;
             Create = true;
             Find = true;
             Remove = true;
         }
-
-        public string Prefix { get; set; }
-
-        private string parentPrefix;
-        public string ParentPrefix 
-        {
-            get 
-            {
-                if (parentPrefix.HasText())
-                    return parentPrefix;
-
-                int lastIndex = Prefix.LastIndexOf(TypeContext.Separator);
-                parentPrefix = Prefix.Substring(0, lastIndex);
-                return parentPrefix;
-            }
-        }
-
-        public string LocalName(string sufix)
-        {
-            return TypeContext.Compose(Prefix, sufix); 
-        }
-
-
-        public string ParentName(string sufix)
-        {
-            return TypeContext.Compose(ParentPrefix, sufix);
-        }
-
 
         public Implementations Implementations { get; set; }
         
@@ -67,6 +41,7 @@ namespace Signum.Web
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
+        public bool ReadOnlyEntity { get; set; }
 
         public string OnEntityChanged { get; set; }
         
@@ -79,7 +54,7 @@ namespace Signum.Web
                     return onChangedTotal;
                 
                 string doReload = (ReloadOnChange) ?
-                    (ReloadFunction ?? "ReloadEntity('{0}','{1}');".Formato(ReloadControllerUrl, ParentPrefix)) :
+                    (ReloadFunction ?? "ReloadEntity('{0}','{1}');".Formato(ReloadControllerUrl, Parent.Parent.ControlID)) :
                     "";
                 string total = OnEntityChanged + doReload;
                 
@@ -94,18 +69,18 @@ namespace Signum.Web
 
         public abstract string ToJS();
 
-        public virtual string OptionsJS()
+        public string OptionsJS()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("{");
+            return OptionsJSInternal().ToJS();
+        }
 
-            sb.Append("prefix:'{0}'".Formato(Prefix));
-
-            if (OnChangedTotal.HasText())
-                sb.Append(",onEntityChanged:{0}".Formato(OnChangedTotal));
-
-            sb.Append("}");
-            return sb.ToString();
+        protected virtual JsOptionsBuilder OptionsJSInternal()
+        {
+            return new JsOptionsBuilder(false)
+            {
+                {"prefix", ControlID.TrySingleQuote()},
+                {"onEntityChanged", OnChangedTotal}, 
+            };
         }
 
         protected JsViewOptions DefaultJsViewOptions()
@@ -152,6 +127,44 @@ namespace Signum.Web
             if (!Remove)
                 return "";
             return Removing ?? DefaultRemoving();
+        }
+
+        internal Type CleanRuntimeType 
+        { 
+            get 
+            {
+                if (UntypedValue == null)
+                    return null;
+
+                return typeof(Lite).IsAssignableFrom(UntypedValue.GetType()) ? (UntypedValue as Lite).RuntimeType : UntypedValue.GetType();
+            }
+        }
+
+        internal bool? IsNew
+        {
+            get 
+            {
+                return (UntypedValue as IIdentifiable).TryCS(i => i.IsNew) ??
+                       (UntypedValue as Lite).TryCS(l => l.IdOrNull==null);
+            }
+        }
+
+        internal int? IdOrNull
+        {
+            get
+            {
+                return (UntypedValue as IIdentifiable).TryCS(i => i.IdOrNull) ??
+                       (UntypedValue as Lite).TryCS(l => l.IdOrNull);
+            }
+        }
+
+        internal string ToStr
+        {
+            get 
+            {
+                return (UntypedValue as IIdentifiable).TryCC(i => i.ToStr) ??
+                       (UntypedValue as Lite).TryCC(l => l.ToStr);
+            }
         }
     }
 }

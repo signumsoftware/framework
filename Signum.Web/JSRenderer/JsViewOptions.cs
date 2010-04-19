@@ -24,43 +24,18 @@ namespace Signum.Web
         {
             renderer = () =>
             {
-                StringBuilder sb = new StringBuilder();
-
-                if (Prefix.HasText())
-                    sb.Append("prefix:'{0}',".Formato(Prefix));
-
-                if (ContainerDiv.HasText())
-                    sb.Append("containerDiv:'{0}',".Formato(ContainerDiv));
-
-                if (ControllerUrl.HasText())
-                    sb.Append("controllerUrl:'{0}',".Formato(ControllerUrl));
-
-                if (OnOk.HasText())
-                    sb.Append("onOk:{0},".Formato(OnOk));
-
-                if (OnOkClosed.HasText())
-                    sb.Append("onOkClosed:{0},".Formato(OnOkClosed));
-
-                if (OnCancelled.HasText())
-                    sb.Append("onCancelled:{0},".Formato(OnCancelled));
-
-                if (Type.HasText())
-                    sb.Append("type:'{0}',".Formato(Type));
-
-                if (Id.HasValue)
-                    sb.Append("id:'{0}',".Formato(Id.Value.ToString()));
-
-                if (PartialViewName.HasText())
-                    sb.Append("partialViewName:'{0}',".Formato(PartialViewName));
-
-                if (RequestExtraJsonData.HasText())
-                    sb.Append("requestExtraJsonData:{0},".Formato(RequestExtraJsonData));
-
-                string result = sb.ToString();
-
-                return result.HasText() ? 
-                    "{" + result.Substring(0, result.Length - 1) + "}" :
-                    null; //Instead of "" so we can use Combine string extension
+                return new JsOptionsBuilder(false)
+                {
+                    {"prefix", Prefix.TrySingleQuote()},
+                    {"containerDiv", ContainerDiv.TrySingleQuote()},
+                    {"controllerUrl", ControllerUrl.TrySingleQuote()},
+                    {"onOk", OnOk},
+                    {"onOkClosed", OnOkClosed},
+                    {"onCancelled", OnCancelled},
+                    {"type", Type.TrySingleQuote()},
+                    {"partialViewName", PartialViewName.TrySingleQuote()},
+                    {"requestExtraJsonData", RequestExtraJsonData},
+                }.ToJS();
             };
         }
     }

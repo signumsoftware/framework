@@ -14,8 +14,8 @@
 }
 
 function CloseChooser(urlController, onOk, onCancel, prefix) {
-    var container = $('#' + prefix + "externalPopupDiv").parent();
-    $('#' + prefix + sfBtnCancel).click();
+    var container = $('#' + prefix.compose("externalPopupDiv")).parent();
+    $('#' + prefix.compose(sfBtnCancel)).click();
     $.ajax({
         type: "POST",
         url: urlController,
@@ -34,7 +34,7 @@ function QuickLinkClickServerAjax(urlController, findOptionsRaw, prefix) {
     $.ajax({
         type: "POST",
         url: urlController,
-        data: findOptionsRaw + qp(sfPrefix, newPrefix) + qp("prefixEnd", "S"),
+        data: findOptionsRaw + qp(sfPrefix, newPrefix),
         async: false,
         dataType: "html",
         success: function(msg) {
@@ -44,9 +44,9 @@ function QuickLinkClickServerAjax(urlController, findOptionsRaw, prefix) {
                 ShowErrorMessages(newPrefix, modelState, true, "*");
             }
             else {
-                $('#' + prefix + "divASustituir").html(msg);
-                ShowPopup(newPrefix, prefix + "divASustituir", "modalBackgroundS", "panelPopupS");
-                $('#' + newPrefix + sfBtnCancelS).click(function() { $('#' + prefix + "divASustituir").html("") });
+                $('#' + prefix.compose("divASustituir")).html(msg);
+                ShowPopup(newPrefix, prefix.compose("divASustituir"), "modalBackground", "panelPopup");
+                $('#' + newPrefix.compose(sfBtnCancel)).click(function() { $('#' + prefix.compose("divASustituir")).html("") });
             }
         }
     });
