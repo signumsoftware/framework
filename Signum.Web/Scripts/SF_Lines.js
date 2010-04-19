@@ -1165,7 +1165,7 @@ function GetSFInfoParams(prefix) {
 }*/
 
 function AutocompleteOnSelected(controlId, data) {
-    var prefix = controlId.substr(0, controlId.indexOf(sfToStr));
+    var prefix = controlId.substr(0, controlId.indexOf(sfToStr) - 1);
     var info = RuntimeInfoFor(prefix);
 	info.setEntity(data.type, data.id)
         .ticks(new Date().getTime());

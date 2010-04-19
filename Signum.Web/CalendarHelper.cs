@@ -93,26 +93,26 @@ namespace Signum.Web
     public static class CalendarHelper
     {
         public static Action<HtmlHelper, StringBuilder> IncludeCss;
-
+        public static string jQueryPrefix = "";
         //jQuery ui DatePicker
         public static string Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
             StringBuilder sb = new StringBuilder();
             //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
-            sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/jquery.ui.core.js",
-                "Scripts/jqueryui/jquery.ui.datepicker.js",
-                "Scripts/jqueryui/i18n/jquery.ui.datepicker-es.js"));
+            sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/" + jQueryPrefix + "ui.core.js",
+                "Scripts/jqueryui/"+ jQueryPrefix + "ui.datepicker.js",
+                "Scripts/jqueryui/i18n/" + jQueryPrefix + "ui.datepicker-es.js"));
 
             //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
 
             if (IncludeCss != null)
                 IncludeCss(helper, sb);
             else
-                sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/jquery.ui.all.css",
-                    "Scripts/jqueryui/jquery.ui.base.css",
-                    "Scripts/jqueryui/jquery.ui.core.css",
-                    "Scripts/jqueryui/jquery.ui.datepicker.css",
-                    "Scripts/jqueryui/jquery.ui.theme.css"));
+                sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/" + jQueryPrefix + "ui.all.css",
+                    "Scripts/jqueryui/" + jQueryPrefix + "ui.base.css",
+                    "Scripts/jqueryui/" + jQueryPrefix + "ui.core.css",
+                    "Scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.css",
+                    "Scripts/jqueryui/" + jQueryPrefix + "ui.theme.css"));
 
 
             sb.AppendLine(
