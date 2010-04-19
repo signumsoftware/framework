@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Test;
 using Signum.Engine.Maps;
 using Signum.Web.Sample.Properties;
+using Signum.Entities;
 
 namespace Signum.Web.Sample
 {
@@ -73,7 +74,7 @@ namespace Signum.Web.Sample
 
             Constructor.Start(new ConstructorManager
             {
-                Constructors = new Dictionary<Type, Func<Controller, object>>
+                Constructors = new Dictionary<Type, Func<ModifiableEntity>>
                 {
                     //{ typeof(FuturoTomadorDN), c => new FuturoTomadorDN{DatosContacto = new DatosContactoDN().ToLiteFat() }},
                 }
@@ -81,7 +82,7 @@ namespace Signum.Web.Sample
 
             MusicClient.Start();
 
-            Navigator.Manager.NormalPageUrl = "Views/Shared/NormalPage";
+            //Navigator.Manager.NormalPageUrl = "Views/Shared/NormalPage";
             Navigator.Start();
         }
 

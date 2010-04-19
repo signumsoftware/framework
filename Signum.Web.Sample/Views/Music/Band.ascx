@@ -10,7 +10,7 @@ using (var e = Html.TypeContext<BandDN>())
 {
 	Html.ValueLine(e, f => f.Name);
 	Html.EntityList(e, f => f.Members);
-    Html.EntityLine(e, f => f.LastAward, el => 
+    Html.EntityLineDetail(e, f => f.LastAward, el => 
     {
         //el.OnEntityChanged = "window.alert('hola');";
         //el.Creating = EntityLine.JsCreating(el, new JsViewOptions { PartialViewName = "Views/Music/Award" }).ToJS();

@@ -85,7 +85,6 @@
     <Content Include="Global.asax" />
     <Content Include="Views\Shared\LogOnUserControl.ascx" />
     <Content Include="Views\Shared\Menu.ascx" />
-    <Content Include="Views\Shared\NormalPage.aspx" />
     <Content Include="Views\Shared\WidgetView.ascx" />
     <Content Include="Web.config" />
     <Content Include="Scripts\MicrosoftAjax.js" />
@@ -224,13 +223,13 @@
     <Content Include="Views\Music\Label.ascx" />
     <Content Include="Views\Music\PersonalAward.ascx" />
     <Content Include="Views\Music\Song.ascx" />
-    <Content Include="Views\Shared\Site.Master" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Content Include="Views\Shared\Site.Master" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

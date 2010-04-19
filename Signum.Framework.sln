@@ -38,15 +38,15 @@ Global
 		SccProjectUniqueName5 = Signum.Web\\Signum.Web.csproj
 		SccProjectName5 = Signum.Web
 		SccLocalPath5 = Signum.Web
-		SccProjectUniqueName6 = Signum.Web.Sample\\Signum.Web.Sample.csproj
-		SccProjectName6 = Signum.Web.Sample
-		SccLocalPath6 = Signum.Web.Sample
-		SccProjectUniqueName7 = Signum.Web.Sample.Tests\\Signum.Web.Sample.Tests.csproj
-		SccProjectName7 = Signum.Web.Sample.Tests
-		SccLocalPath7 = Signum.Web.Sample.Tests
-		SccProjectUniqueName8 = Signum.Windows\\Signum.Windows.csproj
-		SccProjectName8 = Signum.Windows
-		SccLocalPath8 = Signum.Windows
+		SccProjectUniqueName6 = Signum.Web.Sample.Tests\\Signum.Web.Sample.Tests.csproj
+		SccProjectName6 = Signum.Web.Sample.Tests
+		SccLocalPath6 = Signum.Web.Sample.Tests
+		SccProjectUniqueName7 = Signum.Windows\\Signum.Windows.csproj
+		SccProjectName7 = Signum.Windows
+		SccLocalPath7 = Signum.Windows
+		SccProjectUniqueName8 = Signum.Web.Sample\\Signum.Web.Sample.csproj
+		SccProjectName8 = Signum.Web.Sample
+		SccLocalPath8 = Signum.Web.Sample
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

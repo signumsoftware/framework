@@ -17,19 +17,20 @@ namespace Signum.Web.Sample
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.Manager.EntitySettings.AddRange(new Dictionary<Type, EntitySettings>
+                Navigator.AddSettings(new List<EntitySettings>
                 {
-                    { typeof(AlbumDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "Album" }},
-                    { typeof(AmericanMusicAwardDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "AmericanMusicAward" }},
-                    { typeof(IAuthorDN), new EntitySettings(false) },
-                    { typeof(ArtistDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "Artist" }},
-                    { typeof(AwardDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "Award" }},
-                    { typeof(BandDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "Band" }},
-                    { typeof(GrammyAwardDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "GrammyAward" }},
-                    { typeof(LabelDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "Label" }},
-                    { typeof(PersonalAwardDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "PersonalAward" }},
-                    { typeof(SongDN), new EntitySettings(false) { PartialViewName = ViewPrefix + "Song" }},
+                    new EntitySettings<AlbumDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Album" },
+                    new EntitySettings<AmericanMusicAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "AmericanMusicAward" },
+                    new EntitySettings<ArtistDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Artist" },
+                    new EntitySettings<AwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Award" },
+                    new EntitySettings<BandDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Band" },
+                    new EntitySettings<GrammyAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "GrammyAward" },
+                    new EntitySettings<LabelDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Label" },
+                    new EntitySettings<PersonalAwardDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "PersonalAward" },
+                    new EntitySettings<SongDN>(EntityType.Default) { PartialViewName = e => ViewPrefix + "Song" },
                 });
+
+                Navigator.RegisterTypeName<IAuthorDN>();
             }
         }
     }
