@@ -1,4 +1,8 @@
-﻿$(function() { $('#form input[type=text]').keypress(function(e) { return e.which != 13 }) })
+﻿/*window['Autocompleter'] = Autocompleter;
+window['Autocompleter.prototype'] = Autocompleter.prototype;
+window['AutocompleteOnSelected'] = AutocompleteOnSelected;*/
+
+$(function() { $('#form input[type=text]').keypress(function(e) { return e.which != 13 }) })
 
 /*window['Autocompleter'] = Autocompleter;
 window['Autocompleter.prototype'] = Autocompleter.prototype;
@@ -27,7 +31,7 @@ Autocompleter = function(controlId, url, _options) {
     self.resultClass = "ddlAuto";
     self.resultSelectedClass = "ddlAutoOn";
     self.$resultDiv = $("<div id='OptOPTVALUEID' class='" + self.resultClass + "'></div>");
-    self.create();
+    self.create();   
 };
 
 Autocompleter.prototype = {
@@ -107,25 +111,23 @@ Autocompleter.prototype = {
                     var $divsCurrentResults = self.$dd.children("." + self.resultClass);
 
                     var i = 0;
-                    for (var result in results) {
+                    for (var l = results.length; i < l; i++) {
                         if (i < prevCount) {
-                            $divsCurrentResults.eq(i).html(self.process(input, results[result])).data("data", results[result]);
+                            $divsCurrentResults.eq(i).html(self.process(input, results[i])).data("data", results[i]);
                             //   //console.log("Replacing " + i + " element");
                         }
                         else {
                             //  //console.log("Adding a new element");
                             var $rD = self.$resultDiv.clone();
-                            $rD.append(self.process(input, results[result])).data("data", results[result]);
+                            $rD.append(self.process(input, results[i])).data("data", results[i]);
                             self.$dd.append($rD);
                         }
-                        i++;
                     }
                     var j;
                     for (j = i; j < prevCount; j++) {
                         // //console.log("Removing " + j + " element (" + prevCount + " results)");
                         $divsCurrentResults.eq(j).remove();
                     }
-
 
                     self.currentResults = results;
 
