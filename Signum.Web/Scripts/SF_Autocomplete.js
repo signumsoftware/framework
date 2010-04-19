@@ -8,7 +8,6 @@ $(function() { $('#form input[type=text]').keypress(function(e) { return e.which
 window['Autocompleter.prototype'] = Autocompleter.prototype;
 window['AutocompleteOnSelected'] = AutocompleteOnSelected;*/
 Autocompleter = function(controlId, url, _options) {
-    //console.log("constructor");
     var self = this;
     self.options = $.extend({
         minChars: 1,
@@ -40,12 +39,9 @@ Autocompleter.prototype = {
 
         this.$control.bind({
             keyup: function(e) {
-                //console.log("_keyup");
                 self.clear(e.which ? e.which : e.keyCode);
-                // self.keyup(e.which ? e.which : e.keyCode);
             },
             keydown: function(e) {
-                //self.clear(e.which ? e.which : e.keyCode);
                 self.keydown(e);
             },
             click: function(e) {
@@ -53,7 +49,6 @@ Autocompleter.prototype = {
                 if (e.stopPropagation) e.stopPropagation();
             },
             focusin: function(e) {
-                //console.log("focusin" + self.currentResults);
                 if (self.currentResults.length) {
                     self.$dd.show();
                 }
@@ -61,7 +56,6 @@ Autocompleter.prototype = {
         });
         this.$dd = $("<div/>").addClass("AutoCompleteMainDiv");
         this.$dd.click(function(e) {
-            //console.log("clickDD");
             self.click(e);
         });
 
@@ -71,7 +65,6 @@ Autocompleter.prototype = {
         });
 
         $("body").click(function() {
-            //console.log("Hiding");
             self.$dd.hide();
         });
     },
@@ -83,7 +76,6 @@ Autocompleter.prototype = {
     keyup: function(key) {
         if (key == 38 || key == 40 || key == 13) return;
         var input = this.$control.val();
-        //console.log(input);
         if (input != null && input.length < this.options.minChars) {
             this.$dd.html("").hide(); this.currentResults = [];
             return;
@@ -94,7 +86,6 @@ Autocompleter.prototype = {
         var data = $.extend({
             q: input, l: this.options.limit
         }, this.options.extraParams);
-        //console.log("data: " + data);  
         var self = this;
         if (self.request) self.request.abort();
         self.request = $.getJSON(
@@ -114,10 +105,8 @@ Autocompleter.prototype = {
                     for (var l = results.length; i < l; i++) {
                         if (i < prevCount) {
                             $divsCurrentResults.eq(i).html(self.process(input, results[i])).data("data", results[i]);
-                            //   //console.log("Replacing " + i + " element");
                         }
                         else {
-                            //  //console.log("Adding a new element");
                             var $rD = self.$resultDiv.clone();
                             $rD.append(self.process(input, results[i])).data("data", results[i]);
                             self.$dd.append($rD);
@@ -125,7 +114,6 @@ Autocompleter.prototype = {
                     }
                     var j;
                     for (j = i; j < prevCount; j++) {
-                        // //console.log("Removing " + j + " element (" + prevCount + " results)");
                         $divsCurrentResults.eq(j).remove();
                     }
 
@@ -148,7 +136,6 @@ Autocompleter.prototype = {
 
     keydown: function(e) {
         var key = e.which ? e.which : e.keyCode;
-        //console.log("keydown " + key);
         if (key == 13) { //Enter
             var selectedOption = $("." + this.resultSelectedClass);
             if (selectedOption.length > 0) {
@@ -173,7 +160,6 @@ Autocompleter.prototype = {
         }
     },
     moveUp: function() {
-        //console.log("moveUp");
         var current = this.$dd.children("." + this.resultSelectedClass).first();
         if (!current.length) { //Not yet in the DDL, select the last one		
             this.selectIndex(this.$dd.children().last());
@@ -182,7 +168,6 @@ Autocompleter.prototype = {
         this.selectIndex(current.prev());
     },
     moveDown: function() {
-        //console.log("moveDown");
         var current = this.$dd.children("." + this.resultSelectedClass).first();
         if (!current.length) { //Not yet in the DDL, select the first one
             this.selectIndex(this.$dd.children());
@@ -191,7 +176,6 @@ Autocompleter.prototype = {
         this.selectIndex(current.next());
     },
     click: function(e) {
-        //console.log("click");
         var target = e.srcElement || e.target;
         if (target != null) {
             this.onOk($(target).closest("." + this.resultSelectedClass).data("data"));
@@ -199,12 +183,10 @@ Autocompleter.prototype = {
         }
     },
     process: function(i, s) {
-        //console.log("process");
         if (this.options.process != null) return this.options.process(i, s);
         return this.highlight(i, s[this.options.textField]);
     },
     highlight: function(i, s) {
-        //console.log("highlight");
         var pre_s = s;
         s = s.replace(new RegExp("(" + i + ")", "gi"), '<strong>$1</strong>');
 
@@ -233,7 +215,6 @@ Autocompleter.prototype = {
         }
     },
     selectIndex: function($option) {
-        //console.log("selectIndex " + $option);
         this.$dd.children("." + this.resultSelectedClass).removeClass(this.resultSelectedClass);
         if ($option == null || $option == undefined) {
             this.$control.val(this.currentText).focus();
@@ -245,7 +226,6 @@ Autocompleter.prototype = {
 };
 
 function replaceDiacritics(s) {
-    //console.log("replaceDiacritics");
     var diacritics = [
         /[\300-\306]/g, /[\340-\346]/g,  // A, a
         /[\310-\313]/g, /[\350-\353]/g,  // E, e

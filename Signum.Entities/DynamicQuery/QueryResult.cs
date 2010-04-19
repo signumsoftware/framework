@@ -33,7 +33,7 @@ namespace Signum.Entities.DynamicQuery
 
                     Array array = values(c);
                     if (array.Length != rows)
-                        throw new InvalidOperationException("{0} results (insted of {1}) for column {2}".Formato(array.Length, rows, c.Name));
+                        throw new InvalidOperationException("{0} results (instead of {1}) for column {2}".Formato(array.Length, rows, c.Name));
                     return array;
                 }).ToArray();
         }

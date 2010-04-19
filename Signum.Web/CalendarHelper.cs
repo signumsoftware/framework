@@ -99,20 +99,20 @@ namespace Signum.Web
         {
             StringBuilder sb = new StringBuilder();
             //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
-            sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/ui.core.js",
-                "Scripts/jqueryui/ui.datepicker.js",
-                "Scripts/jqueryui/i18n/ui.datepicker-es.js"));
+            sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/jquery.ui.core.js",
+                "Scripts/jqueryui/jquery.ui.datepicker.js",
+                "Scripts/jqueryui/i18n/jquery.ui.datepicker-es.js"));
 
             //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
 
             if (IncludeCss != null)
                 IncludeCss(helper, sb);
             else
-                sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/ui.all.css",
-                    "Scripts/jqueryui/ui.base.css",
-                    "Scripts/jqueryui/ui.core.css",
-                    "Scripts/jqueryui/ui.datepicker.css",
-                    "Scripts/jqueryui/ui.theme.css"));
+                sb.AppendLine(helper.DynamicCssInclude("Scripts/jqueryui/jquery.ui.all.css",
+                    "Scripts/jqueryui/jquery.ui.base.css",
+                    "Scripts/jqueryui/jquery.ui.core.css",
+                    "Scripts/jqueryui/jquery.ui.datepicker.css",
+                    "Scripts/jqueryui/jquery.ui.theme.css"));
 
 
             sb.AppendLine(
@@ -128,7 +128,7 @@ namespace Signum.Web
         private static string OptionsToString(DatePickerOptions settings)
         { 
             if (settings == null)
-                return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'-90:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png'";
+                return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'c-90:c+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png'";
 
             return "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}'{8}{9}".Formato(
                 settings.ChangeMonth ? "true" : "false",
