@@ -16,7 +16,7 @@ namespace Signum.Web
         public string Text { get; set; }
         public string AltText { get; set; }
         //Prefix -> JavaScript Event Handler
-        public Func<string, string> OnClick { get; set; }
+        public string OnClick { get; set; }
         
         private string divCssClass = "OperationDiv";
         public string DivCssClass 
