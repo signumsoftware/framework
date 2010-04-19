@@ -61,14 +61,14 @@
             ScrollViewer.ScrollChanged="treeView_ScrollChanged">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem" BasedOn="{StaticResource TreeViewItemStyle1}">
-                    <Setter Property="IsExpanded" Value="{Binding Expanded}"/>
+                    <Setter Property="IsExpanded" Value="{Binding Expanded, Mode=TwoWay}"/>
                 </Style>
             </TreeView.ItemContainerStyle>
 
             <TreeView.ItemTemplateSelector>
                 <m:TypeDataTemplateSelector>
-                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.GroupType}" ItemsSource="{Binding}">
-                        <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Key}" />
+                    <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.GroupType}" ItemsSource="{Binding SubNodes}"  >
+                        <TextBlock HorizontalAlignment="Left" FontWeight="SemiBold"  VerticalAlignment="Center" Text="{Binding Name}" />
                     </HierarchicalDataTemplate>
 
                     <HierarchicalDataTemplate DataType="{x:Static auth:TypeRules.RuleType}">

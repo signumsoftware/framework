@@ -32,7 +32,7 @@ namespace Signum.Web.Operations
 
             if (Id == null)
                 Id = Settings.TryCC(set => set.Options).TryCC(opt => opt.OperationKey) ?? EnumDN.UniqueKey(OperationInfo.Key);
-            
+
             if (OnClick == null)
                 OnClick = GetServerClickAjax(helper.ViewContext.HttpContext) ??
                           GetServerClickPost(helper.ViewContext.HttpContext);
@@ -89,15 +89,15 @@ namespace Signum.Web.Operations
                 Prefix = settingOptions.TryCC(opt => opt.Prefix) ?? (httpContext.Request.IsAjaxRequest() ? (httpContext.Request.Params["prefix"] ?? "") : ""),
                 ControllerUrl = settingOptions.TryCC(opt => opt.ControllerUrl),
                 ValidationControllerUrl = settingOptions.TryCC(opt => opt.ValidationControllerUrl),
-                AvoidValidation = settingOptions.TryCS(opt => opt.AvoidValidation),
+                AvoidValidation = settingOptions.TryCS(opt => opt.AvoidValidation) ?? false,
                 ConfirmMessage = settingOptions.TryCC(opt => opt.ConfirmMessage),
                 OnCancelled = settingOptions.TryCC(opt => opt.OnCancelled),
                 OnOk = settingOptions.TryCC(opt => opt.OnOk),
                 AvoidDefaultOk = settingOptions.TryCS(opt => opt.AvoidDefaultOk) ?? false,
                 OnOperationSuccess = settingOptions.TryCC(opt => opt.OnOperationSuccess),
-                MultiStep = settingOptions.TryCS(opt => opt.MultiStep),
-                NavigateOnSuccess = settingOptions.TryCS(opt => opt.NavigateOnSuccess),
-                ClosePopupOnSuccess = settingOptions.TryCS(opt => opt.ClosePopupOnSuccess),
+                MultiStep = settingOptions.TryCS(opt => opt.MultiStep) ?? false,
+                NavigateOnSuccess = settingOptions.TryCS(opt => opt.NavigateOnSuccess) ?? false,
+                ClosePopupOnSuccess = settingOptions.TryCS(opt => opt.ClosePopupOnSuccess) ?? false,
                 RequestExtraJsonData = settingOptions.TryCC(opt => opt.RequestExtraJsonData),
             };
         }

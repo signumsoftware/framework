@@ -144,7 +144,7 @@ namespace Signum.Web.Authorization
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(prefix + "_Role");
             TypeDN type = this.ExtractEntity<TypeDN>(prefix + "_Type");
 
-            var prp = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, prefix, true); ;
+            var prp = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, prefix, true);
 
             OperationAuthLogic.SetOperationRules(prp.Value);
 

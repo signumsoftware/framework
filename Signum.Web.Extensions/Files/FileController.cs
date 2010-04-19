@@ -51,7 +51,7 @@ namespace Signum.Web.Files
             ViewData["FileType"] = fileType;
 
             string sfUrl = Navigator.Manager.EntitySettings[type].OnPartialViewName(entity);
-            
+
             return Navigator.PartialView(this, entity, prefix, sfUrl);
         }
 
@@ -61,22 +61,18 @@ namespace Signum.Web.Files
             string formFieldId = "";
             foreach (string file in Request.Files)
             {
-                //if (((string)Request.Form[TypeContext.Compose(file, TypeContext.StaticType)]) != "FilePathDN")
-                RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContext.Compose(file, EntityBaseKeys.RuntimeInfo)]);
+                RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(file, EntityBaseKeys.RuntimeInfo)]);
                 if (info.RuntimeType != typeof(FilePathDN))
                     continue;
 
-                //string idStr = (string)Request.Form[TypeContext.Compose(file, TypeContext.Id)];
-                //int id;
-                //if (int.TryParse(idStr, out id))
-                if(info.IdOrNull.HasValue)
+                if (info.IdOrNull.HasValue)
                     continue; //Only new files will come with content
 
                 HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
                 if (hpf.ContentLength == 0)
                     continue;
 
-                string fileType = (string)Request.Form[TypeContext.Compose(file, FileLineKeys.FileType)];
+                string fileType = (string)Request.Form[TypeContextUtilities.Compose(file, FileLineKeys.FileType)];
                 if (!fileType.HasText())
                     throw new InvalidOperationException(Resources.CouldntCreateFilePathWithUnknownFileTypeForField0.Formato(file));
 
@@ -98,11 +94,8 @@ namespace Signum.Web.Files
             if (fp.TryCS(f => f.IdOrNull) != null)
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
-                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(fp).ToString()));
-                //sb.AppendLine("parDoc.getElementById('{0}').value='FilePathDN';".Formato(TypeContext.Compose(formFieldId, TypeContext.RuntimeType)));
-                //sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContext.Compose(formFieldId, TypeContext.Id), fp.Id.ToString()));
-                //sb.AppendLine("parDoc.getElementById('{0}').removeChild(parDoc.getElementById('{1}'));".Formato(TypeContext.Compose(formFieldId, "sfRepeaterElement"), TypeContext.Compose(formFieldId, EntityBaseKeys.IsNew)));
+                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(formFieldId, EntityBaseKeys.ToStrLink), fp.FileName));
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(formFieldId, EntityBaseKeys.RuntimeInfo), new RuntimeInfo(fp).ToString()));
                 sb.AppendLine("parDoc.getElementById('{0}DivNew').style.display='none';".Formato(formFieldId));
                 sb.AppendLine("parDoc.getElementById('{0}DivOld').style.display='block';".Formato(formFieldId));
             }
@@ -119,7 +112,7 @@ namespace Signum.Web.Files
         }
 
         public FileResult Download(int? filePathID)
-        { 
+        {
             if (filePathID == null)
                 throw new ArgumentException(Resources.ArgumentFilePathIDWasNotPassedToTheController);
 

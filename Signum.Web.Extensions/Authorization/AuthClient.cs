@@ -23,7 +23,7 @@ namespace Signum.Web.Authorization
     {
         public static string ViewPrefix = "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.";
 
-        public static string CookieName = "sfUser"; 
+        public static string CookieName = "sfUser";
         public static string LoginUrl = ViewPrefix + "Login.aspx";
         public static string LoginUserControlUrl = ViewPrefix + "LoginUserControl.ascx";
         public static string ChangePasswordUrl = ViewPrefix + "ChangePassword.aspx";
@@ -98,7 +98,7 @@ namespace Signum.Web.Authorization
                     }
                 };
 
-               
+
             }
         }
 
@@ -156,11 +156,11 @@ namespace Signum.Web.Authorization
                     Text = Resources.Save } });
         }
 
-        static void TaskAuthorizeProperties(BaseLine bl, TypeContext context)
+        static void TaskAuthorizeProperties(BaseLine bl)
         {
-            if (context.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
+            if (bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
             {
-                switch (PropertyAuthLogic.GetPropertyAccess(context.PropertyRoute))
+                switch (PropertyAuthLogic.GetPropertyAccess(bl.PropertyRoute))
                 {
                     case PropertyAllowed.None:
                         bl.Visible = false;

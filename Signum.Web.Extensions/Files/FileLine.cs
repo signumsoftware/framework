@@ -13,6 +13,7 @@ using Signum.Web.Extensions.Properties;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using System.Web.Routing;
 #endregion
 
 namespace Signum.Web.Files
@@ -26,10 +27,10 @@ namespace Signum.Web.Files
     {
         public Enum FileType { get; set; }
 
-        public readonly Dictionary<string, object> ValueHtmlProps = new Dictionary<string, object>(0);
+        public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
         public bool Download { get; set; }
-        
+
         public string Downloading { get; set; }
         internal string GetDownloading()
         {
@@ -38,9 +39,9 @@ namespace Signum.Web.Files
             return Downloading ?? DefaultDownloading();
         }
 
-        public FileLine(string prefix)
+        public FileLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            Prefix = prefix;
             Download = true;
             Create = false;
             View = false;
@@ -48,6 +49,7 @@ namespace Signum.Web.Files
 
         public override void SetReadOnly()
         {
+            Parent.ReadOnly = true;
             Find = false;
             Create = false;
             Remove = false;

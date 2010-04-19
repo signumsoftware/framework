@@ -86,7 +86,6 @@
     <Compile Include="Files\FileLine.cs" />
     <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Files\FileController.cs" />
-    <Compile Include="Files\FilePathModification.cs" />
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />

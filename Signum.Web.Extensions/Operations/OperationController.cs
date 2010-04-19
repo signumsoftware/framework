@@ -41,10 +41,10 @@ namespace Signum.Web.Operations
                 MappingContext context = this.UntypedExtractEntity(sfOldPrefix).UntypedApplyChanges(this.ControllerContext, sfOldPrefix, true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
-                if (context.Errors.Any())
+                if (context.GlobalErrors.Any())
                 {
                     this.ModelState.FromContext(context);
-                    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+                    return Navigator.ModelState(ModelState);
                 }
 
                 entity = OperationLogic.ServiceExecute(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
@@ -97,10 +97,10 @@ namespace Signum.Web.Operations
                 MappingContext context = this.UntypedExtractEntity(sfOldPrefix).UntypedApplyChanges(this.ControllerContext, sfOldPrefix, true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
-                if (context.Errors.Any())
+                if (context.GlobalErrors.Any())
                 {
-                   this.ModelState.FromContext(context);
-                    return Content("{\"ModelState\":" + this.ModelState.ToJsonData() + "}");
+                    this.ModelState.FromContext(context);
+                    return Navigator.ModelState(ModelState);
                 }
 
                 entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
@@ -118,7 +118,7 @@ namespace Signum.Web.Operations
         public ActionResult ConstructFromManyExecute(string sfRuntimeType, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
-            
+
             List<Lite> sourceEntities = null;
             if (sfIds.HasText())
             {

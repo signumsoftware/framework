@@ -176,7 +176,7 @@ namespace Signum.Windows.Authorization
 
         static PropertyAllowed GetPropertyAllowed(PropertyRoute route)
         {
-            if (route.PropertyRouteType == PropertyRouteType.MListItems)
+            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
 
             return propertyRules.TryGetS(route) ?? PropertyAllowed.Modify;

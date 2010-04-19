@@ -12,7 +12,7 @@
             <div id="<%=user.Name + "DivOld"%>">
                 <%
                     Html.ValueLine(user, u => u.UserName, vl => vl.ReadOnly = true);
-                    Html.ValueLine("", Html.GlobalName(TypeContext.Compose(user.Name, "OldPassword")), new ValueLine() { LabelText = "Contraseña actual", ShowTicks = false });
+                    Html.ValueLine("", user.Compose("OldPassword"), new ValueLine() { LabelText = "Contraseña actual", ShowTicks = false });
                 %>
             </div>
             <%
@@ -30,8 +30,8 @@
                     //Response.Write("<input type=\"hidden\" id=\"{0}\" name=\"{0}\" value=\"\" />\n".Formato(user.Name + EntityBaseKeys.IsNew));
 
                     Html.ValueLine(user, u => u.UserName);
-                    Html.ValueLine("", Html.GlobalName(TypeContext.Compose(user.Name, "NewPassword")), new ValueLine() { LabelText = "Contraseña", ShowTicks = false });
-                    Html.ValueLine("", Html.GlobalName(TypeContext.Compose(user.Name, "NewPasswordBis")), new ValueLine() { LabelText = "Repita la contraseña", ShowTicks = false });
+                    Html.ValueLine("", user.Compose("NewPassword"), new ValueLine() { LabelText = "Contraseña", ShowTicks = false });
+                    Html.ValueLine("", user.Compose("NewPasswordBis"), new ValueLine() { LabelText = "Repita la contraseña", ShowTicks = false });
                 }
         %>
         </div>

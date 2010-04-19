@@ -35,7 +35,7 @@ namespace Signum.Web.Authorization
         {
             var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
 
-            if (context.Errors.Any())
+            if (context.GlobalErrors.Any())
             {
                 ViewData["Title"] = Resources.ChangePassword;
                 ModelState.FromContext(context);
@@ -165,7 +165,7 @@ namespace Signum.Web.Authorization
         public ActionResult Login()
         {
             //We store the url referrer so that we can go back when logged in
-            string referrer = System.Web.HttpContext.Current.Request.UrlReferrer.TryCC(r=>r.AbsolutePath);
+            string referrer = System.Web.HttpContext.Current.Request.UrlReferrer.TryCC(r => r.AbsolutePath);
             string current = System.Web.HttpContext.Current.Request.RawUrl;
             if (referrer != null && referrer != current)
                 ViewData["referrer"] = System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
@@ -238,7 +238,7 @@ namespace Signum.Web.Authorization
                         return false;   //there is no cookie
 
                     string ticketText = authCookie.Value;
-                    
+
                     UserDN user = UserTicketLogic.UpdateTicket(
                            System.Web.HttpContext.Current.Request.UserHostAddress,
                            ref ticketText);

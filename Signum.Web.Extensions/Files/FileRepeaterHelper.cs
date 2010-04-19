@@ -20,78 +20,55 @@ namespace Signum.Web.Files
 {
     public static class FileRepeaterHelper
     {
-        private static void InternalFileRepeater<T>(this HtmlHelper helper, TypeContext<MList<T>> typeContext, FileRepeater settings)
-            where T : FilePathDN
+        private static string InternalFileRepeater(this HtmlHelper helper, FileRepeater fileRepeater)
         {
-            if (!settings.Visible)
-                return;
-
-            string prefix = helper.GlobalName(typeContext.Name);
-            MList<T> value = typeContext.Value;  
-            Type elementsCleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
-
-            long? ticks = EntityBaseHelper.GetTicks(helper, prefix, settings);
+            if (!fileRepeater.Visible)
+                return "";
 
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(helper.HiddenEntityInfo(prefix, new RuntimeInfo { Ticks = ticks }, new StaticInfo(elementsCleanStaticType)));
+            sb.AppendLine(EntityBaseHelper.BaseLineLabel(helper, fileRepeater));
 
-            sb.AppendLine(EntityBaseHelper.WriteLabel(helper, prefix, settings));
+            sb.AppendLine(helper.Hidden(fileRepeater.Compose(EntityBaseKeys.StaticInfo), new StaticInfo(fileRepeater.ElementType.CleanType()) { IsReadOnly = fileRepeater.ReadOnly }.ToString(), new { disabled = "disabled" }));
+            sb.AppendLine(helper.Hidden(fileRepeater.Compose(TypeContext.Ticks), EntityInfoHelper.GetTicks(helper, fileRepeater).TryToString() ?? ""));
 
-            sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, settings, new Dictionary<string, object>{{"title", settings.AddElementLinkText}}));
-            
-           // sb.AppendLine(helper.Div("", "", "clearall", null)); //To keep create and find buttons' space
+            sb.AppendLine(ListBaseHelper.WriteCreateButton(helper, fileRepeater, new Dictionary<string, object> { { "title", fileRepeater.AddElementLinkText } }));
 
-            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(prefix, EntityRepeaterKeys.ItemsContainer)));
-            if (value != null)
+            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(fileRepeater.Compose(EntityRepeaterKeys.ItemsContainer)));
+            if (fileRepeater.UntypedValue != null)
             {
-                for (int i = 0; i < value.Count; i++)
-                    sb.Append(InternalRepeaterElement(helper, prefix, value[i], i, settings, typeContext));
+                foreach (var itemTC in TypeContextUtilities.TypeElementContext((TypeContext<MList<FilePathDN>>)fileRepeater.Parent))
+                    sb.Append(InternalRepeaterElement(helper, itemTC, fileRepeater));
             }
             sb.AppendLine("</div>");
 
-            sb.AppendLine(EntityBaseHelper.WriteBreakLine());
+            sb.AppendLine(EntityBaseHelper.WriteBreakLine(helper, fileRepeater));
 
-            helper.ViewContext.HttpContext.Response.Write(sb.ToString());
+            return sb.ToString();
         }
 
-        private static string InternalRepeaterElement<T>(this HtmlHelper helper, string prefix, T value, int index, FileRepeater settings, TypeContext<MList<T>> typeContext)
-            where T : FilePathDN
+        private static string InternalRepeaterElement(this HtmlHelper helper, TypeElementContext<FilePathDN> itemTC, FileRepeater fileRepeater)
         {
-            string indexedPrefix = TypeContext.Compose(prefix, index.ToString());
-            Type cleanStaticType = Reflector.ExtractLite(typeof(T)) ?? typeof(T);
-            bool isIdentifiable = typeof(IdentifiableEntity).IsAssignableFrom(typeof(T));
-            bool isLite = typeof(Lite).IsAssignableFrom(typeof(T));
-            
-            Type cleanRuntimeType = null;
-            if (value != null)
-                cleanRuntimeType = typeof(Lite).IsAssignableFrom(value.GetType()) ? (value as Lite).RuntimeType : value.GetType();
-
-            long? ticks = EntityBaseHelper.GetTicks(helper, indexedPrefix, settings);
-
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(TypeContext.Compose(indexedPrefix, EntityRepeaterKeys.RepeaterElement)));
-            
-            sb.AppendLine(helper.Hidden(TypeContext.Compose(indexedPrefix, EntityListBaseKeys.Index), index.ToString()));
+            sb.AppendLine("<div id='{0}' name='{0}' class='repeaterElement'>".Formato(itemTC.Compose(EntityRepeaterKeys.RepeaterElement)));
 
-            if (settings.Remove)
+            sb.AppendLine(helper.Hidden(itemTC.Compose(EntityListBaseKeys.Index), itemTC.Index.ToString()));
+
+            if (fileRepeater.Remove)
                 sb.AppendLine(
-                    helper.Button(TypeContext.Compose(indexedPrefix, "btnRemove"),
+                    helper.Button(itemTC.Compose("btnRemove"),
                                   "x",
-                                  "ERepOnRemoving({0}, '{1}');".Formato(settings.ToJS(), indexedPrefix),
+                                  "ERepOnRemoving({0}, '{1}');".Formato(fileRepeater.ToJS(), itemTC.ControlID),
                                   "lineButton remove",
-                                  new Dictionary<string, object> { { "title", settings.RemoveElementLinkText } }));
+                                  new Dictionary<string, object> { { "title", fileRepeater.RemoveElementLinkText } }));
 
             //Render FileLine for the current item
-            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(TypeContext.Compose(indexedPrefix, EntityBaseKeys.Entity)));
-            TypeContext<FilePathDN> tc;
-            if (isLite)
-                tc = new TypeElementContext<FilePathDN>((FilePathDN)Database.Retrieve((Lite)(object)value), typeContext, index);
-            else
-                tc = new TypeElementContext<FilePathDN>(value, typeContext, index);
-            using (FileLine fl = new FileLine(indexedPrefix) { Remove = false })
-                sb.AppendLine(helper.InternalFileLine<FilePathDN>(tc, fl));
+            sb.AppendLine("<div id='{0}' name='{0}'>".Formato(itemTC.Compose(EntityBaseKeys.Entity)));
+            TypeContext<FilePathDN> tc = (TypeContext<FilePathDN>)TypeContextUtilities.CleanTypeContext(itemTC);
+
+            using (FileLine fl = new FileLine(typeof(FilePathDN), tc.Value, itemTC, "", tc.PropertyRoute) { Remove = false })
+                sb.AppendLine(helper.InternalFileLine(fl));
             sb.AppendLine("</div>");
 
             sb.AppendLine("</div>");
@@ -100,7 +77,7 @@ namespace Signum.Web.Files
         }
 
         public static void FileRepeater<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
-            where S : FilePathDN 
+            where S : FilePathDN
         {
             helper.FileRepeater(tc, property, null);
         }
@@ -110,15 +87,15 @@ namespace Signum.Web.Files
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            FileRepeater fl = new FileRepeater(helper.GlobalName(context.Name));
+            FileRepeater fl = new FileRepeater(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+
             //Navigator.ConfigureEntityBase(el, Reflector.ExtractLite(typeof(S)) ?? typeof(S), false);
-            Common.FireCommonTasks(fl, context);
+            Common.FireCommonTasks(fl);
 
             if (settingsModifier != null)
                 settingsModifier(fl);
 
-            using (fl)
-                helper.InternalFileRepeater<S>(context, fl);
+            helper.Write(helper.InternalFileRepeater(fl));
         }
     }
 }

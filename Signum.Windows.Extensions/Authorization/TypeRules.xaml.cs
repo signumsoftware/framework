@@ -25,7 +25,7 @@ namespace Signum.Windows.Authorization
     public partial class TypeRules : Window
     {
         public static Type RuleType = typeof(AllowedRule<TypeDN, TypeAllowed>);
-        public static Type GroupType = typeof(IGrouping<string, AllowedRule<TypeDN, TypeAllowed>>);
+        public static Type GroupType = typeof(NamespaceNode);
 
         public Lite<RoleDN> Role
         {
@@ -54,14 +54,25 @@ namespace Signum.Windows.Authorization
             Load();
         }
 
-        
+
         private void Load()
         {
             TypeRulePack trp = Server.Return((ITypeAuthServer s) => s.GetTypesRules(Role));
 
             DataContext = trp;
 
-            treeView.ItemsSource = trp.Rules.GroupBy(a => a.Resource.Namespace).OrderBy(a => a.Key).ToList();
+            Dictionary<string, bool> expanded = treeView.ItemsSource == null ? new Dictionary<string, bool>() :
+                ((List<NamespaceNode>)treeView.ItemsSource).ToDictionary(a => a.Name, a => a.Expanded); 
+
+            treeView.ItemsSource = (from r in trp.Rules
+                                    group r by r.Resource.Namespace into g
+                                    orderby g.Key
+                                    select new NamespaceNode
+                                    {
+                                        Name = g.Key,
+                                        Expanded = expanded.TryGetS(g.Key) ?? false, 
+                                        SubNodes = g.OrderBy(a => a.Resource.ClassName).ToList()
+                                    }).ToList();
         }
 
         public DataTemplateSelector MyDataTemplateSelector;
@@ -121,12 +132,16 @@ namespace Signum.Windows.Authorization
 
     }
 
-    //public class NamespaceNode
-    //{
-    //    public string Name { get; set; }
-    //    public List<object> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
+    public class NamespaceNode
+    {
+        bool expanded;
+        public bool Expanded
+        {
+            get { return expanded; }
+            set { expanded = value; }
+        }
 
-    //    public bool Expanded { get { return SubNodes.OfType<NamespaceNode>().Any(); } }
-    //}
-
+        public string Name { get; set; }
+        public List<AllowedRule<TypeDN, TypeAllowed>> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
+    }
 }

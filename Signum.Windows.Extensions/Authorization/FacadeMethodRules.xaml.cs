@@ -48,7 +48,7 @@ namespace Signum.Windows.Authorization
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            Server.Execute((IFacadeMethodAuthServer s) => s.SetFacadeMethodRules((FacadeMethodRulePack)listView.ItemsSource));
+            Server.Execute((IFacadeMethodAuthServer s) => s.SetFacadeMethodRules((FacadeMethodRulePack)DataContext));
             Load();
         }
 
