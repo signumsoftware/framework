@@ -33,7 +33,7 @@ namespace Signum.Web
 
         public static void Field(this HtmlHelper html, string label, string value)
         {
-            html.Write("<div class=\"field\"><span class=\"labelLine\">{0}</span><span class=\"valueLine\">{1}</span><div class=\"clearall\"></div>".Formato(label, value));
+            html.Write("<div class=\"field\"><span class=\"labelLine\">{0}</span><span class=\"valueLine\">{1}</span></div><div class=\"clearall\"></div>".Formato(label, value));
         }
 
         public static string CheckBox(this HtmlHelper html, string name, bool value, bool enabled)

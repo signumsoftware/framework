@@ -84,7 +84,7 @@ FindNavigator.prototype = {
     search: function() {
         //	var async = concurrentSearch[prefix + "btnSearch"];
         //	if (async) concurrentSearch[prefix + "btnSearch"]=false;
-    var btnSearch = $(this.pf("btnSearch"));
+        var btnSearch = $(this.pf("btnSearch"));
         btnSearch.toggleClass('loading').val(lang['searching']);
         var self = this;
         $.ajax({
@@ -122,6 +122,17 @@ FindNavigator.prototype = {
         var currentfilters = this.serializeFilters();
         if (!empty(currentfilters))
             $.extend(requestData, currentfilters);
+        else if (!empty(this.findOptions.filters)) {
+            var filterArray = this.findOptions.filters.split("&");
+            for (var i = 0, l = filterArray.length; i < l; i++) {
+                var pair = filterArray[i];
+                if (!empty(pair)) {
+                    pair = pair.split("=");
+                    if (pair.length == 2)
+                        requestData[pair[0]] = pair[1];
+                }
+            }
+        }
 
         requestData[sfPrefix] = this.findOptions.prefix;
 
@@ -132,7 +143,7 @@ FindNavigator.prototype = {
         var result = "";
         var self = this;
         $(this.pf("tblFilters > tbody > tr")).each(function() {
-        result = $.extend(result, self.serializeFilter(this.id.substring(this.id.lastIndexOf("_") + 1, this.id.length)));
+            result = $.extend(result, self.serializeFilter(this.id.substring(this.id.lastIndexOf("_") + 1, this.id.length)));
         });
         return result;
     },
@@ -198,7 +209,7 @@ FindNavigator.prototype = {
         var optionId = selectedColumn[0].id;
         var filterName = optionId.substring(optionId.indexOf("__") + 2, optionId.length);
         var queryUrlName = ((empty(this.findOptions.queryUrlName)) ? $(this.pf(sfQueryUrlName)).val() : this.findOptions.queryUrlName);
-        
+
         var self = this;
         $.ajax({
             type: "POST",

@@ -106,7 +106,7 @@ namespace Signum.Web
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().TrySingleQuote() : null);
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TryToString());
-            op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString(""));
+            op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("").TrySingleQuote());
         }
     }
 
