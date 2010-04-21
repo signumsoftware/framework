@@ -1162,13 +1162,13 @@ namespace Signum.Engine.Linq
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
             {
                 ImplementedByExpression rib = (ImplementedByExpression)operand;
-                FieldInitExpression fie = rib.Implementations.Where(ri => ri.Type == b.TypeOperand).Single(Resources.TheFieldHasNoImplementationForType0.Formato(b.Type.TypeName())).Field;
+                FieldInitExpression fie = rib.Implementations.Where(ri => ri.Type == b.TypeOperand).Single(Resources.TheFieldHasNoImplementationForType0.Formato(b.TypeOperand.TypeName())).Field;
                 return new IsNotNullExpression(fie.ExternalId);
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
                 ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
-                int idType = Schema.Current.IDsForType.GetOrThrow(b.TypeOperand, Resources.TheType0IsNotInTheTypesTable.Formato(b.Type.TypeName()));
+                int idType = Schema.Current.IDsForType.GetOrThrow(b.TypeOperand, Resources.TheType0IsNotInTheTypesTable.Formato(b.TypeOperand.TypeName()));
                 return SmartEqualizer.EqualNullable(riba.TypeId, Expression.Constant(idType));
             }
             return base.VisitTypeIs(b); 
