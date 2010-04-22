@@ -24,7 +24,7 @@ using System.Security;
 [assembly: Guid("b7ff53fc-169d-4fe3-9d34-070a4372f6ee")]
 
 
-[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.4.min.js", "text/javascript")]
+[assembly: System.Web.UI.WebResource("Signum.Web.Scripts.jquery-1.4.2.min.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftAjax.debug.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftAjax.js", "text/javascript")]
 [assembly: System.Web.UI.WebResource("Signum.Web.Scripts.MicrosoftMvcAjax.debug.js", "text/javascript")]
