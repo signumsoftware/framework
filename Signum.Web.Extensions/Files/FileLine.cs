@@ -66,9 +66,9 @@ namespace Signum.Web.Files
             return FileLine.JsRemoving(this).ToJS();
         }
 
-        public static JsRenderer JsRemoving(FileLine fline)
+        public static JsInstruction JsRemoving(FileLine fline)
         {
-            return new JsRenderer(() => "FLineOnRemoving({0})".Formato(fline.ToJS()));
+            return new JsInstruction(() => "FLineOnRemoving({0})".Formato(fline.ToJS()));
         }
 
         protected string DefaultDownloading()
@@ -76,9 +76,9 @@ namespace Signum.Web.Files
             return FileLine.JsDownloading(this).ToJS();
         }
 
-        public static JsRenderer JsDownloading(FileLine fline)
+        public static JsInstruction JsDownloading(FileLine fline)
         {
-            return new JsRenderer(() => "javascript:FLineOnDownloading({0})".Formato(fline.ToJS()));
+            return new JsInstruction(() => "javascript:FLineOnDownloading({0})".Formato(fline.ToJS()));
         }
 
         protected override string DefaultFinding()

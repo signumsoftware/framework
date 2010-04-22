@@ -19,7 +19,7 @@ namespace Signum.Web.Authorization
     [HandleException]
     public partial class AuthController : Controller
     {
-        public static event Action<UserDN> OnUserLogged;
+        public static event Action OnUserLogged;
         public static event Action<Controller, UserDN> OnUserPreLogin;
         public const string SessionUserKey = "user";
 
@@ -239,6 +239,11 @@ namespace Signum.Web.Authorization
                            System.Web.HttpContext.Current.Request.UserHostAddress,
                            ref ticketText);
 
+                     if (OnUserPreLogin != null)
+                       OnUserPreLogin(null, user);
+
+                    Thread.CurrentPrincipal = user;
+
                     System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
                     {
                         Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
@@ -377,10 +382,8 @@ namespace Signum.Web.Authorization
         {
             System.Web.HttpContext.Current.Session[SessionUserKey] = user;
 
-            //FormsAuthentication.SetAuthCookie(userName, rememberMe);
-
             if (OnUserLogged != null)
-                OnUserLogged(user);
+                OnUserLogged();
         }
 
         public ActionResult Logout()

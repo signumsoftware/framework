@@ -26,17 +26,19 @@ namespace Signum.Web.Operations
             ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
 
             Constructor.ConstructorManager.GeneralConstructor += new Func<Type, ModifiableEntity>(Manager.ConstructorManager_GeneralConstructor);
-            Constructor.ConstructorManager.VisualGeneralConstructor += new Func<Type, ControllerBase, object>(Manager.ConstructorManager_VisualGeneralConstructor);
-            
+            Constructor.ConstructorManager.VisualGeneralConstructor += new Func<ConstructContext, ActionResult>(Manager.ConstructorManager_VisualGeneralConstructor); 
             ButtonBarQueryHelper.GetButtonBarForQueryName += Manager.ButtonBar_GetButtonBarForQueryName;
         }
+
+
     }
+
 
     public class OperationManager
     {
-        public Dictionary<Enum, OperationButton> Settings = new Dictionary<Enum, OperationButton>();
+        public Dictionary<Enum, OperationSettings> Settings = new Dictionary<Enum, OperationSettings>();
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ControllerContext controllerContext, ModifiableEntity entity, string mainControlUrl)
+        internal ToolBarButton[] ButtonBar_GetButtonBarElement(ControllerContext controllerContext, ModifiableEntity entity, string partialViewName, string prefix)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -45,165 +47,60 @@ namespace Signum.Web.Operations
 
             var list = OperationLogic.ServiceGetEntityOperationInfos(ident);
 
-            if (list == null || list.Count == 0)
-                return null;
-
-            var dic = (from oi in list
-                       let omi = Settings.TryGetC(oi.Key)
-                       where omi.TryCC(sett => sett.Settings).TryCC(oset => oset as EntityOperationSettings).TryCC(eoset => eoset.IsVisible) == null || ((EntityOperationSettings)omi.Settings).IsVisible(ident)
-                       select new { OperationInfo = oi, OperationMenuItem = omi }).ToDictionary(a => a.OperationInfo.Key);
-
-            if (dic.Count == 0)
-                return null;
-
-            List<ToolBarButton> items = new List<ToolBarButton>();
-
-            foreach (OperationInfo oi in list)
-            {
-                if (dic.ContainsKey(oi.Key))
-                {
-                    OperationButton item = new OperationButton
+            return (from oi in list
+                    let os = (EntityOperationSettings)Settings.TryGetC(oi.Key)
+                    let ctx = new EntityOperationContext
                     {
+                        Entity = ident,
+                        OperationSettings = os,
                         OperationInfo = oi,
-                        Settings = dic[oi.Key].OperationMenuItem.TryCC(set => set.Settings)
-                    };
+                        PartialViewName = partialViewName,
+                        Prefix = prefix
+                    }
+                    where os == null || os.IsVisible == null || os.IsVisible(ctx)
+                    select OperationButtonFactory.Create(ctx)).ToArray();
 
-                    items.Add(item);
-                }
-            }
-
-            return items.ToArray();
         }
 
-        internal ToolBarButton[] ButtonBar_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType)
+        internal ToolBarButton[] ButtonBar_GetButtonBarForQueryName(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
         {
             if (entityType == null || queryName == null)
                 return null;
 
             var list = OperationLogic.ServiceGetQueryOperationInfos(entityType);
-
-            if (list == null || list.Count == 0)
-                return null;
-
-            var dic = (from oi in list
-                       let omi = Settings.TryGetC(oi.Key)
-                       where omi.TryCC(sett => sett.Settings).TryCC(oset => oset as ConstructorFromManySettings).TryCS(eoset => eoset.IsVisible(queryName, oi)) == null || ((ConstructorFromManySettings)omi.Settings).IsVisible(queryName, oi)
-                       select new { OperationInfo = oi, OperationMenuItem = omi }).ToDictionary(a => a.OperationInfo.Key);
-
-            if (dic.Count == 0)
-                return null;
-
-            List<ToolBarButton> items = new List<ToolBarButton>();
-
-            foreach (OperationInfo oi in list)
-            {
-                if (dic.ContainsKey(oi.Key))
-                {
-                    ToolBarButton item = new OperationButton
+            return (from oi in list
+                    let os = (QueryOperationSettings)Settings.TryGetC(oi.Key)
+                    let ctx = new QueryOperationContext
                     {
+                        OperationSettings = os,
                         OperationInfo = oi,
-                        Settings = dic[oi.Key].OperationMenuItem.TryCC(set => set.Settings)
-                    };
-                    
-                    items.Add(item);
-                }
-            }
-
-            return items.ToArray();
+                        Prefix = prefix
+                    }
+                    where os == null || os.IsVisible == null || os.IsVisible(ctx)
+                    select OperationButtonFactory.Create(ctx)).ToArray();
         }
-
-        //protected internal virtual string GetServerClickAjax(HttpContextBase httpContext, Enum key, OperationButton omi, object queryName, Type entityType)
-        //{
-        //    if (omi == null || omi.TryCC(om => om.Settings).TryCS(set => set.Post) == true)
-        //        return null;
-
-        //    throw new NotImplementedException("ConstructorFromMany operations not supported yet");
-        //    //string controllerUrl = "Operation/ConstructFromManyExecute";
-        //    //if (omi.Settings.TryCC(set => set.Options).TryCC(opt => opt.ControllerUrl).HasText())
-        //    //    controllerUrl = omi.Settings.Options.ControllerUrl;
-
-        //    //return "javascript:ConstructFromManyExecute('{0}','{1}','{2}','{3}',{4},{5});".Formato(
-        //    //    controllerUrl,
-        //    //    entityType.Name,
-        //    //    EnumDN.UniqueKey(key),
-        //    //    httpContext.Request.Params["prefix"] ?? "",
-        //    //    ((string)httpContext.Request.Params[ViewDataKeys.OnOk]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnOk].Replace("\"","'") : "''",
-        //    //    ((string)httpContext.Request.Params[ViewDataKeys.OnCancel]).HasText() ? httpContext.Request.Params[ViewDataKeys.OnCancel].Replace("\"","'") : "''"
-        //    //    );
-        //}
 
         internal ModifiableEntity ConstructorManager_GeneralConstructor(Type type)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
                 return null;
 
-            List<OperationInfo> list = OperationLogic.ServiceGetConstructorOperationInfos(type);
+            OperationInfo constructor = OperationLogic.ServiceGetConstructorOperationInfos(type).SingleOrDefault();
 
-            var dic = (from oi in list
-                       let omi = Settings.TryGetC(oi.Key)
-                       where omi.TryCC(sett => sett.Settings).TryCC(oset => oset as ConstructorSettings).TryCC(eoset => eoset.IsVisible) == null || ((ConstructorSettings)omi.Settings).IsVisible(oi)
-                       select new { OperationInfo = oi, OperationMenuItem = omi }).ToDictionary(a => a.OperationInfo.Key);
-
-            if (dic.Count == 0)
+            if (constructor == null)
                 return null;
 
-            Enum selected = null;
-            if (list.Count == 1)
-                selected = dic.Keys.Single();
-            else
-                return null;
-            
-            var pair = dic[selected];
-
-            if (pair.OperationMenuItem != null && ((ConstructorSettings)pair.OperationMenuItem.Settings).Constructor != null)
-                return ((ConstructorSettings)pair.OperationMenuItem.Settings).Constructor(pair.OperationInfo);
-            else
-                return (ModifiableEntity)OperationLogic.ServiceConstruct(type, selected);
+            return (ModifiableEntity)OperationLogic.ServiceConstruct(type, constructor.Key);
         }
 
-        internal object ConstructorManager_VisualGeneralConstructor(Type type, ControllerBase controller)
+        internal ActionResult ConstructorManager_VisualGeneralConstructor(ConstructContext ctx)
         {
-            if (!typeof(IIdentifiable).IsAssignableFrom(type))
+            var count = OperationLogic.ServiceGetConstructorOperationInfos(ctx.Type).Count;
+
+            if (count == 0 || count == 1)
                 return null;
 
-            List<OperationInfo> list = OperationLogic.ServiceGetConstructorOperationInfos(type);
-
-            var dic = (from oi in list
-                       let omi = Settings.TryGetC(oi.Key)
-                       where omi.TryCC(sett => sett.Settings).TryCC(oset => oset as ConstructorSettings).TryCC(eoset => eoset.IsVisible) == null || ((ConstructorSettings)omi.Settings).IsVisible(oi)
-                       select new { OperationInfo = oi, OperationMenuItem = omi }).ToDictionary(a => a.OperationInfo.Key);
-
-            if (dic.Count == 0)
-                return null;
-
-            if (list.Count == 1)
-                return null;
-            else
-            {
-                throw new NotImplementedException("Constructor operations not supported yet");
-
-                //StringBuilder sb = new StringBuilder();
-                //string onOk = controller.Request.Params[ViewDataKeys.OnOk].Replace("\"", "'");
-                //string onCancel = controller.Request.Params[ViewDataKeys.OnCancel].Replace("\"", "'");
-                //string prefix = controller.Request.Params["prefix"];
-                ////string onClick = "";
-                //foreach (OperationInfo oi in list)
-                //{
-                //    //if (dic[oi.Key].OperationMenuItem.OnServerClickAjax != "")
-                //    //    onClick = "javascript:CloseChooser('{0}',{1},{2},'{3}');".Formato(dic[oi.Key].OperationSettings.OnServerClickAjax, onOk, onCancel, prefix);
-                //    //else if (dic[oi.Key].OperationMenuItem.OnServerClickPost != "")
-                //    //    onClick= "javascript:PostServer('{0}');".Formato(dic[oi.Key].OperationSettings.OnServerClickPost);
-                //    //sb.AppendLine("<input type='button' value='{0}' onclick=\"{1}\"/><br />".Formato(oi.Key.ToString(), onClick));
-                //}
-                //controller.ViewData[ViewDataKeys.PopupPrefix] = prefix;
-                //controller.ViewData[ViewDataKeys.CustomHtml] = sb.ToString();
-                //return new PartialViewResult
-                //{
-                //    ViewName = Navigator.Manager.ChooserPopupUrl,
-                //    ViewData = controller.ViewData,
-                //    TempData = controller.TempData
-                //};
-            }
-        }   
+            throw new NotImplementedException();  //show chooser
+        }
     }
 }

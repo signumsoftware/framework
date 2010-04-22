@@ -10,97 +10,92 @@ using Signum.Web.Properties;
 
 namespace Signum.Web.Operations
 {
-    public abstract class JsOperationBase
+    public abstract class JsOperationBase : JsInstruction
     {
         protected JsOperationOptions options;
 
-        public abstract string ToJS();
-
-        public static JsRenderer Execute(JsOperationExecutor executor)
+        public JsOperationBase(JsOperationOptions options)
         {
-            return new JsRenderer(() => "OperationExecute({0})".Formato(executor.ToJS()));
+            this.options = options;
         }
 
-        public static JsRenderer ExecutePost(JsOperationExecutor executor)
+        public JsInstruction DefaultSubmit()
         {
-            return new JsRenderer(() => "OperationExecutePost({0})".Formato(executor.ToJS()));
+            return new JsInstruction(() => "{0}.defaultSubmit()".Formato(this.ToJS()));
         }
 
-        public static JsRenderer ConstructFrom(JsOperationConstructorFrom executor)
+        public JsInstruction OperationSubmit()
         {
-            return new JsRenderer(() => "OperationConstructFrom({0})".Formato(executor.ToJS()));
+            return new JsInstruction(() => "{0}.operationSubmit()".Formato(this.ToJS()));
         }
 
-        public static JsRenderer ConstructFromPost(JsOperationConstructorFrom executor)
+        public JsInstruction OperationAjax(string newPrefix, JsFunction onSucess)
         {
-            return new JsRenderer(() => "OperationConstructFromPost({0})".Formato(executor.ToJS()));
+            return new JsInstruction(() => "{0}.operationAjax('{1}', {2})".Formato(this.ToJS(), newPrefix, onSucess.ToJS()));
         }
+    }
 
-        public static JsRenderer ConstructFromMany(JsOperationConstructorFromMany executor)
-        {
-            return new JsRenderer(() => "OperationConstructFromMany({0})".Formato(executor.ToJS()));
-        }
 
-        public static JsRenderer Delete(JsOperationDelete executor)
-        {
-            return new JsRenderer(() => "OperationDelete({0})".Formato(executor.ToJS()));
-        }
-
-        public static JsRenderer AvoidDefaultOk(JsRenderer body)
-        {
-            return new JsRenderer(() => "function(){{{0} return false;}}".Formato(body != null ? body.ToJS() : ""));
-        }
+    public static class JsOp
+    {
+        public static readonly JsFunction ReloadContent = new JsFunction() { Renderer = () => "OpReloadContent" };
+        public static readonly JsFunction OpenPopup = new JsFunction() { Renderer = () => "OpOpenPopup" };
+        public static readonly JsFunction Navigate = new JsFunction() { Renderer = () => "OpNavigate" };
     }
 
     public class JsOperationExecutor : JsOperationBase
     {
-        public JsOperationExecutor(JsOperationOptions jsOptions)
+        public JsOperationExecutor(JsOperationOptions options)
+            : base(options)
         {
-            this.options = jsOptions;
+            Renderer = () => "new OperationExecutor(" + this.options.ToJS() + ")";
         }
 
-        public override string ToJS()
+        public JsInstruction DefaultExecute()
         {
-            return "new OperationExecutor(" + this.options.ToJS() + ")";
+            return new JsInstruction(() => "{0}.defaultExecute()".Formato(this.ToJS()));
         }
     }
 
     public class JsOperationConstructorFrom : JsOperationBase
     {
-        public JsOperationConstructorFrom(JsOperationOptions jsOptions)
+        public JsOperationConstructorFrom(JsOperationOptions options)
+            : base(options)
         {
-            this.options = jsOptions;
+            Renderer = () => "new ConstructorFrom(" + this.options.ToJS() + ")";
         }
 
-        public override string ToJS()
+        public JsInstruction DefaultConstruct()
         {
-            return "new ConstructorFrom(" + this.options.ToJS() + ")";
+            return new JsInstruction(() => "{0}.defaultConstruct()".Formato(this.ToJS()));
         }
     }
 
     public class JsOperationConstructorFromMany : JsOperationBase
     {
-        public JsOperationConstructorFromMany(JsOperationOptions jsOptions)
+        public JsOperationConstructorFromMany(JsOperationOptions options)
+            : base(options)
         {
-            this.options = jsOptions;
+            Renderer = () => "new ConstructorFromMany(" + this.options.ToJS() + ")";
         }
 
-        public override string ToJS()
+        public JsInstruction DefaultConstruct()
         {
-            return "new ConstructorFromMany(" + this.options.ToJS() + ")";
+            return new JsInstruction(() => "{0}.defaultConstruct()".Formato(this.ToJS()));
         }
     }
 
     public class JsOperationDelete : JsOperationBase
     {
-        public JsOperationDelete(JsOperationOptions jsOptions)
+        public JsOperationDelete(JsOperationOptions options)
+            : base(options)
         {
-            this.options = jsOptions;
+            Renderer = () =>"new DeleteExecutor(" + this.options.ToJS() + ")";
         }
 
-        public override string ToJS()
+        public JsInstruction DefaultDelete()
         {
-            return "new DeleteExecutor(" + this.options.ToJS() + ")";
+            return new JsInstruction(() => "{0}.defaultDelete()".Formato(this.ToJS()));
         }
     }
 }
