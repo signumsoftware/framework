@@ -38,9 +38,6 @@
     <OutputPath>bin\Partial\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.5.452, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="Microsoft.VisualStudio.TeamSystem.Data.UnitTesting, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
@@ -82,7 +79,6 @@
     <Compile Include="Files\FileRepeaterHelper.cs" />
     <Compile Include="Files\FileRepeater.cs" />
     <Compile Include="Files\FileLineHelper.cs" />
-    <Compile Include="Files\DatabaseSetup.cs" />
     <Compile Include="Files\FileLine.cs" />
     <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Files\FileController.cs" />
