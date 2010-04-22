@@ -16,9 +16,9 @@ namespace Signum.Utilities
         public static string Quote(this string s)
         {
             if (s == null || s.Length == 0)
-                return "\'\'";
+                return "\"\"";
 
-            return "\'" + s.Escape() + "\'";
+            return "\"" + s.Escape() + "\"";
         }
         private static string Escape(this string s)
         {
@@ -71,15 +71,15 @@ namespace Signum.Utilities
 
         public static string ToJSonArray<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
-            return "[" + collection.ToString(toString, ", ") + "]";
+            return "[" + collection.ToString(toString, ",") + "]";
         }
 
         public static string ToJSonObject<K, V>(this IDictionary<K, V> dictionary, Func<K, string> keyQuoted, Func<V, string> value)
         {
             return "{" + dictionary.ToString(kvp =>
-                "{0} : {1}".Formato(
+                "{0}:{1}".Formato(
                    keyQuoted(kvp.Key),
-                   value(kvp.Value)), ", ") + "}";
+                   value(kvp.Value)), ",") + "}";
         }
 
         public static string ToJSonArrayBig<T>(this IEnumerable<T> collection, Func<T, string> toString)
@@ -101,10 +101,10 @@ namespace Signum.Utilities
         {
             List<MemberEntry<T>> entries = (List<MemberEntry<T>>)cache.GetOrCreate(typeof(T), () => MemberEntryFactory.GenerateList<T>());
 
-            return "{\r\n" + entries.ToString(m =>
+            return "{" + entries.ToString(m =>
                 "{0}:{1}".Formato(
                    Quote(m.Name),
-                   value(m.Getter(element))), ",\r\n").Indent(3) + "\r\n}";
+                   value(m.Getter(element))), ",").Indent(3) + "}";
             
         }
     }
