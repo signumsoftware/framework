@@ -34,16 +34,18 @@ namespace Signum.Web
             return (T)ConstructorManager.Construct(typeof(T));
         }
 
-        public static object VisualConstruct(Type type, ControllerBase controller)
+        public static ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle)
         {
-            return ConstructorManager.VisualConstruct(type, controller);
+            return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle);
         }
+    }
 
-        public static T VisualConstruct<T>(ControllerBase controller) where T : ModifiableEntity
-        {
-            return (T)ConstructorManager.VisualConstruct(typeof(T), controller);
-        }
-
+    public class ConstructContext
+    {
+        public ControllerBase Controller { get; set; }
+        public Type Type { get; set; }
+        public string Prefix { get; set; }
+        public VisualConstructStyle PreferredViewStyle { get; set; }
     }
     
     public class ConstructorManager
@@ -51,15 +53,15 @@ namespace Signum.Web
         public event Func<Type, ModifiableEntity> GeneralConstructor;
         public Dictionary<Type, Func<ModifiableEntity>> Constructors;
 
-        public event Func<Type, ControllerBase, object> VisualGeneralConstructor;
-        public Dictionary<Type, Func<ControllerBase, object>> VisualConstructors;
+        public event Func<ConstructContext, ActionResult> VisualGeneralConstructor;
+        public Dictionary<Type, Func<ConstructContext, ActionResult>> VisualConstructors;
 
         internal void Initialize()
         {
             if (Constructors == null)
                 Constructors = new Dictionary<Type, Func<ModifiableEntity>>();
             if (VisualConstructors == null)
-                VisualConstructors = new Dictionary<Type, Func<ControllerBase, object>>();
+                VisualConstructors = new Dictionary<Type, Func<ConstructContext, ActionResult>>();
         }
 
         public virtual ModifiableEntity Construct(Type type)
@@ -87,28 +89,54 @@ namespace Signum.Web
             return (ModifiableEntity)Activator.CreateInstance(type);
         }
 
-        public virtual object VisualConstruct(Type type, ControllerBase controller)
+        public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle)
         {
-            Func<ControllerBase, object> c = VisualConstructors.TryGetC(type);
+            ConstructContext ctx = new ConstructContext { Controller = controller, Type = type, Prefix = prefix, PreferredViewStyle = preferredStyle };
+            Func<ConstructContext, ActionResult> c = VisualConstructors.TryGetC(type);
             if (c != null)
             {
-                object result = c(controller);
+                ActionResult result = c(ctx);
                 if (result != null)
                     return result;
             }
 
             if (VisualGeneralConstructor != null)
             {
-                object result = VisualGeneralConstructor(type, controller);
+                ActionResult result = VisualGeneralConstructor(ctx);
                 if (result != null)
                     return result;
             }
 
-            object o = Constructor.Construct(type);
-            return AddFilterProperties(o, controller);
+            if (preferredStyle == VisualConstructStyle.Navigate)
+                return new ContentResult { Content = Navigator.ViewRoute(type, null) };
+
+            ModifiableEntity entity = Constructor.Construct(type);
+            return EncapsulateView(controller, entity, prefix, preferredStyle); 
         }
 
-        public static object AddFilterProperties(object obj, ControllerBase controller)
+        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle)
+        {
+            IdentifiableEntity ident = entity as IdentifiableEntity;
+
+            if (ident == null)
+                throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities"); 
+
+            AddFilterProperties(entity, controller);
+
+            switch (preferredStyle)
+            {
+                case VisualConstructStyle.PopupView:
+                    return Navigator.PopupView(controller, ident, prefix);
+                case VisualConstructStyle.PartialView:
+                    return Navigator.PartialView(controller, ident, prefix);
+                case VisualConstructStyle.View:
+                    return Navigator.View(controller, ident); 
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        public static void AddFilterProperties(ModifiableEntity obj, ControllerBase controller)
         {
             if (obj == null)
                 throw new ArgumentNullException("result");
@@ -116,7 +144,7 @@ namespace Signum.Web
             HttpContextBase httpContext = controller.ControllerContext.HttpContext;
 
             if (!httpContext.Request.Params.AllKeys.Contains("sfQueryUrlName"))
-                return obj;
+                return;
 
             Type type = obj.GetType();
 
@@ -133,8 +161,6 @@ namespace Signum.Web
 
             foreach (var p in pairs)
                 p.pi.SetValue(obj, Convert(p.fo.Value, p.pi.PropertyType), null);
-            
-            return obj;
         }
 
         public static object Convert(object obj, Type type)
@@ -176,5 +202,13 @@ namespace Signum.Web
 
             throw new InvalidCastException(Properties.Resources.ImposibleConvertObject0From1To2.Formato(obj, objType, type));
         }
+    }
+
+    public enum VisualConstructStyle
+    {
+        PopupView, 
+        PartialView,
+        View,
+        Navigate
     }
 }

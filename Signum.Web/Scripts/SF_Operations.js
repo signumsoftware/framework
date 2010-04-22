@@ -4,15 +4,8 @@
         operationKey: null,
         isLite: false,
         controllerUrl: null,
-        validationControllerUrl: null,
-        avoidValidation: false,
         onOk: null,
         onCancelled: null,
-        onOperationSuccess: null,
-        multiStep: false,
-        navigateOnSuccess: false,
-        closePopupOnSuccess: false,
-        confirmMsg: null,
         requestExtraJsonData: null,
     }, _options);
 };
@@ -28,7 +21,7 @@ OperationManager.prototype = {
     },
 
     newPrefix: function() {
-        return this.options.prefix + "_New";
+        return this.options.prefix.compose("New");
     },
 
     requestData: function(newPrefix) {
@@ -76,49 +69,41 @@ OperationManager.prototype = {
         return requestData;
     },
 
-    entityIsValid: function() {
-        log("OperationManager entityIsValid");
-        var info = this.runtimeInfo();
-        var isValid = null;
-        if (empty(this.options.prefix))
-            isValid = new Validator({ controllerUrl: this.options.validationControllerUrl }).validate();
-        else
-            isValid = new PartialValidator({ controllerUrl: this.options.validationControllerUrl, prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).validate().isValid;
-        if (!isValid) {
-            window.alert(lang['popupErrorsStop']);
-            return false;
-        }
-        return true;
-    },
-
-    executedSuccessfully: function(operationResult) {
-        log("OperationManager executedSuccessfully");
-        if (operationResult.indexOf("ModelState") < 0)
-            return true;
-
-        eval('var result=' + operationResult);
-        var modelState = result["ModelState"];
-        if (empty(this.options.prefix))
-            new Validator().showErrors(modelState);
-        else {
-            var info = this.runtimeInfo();
-            new PartialValidator({ prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).showErrors(modelState);
-        }
-        return false;
-    },
-
-    post: function() {
-        log("OperationManager post");
-        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
-            return;
-
+    operationAjax: function(newPrefix, onSuccess)
+    {
+        log("OperationManager callServer");
+    
         NotifyInfo(lang['executingOperation']);
-
-        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
-            if (!this.entityIsValid())
-                return;
-        }
-
+    
+        if (empty(newPrefix))
+            newPrefix = this.options.prefix;
+    
+        var self = this;
+        $.ajax({
+            type: "POST",
+            url: this.options.controllerUrl,
+            data: this.requestData(newPrefix),
+            async: false,
+            dataType: "html",
+            success: function(operationResult) {
+                if (self.executedSuccessfully(operationResult)) {
+                    if (onSuccess != null)
+                        onSuccess(newPrefix, operationResult);
+                }
+                else{
+                    NotifyInfo(lang['error'], 2000);
+                    return;
+                }
+             },
+             error:
+                function() { NotifyInfo(lang['error'], 2000); }
+        });
+    },
+    
+    operationSubmit: function()
+    {
+        log("OperationManager operationSubmit");
+    
         var info = this.runtimeInfo();
         if (info.find().length > 0)
         {
@@ -137,9 +122,36 @@ OperationManager.prototype = {
                     $("form").append(hiddenInput(key, this.options.requestExtraJsonData[key]));
             }
         }
-            
-        document.forms[0].action = this.options.controllerUrl;
-        document.forms[0].submit();
+         
+        Submit(this.options.controllerUrl);
+    },
+
+    executedSuccessfully: function(operationResult) {
+        log("OperationManager executedSuccessfully");
+        if (operationResult.indexOf("ModelState") < 0)
+            return true;
+
+        eval('var result=' + operationResult);
+        var modelState = result["ModelState"];
+        if (empty(this.options.prefix))
+            new Validator().showErrors(modelState);
+        else {
+            var info = this.runtimeInfo();
+            new PartialValidator({ prefix: this.options.prefix, type: info.runtimeType(), id: info.id() }).showErrors(modelState);
+        }
+        return false;
+    },
+
+    defaultSubmit: function() {
+        log("OperationManager defaultSubmit");
+        
+        if (isTrue(this.options.isLite))
+            operationSubmit();
+        else {
+            var onSuccess = function() { this.operationSubmit(); };
+            if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
+                return;
+        }
     }
 };
 
@@ -148,88 +160,25 @@ var OperationExecutor = function(_options) {
         controllerUrl: "Operation/OperationExecute"
     }, _options));
 
-    this.execute = function() {
-        log("OperationExecutor execute");
-        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
-            return;
-
-        NotifyInfo(lang['executingOperation']);
-
-        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
-            if (!this.entityIsValid()) {
-                NotifyInfo(lang['error'], 2000);
+    this.defaultExecute = function() {
+        log("OperationExecutor defaultExecute");
+        
+        var onSuccess = function() 
+        { 
+            this.operationAjax(null, ReloadContent); 
+            NotifyInfo(lang['operationExecuted'], 2000); 
+        };
+        
+        if (isTrue(this.options.isLite))
+            onSuccess();
+        else {
+            if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
                 return;
-            }
         }
-
-        var newPrefix = (isFalse(this.options.multiStep)) ? this.options.prefix : this.newPrefix();
-        var self = this;
-        $.ajax({
-            type: "POST",
-            url: this.options.controllerUrl,
-            data: this.requestData(newPrefix),
-            async: false,
-            dataType: "html",
-            success: function(operationResult) {
-                if (!self.executedSuccessfully(operationResult)) {
-                    NotifyInfo(lang['error'], 2000);
-                    return;
-                }
-
-                if (self.options.navigateOnSuccess) {
-                    PostServer(operationResult);
-                    return;
-                }
-
-                if (self.options.multiStep) {
-                    new ViewNavigator({
-                        prefix: newPrefix,
-                        containerDiv: newPrefix.compose("externalPopupDiv"),
-                        onOk: self.options.onOk,
-                        onCancelled: self.options.onCancelled
-                    }).viewSave(operationResult);
-                    return;
-                }
-
-                //if (empty(self.options.prefix)) //NormalWindow
-                if (operationResult.indexOf("<form") >= 0) //NormalWindow: It might have prefix but the operation returns a full page reload
-                    $("#content").html(operationResult.substring(operationResult.indexOf("<form"), operationResult.indexOf("</form>") + 7));
-                else { //PopupWindow
-                    if (self.options.closePopupOnSuccess) {
-                        $('#' + newPrefix.compose("externalPopupDiv")).remove();
-                    }
-                    else {
-                        new ViewNavigator({
-                            prefix: newPrefix,
-                            containerDiv: newPrefix.compose("externalPopupDiv"),
-                            onOk: self.options.onOk,
-                            onCancelled: self.options.onCancelled
-                        }).viewSave(operationResult);
-                    }
-                }
-
-                if (!empty(self.options.onOperationSuccess))
-                    self.options.onOperationSuccess();
-
-                NotifyInfo(lang['operationExecuted'], 2000);
-            },
-            error:
-                function() { NotifyInfo(lang['error'], 2000); }
-        });
     };
 };
 
 OperationExecutor.prototype = new OperationManager();
-
-function OperationExecute(executor, prefix) {
-    if (!empty(prefix))
-        executor.options = $.extend(executor.options, { prefix: prefix });
-    executor.execute();
-}
-
-function OperationExecutePost(executor) {
-    executor.post();
-}
 
 //ConstructorFrom options = OperationManager options + returnType
 var ConstructorFrom = function(_options) {
@@ -238,69 +187,25 @@ var ConstructorFrom = function(_options) {
         returnType: null
     }, _options));
 
-    this.construct = function() {
+    this.defaultConstruct = function() {
         log("ConstructorFrom construct");
 
-        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
-            return;
-
-        NotifyInfo(lang['executingOperation']);
-
-        if (!this.options.avoidValidation && isFalse(this.options.isLite)) {
-            if (!this.entityIsValid()) {
-                NotifyInfo(lang['error'], 2000);
-                return;
-            }
+        var onSuccess = function() 
+        { 
+            this.operationAjax(this.newPrefix(), OpenPopup); 
+            NotifyInfo(lang['operationExecuted'], 2000); 
         }
-
-        var self = this;
-        $.ajax({
-            type: "POST",
-            url: this.options.controllerUrl,
-            data: this.requestData(this.newPrefix()),
-            async: false,
-            dataType: "html",
-            success: function(operationResult) {
-                if (!self.executedSuccessfully(operationResult)) {
-                    NotifyInfo(lang['error'], 2000);
-                    return;
-                }
-
-                if (self.options.navigateOnSuccess) {
-                    PostServer(operationResult);
-                    return;
-                }
-
-                var navigator = new ViewNavigator({
-                    prefix: self.newPrefix(),
-                    type: self.options.returnType,
-                    onOk: self.options.onOk,
-                    onCancelled: self.options.onCancelled
-                }).showCreateSave(operationResult);
-                //$(self.pf("divASustituir")).html(operationResult);
-                //new popup().show(self.options.prefix + "divASustituir");
-                //$('#' + self.options.prefix + sfBtnCancel).click(empty(self.options.onCancel) ? (function() { $('#' + self.options.prefix + "divASustituir").html(""); }) : self.options.onCancel);
-
-                if (!empty(self.options.onOperationSuccess))
-                    self.options.onOperationSuccess();
-
-                NotifyInfo(lang['operationExecuted'], 2000);
-            },
-            error:
-                function() { NotifyInfo(lang['error'], 2000); }
-        });
+        
+        if (isTrue(this.options.isLite))
+            onSuccess();
+        else {
+            if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
+                return;
+        }
     };
 };
 
 ConstructorFrom.prototype = new OperationManager();
-
-function OperationConstructFrom(constructorFrom) {
-    constructorFrom.construct();
-}
-
-function OperationConstructFromPost(constructorFrom) {
-    constructorFrom.post();
-}
 
 var DeleteExecutor = function(_options) {
     OperationManager.call(this, $.extend({
@@ -336,7 +241,7 @@ var DeleteExecutor = function(_options) {
                 }
 
                 if (self.options.navigateOnSuccess) {
-                    PostServer(operationResult);
+                    Submit(operationResult);
                     return;
                 }
 
@@ -417,7 +322,7 @@ var ConstructorFromMany = function(_options) {
                 }
 
                 if (self.options.navigateOnSuccess) {
-                    PostServer(operationResult);
+                    Submit(operationResult);
                     return;
                 }
 
@@ -485,6 +390,28 @@ function ReloadEntity(urlController, prefix, parentDiv, reloadButtonBar) {
            }
         }
     });
+}
+
+function OpReloadContent(prefix, operationResult){
+    log("OperationExecutor defaultOnSuccess");
+    if (operationResult.indexOf("<form") >= 0) //NormalWindow: It might have prefix but the operation returns a full page reload
+        $("#content").html(operationResult.substring(operationResult.indexOf("<form"), operationResult.indexOf("</form>") + 7));
+    else { //PopupWindow
+        new ViewNavigator({
+            prefix: prefix,
+            containerDiv: prefix.compose("externalPopupDiv")
+        }).viewSave(operationResult);
+    }
+}
+
+function OpOpenPopup(prefix, operationResult)
+{
+    new ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
+}
+
+function OpNavigate(prefix, operationResult)
+{
+    Submit(operationResult);
 }
 
 

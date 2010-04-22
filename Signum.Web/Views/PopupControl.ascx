@@ -31,13 +31,13 @@
     <div id="<%=modelTC.Compose("divButtonBar")%>" class="buttonBar">
         <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false)){ %>
             <% if(ViewData[ViewDataKeys.OnOk]!=null) { %>
-            <input type="button" class="OperationDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
+            <input type="button" class="ButtonDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" onclick="<%=ViewData[ViewDataKeys.OnOk]%>" />
         <%} else{ %>
-            <input type="button" class="OperationDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" />
+            <input type="button" class="ButtonDiv" id="<%=modelTC.Compose(ViewDataKeys.BtnOk)%>" value="OK" />
          <%} %>    
             
         <%} %>
-        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, modelTC.ControlID)%>
+        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html)%>
     </div>
     <div class="clearall"></div>
     <%= Html.ValidationSummaryAjax(modelTC) %>
@@ -45,7 +45,7 @@
     <div class="clearall"></div>
     <div id="<%=modelTC.Compose("divMainControl")%>" class="divMainControl">
         <%
-          Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); 
+            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); 
         %>
     </div>
 </div>

@@ -101,12 +101,12 @@ namespace Signum.Web
 
         public void Fill(JsOptionsBuilder op)
         {
-            op.Add("queryUrlName", QueryName.TryCC(qn => Navigator.Manager.QuerySettings[qn].UrlName).TrySingleQuote());
+            op.Add("queryUrlName", QueryName.TryCC(qn => Navigator.Manager.QuerySettings[qn].UrlName.Quote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
-            op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().TrySingleQuote() : null);
+            op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().Quote() : null);
             op.Add("create", !Create ? "false" : null);
             op.Add("allowMultiple", AllowMultiple.TryToString());
-            op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("").TrySingleQuote());
+            op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("").Quote());
         }
     }
 

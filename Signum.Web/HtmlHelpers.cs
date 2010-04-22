@@ -54,7 +54,7 @@ namespace Signum.Web
                 sb.AppendLine("<input type='checkbox' id='{0}' name='{0}' value='{1}' disabled='disabled'{2}{3} />".Formato(
                     name, 
                     value ? "true" : "false", 
-                    htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " "), 
+                    htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " "), 
                     value ? "checked='checked'" : ""));
 
                 sb.AppendLine("<input type='hidden' id='{0}' name='{0}' value='{1}' disabled='disabled' />".Formato(
@@ -130,7 +130,7 @@ namespace Signum.Web
         public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
-            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
+            string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " ")) : "";
             string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
             return "<div{0}{1}{2}>{3}</div>".Formato(idname, css, attributes, innerHTML);
         }

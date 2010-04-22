@@ -514,7 +514,7 @@ namespace Signum.Web
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, "");
             controller.ViewData.Model = tc; 
 
-            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? Navigator.OnPartialViewName(entity);
+            controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName(entity);
             
             if (!controller.ViewData.Keys.Any(s => s==ViewDataKeys.PageTitle))
                 controller.ViewData[ViewDataKeys.PageTitle] = entity.ToStr;
@@ -552,7 +552,7 @@ namespace Signum.Web
                 throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
-            controller.ViewData[ViewDataKeys.MainControlUrl] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);
+            controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);
             
             if (Navigator.IsReadOnly(cleanType))
                 cleanTC.ReadOnly = true;
@@ -595,7 +595,7 @@ namespace Signum.Web
 
             controller.ViewData.Model = new Context(null, "");
 
-            controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
+            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlUrl;
 
             controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
@@ -659,7 +659,7 @@ namespace Signum.Web
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             controller.ViewData.Model = context;
-            controller.ViewData[ViewDataKeys.MainControlUrl] = SearchControlUrl;
+            controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlUrl;
             
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
             controller.ViewData[ViewDataKeys.QueryDescription] = queryDescription;

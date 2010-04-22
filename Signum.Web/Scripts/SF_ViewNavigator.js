@@ -91,7 +91,7 @@ ViewNavigator.prototype = {
         if (empty(this.viewOptions.type))
             throw "Type must be specified to Navigator on Navigate mode";
         var self = this;
-        this.callServer(function(url) { PostServer(url, self.viewOptions.requestExtraJsonData); });
+        this.callServer(function(url) { Submit(url, self.viewOptions.requestExtraJsonData); });
     },
 
     isLoaded: function() {
@@ -237,6 +237,10 @@ ViewNavigator.prototype = {
         if (this.viewOptions.onCancelled != null)
             this.viewOptions.onCancelled();
     }
+}
+
+function ClosePopup(prefix) {
+    $('#' + prefix.compose("externalPopupDiv")).remove();
 }
 
 function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat) {

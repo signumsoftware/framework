@@ -46,7 +46,8 @@ namespace Signum.Web
         protected override JsOptionsBuilder OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
-            result.Add("detailDiv", DetailDiv.TrySingleQuote());
+            if (DetailDiv.HasText())
+                result.Add("detailDiv", DetailDiv.Quote());
             return result;
         }
 
@@ -60,9 +61,9 @@ namespace Signum.Web
             return EntityLineDetail.JsCreating(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsCreating(EntityLineDetail edline, JsViewOptions viewOptions)
+        public static JsInstruction JsCreating(EntityLineDetail edline, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "EDLineOnCreating({0})".Formato(",".Combine(
+            return new JsInstruction(() => "EDLineOnCreating({0})".Formato(",".Combine(
                 edline.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }
@@ -72,9 +73,9 @@ namespace Signum.Web
             return EntityLineDetail.JsFinding(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsFinding(EntityLineDetail edline, JsFindOptions findOptions, JsViewOptions viewOptions)
+        public static JsInstruction JsFinding(EntityLineDetail edline, JsFindOptions findOptions, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "EDLineOnFinding({0})".Formato(",".Combine(
+            return new JsInstruction(() => "EDLineOnFinding({0})".Formato(",".Combine(
                 edline.ToJS(),
                 findOptions.TryCC(f => f.ToJS())),
                 viewOptions.TryCC(v => v.ToJS())));
@@ -85,9 +86,9 @@ namespace Signum.Web
             return EntityLineDetail.JsRemoving(this).ToJS();
         }
 
-        public static JsRenderer JsRemoving(EntityLineDetail edline)
+        public static JsInstruction JsRemoving(EntityLineDetail edline)
         {
-            return new JsRenderer(() => "EDLineOnRemoving({0})".Formato(edline.ToJS()));
+            return new JsInstruction(() => "EDLineOnRemoving({0})".Formato(edline.ToJS()));
         }
     }
 }

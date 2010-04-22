@@ -35,7 +35,8 @@ namespace Signum.Web
         protected override JsOptionsBuilder OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
-            result.Add("detailDiv", DetailDiv.TrySingleQuote());
+            if (DetailDiv.HasText())
+                result.Add("detailDiv", DetailDiv.Quote());
             return result;
         }
 
@@ -44,9 +45,9 @@ namespace Signum.Web
             return EntityListDetail.JsViewing(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsViewing(EntityListDetail edlist, JsViewOptions viewOptions)
+        public static JsInstruction JsViewing(EntityListDetail edlist, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "EDListOnViewing({0})".Formato(",".Combine(
+            return new JsInstruction(() => "EDListOnViewing({0})".Formato(",".Combine(
                 edlist.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }
@@ -56,9 +57,9 @@ namespace Signum.Web
             return EntityListDetail.JsCreating(this, DefaultJsViewOptions()).ToJS();
         }
 
-        private static JsRenderer JsCreating(EntityListDetail edlist, JsViewOptions viewOptions)
+        private static JsInstruction JsCreating(EntityListDetail edlist, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "EDListOnCreating({0})".Formato(",".Combine(
+            return new JsInstruction(() => "EDListOnCreating({0})".Formato(",".Combine(
                 edlist.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }
@@ -68,9 +69,9 @@ namespace Signum.Web
             return EntityListDetail.JsFinding(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsFinding(EntityListDetail edlist, JsFindOptions findOptions, JsViewOptions viewOptions)
+        public static JsInstruction JsFinding(EntityListDetail edlist, JsFindOptions findOptions, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "EDListOnFinding({0})".Formato(",".Combine(
+            return new JsInstruction(() => "EDListOnFinding({0})".Formato(",".Combine(
                 edlist.ToJS(),
                 findOptions.TryCC(f => f.ToJS())),
                 viewOptions.TryCC(v => v.ToJS())));
@@ -81,9 +82,9 @@ namespace Signum.Web
             return EntityListDetail.JsRemoving(this).ToJS();
         }
 
-        public static JsRenderer JsRemoving(EntityListDetail edlist)
+        public static JsInstruction JsRemoving(EntityListDetail edlist)
         {
-            return new JsRenderer(() => "EDListOnRemoving({0})".Formato(edlist.ToJS()));
+            return new JsInstruction(() => "EDListOnRemoving({0})".Formato(edlist.ToJS()));
         }
     }
 }

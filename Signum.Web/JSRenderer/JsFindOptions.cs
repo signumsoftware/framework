@@ -9,37 +9,37 @@ namespace Signum.Web
 {
     public class JsFindOptions : JsRenderer
     {
-        public string Prefix { get; set; }
+        public JsValue<string> Prefix { get; set; }
         public FindOptions FindOptions { get; set; }
-        public int? Top { get; set; }
+        public JsValue<int?> Top { get; set; }
         /// <summary>
         /// To be called to open a Find window
         /// </summary>
-        public string NavigatorControllerUrl { get; set; }
+        public JsValue<string> NavigatorControllerUrl { get; set; }
         /// <summary>
         /// To be called when clicking the search button
         /// </summary>
-        public string SearchControllerUrl { get; set; }
+        public JsValue<string> SearchControllerUrl { get; set; }
         /// <summary>
         /// To be called when closing the popup (if exists) with the Ok button
         /// </summary>
-        public string OnOk { get; set; }
-        public string OnCancelled { get; set; }
-        public bool? Async { get; set; }
+        public JsFunction OnOk { get; set; }
+        public JsFunction OnCancelled { get; set; }
+        public JsValue<bool?> Async { get; set; }
 
         public JsFindOptions()
         {
-            renderer = () =>
+            Renderer = () =>
             {
                 JsOptionsBuilder options = new JsOptionsBuilder(true)
                 {
-                    {"prefix", Prefix.TrySingleQuote()},
-                    {"top", Top.TryToString() },
-                    {"navigatorControllerUrl", NavigatorControllerUrl.TrySingleQuote()},
-                    {"searchControllerUrl",SearchControllerUrl.TrySingleQuote()},
-                    {"onOk",OnOk},
-                    {"onCancelled", OnCancelled},
-                    {"async", Async == true ? "true": null},
+                    {"prefix", Prefix.TryCC(t=>t.ToJS())},
+                    {"top", Top.TryCC(t=>t.ToJS()) },
+                    {"navigatorControllerUrl", NavigatorControllerUrl.TryCC(t=>t.ToJS())},
+                    {"searchControllerUrl",SearchControllerUrl.TryCC(t=>t.ToJS())},
+                    {"onOk",OnOk.TryCC(t=>t.ToJS())},
+                    {"onCancelled", OnCancelled.TryCC(t=>t.ToJS())},
+                    {"async", Async.TryCC(t=>t.ToJS())},
                 };
 
                 if (FindOptions != null)
@@ -50,7 +50,7 @@ namespace Signum.Web
         }
     }
 
-    public class JsFindNavigator : JsRenderer
+    public class JsFindNavigator : JsInstruction
     {
         public JsFindNavigator(Func<string> renderer) : base(renderer)
         { 

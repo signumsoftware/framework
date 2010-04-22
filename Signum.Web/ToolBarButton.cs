@@ -15,10 +15,12 @@ namespace Signum.Web
         public string ImgSrc { get; set; }
         public string Text { get; set; }
         public string AltText { get; set; }
-        //Prefix -> JavaScript Event Handler
         public string OnClick { get; set; }
         
-        private string divCssClass = "OperationDiv";
+        public static string DefaultEntityDivCssClass = "ButtonDiv";
+        public static string DefaultQueryDivCssClass = "QueryButtonDiv";
+
+        private string divCssClass;
         public string DivCssClass 
         { 
             get { return divCssClass; } 
@@ -38,7 +40,7 @@ namespace Signum.Web
             get { return htmlProps; }
         }
 
-        public virtual string ToString(HtmlHelper helper, string prefix)
+        public virtual string ToString(HtmlHelper helper)
         {
             HtmlProps.Add("title", AltText ?? "");
 

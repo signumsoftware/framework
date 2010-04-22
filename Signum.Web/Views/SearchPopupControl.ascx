@@ -30,7 +30,7 @@
         &nbsp;
     </div>  
     <div class="clearall"></div>
-    <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
+    <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); %>
     <br />
     <%= Html.ValidationSummaryAjax(context) %>
 </div>

@@ -62,10 +62,10 @@ namespace Signum.Web
                 case RenderMode.Content:
                     return helper.RenderPartialToString(partialViewName, vdd);
                 case RenderMode.Popup:
-                    vdd.Add(ViewDataKeys.MainControlUrl, partialViewName);
+                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
                     return helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd);
                 case RenderMode.PopupInDiv:
-                    vdd.Add(ViewDataKeys.MainControlUrl, partialViewName);
+                    vdd.Add(ViewDataKeys.PartialViewName, partialViewName);
                     return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
                         helper.RenderPartialToString(Navigator.Manager.PopupControlUrl, vdd),
                         "",

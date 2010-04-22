@@ -62,7 +62,7 @@ namespace Signum.Web
                    // {
                    //     if (!string.IsNullOrEmpty(mi.OnClick) || !string.IsNullOrEmpty(mi.OnServerClickAjax))
                    //         throw new ArgumentException(Resources.MenuItem0HasOnServerClickPostAndAnotherClickDefined.Formato(mi.Id));
-                   //     onclick = "PostServer('{0}');".Formato(mi.OnServerClickPost);
+                    //     onclick = "Submit('{0}');".Formato(mi.OnServerClickPost);
                    // }
 
                    // //Add cursor pointer to the htmlProps

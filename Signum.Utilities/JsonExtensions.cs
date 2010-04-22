@@ -9,14 +9,6 @@ namespace Signum.Utilities
 {
     public static class JsonExtensions
     {
-        public static string TrySingleQuote(this string s)
-        {
-            if (!s.HasText())
-                return null;
-
-            return "\'" + s.Escape() + "\'";
-        }
-
         ///  FUNCTION Enquote Public Domain 2002 JSON.org 
         ///  @author JSON.org 
         ///  @version 0.1 
@@ -24,9 +16,9 @@ namespace Signum.Utilities
         public static string Quote(this string s)
         {
             if (s == null || s.Length == 0)
-                return "\"\"";
+                return "\'\'";
 
-            return "\"" + s.Escape() + "\"";
+            return "\'" + s.Escape() + "\'";
         }
         private static string Escape(this string s)
         {

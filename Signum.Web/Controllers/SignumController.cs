@@ -50,23 +50,14 @@ namespace Signum.Web.Controllers
         { 
             Type type = Navigator.ResolveType(sfRuntimeType);
 
-            IIdentifiable entity = null;
-            object result = Constructor.VisualConstruct(type, this);
-            if (result.GetType() == typeof(PartialViewResult))
-                return (PartialViewResult)result;
-            else if (typeof(IIdentifiable).IsAssignableFrom(result.GetType()))
-                entity = (IIdentifiable)result;
-            else
-                throw new InvalidOperationException("Invalid result type for a Constructor");
-
-            return Content(Navigator.ViewRoute(type, null));
+            return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate);
         }
 
         public PartialViewResult PopupCreate(string sfRuntimeType, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
 
-            object result = Constructor.VisualConstruct(type, this);
+            object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
             if (result.GetType() == typeof(PartialViewResult))
                 return (PartialViewResult)result;
 
@@ -99,11 +90,9 @@ namespace Signum.Web.Controllers
                     entity = Database.Retrieve(type, sfId.Value);
                 else
                 {
-                    object result = Constructor.VisualConstruct(type, this);
-                    if (result.GetType() == typeof(PartialViewResult))
+                    ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
+                    if (result is PartialViewResult)
                         return (PartialViewResult)result;
-                    else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                        entity = (IdentifiableEntity)result;
                     else
                         throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
@@ -139,11 +128,9 @@ namespace Signum.Web.Controllers
                     entity = Database.Retrieve(type, sfId.Value);
                 else
                 {
-                    object result = Constructor.VisualConstruct(type, this);
-                    if (result.GetType() == typeof(PartialViewResult))
+                    object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView);
+                    if (result is PartialViewResult)
                         return (PartialViewResult)result;
-                    else if (typeof(ModifiableEntity).IsAssignableFrom(result.GetType()))
-                        entity = (IdentifiableEntity)result;
                     else
                         throw new InvalidOperationException("Invalid result type for a Constructor");
                 }
@@ -357,7 +344,8 @@ namespace Signum.Web.Controllers
             }
 
             HtmlHelper helper = CreateHtmlHelper(this);
-            return Content(ButtonBarEntityHelper.GetForEntity(this.ControllerContext, entity, Navigator.Manager.EntitySettings[type].OnPartialViewName(entity)).ToString(helper, prefix));
+            return Content(ButtonBarEntityHelper.GetForEntity(this.ControllerContext, entity, 
+                Navigator.Manager.EntitySettings[type].OnPartialViewName(entity), prefix).ToString(helper));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

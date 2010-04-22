@@ -30,15 +30,15 @@
 </div>
 
 <div id="<%=context.Compose("divMenuItems") %>" class="buttonBar">
-    <label class="OperationDiv" for="<%=context.Compose(ViewDataKeys.Top)%>">Núm.registros</label> 
-    <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "class", "OperationDiv" }, { "onkeydown", "return validator.number(event)" } })%>
+    <label class="ButtonDiv" for="<%=context.Compose(ViewDataKeys.Top)%>">Núm.registros</label> 
+    <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "class", "ButtonDiv" }, { "onkeydown", "return validator.number(event)" } })%>
 
-    <input class="OperationDiv btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="Buscar" /> 
+    <input class="ButtonDiv btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="Buscar" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
         <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
     <%} %>
-    <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType).ToString(Html, context.ControlID)%> 
+    <%= ButtonBarQueryHelper.GetButtonBarElementsForQuery(this.ViewContext, findOptions.QueryName, entitiesType, context.ControlID).ToString(Html)%> 
 </div>
 <div class="clearall"></div>
 <div id="<%=context.Compose("divResults")%>" class="divResults"></div>

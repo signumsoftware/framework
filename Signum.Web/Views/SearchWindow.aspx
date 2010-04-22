@@ -16,7 +16,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
-        <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString()); %>
+        <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString()); %>
         <%= Html.ValidationSummaryAjax() %>
  <%}%>
  <div id="divASustituir"></div>

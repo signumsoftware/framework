@@ -88,6 +88,7 @@
     <Compile Include="CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Constructor.cs" />
+    <Compile Include="JSRenderer\JsFunction.cs" />
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
     <Compile Include="ControllerAttributes.cs" />
@@ -102,17 +103,16 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateData.cs" />
     <Compile Include="ModelStateExtensions.cs" />
+    <Compile Include="ToolBarButton.cs" />
     <Compile Include="TypeContext\TypeContext.cs" />
     <Compile Include="TypeContext\TypeContextExpression.cs" />
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
     <Compile Include="ValueLineBoxModel.cs" />
-    <Compile Include="ToolBarButtom.cs" />
     <Compile Include="EntityInfo.cs" />
     <Compile Include="JSRenderer\JsValidatorOptions.cs" />
     <Compile Include="JSRenderer\JsFindOptions.cs" />
     <Compile Include="JSRenderer\JsViewOptions.cs" />
-    <Compile Include="JSRenderer\JsBaseLineOptions.cs" />
     <Compile Include="Lines\BaseLine.cs" />
     <Compile Include="Lines\EntityRepeater.cs" />
     <Compile Include="Lines\EntityListDetail.cs" />

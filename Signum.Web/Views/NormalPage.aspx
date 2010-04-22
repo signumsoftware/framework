@@ -39,9 +39,9 @@
      <div id="divButtonBar" class="operations">
         <%if (Model != null && Navigator.Manager.ShowOkSave(modelTC.UntypedValue.GetType(), false))
           { %>
-            <div id="btnSave" class="OperationDiv" onclick="javascript:TrySave({});"><%= Resources.Save %></div>  
+            <div id="btnSave" class="ButtonDiv" onclick="javascript:TrySave({});"><%= Resources.Save %></div>  
         <%} %>
-        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.MainControlUrl].ToString()).ToString(Html, "") %>     
+        <%= ButtonBarEntityHelper.GetForEntity(this.ViewContext, (ModifiableEntity)modelTC.UntypedValue, ViewData[ViewDataKeys.PartialViewName].ToString(), modelTC.ControlID).ToString(Html)%>     
      </div>
      <div class="clearall"></div>
      <div class="validationSummaryAjax">
@@ -50,7 +50,7 @@
      </div>    
     <div id="divMainControl" class="divMainControl">
         <%
-        Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); 
+            Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); 
         %>
     </div>
     <div id="divASustituir"></div>

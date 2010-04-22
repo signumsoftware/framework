@@ -6,7 +6,7 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public class JsOptionsBuilder : IJSRenderer, IEnumerable<KeyValuePair<string, string>>
+    public class JsOptionsBuilder : JsRenderer, IEnumerable<KeyValuePair<string, string>>
     {
         bool big;
         Dictionary<string, string> dic = new Dictionary<string, string>();
@@ -14,6 +14,8 @@ namespace Signum.Web
         public JsOptionsBuilder(bool big)
         {
             this.big = big;
+
+            Renderer = () => "{{{0}}}".Formato(this.dic.ToString(kvp => "{0}: {1}".Formato(kvp.Key, kvp.Value), big ? ",\r\n" : ", "));
         }
 
         public void Add(string key, string value)
@@ -32,11 +34,6 @@ namespace Signum.Web
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return dic.GetEnumerator();
-        }
-
-        public string ToJS()
-        {
-            return "{{{0}}}".Formato(dic.ToString(kvp => "{0}: {1}".Formato(kvp.Key, kvp.Value), big ? ",\r\n" : ", "));
         }
 
         public override string ToString()

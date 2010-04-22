@@ -7,46 +7,59 @@ using System.Web.Mvc;
 
 namespace Signum.Web
 {
-    public interface IJSRenderer
+    public abstract class JsRenderer
     {
-        string ToJS();
-    }
-
-    public class JsRenderer
-    {
-        protected Func<string> renderer;
-        public JsRenderer(Func<string> renderer)
-        {
-            if (renderer == null)
-                throw new ArgumentException("renderer"); 
-            this.renderer = renderer;
-        }
-
+        public Func<string> Renderer { get; set; }
+        
         protected JsRenderer()
         {
         }
 
         public string ToJS()
         {
-            return renderer();
-        }
-
-        public static JsRenderer operator & (JsRenderer js1, JsRenderer js2)
-        {
-            return new JsRenderer(() => js1.ToJS() + ";" + js2.ToJS());
+            return Renderer();
         }
     }
 
-    public static class JSnippetExtensions
+    public class JsInstruction :JsRenderer
     {
-        public static JsRenderer SurroundFunction(this JsRenderer js)
+        protected JsInstruction()
         {
-            return new JsRenderer(() => "function(){ " + js.ToJS() + " }");
         }
 
-        public static JsRenderer SurroundReturnFunction(this JsRenderer js)
+         public JsInstruction(Func<string> renderer)
         {
-            return new JsRenderer(() => "function(){ return " + js.ToJS() + " }");
+            if (renderer == null)
+                throw new ArgumentException("renderer");
+            this.Renderer = renderer;
+        }
+
+        public static JsInstruction operator & (JsInstruction js1, JsInstruction js2)
+        {
+            return new JsInstruction(() => js1.ToJS() + "; " + js2.ToJS());
+        }
+
+        public static implicit operator JsInstruction(string code)
+        {
+            return new JsInstruction(() => code); 
+        }
+    }
+
+    public class JsValue<T> : JsRenderer
+    {
+        protected JsValue() { }
+
+        public static implicit operator JsValue<T>(T value)
+        {
+            object obj = (object)value;
+            if (obj == null)
+                return new JsValue<T>() { Renderer = () => "null" };
+            if (obj is bool)
+                return new JsValue<T>() { Renderer = () => ((bool)obj) ? "true" : "false" };
+            else if (obj is string)
+                return new JsValue<T>() { Renderer = () => ((string)obj).Quote() };
+            else
+                return new JsValue<T>() { Renderer = () => value.ToString() }; //numbers an other
         }
     }
 }

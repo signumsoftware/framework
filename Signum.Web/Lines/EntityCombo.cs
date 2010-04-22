@@ -62,9 +62,9 @@ namespace Signum.Web
             return EntityCombo.JsViewing(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsViewing(EntityCombo ecombo, JsViewOptions viewOptions)
+        public static JsInstruction JsViewing(EntityCombo ecombo, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "EComboOnViewing({0})".Formato(",".Combine(
+            return new JsInstruction(() => "EComboOnViewing({0})".Formato(",".Combine(
                 ecombo.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }
@@ -74,9 +74,9 @@ namespace Signum.Web
             return EntityCombo.JsCreating(this, DefaultJsViewOptions()).ToJS();
         }
 
-        private static JsRenderer JsCreating(EntityCombo ecombo, JsViewOptions viewOptions)
+        private static JsInstruction JsCreating(EntityCombo ecombo, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "EComboOnCreating({0})".Formato(",".Combine(
+            return new JsInstruction(() => "EComboOnCreating({0})".Formato(",".Combine(
                 ecombo.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }

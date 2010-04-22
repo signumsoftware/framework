@@ -251,7 +251,7 @@ function concat(array, toIndex, firstChar) {
     return path;
 }
 
-function PostServer(urlController, requestExtraJsonData) {
+function Submit(urlController, requestExtraJsonData) {
     if (!empty(requestExtraJsonData)) {
         for (var key in requestExtraJsonData) {
             if (jQuery.isFunction(requestExtraJsonData[key]))

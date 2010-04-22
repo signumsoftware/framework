@@ -51,9 +51,9 @@ namespace Signum.Web
             return EntityLine.JsViewing(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsViewing(EntityLine eline, JsViewOptions viewOptions)
+        public static JsInstruction JsViewing(EntityLine eline, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "ELineOnViewing({0})".Formato(",".Combine(
+            return new JsInstruction(() => "ELineOnViewing({0})".Formato(",".Combine(
                 eline.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }
@@ -63,9 +63,9 @@ namespace Signum.Web
             return EntityLine.JsCreating(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsCreating(EntityLine eline, JsViewOptions viewOptions)
+        public static JsInstruction JsCreating(EntityLine eline, JsViewOptions viewOptions)
         { 
-            return new JsRenderer(() => "ELineOnCreating({0})".Formato(",".Combine(
+            return new JsInstruction(() => "ELineOnCreating({0})".Formato(",".Combine(
                 eline.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }
@@ -75,9 +75,9 @@ namespace Signum.Web
             return EntityLine.JsFinding(this, DefaultJsfindOptions()).ToJS();
         }
 
-        public static JsRenderer JsFinding(EntityLine eline, JsFindOptions findOptions)
+        public static JsInstruction JsFinding(EntityLine eline, JsFindOptions findOptions)
         {
-            return new JsRenderer(() => "ELineOnFinding({0})".Formato(",".Combine(
+            return new JsInstruction(() => "ELineOnFinding({0})".Formato(",".Combine(
                 eline.ToJS(),
                 findOptions.TryCC(v => v.ToJS()))));
         }
@@ -87,9 +87,9 @@ namespace Signum.Web
             return EntityLine.JsRemoving(this).ToJS();
         }
 
-        public static JsRenderer JsRemoving(EntityLine eline)
+        public static JsInstruction JsRemoving(EntityLine eline)
         {
-            return new JsRenderer(() => "ELineOnRemoving({0})".Formato(eline.ToJS()));
+            return new JsInstruction(() => "ELineOnRemoving({0})".Formato(eline.ToJS()));
         }
     }
 }

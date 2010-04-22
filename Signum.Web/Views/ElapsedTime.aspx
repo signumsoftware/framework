@@ -68,13 +68,13 @@
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
-            <input type="button" id="btnSave" class="OperationDiv" onclick="<%="TrySave({});" %>" value="Guardar" />   
+            <input type="button" id="btnSave" class="ButtonDiv" onclick="<%="TrySave({});" %>" value="Guardar" />   
         <%} %>
-        <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.MainControlUrl].ToString(), "") %>  
+        <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.PartialViewName].ToString(), "")%>  
         <br />
         <%= Html.ValidationSummaryAjax() %>
         <br />
-        <%Html.RenderPartial(ViewData[ViewDataKeys.MainControlUrl].ToString(), Model); %>
+        <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model); %>
         <div id="divASustituir"></div>
  <%}%>
 </asp:Content>

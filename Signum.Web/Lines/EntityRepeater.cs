@@ -43,12 +43,12 @@ namespace Signum.Web
             return "new ERep(" + this.OptionsJS() + ")";
         }
 
-
         protected override JsOptionsBuilder OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
             result.Add("maxElements", MaxElements.TryToString());
-            result.Add("removeItemLinkText", RemoveElementLinkText.TrySingleQuote());
+            if (RemoveElementLinkText.HasText())
+                result.Add("removeItemLinkText", RemoveElementLinkText.Quote());
             return result;
         }
 
@@ -62,9 +62,9 @@ namespace Signum.Web
             return EntityRepeater.JsCreating(this, DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsCreating(EntityRepeater erep, JsViewOptions viewOptions)
+        public static JsInstruction JsCreating(EntityRepeater erep, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "ERepOnCreating({0})".Formato(",".Combine(
+            return new JsInstruction(() => "ERepOnCreating({0})".Formato(",".Combine(
                 erep.ToJS(),
                 viewOptions.TryCC(v => v.ToJS()))));
         }
@@ -74,9 +74,9 @@ namespace Signum.Web
             return EntityRepeater.JsFinding(this, DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
         }
 
-        public static JsRenderer JsFinding(EntityRepeater erep, JsFindOptions findOptions, JsViewOptions viewOptions)
+        public static JsInstruction JsFinding(EntityRepeater erep, JsFindOptions findOptions, JsViewOptions viewOptions)
         {
-            return new JsRenderer(() => "ERepOnFinding({0})".Formato(",".Combine(
+            return new JsInstruction(() => "ERepOnFinding({0})".Formato(",".Combine(
                 erep.ToJS(),
                 findOptions.TryCC(f => f.ToJS())),
                 viewOptions.TryCC(v => v.ToJS())));

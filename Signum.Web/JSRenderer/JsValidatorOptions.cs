@@ -9,39 +9,34 @@ namespace Signum.Web
 {
     public class JsValidatorOptions : JsRenderer
     {
-        public string Prefix { get; set; }
-        public string ParentDiv { get; set; }
-        public string ControllerUrl { get; set; }
-        public string PrefixToIgnore { get; set; }
+        public JsValue<string> Prefix { get; set; }
+        public JsValue<string> ParentDiv { get; set; }
+        public JsValue<string> ControllerUrl { get; set; }
+        public JsValue<string> PrefixToIgnore { get; set; }
 
-        public bool showInlineErrors = true;
-        public bool ShowInlineErrors { get { return showInlineErrors; } set { showInlineErrors = value; } }
+        public JsValue<bool> ShowInlineErrors { get; set; }
 
-        public string fixedInlineErrorText = "*";
-        public string FixedInlineErrorText { get { return fixedInlineErrorText; } set { fixedInlineErrorText = value; } }
+        public JsValue<string> FixedInlineErrorText { get; set; }
 
-        public string OnSuccess { get; set; }
-        
-        public string Type { get; set; }
-        public int? Id { get; set; }
-        public string RequestExtraJsonData { get; set; }
+        public JsValue<string> Type { get; set; }
+        public JsValue<int?> Id { get; set; }
+        public JsValue<string> RequestExtraJsonData { get; set; }
 
         public JsValidatorOptions()
         {
-            renderer = () =>
+            Renderer = () =>
             {
                 return new JsOptionsBuilder(false)
                 {
-                    {"prefix", Prefix.TrySingleQuote()},
-                    {"parentDiv", ParentDiv.TrySingleQuote()},
-                    {"controllerUrl", ControllerUrl.TrySingleQuote()},
-                    {"prefixToIgnore", PrefixToIgnore.TrySingleQuote()},
-                    {"showInlineErrors", ShowInlineErrors? null: "false"},
-                    {"fixedInlineErrorText", FixedInlineErrorText != "*" ? FixedInlineErrorText.TrySingleQuote() : null},
-                    {"onSuccess", OnSuccess},
-                    {"type",Type.TrySingleQuote()},
-                    {"id",Id.TryToString()},
-                    {"requestExtraJsonData",RequestExtraJsonData},
+                    {"prefix", Prefix.TryCC(a=>a.ToJS())},
+                    {"parentDiv", ParentDiv.TryCC(a=>a.ToJS())},
+                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
+                    {"prefixToIgnore", PrefixToIgnore.TryCC(a=>a.ToJS())},
+                    {"showInlineErrors",  ShowInlineErrors.TryCC(a=>a.ToJS())},
+                    {"fixedInlineErrorText", FixedInlineErrorText.TryCC(a=>a.ToJS())},
+                    {"type", Type.TryCC(a=>a.ToJS())},
+                    {"id", Id.TryCC(a=>a.ToJS())},
+                    {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
                 }.ToJS(); 
             };
         }
@@ -49,24 +44,34 @@ namespace Signum.Web
 
     public static class JsValidator
     {
-        public static JsRenderer ValidatePartial(JsValidatorOptions options)
+        public static JsInstruction ValidatePartial(JsValidatorOptions options)
         {
-            return new JsRenderer(() => "ValidatePartial({0})".Formato(options.ToJS()));
+            return new JsInstruction(() => "ValidatePartial({0})".Formato(options.ToJS()));
         }
 
-        public static JsRenderer TrySavePartial(JsValidatorOptions options)
+        public static JsInstruction TrySavePartial(JsValidatorOptions options)
         {
-            return new JsRenderer(() => "TrySavePartial({0})".Formato(options.ToJS()));
+            return new JsInstruction(() => "TrySavePartial({0})".Formato(options.ToJS()));
         }
 
-        public static JsRenderer Validate(JsValidatorOptions options)
+        public static JsInstruction Validate(JsValidatorOptions options)
         {
-            return new JsRenderer(() => "Validate({0})".Formato(options.ToJS()));
+            return new JsInstruction(() => "Validate({0})".Formato(options.ToJS()));
         }
 
-        public static JsRenderer TrySave(JsValidatorOptions options)
+        public static JsInstruction TrySave(JsValidatorOptions options)
         {
-            return new JsRenderer(() => "TrySave({0})".Formato(options.ToJS()));
+            return new JsInstruction(() => "TrySave({0})".Formato(options.ToJS()));
+        }
+
+        public static JsInstruction EntityIsValid(JsValue<string> prefix, JsFunction onSuccess)
+        {
+            return EntityIsValid(new JsValidatorOptions { Prefix = prefix }, onSuccess);
+        }
+
+        public static JsInstruction EntityIsValid(JsValidatorOptions options, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "EntityIsValid({0},{1})".Formato(options.ToJS(), onSuccess.ToJS()));
         }
     }
 }

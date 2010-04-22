@@ -34,7 +34,7 @@ namespace Signum.Web
             {
                 Type = Type.Name,
                 ControllerUrl = "Widgets/CreateAlert",
-                OnOkClosed = "function(){ RefreshAlerts('Widgets/RefreshAlerts'); }"
+                OnOkClosed = new JsFunction(){ "RefreshAlerts('Widgets/RefreshAlerts')"}
             };
 
             return new WidgetItem

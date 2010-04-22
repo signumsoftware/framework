@@ -9,53 +9,42 @@ namespace Signum.Web
 {
     public class JsViewOptions : JsRenderer
     {
-        public string Prefix { get; set; }
-        public string ContainerDiv { get; set; }
-        public string ControllerUrl { get; set; }
-        public string OnOk { get; set; }
-        public string OnOkClosed { get; set; }
-        public string OnCancelled { get; set; }
-        public string Type { get; set; }
-        public int? Id { get; set; }
-        public string PartialViewName { get; set; }
-        public string RequestExtraJsonData { get; set; }
+        public JsValue<string> Prefix { get; set; }
+        public JsValue<string> ContainerDiv { get; set; }
+        public JsValue<string> ControllerUrl { get; set; }
+        public JsFunction OnOk { get; set; }
+        public JsFunction OnOkClosed { get; set; }
+        public JsFunction OnCancelled { get; set; }
+        public JsValue<string> Type { get; set; }
+        public JsValue<int?> Id { get; set; }
+        public JsValue<string> PartialViewName { get; set; }
+        public JsInstruction RequestExtraJsonData { get; set; }
 
         public JsViewOptions()
         {
-            renderer = () =>
+            Renderer = () =>
             {
                 return new JsOptionsBuilder(false)
                 {
-                    {"prefix", Prefix.TrySingleQuote()},
-                    {"containerDiv", ContainerDiv.TrySingleQuote()},
-                    {"controllerUrl", ControllerUrl.TrySingleQuote()},
-                    {"onOk", OnOk},
-                    {"onOkClosed", OnOkClosed},
-                    {"onCancelled", OnCancelled},
-                    {"type", Type.TrySingleQuote()},
-                    {"partialViewName", PartialViewName.TrySingleQuote()},
-                    {"requestExtraJsonData", RequestExtraJsonData},
+                    {"prefix", Prefix.TryCC(a=>a.ToJS())},
+                    {"containerDiv", ContainerDiv.TryCC(a=>a.ToJS())},
+                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
+                    {"onOk", OnOk.TryCC(a=>a.ToJS())},
+                    {"onOkClosed", OnOkClosed.TryCC(a=>a.ToJS())},
+                    {"onCancelled", OnCancelled.TryCC(a=>a.ToJS())},
+                    {"type", Type.TryCC(a=>a.ToJS())},
+                    {"partialViewName", PartialViewName.TryCC(a=>a.ToJS())},
+                    {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
                 }.ToJS();
             };
         }
     }
 
-    public class JsViewNavigator
+    public static class JsViewNavigator
     {
-        public static JsRenderer JsOpenChooser(string prefix, string onOptionChosen, string[] optionNames)
+        public static JsInstruction ClosePopup(string prefix)
         {
-            return new JsRenderer(() =>
-            {
-                StringBuilder sb = new StringBuilder();
-
-                sb.Append("openChooser('{0}', {1}, [{2}]);".Formato(
-                    prefix,
-                    onOptionChosen,
-                    optionNames.ToString(on => "'{0}'".Formato(on), ",")
-                    ));
-
-                return sb.ToString();
-            });
+            return new JsInstruction(() => "ClosePopup('{0}')".Formato(prefix));
         }
     }
 }

@@ -6,8 +6,7 @@
         showInlineErrors: true,
         fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
         parentDiv: "",
-        requestExtraJsonData: null,
-        onSuccess: null
+        requestExtraJsonData: null
     }, _valOptions);
 
     this.savingControllerUrl = (empty(this.valOptions.controllerUrl)) ? "Signum/TrySave" : this.valOptions.controllerUrl;
@@ -61,8 +60,6 @@ Validator.prototype = {
                         $("#" + self.valOptions.parentDiv).html(msg.substring(msg.indexOf("<form"), msg.indexOf("</form>") + 7));
                     returnValue = true;
                     NotifyInfo(lang['saved'], 2000);
-                    if (self.valOptions.onSuccess != null)
-                        self.valOptions.onSuccess();
                 }
             }
         });
@@ -86,8 +83,6 @@ Validator.prototype = {
                 }
                 else {
                     returnValue = true;
-                    if (self.valOptions.onSuccess != null)
-                        self.valOptions.onSuccess();
                 }
             }
         });
@@ -252,8 +247,6 @@ var PartialValidator = function(_pvalOptions) {
         });
         if (validatorResult != null && validatorResult.isValid) {
             NotifyInfo(lang['saved'], 2000);
-            if (this.valOptions.onSuccess != null)
-                this.valOptions.onSuccess();
         }
         else
             NotifyInfo(lang['error'], 2000);
@@ -320,10 +313,6 @@ var PartialValidator = function(_pvalOptions) {
             success: function(result) {
                 validatorResult = self.createValidatorResult(result);
                 self.showErrors(validatorResult.modelState);
-                if (validatorResult.isValid) {
-                    if (self.valOptions.onSuccess != null)
-                        self.valOptions.onSuccess();
-                }
             }
         });
         return validatorResult;
@@ -340,4 +329,22 @@ function TrySavePartial(_partialValOptions) {
 function ValidatePartial(_partialValOptions) {
     var validator = new PartialValidator(_partialValOptions);
     return validator.validate();
+};
+
+function EntityIsValid(validationOptions, onSuccess) {
+    log("Validator EntityIsValid");
+    var isValid = null;
+    if (empty(validationOptions.prefix))
+        isValid = new Validator(validationOptions).validate();
+    else {
+        var info = RuntimeInfoFor(validationOptions.prefix);
+        isValid = new PartialValidator($.extend(validationOptions, { type: info.runtimeType(), id: info.id() })).validate().isValid;
+    }
+    if (isValid) {
+        if (onSuccess != null)
+            onSuccess();
+    }
+    else{
+        window.alert(lang['popupErrorsStop']);
+    }
 };
