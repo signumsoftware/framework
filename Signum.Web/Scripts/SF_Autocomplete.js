@@ -201,7 +201,6 @@ Autocompleter.prototype = {
         return s;
     },
     onOk: function(data) {
-        log("onOk");
         this.$dd.hide();
         this.$control.val(data[this.options.textField]);
 
@@ -211,10 +210,8 @@ Autocompleter.prototype = {
         }
         var id = data.id;
         if (this.options.entityIdFieldName != null) {
-            log("onSelected - " + id);
             $('#' + this.options.entityIdFieldName).val(id);
             AutocompleteOnSelected(this.controlId, data);
-            log("Final");
         }
     },
     selectIndex: function($option) {
