@@ -40,8 +40,21 @@ namespace Signum.Web
         }
     }
 
-    public static class JsViewNavigator
+    public class JsViewNavigator : JsInstruction
     {
+        JsViewOptions Options { get; set; }
+
+        public JsViewNavigator(JsViewOptions options)
+            : base(() => "new ViewNavigator('" + options.ToJS() + "')")
+        {
+            this.Options = options;
+        }
+
+        public JsInstruction ShowCreateSave(JsValue<string> html)
+        {
+            return new JsInstruction(() => "{0}.{1}({2})".Formato(this.ToJS(), "showCreateSave", html.ToJS()));
+        }
+
         public static JsInstruction ClosePopup(string prefix)
         {
             return new JsInstruction(() => "ClosePopup('{0}')".Formato(prefix));

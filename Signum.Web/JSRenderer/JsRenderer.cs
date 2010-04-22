@@ -47,6 +47,11 @@ namespace Signum.Web
 
     public class JsValue<T> : JsRenderer
     {
+        public JsValue(string code)
+        {
+            Renderer = () => code;
+        }
+
         protected JsValue() { }
 
         public static implicit operator JsValue<T>(T value)

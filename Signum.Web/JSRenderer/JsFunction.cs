@@ -16,7 +16,7 @@ namespace Signum.Web
         {
             this.Args = args;
 
-            Renderer = () => "function({0}){{\r\n{1}}}".Formato(Args.ToString(", "), instructions.ToString(a => a.ToJS(), ";\r\n").Indent(3));
+            Renderer = () => "function({0}){{{1}}}".Formato(Args.ToString(", "), instructions.ToString(a => a.ToJS(), ";").Indent(3));
         }
 
         public void Add(JsInstruction instruction)
