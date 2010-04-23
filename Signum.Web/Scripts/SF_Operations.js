@@ -149,6 +149,7 @@ OperationManager.prototype = {
             operationSubmit();
         else {
             var onSuccess = function() { this.operationSubmit(); };
+            
             if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
                 return;
         }
