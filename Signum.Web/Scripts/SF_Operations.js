@@ -193,7 +193,7 @@ var ConstructorFrom = function(_options) {
 
         var onSuccess = function() 
         { 
-            this.operationAjax(this.newPrefix(), OpenPopup); 
+            this.operationAjax(this.newPrefix(), OpOpenPopup); 
             NotifyInfo(lang['operationExecuted'], 2000); 
         }
         
