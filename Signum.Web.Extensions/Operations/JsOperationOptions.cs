@@ -35,13 +35,12 @@ namespace Signum.Web.Operations
                 //if (AvoidDefaultOk && OnOk.HasText())
                 //    throw new ArgumentException("JsOperationOptions cannot have both AvoidDefaultOk and OnOk specified");
 
-                return new JsOptionsBuilder(false)
+                var builder = new JsOptionsBuilder(false)
                 {
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
                     {"operationKey", OperationKey.TryCC(a=>a.ToJS())},
                     {"isLite", IsLite.TryCC(a=>a.ToJS())},
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
-                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
                     //{"validationControllerUrl", ValidationControllerUrl.TrySingleQuote()},
                     //{"avoidValidation", AvoidValidation == true? "true": null},
@@ -54,7 +53,12 @@ namespace Signum.Web.Operations
                     //{"closePopupOnSuccess", ClosePopupOnSuccess== true? "true": null},
                     //{"confirmMsg", ConfirmMessage.TrySingleQuote() },
                     
-                }.ToJS();
+                };
+
+                if (ControllerUrl.ToJS() != "null")
+                    builder.Add("controllerUrl", ControllerUrl.ToJS());
+                
+                return builder.ToJS();
             };
         }
     }
