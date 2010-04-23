@@ -45,7 +45,7 @@ namespace Signum.Web
         JsViewOptions Options { get; set; }
 
         public JsViewNavigator(JsViewOptions options)
-            : base(() => "new ViewNavigator('" + options.ToJS() + "')")
+            : base(() => "new ViewNavigator(" + options.ToJS() + ")")
         {
             this.Options = options;
         }
