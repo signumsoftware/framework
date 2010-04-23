@@ -55,7 +55,7 @@ namespace Signum.Web.Operations
                     
                 };
 
-                if (ControllerUrl.ToJS() != "null")
+                if (ControllerUrl != null && ControllerUrl.ToJS() != "null")
                     builder.Add("controllerUrl", ControllerUrl.ToJS());
                 
                 return builder.ToJS();
