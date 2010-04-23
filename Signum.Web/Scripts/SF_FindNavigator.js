@@ -287,7 +287,7 @@ FindNavigator.prototype = {
         log("FindNavigator viewOptionsForSearchCreate");
         if (this.findOptions.prefix != _viewOptions.prefix)
             throw "FindOptions prefix and ViewOptions prefix don't match";
-        _viewOptions.prefix = _viewOptions.prefix + "New";
+        _viewOptions.prefix = "New".compose(_viewOptions.prefix);
         var self = this;
         return $.extend({
             type: $(this.pf(sfEntityTypeName)).val(),
@@ -301,7 +301,7 @@ FindNavigator.prototype = {
         log("FindNavigator viewOptionsForSearchPopupCreate");
         if (this.findOptions.prefix != _viewOptions.prefix)
             throw "FindOptions prefix and ViewOptions prefix don't match";
-        _viewOptions.prefix = _viewOptions.prefix + "New";
+        _viewOptions.prefix = "New".compose(_viewOptions.prefix);
         var self = this;
         return $.extend({
             type: $(this.pf(sfEntityTypeName)).val(),

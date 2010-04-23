@@ -21,7 +21,7 @@ OperationManager.prototype = {
     },
 
     newPrefix: function() {
-        return this.options.prefix.compose("New");
+        return "New".compose(this.options.prefix);
     },
 
     requestData: function(newPrefix) {
@@ -353,7 +353,7 @@ function OperationConstructFromMany(constructorFrom) {
 //function ConstructFromManyExecute(urlController, typeName, operationKey, prefix, onOk, onCancel) {
 //    var ids = GetSelectedElements(prefix);
 //    if (ids == "") return;
-//    var newPrefix = prefix + "_New";
+//    var newPrefix = "New".compose(prefix);
 //    var self = this;
 //    $.ajax({
 //        type: "POST",

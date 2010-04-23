@@ -30,7 +30,7 @@ function CloseChooser(urlController, onOk, onCancel, prefix) {
 }
 
 function QuickLinkClickServerAjax(urlController, findOptionsRaw, prefix) {
-    var newPrefix = prefix + "New";
+    var newPrefix = "New".compose(prefix);
     $.ajax({
         type: "POST",
         url: urlController,

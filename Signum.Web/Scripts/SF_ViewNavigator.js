@@ -80,7 +80,7 @@ ViewNavigator.prototype = {
         if (empty(this.viewOptions.type))
             throw "Type must be specified to Navigator on createSave mode";
         var self = this;
-        this.viewOptions.prefix += "_New";
+        this.viewOptions.prefix = "New".compose(this.viewOptions.prefix);
         this.callServer(function(controlHtml) { self.showCreateSave(controlHtml); });
     },
 

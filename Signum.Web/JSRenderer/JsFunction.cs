@@ -59,7 +59,7 @@ namespace Signum.Web
 
         public static string NewPrefix(string prefix)
         {
-            return TypeContextUtilities.Compose(prefix, "New");
+            return TypeContextUtilities.Compose("New", prefix);
         }
 
         public static JsInstruction OpenChooser(JsValue<string> prefix, string[] optionNames, JsFunction onOptionChosen)
