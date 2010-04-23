@@ -34,6 +34,7 @@ namespace Signum.Utilities
                 char c = s[i];
                 switch (c)
                 {
+                    case '\'':
                     case '\\':
                     case '"':
                     case '>':
