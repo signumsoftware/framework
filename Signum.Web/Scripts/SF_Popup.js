@@ -13,7 +13,7 @@
         var otherPopups = $(".popupWindow");
         var maxZindex = 100;
         otherPopups.each(function() {
-        var zindex = $('#' + this.id).css('z-index');
+            var zindex = $('#' + this.id).css('z-index');
             if (zindex > maxZindex)
                 maxZindex = zindex;
         });
@@ -37,13 +37,12 @@
         popup2.style.minWidth = popupWidth + "px";
         popup2.style.maxWidth = "95%";
         popup2.style.zIndex = parseInt(maxZindex) + 2;
-        
+
         var maxPercentageWidth = 0.95;
         popup2.style.maxWidth = (maxPercentageWidth * 100) + "%";
         popup2.style.maxHeight = $(window).height() + "px";
-        if ($(popup2).children(".searchControl").length)
-        {
-            $(popup2).children(".searchControl").first().css({"maxHeight": $(window).height() - 100, "overflow": "auto"});
+        if ($(popup2).children(".searchControl").length) {
+            $(popup2).children(".searchControl").first().css({ "maxHeight": $(window).height() - 100, "overflow": "auto" });
         }
         popup2.style.minWidth = ((popupWidth > (maxPercentageWidth * 100)) ? (maxPercentageWidth * 100) : popupWidth) + "px";
 
@@ -57,6 +56,7 @@
             modalBackground.fadeIn('slow');
         else
             modalBackground.show();
+
     };
 };
 

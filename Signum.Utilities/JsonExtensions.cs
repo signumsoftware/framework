@@ -20,6 +20,7 @@ namespace Signum.Utilities
 
             return "\'" + s.Escape() + "\'";
         }
+
         private static string Escape(this string s)
         {
             if (s == null || s.Length == 0)
