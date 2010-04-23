@@ -16,9 +16,9 @@ namespace Signum.Utilities
         public static string Quote(this string s)
         {
             if (s == null || s.Length == 0)
-                return "\"\"";
+                return "\'\'";
 
-            return "\"" + s.Escape() + "\"";
+            return "\'" + s.Escape() + "\'";
         }
         private static string Escape(this string s)
         {
