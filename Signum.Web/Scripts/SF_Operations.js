@@ -165,12 +165,12 @@ var OperationExecutor = function(_options) {
         
         var onSuccess = function() 
         { 
-            this.operationAjax(null, ReloadContent); 
+            this.operationAjax(null, OpReloadContent); 
             NotifyInfo(lang['operationExecuted'], 2000); 
         };
         
         if (isTrue(this.options.isLite))
-            onSuccess();
+            onSuccess.call(this);
         else {
             if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
                 return;
@@ -197,7 +197,7 @@ var ConstructorFrom = function(_options) {
         }
         
         if (isTrue(this.options.isLite))
-            onSuccess();
+            onSuccess.call(this);
         else {
             if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
                 return;
