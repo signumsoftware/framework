@@ -37,7 +37,7 @@ namespace Signum.Web
 
             List<Delegate> list = entityButtons.TryGetC(entity.GetType());
             if (list != null)
-                links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(controllerContext, entity, partialViewName)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
+                links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(controllerContext, entity, partialViewName, prefix)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
             return links;
         }

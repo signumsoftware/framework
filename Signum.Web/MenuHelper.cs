@@ -108,13 +108,13 @@ namespace Signum.Web
                 }
                 sb.Append("</ul>");
             }
-            else
+            else if (Link != null)
             {
-                string link = Link.ToString(); 
+                string link = Link.ToString();
 
                 if (link.HasText() && currentUrl.EndsWith(link)) { sb.Append("<b>"); }
-                if(ManualA == null)
-                    sb.Append("<a href='{0}' title='{1}' {2}>{3}</a>".Formato(link, Title, fullClass, Text)); 
+                if (ManualA == null)
+                    sb.Append("<a href='{0}' title='{1}' {2}>{3}</a>".Formato(link, Title, fullClass, Text));
                 else
                     sb.Append(ManualA(link, title, fullClass));
                 if (link.HasText() && currentUrl.EndsWith(link)) { sb.Append("</b>"); }

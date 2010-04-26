@@ -77,7 +77,7 @@ namespace Signum.Web
         {
             var tce = Cast(Visit(me.Expression));
 
-            if (!typeof(Lite).IsAssignableFrom(tce.Type) && (me.Member.Name == "EntityOrNull" && me.Member.Name == "Entity"))
+            if (typeof(Lite).IsAssignableFrom(tce.Type) && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
                 return new TypeContextExpression(tce.Properties, me.Type, tce.Route.Add((PropertyInfo)me.Member));
 
             return new TypeContextExpression(
