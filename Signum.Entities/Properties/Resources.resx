@@ -376,4 +376,61 @@
   <data name="ImmutableEntity_AllowChange" xml:space="preserve">
     <value>Allow Change</value>
   </data>
+  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
+    <value>PropertyRoute can not be of type Root</value>
+  </data>
+  <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
+    <value>The type of column {0} is a subtype of IIdentifiable, use a Lite instead!!</value>
+  </data>
+  <data name="EntityMustBeALite" xml:space="preserve">
+    <value>Entity must be a Lite</value>
+  </data>
+  <data name="SomeColumnsAreNotCorrectlyNumered0" xml:space="preserve">
+    <value>Some columns are not correctly numered: {0}</value>
+  </data>
+  <data name="ResultsInsteadOf1ForColumn2" xml:space="preserve">
+    <value>{0} results (instead of {1}) for column {2}</value>
+  </data>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>Invalid Format</value>
+  </data>
+  <data name="TypeNotFound" xml:space="preserve">
+    <value>Type not found</value>
+  </data>
+  <data name="IdNotValid" xml:space="preserve">
+    <value>Id not valid</value>
+  </data>
+  <data name="AttemptToMakeAPropertyRouteOnA0CastFirst" xml:space="preserve">
+    <value>Attempt to make a property route on a {0}. Cast first.</value>
+  </data>
+  <data name="PropertyInfo0NotFoundOn1" xml:space="preserve">
+    <value>propertyInfo '{0}' not found on {1}</value>
+  </data>
+  <data name="ParentCanNotBeAnNonRootIdentifiable" xml:space="preserve">
+    <value>parent can not be an non-Root Identifiable</value>
+  </data>
+  <data name="PropertyInfoIsNotSupported" xml:space="preserve">
+    <value>{0} PropertyInfo is not supported</value>
+  </data>
+  <data name="PropertiesOfType0NotSupported" xml:space="preserve">
+    <value>Properties of type {0} not supported</value>
+  </data>
+  <data name="TypeMustBeATypeInheritingIdentitiableEntity" xml:space="preserve">
+    <value>type must be a Type inheriting IdentitiableEntity</value>
+  </data>
+  <data name="RootHasNotPropertyString" xml:space="preserve">
+    <value>Root has not PropertyString</value>
+  </data>
+  <data name="PropertyPathFindImplementationsNotSet" xml:space="preserve">
+    <value>PropertyPath.FindImplementations not set</value>
+  </data>
+  <data name="TheStateValidator0ForState1Has2ValuesInsteadOf3" xml:space="preserve">
+    <value>The state Validator {0} for state {1} has {2} values instead of {3}</value>
+  </data>
+  <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
+    <value>State {0} not registered in StateValidator</value>
+  </data>
+  <data name="ThePropertyIsNotRegistered" xml:space="preserve">
+    <value>The property is not registered</value>
+  </data>
 </root>

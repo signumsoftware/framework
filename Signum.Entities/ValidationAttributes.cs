@@ -605,7 +605,7 @@ namespace Signum.Entities
         public void Add(S state, params bool?[] necessary)
         {
             if (necessary != null && necessary.Length != propertyNames.Length)
-                throw new ArgumentException("The state Validator {0} for state {1} has {2} values instead of {3}"
+                throw new ArgumentException(Resources.TheStateValidator0ForState1Has2ValuesInsteadOf3
                     .Formato(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
 
             dictionary.Add(state, necessary);
@@ -619,7 +619,7 @@ namespace Signum.Entities
 
             S state = getState(entity);
 
-            bool? necessary = dictionary.GetOrThrow(state, "State {0} not registered in StateValidator")[index];
+            bool? necessary = dictionary.GetOrThrow(state, Resources.State0NotRegisteredInStateValidator)[index];
 
             if (necessary == null)
                 return null;
@@ -641,7 +641,7 @@ namespace Signum.Entities
         {
             int index = propertyNames.IndexOf(pi.Name);
             if (index == -1)
-                throw new ArgumentException("The property is not registered"); 
+                throw new ArgumentException(Resources.ThePropertyIsNotRegistered); 
 
             return dictionary[state][index];
         }

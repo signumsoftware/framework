@@ -9,6 +9,7 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Properties;
 
 namespace Signum.Engine.Linq
 {
@@ -72,7 +73,7 @@ namespace Signum.Engine.Linq
                 }
                 catch (Exception)
                 {
-                    throw new InvalidCastException("Impossible to convert the value of {0}.{1} ({2}) to {3}".Formato(alias, name, value.TryToString() ?? "null", typeof(S)));
+                    throw new InvalidCastException(Resources.ImpossibleToConvertTheValueOf012To3.Formato(alias, name, value.TryToString() ?? "null", typeof(S)));
                 }
             }
             return previous.GetValue<S>(alias, name); 

@@ -508,4 +508,121 @@ WRITETEXT</value>
   <data name="CannotInsertDuplicatedFields0On1Table" xml:space="preserve">
     <value>Cannot insert duplicated fields {0} on {1} table</value>
   </data>
+  <data name="UserConnectionsFileFoundOn0" xml:space="preserve">
+    <value>UserConnections file found on {0}</value>
+  </data>
+  <data name="ThereAreEntitiesOfDifferentTypes" xml:space="preserve">
+    <value>There are entities of different types</value>
+  </data>
+  <data name="ImplementedByAllIsNotSupportedForFindLiteLike" xml:space="preserve">
+    <value>ImplementedByAll is not supported for FindLiteLike</value>
+  </data>
+  <data name="ImplementedByAllIsNotSupportedForRetriveAllLite" xml:space="preserve">
+    <value>ImplementedByAll is not supported for RetriveAllLite</value>
+  </data>
+  <data name="EntityColumnNotFound" xml:space="preserve">
+    <value>Entity column not found</value>
+  </data>
+  <data name="MoreThanOneEntityColumn" xml:space="preserve">
+    <value>More than one Entity column</value>
+  </data>
+  <data name="Warning0NoResults" xml:space="preserve">
+    <value>Warning {0}: No results</value>
+  </data>
+  <data name="Error0N1QueryProblem" xml:space="preserve">
+    <value>Error {0}: N + 1 query problem</value>
+  </data>
+  <data name="Error01" xml:space="preserve">
+    <value>Error {0}: {1}</value>
+  </data>
+  <data name="MultipleIndexOnTheFollowingColumns" xml:space="preserve">
+    <value>Multiple Index on the following Columns:</value>
+  </data>
+  <data name="NoEntityCacheContextHasBeenCreated" xml:space="preserve">
+    <value>No EntityCache context has been created</value>
+  </data>
+  <data name="HasValueShouldBeABoolExpression" xml:space="preserve">
+    <value>hasValue should be a bool expression</value>
+  </data>
+  <data name="TestingSqlConditionessForNonBooleanExpression0" xml:space="preserve">
+    <value>Testing sql conditioness for non boolean expression: {0}</value>
+  </data>
+  <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
+    <value>{0} belongs to another kind ok Linq Provider</value>
+  </data>
+  <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
+    <value>ConstantExpression with a complex IQueryable unexpected at this stage</value>
+  </data>
+  <data name="TheMember0Of1IsNoAccesibleOnQueries" xml:space="preserve">
+    <value>The member {0} of {1} is no accesible on queries</value>
+  </data>
+  <data name="ToStrIsNoAccesibleOnQueriesInImplementedByAll" xml:space="preserve">
+    <value>ToStr is no accesible on queries in ImplementedByAll</value>
+  </data>
+  <data name="TheMember0OfLiteIsNoAccesibleOnQueriesUseEntityInstead" xml:space="preserve">
+    <value>The member {0} of Lite is no accesible on queries, use Entity instead</value>
+  </data>
+  <data name="TheMember0OfImplementedByAllIsNoAccesibleOnQueries" xml:space="preserve">
+    <value>The member {0} of ImplementedByAll is no accesible on queries</value>
+  </data>
+  <data name="MListOnImplementedByAreNotSupportedYet" xml:space="preserve">
+    <value>MList on ImplementedBy are not supported yet</value>
+  </data>
+  <data name="DoesNotInheritFromEmbeddedEntity" xml:space="preserve">
+    <value>{0} does not inherit from EmbeddedEntity</value>
+  </data>
+  <data name="DoesNotRepresentAColumn" xml:space="preserve">
+    <value>{0} does not represent a column</value>
+  </data>
+  <data name="TheEntityIsNew" xml:space="preserve">
+    <value>The entity is New</value>
+  </data>
+  <data name="Type0IsNotIn1" xml:space="preserve">
+    <value>Type {0} is not in {1}</value>
+  </data>
+  <data name="NoImplementationForTypeS0" xml:space="preserve">
+    <value>No implementation for type(s) {0}</value>
+  </data>
+  <data name="CanNotBeAssignedFrom1" xml:space="preserve">
+    <value>{0} can not be assigned from {1}</value>
+  </data>
+  <data name="CanNotBeAssignedToNull" xml:space="preserve">
+    <value>{0} can not be assigned to null</value>
+  </data>
+  <data name="EntityInNotDefinedForNewItemOfType0" xml:space="preserve">
+    <value>EntityIn not defined for newItem of type {0}</value>
+  </data>
+  <data name="SubqueryWith0Columns" xml:space="preserve">
+    <value>subquery with {0} columns!</value>
+  </data>
+  <data name="ExpressionTypeIsNotIQueryable" xml:space="preserve">
+    <value>expression Type is not IQueryable</value>
+  </data>
+  <data name="ImpossibleToConvertTheValueOf012To3" xml:space="preserve">
+    <value>Impossible to convert the value of {0}.{1} ({2}) to {3}</value>
+  </data>
+  <data name="UnauthorizedAccessTo0" xml:space="preserve">
+    <value>Unauthorized access to {0}</value>
+  </data>
+  <data name="MsInitializing0" xml:space="preserve">
+    <value>{1:0.00} ms initializing {0}</value>
+  </data>
+  <data name="DoesNotImplement1" xml:space="preserve">
+    <value>{0} does not implement {1}</value>
+  </data>
+  <data name="ImplementedByAll01But23" xml:space="preserve">
+    <value>ImplementedByAll {0} = {1} but {2} = {3}</value>
+  </data>
+  <data name="IsNewButHasId1AndIdentityIsTrue" xml:space="preserve">
+    <value>{0} is New, but has Id ({1}) and Identity is true</value>
+  </data>
+  <data name="ImpossibleToSaveNullOnANotNullableEmbeddedFieldUseNullable" xml:space="preserve">
+    <value>Impossible to save null on a not-nullable embedded field, use Nullable Attribute over the field</value>
+  </data>
+  <data name="TheFollowingAttributesAreNotCompatibleWithTargets01" xml:space="preserve">
+    <value>The following attributes are not compatible with Targets {0}: {1}</value>
+  </data>
+  <data name="Type0NotFoundInTheSchema" xml:space="preserve">
+    <value>Type {0} not found in the Schema</value>
+  </data>
 </root>

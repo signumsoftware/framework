@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Engine.Properties;
 
 namespace Signum.Engine.Linq
 {
@@ -35,7 +36,7 @@ namespace Signum.Engine.Linq
         public static bool IsSqlCondition(Expression expression)
         {
             if (!IsBooleanExpression(expression))
-                throw new InvalidOperationException("Testing sql conditioness for non boolean expression : " + expression.ToString());
+                throw new InvalidOperationException(Resources.TestingSqlConditionessForNonBooleanExpression0.Formato(expression.ToString()));
 
             switch (expression.NodeType)
             {
@@ -80,7 +81,7 @@ namespace Signum.Engine.Linq
                     return false;
             }
 
-            throw new InvalidOperationException("Testing sql conditioness for non boolean expression : " + expression.ToString());
+            throw new InvalidOperationException(Resources.TestingSqlConditionessForNonBooleanExpression0.Formato(expression.ToString()));
         }
 
         protected override Expression VisitUnary(UnaryExpression u)

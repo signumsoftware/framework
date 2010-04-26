@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Linq.Expressions;
+using Signum.Entities.Properties;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -102,7 +103,7 @@ namespace Signum.Entities.DynamicQuery
                 if (propertyRoute != null)
                 {
                     if (propertyRoute.PropertyRouteType == PropertyRouteType.Root)
-                        throw new InvalidOperationException("PropertyRoute can not be of type Root");
+                        throw new InvalidOperationException(Resources.PropertyRouteCanNotBeOfTypeRoot);
 
                     PropertyInfo pi = propertyRoute.PropertyInfo;
 
@@ -144,11 +145,11 @@ namespace Signum.Entities.DynamicQuery
             Meta = meta;
 
             if (typeof(IIdentifiable).IsAssignableFrom(Type))
-                throw new InvalidOperationException("The type of column {0} is a subtype of IIdentifiable, use a Lite instead!!".Formato(mi.MemberName()));
+                throw new InvalidOperationException(Resources.TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead.Formato(mi.MemberName()));
 
             Type cleanType = Reflector.ExtractLite(Type); 
             if (IsEntity &&  cleanType == null)
-                throw new InvalidOperationException("Entity must be a Lite");
+                throw new InvalidOperationException(Resources.EntityMustBeALite);
 
             if (meta is CleanMeta && ((CleanMeta)meta).PropertyRoute.PropertyRouteType != PropertyRouteType.Root)
                 PropertyRoute = ((CleanMeta)meta).PropertyRoute;

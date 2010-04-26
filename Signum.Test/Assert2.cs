@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Signum.Test.Properties;
 
 namespace Signum.Test
 {
@@ -21,7 +22,7 @@ namespace Signum.Test
                 return;
             }
 
-            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(T).Name));
+            throw new AssertFailedException(Resources.No0HasBeenThrown.Formato(typeof(T).Name));
         }
 
         public static void Throws<T>(Action action, string messageToContain)
@@ -34,12 +35,12 @@ namespace Signum.Test
             catch (T ex)
             {
                 if(!ex.Message.Contains(messageToContain))
-                    throw new AssertFailedException("Exception thrown does not contain message '{0}'".Formato(ex.Message));
+                    throw new AssertFailedException(Resources.ExceptionThrownDoesNotContainMessage0.Formato(ex.Message));
 
                 return;
             }
 
-            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(T).Name));
+            throw new AssertFailedException(Resources.No0HasBeenThrown.Formato(typeof(T).Name));
         }
     }
 }

@@ -272,15 +272,15 @@ namespace Signum.Entities
             result = null;
             Match match = regex.Match(liteKey);
             if (!match.Success)
-                return "Invalid Format";
+                return Resources.InvalidFormat;
 
             Type type = resolveType(match.Groups["type"].Value);
             if (type == null)
-                return "Type not found";
+                return Resources.TypeNotFound;
 
             int id;
             if (!int.TryParse(match.Groups["id"].Value, out id))
-                return "Id not valid";
+                return Resources.IdNotValid;
 
             string toStr = match.Groups["toStr"].Value; //maybe null
 

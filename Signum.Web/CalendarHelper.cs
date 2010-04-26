@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Web.Properties;
 
 
 namespace Signum.Web
@@ -61,7 +62,7 @@ namespace Signum.Web
             set { buttonImageOnly = value; }
         }
 
-        string buttonText = "Mostrar calendario";
+        string buttonText = Resources.ShowCalendar;
         public string ButtonText
         {
             get { return buttonText; }

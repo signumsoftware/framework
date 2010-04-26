@@ -174,11 +174,38 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} belongs to another kind ok Linq Provider.
+        /// </summary>
+        internal static string BelongsToAnotherKindOkLinqProvider {
+            get {
+                return ResourceManager.GetString("BelongsToAnotherKindOkLinqProvider", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to caching types&apos; table from {0}.
         /// </summary>
         internal static string CachingTypesTableFrom0 {
             get {
                 return ResourceManager.GetString("CachingTypesTableFrom0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} can not be assigned from {1}.
+        /// </summary>
+        internal static string CanNotBeAssignedFrom1 {
+            get {
+                return ResourceManager.GetString("CanNotBeAssignedFrom1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} can not be assigned to null.
+        /// </summary>
+        internal static string CanNotBeAssignedToNull {
+            get {
+                return ResourceManager.GetString("CanNotBeAssignedToNull", resourceCulture);
             }
         }
         
@@ -210,11 +237,65 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ConstantExpression with a complex IQueryable unexpected at this stage.
+        /// </summary>
+        internal static string ConstantExpressionWithAComplexIQueryableUnexpectedAt {
+            get {
+                return ResourceManager.GetString("ConstantExpressionWithAComplexIQueryableUnexpectedAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} does not implement {1}.
+        /// </summary>
+        internal static string DoesNotImplement1 {
+            get {
+                return ResourceManager.GetString("DoesNotImplement1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} does not inherit from EmbeddedEntity.
+        /// </summary>
+        internal static string DoesNotInheritFromEmbeddedEntity {
+            get {
+                return ResourceManager.GetString("DoesNotInheritFromEmbeddedEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} does not represent a column.
+        /// </summary>
+        internal static string DoesNotRepresentAColumn {
+            get {
+                return ResourceManager.GetString("DoesNotRepresentAColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to --- END OF SYNC SCRIPT.
         /// </summary>
         internal static string EndOfSyncScript {
             get {
                 return ResourceManager.GetString("EndOfSyncScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Entity column not found.
+        /// </summary>
+        internal static string EntityColumnNotFound {
+            get {
+                return ResourceManager.GetString("EntityColumnNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EntityIn not defined for newItem of type {0}.
+        /// </summary>
+        internal static string EntityInNotDefinedForNewItemOfType0 {
+            get {
+                return ResourceManager.GetString("EntityInNotDefinedForNewItemOfType0", resourceCulture);
             }
         }
         
@@ -237,11 +318,38 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error {0}: {1}.
+        /// </summary>
+        internal static string Error01 {
+            get {
+                return ResourceManager.GetString("Error01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error {0}: N + 1 query problem.
+        /// </summary>
+        internal static string Error0N1QueryProblem {
+            get {
+                return ResourceManager.GetString("Error0N1QueryProblem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exception on {0}: {1}.
         /// </summary>
         internal static string ExceptionOn01 {
             get {
                 return ResourceManager.GetString("ExceptionOn01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to expression Type is not IQueryable.
+        /// </summary>
+        internal static string ExpressionTypeIsNotIQueryable {
+            get {
+                return ResourceManager.GetString("ExpressionTypeIsNotIQueryable", resourceCulture);
             }
         }
         
@@ -318,6 +426,51 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to hasValue should be a bool expression.
+        /// </summary>
+        internal static string HasValueShouldBeABoolExpression {
+            get {
+                return ResourceManager.GetString("HasValueShouldBeABoolExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ImplementedByAll {0} = {1} but {2} = {3}.
+        /// </summary>
+        internal static string ImplementedByAll01But23 {
+            get {
+                return ResourceManager.GetString("ImplementedByAll01But23", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ImplementedByAll is not supported for FindLiteLike.
+        /// </summary>
+        internal static string ImplementedByAllIsNotSupportedForFindLiteLike {
+            get {
+                return ResourceManager.GetString("ImplementedByAllIsNotSupportedForFindLiteLike", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ImplementedByAll is not supported for RetriveAllLite.
+        /// </summary>
+        internal static string ImplementedByAllIsNotSupportedForRetriveAllLite {
+            get {
+                return ResourceManager.GetString("ImplementedByAllIsNotSupportedForRetriveAllLite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Impossible to convert the value of {0}.{1} ({2}) to {3}.
+        /// </summary>
+        internal static string ImpossibleToConvertTheValueOf012To3 {
+            get {
+                return ResourceManager.GetString("ImpossibleToConvertTheValueOf012To3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Impossible to include in the Schema:.
         /// </summary>
         internal static string ImpossibleToIncludeInTheSchema {
@@ -327,11 +480,65 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Impossible to save null on a not-nullable embedded field, use Nullable Attribute over the field.
+        /// </summary>
+        internal static string ImpossibleToSaveNullOnANotNullableEmbeddedFieldUseNullable {
+            get {
+                return ResourceManager.GetString("ImpossibleToSaveNullOnANotNullableEmbeddedFieldUseNullable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is New, but has Id ({1}) and Identity is true.
+        /// </summary>
+        internal static string IsNewButHasId1AndIdentityIsTrue {
+            get {
+                return ResourceManager.GetString("IsNewButHasId1AndIdentityIsTrue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to MemberInfo {0} not supported by CollectionField.
         /// </summary>
         internal static string MemberInfo0NotSupportedByCollectionField {
             get {
                 return ResourceManager.GetString("MemberInfo0NotSupportedByCollectionField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MList on ImplementedBy are not supported yet.
+        /// </summary>
+        internal static string MListOnImplementedByAreNotSupportedYet {
+            get {
+                return ResourceManager.GetString("MListOnImplementedByAreNotSupportedYet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More than one Entity column.
+        /// </summary>
+        internal static string MoreThanOneEntityColumn {
+            get {
+                return ResourceManager.GetString("MoreThanOneEntityColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {1:0.00} ms initializing {0}.
+        /// </summary>
+        internal static string MsInitializing0 {
+            get {
+                return ResourceManager.GetString("MsInitializing0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Multiple Index on the following Columns:.
+        /// </summary>
+        internal static string MultipleIndexOnTheFollowingColumns {
+            get {
+                return ResourceManager.GetString("MultipleIndexOnTheFollowingColumns", resourceCulture);
             }
         }
         
@@ -354,11 +561,29 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No EntityCache context has been created.
+        /// </summary>
+        internal static string NoEntityCacheContextHasBeenCreated {
+            get {
+                return ResourceManager.GetString("NoEntityCacheContextHasBeenCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No field was given.
         /// </summary>
         internal static string NoFieldWasGiven {
             get {
                 return ResourceManager.GetString("NoFieldWasGiven", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No implementation for type(s) {0}.
+        /// </summary>
+        internal static string NoImplementationForTypeS0 {
+            get {
+                return ResourceManager.GetString("NoImplementationForTypeS0", resourceCulture);
             }
         }
         
@@ -435,6 +660,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to subquery with {0} columns!.
+        /// </summary>
+        internal static string SubqueryWith0Columns {
+            get {
+                return ResourceManager.GetString("SubqueryWith0Columns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Table for type {0} not loaded on current Schema.
         /// </summary>
         internal static string Table0NotLoadedInSchema {
@@ -453,6 +687,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Testing sql conditioness for non boolean expression: {0}.
+        /// </summary>
+        internal static string TestingSqlConditionessForNonBooleanExpression0 {
+            get {
+                return ResourceManager.GetString("TestingSqlConditionessForNonBooleanExpression0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The binary operator &apos;{0}&apos; is not supported.
         /// </summary>
         internal static string TheBinaryOperator0IsNotSupported {
@@ -467,6 +710,15 @@ namespace Signum.Engine.Properties {
         internal static string TheConstantFor0IsNotSupported {
             get {
                 return ResourceManager.GetString("TheConstantFor0IsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entity is New.
+        /// </summary>
+        internal static string TheEntityIsNew {
+            get {
+                return ResourceManager.GetString("TheEntityIsNew", resourceCulture);
             }
         }
         
@@ -499,6 +751,42 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The following attributes are not compatible with Targets {0}: {1}.
+        /// </summary>
+        internal static string TheFollowingAttributesAreNotCompatibleWithTargets01 {
+            get {
+                return ResourceManager.GetString("TheFollowingAttributesAreNotCompatibleWithTargets01", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The member {0} of {1} is no accesible on queries.
+        /// </summary>
+        internal static string TheMember0Of1IsNoAccesibleOnQueries {
+            get {
+                return ResourceManager.GetString("TheMember0Of1IsNoAccesibleOnQueries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The member {0} of ImplementedByAll is no accesible on queries.
+        /// </summary>
+        internal static string TheMember0OfImplementedByAllIsNoAccesibleOnQueries {
+            get {
+                return ResourceManager.GetString("TheMember0OfImplementedByAllIsNoAccesibleOnQueries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The member {0} of Lite is no accesible on queries, use Entity instead.
+        /// </summary>
+        internal static string TheMember0OfLiteIsNoAccesibleOnQueriesUseEntityInstead {
+            get {
+                return ResourceManager.GetString("TheMember0OfLiteIsNoAccesibleOnQueriesUseEntityInstead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Property {0} for type {1} not found.
         /// </summary>
         internal static string TheProperty0ForType1IsnotFound {
@@ -513,6 +801,15 @@ namespace Signum.Engine.Properties {
         internal static string ThereAre0ThatReferThisEntity {
             get {
                 return ResourceManager.GetString("ThereAre0ThatReferThisEntity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are entities of different types.
+        /// </summary>
+        internal static string ThereAreEntitiesOfDifferentTypes {
+            get {
+                return ResourceManager.GetString("ThereAreEntitiesOfDifferentTypes", resourceCulture);
             }
         }
         
@@ -616,6 +913,15 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ToStr is no accesible on queries in ImplementedByAll.
+        /// </summary>
+        internal static string ToStrIsNoAccesibleOnQueriesInImplementedByAll {
+            get {
+                return ResourceManager.GetString("ToStrIsNoAccesibleOnQueriesInImplementedByAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to TRANSACTION ROLLBACKED!.
         /// </summary>
         internal static string TransactionRollbacked {
@@ -661,6 +967,24 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type {0} is not in {1}.
+        /// </summary>
+        internal static string Type0IsNotIn1 {
+            get {
+                return ResourceManager.GetString("Type0IsNotIn1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type {0} not found in the Schema.
+        /// </summary>
+        internal static string Type0NotFoundInTheSchema {
+            get {
+                return ResourceManager.GetString("Type0NotFoundInTheSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to TypeDN table not cached. Remember to call TypeLogic.Start in your Starter and call Administrator.InitializeCurrentSchema .
         /// </summary>
         internal static string TypeDNTableNotCached {
@@ -688,11 +1012,38 @@ namespace Signum.Engine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unauthorized access to {0}.
+        /// </summary>
+        internal static string UnauthorizedAccessTo0 {
+            get {
+                return ResourceManager.GetString("UnauthorizedAccessTo0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UniqueMultiNulls works with only one field. Use Administrator.AddMultiColumnUniqueTriggerNullable instead..
         /// </summary>
         internal static string UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator {
             get {
                 return ResourceManager.GetString("UniqueMultiNullsWorksWithOnlyOneFieldUseAdministrator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UserConnections file found on {0}.
+        /// </summary>
+        internal static string UserConnectionsFileFoundOn0 {
+            get {
+                return ResourceManager.GetString("UserConnectionsFileFoundOn0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning {0}: No results.
+        /// </summary>
+        internal static string Warning0NoResults {
+            get {
+                return ResourceManager.GetString("Warning0NoResults", resourceCulture);
             }
         }
     }

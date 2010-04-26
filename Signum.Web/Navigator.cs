@@ -549,7 +549,7 @@ namespace Signum.Web
             Type cleanType = cleanTC.UntypedValue.GetType();
 
             if (!Navigator.IsViewable(cleanType, false))
-                throw new UnauthorizedAccessException("View for type {0} is not allowed".Formato(cleanType.Name));
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
             controller.ViewData[ViewDataKeys.PartialViewName] = partialViewName ?? Navigator.OnPartialViewName((ModifiableEntity)cleanTC.UntypedValue);

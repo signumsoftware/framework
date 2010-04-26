@@ -11,6 +11,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Engine;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -119,7 +120,7 @@ namespace Signum.Web
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
             if (ident == null)
-                throw new InvalidOperationException("Visual Constructor doesn't work with EmbeddedEntities"); 
+                throw new InvalidOperationException(Resources.VisualConstructorDoesnTWorkWithEmbeddedEntities); 
 
             AddFilterProperties(entity, controller);
 

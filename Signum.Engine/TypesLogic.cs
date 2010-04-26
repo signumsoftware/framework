@@ -132,7 +132,7 @@ namespace Signum.Engine
 
         private static Type GetType(string typeName)
         {
-            return typeToDN.Keys.Where(t => t.Name == typeName).Single("Type {0} not found in the Schema".Formato(typeName));
+            return typeToDN.Keys.Where(t => t.Name == typeName).Single(Resources.Type0NotFoundInTheSchema.Formato(typeName));
         }
 
         private static Type TryGetType(string typeName)

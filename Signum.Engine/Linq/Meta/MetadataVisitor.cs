@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
                 throw new ArgumentException("expression");
 
             if (!typeof(IQueryable).IsAssignableFrom(expression.Type))
-                throw new InvalidOperationException("expression Type is not IQueryable");
+                throw new InvalidOperationException(Resources.ExpressionTypeIsNotIQueryable);
 
             Expression simplified = MetaEvaluator.Clean(expression);
 

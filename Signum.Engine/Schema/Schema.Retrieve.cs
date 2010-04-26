@@ -177,7 +177,7 @@ namespace Signum.Engine.Maps
             int? idTipo = (int?)row.Cell(ColumnTypes.Name);
 
             if (id.HasValue != idTipo.HasValue)
-                throw new InvalidOperationException("ImplementedByAll {0} = {1} but {2} = {3}".Formato(Column.Name, id, ColumnTypes.Name, idTipo));
+                throw new InvalidOperationException(Resources.ImplementedByAll01But23.Formato(Column.Name, id, ColumnTypes.Name, idTipo));
 
             if (id == null)
                 return null;

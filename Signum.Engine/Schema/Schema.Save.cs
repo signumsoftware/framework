@@ -67,7 +67,7 @@ namespace Signum.Engine.Maps
             if (Identity)
             {
                 if (ident.IdOrNull != null)
-                    throw new InvalidOperationException("{0} is New, but has Id ({1}) and Identity is true".Formato(ident, ident.IdOrNull)); 
+                    throw new InvalidOperationException(Resources.IsNewButHasId1AndIdentityIsTrue.Formato(ident, ident.IdOrNull)); 
 
                 return SqlBuilder.InsertSaveId(Name, parameters, ident);
             }
@@ -246,7 +246,7 @@ namespace Signum.Engine.Maps
                 if (HasValue != null)
                     parameters.Add(HasValueParameter(false));
                 else
-                    throw new InvalidOperationException("Impossible to save null on a not-nullable embedded field, use Nullable Attribute over the field");
+                    throw new InvalidOperationException(Resources.ImpossibleToSaveNullOnANotNullableEmbeddedFieldUseNullable);
                 
                 foreach (var v in EmbeddedFields.Values)
                     v.Field.CreateParameter(parameters, null, type, forbidden);

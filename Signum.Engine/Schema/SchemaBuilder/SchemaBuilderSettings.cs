@@ -118,7 +118,7 @@ namespace Signum.Engine.Maps
             var incorrects = attributes.Where(a => a.GetType().SingleAttribute<AttributeUsageAttribute>().TryCS(au => (au.ValidOn & attributeTargets) == 0) ?? false);
 
             if (incorrects.Count() > 0)
-                throw new InvalidOperationException("The following attributes are not compatible with Targets {0}:  {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
+                throw new InvalidOperationException(Resources.TheFollowingAttributesAreNotCompatibleWithTargets01.Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
         public Attribute[] TypeAttributes(Type type)

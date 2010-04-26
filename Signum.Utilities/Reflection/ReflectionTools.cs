@@ -191,7 +191,7 @@ namespace Signum.Utilities.Reflection
         public static object GenericInvoke(this MethodInfo mi, Type[] typeArguments, object obj, object[] parameters)
         {
             if (!mi.IsGenericMethodDefinition)
-                throw new ArgumentException("mi should be a Generic Method Definition");
+                throw new ArgumentException(Resources.MiShouldBeAGenericMethodDefinition);
 
             try
             {

@@ -153,7 +153,7 @@ namespace Signum.Web
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
-                return (R)(object)tc.None("Type {0} not allowed".Formato(typeof(R)));
+                return (R)(object)tc.None(Resources.Type0NotAllowed.Formato(typeof(R)));
             }
 
             Mapping<R> mapping = ((Mapping<R>)AllowedMappings.TryGetC(typeof(R))) ?? Navigator.EntitySettings<R>().MappingDefault;
@@ -404,7 +404,7 @@ namespace Signum.Web
                 return newLite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
-                throw new InvalidOperationException("Changes to Entity {0} not allowed because EntityMapping is null".Formato(newLite.TryToString()));
+                throw new InvalidOperationException(Resources.ChangesToEntity0AreNotAllowedBecauseEntityMappingIs.Formato(newLite.TryToString()));
 
             var sc = new SubContext<S>(ctx.ControlID, EntityMapping, null, ctx) { Value = newLite.Retrieve() };
             EntityMapping.OnGetValue(sc);

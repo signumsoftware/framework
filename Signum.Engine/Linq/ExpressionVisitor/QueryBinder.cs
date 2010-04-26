@@ -727,10 +727,10 @@ namespace Signum.Engine.Linq
             IQueryable query = (IQueryable)value;
 
             if (!type.IsInstantiationOf(typeof(Query<>)))
-                throw new InvalidOperationException("{0} belongs to another kind ok Linq Provider");
+                throw new InvalidOperationException(Resources.BelongsToAnotherKindOkLinqProvider.Formato(type.TypeName()));
 
             if (!query.IsBase())
-                throw new InvalidOperationException("ConstantExpression with a complex IQueryable unexpected at this stage");
+                throw new InvalidOperationException(Resources.ConstantExpressionWithAComplexIQueryableUnexpectedAt);
 
             return query.ElementType;
         }
@@ -922,7 +922,7 @@ namespace Signum.Engine.Linq
                     }
 
                     if (fi == null)
-                        throw new InvalidOperationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, fie.Type.TypeName()));
+                        throw new InvalidOperationException(Resources.TheMember0Of1IsNoAccesibleOnQueries.Formato(m.Member.Name, fie.Type.TypeName()));
 
                     Expression result = fie.GetOrCreateFieldBinding(fie.Token, fi, this);
                     return result;
@@ -933,7 +933,7 @@ namespace Signum.Engine.Linq
                     FieldInfo fi = Reflector.FindFieldInfo(efie.Type, m.Member, true);
 
                     if (fi == null)
-                        throw new InvalidOperationException("The member {0} of {1} is no accesible on queries".Formato(m.Member.Name, efie.Type.TypeName()));
+                        throw new InvalidOperationException(Resources.TheMember0Of1IsNoAccesibleOnQueries.Formato(m.Member.Name, efie.Type.TypeName()));
 
                     Expression result = efie.GetBinding(fi);
                     return result;
@@ -951,12 +951,12 @@ namespace Signum.Engine.Linq
                         if (pi.Name == "ToStr")
                         {
                             if (liteRef.ToStr == null)
-                                throw new InvalidOperationException("ToStr is no accesible on queries in ImplementedByAll");
+                                throw new InvalidOperationException(Resources.ToStrIsNoAccesibleOnQueriesInImplementedByAll);
                             return liteRef.ToStr;
                         }
                     }
 
-                    throw new InvalidOperationException("The member {0} of Lite is no accesible on queries, use EntityOrNull instead".Formato(m.Member));
+                    throw new InvalidOperationException(Resources.TheMember0OfLiteIsNoAccesibleOnQueriesUseEntityInstead.Formato(m.Member));
                 }
                 case (ExpressionType)DbExpressionType.ImplementedBy:
                 {
@@ -985,7 +985,7 @@ namespace Signum.Engine.Linq
                     if (fi != null && fi.FieldEquals((IdentifiableEntity ie) => ie.id))
                         return iba.Id;
 
-                    throw new InvalidOperationException("The member {0} of ImplementedByAll is no accesible on queries".Formato(m.Member));
+                    throw new InvalidOperationException(Resources.TheMember0OfImplementedByAllIsNoAccesibleOnQueries.Formato(m.Member));
                 }
             }
       
@@ -1054,7 +1054,7 @@ namespace Signum.Engine.Linq
             }
 
             if(list.Any(e=>e is MListExpression))
-                throw new InvalidOperationException("MList on ImplementedBy are not supported jet");
+                throw new InvalidOperationException(Resources.MListOnImplementedByAreNotSupportedYet);
 
             return Coalesce(returnType.Nullify(), list);
         }
@@ -1297,7 +1297,7 @@ namespace Signum.Engine.Linq
             {
                 MemberMemberBinding mmb = (MemberMemberBinding)m;
                 if(!typeof(EmbeddedEntity).IsAssignableFrom(m.Member.ReturningType()))
-                    throw new InvalidOperationException("{0} does not inherit from EmbeddedEntity".Formato(m.Member.ReturningType()));
+                    throw new InvalidOperationException(Resources.DoesNotInheritFromEmbeddedEntity.Formato(m.Member.ReturningType()));
 
                 Expression obj2 = Expression.MakeMemberAccess(obj, mmb.Member);
 
@@ -1310,7 +1310,7 @@ namespace Signum.Engine.Linq
         ColumnAssignment AssignColumn(Expression column, Expression expression)
         {
             if (!(column is ColumnExpression))
-                throw new InvalidOperationException("{0} does not represent a column".Formato(column.NiceToString()));
+                throw new InvalidOperationException(Resources.DoesNotRepresentAColumn.Formato(column.NiceToString()));
 
             return new ColumnAssignment((ColumnExpression)column, DbExpressionNominator.FullNominate(expression, false));
         }
@@ -1321,7 +1321,7 @@ namespace Signum.Engine.Linq
                 return AssignNull(colExpression);
 
             if (expression is FieldInitExpression && IsNewId(((FieldInitExpression)expression).ExternalId))
-                throw new InvalidOperationException("The entity is New");
+                throw new InvalidOperationException(Resources.TheEntityIsNew);
 
             if (colExpression is ColumnExpression)
             {
@@ -1353,7 +1353,7 @@ namespace Signum.Engine.Linq
                     FieldInitExpression fie = (FieldInitExpression)expression; 
 
                     if(!colIb.Implementations.Any(i=>i.Type == fie.Type))
-                        throw new InvalidOperationException("Type {0} is not in {1}".Formato(fie.Type.Name, colIb.Implementations.ToString(i => i.Type.Name, ", ")));
+                        throw new InvalidOperationException(Resources.Type0IsNotIn1.Formato(fie.Type.Name, colIb.Implementations.ToString(i => i.Type.Name, ", ")));
 
                     return colIb.Implementations.Select(imp => (AssignColumn(imp.Field.ExternalId,
                        imp.Type == fie.Type ? fie.ExternalId : NullId))).ToArray();
@@ -1364,7 +1364,7 @@ namespace Signum.Engine.Linq
 
                     Type[] types = ib.Implementations.Select(i=>i.Type).Except(colIb.Implementations.Select(i=>i.Type)).ToArray(); 
                     if(types.Any())
-                        throw new InvalidOperationException("No implementation for type(s) {0}".Formato(types.ToString(t => t.Name, ", ")));
+                        throw new InvalidOperationException(Resources.NoImplementationForTypeS0.Formato(types.ToString(t => t.Name, ", ")));
 
                     return colIb.Implementations.Select(cImp => AssignColumn(cImp.Field.ExternalId,
                             ib.Implementations.SingleOrDefault(imp => imp.Type == cImp.Type).TryCC(imp => imp.Field.ExternalId) ?? NullId)).ToArray();
@@ -1407,7 +1407,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            throw new NotImplementedException("{0} can not be assigned from {1}".Formato(colExpression.Type.Name, expression.Type.Name)); 
+            throw new NotImplementedException(Resources.CanNotBeAssignedFrom1.Formato(colExpression.Type.Name, expression.Type.Name)); 
         }
 
         private ColumnAssignment[] AssignNull(Expression colExpression)
@@ -1454,7 +1454,7 @@ namespace Signum.Engine.Linq
                 return colEfie.Bindings.SelectMany(fb => AssignNull(fb.Binding)).PreAnd(ca).ToArray();
             }
 
-            throw new NotImplementedException("{0} can not be assigned to null".Formato(colExpression.Type.Name)); 
+            throw new NotImplementedException(Resources.CanNotBeAssignedToNull.Formato(colExpression.Type.Name)); 
         }
     }
 }

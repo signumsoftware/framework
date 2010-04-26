@@ -103,16 +103,16 @@ namespace Signum.Engine.DynamicQuery
                 ResultTable result = dq.ExecuteQuery(null, null, null, 100);
 
                 if(result.Rows.Length == 0)
-                    return "Warning {0}: No results".Formato(queryName);
+                    return Resources.Warning0NoResults.Formato(queryName);
 
                 if (Connection.CommandCount != 1)
-                    return "Error {0}: N + 1 query problem".Formato(queryName);
+                    return Resources.Error0N1QueryProblem.Formato(queryName);
 
                 return null;
             }
             catch (Exception e)
             {
-                return "Error {0}: {1}".Formato(queryName, e.Message);
+                return Resources.Error01.Formato(queryName, e.Message);
             }
         }
 

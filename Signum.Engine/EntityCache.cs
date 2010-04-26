@@ -69,7 +69,7 @@ namespace Signum.Engine
             get
             {
                 if (stack.IsEmpty)
-                    throw new InvalidOperationException("No EntityCache context has been created");
+                    throw new InvalidOperationException(Resources.NoEntityCacheContextHasBeenCreated);
 
                 return stack.Peek(); 
             }

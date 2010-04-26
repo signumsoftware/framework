@@ -10,6 +10,7 @@ using System.Web.Mvc.Html;
 using System.Linq.Expressions;
 using Signum.Engine;
 using Signum.Web.Controllers;
+using Signum.Web.Properties;
 
 namespace Signum.Web
 {
@@ -114,7 +115,7 @@ namespace Signum.Web
         public override string ToString()
         {
             if (StaticType == null)
-                throw new ArgumentException("StaticInfo's StaticType must be set");
+                throw new ArgumentException(Resources.StaticInfoSStaticTypeMustBeSet);
 
             Type cleanStaticType = Reflector.ExtractLite(StaticType) ?? StaticType;
 
@@ -164,7 +165,7 @@ namespace Signum.Web
                 IsNew = identifiable.IdOrNull == null;
             }
             else
-                throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite or IdentifiableEntity or EmbeddedEntity".Formato(value.GetType()));
+                throw new ArgumentException(Resources.InvalidType0ForRuntimeInfoItMustBeLiteOrIdentifiableEntity.Formato(value.GetType()));
         }
 
         private string RuntimeTypeStr
@@ -174,7 +175,7 @@ namespace Signum.Web
                 if (RuntimeType == null)
                     return "";
                 if (typeof(Lite).IsAssignableFrom(RuntimeType))
-                    throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct an RuntimeInfo<T> instead");
+                    throw new ArgumentException(Resources.RuntimeInfoSRuntimeTypeCannotBeOfTypeLiteUseExtractLite);
                 return RuntimeType.Name;
             }
         }
@@ -182,7 +183,7 @@ namespace Signum.Web
         public override string ToString()
         {
             if (IdOrNull != null && IsNew)
-                throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".Formato(IdOrNull));
+                throw new ArgumentException(Resources.InvalidRuntimeInfoParametersIdOrNull0AndIsNewTrue.Formato(IdOrNull));
 
             return "{0};{1};{2};{3}".Formato(
                 RuntimeTypeStr,
@@ -196,7 +197,7 @@ namespace Signum.Web
         {
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
             if (parts.Length != 4)
-                throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
+                throw new ArgumentException(Resources.IncorrectSfRuntimeInfoFormat0.Formato(formValue));
 
             return new RuntimeInfo
             {

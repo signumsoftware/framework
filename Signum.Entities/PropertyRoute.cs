@@ -50,7 +50,7 @@ namespace Signum.Entities
                 }
 
                 if (imp != null)
-                    throw new InvalidOperationException("Attempt to make a property route on a {0}. Cast first.".Formato(imp.GetType()));
+                    throw new InvalidOperationException(Resources.AttemptToMakeAPropertyRouteOnA0CastFirst.Formato(imp.GetType()));
 
                 return new PropertyRoute(Root(this.Type), propertyInfo);
             }
@@ -66,22 +66,22 @@ namespace Signum.Entities
                 throw new ArgumentNullException("parent");
 
             if (!parent.Type.FollowC(a => a.BaseType).Contains(propertyInfo.DeclaringType))
-                throw new ArgumentException("propertyInfo '{0}' not found on {1}".Formato(propertyInfo.PropertyName(), parent.Type));
+                throw new ArgumentException(Resources.PropertyInfo0NotFoundOn1.Formato(propertyInfo.PropertyName(), parent.Type));
 
             if (typeof(IIdentifiable).IsAssignableFrom(parent.Type) && parent.PropertyRouteType != PropertyRouteType.Root)
-                throw new ArgumentException("parent can not be an non-Root Identifiable");
+                throw new ArgumentException(Resources.ParentCanNotBeAnNonRootIdentifiable);
 
             if (Reflector.IsMList(parent.Type))
             {
                 if (propertyInfo.Name != "Item")
-                    throw new NotSupportedException("{0} PropertyInfo is not supported".Formato(propertyInfo.Name)); 
+                    throw new NotSupportedException(Resources.PropertyInfoIsNotSupported.Formato(propertyInfo.Name)); 
 
                 PropertyRouteType = PropertyRouteType.MListItems;
             }
             else if (Reflector.IsLite(parent.Type))
             {
                 if (propertyInfo.Name != "Entity" && propertyInfo.Name != "EntityOrNull")
-                    throw new NotSupportedException("{0} PropertyInfo is not supported".Formato(propertyInfo.Name));
+                    throw new NotSupportedException(Resources.PropertyInfoIsNotSupported.Formato(propertyInfo.Name));
 
                 PropertyRouteType = PropertyRouteType.LiteEntity;
             }
@@ -90,7 +90,7 @@ namespace Signum.Entities
                 PropertyRouteType = PropertyRouteType.Property;
             }
             else
-                throw new NotSupportedException("Properties of type {0} not supported".Formato(parent.Type));
+                throw new NotSupportedException(Resources.PropertiesOfType0NotSupported.Formato(parent.Type));
 
             this.PropertyInfo = propertyInfo;
             this.Parent = parent;
@@ -107,7 +107,7 @@ namespace Signum.Entities
                 throw new ArgumentNullException("type");
 
             if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                throw new ArgumentException("type must be a Type inheriting IdentitiableEntity");
+                throw new ArgumentException(Resources.TypeMustBeATypeInheritingIdentitiableEntity);
 
             this.type = type;
             this.PropertyRouteType = PropertyRouteType.Root;
@@ -145,7 +145,7 @@ namespace Signum.Entities
             switch (PropertyRouteType)
             {
                 case PropertyRouteType.Root:
-                    throw new InvalidOperationException("Root has not PropertyString");
+                    throw new InvalidOperationException(Resources.RootHasNotPropertyString);
                 case PropertyRouteType.Property:
                     switch (Parent.PropertyRouteType)
                     {
@@ -183,7 +183,7 @@ namespace Signum.Entities
         public Implementations GetImplementations()
         {
             if (FindImplementations == null)
-                throw new InvalidOperationException("PropertyPath.FindImplementations not set");
+                throw new InvalidOperationException(Resources.PropertyPathFindImplementationsNotSet);
 
             return FindImplementations(this);
         }

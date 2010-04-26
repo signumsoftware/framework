@@ -7,6 +7,7 @@ using Signum.Utilities.Reflection;
 using System.Collections;
 using System.Reflection;
 using Signum.Utilities;
+using Signum.Entities.Properties;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -22,7 +23,7 @@ namespace Signum.Entities.DynamicQuery
             var columns = staticColumns.Cast<Column>().Concat(userColumns.Cast<Column>()).ToArray();
             string errors = columns.Where((c, i) => c.Index != i).ToString(c => "{0} ({1})".Formato(c.Name, c.Index), " ");
             if (errors.HasText())
-                throw new InvalidOperationException("Some columns are not correctly numered: " + errors);
+                throw new InvalidOperationException(Resources.SomeColumnsAreNotCorrectlyNumered0.Formato(errors));
 
             this.Columns = columns.Where(c => c.IsAllowed()).ToArray();
             this.Rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
@@ -33,7 +34,7 @@ namespace Signum.Entities.DynamicQuery
 
                     Array array = values(c);
                     if (array.Length != rows)
-                        throw new InvalidOperationException("{0} results (instead of {1}) for column {2}".Formato(array.Length, rows, c.Name));
+                        throw new InvalidOperationException(Resources.ResultsInsteadOf1ForColumn2.Formato(array.Length, rows, c.Name));
                     return array;
                 }).ToArray();
         }

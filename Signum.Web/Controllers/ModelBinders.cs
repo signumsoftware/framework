@@ -8,6 +8,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
 using Signum.Engine;
+using Signum.Web.Properties;
 
 namespace Signum.Web.Controllers
 {
@@ -37,7 +38,7 @@ namespace Signum.Web.Controllers
             if (lite.RuntimeType == Reflector.ExtractLite(lite.GetType()) && !forceRuntimeType)
                 return lite.Id.ToString();
 
-            return lite.Key(rt=>Navigator.TypesToNames.GetOrThrow(rt, "The type {0} is not registered in navigator"));
+            return lite.Key(rt=>Navigator.TypesToNames.GetOrThrow(rt, Resources.TheType0IsNotRegisteredInNavigator));
         }
 
 
@@ -46,7 +47,8 @@ namespace Signum.Web.Controllers
             if (string.IsNullOrEmpty(value))
                 return null;
 
-            return Lite.ParseLite(staticType, value, typeName => Navigator.NamesToTypes.GetOrThrow(typeName, "The name {0} does not correspond to any type in navigator"));
+            return Lite.ParseLite(staticType, value, typeName => 
+                Navigator.NamesToTypes.GetOrThrow(typeName, Resources.TheName0DoesNotCorrespondToAnyTypeInNavigator));
         }
     }
 

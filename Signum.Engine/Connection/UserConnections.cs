@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using Signum.Engine.Maps;
 using Signum.Utilities;
+using Signum.Engine.Properties;
 
 namespace Signum.Engine
 {
@@ -22,7 +23,7 @@ namespace Signum.Engine
             if (!File.Exists(FileName))
                 return new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-            Debug.WriteLine("UserConnections file found on {0}".Formato(FileName));
+            Debug.WriteLine(Resources.UserConnectionsFileFoundOn0.Formato(FileName));
 
             return File.ReadAllLines(FileName).Select(s => s.Split('>')).ToDictionary(a => a[0], a => a[1]);          
         }

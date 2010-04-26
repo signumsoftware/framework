@@ -48,7 +48,7 @@ namespace Signum.Utilities
                     break;
             }
 
-            return "Unknown ({0})".Formato(os.VersionString);
+            return Properties.Resources.OS_Unknown0.Formato(os.VersionString);
         }
 
         public static DateTime CompilationTime(this Version v)

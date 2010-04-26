@@ -297,4 +297,49 @@
   <data name="Yes" xml:space="preserve">
     <value>yes</value>
   </data>
+  <data name="ShowCalendar" xml:space="preserve">
+    <value>Show calendar</value>
+  </data>
+  <data name="VisualConstructorDoesnTWorkWithEmbeddedEntities" xml:space="preserve">
+    <value>Visual Constructor doesn't work with EmbeddedEntities</value>
+  </data>
+  <data name="TheType0IsNotRegisteredInNavigator" xml:space="preserve">
+    <value>The type {0} is not registered in navigator</value>
+  </data>
+  <data name="TheName0DoesNotCorrespondToAnyTypeInNavigator" xml:space="preserve">
+    <value>The name {0} does not correspond to any type in navigator</value>
+  </data>
+  <data name="PopupCreateCannotBeCalledForEmbeddedType0" xml:space="preserve">
+    <value>PopupCreate cannot be called for Embedded type {0}</value>
+  </data>
+  <data name="IdentifiableEntityToSave" xml:space="preserve">
+    <value>IdentifiableEntity to save</value>
+  </data>
+  <data name="GetTypeChooserNeedsAnImplementedBy" xml:space="preserve">
+    <value>GetTypeChooser needs an ImplementedBy</value>
+  </data>
+  <data name="TypeWasNotPossibleToExtract" xml:space="preserve">
+    <value>Type was not possible to extract</value>
+  </data>
+  <data name="StaticInfoSStaticTypeMustBeSet" xml:space="preserve">
+    <value>StaticInfo's StaticType must be set</value>
+  </data>
+  <data name="InvalidType0ForRuntimeInfoItMustBeLiteOrIdentifiableEntity" xml:space="preserve">
+    <value>Invalid type {0} for RuntimeInfo. It must be Lite or IdentifiableEntity or EmbeddedEntity</value>
+  </data>
+  <data name="RuntimeInfoSRuntimeTypeCannotBeOfTypeLiteUseExtractLite" xml:space="preserve">
+    <value>RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct an RuntimeInfo&lt;T&gt; instead</value>
+  </data>
+  <data name="InvalidRuntimeInfoParametersIdOrNull0AndIsNewTrue" xml:space="preserve">
+    <value>Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true</value>
+  </data>
+  <data name="IncorrectSfRuntimeInfoFormat0" xml:space="preserve">
+    <value>Incorrect sfRuntimeInfo format: {0}</value>
+  </data>
+  <data name="Type0NotAllowed" xml:space="preserve">
+    <value>Type {0} not allowed</value>
+  </data>
+  <data name="ChangesToEntity0AreNotAllowedBecauseEntityMappingIs" xml:space="preserve">
+    <value>Changes to Entity {0} are not allowed because EntityMapping is null</value>
+  </data>
 </root>

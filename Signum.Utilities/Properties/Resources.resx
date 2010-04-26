@@ -349,4 +349,25 @@
   <data name="Yesterday" xml:space="preserve">
     <value>Yesterday</value>
   </data>
+  <data name="OS_Unknown0" xml:space="preserve">
+    <value>Unknown ({0})</value>
+  </data>
+  <data name="NotSupported0" xml:space="preserve">
+    <value>Not supported {0}</value>
+  </data>
+  <data name="TheNodeType0IsNotSupportedAsUnaryExpression" xml:space="preserve">
+    <value>The nodeType {0} is not supported as unary expression</value>
+  </data>
+  <data name="Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="MiShouldBeAGenericMethodDefinition" xml:space="preserve">
+    <value>mi should be a Generic Method Definition</value>
+  </data>
+  <data name="GenericTypeDefinitionShouldBeAGenericTypeDefinition" xml:space="preserve">
+    <value>genericTypeDefinition should be a Generic Type Definition</value>
+  </data>
+  <data name="GenericMethodDefinitionShouldBeAGenericMethodDefinition" xml:space="preserve">
+    <value>genericMethodDefinition should be a Generic Method Definition</value>
+  </data>
 </root>

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Reflection.Emit;
 using System.Collections;
+using Signum.Utilities.Properties;
 
 namespace Signum.Utilities
 {
@@ -49,7 +50,7 @@ namespace Signum.Utilities
         public static bool IsInstantiationOf(this Type type, Type genericTypeDefinition)
         {
             if (!genericTypeDefinition.IsGenericTypeDefinition)
-                throw new ArgumentException("genericTypeDefinition should be a Generic Type Definition");
+                throw new ArgumentException(Resources.GenericTypeDefinitionShouldBeAGenericTypeDefinition);
 
             return type.IsGenericType && type.GetGenericTypeDefinition() == genericTypeDefinition;
         }
@@ -57,7 +58,7 @@ namespace Signum.Utilities
         public static bool IsInstantiationOf(this MethodInfo method, MethodInfo genericMethodDefinitoin)
         {
             if (!genericMethodDefinitoin.IsGenericMethodDefinition)
-                throw new ArgumentException("genericMethodDefinitoin should be a Generic Method Definition");
+                throw new ArgumentException(Resources.GenericMethodDefinitionShouldBeAGenericMethodDefinition);
 
             return genericMethodDefinitoin.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinitoin);
         }

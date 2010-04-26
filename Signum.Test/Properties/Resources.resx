@@ -123,4 +123,10 @@
   <data name="Prueba5" xml:space="preserve">
     <value>Custom Test 5</value>
   </data>
+  <data name="No0HasBeenThrown" xml:space="preserve">
+    <value>No {0} has been thrown</value>
+  </data>
+  <data name="ExceptionThrownDoesNotContainMessage0" xml:space="preserve">
+    <value>Exception thrown does not contain message '{0}'</value>
+  </data>
 </root>

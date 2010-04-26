@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
         public void AssertAllowed(Type type)
         {
             if (!IsAllowed(type))
-                throw new UnauthorizedAccessException("Unauthorized access to {0}".Formato(type.NiceName()));
+                throw new UnauthorizedAccessException(Resources.UnauthorizedAccessTo0.Formato(type.NiceName()));
         }
 
         readonly IEntityEvents entityEventsGlobal = new EntityEvents<IdentifiableEntity>(); 
@@ -260,7 +260,7 @@ namespace Signum.Engine.Maps
                     sw.Start();
                     pair.Handler(this);
                     sw.Stop();
-                    Debug.WriteLine("{1:0.00} ms initializing {0} ".Formato(pair.Handler.Method.DeclaringType.TypeName(), sw.Elapsed.TotalMilliseconds));
+                    Debug.WriteLine(Resources.MsInitializing0.Formato(pair.Handler.Method.DeclaringType.TypeName(), sw.Elapsed.TotalMilliseconds));
                 }
             }
         }
@@ -548,7 +548,7 @@ namespace Signum.Engine.Maps
         public static void AssertImplements(this Field field, Type type)
         {
             if (!Implements(field, type))
-                throw new InvalidOperationException("{0} does not implement {1}".Formato(field.ToString(), type.Name)); 
+                throw new InvalidOperationException(Resources.DoesNotImplement1.Formato(field.ToString(), type.Name)); 
         }
     }
 

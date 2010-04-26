@@ -100,7 +100,7 @@ namespace Signum.Engine.Linq
                 throw new ArgumentNullException("bindings");
 
             if (hasValue != null && hasValue.Type != typeof(bool))
-                throw new ArgumentException("hasValue should be a bool expression");
+                throw new ArgumentException(Resources.HasValueShouldBeABoolExpression);
 
             HasValue = hasValue;
 

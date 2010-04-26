@@ -249,4 +249,7 @@
   <data name="Yes" xml:space="preserve">
     <value>sí</value>
   </data>
+  <data name="ShowCalendar" xml:space="preserve">
+    <value>Mostrar calendario</value>
+  </data>
 </root>

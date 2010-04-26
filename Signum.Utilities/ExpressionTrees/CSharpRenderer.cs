@@ -19,12 +19,12 @@ namespace Signum.Utilities.ExpressionTrees
     {
         public static string GenerateCSharpCode(this Expression expression, string[] importedNamespaces)
         {
-            return new CSharTreeVisitor { ImportedNamespaces = importedNamespaces }.VisitReal(expression);
+            return new CSharpTreeVisitor { ImportedNamespaces = importedNamespaces }.VisitReal(expression);
         }
 
         public static string GenerateCSharpCode(this Expression expression)
         {
-            return new CSharTreeVisitor().VisitReal(expression);
+            return new CSharpTreeVisitor().VisitReal(expression);
         }
 
         /// <summary>
