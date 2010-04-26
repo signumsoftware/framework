@@ -42,19 +42,9 @@ namespace Signum.Web
 
     public class Js
     {
-        public static JsInstruction Return(string value)
+        public static JsInstruction Return<T>(JsValue<T> value)
         {
-            return "return {0}".Formato(value); 
-        }
-
-        public static JsInstruction ReturnTrue()
-        {
-            return Return("true"); 
-        }
-
-        public static JsInstruction ReturnFalse()
-        {
-            return Return("false");
+            return "return {0}".Formato(value.ToJS());
         }
 
         public static string NewPrefix(string prefix)
@@ -64,7 +54,7 @@ namespace Signum.Web
 
         public static JsInstruction OpenChooser(JsValue<string> prefix, string[] optionNames, JsFunction onOptionChosen)
         {
-            return "openChooser('{0}', [{1}], {2});".Formato(
+            return "openChooser({0}, [{1}], {2});".Formato(
                     prefix.ToJS(),
                     optionNames.ToString(on => "'{0}'".Formato(on), ","),
                     onOptionChosen);
@@ -72,20 +62,20 @@ namespace Signum.Web
 
         public static JsInstruction Submit(JsValue<string> controllerUrl)
         {
-            return new JsInstruction(() => "Submit('{0}')".Formato(controllerUrl));
+            return new JsInstruction(() => "Submit({0})".Formato(controllerUrl.ToJS()));
         }
 
         public static JsInstruction Submit(JsValue<string> controllerUrl, JsInstruction requestExtraJsonData)
         {
-            if (requestExtraJsonData != null)
+            if (requestExtraJsonData == null)
                 return Submit(controllerUrl);
 
-            return new JsInstruction(() => "Submit('{0}',{1})".Formato(controllerUrl, requestExtraJsonData));
+            return new JsInstruction(() => "Submit({0},{1})".Formato(controllerUrl.ToJS(), requestExtraJsonData.ToJS()));
         }
 
         public static JsInstruction Confirm(JsValue<string> message, JsFunction onSuccess)
         {
-            return new JsInstruction(() => "if(confirm('{0}')){1}()".Formato(message, onSuccess));
+            return new JsInstruction(() => "if(confirm({0})){1}()".Formato(message.ToJS(), onSuccess));
         }
     }
 }

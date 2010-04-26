@@ -105,7 +105,7 @@ namespace Signum.Web
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
             op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().Quote() : null);
             op.Add("create", !Create ? "false" : null);
-            op.Add("allowMultiple", AllowMultiple.TryToString());
+            op.Add("allowMultiple", AllowMultiple.TrySC(b => b ? "true" : "false"));
             op.Add("filters", filterOptions.Empty() ? null : filterOptions.Select((f, i) => f.ToString(i)).ToString("").Quote());
         }
     }
