@@ -225,4 +225,13 @@
   <data name="RememberPasswordExplanation" xml:space="preserve">
     <value>Introduzca su nombre de usuario y dirección de correo electrónico para recibir un mensaje en su cuenta con la contraseña</value>
   </data>
+  <data name="HelpDocumentation" xml:space="preserve">
+    <value>Help documentation</value>
+  </data>
+  <data name="Property0DoesNotExistInType1" xml:space="preserve">
+    <value>Property {0} does not exist in type {1}</value>
+  </data>
+  <data name="Key0NotFound" xml:space="preserve">
+    <value>Key {0} not found</value>
+  </data>
 </root>

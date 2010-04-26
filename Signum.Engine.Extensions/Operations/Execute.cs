@@ -47,7 +47,7 @@ namespace Signum.Engine.Operations
         protected virtual string OnCanExecute(T entity)
         {
             if (entity.IsNew && !AllowsNew)
-                return "The Entity {0} is New".Formato(entity);
+                return Resources.TheEntity0IsNew.Formato(entity);
 
             if (CanExecute != null)
                 return CanExecute(entity);

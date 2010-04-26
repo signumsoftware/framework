@@ -102,7 +102,7 @@ namespace Signum.Web.Files
             else
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(formFieldId));
-                sb.AppendLine("window.alert('Error guardando el archivo');");
+                sb.AppendLine("window.alert('{0}');".Formato(Resources.ErrorSavingFile));
             }
 
             sb.AppendLine("</script>");

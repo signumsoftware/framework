@@ -228,4 +228,16 @@
   <data name="RememberPasswordExplanation" xml:space="preserve">
     <value>Type your username and your email address to receive an email message with the password</value>
   </data>
+  <data name="MailBody_RememberPassword" xml:space="preserve">
+    <value>Le enviamos este correo por haber solicitado que le recordemos su contraseña. Por seguridad, hemos generado una contraseña aleatoria, que luego podrá cambiar.&lt;br/&gt;&lt;br/&gt;La contraseña es &lt;b&gt;{0}&lt;/b&gt;</value>
+  </data>
+  <data name="MailSubject_RememberPassword" xml:space="preserve">
+    <value>Recordatorio de contraseña</value>
+  </data>
+  <data name="ErrorSavingFile" xml:space="preserve">
+    <value>Error saving file</value>
+  </data>
+  <data name="Key0NotFound" xml:space="preserve">
+    <value>Key {0} not found</value>
+  </data>
 </root>

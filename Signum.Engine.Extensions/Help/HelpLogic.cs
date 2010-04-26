@@ -39,7 +39,7 @@ namespace Signum.Engine.Help
 
         static Dictionary<Type, EntityHelp> TypeToHelpFiles
         {
-            get { return HelpLogic.typeToHelpFiles.ThrowIfNullC("No se ha cargado Help"); }
+            get { return HelpLogic.typeToHelpFiles.ThrowIfNullC(Resources.HelpNotLoaded); }
             set { HelpLogic.typeToHelpFiles = value; }
         }
 
@@ -145,7 +145,7 @@ namespace Signum.Engine.Help
 
         public static Type FromCleanName(string cleanName)
         {
-            return CleanNameToType.GetOrThrow(cleanName, "No help for " + cleanName);
+            return CleanNameToType.GetOrThrow(cleanName, Resources.NoHelpFor0.Formato(cleanName));
         }
 
         public static void Start(SchemaBuilder sb)
@@ -199,7 +199,7 @@ namespace Signum.Engine.Help
                 var typeHelpInfo = from doc in entitiesDocuments
                                    let typeName = EntityHelp.GetEntityFullName(doc.Document)
                                    where typeName != null
-                                   select EntityHelp.Load(typesDic.GetOrThrow(typeName, "No Type with FullName {0} found in the schema"), doc.Document, doc.File);
+                                   select EntityHelp.Load(typesDic.GetOrThrow(typeName, Resources.NoTypeWithFullName0FoundInTheSchema), doc.Document, doc.File);
 
 
                 //tipo a entityHelp

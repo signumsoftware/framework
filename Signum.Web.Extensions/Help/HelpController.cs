@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Signum.Web.Extensions;
 using System.Text;
+using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Help
 {
@@ -24,7 +25,7 @@ namespace Signum.Web.Help
         {
             NamespaceModel model = new NamespaceModel("", HelpLogic.AllTypes());
             ViewData["appendices"] = HelpLogic.GetAppendices();
-            ViewData[ViewDataKeys.PageTitle] = "Documentación de ayuda";
+            ViewData[ViewDataKeys.PageTitle] = Resources.es.HelpDocumentation;
             return View(HelpClient.ViewPrefix + HelpClient.IndexUrl, model);
         }
 
@@ -109,7 +110,7 @@ namespace Signum.Web.Help
                 if (key.StartsWith("p-"))
                 {
                     subKey = subKey.Replace("_", "/");
-                    if (!eh.Properties.ContainsKey(subKey)) throw new ApplicationException("Property {0} does not exist in type {1}".Formato(subKey, entity));
+                    if (!eh.Properties.ContainsKey(subKey)) throw new ApplicationException(Resources.es.Property0DoesNotExistInType1.Formato(subKey, entity));
                     eh.Properties[subKey].UserDescription = Request.Form[key].ToString();
                     entityModified = true;
                 }
@@ -141,7 +142,7 @@ namespace Signum.Web.Help
                     eh.Description = Request.Form[key].ToString();
                     entityModified = true;
                 }
-                else throw new ApplicationException("Key {0} not found".Formato(Request.Form[key].ToString()));
+                else throw new ApplicationException(Resources.Key0NotFound.Formato(Request.Form[key].ToString()));
             }
 
             //Save it to file
@@ -166,7 +167,7 @@ namespace Signum.Web.Help
             {
                 if (key.Equals("description"))
                     nh.Description = Request.Form[key].ToString();
-                else throw new ApplicationException("Key {0} not found".Formato(Request.Form[key].ToString()));
+                else throw new ApplicationException(Resources.Key0NotFound.Formato(Request.Form[key].ToString()));
             }
             nh.Save();            
             HelpLogic.ReloadDocumentNamespace(nh);
@@ -183,7 +184,7 @@ namespace Signum.Web.Help
                     ah.Description = Request.Form[key].ToString();
                 else if (key.Equals("title"))
                     ah.Title = Request.Form[key].ToString();
-                else throw new ApplicationException("Key {0} not found".Formato(Request.Form[key].ToString()));
+                else throw new ApplicationException(Resources.Key0NotFound.Formato(Request.Form[key].ToString()));
             }
             ah.Save();
             HelpLogic.ReloadDocumentAppendix(ah);

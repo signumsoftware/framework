@@ -85,11 +85,11 @@ namespace Signum.Web.Authorization
                     user.Save();
                 }
 
-                string texto = @"Le enviamos este correo por haber solicitado que le recordemos su contraseña. Por seguridad, hemos generado una contraseña aleatoria, que luego podrá cambiar.<br/><br/>La contraseña es <b>" + randomPassword + "</b>";
+                string texto = Resources.MailBody_RememberPassword.Formato(randomPassword);
                 MailMessage message = new MailMessage()
                 {
                     To = { user.Email },
-                    Subject = "Recordatorio de contraseña",
+                    Subject = Resources.MailSubject_RememberPassword,
                     From = new MailAddress(AuthClient.RememberPasswordEmailFrom),
                     Body = texto,
                     IsBodyHtml = true

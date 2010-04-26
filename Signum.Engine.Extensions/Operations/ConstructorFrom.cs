@@ -48,7 +48,7 @@ namespace Signum.Engine.Operations
         string OnCanConstruct(IIdentifiable entity)
         {
             if (entity.IsNew && !AllowsNew)
-                return "The Entity {0} is New".Formato(entity);
+                return Resources.TheEntity0IsNew.Formato(entity);
 
             if (CanConstruct != null)
                 return CanConstruct((F)entity);

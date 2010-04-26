@@ -15,6 +15,7 @@ using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Operations;
 using Signum.Engine.Operations;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Mailing
 {
@@ -81,7 +82,7 @@ namespace Signum.Engine.Mailing
 
         public static EmailMessageDN Send(this IEmailOwnerDN recipient, Enum templateKey, Dictionary<string, object> args)
         {
-            EmailContent content = EmailTemplates.GetOrThrow(templateKey, "{0} not registered in EmailLogic")(recipient, args);
+            EmailContent content = EmailTemplates.GetOrThrow(templateKey, Resources.NotRegisteredInEmailLogic)(recipient, args);
 
             var result = new EmailMessageDN
             {
@@ -99,7 +100,7 @@ namespace Signum.Engine.Mailing
         public static EmailMessageDN ComposeMail(this EmailMessageDN emailMessage)
         {
             EmailContent content = EmailTemplates.GetOrThrow(
-                EnumLogic<EmailTemplateDN>.ToEnum(emailMessage.Template), "{0} not registered")(emailMessage.Recipient.Retrieve(), null);
+                EnumLogic<EmailTemplateDN>.ToEnum(emailMessage.Template), Resources.NotRegistered)(emailMessage.Recipient.Retrieve(), null);
             emailMessage.Subject = content.Subject;
             emailMessage.Body = content.Body;
             return emailMessage;
@@ -149,7 +150,7 @@ namespace Signum.Engine.Mailing
                 getLazies != null ? getLazies() : null;
 
             if (lites == null)
-                throw new InvalidOperationException("No users to process found");
+                throw new InvalidOperationException(Resources.NoUsersToProcessFound);
 
             package.NumLines = lites.Count;
 

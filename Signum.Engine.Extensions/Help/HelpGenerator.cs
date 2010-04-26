@@ -222,10 +222,10 @@ namespace Signum.Engine.Help
             IQueryable query = (IQueryable)value;
 
             if (!type.IsInstantiationOf(typeof(Query<>)))
-                throw new InvalidOperationException("{0} belongs to another kind ok Linq Provider");
+                throw new InvalidOperationException(Resources.BelongsToAnotherKindOkLinqProvider);
 
             if (!query.IsBase())
-                throw new InvalidOperationException("ConstantExpression with a complex IQueryable unexpected at this stage");
+                throw new InvalidOperationException(Resources.ConstantExpressionWithAComplexIQueryableUnexpectedAt);
 
             return query.ElementType;
         }

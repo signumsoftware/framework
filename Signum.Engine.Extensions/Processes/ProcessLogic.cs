@@ -188,7 +188,7 @@ namespace Signum.Engine.Processes
         {
             ExecutingProcess process;
             if (!currentProcesses.TryGetValue(processExecutionId, out process))
-                throw new ApplicationException("ProcessExecution {0} is not running anymore".Formato(processExecutionId));
+                throw new ApplicationException(Resources.ProcessExecution0IsNotRunningAnymore.Formato(processExecutionId));
 
             process.Suspend();
         }

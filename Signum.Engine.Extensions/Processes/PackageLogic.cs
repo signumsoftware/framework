@@ -12,6 +12,7 @@ using Signum.Engine.Basics;
 using System.Reflection;
 using Signum.Entities.Scheduler;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Processes
 {
@@ -84,7 +85,7 @@ namespace Signum.Engine.Processes
                 getLazies != null? getLazies(): null;
 
             if (lites == null)
-                throw new InvalidOperationException("No entities to process found");
+                throw new InvalidOperationException(Resources.NoEntitiesToProcessFound);
 
             package.NumLines = lites.Count; 
             
