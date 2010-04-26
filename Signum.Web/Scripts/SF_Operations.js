@@ -71,7 +71,7 @@ OperationManager.prototype = {
 
     operationAjax: function(newPrefix, onSuccess)
     {
-        log("OperationManager callServer");
+        log("OperationManager operationAjax");
     
         NotifyInfo(lang['executingOperation']);
     
@@ -272,6 +272,7 @@ var ConstructorFromMany = function(_options) {
 
     this.requestData = function(newPrefix, items) {
         log("ConstructorFromMany requestData");
+        
         var requestData = $('#' + sfTabId).serialize();
         requestData += qp("sfRuntimeType", $(this.pf(sfEntityTypeName)).val())
                      + qp("sfOperationFullKey", this.options.operationKey)
@@ -292,22 +293,13 @@ var ConstructorFromMany = function(_options) {
         }
         
         return requestData;
-    },
+    };
 
-    this.construct = function() {
-        log("ConstructorFromMany construct");
-
-        if (!empty(this.options.confirmMsg) && !confirm(this.options.confirmMsg))
-            return;
-
+    this.operationAjax = function(newPrefix, items, onSuccess)
+    {
+        log("ConstructorFromMany operationAjax");
+    
         NotifyInfo(lang['executingOperation']);
-
-        var items = SelectedItems({prefix:this.options.prefix});
-        if (items.length == 0) 
-        {
-            NotifyInfo(lang['noElementsSelected']);
-            return;
-        }
     
         var self = this;
         $.ajax({
@@ -317,31 +309,30 @@ var ConstructorFromMany = function(_options) {
             async: false,
             dataType: "html",
             success: function(operationResult) {
-                if (!self.executedSuccessfully(operationResult)) {
+                if (self.executedSuccessfully(operationResult)) {
+                    if (onSuccess != null)
+                        onSuccess(newPrefix, operationResult);
+                }
+                else{
                     NotifyInfo(lang['error'], 2000);
                     return;
                 }
-
-                if (self.options.navigateOnSuccess) {
-                    Submit(operationResult);
-                    return;
-                }
-
-                var navigator = new ViewNavigator({
-                    prefix: self.newPrefix(),
-                    type: self.options.returnType,
-                    onOk: self.options.onOk,
-                    onCancelled: self.options.onCancelled
-                }).showCreateSave(operationResult);
-                
-                if (!empty(self.options.onOperationSuccess))
-                    self.options.onOperationSuccess();
-
-                NotifyInfo(lang['operationExecuted'], 2000);
-            },
-            error:
+             },
+             error:
                 function() { NotifyInfo(lang['error'], 2000); }
         });
+    };
+    
+    this.defaultConstruct = function() {
+        log("ConstructorFromMany defaultConstruct");
+
+        var onSuccess = function(items) 
+        { 
+            this.operationAjax(this.newPrefix(), items, OpOpenPopup); 
+            NotifyInfo(lang['operationExecuted'], 2000); 
+        }
+
+        HasSelectedItems({prefix:this.newPrefix()}, onSuccess);
     };
 };
 
@@ -350,26 +341,6 @@ ConstructorFromMany.prototype = new OperationManager();
 function OperationConstructFromMany(constructorFrom) {
     constructorFromMany.construct();
 }
-
-//function ConstructFromManyExecute(urlController, typeName, operationKey, prefix, onOk, onCancel) {
-//    var ids = GetSelectedElements(prefix);
-//    if (ids == "") return;
-//    var newPrefix = "New".compose(prefix);
-//    var self = this;
-//    $.ajax({
-//        type: "POST",
-//        url: urlController,
-//        data: "sfIds=" + ids + qp("sfRuntimeType", typeName) + qp("sfOperationFullKey", operationKey) + qp(sfPrefix, newPrefix) + qp("sfOnOk", singleQuote(onOk)) + qp("sfOnCancel", singleQuote(onCancel)),
-//        async: false,
-//        dataType: "html",
-//        success: function(msg) {
-//            $('#' + prefix + "divASustituir").html(msg);
-//            new popup().show(prefix + "divASustituir");
-//            $('#' + newPrefix + sfBtnOk).click(onOk);
-//            $('#' + newPrefix + sfBtnCancel).click(function() { $('#' + prefix + "divASustituir").html(""); if (onCancel != null) onCancel(); });
-//        }
-//    });
-//}
 
 function ReloadEntity(urlController, prefix, parentDiv, reloadButtonBar) {
     $.ajax({
@@ -408,6 +379,11 @@ function OpReloadContent(prefix, operationResult){
 function OpOpenPopup(prefix, operationResult)
 {
     new ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
+}
+
+function OpOpenPopupNoDefaultOk(prefix, operationResult)
+{
+    new ViewNavigator({ prefix: prefix, onOk: function(){ return false; }}).showCreateSave(operationResult);
 }
 
 function OpNavigate(prefix, operationResult)

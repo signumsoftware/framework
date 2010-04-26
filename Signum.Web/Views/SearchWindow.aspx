@@ -18,6 +18,7 @@
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString()); %>
         <%= Html.ValidationSummaryAjax() %>
+        <div id="divASustituir"></div>
+        <div class="clear"></div>   
  <%}%>
- <div id="divASustituir"></div>
 </asp:Content>

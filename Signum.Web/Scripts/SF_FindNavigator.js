@@ -329,6 +329,16 @@ function SplitSelectedIds(_findOptions) {
     return new FindNavigator(_findOptions).splitSelectedIds();
 }
 
+function HasSelectedItems(_findOptions, onSuccess) {
+    log("FindNavigator HasSelectedItems");
+    var items = SelectedItems(_findOptions);
+    if (items.length == 0) {
+        NotifyInfo(lang['noElementsSelected']);
+        return;
+    }
+    onSuccess(items);
+}
+
 function AddFilter(prefix) {
     new FindNavigator({ prefix: prefix }).addFilter();
 }

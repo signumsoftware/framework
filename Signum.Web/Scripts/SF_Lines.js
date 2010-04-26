@@ -16,7 +16,7 @@ EBaseLine.prototype = {
     },
 
     setTicks: function() {
-    log("EBaseLine setTicks");
+        log("EBaseLine setTicks");
         if ($('#' + sfReactive).length > 0)
             this.runtimeInfo().ticks(new Date().getTime());
     },
@@ -34,7 +34,7 @@ EBaseLine.prototype = {
         if (!validatorResult.isValid) {
             if (!confirm(lang['popupErrors']))
                 return false;
-            else 
+            else
                 validator.showErrors(validatorResult.modelState, true);
         }
         this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
@@ -46,9 +46,16 @@ EBaseLine.prototype = {
         //Abstract function
     },
 
+    fireOnEntityChangedWithTicks: function(hasEntity) {
+        log("EBaseLine fireOnEntityChangedWithTicks");
+        this.setTicks();
+        this.updateButtonsDisplay(hasEntity);
+        if (!empty(this.options.onEntityChanged))
+            this.options.onEntityChanged();
+    },
+
     fireOnEntityChanged: function(hasEntity) {
         log("EBaseLine fireOnEntityChanged");
-        this.setTicks();
         this.updateButtonsDisplay(hasEntity);
         if (!empty(this.options.onEntityChanged))
             this.options.onEntityChanged();
@@ -61,7 +68,7 @@ EBaseLine.prototype = {
         this.runtimeInfo().removeEntity();
 
         this.removeSpecific();
-        this.fireOnEntityChanged(false);
+        this.fireOnEntityChangedWithTicks(false);
     },
 
     getRuntimeType: function(_onTypeFound) {
@@ -97,6 +104,7 @@ EBaseLine.prototype = {
         }
         else
             new ViewNavigator(viewOptions).createOk();
+        this.setTicks();
     },
 
     find: function(_findOptions) {
@@ -217,8 +225,8 @@ var ELine = function(_elineOptions) {
     this.onViewingOk = function(validateUrl) {
         log("ELine onViewingOk"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
         var acceptChanges = this.checkValidation(validateUrl, this.runtimeInfo().runtimeType());
-        if (acceptChanges)
-            this.setTicks();
+//        if (acceptChanges)
+//            this.setTicks();
         return acceptChanges;
     };
 
@@ -258,7 +266,7 @@ var ELine = function(_elineOptions) {
         return $.extend({
             prefix: this.options.prefix,
             onOk: function(selectedItems) { return self.onFindingOk(selectedItems); },
-            onOkClosed: function() { self.fireOnEntityChanged(true); },
+            onOkClosed: function() { self.fireOnEntityChangedWithTicks(true); },
             allowMultiple: false
         }, _findOptions);
     };
@@ -306,19 +314,19 @@ var EDLine = function(_edlineOptions) {
     EBaseLine.call(this, _edlineOptions);
 
     this.typedCreate = function(_viewOptions) {
-    log("EDLine create");
+        log("EDLine create");
         if (empty(_viewOptions.type)) throw "ViewOptions type parameter must not be null in EDLine typedCreate. Call create instead";
         var viewOptions = this.viewOptionsForCreating(_viewOptions);
         var template = window[this.options.prefix.compose("sfTemplate")];
         if (!empty(template)) { //Template pre-loaded: EmbeddedEntity
             $('#' + viewOptions.containerDiv).html(template);
         }
-        else{
+        else {
             new ViewNavigator(viewOptions).viewEmbedded();
         }
         this.onCreated(viewOptions.type);
     };
-    
+
     this.viewOptionsForCreating = function(_viewOptions) {
         log("EDLine viewOptionsForCreating");
         return $.extend({
@@ -336,11 +344,11 @@ var EDLine = function(_edlineOptions) {
     this.onCreated = function(runtimeType) {
         log("EDLine onCreated");
         this.newEntity(runtimeType);
-        this.fireOnEntityChanged(true);
+        this.fireOnEntityChangedWithTicks(true);
     };
 
     this.find = function(_findOptions, _viewOptions) {
-    log("EDLine find");
+        log("EDLine find");
         var _self = this;
         var type = this.getRuntimeType(function(type) {
             _self.typedFind($.extend({ queryUrlName: type }, _findOptions), _viewOptions);
@@ -348,19 +356,19 @@ var EDLine = function(_edlineOptions) {
     };
 
     this.typedFind = function(_findOptions, _viewOptions) {
-    log("EDLine typedFind");
+        log("EDLine typedFind");
         if (empty(_findOptions.queryUrlName)) throw "FindOptions queryUrlName parameter must not be null in EDLine typedFind. Call find instead";
         var findOptions = this.createFindOptions(_findOptions, _viewOptions);
         new FindNavigator(findOptions).openFinder();
     };
 
     this.createFindOptions = function(_findOptions, _viewOptions) {
-    log("EDLine createFindOptions");
+        log("EDLine createFindOptions");
         var self = this;
         return $.extend({
             prefix: this.options.prefix,
             onOk: function(selectedItems) { return self.onFindingOk(selectedItems, _viewOptions); },
-            onOkClosed: function() { self.fireOnEntityChanged(true); },
+            onOkClosed: function() { self.fireOnEntityChangedWithTicks(true); },
             allowMultiple: false
         }, _findOptions);
     };
@@ -379,7 +387,7 @@ var EDLine = function(_edlineOptions) {
     };
 
     this.removeSpecific = function() {
-    log("EDLine removeSpecific");
+        log("EDLine removeSpecific");
         $("#" + this.options.detailDiv).html("");
     };
 }
@@ -565,8 +573,8 @@ var EList = function(_elistOptions) {
     this.onViewingOk = function(validateUrl, itemPrefix) {
         log("EList onViewingOk"); //Receives url as parameter so it can be overriden when setting viewOptions onOk
         var acceptChanges = this.checkValidation(validateUrl, this.itemRuntimeInfo(itemPrefix).runtimeType(), itemPrefix);
-        if (acceptChanges)
-            this.setItemTicks(itemPrefix);
+//        if (acceptChanges)
+//            this.setItemTicks(itemPrefix);
         return acceptChanges;
     };
 
@@ -616,7 +624,7 @@ var EList = function(_elistOptions) {
         $('#' + selectedItemPrefix.compose(sfToStr)).remove();
         $('#' + selectedItemPrefix.compose(sfEntity)).remove();
         $('#' + selectedItemPrefix.compose(sfIndex)).remove();
-        this.fireOnEntityChanged();
+        this.fireOnEntityChangedWithTicks();
     };
 
     this.updateButtonsDisplay = function() {
@@ -669,13 +677,13 @@ var ERep = function(_erepOptions) {
         var lastIndex = -1;
         if (lastElement.length > 0) {
             var nameSelected = lastElement[0].id;
-            lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(sfRepeaterItem)-1);
+            lastIndex = nameSelected.substring(this.options.prefix.length + 1, nameSelected.indexOf(sfRepeaterItem) - 1);
         }
         return lastIndex;
     };
 
-    this.fireOnEntityChanged = function() {
-        log("ERep fireOnEntityChanged");
+    this.fireOnEntityChangedWithTicks = function() {
+        log("ERep fireOnEntityChangedWithTicks");
         this.setTicks();
         if (!empty(this.options.onEntityChanged))
             this.options.onEntityChanged();
@@ -698,6 +706,7 @@ var ERep = function(_erepOptions) {
                 self.onItemCreated(newHtml, viewOptions);
             });
         }
+        this.setTicks();
     };
 
     this.viewOptionsForCreating = function(_viewOptions) {
@@ -761,6 +770,7 @@ var ERep = function(_erepOptions) {
         if (!this.canAddItems()) return;
         var findOptions = this.createFindOptions(_findOptions, _viewOptions);
         new FindNavigator(findOptions).openFinder();
+        this.setTicks();
     },
 
     this.createFindOptions = function(_findOptions, _viewOptions) {
@@ -804,7 +814,7 @@ var ERep = function(_erepOptions) {
     this.remove = function(itemPrefix) {
         log("ERep remove");
         $('#' + itemPrefix.compose(sfRepeaterItem)).remove();
-        this.fireOnEntityChanged();
+        this.fireOnEntityChangedWithTicks();
     };
 };
 
@@ -843,6 +853,7 @@ var EDList = function(_edlistOptions) {
             new ViewNavigator(viewOptions).viewEmbedded();
         }
         this.onItemCreated(viewOptions);
+        this.setTicks();
     };
 
     this.viewOptionsForCreating = function(_viewOptions) {
@@ -945,6 +956,7 @@ var EDList = function(_edlistOptions) {
         this.restoreCurrent();
         var findOptions = this.createFindOptions(_findOptions, _viewOptions);
         new FindNavigator(findOptions).openFinder();
+        this.setTicks();
     },
 
     this.createFindOptions = function(_findOptions, _viewOptions) {
@@ -1059,7 +1071,7 @@ var ECombo = function(_ecomboOptions) {
         var runtimeInfo = this.runtimeInfo();
         runtimeInfo.setEntity(newRuntimeType, newId);
         $(this.pf(sfEntity)).html(''); //Clean
-        this.fireOnEntityChanged(newEntity);
+        this.fireOnEntityChangedWithTicks(newEntity);
     };
 };
 
@@ -1171,5 +1183,5 @@ function AutocompleteOnSelected(controlId, data) {
         .ticks(new Date().getTime());
     info.find().after(hiddenDiv(prefix.compose(sfEntity), ''));
 	$('#' + prefix.compose(sfLink)).html($('#' + controlId).val());
-    new ELine({ prefix: prefix }).fireOnEntityChanged(true);	
+    new ELine({ prefix: prefix }).fireOnEntityChangedWithTicks(true);	
 }

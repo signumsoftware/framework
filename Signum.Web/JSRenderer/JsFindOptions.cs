@@ -68,6 +68,16 @@ namespace Signum.Web
                 "SelectedItems({0})".Formato(options.ToJS()));
         }
 
+        public static JsInstruction HasSelectedItems(JsValue<string> prefix, JsFunction onSuccess)
+        {
+            return HasSelectedItems(new JsFindOptions { Prefix = prefix }, onSuccess);
+        }
+
+        public static JsInstruction HasSelectedItems(JsFindOptions options, JsFunction onSuccess)
+        {
+            return new JsInstruction(() => "HasSelectedItems({0},{1})".Formato(options.ToJS(), onSuccess.ToJS()));
+        }
+
         public static JsFindNavigator JsSplitSelectedIds(JsFindOptions options)
         {
             return new JsFindNavigator(() =>

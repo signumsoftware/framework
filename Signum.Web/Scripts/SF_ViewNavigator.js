@@ -137,16 +137,17 @@ ViewNavigator.prototype = {
 
     showCreateSave: function(newHtml) {
         log("ViewNavigator showCreateSave");
-        if (!empty(newHtml))
+        if (!empty(newHtml)) {
             $('#divASustituir').after(hiddenDiv(this.tempDivId(), newHtml));
-
+            $('#' + this.tempDivId()).html(cloneContents($('#' + this.tempDivId()).html()));
+        }
         new popup().show(this.tempDivId());
         var self = this;
-        
+
         $('#' + this.viewOptions.prefix.compose(sfBtnOk)).unbind('click').click(function() { self.onCreateSave(); });
         $('#' + this.viewOptions.prefix.compose(sfBtnCancel)).unbind('click').click(function() { self.onCreateCancel(); });
 
-		if (this.viewOptions.onLoaded != null)
+        if (this.viewOptions.onLoaded != null)
             this.viewOptions.onLoaded(this.tempDivId());
     },
 
