@@ -27,7 +27,7 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Permissions(FormCollection form)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("_Role");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
 
             var prp = PermissionAuthLogic.GetPermissionRules(role).ApplyChanges(ControllerContext, "", true); ;
 
@@ -45,7 +45,7 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult FacadeMethods(FormCollection form)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("_Role");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
 
             var prp = FacadeMethodAuthLogic.GetFacadeMethodRules(role).ApplyChanges(ControllerContext, "", true); ;
 
@@ -63,7 +63,7 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult EntityGroups(FormCollection form)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("_Role");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
 
             var prp = EntityGroupAuthLogic.GetEntityGroupRules(role).ApplyChanges(ControllerContext, "", true); ;
 
@@ -81,7 +81,7 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Types(FormCollection form)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("_Role");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
 
             var prp = TypeAuthLogic.GetTypeRules(role).ApplyChanges(ControllerContext, "", true); ;
 
@@ -100,10 +100,10 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveProperties(FormCollection form, string prefix)
         {
-            Lite<RoleDN> rolePost = this.ExtractLite<RoleDN>(prefix + "_Role");
-            TypeDN typePost = this.ExtractEntity<TypeDN>(prefix + "_Type");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
+            TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
-            var prp = PropertyAuthLogic.GetPropertyRules(rolePost, typePost).ApplyChanges(ControllerContext, prefix, true); ;
+            var prp = PropertyAuthLogic.GetPropertyRules(role, type).ApplyChanges(ControllerContext, prefix, true); ;
 
             PropertyAuthLogic.SetPropertyRules(prp.Value);
 
@@ -120,8 +120,8 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveQueries(FormCollection form, string prefix)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>(prefix + "_Role");
-            TypeDN type = this.ExtractEntity<TypeDN>(prefix + "_Type");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
+            TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
             var prp = QueryAuthLogic.GetQueryRules(role, type).ApplyChanges(ControllerContext, prefix, true); ;
 
@@ -141,8 +141,8 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveOperations(FormCollection form, string prefix)
         {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>(prefix + "_Role");
-            TypeDN type = this.ExtractEntity<TypeDN>(prefix + "_Type");
+            Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
+            TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
 
             var prp = OperationAuthLogic.GetOperationRules(role, type).ApplyChanges(ControllerContext, prefix, true);
 

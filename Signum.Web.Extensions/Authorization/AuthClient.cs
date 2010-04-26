@@ -151,7 +151,7 @@ namespace Signum.Web.Authorization
 
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string viewName, string prefix) =>
                 new[] { new ToolBarButton { 
-                    OnClick = (embedded ? "postDialog('{0}', '{1}')" : "PostServer('{0}', '{1}')").Formato(
+                    OnClick = (embedded ? "postDialog('{0}', '{1}')" :  "Submit('{0}', '{1}')").Formato(
                         new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "Auth"), prefix), 
                     Text = Resources.Save } });
         }
