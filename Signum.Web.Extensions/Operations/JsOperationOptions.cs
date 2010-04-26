@@ -42,6 +42,7 @@ namespace Signum.Web.Operations
                     {"isLite", IsLite.TryCC(a=>a.ToJS())},
                     {"returnType",ReturnType.TryCC(a=>a.ToJS())},
                     {"requestExtraJsonData", RequestExtraJsonData.TryCC(a=>a.ToJS())},
+                    {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())}
                     //{"validationControllerUrl", ValidationControllerUrl.TrySingleQuote()},
                     //{"avoidValidation", AvoidValidation == true? "true": null},
                     //{"onOk", OnOk ?? (AvoidDefaultOk ? JsOperationBase.AvoidDefaultOk(null).ToJS() : null)},
@@ -55,8 +56,8 @@ namespace Signum.Web.Operations
                     
                 };
 
-                if (ControllerUrl != null && ControllerUrl.ToJS() != "null")
-                    builder.Add("controllerUrl", ControllerUrl.ToJS());
+                //if (ControllerUrl != null && ControllerUrl.ToJS() != "null")
+                //    builder.Add("controllerUrl", ControllerUrl.ToJS());
                 
                 return builder.ToJS();
             };

@@ -33,6 +33,11 @@ namespace Signum.Web.Operations
         {
             return new JsInstruction(() => "{0}.operationAjax('{1}', {2})".Formato(this.ToJS(), newPrefix, onSucess.ToJS()));
         }
+
+        public JsInstruction OperationAjax(string newPrefix, string querySelectedItems, JsFunction onSucess)
+        {
+            return new JsInstruction(() => "{0}.operationAjax('{1}',{2},{3})".Formato(this.ToJS(), newPrefix, querySelectedItems, onSucess.ToJS()));
+        }
     }
 
 
@@ -40,6 +45,7 @@ namespace Signum.Web.Operations
     {
         public static readonly JsFunction ReloadContent = new JsFunction() { Renderer = () => "OpReloadContent" };
         public static readonly JsFunction OpenPopup = new JsFunction() { Renderer = () => "OpOpenPopup" };
+        public static readonly JsFunction OpOpenPopupNoDefaultOk = new JsFunction() { Renderer = () => "OpOpenPopupNoDefaultOk" };
         public static readonly JsFunction Navigate = new JsFunction() { Renderer = () => "OpNavigate" };
     }
 

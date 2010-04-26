@@ -546,4 +546,10 @@
   <data name="QueryDN_Key" xml:space="preserve">
     <value>Clave</value>
   </data>
+  <data name="HourMinuteDN_Hour" xml:space="preserve">
+    <value>Hora</value>
+  </data>
+  <data name="HourMinuteDN_Minute" xml:space="preserve">
+    <value>Minuto</value>
+  </data>
 </root>
