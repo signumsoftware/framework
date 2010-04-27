@@ -330,10 +330,11 @@ namespace Signum.Web.Controllers
             Type type = Navigator.ResolveType(sfRuntimeType);
             IdentifiableEntity entity = null;
 
-            if (Request.Form.AllKeys.Contains(ViewDataKeys.TabId))
+            if (this.IsReactive())
             {
-                IdentifiableEntity parent = (IdentifiableEntity)Session[Request.Form[ViewDataKeys.TabId]];
-                entity = (IdentifiableEntity)MappingContext.FindSubentity(parent, prefix);
+                IdentifiableEntity parent = (IdentifiableEntity)Session[this.TabID()];
+                if (prefix.HasText() && !prefix.StartsWith("New"))
+                    entity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
             }
             else
             {
