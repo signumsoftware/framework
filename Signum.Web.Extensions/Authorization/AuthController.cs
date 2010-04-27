@@ -22,6 +22,7 @@ namespace Signum.Web.Authorization
         public static event Action OnUserLogged;
         public static event Action<Controller, UserDN> OnUserPreLogin;
         public const string SessionUserKey = "user";
+        public static string CookieDomain = null;
 
         #region "Change password"
         public ActionResult ChangePassword()
@@ -198,10 +199,15 @@ namespace Signum.Web.Authorization
                 string ticketText = UserTicketLogic.NewTicket(
                        System.Web.HttpContext.Current.Request.UserHostAddress);
 
-                System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(AuthClient.CookieName, ticketText)
+                HttpCookie cookie = new HttpCookie(AuthClient.CookieName, ticketText)
                 {
                     Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
-                });
+                };
+
+                if (CookieDomain != null)
+                    cookie.Domain = CookieDomain;
+
+                System.Web.HttpContext.Current.Response.Cookies.Add(cookie);
             }
 
             AddUserSession(user.UserName, user);
