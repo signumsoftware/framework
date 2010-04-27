@@ -187,6 +187,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Help documentation.
+        /// </summary>
+        internal static string HelpDocumentation {
+            get {
+                return ResourceManager.GetString("HelpDocumentation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid new password.
         /// </summary>
         internal static string InvalidNewPassword {

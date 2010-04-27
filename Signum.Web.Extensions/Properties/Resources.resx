@@ -240,4 +240,7 @@
   <data name="Key0NotFound" xml:space="preserve">
     <value>Key {0} not found</value>
   </data>
+  <data name="HelpDocumentation" xml:space="preserve">
+    <value>Help documentation</value>
+  </data>
 </root>

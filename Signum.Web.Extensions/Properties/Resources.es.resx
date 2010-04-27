@@ -234,4 +234,7 @@
   <data name="Key0NotFound" xml:space="preserve">
     <value>Key {0} not found</value>
   </data>
+  <data name="HelpDocumentation1" xml:space="preserve">
+    <value>Documentación de ayuda</value>
+  </data>
 </root>

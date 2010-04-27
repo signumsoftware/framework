@@ -25,7 +25,7 @@ namespace Signum.Web.Help
         {
             NamespaceModel model = new NamespaceModel("", HelpLogic.AllTypes());
             ViewData["appendices"] = HelpLogic.GetAppendices();
-            ViewData[ViewDataKeys.PageTitle] = Resources.es.HelpDocumentation;
+            ViewData[ViewDataKeys.PageTitle] = Resources.HelpDocumentation;
             return View(HelpClient.ViewPrefix + HelpClient.IndexUrl, model);
         }
 
@@ -110,7 +110,7 @@ namespace Signum.Web.Help
                 if (key.StartsWith("p-"))
                 {
                     subKey = subKey.Replace("_", "/");
-                    if (!eh.Properties.ContainsKey(subKey)) throw new ApplicationException(Resources.es.Property0DoesNotExistInType1.Formato(subKey, entity));
+                    if (!eh.Properties.ContainsKey(subKey)) throw new ApplicationException(Resources.Property0NotExistsInType1.Formato(subKey, entity));
                     eh.Properties[subKey].UserDescription = Request.Form[key].ToString();
                     entityModified = true;
                 }
