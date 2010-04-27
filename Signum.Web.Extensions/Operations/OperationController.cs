@@ -21,16 +21,15 @@ namespace Signum.Web.Operations
     [HandleException, AuthenticationRequired]
     public class OperationController : Controller
     {
-        public ActionResult OperationExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
+        public ActionResult OperationExecute(string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
-            Type type = Navigator.ResolveType(sfRuntimeType);
-
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                if (sfId.HasValue)
+                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo));
+                if (runtimeInfo.IdOrNull.HasValue)
                 {
-                    Lite lite = Lite.Create(type, sfId.Value);
+                    Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
                     entity = OperationLogic.ServiceExecuteLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else
@@ -62,13 +61,12 @@ namespace Signum.Web.Operations
                 return Navigator.View(this, entity);
         }
 
-        public ActionResult DeleteExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult DeleteExecute(string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
-            Type type = Navigator.ResolveType(sfRuntimeType);
-
-            if (sfId.HasValue)
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo));
+            if (runtimeInfo.IdOrNull.HasValue)
             {
-                Lite lite = Lite.Create(type, sfId.Value);
+                Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
                 OperationLogic.ServiceDelete(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey), null);
             }
             else
@@ -77,16 +75,15 @@ namespace Signum.Web.Operations
             return Content("");
         }
 
-        public ActionResult ConstructFromExecute(string sfRuntimeType, int? sfId, string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
+        public ActionResult ConstructFromExecute(string sfOperationFullKey, bool isLite, string prefix, string sfOldPrefix, string sfOnOk, string sfOnCancel)
         {
-            Type type = Navigator.ResolveType(sfRuntimeType);
-
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                if (sfId.HasValue)
+                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo));
+                if (runtimeInfo.IdOrNull.HasValue)
                 {
-                    Lite lite = Lite.Create(type, sfId.Value);
+                    Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
                     entity = (IdentifiableEntity)OperationLogic.ServiceConstructFromLite(lite, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
                 }
                 else

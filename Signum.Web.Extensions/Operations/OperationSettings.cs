@@ -69,7 +69,7 @@ namespace Signum.Web.Operations
                 OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
-                ControllerUrl = OperationSettings.TryCC(s => (JsValue<string>)s.ControllerUrl),
+                ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c),
                 RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData),
             };
         }
@@ -87,7 +87,7 @@ namespace Signum.Web.Operations
                 OperationKey = EnumDN.UniqueKey(OperationInfo.Key),
                 IsLite = OperationInfo.Lite,
                 Prefix = this.Prefix,
-                ControllerUrl = OperationSettings.TryCC(s => (JsValue<string>)s.ControllerUrl),
+                ControllerUrl = OperationSettings.TryCC(s => s.ControllerUrl).TryCC(c => (JsValue<string>)c),
                 RequestExtraJsonData = OperationSettings.TryCC(opt => (JsInstruction)opt.RequestExtraJsonData), //Not quoted
             };
         }
