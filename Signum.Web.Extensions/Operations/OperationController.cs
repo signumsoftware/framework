@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region usings
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,6 +16,7 @@ using Signum.Engine.Operations;
 using Signum.Entities.Operations;
 using Signum.Engine.Basics;
 using Signum.Web.Extensions.Properties;
+#endregion
 
 namespace Signum.Web.Operations
 {
@@ -52,13 +54,18 @@ namespace Signum.Web.Operations
                     Session[this.TabID()] = entity;
             }
 
-            if (prefix.HasText() && Request.IsAjaxRequest())
+            if (prefix.HasText())
             {
                 ViewData[ViewDataKeys.WriteSFInfo] = true;
                 return Navigator.PopupView(this, entity, prefix);
             }
             else //NormalWindow
-                return Navigator.View(this, entity);
+            {
+                if (Request.IsAjaxRequest())
+                    return Navigator.NormalControl(this, entity);
+                else
+                    return Navigator.View(this, entity);
+            }
         }
 
         public ActionResult DeleteExecute(string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
@@ -103,13 +110,18 @@ namespace Signum.Web.Operations
                 entity = (IdentifiableEntity)OperationLogic.ServiceConstructFrom(entity, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
             }
 
-            if (prefix.HasText() && Request.IsAjaxRequest())
+            if (prefix.HasText())
             {
                 ViewData[ViewDataKeys.WriteSFInfo] = true;
                 return Navigator.PopupView(this, entity, prefix);
             }
             else //NormalWindow
-                return Navigator.View(this, entity);
+            {
+                if (Request.IsAjaxRequest())
+                    return Navigator.NormalControl(this, entity);
+                else
+                    return Navigator.View(this, entity);
+            }
         }
 
         public ActionResult ConstructFromManyExecute(string sfRuntimeType, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
