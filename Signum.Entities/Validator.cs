@@ -16,12 +16,15 @@ namespace Signum.Entities
 
         public static PropertyPack GetOrCreatePropertyPack<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
         {
-            return GetPropertyPacks(typeof(T)).TryGetC(ReflectionTools.GetPropertyInfo(property).Name);
+            return GetOrCreatePropertyPack(typeof(T), ReflectionTools.GetPropertyInfo(property).Name);
         }
 
-        public static PropertyPack GetOrCreatePropertyPack(PropertyInfo pi)
+        public static PropertyPack GetOrCreatePropertyPack(PropertyRoute route)
         {
-            return GetPropertyPacks(pi.DeclaringType).TryGetC(pi.Name);
+            if (route.PropertyRouteType != PropertyRouteType.Property)
+                throw new InvalidOperationException("PropertyRoute of type Property expected");
+
+            return GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name);
         }
 
         public static PropertyPack GetOrCreatePropertyPack(Type type, string property)

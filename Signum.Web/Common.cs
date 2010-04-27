@@ -24,6 +24,7 @@ namespace Signum.Web
         static Common()
         {
             CommonTask += new CommonTask(TaskSetLabelText);
+            CommonTask += new CommonTask(TaskSetFormatText);
             CommonTask += new CommonTask(TaskSetImplementations);
             CommonTask += new CommonTask(TaskSetReadOnly);
             CommonTask += new CommonTask(TaskSetAccess);
@@ -59,7 +60,7 @@ namespace Signum.Web
             ValueLine vl = bl as ValueLine;
             if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.Property)
             {
-                string format = Reflector.FormatString(bl.PropertyRoute.PropertyInfo);
+                string format = Reflector.FormatString(bl.PropertyRoute);
                 if (format != null)
                     vl.Format = format;
             }

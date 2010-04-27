@@ -327,10 +327,13 @@ namespace Signum.Entities.DynamicQuery
         protected override QueryToken[] SubTokensInternal()
         {
             if (PropertyInfo.PropertyType.UnNullify() == typeof(DateTime))
-            {
-                if (PropertyInfo != null)
+            {  
+                PropertyRoute route = this.GetPropertyRoute();
+
+                if (route != null)
                 {
-                    var att = Validator.GetOrCreatePropertyPack(PropertyInfo).TryCC(pp =>
+          
+                    var att = Validator.GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name).TryCC(pp =>
                         pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault());
                     if (att != null)
                     {
@@ -354,7 +357,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Format
         {
-            get { return Reflector.FormatString(PropertyInfo); }
+            get { return Reflector.FormatString(this.GetPropertyRoute()); }
         }
 
         public override string Unit
@@ -515,7 +518,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 if (Column.PropertyRoute != null)
                 {
-                    var att = Validator.GetOrCreatePropertyPack(Column.PropertyRoute.PropertyInfo)
+                    var att = Validator.GetOrCreatePropertyPack(Column.PropertyRoute.Parent.Type, Column.PropertyRoute.PropertyInfo.Name)
                         .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
                     if (att != null)
                         return NetPropertyToken.DateTimeProperties(this, att.Precision);

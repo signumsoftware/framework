@@ -137,8 +137,8 @@ namespace Signum.Web
                     valueLine.ValueHtmlProps.Add("onblur", setTicks + reloadOnChangeFunction);
             }
 
-            valueLine.ValueHtmlProps["size"] = valueLine.Format.TryCS(f => f.Length) ?? 20;
-
+            valueLine.ValueHtmlProps["size"] = (valueLine.Format == "d") ? 10 : 20;
+            
             string returnString = helper.TextBox(valueLine.ControlID, value != null ? ((DateTime)value).ToString(valueLine.Format) : "", valueLine.ValueHtmlProps) +
                    "\n" +
                    helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions);

@@ -316,7 +316,7 @@ namespace Signum.Web.Controllers
             {
                 Session[this.TabID()] = entity;
                 this.ViewData[ViewDataKeys.Reactive] = true;
-                if (prefix.HasText())
+                if (prefix.HasText() && !prefix.StartsWith("New"))
                     entity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
             }
 

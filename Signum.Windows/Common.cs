@@ -293,7 +293,7 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && vl.NotSet(ValueLine.FormatProperty) && context.PropertyRouteType == PropertyRouteType.Property)
             {
-                string format = Reflector.FormatString(context.PropertyInfo);
+                string format = Reflector.FormatString(context);
                 if (format != null)
                     vl.Format = format;
             }

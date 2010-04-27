@@ -6,7 +6,7 @@
         controllerUrl: null,
         onOk: null,
         onCancelled: null,
-        requestExtraJsonData: null,
+        requestExtraJsonData: null
     }, _options);
 };
 
@@ -50,8 +50,8 @@ OperationManager.prototype = {
                 requestData += qp(myRuntimeInfoKey, info.find().val());
         }
         requestData += qp("isLite", this.options.isLite)
-                     + qp("sfRuntimeType", empty(runtimeType) ? StaticInfoFor(this.options.prefix).staticType() : runtimeType)
-                     + qp("sfId", info.id())
+                     //+ qp("sfRuntimeType", empty(runtimeType) ? StaticInfoFor(this.options.prefix).staticType() : runtimeType)
+                     //+ qp("sfId", info.id())
                      + qp("sfOperationFullKey", this.options.operationKey)
                      + qp(sfPrefix, newPrefix)
                      + qp("sfOldPrefix", this.options.prefix)
@@ -104,12 +104,24 @@ OperationManager.prototype = {
     {
         log("OperationManager operationSubmit");
     
-        var info = this.runtimeInfo();
-        if (info.find().length > 0)
-        {
-            $("form").append(hiddenInput("sfRuntimeType", info.runtimeType()) +
-                hiddenInput('sfId', info.id()));
-        }
+////        var info = this.runtimeInfo();
+////        if (info.find().length > 0)
+////        {
+////            $("form").append(hiddenInput("sfRuntimeType", info.runtimeType()) +
+////                hiddenInput('sfId', info.id()));
+////        }
+        
+//        var info = this.runtimeInfo();
+//        var runtimeType = info.runtimeType();
+
+//        var myRuntimeInfoKey = this.options.prefix.compose(sfRuntimeInfo);
+//        if ($(":input:hidden[name=" + myRuntimeInfoKey + "]").length  == 0) {
+//            if (empty(runtimeType))
+//                hiddenInput(myRuntimeInfoKey, info.createValue(StaticInfoFor(this.options.prefix).staticType(), info.id(), info.isNew(), info.ticks()));
+//            else
+//                hiddenInput(myRuntimeInfoKey, info.find().val());
+//        }
+        
         $("form").append(hiddenInput('isLite', this.options.isLite) +
             hiddenInput('sfOperationFullKey', this.options.operationKey) +
             hiddenInput("sfOldPrefix", this.options.prefix));
@@ -149,8 +161,8 @@ OperationManager.prototype = {
             operationSubmit();
         else {
             var onSuccess = function() { this.operationSubmit(); };
-            
-            if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
+            var self = this;
+            if (!EntityIsValid({prefix:this.options.prefix}, function(){onSuccess.call(self)}))
                 return;
         }
     }
@@ -169,11 +181,12 @@ var OperationExecutor = function(_options) {
             this.operationAjax(null, OpReloadContent); 
             NotifyInfo(lang['operationExecuted'], 2000); 
         };
-        
+
+        var self = this;
         if (isTrue(this.options.isLite))
             onSuccess.call(this);
         else {
-            if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
+            if (!EntityIsValid({ prefix: this.options.prefix }, function() { onSuccess.call(self) }))
                 return;
         }
     };
@@ -196,11 +209,12 @@ var ConstructorFrom = function(_options) {
             this.operationAjax(this.newPrefix(), OpOpenPopup); 
             NotifyInfo(lang['operationExecuted'], 2000); 
         }
-        
+
+        var self = this;
         if (isTrue(this.options.isLite))
             onSuccess.call(this);
         else {
-            if (!EntityIsValid({prefix:this.options.prefix}, onSuccess.call(this)))
+            if (!EntityIsValid({ prefix: this.options.prefix }, function() { onSuccess.call(self) }))
                 return;
         }
     };
@@ -332,7 +346,8 @@ var ConstructorFromMany = function(_options) {
             NotifyInfo(lang['operationExecuted'], 2000); 
         }
 
-        HasSelectedItems({prefix:this.newPrefix()}, onSuccess);
+        var self = this;
+        HasSelectedItems({ prefix: this.newPrefix() }, onSuccess);
     };
 };
 

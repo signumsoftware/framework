@@ -295,13 +295,16 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        public static string FormatString(PropertyInfo property)
+        public static string FormatString(PropertyRoute route)
         {
-            FormatAttribute format = property.SingleAttribute<FormatAttribute>();
+            if (route.PropertyRouteType != PropertyRouteType.Property)
+                throw new InvalidOperationException("PropertyRoute of type Property expected");
+
+            FormatAttribute format = route.PropertyInfo.SingleAttribute<FormatAttribute>();
             if(format != null)
                 return format.Format;
 
-            var pp = Validator.GetOrCreatePropertyPack(property);
+            var pp = Validator.GetOrCreatePropertyPack(route);
             if (pp != null)
             {
                 DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault();
@@ -317,7 +320,7 @@ namespace Signum.Entities.Reflection
                     return stringCase.TextCase == Case.Lowercase ? "L" : "U";
             }
 
-            return FormatString(property.PropertyType);
+            return FormatString(route.Type);
         }
 
         public static string FormatString(Type type)

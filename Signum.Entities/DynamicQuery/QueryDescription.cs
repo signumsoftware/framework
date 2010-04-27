@@ -102,16 +102,23 @@ namespace Signum.Entities.DynamicQuery
                 propertyRoute = value;
                 if (propertyRoute != null)
                 {
-                    if (propertyRoute.PropertyRouteType == PropertyRouteType.Root)
-                        throw new InvalidOperationException(Resources.PropertyRouteCanNotBeOfTypeRoot);
+                    switch (propertyRoute.PropertyRouteType)
+                    {
+                        case PropertyRouteType.LiteEntity:
+                        case PropertyRouteType.Root:
+                            throw new InvalidOperationException(Resources.PropertyRouteCanNotBeOfTypeRoot);
+                        case PropertyRouteType.Property:
+                            PropertyInfo pi = propertyRoute.PropertyInfo;
 
-                    PropertyInfo pi = propertyRoute.PropertyInfo;
-
-                    if (pi.Name == this.Name)
-                        DisplayName = pi.NiceName();
-                    Format = Reflector.FormatString(pi);
-                    Unit = pi.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
-                    //Implementations = propertyRoute.GetImplementations(); delayed to connection creation
+                            if (pi.Name == this.Name)
+                                DisplayName = pi.NiceName();
+                            Format = Reflector.FormatString(propertyRoute);
+                            Unit = pi.SingleAttribute<UnitAttribute>().TryCC(u => u.UnitName);
+                            return;
+                        case PropertyRouteType.MListItems:
+                            Format = Reflector.FormatString(propertyRoute.Type);
+                            return;
+                    }
                 }
             }
         }

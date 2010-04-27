@@ -139,7 +139,6 @@ ViewNavigator.prototype = {
         log("ViewNavigator showCreateSave");
         if (!empty(newHtml)) {
             $('#divASustituir').after(hiddenDiv(this.tempDivId(), newHtml));
-            $('#' + this.tempDivId()).html(cloneContents($('#' + this.tempDivId()).html()));
         }
         new popup().show(this.tempDivId());
         var self = this;
