@@ -108,6 +108,21 @@ namespace Signum.Web
             return Manager.View(controller, entity, partialViewName, admin);
         }
 
+        public static PartialViewResult NormalControl(ControllerBase controller, IdentifiableEntity entity)
+        {
+            return Manager.NormalControl(controller, entity, null, false); 
+        }
+
+        public static PartialViewResult NormalControl(ControllerBase controller, IdentifiableEntity entity, bool admin)
+        {
+            return Manager.NormalControl(controller, entity, null, admin); 
+        }
+
+        public static PartialViewResult NormalControl(ControllerBase controller, IdentifiableEntity entity, string partialViewName)
+        {
+            return Manager.NormalControl(controller, entity, partialViewName, false);
+        }
+
         public static string GetOrCreateTabID(ControllerBase c)
         {
             return Manager.GetOrCreateTabID(c);
@@ -402,7 +417,7 @@ namespace Signum.Web
             return Manager.ModelState(new ModelStateData(modelState));
         }
 
-        internal static string OnPartialViewName(ModifiableEntity entity)
+        public static string OnPartialViewName(ModifiableEntity entity)
         {
             return Manager.EntitySettings.GetOrThrow(entity.GetType(), Resources.TheresNotAViewForType0).OnPartialViewName(entity); 
         }
@@ -418,6 +433,7 @@ namespace Signum.Web
         public string AjaxErrorPageUrl = ViewsPrefix + "AjaxError.ascx";
         public string ErrorPageUrl = ViewsPrefix + "Error.aspx";
         public string NormalPageUrl = ViewsPrefix + "NormalPage.aspx";
+        public string NormalControlUrl = ViewsPrefix + "NormalControl.ascx";
         public string PopupControlUrl = ViewsPrefix + "PopupControl.ascx";
         public string ChooserPopupUrl = ViewsPrefix + "ChooserPopup.ascx";
         public string SearchPopupControlUrl = ViewsPrefix + "SearchPopupControl.ascx";
@@ -509,6 +525,31 @@ namespace Signum.Web
 
         protected internal virtual ViewResult View(ControllerBase controller, IdentifiableEntity entity, string partialViewName, bool admin)
         {
+            FillViewDataForViewing(controller, entity, partialViewName, admin);
+
+            return new ViewResult()
+            {
+                ViewName = NormalPageUrl,
+                MasterName = null,
+                ViewData = controller.ViewData,
+                TempData = controller.TempData
+            };
+        }
+
+        protected internal virtual PartialViewResult NormalControl(ControllerBase controller, IdentifiableEntity entity, string partialViewName, bool admin)
+        {
+            FillViewDataForViewing(controller, entity, partialViewName, admin);
+
+            return new PartialViewResult()
+            {
+                ViewName = NormalControlUrl,
+                ViewData = controller.ViewData,
+                TempData = controller.TempData
+            };
+        }
+
+        private void FillViewDataForViewing(ControllerBase controller, IdentifiableEntity entity, string partialViewName, bool admin)
+        { 
             Type type = entity.GetType();
             
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, "");
@@ -533,14 +574,6 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.Reactive] = true;
                 controller.ControllerContext.HttpContext.Session[tabID] = entity;
             }
-
-            return new ViewResult()
-            {
-                ViewName = NormalPageUrl,
-                MasterName = null,
-                ViewData = controller.ViewData,
-                TempData = controller.TempData
-            };
         }
 
         protected internal virtual PartialViewResult PopupView(ControllerBase controller, TypeContext tc, string partialViewName)

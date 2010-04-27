@@ -304,7 +304,7 @@ namespace Signum.Web.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public PartialViewResult ReloadEntity(string prefix)
+        public PartialViewResult ReloadEntity(string prefix, string sfPartialViewName)
         {
             MappingContext context = this.UntypedExtractEntity(prefix)
                 .ThrowIfNullC(Resources.TypeWasNotPossibleToExtract)
@@ -321,33 +321,36 @@ namespace Signum.Web.Controllers
             }
 
             this.ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
-            return Navigator.PartialView(this, entity, prefix);
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ContentResult GetButtonBar(string sfRuntimeType, int? sfId, string prefix)
-        {
-            Type type = Navigator.ResolveType(sfRuntimeType);
-            IdentifiableEntity entity = null;
-
-            if (this.IsReactive())
-            {
-                IdentifiableEntity parent = (IdentifiableEntity)Session[this.TabID()];
-                if (prefix.HasText() && !prefix.StartsWith("New"))
-                    entity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
-            }
+            if (prefix.HasText())
+                return Navigator.PartialView(this, entity, prefix, sfPartialViewName);
             else
-            {
-                if (sfId.HasValue)
-                    entity = Database.Retrieve(Lite.Create(type, sfId.Value));
-                else
-                    entity = (IdentifiableEntity)Constructor.Construct(type);
-            }
-
-            HtmlHelper helper = CreateHtmlHelper(this);
-            return Content(ButtonBarEntityHelper.GetForEntity(this.ControllerContext, entity, 
-                Navigator.Manager.EntitySettings[type].OnPartialViewName(entity), prefix).ToString(helper));
+                return Navigator.NormalControl(this, entity, sfPartialViewName);
         }
+
+        //[AcceptVerbs(HttpVerbs.Post)]
+        //public ContentResult GetButtonBar(string sfRuntimeType, int? sfId, string prefix)
+        //{
+        //    Type type = Navigator.ResolveType(sfRuntimeType);
+        //    IdentifiableEntity entity = null;
+
+        //    if (this.IsReactive())
+        //    {
+        //        IdentifiableEntity parent = (IdentifiableEntity)Session[this.TabID()];
+        //        if (prefix.HasText() && !prefix.StartsWith("New"))
+        //            entity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
+        //    }
+        //    else
+        //    {
+        //        if (sfId.HasValue)
+        //            entity = Database.Retrieve(Lite.Create(type, sfId.Value));
+        //        else
+        //            entity = (IdentifiableEntity)Constructor.Construct(type);
+        //    }
+
+        //    HtmlHelper helper = CreateHtmlHelper(this);
+        //    return Content(ButtonBarEntityHelper.GetForEntity(this.ControllerContext, entity, 
+        //        Navigator.Manager.EntitySettings[type].OnPartialViewName(entity), prefix).ToString(helper));
+        //}
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult DoPostBack()

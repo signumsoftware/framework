@@ -2,6 +2,7 @@
 var sfPrefix = "prefix";
 var sfPrefixToIgnore = "prefixToIgnore";
 var sfTabId = "sfTabId";
+var sfPartialViewName = "sfPartialViewName";
 var sfReactive = "sfReactive";
 var sfFieldErrorClass = "field-validation-error";
 var sfInputErrorClass = "input-validation-error";

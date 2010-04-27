@@ -357,32 +357,26 @@ function OperationConstructFromMany(constructorFrom) {
     constructorFromMany.construct();
 }
 
-function ReloadEntity(urlController, prefix, parentDiv, reloadButtonBar) {
+function ReloadEntity(urlController, prefix, parentDiv) {
     $.ajax({
         type: "POST",
         url: urlController,
-        data: $("form *").not(".searchControl *").serialize() + qp(sfPrefix, prefix),
+        data: $("form *").not(".searchControl *").serialize() + qp(sfPrefix, prefix) + qp(sfPartialViewName, $('#' + sfPartialViewName).val()),
         async: false,
         dataType: "html",
         success: function(msg) {
            if (!empty(parentDiv))
                $('#' + parentDiv).html(msg);
            else
-               $('#' + prefix.compose("divMainControl")).html(msg);
-           
-           if (!isFalse(reloadButtonBar))
-           {
-               var info = RuntimeInfoFor(prefix);
-               $.post('Signum/GetButtonBar', { sfRuntimeType: info.runtimeType(), sfId: info.id(), prefix: prefix, sfTabId: $("#" + sfTabId).val() } ,function(data){ $('#' + prefix.compose("divButtonBar")).html(data) });
-           }
+               $('#' + prefix.compose("divNormalControl")).html(msg);
         }
     });
 }
 
 function OpReloadContent(prefix, operationResult){
     log("OperationExecutor defaultOnSuccess");
-    if (operationResult.indexOf("<form") >= 0) //NormalWindow: It might have prefix but the operation returns a full page reload
-        $("#content").html(operationResult.substring(operationResult.indexOf("<form"), operationResult.indexOf("</form>") + 7));
+    if (empty(prefix)) //NormalWindow
+        $("#divNormalControl").html(operationResult);
     else { //PopupWindow
         new ViewNavigator({
             prefix: prefix,

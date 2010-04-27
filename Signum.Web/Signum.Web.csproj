@@ -222,7 +222,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\fancy_closebox.png" />
-    <EmbeddedResource Include="Views\Copy of PopupControl.ascx">
+    <EmbeddedResource Include="Views\NormalControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ValueLineBox.ascx">
