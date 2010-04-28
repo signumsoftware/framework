@@ -60,6 +60,11 @@
     <Compile Include="ExpressionTrees\Linq.cs" />
     <Compile Include="FileExtensions.cs" />
     <Compile Include="NaturalLanguageTools.cs" />
+    <Compile Include="Properties\Resources.fr.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.fr.resx</DependentUpon>
+    </Compile>
     <Compile Include="QueryableExtensions.cs" />
     <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="CSV.cs" />
@@ -148,6 +153,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.fr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

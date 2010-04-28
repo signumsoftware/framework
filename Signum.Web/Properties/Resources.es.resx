@@ -229,13 +229,13 @@
     <value>Alertadas</value>
   </data>
   <data name="TypeSubContextCanNotBeCreated0" xml:space="preserve">
-    <value>TypeSubContext can not be created: {0}</value>
+    <value>TypeSubContext no se puede crear: {0}</value>
   </data>
   <data name="View" xml:space="preserve">
     <value>Ver</value>
   </data>
   <data name="Query0HasNoUrlName" xml:space="preserve">
-    <value>Query {0} has no UrlName</value>
+    <value>Query {0} no tiene UrlName</value>
   </data>
   <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
     <value>Los datos de Sesión son incorrectos. Debe refrescar la página antes de continuar</value>
@@ -251,5 +251,101 @@
   </data>
   <data name="ShowCalendar" xml:space="preserve">
     <value>Mostrar calendario</value>
+  </data>
+  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
+    <value>La columna {0} no se encuentra en la query {1}</value>
+  </data>
+  <data name="Type0HasToBeIIdentifiableAtLeast" xml:space="preserve">
+    <value>el typo {0} debe ser IIdentifiable como mínimo</value>
+  </data>
+  <data name="Type0HasToBeAbstractNotInTheSchema" xml:space="preserve">
+    <value>el tipo {0} debe ser abstracto (no en el  esquema)</value>
+  </data>
+  <data name="Type0HasToBeInTheSchema" xml:space="preserve">
+    <value>el tipo {0} debe estar en el esquema</value>
+  </data>
+  <data name="AbstractContextHasNotRoute" xml:space="preserve">
+    <value>Abstract Context no tiene un Route</value>
+  </data>
+  <data name="ExpressionCannotFinishWithAnTypeWithImplementations0" xml:space="preserve">
+    <value>La Expression no puede acabar con un tipo con implementaciones {{0}}</value>
+  </data>
+  <data name="EntityComboCanOnlyBeDoneForAnIdentifiableOrALiteNotFor0" xml:space="preserve">
+    <value>EntityCombo sólo puede utilizarse para un identifiable o un lite no para {0}</value>
+  </data>
+  <data name="InvalidResultTypeForADirectConstructor" xml:space="preserve">
+    <value>Tipo de resultado inválido para un Direct Constructor</value>
+  </data>
+  <data name="InvalidResultTypeForAConstructor" xml:space="preserve">
+    <value>Tipo de resultado inválido para un Constructor</value>
+  </data>
+  <data name="PartialViewTypeWasNotPossibleToExtract" xml:space="preserve">
+    <value>PartialView: no ha sido posible extraer el tipo</value>
+  </data>
+  <data name="PopupViewCannotBeCalledForEmbeddedType0" xml:space="preserve">
+    <value>No se puede llamar a PopupView desde el tipo embebido {0}</value>
+  </data>
+  <data name="ImplementedByAllTypesAreNotAllowedInEntityCombo" xml:space="preserve">
+    <value>No se permiten tipos ImplementedByAll en EntityCombo</value>
+  </data>
+  <data name="TypesWithImplementationsMustProvideDataToEntityCombo" xml:space="preserve">
+    <value>Tipos con implementaciones deben proporcionar Data al EntityCombo</value>
+  </data>
+  <data name="EntityComboCannotHaveOnchangeHtmlPropertyUseOnEntityChangedInstead" xml:space="preserve">
+    <value>EntityCombo no puede tener la propiedad html onchange, utilice onEntityChanged en su lugar</value>
+  </data>
+  <data name="ViewForType0IsNotAllowed" xml:space="preserve">
+    <value>View para el tipo {0} no está permitido</value>
+  </data>
+  <data name="GetChooserNeedsAListOfOptions" xml:space="preserve">
+    <value>GetChooser necesita una lista de opciones</value>
+  </data>
+  <data name="TextNotSetForMenuItem0" xml:space="preserve">
+    <value>No se ha establecido el texto para el menú item {0}</value>
+  </data>
+  <data name="ValueLineBoxType0DoesNotExist" xml:space="preserve">
+    <value>No existe ValueLineBoxType {0}</value>
+  </data>
+  <data name="VisualConstructorDoesnTWorkWithEmbeddedEntities" xml:space="preserve">
+    <value>Visual Constructor no funciona con EmbeddedEntities</value>
+  </data>
+  <data name="TheType0IsNotRegisteredInNavigator" xml:space="preserve">
+    <value>El tipo {0} no está registrado en el navegador</value>
+  </data>
+  <data name="TheName0DoesNotCorrespondToAnyTypeInNavigator" xml:space="preserve">
+    <value>Tl nombre {0} no se corresponde con ningún tipo en el navegador</value>
+  </data>
+  <data name="PopupCreateCannotBeCalledForEmbeddedType0" xml:space="preserve">
+    <value>No se puede llamar a PopupCreate para el tipo embebido {0}</value>
+  </data>
+  <data name="IdentifiableEntityToSave" xml:space="preserve">
+    <value>IdentifiableEntity para guardar</value>
+  </data>
+  <data name="GetTypeChooserNeedsAnImplementedBy" xml:space="preserve">
+    <value>GetTypeChooser necesita un ImplementedBy</value>
+  </data>
+  <data name="TypeWasNotPossibleToExtract" xml:space="preserve">
+    <value>No ha sido posible extraer el tipo</value>
+  </data>
+  <data name="StaticInfoSStaticTypeMustBeSet" xml:space="preserve">
+    <value>Debe establecer el Static Type del StaticInfo</value>
+  </data>
+  <data name="InvalidType0ForRuntimeInfoItMustBeLiteOrIdentifiableEntity" xml:space="preserve">
+    <value>Tipo {0} inválido para RuntimeInfo. Debe ser un Lite o un IdentifiableEntity </value>
+  </data>
+  <data name="RuntimeInfoSRuntimeTypeCannotBeOfTypeLiteUseExtractLite" xml:space="preserve">
+    <value>El RuntimeType de RuntimeInfo no puede ser de tipo Lite. Utilice ExtractLite o cree un RuntimeInfo&lt;T&gt; en su lugar.</value>
+  </data>
+  <data name="InvalidRuntimeInfoParametersIdOrNull0AndIsNewTrue" xml:space="preserve">
+    <value>Parámetros de RuntimeInfo inválidos: IdOrNull={0} e IsNew=true</value>
+  </data>
+  <data name="IncorrectSfRuntimeInfoFormat0" xml:space="preserve">
+    <value>Formato incorrecto de sfRuntimeInfo: {0}</value>
+  </data>
+  <data name="Type0NotAllowed" xml:space="preserve">
+    <value>El tipo {0} no está permitido</value>
+  </data>
+  <data name="ChangesToEntity0AreNotAllowedBecauseEntityMappingIs" xml:space="preserve">
+    <value>No se permiten los cambios sobre la entidad {0} porque EntityMapping es null</value>
   </data>
 </root>

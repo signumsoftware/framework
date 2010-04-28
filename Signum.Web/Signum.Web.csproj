@@ -103,6 +103,11 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateData.cs" />
     <Compile Include="ModelStateExtensions.cs" />
+    <Compile Include="Properties\Resources.fr.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.fr.resx</DependentUpon>
+    </Compile>
     <Compile Include="ToolBarButton.cs" />
     <Compile Include="TypeContext\TypeContext.cs" />
     <Compile Include="TypeContext\TypeContextExpression.cs" />
@@ -224,6 +229,10 @@
     <Content Include="Images\fancy_closebox.png" />
     <EmbeddedResource Include="Views\NormalControl.ascx">
       <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.fr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ValueLineBox.ascx">
       <SubType>ASPXCodeBehind</SubType>

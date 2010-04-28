@@ -117,198 +117,80 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="HaveANumberOfElements01" xml:space="preserve">
-    <value>tiene un número de elementos {0} {1}</value>
-  </data>
-  <data name="QueryUtilsFindImplementationsCallbackNotSet" xml:space="preserve">
-    <value>QueryUtils.FindImplementations callback no establecida</value>
-  </data>
-  <data name="As0" xml:space="preserve">
-    <value>As {0}</value>
-  </data>
-  <data name="Year" xml:space="preserve">
-    <value>Año</value>
-  </data>
-  <data name="Month" xml:space="preserve">
-    <value>Mes</value>
-  </data>
-  <data name="Day" xml:space="preserve">
-    <value>Dia</value>
-  </data>
-  <data name="Hour" xml:space="preserve">
-    <value>Hora</value>
-  </data>
-  <data name="Minute" xml:space="preserve">
-    <value>Minuto</value>
-  </data>
-  <data name="Second" xml:space="preserve">
-    <value>Segundo</value>
-  </data>
-  <data name="Millisecond" xml:space="preserve">
-    <value>Milisegundo</value>
-  </data>
-  <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
-    <value>La longitud de {{0}} ha de ser menor o igual a {0}</value>
-  </data>
-  <data name="_0IsNewAndHasNoId" xml:space="preserve">
-    <value>'{0}' es nueva y no tiene Id</value>
-  </data>
-  <data name="TheLiteIsPointingToANewEntityAndHasNoIdYet" xml:space="preserve">
-    <value>El Lite apunta a una entidad nueva que aún no tiene Id</value>
-  </data>
-  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
-    <value>property debe ser una expression de acceso a una propiedad</value>
-  </data>
-  <data name="BeNotNull" xml:space="preserve">
-    <value>ser no nulo</value>
-  </data>
-  <data name="Have0Decimals" xml:space="preserve">
-    <value>tener {0} decimales</value>
-  </data>
-  <data name="BeBetween0And1" xml:space="preserve">
-    <value>estar entre {0} y {1}</value>
-  </data>
-  <data name="TheNumberOfElementsHasToBe01" xml:space="preserve">
-    <value>El numero de elementos debe ser {0} {1}</value>
-  </data>
-  <data name="And" xml:space="preserve">
-    <value> y </value>
-  </data>
-  <data name="HaveBetween0And1Characters" xml:space="preserve">
-    <value>tener entre {0} y {1} caracteres</value>
-  </data>
-  <data name="HaveMinimum0Characters" xml:space="preserve">
-    <value>tener mínimo {0} caracteres</value>
-  </data>
-  <data name="HaveMaximun0Characters" xml:space="preserve">
-    <value>tener máximo {0} caracteres</value>
-  </data>
-  <data name="_0IsNotAllowedOnState1" xml:space="preserve">
-    <value>{0} no está permitido en estado  {1}</value>
-  </data>
-  <data name="_0IsNecessaryOnState1" xml:space="preserve">
-    <value>{0} es necesario en estado {1}</value>
-  </data>
-  <data name="AttemptToSaveANotNewModifiedImmutableEntity" xml:space="preserve">
-    <value>Se ha intentado guardad una ImmutableEntity modificada y no nueva</value>
-  </data>
-  <data name="DifferentInstancesOfTheSameEntity1HaveBeenFound2" xml:space="preserve">
-    <value>Se han encontrado {0} instancias diferentes de la misma entidad ({1}):
-{2}</value>
+  <data name="_0As1" xml:space="preserve">
+    <value>({0} como {1})</value>
   </data>
   <data name="_0DoesNotHaveAValid0Format" xml:space="preserve">
     <value>{{0}} no tiene formato de {0} correcto</value>
   </data>
-  <data name="FilterOperation_GreaterThanOrEqual" xml:space="preserve">
-    <value>mayor o igual que</value>
-  </data>
-  <data name="FilterOperation_Contains" xml:space="preserve">
-    <value>contiene</value>
-  </data>
-  <data name="FilterOperation_EndsWith" xml:space="preserve">
-    <value>acaba por</value>
-  </data>
-  <data name="FilterOperation_Like" xml:space="preserve">
-    <value>like</value>
-  </data>
-  <data name="FilterOperation_StartsWith" xml:space="preserve">
-    <value>empieza por</value>
-  </data>
-  <data name="NewEntitiesAreNotAllowed" xml:space="preserve">
-    <value>No se puede establecer una entidad nueva</value>
-  </data>
-  <data name="TypeIsNotSmallerThan" xml:space="preserve">
-    <value>El tipo {0} no es menor que {1}</value>
-  </data>
-  <data name="EntitiesDoNotMatch" xml:space="preserve">
-    <value>La entidad no coincide con el Lite</value>
-  </data>
-  <data name="RemovingEntityNotAllowedInNewLazies" xml:space="preserve">
-    <value>No se puede eliminar la entidad a un Lite sin id</value>
-  </data>
-  <data name="ToLiteLightNotAllowedForNewEntities" xml:space="preserve">
-    <value>Sólo se permite ToLiteLight para Entidades con Id</value>
-  </data>
-  <data name="_0NotSupported" xml:space="preserve">
-    <value>{0} no soportado</value>
-  </data>
-  <data name="FieldForPropertyNotFound" xml:space="preserve">
-    <value>No se ha encontrado el campo correspondiente para la propiedad {0}</value>
-  </data>
-  <data name="OnlyOneArgumentAllowed" xml:space="preserve">
-    <value>Debe tratarse de un metodo extensional de un solo argumento</value>
-  </data>
-  <data name="New" xml:space="preserve">
-    <value>Nuevo</value>
-  </data>
-  <data name="Property0HasNoValue" xml:space="preserve">
-    <value>La propiedad {0} no tiene un valor</value>
-  </data>
-  <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
-    <value>La longitud de {{0}} ha de ser mayor o igual a {0}</value>
-  </data>
-  <data name="_0HasNoCorrectFormat" xml:space="preserve">
-    <value>{0} no tiene el formato correcto</value>
-  </data>
-  <data name="_0HasToBe0Than1" xml:space="preserve">
-    <value>{{0}} ha de ser {0} {1}</value>
-  </data>
-  <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
-    <value>El número de elementos en {{0}} ha de ser {0} {1}</value>
+  <data name="_0DoesNotInheritFromIdentifiableEntity" xml:space="preserve">
+    <value>{0} no hereda de IdentifiableEntity</value>
   </data>
   <data name="_0HasHoursMinutesAndSeconds" xml:space="preserve">
     <value>{0} tiene horas minutos y segundos</value>
   </data>
-  <data name="_0HasToBeUppercase" xml:space="preserve">
-    <value>{0} debe estar todo en mayúsculas</value>
-  </data>
-  <data name="_0HasToBeLowercase" xml:space="preserve">
-    <value>{0} debe estar todo en minúsculas</value>
-  </data>
-  <data name="_0DoesNotInheritFromIdentifiableEntity" xml:space="preserve">
-    <value>{0} no hereda de IdentifiableEntity</value>
-  </data>
-  <data name="FilterOperation_DistinctTo" xml:space="preserve">
-    <value>distinto de</value>
-  </data>
-  <data name="FilterOperation_EqualTo" xml:space="preserve">
-    <value>igual a</value>
-  </data>
-  <data name="FilterOperation_GreaterThan" xml:space="preserve">
-    <value>mayor que</value>
-  </data>
-  <data name="FilterOperation_LessThan" xml:space="preserve">
-    <value>menor que</value>
-  </data>
-  <data name="FilterOperation_LessThanOrEqual" xml:space="preserve">
-    <value>menor o igual que</value>
-  </data>
-  <data name="Type0NotSupported" xml:space="preserve">
-    <value>Tipo no soportado {0}</value>
-  </data>
-  <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
-    <value>La longitud de {{0}} ha de ser {0}</value>
-  </data>
-  <data name="_0HasToBeBetween0And1" xml:space="preserve">
-    <value>{{0}} debe estar entre {0} y {1}</value>
-  </data>
   <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
     <value>{{0}} tiene mas de  {0} decimales</value>
   </data>
-  <data name="LockedModificationException" xml:space="preserve">
-    <value>Modificación no permitida: el objeto está bloqueado</value>
-  </data>
-  <data name="FileName" xml:space="preserve">
-    <value>Nombre de archivo</value>
-  </data>
-  <data name="Telephone" xml:space="preserve">
-    <value>Teléfono</value>
+  <data name="_0HasNoCorrectFormat" xml:space="preserve">
+    <value>{0} no tiene el formato correcto</value>
   </data>
   <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
     <value>{{0}} tiene algunos elementos repetidos: {0}</value>
   </data>
+  <data name="_0HasToBe0Than1" xml:space="preserve">
+    <value>{{0}} ha de ser {0} {1}</value>
+  </data>
+  <data name="_0HasToBeBetween0And1" xml:space="preserve">
+    <value>{{0}} debe estar entre {0} y {1}</value>
+  </data>
+  <data name="_0HasToBeLowercase" xml:space="preserve">
+    <value>{0} debe estar todo en minúsculas</value>
+  </data>
+  <data name="_0HasToBeUppercase" xml:space="preserve">
+    <value>{0} debe estar todo en mayúsculas</value>
+  </data>
+  <data name="_0IsNecessaryOnState1" xml:space="preserve">
+    <value>{0} es necesario en estado {1}</value>
+  </data>
+  <data name="_0IsNewAndHasNoId" xml:space="preserve">
+    <value>'{0}' es nueva y no tiene Id</value>
+  </data>
+  <data name="_0IsNotAllowedOnState1" xml:space="preserve">
+    <value>{0} no está permitido en estado  {1}</value>
+  </data>
+  <data name="_0IsNotAValidIdentifier" xml:space="preserve">
+    <value>'{0}' no es un identificador válido</value>
+  </data>
+  <data name="_0NotSupported" xml:space="preserve">
+    <value>{0} no soportado</value>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value> y </value>
+  </data>
+  <data name="As0" xml:space="preserve">
+    <value>As {0}</value>
+  </data>
+  <data name="AttemptToMakeAPropertyRouteOnA0CastFirst" xml:space="preserve">
+    <value>Intento de hacer un property route en un {0}. Conviértalo primero.</value>
+  </data>
   <data name="AttemptToModify0WhenTheEntityIsNotNew" xml:space="preserve">
     <value>Se ha intentado modificar {0} cuando la entidad no es nueva</value>
+  </data>
+  <data name="AttemptToSaveANotNewModifiedImmutableEntity" xml:space="preserve">
+    <value>Se ha intentado guardad una ImmutableEntity modificada y no nueva</value>
+  </data>
+  <data name="Be" xml:space="preserve">
+    <value>ser </value>
+  </data>
+  <data name="BeBetween0And1" xml:space="preserve">
+    <value>estar entre {0} y {1}</value>
+  </data>
+  <data name="BeNotNull" xml:space="preserve">
+    <value>ser no nulo</value>
+  </data>
+  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
+    <value>La columna {0} no se ha encontrado en la query {1}</value>
   </data>
   <data name="ComparisonType_DistinctTo" xml:space="preserve">
     <value>distinto a</value>
@@ -328,11 +210,75 @@
   <data name="ComparisonType_LessThanOrEqual" xml:space="preserve">
     <value>menor o igual que</value>
   </data>
-  <data name="LockeableEntity_Locked" xml:space="preserve">
-    <value>Bloqueado</value>
+  <data name="Count" xml:space="preserve">
+    <value>[Num]</value>
   </data>
-  <data name="OrBeNull" xml:space="preserve">
-    <value>o ser nulo</value>
+  <data name="Day" xml:space="preserve">
+    <value>Dia</value>
+  </data>
+  <data name="DifferentInstancesOfTheSameEntity1HaveBeenFound2" xml:space="preserve">
+    <value>Se han encontrado {0} instancias diferentes de la misma entidad ({1}):
+{2}</value>
+  </data>
+  <data name="EntitiesDoNotMatch" xml:space="preserve">
+    <value>La entidad no coincide con el Lite</value>
+  </data>
+  <data name="EntityMustBeALite" xml:space="preserve">
+    <value>Entity debe ser un Lite</value>
+  </data>
+  <data name="FieldForPropertyNotFound" xml:space="preserve">
+    <value>No se ha encontrado el campo correspondiente para la propiedad {0}</value>
+  </data>
+  <data name="FileName" xml:space="preserve">
+    <value>Nombre de archivo</value>
+  </data>
+  <data name="FilterOperation_Contains" xml:space="preserve">
+    <value>contiene</value>
+  </data>
+  <data name="FilterOperation_DistinctTo" xml:space="preserve">
+    <value>distinto de</value>
+  </data>
+  <data name="FilterOperation_EndsWith" xml:space="preserve">
+    <value>acaba por</value>
+  </data>
+  <data name="FilterOperation_EqualTo" xml:space="preserve">
+    <value>igual a</value>
+  </data>
+  <data name="FilterOperation_GreaterThan" xml:space="preserve">
+    <value>mayor que</value>
+  </data>
+  <data name="FilterOperation_GreaterThanOrEqual" xml:space="preserve">
+    <value>mayor o igual que</value>
+  </data>
+  <data name="FilterOperation_LessThan" xml:space="preserve">
+    <value>menor que</value>
+  </data>
+  <data name="FilterOperation_LessThanOrEqual" xml:space="preserve">
+    <value>menor o igual que</value>
+  </data>
+  <data name="FilterOperation_Like" xml:space="preserve">
+    <value>like</value>
+  </data>
+  <data name="FilterOperation_StartsWith" xml:space="preserve">
+    <value>empieza por</value>
+  </data>
+  <data name="Have0Decimals" xml:space="preserve">
+    <value>tener {0} decimales</value>
+  </data>
+  <data name="HaveANumberOfElements01" xml:space="preserve">
+    <value>tiene un número de elementos {0} {1}</value>
+  </data>
+  <data name="HaveAPrecisionOf" xml:space="preserve">
+    <value>tener una precisión de</value>
+  </data>
+  <data name="HaveBetween0And1Characters" xml:space="preserve">
+    <value>tener entre {0} y {1} caracteres</value>
+  </data>
+  <data name="HaveMaximun0Characters" xml:space="preserve">
+    <value>tener máximo {0} caracteres</value>
+  </data>
+  <data name="HaveMinimum0Characters" xml:space="preserve">
+    <value>tener mínimo {0} caracteres</value>
   </data>
   <data name="HaveNoRepeatedElements" xml:space="preserve">
     <value>no debe tener elementos repetidos</value>
@@ -340,29 +286,38 @@
   <data name="HaveValid0Format" xml:space="preserve">
     <value>debe tener un formato {0} válido</value>
   </data>
-  <data name="Be" xml:space="preserve">
-    <value>ser </value>
-  </data>
-  <data name="TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery" xml:space="preserve">
-    <value>El Lite {0} no está cargado, usa Database.Retrieve o considera reescribir tu query</value>
+  <data name="Hour" xml:space="preserve">
+    <value>Hora</value>
   </data>
   <data name="IdentifiableEntity_ToStr" xml:space="preserve">
     <value>[Texto]</value>
   </data>
-  <data name="Count" xml:space="preserve">
-    <value>[Num]</value>
+  <data name="IdNotValid" xml:space="preserve">
+    <value>Id no válido</value>
   </data>
-  <data name="HaveAPrecisionOf" xml:space="preserve">
-    <value>tener una precisión de</value>
+  <data name="ImmutableEntity_AllowChange" xml:space="preserve">
+    <value>Permitir cambios</value>
+  </data>
+  <data name="InvalidFormat" xml:space="preserve">
+    <value>Formato inválido</value>
+  </data>
+  <data name="LockeableEntity_Locked" xml:space="preserve">
+    <value>Bloqueado</value>
+  </data>
+  <data name="LockedModificationException" xml:space="preserve">
+    <value>Modificación no permitida: el objeto está bloqueado</value>
   </data>
   <data name="Lowercase" xml:space="preserve">
     <value>Minúsculas</value>
   </data>
-  <data name="Uppercase" xml:space="preserve">
-    <value>Mayúsculas</value>
+  <data name="Millisecond" xml:space="preserve">
+    <value>Milisegundo</value>
   </data>
-  <data name="Column0NotFoundOnQuery1" xml:space="preserve">
-    <value>La columna {0} no se ha encontrado en la query {1}</value>
+  <data name="Minute" xml:space="preserve">
+    <value>Minuto</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>Mes</value>
   </data>
   <data name="MoreThanOneColumnNamed0OnQuery1" xml:space="preserve">
     <value>Más de una columna llamada {0} en la query {1}</value>
@@ -370,19 +325,121 @@
   <data name="MoreThanOneTokenWithKey0FoundOn1" xml:space="preserve">
     <value>Más de un token con clave {0} en {1}</value>
   </data>
-  <data name="Token0NotCompatibleWith1" xml:space="preserve">
-    <value>Token {0} no compatible con {1}</value>
+  <data name="New" xml:space="preserve">
+    <value>Nuevo</value>
+  </data>
+  <data name="NewEntitiesAreNotAllowed" xml:space="preserve">
+    <value>No se puede establecer una entidad nueva</value>
   </data>
   <data name="Of" xml:space="preserve">
     <value> de </value>
   </data>
-  <data name="_0As1" xml:space="preserve">
-    <value>({0} como {1})</value>
+  <data name="OnlyOneArgumentAllowed" xml:space="preserve">
+    <value>Debe tratarse de un metodo extensional de un solo argumento</value>
   </data>
-  <data name="_0IsNotAValidIdentifier" xml:space="preserve">
-    <value>'{0}' no es un identificador válido</value>
+  <data name="OrBeNull" xml:space="preserve">
+    <value>o ser nulo</value>
   </data>
-  <data name="ImmutableEntity_AllowChange" xml:space="preserve">
-    <value>Permitir cambios</value>
+  <data name="ParentCanNotBeAnNonRootIdentifiable" xml:space="preserve">
+    <value>parent no puede ser un non-Root Identifiable</value>
+  </data>
+  <data name="PropertiesOfType0NotSupported" xml:space="preserve">
+    <value>Las propiedades de tipo {0} no están soportadas</value>
+  </data>
+  <data name="Property0HasNoValue" xml:space="preserve">
+    <value>La propiedad {0} no tiene un valor</value>
+  </data>
+  <data name="PropertyInfo0NotFoundOn1" xml:space="preserve">
+    <value>No se ha encontrato el propertyInfo '{0}' en {1}</value>
+  </data>
+  <data name="PropertyInfoIsNotSupported" xml:space="preserve">
+    <value>PropertyInfo {0} no está soportado</value>
+  </data>
+  <data name="PropertyPathFindImplementationsNotSet" xml:space="preserve">
+    <value>PropertyPath.FindImplementations no establecido</value>
+  </data>
+  <data name="PropertyRouteCanNotBeOfTypeRoot" xml:space="preserve">
+    <value>PropertyRoute no puede ser del tipo Root</value>
+  </data>
+  <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
+    <value>property debe ser una expression de acceso a una propiedad</value>
+  </data>
+  <data name="QueryUtilsFindImplementationsCallbackNotSet" xml:space="preserve">
+    <value>QueryUtils.FindImplementations callback no establecida</value>
+  </data>
+  <data name="RemovingEntityNotAllowedInNewLazies" xml:space="preserve">
+    <value>No se puede eliminar la entidad a un Lite sin id</value>
+  </data>
+  <data name="ResultsInsteadOf1ForColumn2" xml:space="preserve">
+    <value>{0} resultados (en lugar de {1}) para la columna {2}</value>
+  </data>
+  <data name="RootHasNotPropertyString" xml:space="preserve">
+    <value>Root no tiene PropertyString</value>
+  </data>
+  <data name="Second" xml:space="preserve">
+    <value>Segundo</value>
+  </data>
+  <data name="SomeColumnsAreNotCorrectlyNumered0" xml:space="preserve">
+    <value>Algunas columnas no están correctamente numeradas: {0}</value>
+  </data>
+  <data name="State0NotRegisteredInStateValidator" xml:space="preserve">
+    <value>El estado {0} no está registrado en StateValidator</value>
+  </data>
+  <data name="Telephone" xml:space="preserve">
+    <value>Teléfono</value>
+  </data>
+  <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
+    <value>La longitud de {{0}} ha de ser {0}</value>
+  </data>
+  <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
+    <value>La longitud de {{0}} ha de ser mayor o igual a {0}</value>
+  </data>
+  <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
+    <value>La longitud de {{0}} ha de ser menor o igual a {0}</value>
+  </data>
+  <data name="TheLite0IsNotLoadedUseDatabaseRetrieveOrConsiderRewritingYourQuery" xml:space="preserve">
+    <value>El Lite {0} no está cargado, usa Database.Retrieve o considera reescribir tu query</value>
+  </data>
+  <data name="TheLiteIsPointingToANewEntityAndHasNoIdYet" xml:space="preserve">
+    <value>El Lite apunta a una entidad nueva que aún no tiene Id</value>
+  </data>
+  <data name="TheNumberOfElementsHasToBe01" xml:space="preserve">
+    <value>El numero de elementos debe ser {0} {1}</value>
+  </data>
+  <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
+    <value>El número de elementos en {{0}} ha de ser {0} {1}</value>
+  </data>
+  <data name="ThePropertyIsNotRegistered" xml:space="preserve">
+    <value>La propiedad no está registrada</value>
+  </data>
+  <data name="TheStateValidator0ForState1Has2ValuesInsteadOf3" xml:space="preserve">
+    <value>El validador de estados {0} para el estado {1} tiene {2} valores en lugar de {3}</value>
+  </data>
+  <data name="TheTypeOfColumn0IsASubtypeOfIIdentifiableUseALiteInstead" xml:space="preserve">
+    <value>El tipo de columna {0} es un subtipo de IIdentifiable, utilice un Lite en su lugar</value>
+  </data>
+  <data name="Token0NotCompatibleWith1" xml:space="preserve">
+    <value>Token {0} no compatible con {1}</value>
+  </data>
+  <data name="ToLiteLightNotAllowedForNewEntities" xml:space="preserve">
+    <value>Sólo se permite ToLiteLight para Entidades con Id</value>
+  </data>
+  <data name="Type0NotSupported" xml:space="preserve">
+    <value>Tipo no soportado {0}</value>
+  </data>
+  <data name="TypeIsNotSmallerThan" xml:space="preserve">
+    <value>El tipo {0} no es menor que {1}</value>
+  </data>
+  <data name="TypeMustBeATypeInheritingIdentitiableEntity" xml:space="preserve">
+    <value>el tipo debe ser un Type que herede de IdentifiableEntity</value>
+  </data>
+  <data name="TypeNotFound" xml:space="preserve">
+    <value>Tipo no encontrado</value>
+  </data>
+  <data name="Uppercase" xml:space="preserve">
+    <value>Mayúsculas</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Año</value>
   </data>
 </root>
