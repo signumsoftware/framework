@@ -22,7 +22,6 @@ namespace Signum.Web.Authorization
         public static event Action OnUserLogged;
         public static event Action<Controller, UserDN> OnUserPreLogin;
         public const string SessionUserKey = "user";
-        public static string CookieDomain = null;
 
         #region "Change password"
         public ActionResult ChangePassword()
@@ -203,9 +202,6 @@ namespace Signum.Web.Authorization
                 {
                     Expires = DateTime.Now.Add(UserTicketLogic.ExpirationInterval),
                 };
-
-                if (CookieDomain != null)
-                    cookie.Domain = CookieDomain;
 
                 System.Web.HttpContext.Current.Response.Cookies.Add(cookie);
             }

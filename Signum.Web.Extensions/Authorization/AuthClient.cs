@@ -46,7 +46,7 @@ namespace Signum.Web.Authorization
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<UserDN>(EntityType.Default), 
-                    new EntitySettings<RoleDN>(EntityType.Default)
+                    new EntitySettings<RoleDN>(EntityType.Admin)
                 });
 
                 if (property)
