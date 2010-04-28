@@ -359,19 +359,23 @@ namespace Signum.Web
             get { return Manager.TypesToNames; }
         }
 
-        public static void RegisterTypeName<T>()
+        public static bool RegisterTypeName<T>()
         {
-            RegisterTypeName(typeof(T));
+            return RegisterTypeName(typeof(T), typeof(T).Name);
         }
 
-        public static void RegisterTypeName(Type type)
+        public static bool RegisterTypeName(Type type)
         {
-            RegisterTypeName(type, type.Name);
+            return RegisterTypeName(type, type.Name);
         }
 
-        public static void RegisterTypeName(Type type, string name)
+        public static bool RegisterTypeName(Type type, string name)
         {
+            if (TypesToNames.ContainsKey(type))
+                return false;
+
             TypesToNames.Add(type, name);
+            return true;
         }
 
         internal static void ConfigureEntityBase(EntityBase eb, Type entityType, bool admin)

@@ -180,7 +180,7 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult TrySavePartial(string prefix)
         {
-            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
+            MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(ControllerContext, prefix, true).UntypedValidateGlobal();
 
             this.ModelState.FromContext(context);
 

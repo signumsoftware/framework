@@ -198,7 +198,7 @@ namespace Signum.Web
             if (typeof(Lite).IsAssignableFrom(filterOption.Token.Type))
             {
                 Type cleanType = Reflector.ExtractLite(filterOption.Token.Type);
-                if (Reflector.IsLowPopulation(cleanType) && !(filterOption.Token.Implementations() is ImplementedByAllAttribute))
+                if (Reflector.IsLowPopulation(cleanType) && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
                     {

@@ -36,6 +36,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult CreateAlert(string sfRuntimeTypeRelated, int? sfIdRelated, string sfOnOk, string sfOnCancel, string prefix, string sfUrl)
         {
             IdentifiableEntity entity = Database.Retrieve(Navigator.NamesToTypes[sfRuntimeTypeRelated], sfIdRelated.Value);
+            ViewData[ViewDataKeys.WriteSFInfo] = true;
             return Navigator.PopupView(this, AlertWidgetHelper.CreateAlert(entity), prefix, sfUrl);
         }
 
