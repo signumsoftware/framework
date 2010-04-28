@@ -28,7 +28,7 @@ namespace Signum.Web.Operations
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo));
+                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
                 if (runtimeInfo.IdOrNull.HasValue)
                 {
                     Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
@@ -70,7 +70,7 @@ namespace Signum.Web.Operations
 
         public ActionResult DeleteExecute(string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo));
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull.HasValue)
             {
                 Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
@@ -87,7 +87,7 @@ namespace Signum.Web.Operations
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo));
+                RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(sfOldPrefix, EntityBaseKeys.RuntimeInfo)]);
                 if (runtimeInfo.IdOrNull.HasValue)
                 {
                     Lite lite = Lite.Create(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
