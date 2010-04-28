@@ -9,6 +9,7 @@ using System.Threading;
 using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Properties;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Operations
 {
@@ -80,7 +81,8 @@ namespace Signum.Engine.Operations
 
                     log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
                     log.End = DateTime.Now;
-                    log.Save();
+                    using (AuthLogic.User(AuthLogic.SystemUser))
+                        log.Save();
 
                     tr.Commit();
                 }
@@ -93,14 +95,17 @@ namespace Signum.Engine.Operations
                 {
                     using (Transaction tr2 = new Transaction(true))
                     {
-                        new LogOperationDN
+                        var log = new LogOperationDN
                         {
                             Operation = EnumLogic<OperationDN>.ToEntity(Key),
                             Start = DateTime.Now,
                             Target = entity.ToLite<IIdentifiable>(),
                             Exception = ex.Message,
                             User = UserDN.Current
-                        }.Save();
+                        };
+
+                        using (AuthLogic.User(AuthLogic.SystemUser))
+                            log.Save();
 
                         tr2.Commit();
                     }

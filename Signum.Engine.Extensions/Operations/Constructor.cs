@@ -9,6 +9,7 @@ using System.Threading;
 using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Engine.Extensions.Properties;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Operations
 {
@@ -60,7 +61,8 @@ namespace Signum.Engine.Operations
                      {
                          log.Target = entity.ToLite<IIdentifiable>();
                          log.End = DateTime.Now;
-                         log.Save();
+                         using (AuthLogic.User(AuthLogic.SystemUser))
+                             log.Save();
                      }
 
                      return tr.Commit(entity);
