@@ -484,7 +484,7 @@ namespace Signum.Web
                         QuerySettings[o].UrlName = GetQueryName(o);
                 }
 
-                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, "UrlQueryNames");
+                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, "UrlQueryNames", StringComparer.InvariantCultureIgnoreCase);
             }
 
             ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
@@ -845,7 +845,7 @@ namespace Signum.Web
             Type type = Navigator.NamesToTypes.TryGetC(typeName) ?? Type.GetType(typeName, false);
 
             if (type == null)
-                throw new ArgumentException(Resources.Type0NotFoundInTheSchema.Formato(typeName));
+                throw new ArgumentException(Resources.Type0NotFoundInNavigatorNamesToTypes.Formato(typeName));
 
             return type;
         }

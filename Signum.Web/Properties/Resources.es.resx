@@ -183,9 +183,6 @@
   <data name="TheresNotAViewForType0" xml:space="preserve">
     <value>No hay una vista asociada al tipo {0}</value>
   </data>
-  <data name="Type0NotFoundInTheSchema" xml:space="preserve">
-    <value>Tipo {0} no encontrado en el Schema</value>
-  </data>
   <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
     <value>Se debe indicar un valor para {0}</value>
   </data>
@@ -347,5 +344,8 @@
   </data>
   <data name="ChangesToEntity0AreNotAllowedBecauseEntityMappingIs" xml:space="preserve">
     <value>No se permiten los cambios sobre la entidad {0} porque EntityMapping es null</value>
+  </data>
+  <data name="Type0NotFoundInNavigatorNamesToTypes" xml:space="preserve">
+    <value>El tipo {0} not encontrado en Navigator NamesToTypes</value>
   </data>
 </root>

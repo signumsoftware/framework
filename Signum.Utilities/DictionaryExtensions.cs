@@ -105,7 +105,17 @@ namespace Signum.Utilities
 
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string keyName)
         {
-            Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>();
+            return source.ToDictionary(keySelector, keyName, null);
+        }
+
+        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string keyName)
+        {
+            return source.ToDictionary(keySelector, elementSelector, keyName, null);
+        }
+
+        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string keyName, IEqualityComparer<TKey> comparer)
+        {
+            Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>(comparer);
             HashSet<TKey> repetitions = new HashSet<TKey>(); 
             foreach (var item in source)
             {
@@ -122,9 +132,9 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string keyName)
+        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string keyName, IEqualityComparer<TKey> comparer)
         {
-            Dictionary<TKey, TElement> result = new Dictionary<TKey, TElement>();
+            Dictionary<TKey, TElement> result = new Dictionary<TKey, TElement>(comparer);
             HashSet<TKey> repetitions = new HashSet<TKey>();
             foreach (var item in source)
             {
@@ -140,6 +150,7 @@ namespace Signum.Utilities
 
             return result;
         }
+
 
         public static Dictionary<K, V> JumpDictionary<K, Z, V>(this IDictionary<K, Z> dictionary, IDictionary<Z, V> other)
         {
