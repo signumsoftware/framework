@@ -54,7 +54,7 @@ namespace Signum.Web
                     return onChangedTotal;
                 
                 string doReload = (ReloadOnChange) ?
-                    (ReloadFunction ?? "ReloadEntity('{0}','{1}');".Formato(ReloadControllerUrl, Parent.Parent.ControlID)) :
+                    (ReloadFunction ?? Js.ReloadEntity(ReloadControllerUrl, Parent.Parent.ControlID).ToJS()) :
                     "";
                 string total = OnEntityChanged + doReload;
                 

@@ -209,7 +209,10 @@ namespace Signum.Web
 
                     if (!ctx.SupressChange)
                     {
-                        SetValue(parent.Value, ctx.Value);
+                        if (ctx.Ticks != null && ctx.Ticks != 0)
+                            ctx.AddOnFinish(() => SetValue(parent.Value, ctx.Value));
+                        else
+                            SetValue(parent.Value, ctx.Value);
                     }
                 }
                 catch (Exception)
@@ -260,12 +263,7 @@ namespace Signum.Web
         {
             foreach (PropertyMapping item in Properties.Values)
             {
-                if (ctx.Root.Ticks != null && ctx.Root.Ticks != 0 && !(ctx.Root is RootContext<T>))
-                {
-                    ctx.AddOnFinish(() => item.SetProperty(ctx));
-                }
-                else
-                    item.SetProperty(ctx);
+                item.SetProperty(ctx);
             }
         }
 
