@@ -205,7 +205,7 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  (Deleted).
+        ///   Looks up a localized string similar to (Deleted).
         /// </summary>
         public static string Deleted {
             get {

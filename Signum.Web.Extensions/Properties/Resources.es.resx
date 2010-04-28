@@ -117,20 +117,74 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
+    <value>¿Está seguro de eliminar del sistema la entidad {0} ({1}:{2})?</value>
+  </data>
+  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
+    <value>No se ha pasado al controlador el parámetro {filePathID}</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirmar nueva contraseña</value>
+  </data>
   <data name="ConstructFromManyOperation0NeedsSourceIdsAsParameter" xml:space="preserve">
     <value>La operación Construct From Many {{{0}}} necesita los Ids origen como parámetro</value>
   </data>
   <data name="ConstructFromManyOperation0NeedsSourceLazies" xml:space="preserve">
-    <value>La operación Construct From Many {{{0}}} necesita los Lazies de origen</value>
+    <value>La operación Construct From Many {{{0}}} necesita los Lites de origen</value>
   </data>
   <data name="CouldNotCreateLiteWithoutAnIdToCallOperation0" xml:space="preserve">
     <value>No se pude crear un Lite sin Id para llamar a la operación {{{0}}}</value>
   </data>
+  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
+    <value>No se pudo crear un FilePathDN con un FileType desconocido para el campo {{0}}</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Contraseña actual</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Cambiar contraseña</value>
+  </data>
+  <data name="ChangePasswordExplanation" xml:space="preserve">
+    <value>Utilice el siguiente formulario para cambiar su contraseña</value>
+  </data>
+  <data name="EmailIsNotValid" xml:space="preserve">
+    <value>El email es diferente del email guardado</value>
+  </data>
+  <data name="EmailMustHaveAValue" xml:space="preserve">
+    <value>El correo electrónico debe tener un valor</value>
+  </data>
+  <data name="ErrorSavingFile" xml:space="preserve">
+    <value>Error guardadndo el archivo</value>
+  </data>
+  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
+    <value>La propiedad FileType del FileLine settings debe ser especificada para el FileLine {0}</value>
+  </data>
+  <data name="HelpDocumentation" xml:space="preserve">
+    <value>Documentación de ayuda</value>
+  </data>
   <data name="InvalidNewPassword" xml:space="preserve">
     <value>La nueva contraseña es incorrecta</value>
   </data>
+  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
+    <value>El tipo de operación {{0}} es inválido para la operación {{1}}</value>
+  </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>El nombre de usuario o la contraseña son incorrectos</value>
+  </data>
+  <data name="Key0NotFound" xml:space="preserve">
+    <value>Clave {0} no encontrada</value>
+  </data>
+  <data name="MailBody_RememberPassword" xml:space="preserve">
+    <value>Le enviamos este correo por haber solicitado que le recordemos su contraseña. Por seguridad, hemos generado una contraseña aleatoria, que luego podrá cambiar.&lt;br/&gt;&lt;br/&gt;La contraseña es &lt;b&gt;{0}&lt;/b&gt;</value>
+  </data>
+  <data name="MailSubject_RememberPassword" xml:space="preserve">
+    <value>Recordatorio de contraseña</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Mensaje</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nueva contraseña</value>
   </data>
   <data name="PasswordDoesNotMatchCurrent" xml:space="preserve">
     <value>La contraseña indicada no coincide con la actual</value>
@@ -138,17 +192,38 @@
   <data name="PasswordHasBeenChangedSuccessfully" xml:space="preserve">
     <value>La contraseña se ha cambiado con éxito</value>
   </data>
+  <data name="PasswordHasBeenSent" xml:space="preserve">
+    <value>La contraseña ha sido enviada a la dirección de correo electrónico proporcionada {0}</value>
+  </data>
   <data name="PasswordMustHave0orMoreCharacters" xml:space="preserve">
     <value>La contraseña debe tener {0} o más caracteres</value>
   </data>
   <data name="PasswordMustHaveAValue" xml:space="preserve">
     <value>Se debe especificar la contraseña</value>
   </data>
+  <data name="Property0DoesNotExistInType1" xml:space="preserve">
+    <value>La propiedad {0} no existe en el tipo {1}</value>
+  </data>
   <data name="Property0HasNoValue" xml:space="preserve">
     <value>La propiedad {0} no tiene un valor</value>
   </data>
   <data name="Property0NotExistsInType1" xml:space="preserve">
     <value>La propiedad {0} no existe en el tipo {1}</value>
+  </data>
+  <data name="RememberPassword" xml:space="preserve">
+    <value>Recordar contraseña</value>
+  </data>
+  <data name="RememberPasswordExplanation" xml:space="preserve">
+    <value>Introduzca su nombre de usuario y dirección de correo electrónico para recibir un mensaje en su cuenta con la contraseña</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>Fuente</value>
+  </data>
+  <data name="StackTrace" xml:space="preserve">
+    <value>StackTrace</value>
+  </data>
+  <data name="TargetSite" xml:space="preserve">
+    <value>Origen</value>
   </data>
   <data name="TheresNotAViewForType0" xml:space="preserve">
     <value>No hay una vista asociada al tipo {0}</value>
@@ -162,79 +237,13 @@
   <data name="UserNameMustHaveAValue" xml:space="preserve">
     <value>Se debe introducir el nombre de usuario</value>
   </data>
+  <data name="ViewName" xml:space="preserve">
+    <value>View name</value>
+  </data>
   <data name="YouMustEnterTheCurrentPassword" xml:space="preserve">
     <value>Debe especificar la contraseña actual</value>
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Debes repetir la nueva contraseña</value>
-  </data>
-  <data name="CouldntCreateFilePathWithUnknownFileTypeForField0" xml:space="preserve">
-    <value>No se pudo crear un FilePathDN con un FileType desconocido para el campo {{0}}</value>
-  </data>
-  <data name="ArgumentFilePathIDWasNotPassedToTheController" xml:space="preserve">
-    <value>No se ha pasado al controlador el parámetro {filePathID}</value>
-  </data>
-  <data name="FileTypePropertyOfFileLineSettingsMustBeSpecified" xml:space="preserve">
-    <value>La propiedad FileType del FileLine settings debe ser especificada para el FileLine {0}</value>
-  </data>
-  <data name="Source" xml:space="preserve">
-    <value>Fuente</value>
-  </data>
-  <data name="Message" xml:space="preserve">
-    <value>Mensaje</value>
-  </data>
-  <data name="StackTrace" xml:space="preserve">
-    <value>StackTrace</value>
-  </data>
-  <data name="TargetSite" xml:space="preserve">
-    <value>Origen</value>
-  </data>
-  <data name="ViewName" xml:space="preserve">
-    <value>View name</value>
-  </data>
-  <data name="InvalidOperationType0inTheConstructionOfOperation1" xml:space="preserve">
-    <value>El tipo de operación {{0}} es inválido para la operación {{1}}</value>
-  </data>
-  <data name="AreYouSureOfDeletingTheEntity012" xml:space="preserve">
-    <value>¿Está seguro de eliminar del sistema la entidad {0} ({1}:{2})?</value>
-  </data>
-  <data name="ChangePassword" xml:space="preserve">
-    <value>Cambiar contraseña</value>
-  </data>
-  <data name="ChangePasswordExplanation" xml:space="preserve">
-    <value>Utilice el siguiente formulario para cambiar su contraseña</value>
-  </data>
-  <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Confirmar nueva contraseña</value>
-  </data>
-  <data name="CurrentPassword" xml:space="preserve">
-    <value>Contraseña actual</value>
-  </data>
-  <data name="EmailMustHaveAValue" xml:space="preserve">
-    <value>El correo electrónico debe tener un valor</value>
-  </data>
-  <data name="NewPassword" xml:space="preserve">
-    <value>Nueva contraseña</value>
-  </data>
-  <data name="PasswordHasBeenSent" xml:space="preserve">
-    <value>La contraseña ha sido enviada a la dirección de correo electrónico proporcionada {0}</value>
-  </data>
-  <data name="RememberPassword" xml:space="preserve">
-    <value>Recordar contraseña</value>
-  </data>
-  <data name="RememberPasswordExplanation" xml:space="preserve">
-    <value>Introduzca su nombre de usuario y dirección de correo electrónico para recibir un mensaje en su cuenta con la contraseña</value>
-  </data>
-  <data name="HelpDocumentation" xml:space="preserve">
-    <value>Help documentation</value>
-  </data>
-  <data name="Property0DoesNotExistInType1" xml:space="preserve">
-    <value>Property {0} does not exist in type {1}</value>
-  </data>
-  <data name="Key0NotFound" xml:space="preserve">
-    <value>Key {0} not found</value>
-  </data>
-  <data name="HelpDocumentation1" xml:space="preserve">
-    <value>Documentación de ayuda</value>
   </data>
 </root>

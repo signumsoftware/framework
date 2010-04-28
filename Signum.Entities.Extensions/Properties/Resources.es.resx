@@ -472,7 +472,7 @@
     <value>Prefijo web</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
-    <value>Create</value>
+    <value>Crear</value>
   </data>
   <data name="UserOperation_Disable" xml:space="preserve">
     <value>Desactivar</value>
@@ -551,5 +551,20 @@
   </data>
   <data name="HourMinuteDN_Minute" xml:space="preserve">
     <value>Minuto</value>
+  </data>
+  <data name="ProcessOperation_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="NotUserLogged" xml:space="preserve">
+    <value>Ningún usuario logado</value>
+  </data>
+  <data name="TheUserStateMustBeDisabled" xml:space="preserve">
+    <value>El estado del usuario debe ser deshabilitado</value>
+  </data>
+  <data name="ProcessStartIsGreaterThanProcessEnd" xml:space="preserve">
+    <value>Process Start es mayor que Process End</value>
+  </data>
+  <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
+    <value>Process Start es nulo, pero Process End no</value>
   </data>
 </root>

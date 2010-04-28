@@ -211,7 +211,7 @@
     <value>La operación {0} no tiene Execute inicializado</value>
   </data>
   <data name="ExcelReportArgumentIsNecessaryForCompositeReports" xml:space="preserve">
-    <value>excelReport argument is necessary for compositeReports</value>
+    <value>el argumento excelReport es necesario para compositeReports</value>
   </data>
   <data name="Character" xml:space="preserve">
     <value>carácter</value>
@@ -317,5 +317,62 @@
   </data>
   <data name="EmailIsNotValid" xml:space="preserve">
     <value>El correo electrónico es diferente del almacenado en el sistema</value>
+  </data>
+  <data name="ConstructsANew0" xml:space="preserve">
+    <value>Construye un nuevo {0}</value>
+  </data>
+  <data name="From0OfThe1" xml:space="preserve">
+    <value>desde {0} del {1}</value>
+  </data>
+  <data name="TheOperationNeedsA0InTheArgumentNumber1" xml:space="preserve">
+    <value>La operación necesita un {0} en el argumento número {1}</value>
+  </data>
+  <data name="Operation0DoesNotHaveConstructInitialized" xml:space="preserve">
+    <value>La operación {0} no tiene un Construct inicializado</value>
+  </data>
+  <data name="The0" xml:space="preserve">
+    <value>El {0}</value>
+  </data>
+  <data name="_0IsA1" xml:space="preserve">
+    <value>{0} es un {1}</value>
+  </data>
+  <data name="FromMany0" xml:space="preserve">
+    <value>desde muchos {0}</value>
+  </data>
+  <data name="OfThe0" xml:space="preserve">
+    <value>del {0}</value>
+  </data>
+  <data name="Call0Over1OfThe2" xml:space="preserve">
+    <value>Ejecuta {0} sobre {1} del {2}</value>
+  </data>
+  <data name="BelongsToAnotherKindOkLinqProvider" xml:space="preserve">
+    <value>{0} peretenece a otro tipo de Linq Provider</value>
+  </data>
+  <data name="ConstantExpressionWithAComplexIQueryableUnexpectedAt" xml:space="preserve">
+    <value>ConstantExpression con un IQueryable complejo no esperado en este punto</value>
+  </data>
+  <data name="HelpNotLoaded" xml:space="preserve">
+    <value>Ayuda no cargada</value>
+  </data>
+  <data name="NoHelpFor0" xml:space="preserve">
+    <value>No hay ayuda para {0}</value>
+  </data>
+  <data name="NoTypeWithFullName0FoundInTheSchema" xml:space="preserve">
+    <value>No se ha encontrado un Tipo con el nombre completo {0} en el esquema</value>
+  </data>
+  <data name="NotRegisteredInEmailLogic" xml:space="preserve">
+    <value>{0} no está resgistrado en EmailLogic</value>
+  </data>
+  <data name="NotRegistered" xml:space="preserve">
+    <value>{0} no está registrado</value>
+  </data>
+  <data name="NoUsersToProcessFound" xml:space="preserve">
+    <value>No se han encontrado usuarios que procesar</value>
+  </data>
+  <data name="NoEntitiesToProcessFound" xml:space="preserve">
+    <value>No se han encontrado entidades que procesar</value>
+  </data>
+  <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
+    <value>El ProcessExecution {0} ya no está ejecutándose</value>
   </data>
 </root>
