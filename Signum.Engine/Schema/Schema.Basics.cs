@@ -51,6 +51,20 @@ namespace Signum.Engine.Maps
             set { tablesForID = value; }
         }
 
+        Dictionary<Type, TypeDN> typeToDN;
+        internal Dictionary<Type, TypeDN> TypeToDN
+        {
+            get { return typeToDN.ThrowIfNullC(Resources.TypeDNTableNotCached); }
+            set { typeToDN = value; }
+        }
+
+        Dictionary<TypeDN, Type> dnToType;
+        internal Dictionary<TypeDN, Type> DnToType
+        {
+            get { return dnToType.ThrowIfNullC(Resources.TypeDNTableNotCached); }
+            set { dnToType = value; }
+        }
+
         #region Events
 
         public event Func<Type, bool> IsAllowedCallback;
@@ -279,9 +293,14 @@ namespace Signum.Engine.Maps
             Generating += Administrator.ShrinkDataBase;
             Generating += Administrator.CreateTablesScript;
             Generating += Administrator.InsertEnumValuesScript;
-           
+            Generating += TypeLogic.Schema_Generating;
+
+
             Synchronizing += Administrator.SynchronizeSchemaScript;
             Synchronizing += Administrator.SynchronizeEnumsScript;
+            Synchronizing += TypeLogic.Schema_Synchronizing;
+
+            Initializing(InitLevel.Level0SyncEntities, TypeLogic.Schema_Initializing);
         }
 
         public static Schema Current

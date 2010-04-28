@@ -90,7 +90,7 @@ namespace Signum.Services
         public Dictionary<Type, TypeDN> ServerTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeLogic.TypeToDN);
+                () => Schema.Current.TypeToDN);
         }
 
         public DateTime ServerNow()

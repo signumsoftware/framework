@@ -28,6 +28,7 @@ namespace Signum.Engine.Maps
         public SchemaBuilder()
         {
             schema = new Schema(new SchemaSettings());
+            Include<TypeDN>();
         }
 
         protected SchemaBuilder(Schema schema)

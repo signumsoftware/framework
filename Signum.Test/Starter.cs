@@ -50,7 +50,6 @@ namespace Signum.Test
 
         public static void InternalStart(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            TypeLogic.Start(sb);
             sb.Include<AlbumDN>();
             sb.Include<NoteDN>();
             sb.Include<AlertDN>();

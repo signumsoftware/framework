@@ -14,33 +14,27 @@ namespace Signum.Engine
 {
     public static class TypeLogic
     {
-        static Dictionary<Type, TypeDN> typeToDN; 
-        public static Dictionary<Type, TypeDN> TypeToDN 
+        public static Dictionary<Type, TypeDN> TypeToDN
         {
-            get { return typeToDN.ThrowIfNullC(Resources.TypeDNTableNotCached); }
-            set { typeToDN = value; }
+            get { return Schema.Current.TypeToDN; }
         }
 
-        static Dictionary<TypeDN, Type> dnToType; 
         public static Dictionary<TypeDN, Type> DnToType
         {
-            get { return dnToType.ThrowIfNullC(Resources.TypeDNTableNotCached); }
-            set { dnToType = value;  }
+            get { return Schema.Current.DnToType; }
         }
 
-        public static void Start(SchemaBuilder sb)
+        public static Type ToType(this TypeDN type)
         {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                sb.Include<TypeDN>();
-
-                sb.Schema.Synchronizing += Schema_Synchronizing;
-                sb.Schema.Generating += Schema_Generating;
-                sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_Initializing);
-            }
+            return DnToType[type];
         }
 
-        static void Schema_Initializing(Schema sender)
+        public static TypeDN ToTypeDN(this Type type)
+        {
+            return TypeToDN[type];
+        }
+
+        internal static void Schema_Initializing(Schema sender)
         {
             List<TypeDN> types = Administrator.UnsafeRetrieveAll<TypeDN>();
 
@@ -53,8 +47,8 @@ namespace Signum.Engine
             sender.IDsForType = dict.SelectDictionary(k => k, v => v.Id);
             sender.TablesForID = sender.IDsForType.ToDictionary(p => p.Value, p => sender.Table(p.Key));
 
-            typeToDN = dict;
-            dnToType = typeToDN.Inverse();
+            sender.TypeToDN = dict;
+            sender.DnToType = dict.Inverse();
         }
 
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
@@ -86,7 +80,7 @@ namespace Signum.Engine
                 }, Spacing.Double);
         }
 
-        public static SqlPreCommand Schema_Generating()
+        internal static SqlPreCommand Schema_Generating()
         {
             Table table = Schema.Current.Table<TypeDN>();
 
@@ -94,7 +88,7 @@ namespace Signum.Engine
                     select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
         }
 
-        public static List<TypeDN> GenerateSchemaTypes()
+        internal static List<TypeDN> GenerateSchemaTypes()
         {
             var lista = (from tab in Schema.Current.Tables.Values
                          let type = Reflector.ExtractEnumProxy(tab.Type) ?? tab.Type
@@ -109,7 +103,7 @@ namespace Signum.Engine
 
         public static List<Lite<TypeDN>> TypesAssignableFrom(Type type)
         {
-            return TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLite()).ToList();
+            return Schema.Current.TypeToDN.Where(a => type.IsAssignableFrom(a.Key)).Select(a => a.Value.ToLite()).ToList();
         }
 
 
@@ -130,14 +124,14 @@ namespace Signum.Engine
             return Database.RetrieveLite(liteType, lite.RuntimeType, lite.Id);
         }
 
-        private static Type GetType(string typeName)
+        static Type GetType(string typeName)
         {
-            return typeToDN.Keys.Where(t => t.Name == typeName).Single(Resources.Type0NotFoundInTheSchema.Formato(typeName));
+            return Schema.Current.TypeToDN.Keys.Where(t => t.Name == typeName).Single(Resources.Type0NotFoundInTheSchema.Formato(typeName));
         }
 
-        private static Type TryGetType(string typeName)
+        static Type TryGetType(string typeName)
         {
-            return typeToDN.Keys.Where(t => t.Name == typeName).SingleOrDefault();
+            return Schema.Current.TypeToDN.Keys.Where(t => t.Name == typeName).SingleOrDefault();
         }
     }
 }
