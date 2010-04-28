@@ -44,7 +44,7 @@ namespace Signum.Engine.Help
                 Properties = PropertyRoute.GenerateRoutes(t)
                             .ToDictionary(
                                 pp => pp.PropertyString(),
-                                pp => new PropertyHelp(pp, HelpGenerator.GetPropertyHelp(t, pp.PropertyInfo))),
+                                pp => new PropertyHelp(pp, HelpGenerator.GetPropertyHelp(pp))),
 
                 Operations = OperationLogic.GetAllOperationInfos(t)
                             .ToDictionary(

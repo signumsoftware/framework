@@ -20,83 +20,83 @@ namespace Signum.Engine.Help
 {
     public static class HelpGenerator
     {
-        public static string GetPropertyHelp(Type type, PropertyInfo pi)
+        public static string GetPropertyHelp(PropertyRoute pr)
         {
-            string validations = Validator.GetOrCreatePropertyPack(pi.DeclaringType, pi.Name).Validators.CommaAnd(v => v.HelpMessage);
+            string validations = Validator.GetOrCreatePropertyPack(pr).Validators.CommaAnd(v => v.HelpMessage);
 
             if (validations.HasText())
                 validations = Resources.Should + validations;
 
-            if (Reflector.IsIIdentifiable(pi.PropertyType))
+            if (Reflector.IsIIdentifiable(pr.Type))
             {
-                return EntityProperty(type, pi, pi.PropertyType, pi.PropertyType.TypeLink()) + validations;
+                return EntityProperty(pr, pr.Type, pr.Type.TypeLink()) + validations;
             }
-            else if (typeof(Lite).IsAssignableFrom(pi.PropertyType))
+            else if (typeof(Lite).IsAssignableFrom(pr.Type))
             {
-                Type cleanType = Reflector.ExtractLite(pi.PropertyType);
+                Type cleanType = Reflector.ExtractLite(pr.Type);
 
-                return EntityProperty(type, pi, cleanType, cleanType.TypeLink()) + validations;
+                return EntityProperty(pr, cleanType, cleanType.TypeLink()) + validations;
             }
-            else if (Reflector.IsEmbeddedEntity(pi.PropertyType))
+            else if (Reflector.IsEmbeddedEntity(pr.Type))
             {
-                return EntityProperty(type, pi, pi.PropertyType, pi.PropertyType.NiceName());
+                return EntityProperty(pr, pr.Type, pr.Type.NiceName());
             }
-            else if (Reflector.IsMList(pi.PropertyType))
+            else if (Reflector.IsMList(pr.Type))
             {
-                Type elemType = pi.PropertyType.ElementType();
+                Type elemType = pr.Type.ElementType();
 
                 if (Reflector.IsIIdentifiable(elemType))
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pi.NiceName(), elemType.TypeLink()) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.TypeLink()) + validations;
                 }
                 else if (typeof(Lite).IsAssignableFrom(elemType))
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pi.NiceName(), Reflector.ExtractLite(elemType).TypeLink()) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), Reflector.ExtractLite(elemType).TypeLink()) + validations;
                 }
-                else if (Reflector.IsEmbeddedEntity(pi.PropertyType))
+                else if (Reflector.IsEmbeddedEntity(pr.PropertyInfo.PropertyType))
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pi.NiceName(), elemType.NiceName()) + validations;
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.NiceName()) + validations;
                 }
                 else
                 {
-                    string valueType = ValueType(elemType, pi);
-                    return Resources._0IsACollectionOfElements1.Formato(pi.NiceName(), valueType) + validations;
+                    string valueType = ValueType(elemType, pr);
+                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
                 }
             }
             else
             {
-                string valueType = ValueType(pi.PropertyType, pi);
+                string valueType = ValueType(pr.Type, pr);
 
                 Gender gender = NaturalLanguageTools.GetGender(valueType);
 
-                return Resources.ResourceManager.GetGenderAwareResource("_0IsA1", gender).Formato(pi.NiceName(), valueType) + validations;
+                return Resources.ResourceManager.GetGenderAwareResource("_0IsA1", gender).Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
             }
         }
 
-        static string EntityProperty(Type type, PropertyInfo pi, Type propertyType, string typeName)
+        static string EntityProperty(PropertyRoute pr, Type propertyType, string typeName)
         {
-            if (pi.IsDefaultName())
+            if (pr.PropertyInfo.IsDefaultName())
                 return
                     propertyType.GetGenderAwareResource(() => Resources.The0).Formato(typeName) + " " +
-                    type.GetGenderAwareResource(() => Resources.OfThe0).Formato(type.NiceName());
+                    pr.Parent.Type.GetGenderAwareResource(() => Resources.OfThe0).Formato(pr.Parent.Type.NiceName());
             else
                 return
-                    propertyType.GetGenderAwareResource(() => Resources._0IsA1).Formato(pi.NiceName(), typeName);
+                    propertyType.GetGenderAwareResource(() => Resources._0IsA1).Formato(pr.PropertyInfo.NiceName(), typeName);
         }
 
-        static string ValueType(Type propertyType, PropertyInfo pi)
+        static string ValueType(Type propertyType, PropertyRoute pr)
         {
-            UnitAttribute unit = pi.SingleAttribute<UnitAttribute>();
+            UnitAttribute unit = pr.PropertyInfo.SingleAttribute<UnitAttribute>();
 
             Type cleanType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
 
             string typeName =
                     cleanType.IsEnum ? Resources.ValueLike0.Formato(Enum.GetValues(cleanType).Cast<Enum>().CommaOr(e => e.NiceToString())) :
                     cleanType == typeof(decimal) && unit != null && unit.UnitName == "€" ? Resources.Amount :
-                    cleanType == typeof(DateTime) && Validator.GetOrCreatePropertyPack(propertyType, pi.Name).Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault().Map(a=>a != null && a.Precision == DateTimePrecision.Days) ? Resources.Date :
+                    cleanType == typeof(DateTime) && Validator.GetOrCreatePropertyPack(pr).Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefault().Map(a => a != null && a.Precision == DateTimePrecision.Days) ? Resources.Date :
                     NaturalTypeDescription(cleanType);
 
-            string orNull = Nullable.GetUnderlyingType(pi.PropertyType) != null ? Resources.OrNull : null;
+            string orNull = Nullable.GetUnderlyingType(pr.Type) != null ? Resources.OrNull : null;
 
             return typeName.Add(unit != null ? Resources.ExpressedIn + unit.UnitName : null, " ").Add(orNull, " ");
         }

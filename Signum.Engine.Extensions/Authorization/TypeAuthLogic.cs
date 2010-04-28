@@ -26,7 +26,6 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
-                TypeLogic.Start(sb);
                 sb.Schema.EntityEventsGlobal.Saving += Schema_Saving;
                 sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
                 sb.Schema.IsAllowedCallback += new Func<Type, bool>(Schema_IsAllowedCallback);
