@@ -92,7 +92,6 @@
     <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
     <Compile Include="ControllerAttributes.cs" />
-    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\ModelBinders.cs" />
     <Compile Include="Controllers\SignumController.cs" />
     <Compile Include="Controllers\WidgetsController.cs" />

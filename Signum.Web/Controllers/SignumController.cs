@@ -327,31 +327,6 @@ namespace Signum.Web.Controllers
                 return Navigator.NormalControl(this, entity, sfPartialViewName);
         }
 
-        //[AcceptVerbs(HttpVerbs.Post)]
-        //public ContentResult GetButtonBar(string sfRuntimeType, int? sfId, string prefix)
-        //{
-        //    Type type = Navigator.ResolveType(sfRuntimeType);
-        //    IdentifiableEntity entity = null;
-
-        //    if (this.IsReactive())
-        //    {
-        //        IdentifiableEntity parent = (IdentifiableEntity)Session[this.TabID()];
-        //        if (prefix.HasText() && !prefix.StartsWith("New"))
-        //            entity = (IdentifiableEntity)MappingContext.FindSubentity(entity, prefix);
-        //    }
-        //    else
-        //    {
-        //        if (sfId.HasValue)
-        //            entity = Database.Retrieve(Lite.Create(type, sfId.Value));
-        //        else
-        //            entity = (IdentifiableEntity)Constructor.Construct(type);
-        //    }
-
-        //    HtmlHelper helper = CreateHtmlHelper(this);
-        //    return Content(ButtonBarEntityHelper.GetForEntity(this.ControllerContext, entity, 
-        //        Navigator.Manager.EntitySettings[type].OnPartialViewName(entity), prefix).ToString(helper));
-        //}
-
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult DoPostBack()
         {
@@ -361,6 +336,14 @@ namespace Signum.Web.Controllers
 
             ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
             return Navigator.View(this, (IdentifiableEntity)context.UntypedValue);
+        }
+
+        public ActionResult Error()
+        {
+            Exception ex = HttpContext.Session[HandleExceptionAttribute.ErrorSessionKey] as Exception;
+            HttpContext.Application.Remove(Request.UserHostAddress);
+            ViewData.Model = ex;
+            return View(Navigator.Manager.ErrorPageUrl);
         }
 
         public static HtmlHelper CreateHtmlHelper(Controller c)

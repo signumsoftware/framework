@@ -12,19 +12,21 @@ using System.IO;
 using System.Reflection;
 
 //TODO: Marcador GLASS 
-    public class AssemblyResourceProvider : System.Web.Hosting.VirtualPathProvider
+    public class AssemblyResourceProvider : VirtualPathProvider
     {
         public AssemblyResourceProvider() { }
+
         private bool IsAppResourcePath(string virtualPath)
         {
-            String checkPath =
-               VirtualPathUtility.ToAppRelative(virtualPath);
+            string checkPath = VirtualPathUtility.ToAppRelative(virtualPath);
             return checkPath.StartsWith("~/Plugin/", StringComparison.InvariantCultureIgnoreCase);
         }
+
         public override bool FileExists(string virtualPath)
         {
             return (IsAppResourcePath(virtualPath) || base.FileExists(virtualPath));
         }
+
         public override VirtualFile GetFile(string virtualPath)
         {
             if (IsAppResourcePath(virtualPath))
@@ -32,6 +34,7 @@ using System.Reflection;
             else
                 return base.GetFile(virtualPath);
         }
+
         public override System.Web.Caching.CacheDependency GetCacheDependency(string virtualPath, System.Collections.IEnumerable virtualPathDependencies, DateTime utcStart)
         {
             if (IsAppResourcePath(virtualPath))

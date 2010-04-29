@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Web.Security;
 using Signum.Utilities;
+using System.Web.Routing;
 
 namespace Signum.Web
 {
@@ -148,7 +149,8 @@ namespace Signum.Web
     [AspNetHostingPermission(System.Security.Permissions.SecurityAction.InheritanceDemand, Level = AspNetHostingPermissionLevel.Minimal)]
     public class HandleExceptionAttribute : HandleErrorAttribute
     {
-        public static Action<HandleErrorInfo> LogException;
+        public static Action<HandleErrorInfo> LogControllerException;
+        public static Action<Exception> LogGlobalException;
 
         public override void OnException(ExceptionContext filterContext)
         {
@@ -183,7 +185,7 @@ namespace Signum.Web
             string actionName = (string)filterContext.RouteData.Values["action"];
             HandleErrorInfo model = new HandleErrorInfo(filterContext.Exception, controllerName, actionName);
 
-            if (LogException != null) LogException(model);
+            if (LogControllerException != null) LogControllerException(model);
 
             
             if (filterContext.HttpContext.Request.IsAjaxRequest())
@@ -215,8 +217,31 @@ namespace Signum.Web
             filterContext.HttpContext.Response.StatusCode = 500;
             filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
         }
-    }
 
-   // [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
-   // public class HandleUnknownActionAttribute : Han 
+        public static string ErrorSessionKey = "sfError";
+
+        public static void HandlerApplication_Error(HttpContext context)
+        {
+            if (Navigator.Manager == null)
+                return;
+
+            Exception ex = context.Server.GetLastError();
+            context.Server.ClearError();
+
+            HttpException htEx = ex as HttpException;
+            if (htEx != null)
+                context.Response.StatusCode = htEx.GetHttpCode();
+
+            context.Session[ErrorSessionKey] = ex;
+
+            var httpContext = HttpContext.Current;
+
+            UrlHelper helper = new UrlHelper(new RequestContext(new HttpContextWrapper(HttpContext.Current), 
+                RouteTable.Routes.GetRouteData(new HttpContextWrapper(HttpContext.Current))));  //Change in ASP.Net MVC 2
+
+            httpContext.RewritePath(helper.Action("Error", "Signum"), false);
+            IHttpHandler httpHandler = new MvcHttpHandler();
+            httpHandler.ProcessRequest(HttpContext.Current); 
+        }
+    }
 }
