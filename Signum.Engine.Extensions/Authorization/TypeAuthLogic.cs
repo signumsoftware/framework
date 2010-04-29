@@ -26,7 +26,7 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
-                sb.Schema.EntityEventsGlobal.Saving += Schema_Saving;
+                sb.Schema.EntityEventsGlobal.Saved += Schema_Saved; //because we need Modifications propagated
                 sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
                 sb.Schema.IsAllowedCallback += new Func<Type, bool>(Schema_IsAllowedCallback);
 
@@ -49,9 +49,9 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleDN.Current, type) != TypeAllowed.None;
         }
 
-        static void Schema_Saving(IdentifiableEntity ident, bool isRoot, ref bool graphModified)
+        static void Schema_Saved(IdentifiableEntity ident, bool isRoot)
         {
-            if (AuthLogic.IsEnabled)
+            if (AuthLogic.IsEnabled && ident.Modified)
             {
                 TypeAllowed access = cache.GetAllowed(RoleDN.Current, ident.GetType());
 
