@@ -1,35 +1,39 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
+﻿<%@ Page Title="Remember password" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
 <%@ Import Namespace="Signum.Web" %>
-<%@ Import Namespace="Signum.Web.Extensions.Properties" %>
-<%@ Import Namespace="System.Web.Mvc" %>
 
-<asp:Content ID="rememberPasswordContent" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Recordar contraseña</h2>
-    <p>Introduzca su nombre de usuario y dirección de correo electrónico para recibir un mensaje en su cuenta con la contraseña</p>
-    
+<asp:Content ContentPlaceHolderID="MainContent" runat="server">
+    <script type="text/javascript"> $(function(){$("#username").focus();}); </script>
+    <div id="remember-login-form">
+    <h2>Remember password</h2>
+    <p>Type your user name and your e-mail address to receive a message with a new password</p>
+
     <%= Html.ValidationSummary() %>
     <% using (Html.BeginForm()) { %>
-        <div>
-            <table>
-                <tr>
-                    <td>Usuario:</td>
-                    <td>
-                        <%= Html.TextBox("username") %>
-                        <%= Html.ValidationMessage("user") %>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Email:</td>
-                    <td>
-                        <%= Html.TextBox("email")%>
-                        <%= Html.ValidationMessage("email")%>
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><input type="submit" value="Recordar contraseña" /></td>
-                </tr>
-            </table>
-        </div>
+    <table id="remember">
+            <tr>
+                <td>
+                    <label for="username">User name</label>:
+                </td>
+                <td>
+                    <%= Html.TextBox("username", "", new { size = 30 })%>
+                    <%= Html.ValidationMessage("username") %>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="email">Email</label>:
+                </td>
+                <td>
+                    <%= Html.Password("email", "", new { size = 30 }) %>
+                    <%= Html.ValidationMessage("email") %>
+                </td>
+            </tr>
+            <tr>
+            <td colspan="2" class="submit-container">
+                <input type="submit" value="Remember" />
+            </td>
+            </tr>
+        </table>            
+    </div>
     <% } %>
 </asp:Content>

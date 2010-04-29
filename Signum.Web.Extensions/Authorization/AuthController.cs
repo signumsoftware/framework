@@ -13,12 +13,22 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Signum.Web.Authorization
 {
     [HandleException]
     public partial class AuthController : Controller
     {
+        public static event Func<string, string> ValidatePassword =
+            p => {
+                if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
+                    return null;
+                return "The password must be have between 7 and 15 characters, each of them being a number 0-9 or a letter";            
+            };
+
+        public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
+
         public static event Action OnUserLogged;
         public static event Action<Controller, UserDN> OnUserPreLogin;
         public const string SessionUserKey = "user";
@@ -41,6 +51,10 @@ namespace Signum.Web.Authorization
                 ModelState.FromContext(context);
                 return View(AuthClient.ChangePasswordUrl);
             }
+
+            string errorPasswordValidation = ValidatePassword(UserMapping.NewPasswordKey);
+            if (errorPasswordValidation.HasText())
+                return LoginError("password", errorPasswordValidation);
 
             Database.Save(context.Value);
 
@@ -72,13 +86,13 @@ namespace Signum.Web.Authorization
             try
             {
                 if (string.IsNullOrEmpty(username))
-                    return RememberPasswordError("user", Resources.UserNameMustHaveAValue);
+                    return RememberPasswordError("username", Resources.UserNameMustHaveAValue);
 
                 if (string.IsNullOrEmpty(email))
                     return RememberPasswordError("email", Resources.EmailMustHaveAValue);
 
                 UserDN user = AuthLogic.UserToRememberPassword(username, email);
-                string randomPassword = GenerateRandomPassword(8);
+                string randomPassword = GenerateRandomPassword();
                 using (AuthLogic.Disable())
                 {
                     user.PasswordHash = Security.EncodePassword(randomPassword);
@@ -121,45 +135,6 @@ namespace Signum.Web.Authorization
 
             return View(AuthClient.RememberPasswordSuccessUrl);
         }
-
-        enum CharType
-        {
-            Number,
-            Upper,
-            Lower
-        }
-
-        public string GenerateRandomPassword(int size)
-        {
-            StringBuilder sb = new StringBuilder();
-            Random random = new Random();
-            int charCode = 0;
-            for (int i = 0; i < size; i++)
-            {
-                CharType type = (CharType)random.Next(3);
-                switch (type)
-                {
-                    case CharType.Number:
-                        {
-                            charCode = random.Next(48, 58);
-                            break;
-                        }
-                    case CharType.Upper:
-                        {
-                            charCode = random.Next(65, 91);
-                            break;
-                        }
-                    case CharType.Lower:
-                        {
-                            charCode = random.Next(97, 123);
-                            break;
-                        }
-                }
-                sb.Append(Convert.ToChar(charCode));
-            }
-            return sb.ToString();
-        }
-
         #endregion
 
         public ActionResult Login()
