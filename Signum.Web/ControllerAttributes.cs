@@ -201,14 +201,19 @@ namespace Signum.Web
                 filterContext.Result = new ViewResult
                 {
                     ViewName = Navigator.Manager.ErrorPageUrl,
-                    ViewData = new ViewDataDictionary<HandleErrorInfo>(model),
-                    TempData = filterContext.Controller.TempData
+                    TempData = filterContext.Controller.TempData,
+                    ViewData = new ViewDataDictionary<HandleErrorInfo>(model)
+                    {
+                        {ViewDataKeys.PageTitle, model.Exception.InnerException != null ? 
+                            model.Exception.InnerException.Message : 
+                            model.Exception.Message}
+                    },
                 };
-                ((ViewResult)filterContext.Result).ViewData[ViewDataKeys.PageTitle] = model.Exception.InnerException != null ? model.Exception.InnerException.Message : model.Exception.Message;
             }
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.Clear();
             filterContext.HttpContext.Response.StatusCode = 500;
+            filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
         }
     }
 
