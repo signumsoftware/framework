@@ -113,6 +113,9 @@ namespace Signum.Engine.Authorization
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
                     EntityGroupAllowed access = cache.GetAllowed(role, eg);
+                    if (access == EntityGroupAllowed.All)
+                        return true;
+
                     if (((IdentifiableEntity)ident).IsInGroup(eg))
                         return access.HasFlag(EntityGroupAllowed.In);
                     else
