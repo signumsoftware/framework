@@ -34,8 +34,8 @@ namespace Signum.Entities.Authorization
             set { Set(ref passwordHash, value, () => PasswordHash); }
         }
 
-        Lite<IUserRelatedDN> related;
-        public Lite<IUserRelatedDN> Related
+        IUserRelatedDN related;
+        public IUserRelatedDN Related
         {
             get { return related; }
             set { Set(ref related, value, () => Related); }
