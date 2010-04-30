@@ -102,6 +102,11 @@ namespace Signum.Web
 
         public static string CountSearchControl(this HtmlHelper helper, FindOptions findOptions)
         {
+            return CountSearchControl(helper, findOptions, null);
+        }
+
+         public static string CountSearchControl(this HtmlHelper helper, FindOptions findOptions, string prefix)
+        {
             int count = Navigator.QueryCount(new CountOptions(findOptions.QueryName)
             {
                 FilterOptions = findOptions.FilterOptions
@@ -109,6 +114,7 @@ namespace Signum.Web
 
             JsFindOptions foptions = new JsFindOptions
             {
+                Prefix = prefix,
                 FindOptions = findOptions
             };
 
@@ -198,7 +204,7 @@ namespace Signum.Web
             if (typeof(Lite).IsAssignableFrom(filterOption.Token.Type))
             {
                 Type cleanType = Reflector.ExtractLite(filterOption.Token.Type);
-                if (Reflector.IsLowPopulation(cleanType) && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
+                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !(filterOption.Token.Implementations() is ImplementedByAllAttribute) && (cleanType != typeof(IdentifiableEntity)))
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, filterOption.Value, parent, "", filterOption.Token.GetPropertyRoute())
                     {
