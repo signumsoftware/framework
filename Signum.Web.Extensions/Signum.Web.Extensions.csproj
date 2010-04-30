@@ -80,12 +80,13 @@
     <Compile Include="Files\FileRepeater.cs" />
     <Compile Include="Files\FileLineHelper.cs" />
     <Compile Include="Files\FileLine.cs" />
-    <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Files\FileController.cs" />
+    <Compile Include="Files\FilesClient.cs" />
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
     <Compile Include="HttpModules\WhitespaceModule.cs" />
+    <Compile Include="Mailing\EmailClient.cs" />
     <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
     <Compile Include="Operations\OperationButtonFactory.cs" />
