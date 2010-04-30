@@ -339,7 +339,7 @@ var ConstructorFromMany = function(_options) {
         log("ConstructorFromMany defaultConstruct");
 
         var onSuccess = function(items) 
-        { 
+        {
             this.operationAjax(this.newPrefix(), items, OpOpenPopup); 
         }
 
@@ -380,6 +380,7 @@ function OpReloadContent(prefix, operationResult){
             containerDiv: prefix.compose("externalPopupDiv")
         }).viewSave(operationResult);
     }
+    NotifyInfo(lang['operationExecuted'], 2000); 
 }
 
 function OpOpenPopup(prefix, operationResult)
