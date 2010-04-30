@@ -178,8 +178,7 @@ var OperationExecutor = function(_options) {
         
         var onSuccess = function() 
         { 
-            this.operationAjax(null, OpReloadContent); 
-            NotifyInfo(lang['operationExecuted'], 2000); 
+            this.operationAjax(null, OpReloadContent);
         };
 
         var self = this;
@@ -206,8 +205,7 @@ var ConstructorFrom = function(_options) {
 
         var onSuccess = function() 
         { 
-            this.operationAjax(this.newPrefix(), OpOpenPopup); 
-            NotifyInfo(lang['operationExecuted'], 2000); 
+            this.operationAjax(this.newPrefix(), OpOpenPopup);
         }
 
         var self = this;
@@ -343,7 +341,6 @@ var ConstructorFromMany = function(_options) {
         var onSuccess = function(items) 
         { 
             this.operationAjax(this.newPrefix(), items, OpOpenPopup); 
-            NotifyInfo(lang['operationExecuted'], 2000); 
         }
 
         var self = this;
@@ -388,16 +385,18 @@ function OpReloadContent(prefix, operationResult){
 function OpOpenPopup(prefix, operationResult)
 {
     new ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
+    NotifyInfo(lang['operationExecuted'], 2000); 
 }
 
 function OpOpenPopupNoDefaultOk(prefix, operationResult)
 {
-    new ViewNavigator({ prefix: prefix, onOk: function(){ return false; }}).showCreateSave(operationResult);
+    new ViewNavigator({ prefix: prefix, onOk: function() { return false; } }).showCreateSave(operationResult);
+    NotifyInfo(lang['operationExecuted'], 2000); 
 }
 
 function OpNavigate(prefix, operationResult)
 {
-    Submit(operationResult);
+    Submit(operationResult); 
 }
 
 
