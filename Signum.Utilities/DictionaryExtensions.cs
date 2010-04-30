@@ -103,54 +103,33 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string keyName)
+        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string errorContext)
         {
-            return source.ToDictionary(keySelector, keyName, null);
+            Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>();
+            result.AddRange(source, keySelector, v => v, errorContext);
+            return result;
         }
 
-        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string keyName)
+        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string errorContext)
         {
-            return source.ToDictionary(keySelector, elementSelector, keyName, null);
+            Dictionary<TKey, TElement> result = new Dictionary<TKey, TElement>();
+            result.AddRange(source, keySelector, elementSelector, errorContext);
+            return result;
         }
 
-        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string keyName, IEqualityComparer<TKey> comparer)
+        public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer, string errorContext)
         {
             Dictionary<TKey, TSource> result = new Dictionary<TKey, TSource>(comparer);
-            HashSet<TKey> repetitions = new HashSet<TKey>(); 
-            foreach (var item in source)
-            {
-                var key = keySelector(item); 
-                if(result.ContainsKey(key))
-                    repetitions.Add(key);
-                else
-                    result.Add(key, item);
-            }
-
-            if (repetitions.Count > 0)
-                throw new ArgumentException(Resources.ThereAreSomeRepeated01.Formato(keyName, repetitions.ToString(", ")));
-
+            result.AddRange(source, keySelector, v => v, errorContext);
             return result;
         }
 
-        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string keyName, IEqualityComparer<TKey> comparer)
+        public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer, string errorContext)
         {
             Dictionary<TKey, TElement> result = new Dictionary<TKey, TElement>(comparer);
-            HashSet<TKey> repetitions = new HashSet<TKey>();
-            foreach (var item in source)
-            {
-                var key = keySelector(item);
-                if (result.ContainsKey(key))
-                    repetitions.Add(key);
-                else
-                    result.Add(key, elementSelector(item));
-            }
-
-            if (repetitions.Count > 0)
-                throw new ArgumentException(Resources.ThereAreSomeRepeated01.Formato(keyName, repetitions.ToString(", ")));
-
+            result.AddRange(source, keySelector, elementSelector, errorContext);
             return result;
         }
-
 
         public static Dictionary<K, V> JumpDictionary<K, Z, V>(this IDictionary<K, Z> dictionary, IDictionary<Z, V> other)
         {
@@ -253,12 +232,6 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetS(k)));
         }
 
-        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
-        {
-            foreach (var item in keys.ZipStrict(values))
-                dictionary.Add(item.First, item.Second);
-        }
-
         public static void AddRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
         {
             foreach (var item in other)
@@ -267,10 +240,31 @@ namespace Signum.Utilities
             }
         }
 
-        public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> getKey, Func<A, V> getValue)
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other, string errorContext)
+        {
+            dictionary.AddRange(other, kvp => kvp.Key, kvp => kvp.Value, errorContext); 
+        }
+
+        public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> keySelector, Func<A, V> valueSelector)
         {
             foreach (var item in collection)
-                dictionary.Add(getKey(item), getValue(item));
+                dictionary.Add(keySelector(item), valueSelector(item));
+        }
+
+        public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> keySelector, Func<A, V> valueSelector, string errorContext)
+        {
+            HashSet<K> repetitions = new HashSet<K>();
+            foreach (var item in collection)
+            {
+                var key = keySelector(item);
+                if (dictionary.ContainsKey(key))
+                    repetitions.Add(key);
+                else
+                    dictionary.Add(key, valueSelector(item));
+            }
+
+            if (repetitions.Count > 0)
+                throw new ArgumentException(Resources.ThereAreSomeRepeated01.Formato(errorContext, repetitions.ToString(", ")));
         }
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys, IEnumerable<V> values)
@@ -297,17 +291,6 @@ namespace Signum.Utilities
         {
             foreach (var k in keys)
                 dictionary.Remove(k); 
-        }
-
-        public static Dictionary<K, V> Union<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other)
-        {
-            Dictionary<K, V> result = new Dictionary<K, V>(dictionary);
-            foreach (var kvp in other)
-            {
-                V value = result.GetOrCreate(kvp.Key, kvp.Value);
-                Debug.Assert(EqualityComparer<V>.Default.Equals(value, kvp.Value));
-            }
-            return result; 
         }
 
         public static Dictionary<K, V> Extract<K, V>(this IDictionary<K, V> dictionary, Func<K, bool> condition)
@@ -355,6 +338,16 @@ namespace Signum.Utilities
         public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer)
         {
             return dic.ToDictionary(k => k.Value, k => k.Key, comparer);
+        }
+
+        public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, string errorContext)
+        {
+            return dic.ToDictionary(k => k.Value, k => k.Key, errorContext);
+        }
+
+        public static Dictionary<V, K> Inverse<K, V>(this IDictionary<K, V> dic, IEqualityComparer<V> comparer, string errorContext)
+        {
+            return dic.ToDictionary(k => k.Value, k => k.Key, comparer, errorContext);
         }
     }
 }

@@ -470,11 +470,11 @@ namespace Signum.Web
         {
             Navigator.AddSetting(new EntitySettings<ValueLineBoxModel>(EntityType.Default) { PartialViewName = _ => ValueLineBoxUrl });
 
-            TypesToURLNames = EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UrlName ?? Reflector.CleanTypeName(kvp.Key));
-            URLNamesToTypes = TypesToURLNames.Inverse(StringComparer.InvariantCultureIgnoreCase);
+            TypesToURLNames = EntitySettings.SelectDictionary(k => k, (k, v) => v.UrlName ?? Reflector.CleanTypeName(k));
+            URLNamesToTypes = TypesToURLNames.Inverse(StringComparer.InvariantCultureIgnoreCase, "URLNamesToTypes");
 
-            TypesToNames.AddRange(EntitySettings.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.TypeName ?? kvp.Key.Name));
-            NamesToTypes = TypesToNames.Inverse(); 
+            TypesToNames.AddRange(EntitySettings, kvp => kvp.Key, kvp => kvp.Value.TypeName ?? kvp.Key.Name, "TypeToNames");
+            NamesToTypes = TypesToNames.Inverse("NamesToTypes");
 
             if (DynamicQueryManager.Current != null)
             {
@@ -488,12 +488,16 @@ namespace Signum.Web
                         QuerySettings[o].UrlName = GetQueryName(o);
                 }
 
-                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, "UrlQueryNames", StringComparer.InvariantCultureIgnoreCase);
+                UrlQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.UrlName ?? GetQueryName(kvp.Key), kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase, "UrlQueryNames");
             }
 
             ModelBinders.Binders.DefaultBinder = new LiteModelBinder();
             ModelBinders.Binders.Add(typeof(Implementations), new ImplementationsModelBinder());
+
+            Started = true;
         }
+
+        public bool Started { get; private set; } 
 
         HashSet<string> loadedModules = new HashSet<string>();
 

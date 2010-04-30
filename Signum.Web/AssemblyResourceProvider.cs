@@ -60,7 +60,7 @@ using System.Reflection;
 
             assemblyName = Path.Combine(HttpRuntime.BinDirectory, assemblyName);
 
-            System.Reflection.Assembly assembly = System.Reflection.Assembly.LoadFile(assemblyName);
+            Assembly assembly = Assembly.LoadFile(assemblyName);
             if (assembly != null)
             {
                 Stream resourceStream = assembly.GetManifestResourceStream(resourceName);
