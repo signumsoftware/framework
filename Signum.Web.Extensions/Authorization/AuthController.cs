@@ -14,6 +14,8 @@ using System.Net;
 using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Signum.Entities;
+using Signum.Engine.Mailing;
 
 namespace Signum.Web.Authorization
 {
@@ -24,7 +26,7 @@ namespace Signum.Web.Authorization
             p => {
                 if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
                     return null;
-                return "The password must be have between 7 and 15 characters, each of them being a number 0-9 or a letter";            
+                return "The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter";            
             };
 
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
@@ -43,7 +45,7 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult ChangePassword(FormCollection form)
         {
-            var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
+            var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
             {
@@ -52,7 +54,7 @@ namespace Signum.Web.Authorization
                 return View(AuthClient.ChangePasswordUrl);
             }
 
-            string errorPasswordValidation = ValidatePassword(UserMapping.NewPasswordKey);
+            string errorPasswordValidation = ValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
             if (errorPasswordValidation.HasText())
                 return LoginError("password", errorPasswordValidation);
 
@@ -60,7 +62,6 @@ namespace Signum.Web.Authorization
 
             return RedirectToAction("ChangePasswordSuccess");
         }
-
 
         public ActionResult ChangePasswordSuccess()
         {
@@ -72,6 +73,144 @@ namespace Signum.Web.Authorization
 
         #endregion
 
+        #region "Reset"
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult ResetPassword()
+        {
+            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPassword;
+            return View(AuthClient.ResetPasswordUrl);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult ResetPassword(string email)
+        {
+            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPassword;
+            try
+            {
+                if (string.IsNullOrEmpty(email))
+                    return RememberPasswordError("email", Resources.EmailMustHaveAValue);
+
+                //Check the email belongs to a user
+                UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefault(Resources.EmailNotExistsDatabase);
+
+                //Remove old previous requests
+                Database.Query<ResetPasswordRequestDN>().Where(r=>r.RequestDate < DateTime.Now.AddMonths(1)).UnsafeDelete();
+
+                ResetPasswordRequestDN rpr = new ResetPasswordRequestDN() {
+                    Code = MyRandom.Current.NextString(5),
+                    Email = email,
+                    RequestDate = DateTime.Now,
+                };
+
+                rpr.Save();
+
+                //TODO: Send email
+                EmailLogic.Send(user, UserMailTemplate.ResetPassword, null);
+
+               /* MailMessage message = new MailMessage()
+                {
+                    To = { email },
+                    Subject = Resources.MailSubject_ResetPassword,
+                    Body = Resources.MailBody_ResetPassword.Formato(rpr.Code),
+                    IsBodyHtml = true
+                };
+
+                SmtpClient smtp = new SmtpClient();
+                smtp.Send(message);*/
+
+                ViewData["email"] = email;
+                return RedirectToAction("ResetPasswordCode");
+            }
+            catch (Exception ex)
+            {
+                return ResetPasswordError("_FORM", ex.Message);
+            }
+        }
+
+        ViewResult ResetPasswordError(string key, string error)
+        {
+            ModelState.AddModelError("_FORM", error);
+            return View(AuthClient.ResetPasswordUrl);
+        }
+
+        ViewResult ResetPasswordSetNewError(string key, string error)
+        {
+            ModelState.AddModelError("_FORM", error);
+            return View(AuthClient.ResetPasswordSetNewUrl);
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult ResetPasswordCode()
+        {
+            ViewData["Message"] = Resources.ResetPasswordCodeHasBeenSent.Formato(ViewData["email"]);
+            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPassword;
+
+            return View(AuthClient.ResetPasswordCodeUrl);
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult ResetPasswordCode(string code)
+        {
+            //Look for request with provided code
+            ResetPasswordRequestDN rpr = Database.Query<ResetPasswordRequestDN>()
+                .Where(r=>r.Code == code)
+                .SingleOrDefault("The confirmation code that you have just sent is invalid");
+
+            //TODO: May be it would be a good idea to rediret to ResetPassword if invalid
+
+            TempData["ResetPasswordRequest"] = rpr;
+
+            return RedirectToAction("ResetPasswordSetNew");
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ActionResult ResetPasswordSetNew()
+        {
+            ResetPasswordRequestDN rpr = (ResetPasswordRequestDN) TempData["ResetPasswordRequestDN"];
+            if (rpr == null) {
+                TempData["Error"] = "There has been an error with your request to reset your password. Please, enter your login.";
+                RedirectToAction("ResetPassword");
+            }
+            ViewData["rpr"] = rpr.Id;
+            return View("ResetPasswordSetNew");
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult ResetPasswordSetNew(string code, Lite<ResetPasswordRequestDN> rpr)
+        {
+
+            ResetPasswordRequestDN request = rpr.Retrieve();
+            UserDN user = Database.Query<UserDN>().Where(u => u.Email == request.Email).Single();
+
+            var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
+
+            if (context.GlobalErrors.Any())
+            {
+                ViewData["Title"] = Resources.ChangePassword;
+                ModelState.FromContext(context);
+                return View(AuthClient.ResetPasswordSetNewUrl);
+            }
+
+            string errorPasswordValidation = ValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+            if (errorPasswordValidation.HasText())
+                return ResetPasswordSetNewError("NewPassword", errorPasswordValidation);
+
+            Database.Save(context.Value);
+
+            //remove pending requests
+            Database.Query<ResetPasswordRequestDN>().Where(r => r.Email == user.Email).UnsafeDelete();
+
+            return RedirectToAction("ResetPasswordSuccess");            
+        }
+
+        public ActionResult ResetPasswordSuccess()
+        {
+            ViewData[ViewDataKeys.PageTitle] = Resources.ResetPasswordSuccess;
+            return View(AuthClient.ResetPasswordSuccessUrl);
+        }
+        #endregion
+        
         #region "Remember password"
         public ActionResult RememberPassword()
         {
@@ -82,7 +221,7 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult RememberPassword(string username, string email)
         {
-            ViewData["Title"] = Resources.RememberPassword;
+            ViewData[ViewDataKeys.PageTitle] = Resources.RememberPassword;
             try
             {
                 if (string.IsNullOrEmpty(username))
@@ -104,13 +243,11 @@ namespace Signum.Web.Authorization
                 {
                     To = { user.Email },
                     Subject = Resources.MailSubject_RememberPassword,
-                    From = new MailAddress(AuthClient.RememberPasswordEmailFrom),
                     Body = texto,
                     IsBodyHtml = true
                 };
 
-                SmtpClient smtp = new SmtpClient(AuthClient.RememberPasswordEmailSMTP);
-                smtp.Credentials = new NetworkCredential(AuthClient.RememberPasswordEmailUser, AuthClient.RememberPasswordEmailPassword);
+                SmtpClient smtp = new SmtpClient();
                 smtp.Send(message);
 
                 ViewData["email"] = email;
@@ -131,7 +268,7 @@ namespace Signum.Web.Authorization
         public ActionResult RememberPasswordSuccess()
         {
             ViewData["Message"] = Resources.PasswordHasBeenSent.Formato(ViewData["email"]);
-            ViewData["Title"] = Resources.RememberPassword;
+            ViewData[ViewDataKeys.PageTitle] = Resources.RememberPassword;
 
             return View(AuthClient.RememberPasswordSuccessUrl);
         }
@@ -158,7 +295,12 @@ namespace Signum.Web.Authorization
                 return LoginError("password", Resources.PasswordMustHaveAValue);
 
             // Attempt to login
-            UserDN user = AuthLogic.Login(username, Security.EncodePassword(password));
+            UserDN user = null;
+            try
+            {
+                user = AuthLogic.Login(username, Security.EncodePassword(password));
+            }
+            catch (Exception ex){}
             if (user == null)
                 return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
 

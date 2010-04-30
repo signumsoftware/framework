@@ -21,7 +21,7 @@ namespace Signum.Web.Authorization
         public static readonly string NewPasswordKey = "NewPassword";
         public static readonly string NewPasswordBisKey = "NewPasswordBis"; 
 
-        public static EntityMapping<UserDN> ChangePassword = new EntityMapping<UserDN>(false)
+        public static EntityMapping<UserDN> ChangePasswordOld = new EntityMapping<UserDN>(false)
             .SetProperty(u => u.PasswordHash, new ValueMapping<string>(), m => m.GetValue = ctx =>
             {
                 string oldPassword = ctx.Parent.Inputs[OldPasswordKey];
@@ -30,6 +30,12 @@ namespace Signum.Web.Authorization
 
                 return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
             });
+
+        public static EntityMapping<UserDN> ChangePassword = new EntityMapping<UserDN>(false)
+        .SetProperty(u => u.PasswordHash, new ValueMapping<string>(), m => m.GetValue = ctx =>
+        {      
+            return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
+        });
 
         public static string GetNewPassword(MappingContext<string> ctx, string newPasswordKey, string newPasswordBisKey)
         {

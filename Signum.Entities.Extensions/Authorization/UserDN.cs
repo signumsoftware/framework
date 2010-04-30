@@ -121,6 +121,11 @@ namespace Signum.Entities.Authorization
         Disable,
     }
 
+    public enum UserMailTemplate
+    {
+        ResetPassword
+    }
+
     public interface IUserRelatedDN:IIdentifiable
     {
 

@@ -2,7 +2,5 @@
 
 <asp:Content ID="changePasswordSuccessContent" ContentPlaceHolderID="MainContent" runat="server">
     <h2><%=ViewData["Title"]%></h2>
-    <p>
-        <%=ViewData["Message"]%>
-    </p>
+    <p><%=ViewData["Message"]%></p>
 </asp:Content>

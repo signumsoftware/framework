@@ -17,6 +17,7 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Extensions.Properties;
+using Signum.Engine.Mailing;
 
 namespace Signum.Engine.Authorization
 {
@@ -77,6 +78,33 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static void StartPortal(SchemaBuilder sb, DynamicQueryManager dqm)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                //starts password modification feature
+                sb.Include<ResetPasswordRequestDN>();
+
+                dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
+                                                       select new
+                                                       {
+                                                           Entity = e.ToLite(),
+                                                           e.Id,
+                                                           e.RequestDate,
+                                                           e.Code,
+                                                           e.Email
+                                                       }).ToDynamic();
+
+                EmailLogic.Start(sb, dqm);
+
+                EmailLogic.RegisterTemplate(UserMailTemplate.ResetPassword, (eo, args) =>
+                {
+                    ResetPasswordRequestDN request = (ResetPasswordRequestDN)eo;
+                    return EmailLogic.RenderWebMail(Signum.Engine.Extensions.Properties.Resources.ResetPasswordCode,
+                        "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.ResetPasswordMail.ascx", eo, args);
+                });
+            }
+        }
 
         static void Schema_Initializing(Schema schema)
         {

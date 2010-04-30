@@ -72,14 +72,6 @@ namespace Signum.Engine.Mailing
             EmailTemplates[templateKey] = template;
         }
 
-      
-      /*  public static void ComposeAndSend(this IEmailOwnerDN recipient, Enum templateKey, params object[] args)
-        {
-            SendMail(ComposeMail(recipient, templateKey, args));
-        }  */
-
-
-
         public static EmailMessageDN Send(this IEmailOwnerDN recipient, Enum templateKey, Dictionary<string, object> args)
         {
             EmailContent content = EmailTemplates.GetOrThrow(templateKey, Resources.NotRegisteredInEmailLogic)(recipient, args);

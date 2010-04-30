@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\ResetPasswordRequestDN.cs" />
     <Compile Include="Authorization\UserTicketDN.cs" />
     <Compile Include="Authorization\Services.cs" />
     <Compile Include="Authorization\PermissionDN.cs" />

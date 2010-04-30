@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
                        u.State=UserState.Disabled; 
                    },
                    AllowsNew = false ,
-                   Lite =false 
+                   Lite = true 
                 },
          
                 new Goto(UserOperation.Enable, UserState.Created)
@@ -59,7 +59,7 @@ namespace Signum.Engine.Authorization
                        u.State = UserState.Created; 
                    },
                    AllowsNew = false ,
-                   Lite =true  
+                   Lite = true  
                 },
             };
         }

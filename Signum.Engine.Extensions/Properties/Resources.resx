@@ -375,4 +375,7 @@
   <data name="ProcessExecution0IsNotRunningAnymore" xml:space="preserve">
     <value>ProcessExecution {0} is not running anymore</value>
   </data>
+  <data name="ResetPasswordCode" xml:space="preserve">
+    <value>Reset password code</value>
+  </data>
 </root>

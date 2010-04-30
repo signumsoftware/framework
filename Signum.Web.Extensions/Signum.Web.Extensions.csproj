@@ -155,16 +155,13 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\ChangePassword.aspx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\ChangePasswordSuccess.aspx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\Login.aspx">
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\LoginUserControl.ascx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\Register.aspx">
       <SubType>ASPXCodeBehind</SubType>
@@ -187,7 +184,6 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Basic\DateSpanIU.ascx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Help\EntityProperty.ascx">
       <SubType>ASPXCodeBehind</SubType>
@@ -215,10 +211,18 @@
       <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\RememberPassword.aspx">
-      <SubType>ASPXCodeBehind</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Authorization\RememberPasswordSuccess.aspx">
-      <SubType>ASPXCodeBehind</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\ResetPassword.aspx">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\ResetPasswordMail.ascx">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\ResetPasswordCode.aspx">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\ResetPasswordSuccess.aspx">
+    </EmbeddedResource>
+    <EmbeddedResource Include="Authorization\ResetPasswordSetNew.aspx">
     </EmbeddedResource>
     <Content Include="ScriptCombiner\ICSharpCode.SharpZipLib.dll" />
     <EmbeddedResource Include="ViewsChecker\ViewsChecker.aspx">

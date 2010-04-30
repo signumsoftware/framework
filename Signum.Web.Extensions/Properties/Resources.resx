@@ -175,10 +175,10 @@
     <value>Key {0} not found</value>
   </data>
   <data name="MailBody_RememberPassword" xml:space="preserve">
-    <value>We send you this email as you have requested to remember your password. For yoyr safety, we have generated a new random passwor, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;</value>
+    <value>We are sending you this email as you have requested to remember your password. For your safety, we have generated a new random password, that you will be able to modify later.&lt;br/&gt;&lt;br/&gt;The password is &lt;b&gt;{0}&lt;/b&gt;</value>
   </data>
   <data name="MailSubject_RememberPassword" xml:space="preserve">
-    <value>Remeber Password</value>
+    <value>Remember Password</value>
   </data>
   <data name="Message" xml:space="preserve">
     <value>Message</value>
@@ -245,5 +245,17 @@
   </data>
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>You must repeat the new password</value>
+  </data>
+  <data name="EmailNotExistsDatabase" xml:space="preserve">
+    <value>The provided email address does not belong to any registered used</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="ResetPasswordCodeHasBeenSent" xml:space="preserve">
+    <value>A confirmation code to reset your password has been sent to the email account {0}</value>
+  </data>
+  <data name="ResetPasswordSuccess" xml:space="preserve">
+    <value>Your password has been successfully changed</value>
   </data>
 </root>

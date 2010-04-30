@@ -24,7 +24,7 @@
                     <label for="email">Email</label>:
                 </td>
                 <td>
-                    <%= Html.Password("email", "", new { size = 30 }) %>
+                    <%= Html.TextBox("email", "", new { size = 30 })%>
                     <%= Html.ValidationMessage("email") %>
                 </td>
             </tr>
