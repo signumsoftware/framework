@@ -94,7 +94,6 @@
     <Compile Include="Linq\ExpressionVisitor\ProjectionCleaner.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionVisitor.cs" />
     <Compile Include="Linq\ExpressionVisitor\DbExpressionNominator.cs" />
-    <Compile Include="Linq\ExpressionVisitor\OrderByAsserter.cs" />
     <Compile Include="Linq\ExpressionVisitor\ProjectionExpressionFinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryBinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryFormatter.cs" />

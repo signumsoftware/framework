@@ -72,8 +72,7 @@ namespace Signum.Engine.Linq
             Expression replaced = AliasProjectionReplacer.Replace(projCleaned);
             Expression columnCleaned = UnusedColumnRemover.Remove(replaced);
             Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
-            Expression ordered = OrderByAsserter.Assert(subqueryCleaned);
-            return ordered;
+            return subqueryCleaned;
         }
 
         internal int Delete<T>(IQueryable<T> query)
