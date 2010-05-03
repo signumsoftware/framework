@@ -25,7 +25,7 @@ namespace Signum.Engine.Authorization
             permissionTypes.AddRange(types);
         }
 
-        static AuthCache<RulePermissionDN, PermissionDN, Enum, bool> cache;
+        static AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool> cache;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -42,7 +42,7 @@ namespace Signum.Engine.Authorization
 
                 EnumLogic<PermissionDN>.Start(sb, () => permissionTypes.SelectMany(t => Enum.GetValues(t).Cast<Enum>()).ToHashSet());
 
-                cache = new AuthCache<RulePermissionDN, PermissionDN, Enum, bool>(sb,
+                cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
                     EnumLogic<PermissionDN>.ToEnum,
                     EnumLogic<PermissionDN>.ToEntity,
                     AuthUtils.MaxAllowed, true);

@@ -11,9 +11,8 @@ namespace Signum.Entities.Authorization
 {
     //Only for client-side communication
     [Serializable]
-    public abstract class BaseRulePack<R, A> : IdentifiableEntity
-        where R : IdentifiableEntity
-        where A : struct
+    public abstract class BaseRulePack<T> : IdentifiableEntity
+        where T : EmbeddedEntity
     {
         Lite<RoleDN> role;
         [NotNullValidator]
@@ -31,8 +30,8 @@ namespace Signum.Entities.Authorization
             internal set { Set(ref type, value, () => Type); }
         }
 
-        MList<AllowedRule<R, A>> rules;
-        public MList<AllowedRule<R, A>> Rules
+        MList<T> rules;
+        public MList<T> Rules
         {
             get { return rules; }
             set { Set(ref rules, value, () => Rules); }
@@ -40,19 +39,15 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class AllowedRule<R, A> : EmbeddedEntity
+    public abstract class AllowedRule<R, A> : EmbeddedEntity
         where R : IdentifiableEntity
         where A : struct
     {
-        public AllowedRule(A allowedBase)
-        {
-            this.allowedBase = allowedBase;
-        }
-
         A allowedBase;
         public A AllowedBase
         {
             get { return allowedBase; }
+            internal set { allowedBase = value; }
         }
 
         A? allowedOverride;
@@ -94,23 +89,72 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class TypeRulePack : BaseRulePack<TypeDN, TypeAllowed> { }
+    public class TypeRulePack : BaseRulePack<TypeAllowedRule> { }
+    [Serializable]
+    public class TypeAllowedRule : AllowedRule<TypeDN, TypeAllowed> { }
+
 
     [Serializable]
-    public class PropertyRulePack : BaseRulePack<PropertyDN, PropertyAllowed> { }
+    public class PropertyRulePack : BaseRulePack<PropertyAllowedRule> { }
+    [Serializable]
+    public class PropertyAllowedRule : AllowedRule<PropertyDN, PropertyAllowed>{}
+
 
     [Serializable]
-    public class QueryRulePack : BaseRulePack<QueryDN, bool> { }
+    public class QueryRulePack : BaseRulePack<QueryAllowedRule> { }
+    [Serializable]
+    public class QueryAllowedRule : AllowedRule<QueryDN, bool> { }
+
 
     [Serializable]
-    public class OperationRulePack : BaseRulePack<OperationDN, bool> { }
+    public class OperationRulePack : BaseRulePack<OperationAllowedRule> { }
+    [Serializable]
+    public class OperationAllowedRule : AllowedRule<OperationDN, bool> { } 
+
 
     [Serializable]
-    public class PermissionRulePack : BaseRulePack<PermissionDN, bool> { }
+    public class PermissionRulePack : BaseRulePack<PermissionAllowedRule> { }
+    [Serializable]
+    public class PermissionAllowedRule : AllowedRule<PermissionDN, bool> { } 
 
     [Serializable]
-    public class FacadeMethodRulePack : BaseRulePack<FacadeMethodDN, bool> { }
+    public class FacadeMethodRulePack : BaseRulePack<FacadeMethodAllowedRule> { }
+    [Serializable]
+    public class FacadeMethodAllowedRule : AllowedRule<FacadeMethodDN, bool> { } 
 
     [Serializable]
-    public class EntityGroupRulePack : BaseRulePack<EntityGroupDN, EntityGroupAllowed> { }
+    public class EntityGroupRulePack : BaseRulePack<EntityGroupAllowedRule> { }
+    [Serializable]
+    public class EntityGroupAllowedRule : AllowedRule<EntityGroupDN, EntityGroupAllowed>
+    {
+        public TypeAllowed In
+        {
+            get { return EntityGroupAllowedUtils.In(Allowed); }
+            set
+            {
+                Allowed = EntityGroupAllowedUtils.FromInOut(value, EntityGroupAllowedUtils.Out(Allowed));
+                Notify(() => In);
+            }
+        }
+
+        public TypeAllowed Out
+        {
+            get { return EntityGroupAllowedUtils.Out(Allowed); }
+            set
+            {
+                Allowed = EntityGroupAllowedUtils.FromInOut(EntityGroupAllowedUtils.In(Allowed), value);
+                Notify(() => Out);
+            }
+        }
+
+        public TypeAllowed InBase
+        {
+            get { return EntityGroupAllowedUtils.In(AllowedBase); }
+        }
+
+        public TypeAllowed OutBase
+        {
+            get { return EntityGroupAllowedUtils.Out(AllowedBase); }
+        }
+    }
 }

@@ -24,7 +24,7 @@ namespace Signum.Engine.Authorization
 {
     public static class EntityGroupAuthLogic
     {
-        static AuthCache<RuleEntityGroupDN, EntityGroupDN, Enum, EntityGroupAllowed> cache; 
+        static AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowed> cache; 
 
         public static void Start(SchemaBuilder sb)
         {
@@ -33,10 +33,10 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertIsStarted(sb);
                 EntityGroupLogic.Start(sb);
 
-                cache = new AuthCache<RuleEntityGroupDN, EntityGroupDN, Enum, EntityGroupAllowed>(sb,
+                cache = new AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowed>(sb,
                      EnumLogic<EntityGroupDN>.ToEnum,
                      EnumLogic<EntityGroupDN>.ToEntity,
-                     MaxEntityGroupAllowed, EntityGroupAllowed.All);
+                     MaxEntityGroupAllowed, EntityGroupAllowed.CreateCreate);
 
                 sb.Schema.Initializing(InitLevel.Level0SyncEntities, Schema_InitializingRegisterEvents);
             }
@@ -44,7 +44,7 @@ namespace Signum.Engine.Authorization
 
         static EntityGroupAllowed MaxEntityGroupAllowed(this IEnumerable<EntityGroupAllowed> collection)
         {
-            return collection.Aggregate(EntityGroupAllowed.None, (a, b) => a | b);
+            return collection.Aggregate(EntityGroupAllowed.NoneNone, (a, b) => a | b);
         }
 
         static void Schema_InitializingRegisterEvents(Schema sender)
@@ -62,6 +62,7 @@ namespace Signum.Engine.Authorization
              where T : IdentifiableEntity
         {
             sender.EntityEvents<T>().Retrieved += new EntityEventHandler<T>(EntityGroupAuthLogic_Retrieved);
+            sender.EntityEvents<T>().Saving += new EntityEventHandler<T>(EntityGroupAuthLogic_Saving);
             sender.EntityEvents<T>().FilterQuery +=new FilterQueryEventHandler<T>(EntityGroupAuthLogic_FilterQuery);
         }
 
@@ -81,6 +82,13 @@ namespace Signum.Engine.Authorization
             return new Disposable(() => retrieveDisabled = false);
         }
 
+        [ThreadStatic]
+        static bool saveDisabled;
+        public static IDisposable DisableSave()
+        {
+            saveDisabled = true;
+            return new Disposable(() => saveDisabled = false);
+        }
 
         static IQueryable<T> EntityGroupAuthLogic_FilterQuery<T>(IQueryable<T> query)
             where T:IdentifiableEntity
@@ -94,16 +102,28 @@ namespace Signum.Engine.Authorization
             where T:IdentifiableEntity
         {
             if (!retrieveDisabled && isRoot)
-                ident.AssertAllowed();
+                ident.AssertAllowed(TypeAllowed.Read);
         }
 
-        public static void AssertAllowed(this IIdentifiable ident)
+        static void EntityGroupAuthLogic_Saving<T>(T ident, bool isRoot)
+            where T : IdentifiableEntity
         {
-            if (!ident.IsAllowed())
+            if (!saveDisabled && ident.Modified)
+            {
+                if (ident.IsNew)
+                    ident.AssertAllowed(TypeAllowed.Create);
+                else
+                    ident.AssertAllowed(TypeAllowed.None);
+            }
+        }
+
+        public static void AssertAllowed(this IIdentifiable ident, TypeAllowed allowed)
+        {
+            if (!ident.IsAllowedFor(allowed))
                 throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieveThe0WithId1.Formato(ident.GetType().NiceName(), ident.Id));
         }
 
-        public static bool IsAllowed(this IIdentifiable ident)
+        public static bool IsAllowedFor(this IIdentifiable ident, TypeAllowed allowed)
         {
             if(!AuthLogic.IsEnabled)
                 return true;
@@ -113,13 +133,15 @@ namespace Signum.Engine.Authorization
             return EntityGroupLogic.GroupsFor(ident.GetType()).All(eg =>
                 {
                     EntityGroupAllowed access = cache.GetAllowed(role, eg);
-                    if (access == EntityGroupAllowed.All)
+                    TypeAllowed inAllowed = EntityGroupAllowedUtils.In(access);
+                    TypeAllowed outAllowed = EntityGroupAllowedUtils.Out(access);
+                    if (inAllowed >= allowed && outAllowed >= allowed)
                         return true;
 
                     if (((IdentifiableEntity)ident).IsInGroup(eg))
-                        return access.HasFlag(EntityGroupAllowed.In);
+                        return inAllowed >= allowed;
                     else
-                        return access.HasFlag(EntityGroupAllowed.Out);
+                        return outAllowed >= allowed;
                 });
         }
 
@@ -133,23 +155,24 @@ namespace Signum.Engine.Authorization
             RoleDN role = RoleDN.Current;
 
             var pairs = (from eg in EntityGroupLogic.GroupsFor(typeof(T))
+                         let allowed = cache.GetAllowed(role, eg)
                          select new
                          {
                              Group = eg,
-                             Allowed = cache.GetAllowed(role, eg),
+                             AllowedIn = EntityGroupAllowedUtils.In(allowed) != TypeAllowed.None,
+                             AllowedOut = EntityGroupAllowedUtils.Out(allowed) != TypeAllowed.None,
                              Expression = EntityGroupLogic.GetInGroupExpression<T>(eg),
-                         }).Where(p => p.Allowed != EntityGroupAllowed.All ).ToList();
+                         }).Where(p => !p.AllowedIn || !p.AllowedOut).ToList();
 
             if (pairs.Count == 0)
                 return query;
 
-            if (pairs.Any(p => p.Allowed == EntityGroupAllowed.None))
+            if (pairs.Any(p => !p.AllowedIn && !p.AllowedOut))
                 return query.Where(p => false);
 
             ParameterExpression e = Expression.Parameter(typeof(T), "e");
             Expression body = pairs.Select(p =>
-                            p.Allowed == EntityGroupAllowed.In ?
-                            (Expression)Expression.Invoke(p.Expression, e) :
+                            p.AllowedIn ? (Expression)Expression.Invoke(p.Expression, e) :
                             Expression.Not(Expression.Invoke(p.Expression, e))).Aggregate((a, b) => Expression.And(a, b));
 
             Expression cleanBody = DbQueryProvider.Clean(body);

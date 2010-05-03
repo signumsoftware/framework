@@ -20,7 +20,7 @@ namespace Signum.Engine.Authorization
 
     public static class QueryAuthLogic
     {
-        static AuthCache<RuleQueryDN, QueryDN, object, bool> cache;  
+        static AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool> cache;  
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
 
                 dqm.AllowQuery += new Func<object, bool>(dqm_AllowQuery);
 
-                cache = new AuthCache<RuleQueryDN, QueryDN, object, bool>(sb,
+                cache = new AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool>(sb,
                     qn => QueryLogic.ToQueryName(qn.Key),
                     QueryLogic.RetrieveOrGenerateQuery, AuthUtils.MaxAllowed, true);
             }

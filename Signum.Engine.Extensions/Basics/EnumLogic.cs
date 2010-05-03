@@ -90,13 +90,12 @@ namespace Signum.Engine.Basics
 
         public static T ToEntity(Enum key)
         {
-            return ToEntity(key, true);
+            return toEntity.GetOrThrow(key, Resources.TheKey0IsNotFoundIn1Table.Formato(key, typeof(T).Name));
         }
 
-        public static T ToEntity(Enum key, bool throwException)
+        public static T TryToEntity(Enum key)
         {
-            return throwException || toEntity.ContainsKey(key) ? toEntity.GetOrThrow(key, Resources.TheKey0IsNotFoundIn1Table.Formato(key, typeof(T).Name))
-                : null;
+            return toEntity.TryGetC(key); 
         }
 
         public static Enum ToEnum(T entity)

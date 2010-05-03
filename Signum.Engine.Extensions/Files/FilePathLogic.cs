@@ -27,7 +27,7 @@ namespace Signum.Engine.Files
 
                 EnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
-                sb.Schema.EntityEvents<FilePathDN>().Saving += FilePath_Saving;
+                sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathDN>().Deleting += FilePath_Deleting;
 
                 dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
@@ -91,20 +91,20 @@ namespace Signum.Engine.Files
 
         public static FilePathDN UnsafeLoad(FileRepositoryDN repository, FileTypeDN fileType, string fullPath)
         {
-            if (!fullPath.StartsWith(repository.PhysicalPrefix))
+            if (!fullPath.StartsWith(repository.FullPhysicalPrefix))
                 throw new InvalidOperationException("The File {0} doesn't belong to the repository {1}".Formato(fullPath, repository.PhysicalPrefix));
 
             return new FilePathDN
             {
                 FileLength = (int)new FileInfo(fullPath).Length,
                 FileType = fileType,
-                Sufix = fullPath.Substring(repository.PhysicalPrefix.Length).TrimStart('\\'),
+                Sufix = fullPath.Substring(repository.FullPhysicalPrefix.Length).TrimStart('\\'),
                 FileName = Path.GetFileName(fullPath),
                 Repository = repository,
             };
         }
 
-        static void FilePath_Saving(FilePathDN fp, bool isRoot, ref bool graphModified)
+        static void FilePath_PreSaving(FilePathDN fp, bool isRoot, ref bool graphModified)
         {
             if (fp.IsNew && !unsafeMode)
             {

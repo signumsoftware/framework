@@ -17,7 +17,7 @@ namespace Signum.Engine.Authorization
 {
     public static class FacadeMethodAuthLogic
     {
-        static AuthCache<RuleFacadeMethodDN, FacadeMethodDN, string, bool> cache; 
+        static AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool> cache; 
 
         public static void Start(SchemaBuilder sb, Type serviceInterface)
         {
@@ -26,7 +26,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertIsStarted(sb);
                 FacadeMethodLogic.Start(sb, serviceInterface);
 
-                cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodDN, string, bool>(sb,
+                cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool>(sb,
                      fm => fm.Name,
                      n => FacadeMethodLogic.RetrieveOrGenerateServiceOperations().Single(fm => fm.Name == n),
                      AuthUtils.MaxAllowed, true); 

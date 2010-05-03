@@ -102,10 +102,10 @@ namespace Signum.Entities.Files
             internal set { Set(ref repository, value, () => Repository); }
         }
 
-        static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => fp.Repository.PhysicalPrefix + '\\' + fp.Sufix;
+        static Expression<Func<FilePathDN, string>> FullPhysicalPathExpression = fp => Path.Combine(fp.Repository.FullPhysicalPrefix, fp.Sufix);
         public string FullPhysicalPath
         {
-            get { return Repository == null ? null : Repository.PhysicalPrefix + '\\' + Sufix; }
+            get { return Repository == null ? null : Path.Combine(Repository.FullPhysicalPrefix, Sufix); }
         }
 
         static Expression<Func<FilePathDN, string>> FullWebPathExpression = fp => 

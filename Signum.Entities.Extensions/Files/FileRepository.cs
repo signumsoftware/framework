@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using System.Linq.Expressions;
+using System.IO;
 
 namespace Signum.Entities.Files
 {
@@ -32,6 +34,23 @@ namespace Signum.Entities.Files
             get { return physicalPrefix; }
             set { Set(ref physicalPrefix, value, () => PhysicalPrefix); }
         }
+
+
+        static Expression<Func<FileRepositoryDN, string>> FullPhysicalPrefixExpression = fr => ConvertToAbsolute(fr.PhysicalPrefix);
+        public string FullPhysicalPrefix
+        {
+            get { return ConvertToAbsolute(PhysicalPrefix); }
+        }
+
+        static string ConvertToAbsolute(string phsicalPrefix)
+        {
+            if (!Path.IsPathRooted(phsicalPrefix) && OverridenPhisicalCurrentDirectory != null)
+                return Path.Combine(OverridenPhisicalCurrentDirectory, phsicalPrefix);
+
+            return phsicalPrefix;
+        }
+
+        public static string OverridenPhisicalCurrentDirectory; 
 
         [SqlDbType(Size = 500)]
         string webPrefix;

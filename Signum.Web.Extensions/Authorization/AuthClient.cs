@@ -107,30 +107,40 @@ namespace Signum.Web.Authorization
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (types)
-                    Register<TypeRulePack, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
+                    Register<TypeRulePack, TypeAllowedRule, TypeDN, TypeAllowed, TypeDN>("types", a => a.Resource, "Resource", false);
 
                 if (properties)
-                    Register<PropertyRulePack, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path, "Resource_Path", true);
+                    Register<PropertyRulePack, PropertyAllowedRule, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path, "Resource_Path", true);
 
                 if (queries)
-                    Register<QueryRulePack, QueryDN, bool, string>("queries", a => a.Resource.Key, "Resource_Key", true);
+                    Register<QueryRulePack, QueryAllowedRule, QueryDN, bool, string>("queries", a => a.Resource.Key, "Resource_Key", true);
 
                 if (operations)
-                    Register<OperationRulePack, OperationDN, bool, OperationDN>("operations", a => a.Resource, "Resource", true);
+                    Register<OperationRulePack, OperationAllowedRule, OperationDN, bool, OperationDN>("operations", a => a.Resource, "Resource", true);
 
                 if (permissions)
-                    Register<PermissionRulePack, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource, "Resource", false);
+                    Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource, "Resource", false);
 
                 if (facadeMethods)
-                    Register<FacadeMethodRulePack, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.Name, "Resource_Name", false);
+                    Register<FacadeMethodRulePack, FacadeMethodAllowedRule, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.Name, "Resource_Name", false);
 
                 if (entityGroups)
-                    Register<EntityGroupRulePack, EntityGroupDN, EntityGroupAllowed, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
+                {
+                    Register<EntityGroupRulePack, EntityGroupAllowedRule, EntityGroupDN, EntityGroupAllowed, EntityGroupDN>("entityGroups", a => a.Resource, "Resource", false);
+
+                    Navigator.EntitySettings<EntityGroupRulePack>().MappingAdmin
+                        .GetProperty(m => m.Rules, rul =>
+                        ((EntityMapping<EntityGroupAllowedRule>)((MListDictionaryMapping<EntityGroupAllowedRule, EntityGroupDN>)rul).ElementMapping)
+                                .RemoveProperty(a => a.Allowed)
+                                .SetProperty(a => a.In, new ValueMapping<TypeAllowed>(), null)
+                                .SetProperty(a => a.Out, new ValueMapping<TypeAllowed>(), null));
+                }
             }
         }
 
-        static void Register<T, R, A, K>(string partialViewName, Func<AllowedRule<R, A>, K> getKey, string getKeyRoute, bool embedded)
-            where T : BaseRulePack<R, A>
+        static void Register<T, AR, R, A, K>(string partialViewName, Func<AR, K> getKey, string getKeyRoute, bool embedded)
+            where T : BaseRulePack<AR>
+            where AR: AllowedRule<R, A>, new()
             where R : IdentifiableEntity
             where A : struct
         {
@@ -142,9 +152,9 @@ namespace Signum.Web.Authorization
                 PartialViewName = e => "Views/Auth/{0}".Formato(partialViewName),
                 MappingAdmin = new EntityMapping<T>(false)
                     .SetProperty(m => m.Rules,
-                    new MListDictionaryMapping<AllowedRule<R, A>, K>(getKey, getKeyRoute)
+                    new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
                     {
-                        ElementMapping = new EntityMapping<AllowedRule<R, A>>(false)
+                        ElementMapping = new EntityMapping<AR>(false)
                                 .SetProperty(p => p.Allowed, new ValueMapping<A>(), null)
                     }, null)
             });

@@ -60,10 +60,44 @@ namespace Signum.Entities.Authorization
 
     public enum EntityGroupAllowed
     {
-        None = 0,
-        In = 1,
-        Out  = 2,
-        All = 3
+        //In - Out
+        NoneNone = 0,
+        NoneRead = 1,
+        NoneModify = 2,
+        NoneCreate = 3,
+
+        ReadNone = 4,
+        ReadRead = 5,
+        ReadModify = 6,
+        ReadCreate = 7,
+
+        ModifyNone = 8,
+        ModifyRead = 9,
+        ModifyModify = 10,
+        ModifyCreate = 11,
+
+        CreateNone = 12,
+        CreateRead = 13,
+        CreateModify = 14,
+        CreateCreate = 15,
+    }
+
+    public static class EntityGroupAllowedUtils
+    {
+        public static EntityGroupAllowed FromInOut(TypeAllowed inAllowed, TypeAllowed outAllowed)
+        {
+            return (EntityGroupAllowed)(((int)inAllowed << 2) | (int)outAllowed);
+        }
+
+        public static TypeAllowed In(EntityGroupAllowed groupAllowed)
+        {
+            return (TypeAllowed)(((int)groupAllowed >> 2) & 0x3);
+        }
+
+        public static TypeAllowed Out(EntityGroupAllowed groupAllowed)
+        {
+            return (TypeAllowed)((int)groupAllowed & 0x3);
+        }
     }
 
     public enum PropertyAllowed

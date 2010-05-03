@@ -11,10 +11,11 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
 {
-    class AuthCache<RT, R, K, A>
-        where RT: RuleDN<R,A>, new()
-        where R: IdentifiableEntity
-        where A: struct
+    class AuthCache<RT, AR, R, K, A>
+        where RT : RuleDN<R, A>, new()
+        where AR : AllowedRule<R, A>, new()
+        where R : IdentifiableEntity
+        where A : struct
     {
         Dictionary<Lite<RoleDN>, Dictionary<K, A>> _runtimeRules;
         Dictionary<Lite<RoleDN>, Dictionary<K, A>> RuntimeRules
@@ -51,18 +52,19 @@ namespace Signum.Entities.Authorization
             _runtimeRules = null; 
         }
 
-        internal List<AllowedRule<R, A>> GetRules(Lite<RoleDN> role, IEnumerable<R> resources)
+        internal List<AR> GetRules(Lite<RoleDN> role, IEnumerable<R> resources)
         {
             return (from r in resources
                     let k = ToKey(r)
-                    select new AllowedRule<R, A>(GetBaseAllowed(role, k))
+                    select new AR()
                     {
                         Resource = r,
+                        AllowedBase = GetBaseAllowed(role, k),
                         Allowed = GetAllowed(role, k)
                     }).ToList();
         }
 
-        internal void SetRules(BaseRulePack<R, A> rules, Expression<Func<R,bool>> filterResources)
+        internal void SetRules(BaseRulePack<AR> rules, Expression<Func<R,bool>> filterResources)
         {
             var current = Database.Query<RT>().Where(r => r.Role == rules.Role && filterResources.Invoke(r.Resource)).ToDictionary(a => a.Resource);
             var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);

@@ -121,7 +121,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Saving(RoleDN role, bool isRoot, ref bool graphModified)
+        static void Schema_Saving(RoleDN role, bool isRoot)
         {
             if (!role.IsNew && role.Roles != null && role.Roles.Modified)
             {

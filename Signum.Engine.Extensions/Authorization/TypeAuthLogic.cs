@@ -19,18 +19,18 @@ namespace Signum.Engine.Authorization
 {
     public static class TypeAuthLogic
     {
-        static AuthCache<RuleTypeDN, TypeDN, Type, TypeAllowed> cache;
+        static AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed> cache;
 
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertIsStarted(sb);
-                sb.Schema.EntityEventsGlobal.Saved += Schema_Saved; //because we need Modifications propagated
+                sb.Schema.EntityEventsGlobal.Saving += Schema_Saving; //because we need Modifications propagated
                 sb.Schema.EntityEventsGlobal.Retrieving += Schema_Retrieving;
                 sb.Schema.IsAllowedCallback += new Func<Type, bool>(Schema_IsAllowedCallback);
 
-                cache = new AuthCache<RuleTypeDN, TypeDN, Type, TypeAllowed>(sb,
+                cache = new AuthCache<RuleTypeDN, TypeAllowedRule, TypeDN, Type, TypeAllowed>(sb,
                     dn => TypeLogic.DnToType[dn],
                     type => TypeLogic.TypeToDN[type], MaxTypeAllowed, TypeAllowed.Create);
             }
@@ -49,7 +49,7 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleDN.Current, type) != TypeAllowed.None;
         }
 
-        static void Schema_Saved(IdentifiableEntity ident, bool isRoot)
+        static void Schema_Saving(IdentifiableEntity ident, bool isRoot)
         {
             if (AuthLogic.IsEnabled && ident.Modified)
             {

@@ -22,6 +22,8 @@ namespace Signum.Web.Files
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                FileRepositoryDN.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
                 Navigator.AddSetting(new EntitySettings<FilePathDN>(EntityType.Default) { PartialViewName = _ => ViewPrefix + "FilePathIU.ascx" });
             }
         }

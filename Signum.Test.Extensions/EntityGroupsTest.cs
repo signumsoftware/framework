@@ -72,7 +72,7 @@ namespace Signum.Test.Extensions
 
             sb.Schema.Initialize();
 
-            EntityGroupAuthLogic.SetEntityGroupAllowed(role.ToLite(), EntityGroups.UserResources, EntityGroupAllowed.In);
+            EntityGroupAuthLogic.SetEntityGroupAllowed(role.ToLite(), EntityGroups.UserResources, EntityGroupAllowed.CreateNone);
 
             Connection.CurrentLog = new DebugTextWriter();
 

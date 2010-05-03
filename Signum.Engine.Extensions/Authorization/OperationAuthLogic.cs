@@ -20,7 +20,7 @@ namespace Signum.Engine.Authorization
 {
     public static class OperationAuthLogic
     {
-        static AuthCache<RuleOperationDN, OperationDN, Enum, bool> cache; 
+        static AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool> cache; 
 
         public static void Start(SchemaBuilder sb)
         {
@@ -31,7 +31,7 @@ namespace Signum.Engine.Authorization
 
                 OperationLogic.AllowOperation += new AllowOperationHandler(OperationLogic_AllowOperation);
 
-                cache = new AuthCache<RuleOperationDN, OperationDN, Enum, bool>(sb,
+                cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, bool>(sb,
                      EnumLogic<OperationDN>.ToEnum,
                      EnumLogic<OperationDN>.ToEntity,
                      AuthUtils.MaxAllowed, true);
@@ -52,11 +52,13 @@ namespace Signum.Engine.Authorization
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> roleLite, TypeDN typeDN)
         {
+
+            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => EnumLogic<OperationDN>.ToEntity(a.Key));
             return new OperationRulePack
             {
                 Role = roleLite,
                 Type = typeDN,
-                Rules = cache.GetRules(roleLite, OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => EnumLogic<OperationDN>.ToEntity(a.Key))).ToMList()
+                Rules = cache.GetRules(roleLite, resources).ToMList()
             };
         }
 
