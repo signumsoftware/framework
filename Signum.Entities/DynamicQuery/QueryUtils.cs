@@ -115,10 +115,6 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
-                    FilterOperation.GreaterThan,
-                    FilterOperation.GreaterThanOrEqual,
-                    FilterOperation.LessThan,
-                    FilterOperation.LessThanOrEqual,
                 }
             },
             { 

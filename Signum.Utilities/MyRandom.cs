@@ -7,7 +7,6 @@ namespace Signum.Utilities
 {
     public static class MyRandom
     {
-
         [ThreadStatic]
         static Random random;
 
@@ -15,7 +14,10 @@ namespace Signum.Utilities
         {
             get { return random ?? (random = new Random()); }
         }
+    }
 
+    public static class RandomExtensions
+    {
         public static bool NextBool(this Random r)
         {
             return r.Next(2) == 1;

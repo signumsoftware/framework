@@ -38,7 +38,7 @@ namespace Signum.Engine
                     IdentifiableEntity ident = m as IdentifiableEntity;
 
                     if (ident != null)
-                        schema.OnSaving(ident, roots.Contains(ident), ref graphModified);
+                        schema.OnPreSaving(ident, roots.Contains(ident), ref graphModified);
                 }, createGraph);
 
             string error = GraphExplorer.Integrity(modifiables);
@@ -67,6 +67,9 @@ namespace Signum.Engine
             DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
 
             identifiables.RemoveAll(backEdges.Edges);
+
+            foreach (var node in identifiables)
+                schema.OnSaving(node, roots.Contains(node));
 
             IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
 
