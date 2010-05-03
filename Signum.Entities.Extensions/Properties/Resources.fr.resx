@@ -118,241 +118,241 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Deleted" xml:space="preserve">
-    <value>(Deleted)</value>
+    <value>(Effacé)</value>
   </data>
   <data name="ProcessOperation_Cancel" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Annuler</value>
   </data>
   <data name="ProcessOperation_Execute" xml:space="preserve">
-    <value>Execute</value>
+    <value>Executer</value>
   </data>
   <data name="ProcessOperation_FromProcess" xml:space="preserve">
-    <value>New Execution</value>
+    <value>Nouvel execution</value>
   </data>
   <data name="ProcessOperation_Plan" xml:space="preserve">
     <value>Plan</value>
   </data>
   <data name="ProcessOperation_Suspend" xml:space="preserve">
-    <value>Suspend</value>
+    <value>Suspendre</value>
   </data>
   <data name="ProcessState_Canceled" xml:space="preserve">
-    <value>Canceled</value>
+    <value>Annulé</value>
   </data>
   <data name="ProcessState_Created" xml:space="preserve">
-    <value>Created</value>
+    <value>Créé</value>
   </data>
   <data name="ProcessState_Executing" xml:space="preserve">
-    <value>Executing</value>
+    <value>S'execute</value>
   </data>
   <data name="ProcessState_Finished" xml:space="preserve">
-    <value>Finished</value>
+    <value>Terminé</value>
   </data>
   <data name="ProcessState_Planned" xml:space="preserve">
-    <value>Planned</value>
+    <value>Planifié</value>
   </data>
   <data name="ProcessState_Queued" xml:space="preserve">
-    <value>Queued</value>
+    <value>Mise en queu</value>
   </data>
   <data name="ProcessState_Suspended" xml:space="preserve">
-    <value>Suspended</value>
+    <value>suspendu</value>
   </data>
   <data name="ProcessState_Suspending" xml:space="preserve">
-    <value>Suspending</value>
+    <value>en suspension</value>
   </data>
   <data name="ProcessQueries_ErrorExecutions" xml:space="preserve">
-    <value>Error Executons</value>
+    <value>Error d'execution</value>
   </data>
   <data name="ProcessQueries_CurrentExecutions" xml:space="preserve">
-    <value>Current Executions</value>
+    <value>Executions en cours</value>
   </data>
   <data name="CalendarDN" xml:space="preserve">
-    <value>Calendar</value>
+    <value>Calendrier</value>
   </data>
   <data name="CalendarDN_Holidays" xml:space="preserve">
-    <value>Holidays</value>
+    <value>Vacances</value>
   </data>
   <data name="CalendarDN_Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="CompositeReportDN" xml:space="preserve">
-    <value>Composite Report</value>
+    <value>Rapport composite</value>
   </data>
   <data name="CompositeReportDN_ExcelReports" xml:space="preserve">
-    <value>Reports</value>
+    <value>Rapports</value>
   </data>
   <data name="CompositeReportDN_Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="EnumDN_Key" xml:space="preserve">
-    <value>Key</value>
+    <value>Clé</value>
   </data>
   <data name="EnumDN_Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="ExcelReportDN" xml:space="preserve">
-    <value>Excel Report</value>
+    <value>Rapport Excel</value>
   </data>
   <data name="ExcelReportDN_Deleted" xml:space="preserve">
-    <value>Deleted</value>
+    <value>Effacé</value>
   </data>
   <data name="ExcelReportDN_DisplayName" xml:space="preserve">
-    <value>Display Name</value>
+    <value>Nom affiché</value>
   </data>
   <data name="ExcelReportDN_File" xml:space="preserve">
-    <value>File</value>
+    <value>Fichier</value>
   </data>
   <data name="ExcelReportDN_Query" xml:space="preserve">
-    <value>Query</value>
+    <value>Recherche</value>
   </data>
   <data name="HolidayDN" xml:space="preserve">
-    <value>Holidays</value>
+    <value>Vacances</value>
   </data>
   <data name="HolidayDN_Date" xml:space="preserve">
     <value>Date</value>
   </data>
   <data name="HolidayDN_Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="LogOperationDN_End" xml:space="preserve">
-    <value>End</value>
+    <value>Fin</value>
   </data>
   <data name="LogOperationDN_Exception" xml:space="preserve">
     <value>Exception</value>
   </data>
   <data name="LogOperationDN_Operation" xml:space="preserve">
-    <value>Operation</value>
+    <value>Opération</value>
   </data>
   <data name="LogOperationDN_Start" xml:space="preserve">
-    <value>Start</value>
+    <value>Début</value>
   </data>
   <data name="LogOperationDN_Target" xml:space="preserve">
-    <value>Target</value>
+    <value>Cible</value>
   </data>
   <data name="LogOperationDN_User" xml:space="preserve">
-    <value>User</value>
+    <value>Utilisateur</value>
   </data>
   <data name="PackageDN" xml:space="preserve">
-    <value>Package</value>
+    <value>Packet</value>
   </data>
   <data name="PackageDN_Operation" xml:space="preserve">
     <value>Operation</value>
   </data>
   <data name="PackageLineDN" xml:space="preserve">
-    <value>Package Line</value>
+    <value>Line de Packet</value>
   </data>
   <data name="PackageLineDN_Exception" xml:space="preserve">
     <value>Exception</value>
   </data>
   <data name="PackageLineDN_FinishTime" xml:space="preserve">
-    <value>Finish Time</value>
+    <value>Heure de fin</value>
   </data>
   <data name="PackageLineDN_Package" xml:space="preserve">
-    <value>Package</value>
+    <value>Packet</value>
   </data>
   <data name="PackageLineDN_Target" xml:space="preserve">
-    <value>Target</value>
+    <value>Cible</value>
   </data>
   <data name="ProcessDN" xml:space="preserve">
-    <value>Process</value>
+    <value>Processus</value>
   </data>
   <data name="ProcessExecutionDN" xml:space="preserve">
-    <value>Process Execution</value>
+    <value>Execution de processus</value>
   </data>
   <data name="ProcessExecutionDN_CancelationDate" xml:space="preserve">
-    <value>Cancelation Date</value>
+    <value>Date d'annulation</value>
   </data>
   <data name="ProcessExecutionDN_CreationDate" xml:space="preserve">
-    <value>Creation Date</value>
+    <value>Date de création</value>
   </data>
   <data name="ProcessExecutionDN_ErrorDate" xml:space="preserve">
-    <value>Error Date</value>
+    <value>Date d'erreur</value>
   </data>
   <data name="ProcessExecutionDN_Exception" xml:space="preserve">
     <value>Exception</value>
   </data>
   <data name="ProcessExecutionDN_ExecutionEnd" xml:space="preserve">
-    <value>Execution End</value>
+    <value>Fin d'execution</value>
   </data>
   <data name="ProcessExecutionDN_ExecutionStart" xml:space="preserve">
-    <value>Execution Start</value>
+    <value>Début d'execution</value>
   </data>
   <data name="ProcessExecutionDN_PlannedDate" xml:space="preserve">
-    <value>Planned Date</value>
+    <value>Date planifiée</value>
   </data>
   <data name="ProcessExecutionDN_Process" xml:space="preserve">
-    <value>Process</value>
+    <value>Processus</value>
   </data>
   <data name="ProcessExecutionDN_ProcessData" xml:space="preserve">
-    <value>Data</value>
+    <value>Donnés</value>
   </data>
   <data name="ProcessExecutionDN_Progress" xml:space="preserve">
-    <value>Progress</value>
+    <value>Avancement</value>
   </data>
   <data name="ProcessExecutionDN_QueuedDate" xml:space="preserve">
-    <value>Queued Date</value>
+    <value>Date de mise en queue</value>
   </data>
   <data name="ProcessExecutionDN_State" xml:space="preserve">
-    <value>State</value>
+    <value>Etat</value>
   </data>
   <data name="ProcessExecutionDN_SuspendDate" xml:space="preserve">
-    <value>Suspend Date</value>
+    <value>Date de suspension</value>
   </data>
   <data name="RoleDN" xml:space="preserve">
     <value>Role</value>
   </data>
   <data name="RoleDN_Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="RoleDN_Roles" xml:space="preserve">
     <value>Roles</value>
   </data>
   <data name="ScheduledTaskDN" xml:space="preserve">
-    <value>Scheduled Task</value>
+    <value>Tâches planifié</value>
   </data>
   <data name="ScheduledTaskDN_NextDate" xml:space="preserve">
-    <value>Next Date </value>
+    <value>Prochaine date</value>
   </data>
   <data name="ScheduledTaskDN_Rule" xml:space="preserve">
-    <value>Rule</value>
+    <value>Règle </value>
   </data>
   <data name="ScheduledTaskDN_Suspended" xml:space="preserve">
-    <value>Suspended</value>
+    <value>Suspendu</value>
   </data>
   <data name="ScheduledTaskDN_Task" xml:space="preserve">
-    <value>Task</value>
+    <value>Tâche</value>
   </data>
   <data name="ScheduleRuleDailyDN" xml:space="preserve">
-    <value>Dialy</value>
+    <value>Journalier</value>
   </data>
   <data name="ScheduleRuleDayDN_Hour" xml:space="preserve">
-    <value>Hour</value>
+    <value>Heur</value>
   </data>
   <data name="ScheduleRuleDayDN_Minute" xml:space="preserve">
     <value>Minute</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN" xml:space="preserve">
-    <value>Days of week</value>
+    <value>Jours de la semaine</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_AndHoliday" xml:space="preserve">
-    <value>and holidays</value>
+    <value>Et vacances</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Calendar" xml:space="preserve">
-    <value>Calendar</value>
+    <value>Calendrier</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_F" xml:space="preserve">
-    <value>F</value>
+    <value>Ve</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Friday" xml:space="preserve">
-    <value>Friday</value>
+    <value>Vendredi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Holiday" xml:space="preserve">
-    <value>Holiday</value>
+    <value>Vacance</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_M" xml:space="preserve">
-    <value>M</value>
+    <value>Lu</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Monday" xml:space="preserve">
-    <value>Monday</value>
+    <value>Lundi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_S" xml:space="preserve">
     <value>S</value>
@@ -361,210 +361,210 @@
     <value>Sa</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Saturday" xml:space="preserve">
-    <value>Saturday</value>
+    <value>Samedi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Sunday" xml:space="preserve">
-    <value>Sunday</value>
+    <value>Dimanche</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_T" xml:space="preserve">
-    <value>T</value>
+    <value>Ma</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Th" xml:space="preserve">
-    <value>Th</value>
+    <value>Je</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Thursday" xml:space="preserve">
-    <value>Thursday</value>
+    <value>Mardi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Tuesday" xml:space="preserve">
-    <value>Tuesday</value>
+    <value>Jeudi</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_W" xml:space="preserve">
-    <value>W</value>
+    <value>Me</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_Wednesday" xml:space="preserve">
-    <value>Wednesday</value>
+    <value>Mercredi</value>
   </data>
   <data name="ScheduleRuleWeeklyDN" xml:space="preserve">
-    <value>Weekly</value>
+    <value>Hebdomadaire</value>
   </data>
   <data name="ScheduleRuleWeeklyDN_DayOfTheWeek" xml:space="preserve">
-    <value>Day of the week</value>
+    <value>Jour de la semaine</value>
   </data>
   <data name="UserDN" xml:space="preserve">
-    <value>User</value>
+    <value>Utilisateur</value>
   </data>
   <data name="UserDN_Email" xml:space="preserve">
     <value>e-Mail</value>
   </data>
   <data name="UserDN_Related" xml:space="preserve">
-    <value>Related</value>
+    <value>Lié</value>
   </data>
   <data name="UserDN_Role" xml:space="preserve">
     <value>Role</value>
   </data>
   <data name="UserDN_UserName" xml:space="preserve">
-    <value>UserName</value>
+    <value>Nom d'utilisateur</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_ButHoliday" xml:space="preserve">
-    <value>but holidays</value>
+    <value>sauf vacances</value>
   </data>
   <data name="ScheduleRuleWeekDaysDN_At" xml:space="preserve">
-    <value>at</value>
+    <value>à</value>
   </data>
   <data name="ScheduleRuleDailyDN_Everydayat" xml:space="preserve">
-    <value>Every day at </value>
+    <value>Chaque jour à</value>
   </data>
   <data name="Holidayhavetobetrueorfalsewhenacalendarisset" xml:space="preserve">
-    <value>Holiday have to be true or false when a calendar is set</value>
+    <value>Les vancances doivent être véridiques ou fausses quand le calendrier est défini</value>
   </data>
   <data name="Holidayhavetobenullwhennocalendarisset" xml:space="preserve">
-    <value>Holiday have to be null when no calendar is set</value>
+    <value>Les vacances doivent être fausse quand aucun calendrier n'est défini</value>
   </data>
   <data name="CustomTaskDN" xml:space="preserve">
-    <value>Custom Task</value>
+    <value>Tâche paramétrable</value>
   </data>
   <data name="CustomTaskExecutionDN" xml:space="preserve">
-    <value>Custom Task Execution</value>
+    <value>Execution de Tâche paramètré</value>
   </data>
   <data name="CustomTaskExecutionDN_CustomTask" xml:space="preserve">
-    <value>Custom Task</value>
+    <value>Tâche paramétrable</value>
   </data>
   <data name="CustomTaskExecutionDN_EndTime" xml:space="preserve">
-    <value>End Time</value>
+    <value>Heur de fin</value>
   </data>
   <data name="CustomTaskExecutionDN_Exception" xml:space="preserve">
     <value>Exception</value>
   </data>
   <data name="CustomTaskExecutionDN_StartTime" xml:space="preserve">
-    <value>Start Time</value>
+    <value>Heur de commencement</value>
   </data>
   <data name="ScheduleRuleDayDN_StartingOn" xml:space="preserve">
-    <value>Starting On</value>
+    <value>Débute à </value>
   </data>
   <data name="CustomTaskOperation_Execute" xml:space="preserve">
-    <value>New Execute</value>
+    <value>Nouvelle execution</value>
   </data>
   <data name="FilePathDN_FileName" xml:space="preserve">
-    <value>File Name</value>
+    <value>Nom de fichier</value>
   </data>
   <data name="FilePathDN_FileType" xml:space="preserve">
-    <value>FileType</value>
+    <value>Type de fichier</value>
   </data>
   <data name="FilePathDN_Repository" xml:space="preserve">
-    <value>Repository</value>
+    <value>Dépôt</value>
   </data>
   <data name="FilePathDN_Sufix" xml:space="preserve">
-    <value>Sufix</value>
+    <value>Sufixe</value>
   </data>
   <data name="FileRepositoryDN" xml:space="preserve">
-    <value>File Repository</value>
+    <value>Dépôt de fichier</value>
   </data>
   <data name="FileRepositoryDN_Active" xml:space="preserve">
-    <value>Active</value>
+    <value>Activer</value>
   </data>
   <data name="FileRepositoryDN_Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="FileRepositoryDN_PhysicalPrefix" xml:space="preserve">
-    <value>Physical Prefix</value>
+    <value>Prefixe physique</value>
   </data>
   <data name="FileRepositoryDN_WebPrefix" xml:space="preserve">
-    <value>Web Prefix</value>
+    <value>Prefixe de web</value>
   </data>
   <data name="UserOperation_Create" xml:space="preserve">
-    <value>Create</value>
+    <value>Créer</value>
   </data>
   <data name="UserOperation_Disable" xml:space="preserve">
-    <value>Disable</value>
+    <value>Désactiver</value>
   </data>
   <data name="UserOperation_Enable" xml:space="preserve">
-    <value>Enable</value>
+    <value>Activer</value>
   </data>
   <data name="UserOperation_Save" xml:space="preserve">
-    <value>Save</value>
+    <value>Sauver</value>
   </data>
   <data name="UserOperation_SaveNew" xml:space="preserve">
-    <value>Save</value>
+    <value>Sauver</value>
   </data>
   <data name="LogOperationQueries_All" xml:space="preserve">
-    <value>All</value>
+    <value>Tous</value>
   </data>
   <data name="LogOperationQueries_Completed" xml:space="preserve">
-    <value>Completed</value>
+    <value>Complété</value>
   </data>
   <data name="LogOperationQueries_InProcess" xml:space="preserve">
-    <value>In Process</value>
+    <value>En traitement</value>
   </data>
   <data name="FileRepositoryDN_FileTypes" xml:space="preserve">
-    <value>File Types</value>
+    <value>Type de fichier</value>
   </data>
   <data name="DateSpanDN_Days" xml:space="preserve">
-    <value>Days</value>
+    <value>Jours</value>
   </data>
   <data name="DateSpanDN_Months" xml:space="preserve">
-    <value>Months</value>
+    <value>Mois</value>
   </data>
   <data name="DateSpanDN_Years" xml:space="preserve">
-    <value>Years</value>
+    <value>Années</value>
   </data>
   <data name="FilePathDN_FullPhysicalPath" xml:space="preserve">
-    <value>Physical Path</value>
+    <value>Chemin physique</value>
   </data>
   <data name="FilePathDN_FullWebPath" xml:space="preserve">
     <value>URL</value>
   </data>
   <data name="FilePathDN_FileLengthString" xml:space="preserve">
-    <value>File Length</value>
+    <value>Longueur de fichier</value>
   </data>
   <data name="LogOperationDN_Plural" xml:space="preserve">
-    <value>Operation Logs</value>
+    <value>Connections d'opérations</value>
   </data>
   <data name="UserQueryDN" xml:space="preserve">
-    <value>User Query</value>
+    <value>Recherche de l'utilisateur</value>
   </data>
   <data name="UserQueryDN_Columns" xml:space="preserve">
-    <value>Columns</value>
+    <value>Colonne</value>
   </data>
   <data name="UserQueryDN_DisplayName" xml:space="preserve">
-    <value>Display Name</value>
+    <value>Nom affiché</value>
   </data>
   <data name="UserQueryDN_Filters" xml:space="preserve">
-    <value>Filters</value>
+    <value>Filtres</value>
   </data>
   <data name="UserQueryDN_Orders" xml:space="preserve">
-    <value>Orders</value>
+    <value>Ordres</value>
   </data>
   <data name="UserQueryDN_MaxItems" xml:space="preserve">
-    <value>Max Items</value>
+    <value>Eléments maximum</value>
   </data>
   <data name="QueryDN" xml:space="preserve">
-    <value>Query</value>
+    <value>Recherche</value>
   </data>
   <data name="QueryDN_DisplayName" xml:space="preserve">
-    <value>Display Name</value>
+    <value>Nom affiché</value>
   </data>
   <data name="QueryDN_Key" xml:space="preserve">
-    <value>Key</value>
+    <value>Touche</value>
   </data>
   <data name="HourMinuteDN_Hour" xml:space="preserve">
-    <value>Hour</value>
+    <value>Heure</value>
   </data>
   <data name="HourMinuteDN_Minute" xml:space="preserve">
     <value>Minute</value>
   </data>
   <data name="ProcessOperation_Save" xml:space="preserve">
-    <value>Save</value>
+    <value>Sauver</value>
   </data>
   <data name="NotUserLogged" xml:space="preserve">
-    <value>Not user logged</value>
+    <value>Pas d'utilisateur connecté</value>
   </data>
   <data name="TheUserStateMustBeDisabled" xml:space="preserve">
-    <value>The user state must be disabled</value>
+    <value>L'état de l'utilisateur doit être désactivé</value>
   </data>
   <data name="ProcessStartIsGreaterThanProcessEnd" xml:space="preserve">
-    <value>Process Start is greater than Process End</value>
+    <value>Le début du processus est plus grand que sa fin</value>
   </data>
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
-    <value>Process Start is null but Process End is not</value>
+    <value>Le début du procéssus est nul mais pas sa fin</value>
   </data>
 </root>
