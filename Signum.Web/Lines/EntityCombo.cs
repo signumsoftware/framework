@@ -42,10 +42,9 @@ namespace Signum.Web
             Find = false;
         }
 
-        public override void SetReadOnly()
+        protected override void SetReadOnly()
         {
             Parent.ReadOnly = true;
-            ReadOnly = true;
             Find = false;
             Create = false;
             Remove = false;

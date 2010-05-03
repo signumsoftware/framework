@@ -122,8 +122,14 @@ namespace Signum.Web
         public bool ReadOnly
         {
             get { return this[BoolStyles.ReadOnly] ?? Parent.ReadOnly; }
-            set { this[BoolStyles.ReadOnly] = value; }
+            set
+            {
+                this[BoolStyles.ReadOnly] = value;
+                if (value) SetReadOnly();
+            }
         }
+
+        protected virtual void SetReadOnly() { }
 
         public bool ShowValidationMessage
         {

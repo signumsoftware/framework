@@ -28,7 +28,7 @@ namespace Signum.Web
         {
         }
 
-        public override void SetReadOnly()
+        protected override void SetReadOnly()
         {
         }
     }

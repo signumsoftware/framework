@@ -15,7 +15,7 @@ namespace Signum.Web
 {
     public abstract class BaseLine : TypeContext
     {
-        public abstract void SetReadOnly();
+  
 
         protected BaseLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(parent, controlID, propertyRoute)

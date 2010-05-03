@@ -30,10 +30,9 @@ namespace Signum.Web
             Autocomplete = true;        
         }
 
-        public override void SetReadOnly()
+        protected override void SetReadOnly()
         {
             Parent.ReadOnly = true;
-            ReadOnly = true;
             Find = false;
             Create = false;
             Remove = false;

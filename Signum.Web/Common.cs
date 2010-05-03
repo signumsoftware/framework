@@ -94,7 +94,6 @@ namespace Signum.Web
                 if (bl.PropertyRoute.PropertyInfo.IsReadOnly() || bl.ReadOnly)
                 {
                     bl.ReadOnly = true;
-                    bl.SetReadOnly();
                 }
             }
         }
