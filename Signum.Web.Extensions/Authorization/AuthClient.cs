@@ -176,7 +176,7 @@ namespace Signum.Web.Authorization
                         bl.Visible = false;
                         break;
                     case PropertyAllowed.Read:
-                        bl.SetReadOnly();
+                        bl.ReadOnly = true;
                         break;
                     case PropertyAllowed.Modify:
                         break;

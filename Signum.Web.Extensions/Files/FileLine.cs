@@ -47,7 +47,7 @@ namespace Signum.Web.Files
             View = false;
         }
 
-        public override void SetReadOnly()
+        protected override void SetReadOnly()
         {
             Parent.ReadOnly = true;
             Find = false;
