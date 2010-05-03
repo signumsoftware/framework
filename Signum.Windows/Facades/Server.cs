@@ -182,7 +182,10 @@ namespace Signum.Windows
 
         public static Implementations FindImplementations(PropertyRoute propertyRoute)
         {
-            return Return((IBaseServer s) => s.FindImplementations(propertyRoute)); 
+            if (Server.ServerTypes.ContainsKey(propertyRoute.IdentifiableType))
+                Server.Return((IBaseServer s) => s.FindImplementations(propertyRoute));
+
+            return null;
         }
 
         public static object Convert(object obj, Type type)

@@ -318,8 +318,7 @@ namespace Signum.Windows
 
                 if (entityContext != null)
                 {
-                    if (Server.ServerTypes.ContainsKey(entityContext.IdentifiableType))
-                        eb.Implementations = Server.Return((IBaseServer s) => s.FindImplementations(context));
+                    eb.Implementations = entityContext.GetImplementations();
                 }
             }
         }
