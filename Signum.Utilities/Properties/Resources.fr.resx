@@ -169,7 +169,7 @@
     <value>Cell has  " in an unexpected position: {0}</value>
   </data>
   <data name="CellStartsByQuotesButNotEndsLikeThis" xml:space="preserve">
-    <value>Cell starts by " but do not ends like this : {0}</value>
+    <value>Cell starts by " but do not ends like this: {0}</value>
   </data>
   <data name="CubeNotFound" xml:space="preserve">
     <value>Cube not found</value>
