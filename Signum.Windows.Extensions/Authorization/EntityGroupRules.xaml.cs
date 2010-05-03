@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Authorization
 {
@@ -50,6 +51,13 @@ namespace Signum.Windows.Authorization
         {
             Server.Execute((IEntityGroupAuthServer s) => s.SetEntityGroupAllowedRules((EntityGroupRulePack)DataContext));
             Load();
+        }
+
+        class AllowedRuleProxy
+        {
+            public AllowedRule<EntityGroupDN, EntityGroupAllowed> Rule { get; set; }
+
+         
         }
 
         private void btClose_Click(object sender, RoutedEventArgs e)

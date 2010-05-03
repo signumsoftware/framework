@@ -26,32 +26,54 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Entity Group" DisplayMemberBinding="{Binding Group}" />
-                    <GridViewColumn Header="All" Width="40">
+                    <GridViewColumn Header="Entity Group" DisplayMemberBinding="{Binding Resource}" />
+                    <GridViewColumn Header="">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.All}}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="In"/>
+                                    <TextBlock Text="Out"/>
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="In" Width="40">
+                    <GridViewColumn Header="Create" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.In}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
+                                <StackPanel Orientation="Vertical">
+                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Create}}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
+                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Create}}" Style="{StaticResource SphereRadioButton}" Background="Lime"/>
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Out" Width="40">
+                    <GridViewColumn Header="Modify" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.Out}}" Style="{StaticResource SphereRadioButton}" Background="Yellow"  />
+                                <StackPanel Orientation="Vertical">
+                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
+                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Modify}}" Style="{StaticResource SphereRadioButton}" Background="YellowGreen"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Read" Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
+                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.Read}}" Style="{StaticResource SphereRadioButton}" Background="Yellow" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="None" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:EntityGroupAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                <StackPanel>
+                                    <ToggleButton IsChecked="{Binding Path=In, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                    <ToggleButton IsChecked="{Binding Path=Out, Converter={x:Static m:EnumBooleanConverter.Instance}, ConverterParameter={x:Static authdn:TypeAllowed.None}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

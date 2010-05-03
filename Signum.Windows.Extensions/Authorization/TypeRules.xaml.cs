@@ -142,6 +142,6 @@ namespace Signum.Windows.Authorization
         }
 
         public string Name { get; set; }
-        public List<AllowedRule<TypeDN, TypeAllowed>> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
+        public List<TypeAllowedRule> SubNodes { get; set; } //Will be TypeAccesRule or NamespaceNode
     }
 }
