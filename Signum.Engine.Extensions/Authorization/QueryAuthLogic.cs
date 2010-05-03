@@ -59,6 +59,13 @@ namespace Signum.Engine.Authorization
 
             return cache.GetAllowed(RoleDN.Current, queryName);
         }
+        public static bool GetQueryAllowed(Lite<RoleDN>role, object queryName)
+        {
+            if (!AuthLogic.IsEnabled)
+                return true;
+
+            return cache.GetAllowed(role, queryName);
+        }
 
         public static QueryRulePack GetQueryRules(Lite<RoleDN> roleLite, TypeDN typeDN)
         {

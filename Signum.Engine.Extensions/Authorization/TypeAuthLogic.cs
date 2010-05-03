@@ -96,6 +96,11 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleDN.Current, type);
         }
 
+        public static TypeAllowed GetTypeAllowed(Lite<RoleDN> role, Type type)
+        {
+            return cache.GetAllowed(role, type);
+        }
+
         public static Dictionary<Type, TypeAllowed> AuthorizedTypes()
         {
             return cache.GetCleanDictionary();

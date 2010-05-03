@@ -24,7 +24,7 @@ namespace Signum.Windows.Authorization
     /// </summary>
     public partial class TypeRules : Window
     {
-        public static Type RuleType = typeof(AllowedRule<TypeDN, TypeAllowed>);
+        public static Type RuleType = typeof(TypeAllowedRule);
         public static Type GroupType = typeof(NamespaceNode);
 
         public Lite<RoleDN> Role
