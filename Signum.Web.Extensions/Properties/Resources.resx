@@ -258,4 +258,19 @@
   <data name="ResetPasswordSuccess" xml:space="preserve">
     <value>Your password has been successfully changed</value>
   </data>
+  <data name="ChangePasswordAspx_ActualPassword" xml:space="preserve">
+    <value>Actual password</value>
+  </data>
+  <data name="ChangePasswordAspx_ChangePassword" xml:space="preserve">
+    <value>Change password</value>
+  </data>
+  <data name="ChangePasswordAspx_ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="ChangePasswordAspx_NewPassword" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="ChangePasswordAspx_WriteActualPasswordAndNewOne" xml:space="preserve">
+    <value>Write your actual password and the new one</value>
+  </data>
 </root>

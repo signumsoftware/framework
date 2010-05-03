@@ -1,29 +1,32 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
+
 <%@ Import Namespace="Signum.Web.Authorization" %>
+<%@ Import Namespace="Signum.Web.Extensions.Properties" %>
+
 <asp:Content ID="changePasswordContent" ContentPlaceHolderID="MainContent" runat="server">
-     <h2>Cambiar contraseña</h2>
-     <p>Introduzca su contraseña actual y la nueva contraseña</p>
+     <h2><%=Resources.ChangePasswordAspx_ChangePassword %></h2>
+     <p><%=Resources.ChangePasswordAspx_WriteActualPasswordAndNewOne%></p>
      <%= Html.ValidationSummary() %>
 
     <% using (Html.BeginForm()) { %>
         <div id="changePassword">
             <table>
                 <tr>
-                    <td class="label">Contraseña actual:</td>
+                    <td class="label"><%=Resources.ChangePasswordAspx_ActualPassword%>:</td>
                     <td>
                         <%= Html.Password(UserMapping.OldPasswordKey) %>
                         <%= Html.ValidationMessage(UserMapping.OldPasswordKey)%>
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">Nueva contraseña:</td>
+                    <td class="label"><%=Resources.ChangePasswordAspx_NewPassword%>:</td>
                     <td>
                         <%= Html.Password(UserMapping.NewPasswordKey)%>
                         <%= Html.ValidationMessage(UserMapping.NewPasswordKey)%>
                     </td>
                 </tr>
                 <tr>
-                    <td class="label">Confirmar nueva contraseña:</td>
+                    <td class="label"><%=Resources.ChangePasswordAspx_ConfirmNewPassword%>:</td>
                     <td>
                         <%= Html.Password(UserMapping.NewPasswordBisKey)%>
                         <%= Html.ValidationMessage(UserMapping.NewPasswordBisKey)%>
@@ -31,7 +34,7 @@
                 </tr>
                 <tr>
                     <td></td>
-                    <td><input type="submit" value="Cambiar contraseña" /></td>
+                    <td><input type="submit" value="<%=Resources.ChangePasswordAspx_ChangePassword %>" /></td>
                 </tr>
             </table>
         </div>

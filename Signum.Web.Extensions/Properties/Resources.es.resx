@@ -246,4 +246,31 @@
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>Debes repetir la nueva contraseña</value>
   </data>
+  <data name="EmailNotExistsDatabase" xml:space="preserve">
+    <value>El email proporcionado no pertenece a ningún usuario registrado</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Restablecer contraseña</value>
+  </data>
+  <data name="ResetPasswordCodeHasBeenSent" xml:space="preserve">
+    <value>Se ha enviado a su cuenta de correo un código para restablecer su contraseña</value>
+  </data>
+  <data name="ResetPasswordSuccess" xml:space="preserve">
+    <value>Su contraseña ha sido modificada con éxito</value>
+  </data>
+  <data name="ChangePasswordAspx_ActualPassword" xml:space="preserve">
+    <value>Contraseña actual</value>
+  </data>
+  <data name="ChangePasswordAspx_ChangePassword" xml:space="preserve">
+    <value>Cambiar contraseña</value>
+  </data>
+  <data name="ChangePasswordAspx_ConfirmNewPassword" xml:space="preserve">
+    <value>Confirmar contraseña</value>
+  </data>
+  <data name="ChangePasswordAspx_NewPassword" xml:space="preserve">
+    <value>Nueva contraseña</value>
+  </data>
+  <data name="ChangePasswordAspx_WriteActualPasswordAndNewOne" xml:space="preserve">
+    <value>Escriba su contraseña actual y la nueva contraseña</value>
+  </data>
 </root>
