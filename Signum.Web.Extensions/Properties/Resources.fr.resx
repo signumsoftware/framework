@@ -246,4 +246,31 @@
   <data name="YouMustRepeatTheNewPassword" xml:space="preserve">
     <value>You must repeat the new password</value>
   </data>
+  <data name="EmailNotExistsDatabase" xml:space="preserve">
+    <value>L'adresse mail donnée n'appartient à aucun utilisateur enrigistré</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reinitialisation du mot de passe</value>
+  </data>
+  <data name="ResetPasswordCodeHasBeenSent" xml:space="preserve">
+    <value>Un code de confirmation pour réinitialiser votre mot de passe a été envoyé sur votre compte mail {0}</value>
+  </data>
+  <data name="ResetPasswordSuccess" xml:space="preserve">
+    <value>Votre mot de passe a été modifié avec succès</value>
+  </data>
+  <data name="ChangePasswordAspx_ActualPassword" xml:space="preserve">
+    <value>Mot de passe actuel</value>
+  </data>
+  <data name="ChangePasswordAspx_ChangePassword" xml:space="preserve">
+    <value>Changer mot de passe</value>
+  </data>
+  <data name="ChangePasswordAspx_ConfirmNewPassword" xml:space="preserve">
+    <value>Confirmer nouveau mot de passe</value>
+  </data>
+  <data name="ChangePasswordAspx_NewPassword" xml:space="preserve">
+    <value>Nouveau mot de passe</value>
+  </data>
+  <data name="ChangePasswordAspx_WriteActualPasswordAndNewOne" xml:space="preserve">
+    <value>Ecrivez votre mot de passe actuel et le nouveau</value>
+  </data>
 </root>
