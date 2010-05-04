@@ -442,4 +442,10 @@
   <data name="Year" xml:space="preserve">
     <value>Year</value>
   </data>
+  <data name="_0IsNotAllowed" xml:space="preserve">
+    <value>{0} is not allowed</value>
+  </data>
+  <data name="_0IsNecessary" xml:space="preserve">
+    <value>{0} is necessary</value>
+  </data>
 </root>

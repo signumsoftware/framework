@@ -28,7 +28,7 @@ namespace Signum.Entities
         //Descriptive information that continues the sentence: The property should {HelpMessage}
         //Used for documentation purposes only
         public abstract string HelpMessage { get; }
-        
+
         public string Error(PropertyInfo property, object value)
         {
             if (DisableOnCorrupt && !Corruption.Strict)
@@ -490,7 +490,7 @@ namespace Signum.Entities
 
         public DateTimePrecissionValidatorAttribute(DateTimePrecision precision)
         {
-            this.Precision = precision; 
+            this.Precision = precision;
         }
 
         protected override string OverrideError(object value)
@@ -613,6 +613,11 @@ namespace Signum.Entities
 
         public string Validate(E entity, PropertyInfo pi)
         {
+            return Validate(entity, pi, true);
+        }
+
+        public string Validate(E entity, PropertyInfo pi, bool showState)
+        {
             int index = propertyNames.IndexOf(pi.Name);
             if (index == -1)
                 return null;
@@ -629,10 +634,12 @@ namespace Signum.Entities
                 val = null;
 
             if (val != null && !necessary.Value)
-                return Resources._0IsNotAllowedOnState1.Formato(propertyNiceNames[index], state);
+                return showState ? Resources._0IsNotAllowedOnState1.Formato(propertyNiceNames[index], state) :
+                                   Resources._0IsNotAllowed.Formato(propertyNiceNames[index]);
 
             if (val == null && necessary.Value)
-                return Resources._0IsNecessaryOnState1.Formato(propertyNiceNames[index], state);
+                return showState ? Resources._0IsNecessaryOnState1.Formato(propertyNiceNames[index], state) :
+                                   Resources._0IsNecessary.Formato(propertyNiceNames[index]);
 
             return null;
         }
@@ -641,7 +648,7 @@ namespace Signum.Entities
         {
             int index = propertyNames.IndexOf(pi.Name);
             if (index == -1)
-                throw new ArgumentException(Resources.ThePropertyIsNotRegistered); 
+                throw new ArgumentException(Resources.ThePropertyIsNotRegistered);
 
             return dictionary[state][index];
         }

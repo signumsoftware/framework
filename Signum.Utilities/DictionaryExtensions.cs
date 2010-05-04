@@ -232,7 +232,7 @@ namespace Signum.Utilities
             return set.ToDictionary(k => k, k => mixer(k, dic1.TryGetS(k), dic2.TryGetS(k)));
         }
 
-        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other)
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other)
         {
             foreach (var item in other)
             {
@@ -240,7 +240,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, Dictionary<K, V> other, string errorContext)
+        public static void AddRange<K, V>(this IDictionary<K, V> dictionary, IDictionary<K, V> other, string errorContext)
         {
             dictionary.AddRange(other, kvp => kvp.Key, kvp => kvp.Value, errorContext); 
         }
