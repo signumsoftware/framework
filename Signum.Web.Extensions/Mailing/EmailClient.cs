@@ -23,18 +23,18 @@ namespace Signum.Web.Mailing
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                EmailLogic.BodyRenderer += new BodyRenderer(EmailLogic_WebMailRenderer);
+                EmailLogic.BodyRenderer += (vn, model, args) => RenderControl(vn, model, args);
             }
         }
 
-        static string EmailLogic_WebMailRenderer(string viewName, IEmailOwnerDN owner, Dictionary<string, object> args)
+        public static string RenderControl(string viewName, object model, IDictionary<string, object> args)
         {
             ViewDataDictionary viewData = new ViewDataDictionary();
-            viewData.Model = owner;
+            viewData.Model = model;
             if (args != null)
                 viewData.AddRange(args);
 
-            ViewPage vp = new ViewPage { ViewData = viewData };
+            ViewPage vp = new ViewPage { ViewData = viewData};
             Control control = vp.LoadControl(viewName);
 
             vp.Controls.Add(control);
@@ -42,10 +42,20 @@ namespace Signum.Web.Mailing
             StringBuilder sb = new StringBuilder();
             using (StringWriter sw = new StringWriter(sb))
             {
+                var fakeResponse = new HttpResponse(sw);
+                var fakeContext = new HttpContext(HttpContext.Current.Request, fakeResponse);
+               
+                var oldContext = HttpContext.Current;
+                HttpContext.Current = fakeContext;
+
                 using (HtmlTextWriter tw = new HtmlTextWriter(sw))
                 {
-                    vp.RenderControl(tw);
+                    vp.RenderView(new ViewContext());
                 }
+
+                HttpContext.Current = fakeContext;
+
+                sw.Flush();
             }
 
             return sb.ToString();

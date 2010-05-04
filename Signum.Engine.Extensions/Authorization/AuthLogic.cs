@@ -78,6 +78,14 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static void StartUserOperations(SchemaBuilder sb)
+        {
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                new UserGraph().Register();
+            }
+        }
+
         public static void StartPortal(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -99,7 +107,6 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.RegisterTemplate(UserMailTemplate.ResetPassword, (eo, args) =>
                 {
-                    ResetPasswordRequestDN request = (ResetPasswordRequestDN)eo;
                     return EmailLogic.RenderWebMail(Signum.Engine.Extensions.Properties.Resources.ResetPasswordCode,
                         "~/Plugin/Signum.Web.Extensions.dll/Signum.Web.Extensions.Authorization.ResetPasswordMail.ascx", eo, args);
                 });
