@@ -5,6 +5,7 @@ using System.Text;
 using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Web.Properties;
+using System.Globalization;
 
 
 namespace Signum.Web
@@ -89,6 +90,14 @@ namespace Signum.Web
             get { return maxDate; }
             set { maxDate = value; }
         }
+
+        [ThreadStatic]
+        static string defaultculture;
+        public static string DefaultCulture
+        {
+            get { return defaultculture ?? CultureInfo.CurrentCulture.Name.Substring(0,2); }
+            set { defaultculture = value; }
+        }
     }
 
     public static class CalendarHelper
@@ -102,7 +111,7 @@ namespace Signum.Web
             //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
             sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/" + jQueryPrefix + "ui.core.js",
                 "Scripts/jqueryui/"+ jQueryPrefix + "ui.datepicker.js",
-                "Scripts/jqueryui/i18n/" + jQueryPrefix + "ui.datepicker-es.js"));
+                "Scripts/jqueryui/i18n/" + jQueryPrefix + "ui.datepicker-" + DatePickerOptions.DefaultCulture + ".js"));
 
             //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
 
