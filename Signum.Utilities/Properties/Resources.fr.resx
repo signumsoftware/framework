@@ -118,19 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="_0Day" xml:space="preserve">
-    <value>{0} Day</value>
+    <value>{0} Jour</value>
   </data>
   <data name="_0Days" xml:space="preserve">
-    <value>{0} Days</value>
+    <value>{0} Jours</value>
   </data>
   <data name="_0HasNoFreeBits" xml:space="preserve">
-    <value>{0:X} has no free bits</value>
+    <value>{0:X} n'a pas de bits libres</value>
   </data>
   <data name="_0Hour" xml:space="preserve">
-    <value>{0} Hour</value>
+    <value>{0} Heure</value>
   </data>
   <data name="_0Hours" xml:space="preserve">
-    <value>{0} Hours</value>
+    <value>{0} Heures</value>
   </data>
   <data name="_0Minute" xml:space="preserve">
     <value>{0} Minute</value>
@@ -139,235 +139,235 @@
     <value>{0} Minutes</value>
   </data>
   <data name="_0Month" xml:space="preserve">
-    <value>{0} Month</value>
+    <value>{0} Mois</value>
   </data>
   <data name="_0Months" xml:space="preserve">
-    <value>{0} Months</value>
+    <value>{0} Mois</value>
   </data>
   <data name="_0Second" xml:space="preserve">
-    <value>{0} Second</value>
+    <value>{0} Seconde</value>
   </data>
   <data name="_0Seconds" xml:space="preserve">
-    <value>{0} Seconds</value>
+    <value>{0} Secondes</value>
   </data>
   <data name="_0Year" xml:space="preserve">
-    <value>{0} Year</value>
+    <value>{0} Année</value>
   </data>
   <data name="_0Year1Month2Day" xml:space="preserve">
-    <value>{0} Year(s), {1} Month(s), {2} Day(s)</value>
+    <value>{0} Année(s), {1} Mois, {2} Jour(s)</value>
   </data>
   <data name="_0Years" xml:space="preserve">
-    <value>{0} Years</value>
+    <value>{0} Années</value>
   </data>
   <data name="And" xml:space="preserve">
-    <value> and </value>
+    <value>et</value>
   </data>
   <data name="CannotRemoveItemThatIsNotInTree" xml:space="preserve">
-    <value>Cannot remove item that is not in tree.</value>
+    <value>Ne peut supprimer un élément qui n'est pas dans l'arbre</value>
   </data>
   <data name="CellHasQuotesInAnUnexpectedPosition" xml:space="preserve">
-    <value>Cell has  " in an unexpected position: {0}</value>
+    <value>La cellule a  " dans un endroit inapproprié: {0}</value>
   </data>
   <data name="CellStartsByQuotesButNotEndsLikeThis" xml:space="preserve">
-    <value>Cell starts by " but do not ends like this: {0}</value>
+    <value>La celule débute par " mais ne termine pas de la même façon: {0}</value>
   </data>
   <data name="CubeNotFound" xml:space="preserve">
-    <value>Cube not found</value>
+    <value>Cube pas trouvé</value>
   </data>
   <data name="DateLast" xml:space="preserve">
-    <value>Last {0}</value>
+    <value>Dernier {0}</value>
   </data>
   <data name="DateSeparators" xml:space="preserve">
     <value>,</value>
   </data>
   <data name="DateThis" xml:space="preserve">
-    <value>This {0}</value>
+    <value>Celui-ci {0}</value>
   </data>
   <data name="DateTimePrecision_Days" xml:space="preserve">
-    <value>Days</value>
+    <value>Jours</value>
   </data>
   <data name="DateTimePrecision_Hours" xml:space="preserve">
-    <value>Hours</value>
+    <value>Heures</value>
   </data>
   <data name="DateTimePrecision_Milliseconds" xml:space="preserve">
-    <value>Milliseconds</value>
+    <value>Millisecondes</value>
   </data>
   <data name="DateTimePrecision_Minutes" xml:space="preserve">
     <value>Minutes</value>
   </data>
   <data name="DateTimePrecision_Seconds" xml:space="preserve">
-    <value>Seconds</value>
+    <value>Secondes</value>
   </data>
   <data name="DictionaryEmpty" xml:space="preserve">
-    <value>Dictionary Empty</value>
+    <value>Dictionnaire vide</value>
   </data>
   <data name="EmptyList" xml:space="preserve">
-    <value>Empty List</value>
+    <value>Liste vide</value>
   </data>
   <data name="EmptyPriorityQueue" xml:space="preserve">
-    <value>Empty Priority Queue</value>
+    <value>Priority Queue vide</value>
   </data>
   <data name="EmptyQueue" xml:space="preserve">
-    <value>Empty queue</value>
+    <value>Queue vide</value>
   </data>
   <data name="EmptyStack" xml:space="preserve">
-    <value>Empty stack</value>
+    <value>Stack vide</value>
   </data>
   <data name="EmptyTree" xml:space="preserve">
-    <value>Empty tree</value>
+    <value>Arbre vide</value>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
-    <value>Enter your selection: </value>
+    <value>Entrez votre sélection: </value>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Enter yout selections separated by comma: </value>
+    <value>Entrez votre sélection séparé par une virgule: </value>
   </data>
   <data name="Error0Extra1" xml:space="preserve">
-    <value>Error {0}:
- Extra: {1}</value>
+    <value>Erreur {0}:
+ Excèdant: {1}</value>
   </data>
   <data name="Error0Lacking1" xml:space="preserve">
-    <value>Error {0}:
- Lacking: {1}</value>
+    <value>Erreur {0}:
+ Manquant: {1}</value>
   </data>
   <data name="Error0Lacking1Extra2" xml:space="preserve">
-    <value>Error {0}:
- Lacking: {1}
- Extra: {2}</value>
+    <value>Erreur {0}:
+ Manquant: {1}
+ Excèdant: {2}</value>
   </data>
   <data name="ExpansionFailed0DoesNotImplementIMethodExpander" xml:space="preserve">
-    <value>Expansion failed! '{0}' does not implement IMethodExpander</value>
+    <value>L'expansion a échoué! '{0}' n'implémante pas le IMethodExpander</value>
   </data>
   <data name="FieldShouldBeAnExpressionAccessingAField" xml:space="preserve">
-    <value>field should be an expression accessing a field</value>
+    <value>Le champ doit être une expression accédant à un champ</value>
   </data>
   <data name="FirstCollectionIsShorter" xml:space="preserve">
-    <value>The first collecton is shorter</value>
+    <value>La première collection est plus courte</value>
   </data>
   <data name="GenericMethodDefinitionShouldBeAGenericMethodDefinition" xml:space="preserve">
-    <value>genericMethodDefinition should be a Generic Method Definition</value>
+    <value>genericMethodDefinition ne devrait pas être une Generic Method Definition</value>
   </data>
   <data name="GenericTypeDefinitionShouldBeAGenericTypeDefinition" xml:space="preserve">
-    <value>genericTypeDefinition should be a Generic Type Definition</value>
+    <value>genericTypeDefinition ne devrait pas être une Generic Type Definition</value>
   </data>
   <data name="InconsistenceFoundCube012CouldHaveValues34" xml:space="preserve">
-    <value>Inconsistence found, cube {0} x {1} x {2} could have values {3} ó {4}</value>
+    <value>Inconsistances trouvées, cube {0} x {1} x {2} peut avoir les valeurs{3} ó {4}</value>
   </data>
   <data name="InconsistenceFoundOnSquare01CouldHaveValues23" xml:space="preserve">
-    <value>Inconsistence found, square {0} x {1} could have values {2} ó {3}</value>
+    <value>Inconsistances trouvées, carré {0} x {1} peut avoir les valeurs {2} ó {3}</value>
   </data>
   <data name="Interval0OverlapsWithTheExisting1" xml:space="preserve">
-    <value>Interval {0} overlaps with the exisisting {1}</value>
+    <value>Intervalle {0} chevauche  les existantes {1}</value>
   </data>
   <data name="IntervalLimitsDoNotExistOnDictionary" xml:space="preserve">
-    <value>Interval limits do not exisit on dictionary</value>
+    <value>La limite de l'intervalle n'existe pas dans le dictionnaire</value>
   </data>
   <data name="Intervalo0OverlapsWithExistingOne1Value2" xml:space="preserve">
-    <value>Interval {0} overlaps with the existing {1}, value : {2}</value>
+    <value>L'intervalle {0} chevauche l'existant {1}, valeur : {2}</value>
   </data>
   <data name="IsNotAnEnum" xml:space="preserve">
-    <value>{0} is not an Enum</value>
+    <value>{0} n'est pas un Enum</value>
   </data>
   <data name="Key0NotFound" xml:space="preserve">
-    <value>Key {0} not found</value>
+    <value>Clé {0} pas trouvée</value>
   </data>
   <data name="MaxShouldBeGreaterOrEqualThanMin" xml:space="preserve">
-    <value>max should be greater or equal than min</value>
+    <value>Le max doit être plus grand ou égal au min</value>
   </data>
   <data name="MemberShouldBeAnExpressionAccessingAMember" xml:space="preserve">
-    <value>member should be an expression accessing a member</value>
+    <value>Le membre doit être une expression accédant à un membre</value>
   </data>
   <data name="Method0NotFoundOnType1" xml:space="preserve">
-    <value>Method {0} not found on type {1}</value>
+    <value>Methode {0} pas trouvée dans le type {1}</value>
   </data>
   <data name="MethodShouldBeAnExpressionCallingAMethod" xml:space="preserve">
-    <value>method should be an expression calling a method</value>
+    <value>La méthode doit être une expression appelant une méthode</value>
   </data>
   <data name="MinAndMaxShouldBeGreaterThan0" xml:space="preserve">
-    <value>min and max should be greater than 0</value>
+    <value>min et max doivent être plus grand que 0</value>
   </data>
   <data name="MinIsGreaterThanMax" xml:space="preserve">
-    <value>Min is greater than Max</value>
+    <value>Min est plus grand que Max</value>
   </data>
   <data name="MiShouldBeAGenericMethodDefinition" xml:space="preserve">
-    <value>mi should be a Generic Method Definition</value>
+    <value>mi devrait être une Generic Method Definition</value>
   </data>
   <data name="MoreThanOneMemberNamed0" xml:space="preserve">
-    <value>There is more than one member named '{0}'</value>
+    <value>Il y a plus qu'un membre nommé '{0}'</value>
   </data>
   <data name="NoElementExistWithKey0" xml:space="preserve">
-    <value>No element exist with key: {0}</value>
+    <value>Pas d'éléments existants avec la touche: {0}</value>
   </data>
   <data name="NoIntervalFound" xml:space="preserve">
-    <value>No interval found</value>
+    <value>Intervalles introuvables</value>
   </data>
   <data name="NoMatchInA01Switch" xml:space="preserve">
-    <value>No match in a {0} -&gt; {1} switch</value>
+    <value>Pas de correspondance dans {0} -&gt; {1} interrupteur</value>
   </data>
   <data name="NoMemberNamed0" xml:space="preserve">
-    <value>There is no member with name '{0}'</value>
+    <value>Il n'y a pas de membre avec le nom '{0}'</value>
   </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
-    <value>No option with key {0} found</value>
+    <value>Pas d'option avec la touche {0} trouvée</value>
   </data>
   <data name="NotSupported0" xml:space="preserve">
-    <value>Not supported {0}</value>
+    <value>Pas supporté {0}</value>
   </data>
   <data name="Or" xml:space="preserve">
-    <value> or </value>
+    <value>ou</value>
   </data>
   <data name="OS_Unknown0" xml:space="preserve">
-    <value>Unknown ({0})</value>
+    <value>Inconnu({0})</value>
   </data>
   <data name="PropertyShouldBeAnExpressionAccessingAProperty" xml:space="preserve">
-    <value>property should be an expression accessing a property</value>
+    <value>La propriété doit être une expression accédant à une propriété</value>
   </data>
   <data name="SecondCollectionsIsShorter" xml:space="preserve">
-    <value>The second collection is shorter</value>
+    <value>La deuxième collection est plus courte</value>
   </data>
   <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
-    <value>Select one of the following options:</value>
+    <value>Choisissez une des options:</value>
   </data>
   <data name="SquareNotFound" xml:space="preserve">
-    <value>Square not found</value>
+    <value>Carré introuvable</value>
   </data>
   <data name="String0IsTooShort" xml:space="preserve">
-    <value>String '{0}' is too short</value>
+    <value>La chaîne '{0}' est trop courte</value>
   </data>
   <data name="TheCollectionHasNoElements" xml:space="preserve">
-    <value>The collection has no elements</value>
+    <value>La collection n'a pas d'étélements</value>
   </data>
   <data name="TheDateHasSomeValueInTheHourMinuteSecondOrMillisecond" xml:space="preserve">
-    <value>The date has some value in the hour, minutes, seconds or milliseconds</value>
+    <value>La date a des valeurs dans l'heure, minutes, secondes ou millisecondes</value>
   </data>
   <data name="TheNode0IsNotInTheGraph" xml:space="preserve">
-    <value>The node {0} is not in the graph</value>
+    <value>Le noeud {0} n'est pas sur le graph</value>
   </data>
   <data name="TheNodeType0IsNotSupportedAsUnaryExpression" xml:space="preserve">
-    <value>The nodeType {0} is not supported as unary expression</value>
+    <value>Le type de noeud {0} n'est pas supporté comme expression unaire</value>
   </data>
   <data name="ThereAreSomeRepeated01" xml:space="preserve">
-    <value>There are some repeated {0}: {1}</value>
+    <value>Il y a des {0} répétés: {1}</value>
   </data>
   <data name="ThereIsMoreThanOneElementWithKey0" xml:space="preserve">
-    <value>There is more than one element with key: {0}</value>
+    <value>Il y a plus d'un éléments avec la touche(clé): {0}</value>
   </data>
   <data name="Today" xml:space="preserve">
-    <value>Today</value>
+    <value>Aujourd'hui</value>
   </data>
   <data name="Tomorrow" xml:space="preserve">
-    <value>Tomorrow</value>
+    <value>Demain</value>
   </data>
   <data name="Unavailable" xml:space="preserve">
-    <value>Unavailable</value>
+    <value>Indisponible</value>
   </data>
   <data name="UnhandledBindingType0" xml:space="preserve">
-    <value>Unhandled binding type '{0}'</value>
+    <value>Type de liaison pas prise en charge '{0}'</value>
   </data>
   <data name="UnhandledExpressionType0" xml:space="preserve">
-    <value>Unhandled expression type: '{0}'</value>
+    <value>Type d'expression pas prise en charge: '{0}'</value>
   </data>
   <data name="Yesterday" xml:space="preserve">
-    <value>Yesterday</value>
+    <value>Hier</value>
   </data>
 </root>
