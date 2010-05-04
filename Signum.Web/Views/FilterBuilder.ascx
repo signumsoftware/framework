@@ -6,6 +6,7 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Engine.DynamicQuery" %>
+<%@ Import Namespace="Signum.Web.Properties" %>
 
 <%  bool visible = ((FindOptions)ViewData[ViewDataKeys.FindOptions]).FilterMode == FilterMode.Visible;
     Context context = (Context)Model;
@@ -18,10 +19,10 @@
 
 <div id="<%=context.Compose("fields-search")%>">
     <div id="<%=context.Compose("fields-list")%>" class="fields-list">
-        <a onclick="javascript:toggleFilters('<%=context.Compose("fields-search")%>');" class="filters-header<%= visible ? "" : " close" %>" rev="filters-body"><%= visible ? "Ocultar filtros" : "Mostrar filtros" %></a>
+        <a onclick="javascript:toggleFilters('<%=context.Compose("fields-search")%>');" class="filters-header<%= visible ? "" : " close" %>" rev="filters-body"><%= visible ? Html.Encode(Resources.HideFilters) : Html.Encode(Resources.ShowFilters) %></a>
         <div class="filters" <%= visible ? "" : "style='display:none'"%>>
             <div id="<%=context.Compose("filters-body")%>" class="filters-body">
-                <label for="<%=context.Compose("ddlNewFilters")%>">Filtrar por campo</label>
+                <label for="<%=context.Compose("ddlNewFilters")%>"><%=Html.Encode(Resources.FilterByField) %></label>
                 <select id="<%=context.Compose("ddlNewFilters")%>">
 
                 <% 
@@ -39,18 +40,18 @@
                 %>
                </select> 
                <%=Html.Button(context.Compose("btnAddFilter"), "+", "AddFilter('{0}');".Formato(context.ControlID), "", null)%>
-               <%=Html.Button(context.Compose("btnClearAllFilters"), "Eliminar Filtros", "ClearAllFilters('{0}');".Formato(context.ControlID), "", null)%>
+               <%=Html.Button(context.Compose("btnClearAllFilters"), Html.Encode(Resources.DeleteFilters), "ClearAllFilters('{0}');".Formato(context.ControlID), "", null)%>
            </div>
     <% List<FilterOption> filterOptions = findOptions.FilterOptions; %>
   
     <div id="<%=context.Compose("filters-list")%>" class="filters-list">
-        <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>">No se han especificado filtros</span>
+        <span class="explanation" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;" %>"><%=Html.Encode(Resources.NoFiltersSpecified)%></span>
         <table id="<%=context.Compose("tblFilters")%>" style="<%= (filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "" %>">            
             <thead>
                 <tr>
-                    <th>Campo</th>
-                    <th>Operación</th>
-                    <th>Valor</th>
+                    <th><%=Html.Encode(Resources.Field)%></th>
+                    <th><%=Html.Encode(Resources.Operation)%></th>
+                    <th><%=Html.Encode(Resources.Value)%></th>
                     <th></th>
                 </tr>  
             </thead>  

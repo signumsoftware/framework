@@ -5,6 +5,7 @@
 <%@ Import Namespace="Signum.Entities.Reflection" %>
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="Signum.Web.Properties" %>
 
 <% Context context = (Context)Model;
    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
@@ -88,7 +89,7 @@
                 <% if (entityField != null && viewable)
                    { %>
                    <td id="<%=context.Compose("tdResults")%>">
-                    <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Ver">Ver</a>
+                    <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Ver"><%=Html.Encode(Resources.View) %></a>
                 </td>
                 <% } %>
                 <%

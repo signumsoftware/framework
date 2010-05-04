@@ -8,6 +8,8 @@ using Signum.Utilities;
 using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Entities.Reflection;
+using Signum.Web.Properties;
+using System.Web;
 
 namespace Signum.Web
 {
@@ -19,7 +21,7 @@ namespace Signum.Web
                 return;
             
             if (Navigator.IsNavigable(lite.RuntimeType, admin))
-                helper.Write(helper.Href("", lite.ToStr, Navigator.ViewRoute(lite.RuntimeType, lite.Id), "Ver", "", null));
+                helper.Write(helper.Href("", lite.ToStr, Navigator.ViewRoute(lite.RuntimeType, lite.Id), HttpUtility.HtmlEncode(Resources.View), "", null));
             else
                 helper.Write(helper.Span("", lite.ToStr, ""));
         }

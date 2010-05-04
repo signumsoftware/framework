@@ -348,4 +348,52 @@
   <data name="ChangesToEntity0AreNotAllowedBecauseEntityMappingIs" xml:space="preserve">
     <value>Changes to Entity {0} are not allowed because EntityMapping is null</value>
   </data>
+  <data name="Average" xml:space="preserve">
+    <value>Average</value>
+  </data>
+  <data name="DeleteFilters" xml:space="preserve">
+    <value>Delete Filters</value>
+  </data>
+  <data name="ExecutedXTimes" xml:space="preserve">
+    <value>Executed x times</value>
+  </data>
+  <data name="Field" xml:space="preserve">
+    <value>Field</value>
+  </data>
+  <data name="FilterByField" xml:space="preserve">
+    <value>Filter by field</value>
+  </data>
+  <data name="HideFilters" xml:space="preserve">
+    <value>Hide filters</value>
+  </data>
+  <data name="Maximum" xml:space="preserve">
+    <value>Maximum</value>
+  </data>
+  <data name="Minimum" xml:space="preserve">
+    <value>Minimum</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NoFiltersSpecified" xml:space="preserve">
+    <value>No filters specified</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="ShowFilters" xml:space="preserve">
+    <value>Show filters</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Type0NotFoundInTheSchema" xml:space="preserve">
+    <value>Type {0} not found in the schema</value>
+  </data>
+  <data name="NumberOfRows" xml:space="preserve">
+    <value>Number of rows</value>
+  </data>
 </root>

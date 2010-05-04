@@ -166,7 +166,7 @@
     <value>No se ha encontrado la propiedad {{0}} en el tipo {1}</value>
   </data>
   <data name="NoQueryWithName0" xml:space="preserve">
-    <value>No hay una query asociada al nombre {{{0}}}</value>
+    <value>No hay una query asociada al nombre {0}</value>
   </data>
   <data name="NotPossibleToAssign0" xml:space="preserve">
     <value>No es posible utilizar el valor indicado como {0}</value>
@@ -182,6 +182,9 @@
   </data>
   <data name="TheresNotAViewForType0" xml:space="preserve">
     <value>No hay una vista asociada al tipo {0}</value>
+  </data>
+  <data name="Type0NotFoundInNavigatorNamesToTypes" xml:space="preserve">
+    <value>El tipo {0} not encontrado en Navigator NamesToTypes</value>
   </data>
   <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
     <value>Se debe indicar un valor para {0}</value>
@@ -345,7 +348,52 @@
   <data name="ChangesToEntity0AreNotAllowedBecauseEntityMappingIs" xml:space="preserve">
     <value>No se permiten los cambios sobre la entidad {0} porque EntityMapping es null</value>
   </data>
-  <data name="Type0NotFoundInNavigatorNamesToTypes" xml:space="preserve">
-    <value>El tipo {0} not encontrado en Navigator NamesToTypes</value>
+  <data name="Average" xml:space="preserve">
+    <value>Medio</value>
+  </data>
+  <data name="DeleteFilters" xml:space="preserve">
+    <value>Eliminar Filtros</value>
+  </data>
+  <data name="ExecutedXTimes" xml:space="preserve">
+    <value>Ejecutado x veces</value>
+  </data>
+  <data name="Field" xml:space="preserve">
+    <value>Campo</value>
+  </data>
+  <data name="FilterByField" xml:space="preserve">
+    <value>Filtrar por campo</value>
+  </data>
+  <data name="HideFilters" xml:space="preserve">
+    <value>Ocultar filtros</value>
+  </data>
+  <data name="Maximum" xml:space="preserve">
+    <value>Máximo</value>
+  </data>
+  <data name="Minimum" xml:space="preserve">
+    <value>Mínimo</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="NoFiltersSpecified" xml:space="preserve">
+    <value>No se han especificado filtros</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Operación</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="ShowFilters" xml:space="preserve">
+    <value>Mostrar filtros</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Valor</value>
+  </data>
+  <data name="Type0NotFoundInTheSchema" xml:space="preserve">
+    <value>El tipo {0} no se encuentra en el esquema</value>
+  </data>
+  <data name="NumberOfRows" xml:space="preserve">
+    <value>Núm. registros</value>
   </data>
 </root>

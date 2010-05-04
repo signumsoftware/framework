@@ -2,6 +2,7 @@
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="System.Configuration" %>
 <%@ Import Namespace="Signum.Utilities" %>
+<%@ Import Namespace="Signum.Web.Properties" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <link href="<%= System.Web.VirtualPathUtility.ToAbsolute("~/Content/Site.css")%>" rel="stylesheet" type="text/css" />
@@ -29,12 +30,12 @@
                     <table>
                         <tr>
                             <td>
-                                Nombre
+                                <%=HttpUtility.HtmlEncode(Resources.Name) %>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Ejecutado x veces
+                                <%=HttpUtility.HtmlEncode(Resources.ExecutedXTimes) %>
                             </td>
                         </tr>
                     </table>
@@ -43,17 +44,17 @@
                     <table>
                         <tr>
                             <td>
-                                Máximo
+                                <%=HttpUtility.HtmlEncode(Resources.Maximum) %>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Medio
+                                <%=HttpUtility.HtmlEncode(Resources.Average) %>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Mínimo
+                                <%=HttpUtility.HtmlEncode(Resources.Minimum) %>
                             </td>
                         </tr>                                                
                     </table>
@@ -68,7 +69,7 @@
 <% using(Html.BeginForm("DoPostBack","Signum","POST")){ %>
      <h2><%= ViewData[ViewDataKeys.PageTitle] ?? ""%></h2>
         <%if (Model != null && Navigator.Manager.ShowOkSave(Model.GetType(), false)){ %>
-            <input type="button" id="btnSave" class="ButtonDiv" onclick="<%="TrySave({});" %>" value="Guardar" />   
+            <input type="button" id="btnSave" class="ButtonDiv" onclick="<%="TrySave({});" %>" value="<%=HttpUtility.HtmlEncode(Resources.Save) %>" />   
         <%} %>
         <%= Html.GetButtonBarElements(Model, ViewData[ViewDataKeys.PartialViewName].ToString(), "")%>  
         <br />

@@ -1,4 +1,5 @@
 <%@ Control Language="C#" Inherits="System.Web.Mvc.ViewUserControl" %>
+
 <%@ Import Namespace="Signum.Web" %>
 <%@ Import Namespace="Signum.Web.Properties" %>
 <%@ Import Namespace="Signum.Entities.DynamicQuery" %>
@@ -7,6 +8,8 @@
 <%@ Import Namespace="Signum.Engine.DynamicQuery" %>
 <%@ Import Namespace="System.Configuration" %>
 <%@ Import Namespace="Signum.Entities.Reflection" %>
+<%@ Import Namespace="Signum.Web.Properties" %>
+
 <% 
     Context context = (Context)Model;
     FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
@@ -30,10 +33,10 @@
 </div>
 
 <div id="<%=context.Compose("divMenuItems") %>" class="buttonBar">
-    <label class="ButtonDiv" for="<%=context.Compose(ViewDataKeys.Top)%>">Núm.registros</label> 
+    <label class="ButtonDiv" for="<%=context.Compose(ViewDataKeys.Top)%>"><%=Html.Encode(Resources.NumberOfRows) %></label> 
     <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "class", "ButtonDiv" }, { "onkeydown", "return validator.number(event)" } })%>
 
-    <input class="ButtonDiv btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="Buscar" /> 
+    <input class="ButtonDiv btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%=Html.Encode(Resources.Search) %>" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
         <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
