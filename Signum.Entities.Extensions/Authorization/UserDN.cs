@@ -123,7 +123,7 @@ namespace Signum.Entities.Authorization
 
     public enum UserMailTemplate
     {
-        ResetPassword
+        ResetPassword,
     }
 
     public interface IUserRelatedDN:IIdentifiable

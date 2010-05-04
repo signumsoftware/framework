@@ -24,7 +24,6 @@ namespace Signum.Web.Mailing
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 EmailLogic.BodyRenderer += new BodyRenderer(EmailLogic_WebMailRenderer);
-            
             }
         }
 
@@ -32,7 +31,8 @@ namespace Signum.Web.Mailing
         {
             ViewDataDictionary viewData = new ViewDataDictionary();
             viewData.Model = owner;
-            viewData.AddRange(args);
+            if (args != null)
+                viewData.AddRange(args);
 
             ViewPage vp = new ViewPage { ViewData = viewData };
             Control control = vp.LoadControl(viewName);

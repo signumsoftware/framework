@@ -97,8 +97,6 @@ namespace Signum.Web.Authorization
                         context.HttpContext.Response.Redirect(loginUrl, true);
                     }
                 };
-
-
             }
         }
 

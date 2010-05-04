@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Signum.Entities;
 using Signum.Engine.Mailing;
+using System.Collections.Generic;
 
 namespace Signum.Web.Authorization
 {
@@ -23,10 +24,11 @@ namespace Signum.Web.Authorization
     public partial class AuthController : Controller
     {
         public static event Func<string, string> ValidatePassword =
-            p => {
+            p =>
+            {
                 if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
                     return null;
-                return "The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter";            
+                return "The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter";
             };
 
         public static event Func<string> GenerateRandomPassword = () => MyRandom.Current.NextString(8);
@@ -95,9 +97,10 @@ namespace Signum.Web.Authorization
                 UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefault(Resources.EmailNotExistsDatabase);
 
                 //Remove old previous requests
-                Database.Query<ResetPasswordRequestDN>().Where(r=>r.RequestDate < DateTime.Now.AddMonths(1)).UnsafeDelete();
+                Database.Query<ResetPasswordRequestDN>().Where(r => r.RequestDate < DateTime.Now.AddMonths(1)).UnsafeDelete();
 
-                ResetPasswordRequestDN rpr = new ResetPasswordRequestDN() {
+                ResetPasswordRequestDN rpr = new ResetPasswordRequestDN()
+                {
                     Code = MyRandom.Current.NextString(5),
                     Email = email,
                     RequestDate = DateTime.Now,
@@ -108,16 +111,16 @@ namespace Signum.Web.Authorization
                 //TODO: Send email
                 EmailLogic.Send(user, UserMailTemplate.ResetPassword, null);
 
-               /* MailMessage message = new MailMessage()
-                {
-                    To = { email },
-                    Subject = Resources.MailSubject_ResetPassword,
-                    Body = Resources.MailBody_ResetPassword.Formato(rpr.Code),
-                    IsBodyHtml = true
-                };
+                /* MailMessage message = new MailMessage()
+                 {
+                     To = { email },
+                     Subject = Resources.MailSubject_ResetPassword,
+                     Body = Resources.MailBody_ResetPassword.Formato(rpr.Code),
+                     IsBodyHtml = true
+                 };
 
-                SmtpClient smtp = new SmtpClient();
-                smtp.Send(message);*/
+                 SmtpClient smtp = new SmtpClient();
+                 smtp.Send(message);*/
 
                 ViewData["email"] = email;
                 return RedirectToAction("ResetPasswordCode");
@@ -154,7 +157,7 @@ namespace Signum.Web.Authorization
         {
             //Look for request with provided code
             ResetPasswordRequestDN rpr = Database.Query<ResetPasswordRequestDN>()
-                .Where(r=>r.Code == code)
+                .Where(r => r.Code == code)
                 .SingleOrDefault("The confirmation code that you have just sent is invalid");
 
             //TODO: May be it would be a good idea to rediret to ResetPassword if invalid
@@ -167,8 +170,9 @@ namespace Signum.Web.Authorization
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordSetNew()
         {
-            ResetPasswordRequestDN rpr = (ResetPasswordRequestDN) TempData["ResetPasswordRequestDN"];
-            if (rpr == null) {
+            ResetPasswordRequestDN rpr = (ResetPasswordRequestDN)TempData["ResetPasswordRequestDN"];
+            if (rpr == null)
+            {
                 TempData["Error"] = "There has been an error with your request to reset your password. Please, enter your login.";
                 RedirectToAction("ResetPassword");
             }
@@ -201,7 +205,7 @@ namespace Signum.Web.Authorization
             //remove pending requests
             Database.Query<ResetPasswordRequestDN>().Where(r => r.Email == user.Email).UnsafeDelete();
 
-            return RedirectToAction("ResetPasswordSuccess");            
+            return RedirectToAction("ResetPasswordSuccess");
         }
 
         public ActionResult ResetPasswordSuccess()
@@ -210,7 +214,7 @@ namespace Signum.Web.Authorization
             return View(AuthClient.ResetPasswordSuccessUrl);
         }
         #endregion
-        
+
         #region "Remember password"
         public ActionResult RememberPassword()
         {
@@ -238,17 +242,19 @@ namespace Signum.Web.Authorization
                     user.Save();
                 }
 
-                string texto = Resources.MailBody_RememberPassword.Formato(randomPassword);
-                MailMessage message = new MailMessage()
-                {
-                    To = { user.Email },
-                    Subject = Resources.MailSubject_RememberPassword,
-                    Body = texto,
-                    IsBodyHtml = true
-                };
+                //string texto = Resources.MailBody_RememberPassword.Formato(randomPassword);
+                user.Send(UserMailTemplate.ResetPassword, new Dictionary<string, object>() { { "password", randomPassword } });
 
-                SmtpClient smtp = new SmtpClient();
-                smtp.Send(message);
+                //MailMessage message = new MailMessage()
+                //{
+                //    To = { user.Email },
+                //    Subject = Resources.MailSubject_RememberPassword,
+                //    Body = texto,
+                //    IsBodyHtml = true
+                //};
+
+                //SmtpClient smtp = new SmtpClient();
+                //smtp.Send(message);
 
                 ViewData["email"] = email;
                 return RedirectToAction("RememberPasswordSuccess");
@@ -300,7 +306,7 @@ namespace Signum.Web.Authorization
             {
                 user = AuthLogic.Login(username, Security.EncodePassword(password));
             }
-            catch (Exception ex){}
+            catch (Exception ex) { }
             if (user == null)
                 return LoginError("_FORM", Resources.InvalidUsernameOrPassword);
 
@@ -358,8 +364,8 @@ namespace Signum.Web.Authorization
                            System.Web.HttpContext.Current.Request.UserHostAddress,
                            ref ticketText);
 
-                     if (OnUserPreLogin != null)
-                       OnUserPreLogin(null, user);
+                    if (OnUserPreLogin != null)
+                        OnUserPreLogin(null, user);
 
                     Thread.CurrentPrincipal = user;
 
