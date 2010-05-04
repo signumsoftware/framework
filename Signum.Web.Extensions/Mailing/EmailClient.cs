@@ -53,7 +53,7 @@ namespace Signum.Web.Mailing
                     vp.RenderView(new ViewContext());
                 }
 
-                HttpContext.Current = fakeContext;
+                HttpContext.Current = oldContext;
 
                 sw.Flush();
             }
