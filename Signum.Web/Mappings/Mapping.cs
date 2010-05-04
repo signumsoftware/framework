@@ -276,6 +276,7 @@ namespace Signum.Web
                 if (error.HasText())
                     childCtx.Error.Add(error);
 
+
                 childCtx.ValidateInternal();
             }
         }
