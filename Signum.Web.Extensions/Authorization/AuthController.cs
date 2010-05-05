@@ -58,7 +58,12 @@ namespace Signum.Web.Authorization
 
             string errorPasswordValidation = ValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
             if (errorPasswordValidation.HasText())
-                return LoginError("password", errorPasswordValidation);
+            {
+                ModelState.AddModelError("password", errorPasswordValidation);
+                return View(AuthClient.ChangePasswordUrl);
+                //return LoginError("password", errorPasswordValidation);
+            }
+
 
             Database.Save(context.Value);
 
