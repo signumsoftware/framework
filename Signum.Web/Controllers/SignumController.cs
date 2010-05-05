@@ -165,7 +165,7 @@ namespace Signum.Web.Controllers
             Database.Save(ident);
 
             ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
-            return Navigator.View(this, ident);
+            return Navigator.View(this, ident, true);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]

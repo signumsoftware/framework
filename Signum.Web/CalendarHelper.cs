@@ -90,6 +90,13 @@ namespace Signum.Web
             set { maxDate = value; }
         }
 
+        bool constrainImput;
+        public bool ConstrainImput
+        {
+            get { return constrainImput; }
+            set { constrainImput = value; }
+        }
+
         [ThreadStatic]
         static string defaultculture;
         public static string DefaultCulture
@@ -133,11 +140,13 @@ namespace Signum.Web
         }
 
         private static string OptionsToString(DatePickerOptions settings)
-        { 
+        {
             if (settings == null)
+                return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'c-90:c+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png'";
                 return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'-80:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png'";
+                return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'-80:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png', constrainInput: false";
 
-            return "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}'{8}{9}".Formato(
+            return "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}', constrainInput: {8}{9}{10}".Formato(
                 settings.ChangeMonth ? "true" : "false",
                 settings.ChangeYear ? "true" : "false",
                 settings.FirstDay,
@@ -146,6 +155,7 @@ namespace Signum.Web
                 settings.ButtonImageOnly ? "true" : "false",
                 settings.ButtonText,
                 settings.ButtonImageSrc,
+                settings.ConstrainImput,
                 (settings.MinDate.HasText() ? ", minDate: " + settings.MinDate : ""),
                 (settings.MaxDate.HasText() ? ", maxDate: " + settings.MaxDate : "")
                 );

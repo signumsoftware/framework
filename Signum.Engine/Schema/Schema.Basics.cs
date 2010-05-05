@@ -241,13 +241,19 @@ namespace Signum.Engine.Maps
         class InitPair
         {
             public InitLevel Level;
-            public InitEventHandler Handler; 
+            public InitEventHandler Handler;
+
+            public override string ToString()
+            {
+                return "{0} -> {1}.{2}".Formato(Level, Handler.Method.DeclaringType.TypeName(), Handler.Method.MethodName());
+            }
         }
 
         List<InitPair> initializing = new List<InitPair>();
         public void Initializing(InitLevel level, InitEventHandler handler)
         {
-            initializing.Add(new InitPair { Level = level, Handler = handler }); 
+            initializing.Insert(initializing.FindIndex(p => p.Level > level).NotFound(initializing.Count),
+                new InitPair { Level = level, Handler = handler });
         }
 
         InitLevel? initLevel;

@@ -28,7 +28,7 @@ namespace Signum.Engine.DynamicQuery
             get
             {
                 AssertQueryAllowed(queryName);
-                return TryGet(queryName).ThrowIfNullC(Resources.TheView0IsNotOnQueryManager.Formato(queryName));
+                return queries.GetOrThrow(queryName, Resources.TheView0IsNotOnQueryManager);
             }
             set
             {
