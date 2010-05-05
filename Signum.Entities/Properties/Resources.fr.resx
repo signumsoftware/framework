@@ -347,7 +347,7 @@
     <value>Propriétés de type {0} ne sont pas supportées</value>
   </data>
   <data name="Property0HasNoValue" xml:space="preserve">
-    <value>Proriété {0} n'a pas de valeur</value>
+    <value>Propriété {0} n'a pas de valeur</value>
   </data>
   <data name="PropertyInfo0NotFoundOn1" xml:space="preserve">
     <value>Info de propriété '{0}' pas trouvé sur {1}</value>
