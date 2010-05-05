@@ -243,13 +243,9 @@ namespace Signum.Engine.Help
             }
         }
 
-        public static Type GetQueryType (object query)
+        public static Type GetQueryType(object query)
         {
-            if (query as Enum != null)
-            {
-                return DynamicQueryManager.Current[(Enum)query].EntityColumn().DefaultEntityType();
-            }
-            return (Type)query;
+            return DynamicQueryManager.Current[query].EntityColumn().DefaultEntityType();
         }
 
         private static List<FileXDocument> LoadDocuments(string subdirectory)

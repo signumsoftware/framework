@@ -16,6 +16,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Engine.Extensions.Properties;
+using System.Net;
 
 namespace Signum.Engine.Mailing
 {
@@ -30,6 +31,8 @@ namespace Signum.Engine.Mailing
     public static class EmailLogic
     {
         public static event BodyRenderer BodyRenderer;
+
+        public static Func<SmtpClient> SmtpClientBuilder;
 
         public static EmailContent RenderWebMail(string subject, string viewName, IEmailOwnerDN owner, Dictionary<string, object> args)
         {
@@ -111,7 +114,7 @@ namespace Signum.Engine.Mailing
                 IsBodyHtml = true,
             };
 
-            SmtpClient client = new SmtpClient();
+            SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
             client.Send(message);
             emailMessage.Save();
         }     
