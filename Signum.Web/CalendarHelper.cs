@@ -7,7 +7,6 @@ using Signum.Utilities;
 using Signum.Web.Properties;
 using System.Globalization;
 
-
 namespace Signum.Web
 {
     public class DatePickerOptions
@@ -108,17 +107,11 @@ namespace Signum.Web
         public static string Calendar(this HtmlHelper helper, string elementId, DatePickerOptions settings)
         {
             StringBuilder sb = new StringBuilder();
-            //sb.Append(helper.ScriptInclude(helper.CombinedJsUrlPath("Scripts/jqueryui", "ui.core.js", "ui.datepicker.js", "i18n/ui.datepicker-es.js")));
 
-            sb.Append(HtmlHelperExtenders.GetScriptRegistrationCode("Scripts/jqueryui/" + jQueryPrefix + "ui.core.js", true));
-            sb.Append(HtmlHelperExtenders.GetScriptRegistrationCode("Scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.js", true));
-            sb.Append(HtmlHelperExtenders.GetScriptRegistrationCode("Scripts/jqueryui/i18n/" + jQueryPrefix + "ui.datepicker-" + DatePickerOptions.DefaultCulture + ".js", true));
-
-            //sb.AppendLine(helper.ScriptInclude("Scripts/jqueryui/" + jQueryPrefix + "ui.core.js",
-            //    "Scripts/jqueryui/"+ jQueryPrefix + "ui.datepicker.js",
-            //    "Scripts/jqueryui/i18n/" + jQueryPrefix + "ui.datepicker-" + DatePickerOptions.DefaultCulture + ".js"));
-
-            //sb.AppendLine(helper.DynamicCssInclude(helper.CombinedCssUrlPath("Scripts/jqueryui", "ui.all.css", "ui.base.css", "ui.core.css", "ui.datepicker.css", "ui.theme.css")));
+            sb.Append(helper.DynamicScriptInclude(
+                "Scripts/jqueryui/" + jQueryPrefix + "ui.core.js",
+                "Scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.js",
+                "Scripts/jqueryui/i18n/" + jQueryPrefix + "ui.datepicker-" + DatePickerOptions.DefaultCulture + ".js"));
 
             if (IncludeCss != null)
                 IncludeCss(helper, sb);
@@ -128,7 +121,6 @@ namespace Signum.Web
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.core.css",
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.datepicker.css",
                     "Scripts/jqueryui/" + jQueryPrefix + "ui.theme.css"));
-
 
             sb.AppendLine(
                 "<script type=\"text/javascript\">\n" + 
@@ -157,37 +149,6 @@ namespace Signum.Web
                 (settings.MinDate.HasText() ? ", minDate: " + settings.MinDate : ""),
                 (settings.MaxDate.HasText() ? ", maxDate: " + settings.MaxDate : "")
                 );
-        }
-
-        //Ajax control toolkit calendar
-        public static string CalendarAjaxControlToolkit(this HtmlHelper helper, string elementId)
-        {
-            var sb = new StringBuilder();
-
-            // Add Microsoft Ajax library   
-            sb.AppendLine(helper.MicrosoftAjaxLibraryInclude());
-
-            // Add toolkit scripts   
-            sb.AppendLine(helper.ToolkitInclude
-                (
-                    "AjaxControlToolkit.ExtenderBase.BaseScripts.js",
-                    "AjaxControlToolkit.Common.Common.js",
-                    "AjaxControlToolkit.Common.DateTime.js",
-                    "AjaxControlToolkit.Animation.Animations.js",
-                    "AjaxControlToolkit.PopupExtender.PopupBehavior.js",
-                    "AjaxControlToolkit.Animation.AnimationBehavior.js",
-                    "AjaxControlToolkit.Common.Threading.js",
-                    "AjaxControlToolkit.Compat.Timer.Timer.js",
-                    "AjaxControlToolkit.Calendar.CalendarBehavior.js"
-                ));
-
-            // Add Calendar CSS file   
-            sb.AppendLine(helper.DynamicToolkitCssInclude("AjaxControlToolkit.Calendar.Calendar.css"));
-
-            // Perform $create   
-            sb.AppendLine(helper.Create("AjaxControlToolkit.CalendarBehavior", "{\"format\":\"dd/MM/yyyy\"}", elementId));
-
-            return sb.ToString();
         }
     }
 }

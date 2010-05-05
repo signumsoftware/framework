@@ -81,7 +81,6 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
-    <Compile Include="AjaxToolkitExtensions.cs" />
     <Compile Include="AppSettings.cs" />
     <Compile Include="AssemblyResourceProvider.cs" />
     <Compile Include="ButtonBar.cs" />
@@ -160,8 +159,7 @@
     <Compile Include="Navigator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuerySettings.cs" />
-    <Compile Include="ScriptHelper.cs" />
-    <Compile Include="ScriptManager.cs">
+    <Compile Include="ScriptHelper.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="SearchControlHelper.cs" />

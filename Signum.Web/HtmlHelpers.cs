@@ -193,40 +193,6 @@ namespace Signum.Web
                      </script>"
                     .Formato(ddlName, controllerUrl, entityIdFieldName, entityTypeName, implementations); 
         }
-
-        public static string CssDynamic(this HtmlHelper html, string url) {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("<script type='text/javascript'>");
-            sb.AppendLine("var link=document.createElement('link');");
-            sb.AppendLine("link.setAttribute('rel', 'stylesheet');");
-            sb.AppendLine("link.setAttribute('type', 'text/css');");
-            sb.AppendFormat("link.setAttribute('href', '{0}');", url);
-            sb.AppendLine();
-            sb.AppendLine("var head = document.getElementsByTagName('head')[0];");
-            sb.AppendLine("head.appendChild(link);");
-            sb.AppendLine("</script>");
-            return sb.ToString();
-        }
-
-        public static string GetScriptRegistrationCode(string url, bool includeScriptTags){
-            StringBuilder sb = new StringBuilder();
-            if (includeScriptTags)
-                sb.AppendLine("<script type='text/javascript'>");
-            sb.AppendLine("var script=document.createElement('script');");
-            sb.AppendLine("script.setAttribute('type', 'text/javascript');");
-            sb.AppendFormat("script.setAttribute('src', '{0}');", url);
-            sb.AppendLine();
-            sb.AppendLine("var head = document.getElementsByTagName('head')[0];");
-            sb.AppendLine("head.appendChild(script);");
-            if (includeScriptTags)
-                sb.AppendLine("</script>");
-            return sb.ToString();
-        }
-
-        public static void RegisterScript(this HtmlHelper html, Type type, string fullName) {
-            string url = new ScriptManager().Page.ClientScript.GetWebResourceUrl(type, fullName);
-            html.ViewContext.HttpContext.Response.Write(HtmlHelperExtenders.GetScriptRegistrationCode(url, true));
-        }
    }
 }
 
