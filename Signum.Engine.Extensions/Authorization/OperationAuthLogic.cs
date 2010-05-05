@@ -74,5 +74,11 @@ namespace Signum.Engine.Authorization
         {
             cache.SetAllowed(role, operationKey, allowed);
         }
+
+
+        public static bool GetOperationAllowed(Enum operationKey)
+        {
+            return cache.GetAllowed(RoleDN.Current.ToLite(), operationKey);
+        }
     }
 }
