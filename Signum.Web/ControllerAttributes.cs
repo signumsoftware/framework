@@ -154,33 +154,7 @@ namespace Signum.Web
 
         public override void OnException(ExceptionContext filterContext)
         {
-            //TODO:Añadir logging
-            if (filterContext == null)
-            {
-                throw new ArgumentNullException("filterContext");
-            }
-
-            // If custom errors are disabled, we need to let the normal ASP.NET exception handler
-            // execute so that the user can see useful debugging information.
-            /*if (filterContext.ExceptionHandled || !filterContext.HttpContext.IsCustomErrorEnabled)
-            {
-                return;
-            }*/
-
             Exception exception = filterContext.Exception;
-
-            // If this is not an HTTP 500 (for example, if somebody throws an HTTP 404 from an action method),
-            // ignore it.
-            if (new HttpException(null, exception).GetHttpCode() != 500)
-            {
-                return;
-            }
-
-            if (!ExceptionType.IsInstanceOfType(exception))
-            {
-                return;
-            }
-
             string controllerName = (string)filterContext.RouteData.Values["controller"];
             string actionName = (string)filterContext.RouteData.Values["action"];
             HandleErrorInfo model = new HandleErrorInfo(filterContext.Exception, controllerName, actionName);
@@ -214,8 +188,17 @@ namespace Signum.Web
             }
             filterContext.ExceptionHandled = true;
             filterContext.HttpContext.Response.Clear();
-            filterContext.HttpContext.Response.StatusCode = 500;
+            filterContext.HttpContext.Response.StatusCode = GetHttpError(exception);
             filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
+        }
+
+        public static int GetHttpError(Exception ex)
+        {
+            int error = new HttpException(null, ex).GetHttpCode();
+
+            if (error == 401) //not authoriozed shows a log-io
+                return 500;
+            return error;
         }
 
         public static string ErrorSessionKey = "sfError";
@@ -228,20 +211,18 @@ namespace Signum.Web
             Exception ex = context.Server.GetLastError();
             context.Server.ClearError();
 
-            HttpException htEx = ex as HttpException;
-            if (htEx != null)
-                context.Response.StatusCode = htEx.GetHttpCode();
+            context.Response.StatusCode = GetHttpError(ex);
 
             context.Session[ErrorSessionKey] = ex;
 
             var httpContext = HttpContext.Current;
 
-            UrlHelper helper = new UrlHelper(new RequestContext(new HttpContextWrapper(HttpContext.Current), 
+            UrlHelper helper = new UrlHelper(new RequestContext(new HttpContextWrapper(HttpContext.Current),
                 RouteTable.Routes.GetRouteData(new HttpContextWrapper(HttpContext.Current))));  //Change in ASP.Net MVC 2
 
             httpContext.RewritePath(helper.Action("Error", "Signum"), false);
             IHttpHandler httpHandler = new MvcHttpHandler();
-            httpHandler.ProcessRequest(HttpContext.Current); 
+            httpHandler.ProcessRequest(HttpContext.Current);
         }
     }
 }

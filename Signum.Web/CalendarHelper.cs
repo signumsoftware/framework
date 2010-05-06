@@ -142,8 +142,6 @@ namespace Signum.Web
         private static string OptionsToString(DatePickerOptions settings)
         {
             if (settings == null)
-                return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'c-90:c+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png'";
-                return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'-80:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png'";
                 return "changeMonth:true, changeYear:true, firstDay:1, yearRange:'-80:+10', showOn:'button', buttonImageOnly:true, buttonText:'mostrar calendario', buttonImage:'Scripts/jqueryui/images/calendar.png', constrainInput: false";
 
             return "changeMonth:{0}, changeYear:{1}, firstDay:{2}, yearRange:'{3}', showOn:'{4}', buttonImageOnly:{5}, buttonText:'{6}', buttonImage:'{7}', constrainInput: {8}{9}{10}".Formato(

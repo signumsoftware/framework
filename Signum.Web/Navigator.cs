@@ -425,6 +425,28 @@ namespace Signum.Web
         {
             return Manager.EntitySettings.GetOrThrow(entity.GetType(), Resources.TheresNotAViewForType0).OnPartialViewName(entity); 
         }
+
+        internal static bool AnyDelegate<T>(this Func<T, bool> func, T val)
+        {
+            foreach (Func<T, bool> f in func.GetInvocationList())
+            {
+                if (f(val))
+                    return true;
+            }
+
+            return false;
+        }
+
+        internal static bool AllDelegate<T>(this Func<T, bool> func, T val)
+        {
+            foreach (Func<T, bool> f in func.GetInvocationList())
+            {
+                if (!f(val))
+                    return false;
+            }
+
+            return true;
+        }
     }
     
     public class NavigationManager
@@ -629,6 +651,9 @@ namespace Signum.Web
 
         protected internal virtual ViewResult Find(ControllerBase controller, FindOptions findOptions)
         {
+            if (!Navigator.IsFindable(findOptions.QueryName))
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             foreach (FilterOption opt in findOptions.FilterOptions)
@@ -697,6 +722,9 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
         {
+            if (!Navigator.IsFindable(findOptions.QueryName))
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
             controller.ViewData.Model = context;
@@ -730,6 +758,9 @@ namespace Signum.Web
 
         protected internal virtual PartialViewResult Search(ControllerBase controller, FindOptions findOptions, int? top, Context context)
         {
+            if (!Navigator.IsFindable(findOptions.QueryName))
+                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+
             var filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList();
             var orders = findOptions.OrderOptions.Select(fo => fo.ToOrder()).ToList();
 
@@ -906,7 +937,7 @@ namespace Signum.Web
 
         protected internal virtual bool IsViewable(Type type, bool admin)
         {
-            if (GlobalIsViewable != null && !GlobalIsViewable(type))
+            if (GlobalIsViewable != null && !GlobalIsViewable.AllDelegate(type))
                 return false;
 
             EntitySettings es = EntitySettings.TryGetC(type);
@@ -924,7 +955,7 @@ namespace Signum.Web
             if (typeof(EmbeddedEntity).IsAssignableFrom(type))
                 return false;
 
-            if (GlobalIsNavigable != null && !GlobalIsNavigable(type))
+            if (GlobalIsNavigable != null && !GlobalIsNavigable.AllDelegate(type))
                 return false;
 
             EntitySettings es = EntitySettings.TryGetC(type);
@@ -939,7 +970,7 @@ namespace Signum.Web
 
         protected internal virtual bool IsReadOnly(Type type)
         {
-            if (GlobalIsReadOnly != null && GlobalIsReadOnly(type))
+            if (GlobalIsReadOnly != null && GlobalIsReadOnly.AnyDelegate(type))
                 return true;
 
             EntitySettings es = EntitySettings.TryGetC(type);
@@ -951,7 +982,7 @@ namespace Signum.Web
 
         protected internal virtual bool IsCreable(Type type, bool admin)
         {
-            if (GlobalIsCreable != null && !GlobalIsCreable(type))
+            if (GlobalIsCreable != null && !GlobalIsCreable.AllDelegate(type))
                 return false;
 
             EntitySettings es = EntitySettings.TryGetC(type);
@@ -963,7 +994,7 @@ namespace Signum.Web
 
         protected internal virtual bool IsFindable(object queryName)
         {
-            if (GlobalIsFindable != null && !GlobalIsFindable(queryName))
+            if (GlobalIsFindable != null && !GlobalIsFindable.AllDelegate(queryName))
                 return false;
 
             if (QuerySettings == null)
