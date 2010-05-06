@@ -31,10 +31,9 @@ namespace Signum.Engine.Authorization
                    Lite =false 
                 },
                 new Goto(UserOperation.Save, UserState.Created)
-                {
+                { 
                    FromStates = new []{UserState.Created},
                    Execute = (u,_)=>{},
-                   AllowsNew = false,
                    Lite =false 
                 },
                   
