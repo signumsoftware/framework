@@ -74,7 +74,8 @@ Autocompleter.prototype = {
         this.timerID = setTimeout(function() { self.keyup(e) }, self.options.delay);
     },
     keyup: function(key) {
-        if (key == 38 || key == 40 || key == 13) return;
+        if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
+        if (this.currentText == this.$control.val()) return;
         var input = this.$control.val();
         if (input != null && input.length < this.options.minChars) {
             this.$dd.html("").hide(); this.currentResults = [];
@@ -88,6 +89,7 @@ Autocompleter.prototype = {
         }, this.options.extraParams);
         var self = this;
         if (self.request) self.request.abort();
+        self.$control.addClass('loading');
         self.request = $.getJSON(
             self.url, data,
             function(results) {
@@ -125,6 +127,8 @@ Autocompleter.prototype = {
                         top: offset.top + self.$control.outerHeight(),
                         width: self.$control.width()
                     });
+
+                    self.$control.removeClass('loading');
 
                     if (prevCount == 0)
                         self.$dd.slideDown("fast");
