@@ -195,6 +195,12 @@ namespace Signum.Engine.Operations
             return entity;
         }
 
+        public static string CanExecute<T>(this T entity, Enum operationKey)
+           where T : class, IIdentifiable
+        {
+            return Find<IExecuteOperation>(entity.GetType(), operationKey).AssertLite(false).CanExecute(entity);
+        }
+
         public static T ExecuteBase<T>(this T entity, Type baseType, Enum operationKey, params object[] args)
              where T : class, IIdentifiable
         {
@@ -270,7 +276,6 @@ namespace Signum.Engine.Operations
         {
             return (T)Find<IConstructorFromOperation>(lite.RuntimeType, operationKey).AssertLite(true).Construct(Database.RetrieveAndForget(lite), args);
         }
-
 
         public static T ConstructFromBase<T>(this IIdentifiable entity, Type baseType, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
