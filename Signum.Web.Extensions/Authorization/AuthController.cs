@@ -21,7 +21,7 @@ using System.Collections.Generic;
 namespace Signum.Web.Authorization
 {
     [HandleException]
-    public partial class AuthController : Controller
+    public class AuthController : Controller
     {
         public static event Func<string, string> ValidatePassword =
             p =>

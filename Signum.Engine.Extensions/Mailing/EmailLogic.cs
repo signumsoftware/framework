@@ -17,6 +17,7 @@ using Signum.Entities.Operations;
 using Signum.Engine.Operations;
 using Signum.Engine.Extensions.Properties;
 using System.Net;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Mailing
 {
@@ -92,6 +93,21 @@ namespace Signum.Engine.Mailing
             return result;
         }
 
+        public static void SendAsync(this IEmailOwnerDN recipient, Enum templateKey, Dictionary<string, object> args)
+        {
+            EmailContent content = EmailTemplates.GetOrThrow(templateKey, Resources.NotRegisteredInEmailLogic)(recipient, args);
+
+            var result = new EmailMessageDN
+            {
+                Recipient = recipient.ToLite(),
+                Template = EnumLogic<EmailTemplateDN>.ToEntity(templateKey),
+                Subject = content.Subject,
+                Body = content.Body,
+            };
+
+            SendMailAsync(result);
+        }
+
         public static EmailMessageDN ComposeMail(this EmailMessageDN emailMessage)
         {
             EmailContent content = EmailTemplates.GetOrThrow(
@@ -106,6 +122,32 @@ namespace Signum.Engine.Mailing
             emailMessage.Sent = DateTime.Now;
             emailMessage.Received = null;
 
+            try
+            {
+                MailMessage message = new MailMessage()
+                {
+                    To = { emailMessage.Recipient.Retrieve().Email },
+                    Subject = emailMessage.Subject,
+                    Body = emailMessage.Body,
+                    IsBodyHtml = true,
+                };
+
+                SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
+                client.Send(message);
+                emailMessage.Save();
+            }
+            catch (Exception e)
+            {
+                emailMessage.Exception = e.Message;
+                emailMessage.State = EmailState.SentError;
+            }
+        }
+
+        public static void SendMailAsync(EmailMessageDN emailMessage)
+        {
+            emailMessage.Sent = DateTime.Now;
+            emailMessage.Received = null;
+
             MailMessage message = new MailMessage()
             {
                 To = { emailMessage.Recipient.Retrieve().Email },
@@ -115,8 +157,22 @@ namespace Signum.Engine.Mailing
             };
 
             SmtpClient client = SmtpClientBuilder == null ? new SmtpClient() : SmtpClientBuilder();
-            client.Send(message);
+            client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
+
+            client.SendAsync(message, emailMessage);
             emailMessage.Save();
+        }
+
+        static void client_SendCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            EmailMessageDN emailMessage = (EmailMessageDN)e.UserState;
+            if (e.Error != null)
+            {
+                emailMessage.Exception = e.Error.Message;
+                emailMessage.State = EmailState.SentError;
+            }
+            using (AuthLogic.Disable())
+                emailMessage.Save();
         }     
     }
 

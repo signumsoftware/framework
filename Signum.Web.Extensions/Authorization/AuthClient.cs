@@ -142,7 +142,7 @@ namespace Signum.Web.Authorization
 
             Navigator.AddSetting(new EntitySettings<T>(EntityType.NotSaving)
             {
-                PartialViewName = e => "Views/Auth/{0}".Formato(partialViewName),
+                PartialViewName = e => "Views/AuthAdmin/{0}".Formato(partialViewName),
                 MappingAdmin = new EntityMapping<T>(false)
                     .SetProperty(m => m.Rules,
                     new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
@@ -155,7 +155,7 @@ namespace Signum.Web.Authorization
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ControllerContext controllerContext, T entity, string viewName, string prefix) =>
                 new[] { new ToolBarButton { 
                     OnClick = (embedded ? "postDialog('{0}', '{1}')" :  "Submit('{0}', '{1}')").Formato(
-                        new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "Auth"), prefix), 
+                        new UrlHelper(controllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), prefix), 
                     Text = Resources.Save } });
         }
 

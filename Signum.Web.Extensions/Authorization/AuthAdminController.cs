@@ -17,8 +17,13 @@ using Signum.Web.Controllers;
 
 namespace Signum.Web.Authorization
 {
-    public partial class AuthController : Controller
+    public class AuthAdminController : Controller
     {
+        protected override void OnAuthorization(AuthorizationContext filterContext)
+        {
+            BasicPermissions.AdminRules.Authorize();
+        }
+
         public ViewResult Permissions(Lite<RoleDN> role)
         {
             return Navigator.View(this, PermissionAuthLogic.GetPermissionRules(role), true);

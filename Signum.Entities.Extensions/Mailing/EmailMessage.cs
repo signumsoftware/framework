@@ -63,6 +63,7 @@ namespace Signum.Entities.Mailing
         }
 
         string exception;
+        [StringLengthValidator(AllowNulls = true, Max = int.MaxValue)]
         public string Exception
         {
             get { return exception; }
@@ -86,10 +87,10 @@ namespace Signum.Entities.Mailing
         static StateValidator<EmailMessageDN, EmailState> validator = new StateValidator<EmailMessageDN,EmailState>(
             m => m.State, m => m.Body, m=> m.Subject, m=>m.Exception, m=> m.Sent, m=>m.Received, m=>m.Package)
             {
-               {EmailState.Prepared,    false,      false,          false,      false,          false,          true },
-               {EmailState.SentOk,      true,       true,           false,      true,           false,          null },
-               {EmailState.SentError,   true,       true,           true,       true,           null,           null },
-               {EmailState.Received,    true,       true,           false,      true,           true,           null },
+{EmailState.Prepared,    false,      false,          false,      false,          false,          true },
+{EmailState.SentOk,      true,       true,           false,      true,           false,          null },
+{EmailState.SentError,   true,       true,           true,       true,           null,           null },
+{EmailState.Received,    true,       true,           false,      true,           true,           null },
             };
         }
     }
