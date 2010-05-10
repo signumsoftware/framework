@@ -90,11 +90,11 @@ namespace Signum.Web
             set { maxDate = value; }
         }
 
-        bool constrainImput;
-        public bool ConstrainImput
+        bool constrainInput;
+        public bool ConstrainInput
         {
-            get { return constrainImput; }
-            set { constrainImput = value; }
+            get { return constrainInput; }
+            set { constrainInput = value; }
         }
 
         [ThreadStatic]
@@ -153,7 +153,7 @@ namespace Signum.Web
                 settings.ButtonImageOnly ? "true" : "false",
                 settings.ButtonText,
                 settings.ButtonImageSrc,
-                settings.ConstrainImput,
+                settings.ConstrainInput ? "true" : "false",
                 (settings.MinDate.HasText() ? ", minDate: " + settings.MinDate : ""),
                 (settings.MaxDate.HasText() ? ", maxDate: " + settings.MaxDate : "")
                 );
