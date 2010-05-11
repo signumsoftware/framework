@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Data;
 using System.Text.RegularExpressions;
 using Signum.Utilities.Properties;
+using System.Collections;
 
 namespace Signum.Utilities
 {
@@ -488,6 +489,17 @@ namespace Signum.Utilities
         #endregion
 
         #region Operation
+        public static IEnumerable<T> Concat<T>(params IEnumerable<T>[] collections)
+        {
+            foreach (var collection in collections)
+            {
+                foreach (var item in collection)
+                {
+                    yield return item;
+                }
+            }
+        }
+
         public static IEnumerable<S> BiSelect<T, S>(this IEnumerable<T> collection, Func<T, T, S> func)
         {
             return BiSelect(collection, func, BiSelectOptions.None);
