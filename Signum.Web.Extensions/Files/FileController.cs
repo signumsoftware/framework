@@ -127,9 +127,7 @@ namespace Signum.Web.Files
             binaryFile = fp.FullWebPath != null ? new WebClient().DownloadData(fp.FullWebPath)
                 : FilePathLogic.GetByteArray(fp);
 
-            throw new NotImplementedException();
-            //return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
-            return null;
+            return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
         }
 
         
