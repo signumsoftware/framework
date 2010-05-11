@@ -52,6 +52,9 @@ Autocompleter.prototype = {
                 if (self.currentResults.length) {
                     self.$dd.show();
                 }
+            },
+            blur: function() {
+                self.$dd.hide();
             }
         });
         this.$dd = $("<div/>").addClass("AutoCompleteMainDiv");
@@ -64,9 +67,7 @@ Autocompleter.prototype = {
             self.selectIndex($(this));
         });
 
-        $("body").click(function() {
-            self.$dd.hide();
-        });
+
     },
     clear: function(e) {
         clearTimeout(this.timerID);
