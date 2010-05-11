@@ -356,5 +356,23 @@ namespace Signum.Web.Controllers
                             c.TempData),
                         new ViewPage());
         }
+
+        public static string GetMimeType(string extension)
+        {
+            string mimeType = String.Empty;
+
+            // Attempt to get the mime-type from the registry.
+            Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(extension);
+
+            if (regKey != null)
+            {
+                string type = (string)regKey.GetValue("Content Type");
+
+                if (type != null)
+                    mimeType = type;
+            }
+
+            return mimeType;
+        }
     }
 }
