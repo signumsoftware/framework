@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Utilities;
+using System.IO;
 
 namespace Signum.Windows.Reports
 {
@@ -35,6 +36,7 @@ namespace Signum.Windows.Reports
 
             if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
             {
+                PlainExcelGenerator2.WritePlainExcel(SearchControl.ResultTable, Path.GetFileNameWithoutExtension(sfd.FileName) + ".xlsx");
                 PlainExcelGenerator.GenerateReport(sfd.FileName, SearchControl.ResultTable);
             }
         }

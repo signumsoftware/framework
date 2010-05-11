@@ -14,8 +14,10 @@ using Signum.Windows.Extensions.Properties;
 
 namespace Signum.Windows.Reports
 {
+    
     public static class ExcelReportGenerator
     {
+       
         public static void GenerarInforme(string filename, ResultTable vista)
         {
             if (vista == null || vista.Rows.Length == 0 || vista.Columns.Length == 0)
