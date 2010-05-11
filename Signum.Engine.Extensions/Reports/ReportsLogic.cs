@@ -10,6 +10,9 @@ using Signum.Engine.Linq;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Basics;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml;
 
 namespace Signum.Engine.Reports
 {
@@ -57,5 +60,66 @@ namespace Signum.Engine.Reports
                     where er.Query.Key == QueryUtils.GetQueryName(queryName)
                     select er.ToLite()).ToList();
         }
+
+
+        //public static void BuildWorkbook(string fileName, ResultTable queryResult)
+        //{
+        //    try
+        //    {
+        //        using (SpreadsheetDocument s = SpreadsheetDocument.Create(fileName, SpreadsheetDocumentType.Workbook))
+        //        {
+        //            WorkbookPart workbookPart = s.AddWorkbookPart();
+        //            workbookPart.Workbook = new Workbook
+        //            {
+        //                FileVersion = new FileVersion { ApplicationName = "Microsoft Office Excel" },
+        //                Sheets = new Sheets()
+        //            };
+
+        //            workbookPart.AddWorksheet("Hoja 1", new Worksheet(queryResult.Rows.Select (r => new Row(r.Table.Rows.Select(c =>  Cell((string)r[c.Index])).ToArray())).ToSheetData())); 
+
+        //            workbookPart.Workbook.Save();
+        //            s.Close();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.ToString());
+        //        Console.ReadLine();
+        //    }
+        //}
+
+
+        //public static Cell Cell(int value)
+        //{
+        //    return new Cell(new CellValue { Text = value.ToString() });
+        //}
+
+        //public static Cell Cell(string value)
+        //{
+        //    return new Cell(new InlineString(new Text { Text = value })) { DataType = CellValues.InlineString };
+        //}
+
+        //public static SheetData ToSheetData(this IEnumerable<Row> rows)
+        //{
+        //    return new SheetData(rows.Cast<OpenXmlElement>());
+        //}
+
+        //public static WorksheetPart AddWorksheet(this WorkbookPart workbookPart, string name, Worksheet sheet)
+        //{
+        //    var result = workbookPart.AddNewPart<WorksheetPart>();
+        //    result.Worksheet = sheet;
+        //    sheet.Save();
+
+        //    workbookPart.Workbook.Sheets.Append(
+        //        new Sheet
+        //        {
+        //            Name = name,
+        //            SheetId = (uint)workbookPart.Workbook.Sheets.Count() + 1,
+        //            Id = workbookPart.GetIdOfPart(result)
+        //        });
+
+        //    return result;
+        //}
+
     }
 }

@@ -23,6 +23,7 @@ using System.Text;
 using System.Net;
 using Signum.Engine.Files;
 using System.Reflection;
+using Signum.Web.Controllers;
 #endregion
 
 namespace Signum.Web.Files
@@ -126,25 +127,11 @@ namespace Signum.Web.Files
             binaryFile = fp.FullWebPath != null ? new WebClient().DownloadData(fp.FullWebPath)
                 : FilePathLogic.GetByteArray(fp);
 
-            return File(binaryFile, GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
+            throw new NotImplementedException();
+            //return File(binaryFile, SignumController.GetMimeType(Path.GetExtension(fp.FileName)), fp.FileName);
+            return null;
         }
 
-        private string GetMimeType(string extension)
-        {
-            string mimeType = String.Empty;
-
-            // Attempt to get the mime-type from the registry.
-            Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(extension);
-
-            if (regKey != null)
-            {
-                string type = (string)regKey.GetValue("Content Type");
-
-                if (type != null)
-                    mimeType = type;
-            }
-
-            return mimeType;
-        }
+        
     }
 }
