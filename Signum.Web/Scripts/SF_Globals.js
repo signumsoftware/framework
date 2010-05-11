@@ -311,24 +311,6 @@ function log(s) {
     }
 }
 
-// establece clase "focused" al div alrededor del campo con foco
-function initAroundDivs() {
-    $('.valueLine,.rbValueLine').each(function() {
-        if (this.id != undefined && this.id != null && this.id != "") {
-            var elementID = $("#" + this.id);
-            var around = elementID.parents('div[class=around]');
-            if (around.length > 0) {
-                elementID.focus(function() { around.addClass('focused'); });
-                elementID.blur(function() { around.removeClass('focused'); });
-            }
-        }
-    });
-}
-
-
-
-$(function() { initAroundDivs(); });
-
 function singleQuote(myfunction) {
     if (myfunction != null)
         return myfunction.toString().replace(/"/g, "'");

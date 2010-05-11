@@ -59,17 +59,13 @@ namespace Signum.Web
 
         public static string RegisterScripts(this HtmlHelper html, params string[] scriptUrls)
         {
+            //TODO: Make non-blocking request keeping calls to library after having load
+            //maybe through a stub
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("<script type='text/javascript'>");
             foreach (string url in scriptUrls)
             {
-                sb.AppendLine("var script=document.createElement('script');");
-                sb.AppendLine("script.setAttribute('type', 'text/javascript');");
-                sb.AppendFormat("script.setAttribute('src', '{0}');", url);
-                sb.AppendLine("var head = document.getElementsByTagName('head')[0];");
-                sb.AppendLine("head.appendChild(script);");
+                sb.AppendFormat("<script type=\"text/javascript\" src=\"{0}\"></script>", url);
             }
-            sb.AppendLine("</script>");
             return sb.ToString();
         }
 

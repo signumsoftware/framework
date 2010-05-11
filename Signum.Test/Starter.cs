@@ -42,10 +42,10 @@ namespace Signum.Test
         {
             SchemaBuilder sb = new SchemaBuilder();
             DynamicQueryManager dqm = new DynamicQueryManager();
+            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
 
             InternalStart(sb, dqm);
 
-            ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
         }
 
         public static void InternalStart(SchemaBuilder sb, DynamicQueryManager dqm)

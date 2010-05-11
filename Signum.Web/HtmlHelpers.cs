@@ -122,14 +122,14 @@ namespace Signum.Web
             return "<a{0}{1}{2}{3} href=\"{4}\">{5}</a>".Formato(idname,css,tooltip,attributes,href,text);
         }
 
-        public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass)
+        public static string Div(this HtmlHelper html, string id, string innerHTML, string cssClass)
         {
-            return html.Div(name, innerHTML, cssClass, null);
+            return html.Div(id, innerHTML, cssClass, null);
         }
 
-        public static string Div(this HtmlHelper html, string name, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
+        public static string Div(this HtmlHelper html, string id, string innerHTML, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string idname = id.HasText() ? (" id='" + id + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=\"" + kv.Value.ToString() + "\"", " ")) : "";
             string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
             return "<div{0}{1}{2}>{3}</div>".Formato(idname, css, attributes, innerHTML);
@@ -137,7 +137,7 @@ namespace Signum.Web
 
         public static string Button(this HtmlHelper html, string name, string value, string onclick, string cssClass, IDictionary<string, object> htmlAttributes)
         {
-            string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
+            string idname = name.HasText() ? (" id='" + name + "'") : "";
             string attributes = htmlAttributes != null ? (" " + htmlAttributes.ToString(kv => kv.Key + "=" + kv.Value.ToString().Quote(), " ")) : "";
             string css = cssClass.HasText() ? " class='" + cssClass + "'" : "";
             return "<input type='button'{0}{1} value='{2}'{3} onclick=\"{4}\" />".Formato(idname, css, value, attributes, onclick);

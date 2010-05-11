@@ -32,11 +32,11 @@
     <%Html.RenderPartial(Navigator.Manager.FilterBuilderUrl, ViewData); %>
 </div>
 
-<div id="<%=context.Compose("divMenuItems") %>" class="buttonBar">
-    <label class="ButtonDiv" for="<%=context.Compose(ViewDataKeys.Top)%>"><%=Html.Encode(Resources.NumberOfRows) %></label> 
-    <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "class", "ButtonDiv" }, { "onkeydown", "return validator.number(event)" } })%>
+<div id="<%=context.Compose("divMenuItems") %>" class="searchFooter">
+    <label for="<%=context.Compose(ViewDataKeys.Top)%>"><%=Html.Encode(Resources.NumberOfRows) %></label> 
+    <%= Html.TextBox(context.Compose(ViewDataKeys.Top), Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, Resources.MissingQuerySettingsForQueryName0).Top.TryToString(), new Dictionary<string, object> { { "size", "5" }, { "onkeydown", "return validator.number(event)" } })%>
 
-    <input class="ButtonDiv btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%=Html.Encode(Resources.Search) %>" /> 
+    <input class="btnSearch" id="<%=context.Compose("btnSearch")%>" type="button" onclick="<%="Search({{prefix:'{0}'}});".Formato(context.ControlID) %>" value="<%=Html.Encode(Resources.Search) %>" /> 
     <% if (findOptions.Create && Navigator.IsCreable(entitiesType, true) && viewable)
        { %>
         <input type="button" value="+" class="lineButton create" onclick="<%="SearchCreate({{prefix:'{0}'}});".Formato(context.ControlID)%>" />
