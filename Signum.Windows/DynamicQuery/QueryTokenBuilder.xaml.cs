@@ -19,11 +19,6 @@ namespace Signum.Windows
 {
     public partial class QueryTokenBuilder : UserControl
     {
-        static QueryTokenBuilder()
-        {
-            PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
-        }
-
         public static readonly DependencyProperty TokenProperty =
               DependencyProperty.Register("Token", typeof(QueryToken), typeof(QueryTokenBuilder), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                   (d, e) => ((QueryTokenBuilder)d).UpdateTokenList((QueryToken)e.NewValue)));

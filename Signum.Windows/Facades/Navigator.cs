@@ -33,6 +33,7 @@ namespace Signum.Windows
             Manager = navigator;
 
             //Looking for a better place to do this
+            PropertyRoute.SetFindImplementationsCallback(Server.FindImplementations);
             EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
         }
 
