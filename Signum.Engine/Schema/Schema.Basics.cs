@@ -120,16 +120,16 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnSaving(entity, isRoot);
         }
 
-        internal void OnSaved(IdentifiableEntity entity, bool isRoot)
+        internal void OnSaved(IdentifiableEntity entity, bool isRoot, bool isNew)
         {
             AssertAllowed(entity.GetType()); 
 
             IEntityEvents ee = entityEvents.TryGetC(entity.GetType());
 
             if (ee != null)
-                ee.OnSaved(entity, isRoot);
+                ee.OnSaved(entity, isRoot, isNew);
 
-            entityEventsGlobal.OnSaved(entity, isRoot); 
+            entityEventsGlobal.OnSaved(entity, isRoot, isNew); 
         }
 
         internal void OnRetrieving(Type type, int id, bool isRoot)
@@ -397,7 +397,7 @@ namespace Signum.Engine.Maps
     {
         void OnPreSaving(IdentifiableEntity entity, bool isRoot, ref bool graphModified);
         void OnSaving(IdentifiableEntity entity, bool isRoot);
-        void OnSaved(IdentifiableEntity entity, bool isRoot);
+        void OnSaved(IdentifiableEntity entity, bool isRoot, bool isCreated);
         void OnRetrieving(Type type, int id, bool isRoot);
         void OnRetrieved(IdentifiableEntity entity, bool isRoot);
         void OnDeleting(Type type, int id);
@@ -407,15 +407,15 @@ namespace Signum.Engine.Maps
     public class EntityEvents<T> : IEntityEvents
         where T : IdentifiableEntity
     {
-        public event SavingEntityEventHandler<T> PreSaving;
+        public event PreSavingEntityEventHandler<T> PreSaving;
         public event EntityEventHandler<T> Saving;
-        public event EntityEventHandler<T> Saved;
+        public event SavedEntityEventHandler<T> Saved;
 
-        public event TypeIdRootEventHandler Retrieving;
+        public event RetrivingEntityEventHandler Retrieving;
         public event EntityEventHandler<T> Retrieved;
 
-        public event TypeIdEventHandler Deleting;
-        public event TypeIdEventHandler Deleted;
+        public event DeleteEntityEventHandler Deleting;
+        public event DeleteEntityEventHandler Deleted;
 
         public event FilterQueryEventHandler<T> FilterQuery; 
 
@@ -442,10 +442,10 @@ namespace Signum.Engine.Maps
                 Saving((T)entity, isRoot);
         }
 
-        void IEntityEvents.OnSaved(IdentifiableEntity entity, bool isRoot)
+        void IEntityEvents.OnSaved(IdentifiableEntity entity, bool isRoot, bool isNew)
         {
             if (Saved != null)
-                Saved((T)entity, isRoot);
+                Saved((T)entity, isRoot, isNew);
         }
 
         void IEntityEvents.OnRetrieving(Type type, int id, bool isRoot)
@@ -473,10 +473,11 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public delegate void SavingEntityEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
+    public delegate void PreSavingEntityEventHandler<T>(T ident, bool isRoot, ref bool graphModified) where T : IdentifiableEntity;
     public delegate void EntityEventHandler<T>(T ident, bool isRoot) where T : IdentifiableEntity;
-    public delegate void TypeIdRootEventHandler(Type type, int id, bool isRoot);
-    public delegate void TypeIdEventHandler(Type type, int id);
+    public delegate void SavedEntityEventHandler<T>(T ident, bool isRoot, bool isNew) where T : IdentifiableEntity;
+    public delegate void RetrivingEntityEventHandler(Type type, int id, bool isRoot);
+    public delegate void DeleteEntityEventHandler(Type type, int id);
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
     public delegate void InitEventHandler(Schema sender); 

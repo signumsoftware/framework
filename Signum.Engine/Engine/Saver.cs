@@ -50,6 +50,8 @@ namespace Signum.Engine
             //colapsa modifiables (collections and embeddeds) keeping indentifiables only
             DirectedGraph<IdentifiableEntity> identifiables = GraphExplorer.ColapseIdentifiables(modifiables);
 
+            List<IdentifiableEntity> newEnities = identifiables.Where(i => i.IsNew).ToList();
+
             //Remove all the edges that doesn't mean a dependency
             identifiables.RemoveAll(identifiables.Edges.Where(e=>!e.To.IsNew).ToList());
 
@@ -83,7 +85,7 @@ namespace Signum.Engine
             SaveGroup(postSavings, schema, null);
 
             foreach (var node in identifiables)
-                schema.OnSaved(node, roots.Contains(node));
+                schema.OnSaved(node, roots.Contains(node), newEnities.Contains(node));
 
             EntityCache.Add(identifiables);
         }
