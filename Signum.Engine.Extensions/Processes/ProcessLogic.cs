@@ -149,7 +149,7 @@ namespace Signum.Engine.Processes
             }
         }
 
-        static void ProcessExecution_Saved(ProcessExecutionDN pe, bool isRoot)
+        static void ProcessExecution_Saved(ProcessExecutionDN pe, bool isRoot, bool isNew)
         {
             switch (pe.State)
             {

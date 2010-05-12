@@ -154,7 +154,7 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        static void Schema_Saved(RoleDN role, bool isRoot)
+        static void Schema_Saved(RoleDN role, bool isRoot, bool isNew)
         {
             Transaction.RealCommit += () => _roles = null;
 

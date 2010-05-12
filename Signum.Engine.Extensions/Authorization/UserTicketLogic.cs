@@ -36,11 +36,11 @@ namespace Signum.Engine.Authorization
                                                  ut.Device,
                                              }).ToDynamic();
 
-                sb.Schema.EntityEvents<UserDN>().Saved += new EntityEventHandler<UserDN>(UserTicketLogic_Saved);
+                sb.Schema.EntityEvents<UserDN>().Saved += UserTicketLogic_Saved;
             }
         }
 
-        static void UserTicketLogic_Saved(UserDN ident, bool isRoot)
+        static void UserTicketLogic_Saved(UserDN ident, bool isRoot, bool isNew)
         {
             CleanExpiredTickets(ident);
         }
