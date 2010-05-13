@@ -567,4 +567,10 @@
   <data name="ProcessStartIsNullButProcessEndIsNot" xml:space="preserve">
     <value>Process Start es nulo, pero Process End no</value>
   </data>
+  <data name="ThereAreNoResultsToWrite" xml:space="preserve">
+    <value>No hay resultados que exportar al informe</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Datos</value>
+  </data>
 </root>

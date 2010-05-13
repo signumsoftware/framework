@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Win32;
 using System.Windows.Media.Imaging;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Reports;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Prop = Signum.Windows.Extensions.Properties;
@@ -27,17 +28,17 @@ namespace Signum.Windows.Reports
             SaveFileDialog sfd = new SaveFileDialog()
             {
                 AddExtension = true,
-                DefaultExt = ".xml",
-                Filter = Prop.Resources.Excel2003XmlSpreadsheet,
+                DefaultExt = ".xlsx",
+                Filter = Prop.Resources.Excel2007Spreadsheet,
                 OverwritePrompt = true,
-                FileName = "{0}.xml".Formato(QueryUtils.GetNiceQueryName(SearchControl.QueryName)),
+                FileName = "{0}.xlsx".Formato(QueryUtils.GetNiceQueryName(SearchControl.QueryName)),
                 Title = Prop.Resources.FindLocationFoExcelReport
             };
 
             if (sfd.ShowDialog(this.FindCurrentWindow()) == true)
             {
-                PlainExcelGenerator2.WritePlainExcel(SearchControl.ResultTable, Path.GetFileNameWithoutExtension(sfd.FileName) + ".xlsx");
-                PlainExcelGenerator.GenerateReport(sfd.FileName, SearchControl.ResultTable);
+                PlainExcelGenerator.WritePlainExcel(SearchControl.ResultTable, sfd.FileName);
+                System.Diagnostics.Process.Start(sfd.FileName);
             }
         }
 

@@ -567,4 +567,10 @@
   <data name="Deleted" xml:space="preserve">
     <value>(Deleted)</value>
   </data>
+  <data name="ThereAreNoResultsToWrite" xml:space="preserve">
+    <value>There are no results to write</value>
+  </data>
+  <data name="Data" xml:space="preserve">
+    <value>Data</value>
+  </data>
 </root>

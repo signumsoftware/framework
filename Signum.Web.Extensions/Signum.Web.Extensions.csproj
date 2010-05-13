@@ -110,6 +110,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.fr.resx</DependentUpon>
     </Compile>
+    <Compile Include="Reports\ReportClient.cs" />
+    <Compile Include="Reports\ReportController.cs" />
     <Compile Include="ScriptCombiner\CombineController.cs" />
     <Compile Include="ScriptCombiner\CombinerHtmlHelper.cs" />
     <Compile Include="ScriptCombiner\JavaScriptMinifier.cs" />

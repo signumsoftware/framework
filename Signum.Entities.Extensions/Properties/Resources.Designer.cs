@@ -178,6 +178,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data.
+        /// </summary>
+        public static string Data {
+            get {
+                return ResourceManager.GetString("Data", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Days.
         /// </summary>
         public static string DateSpanDN_Days {
@@ -1060,7 +1069,7 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Días de la semana.
+        ///   Looks up a localized string similar to Days of week.
         /// </summary>
         public static string ScheduleRuleWeekDaysDN {
             get {
@@ -1254,6 +1263,15 @@ namespace Signum.Entities.Extensions.Properties {
         public static string ScheduleRuleWeeklyDN_DayOfTheWeek {
             get {
                 return ResourceManager.GetString("ScheduleRuleWeeklyDN_DayOfTheWeek", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no results to write.
+        /// </summary>
+        public static string ThereAreNoResultsToWrite {
+            get {
+                return ResourceManager.GetString("ThereAreNoResultsToWrite", resourceCulture);
             }
         }
         

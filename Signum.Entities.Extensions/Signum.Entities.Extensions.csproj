@@ -38,6 +38,7 @@
     <OutputPath>bin\Partial\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -92,6 +93,8 @@
       <DependentUpon>Resources.fr.resx</DependentUpon>
     </Compile>
     <Compile Include="Reports\CompositeReportDN.cs" />
+    <Compile Include="Reports\Generator\CellBuilder.cs" />
+    <Compile Include="Reports\Generator\ExcelExtensions.cs" />
     <Compile Include="Reports\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -107,6 +110,8 @@
     </Compile>
     <Compile Include="Reports\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
+    <Compile Include="Reports\Generator\PlainExcelGenerator.cs" />
+    <Compile Include="Reports\Generator\PlainExcelGeneratorOld.cs" />
     <Compile Include="Reports\UserQueryDN.cs" />
     <Compile Include="Scheduler\CalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
@@ -142,6 +147,7 @@
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />
     <None Include="Files\Files.cd" />
+    <EmbeddedResource Include="Reports\Generator\plainExcelTemplate.xlsx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
