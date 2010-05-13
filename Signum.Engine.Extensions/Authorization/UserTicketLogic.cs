@@ -22,7 +22,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertIsStarted(sb);
+                AuthLogic.AssertStarted(sb);
                 sb.Include<UserTicketDN>();
 
                 dqm[typeof(UserTicketDN)] = (from ut in Database.Query<UserTicketDN>()

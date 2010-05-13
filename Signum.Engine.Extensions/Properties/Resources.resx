@@ -378,4 +378,7 @@
   <data name="ResetPasswordCode" xml:space="preserve">
     <value>Reset password code</value>
   </data>
+  <data name="NoEmailsToProcessFound" xml:space="preserve">
+    <value>No emails to process found</value>
+  </data>
 </root>

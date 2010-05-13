@@ -124,21 +124,15 @@ namespace Signum.Web.Operations
             }
         }
 
-        public ActionResult ConstructFromManyExecute(string sfRuntimeType, string sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
+        public ActionResult ConstructFromManyExecute(string sfRuntimeType, List<int> sfIds, string sfOperationFullKey, string prefix, string sfOnOk, string sfOnCancel)
         {
             Type type = Navigator.ResolveType(sfRuntimeType);
 
-            List<Lite> sourceEntities = null;
-            if (sfIds.HasText())
-            {
-                string[] ids = sfIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                if (ids == null || ids.Length == 0)
-                    throw new ArgumentException(Resources.ConstructFromManyOperation0NeedsSourceIdsAsParameter.Formato(sfOperationFullKey));
-                sourceEntities = ids.Select(idstr => Lite.Create(type, int.Parse(idstr))).ToList();
-            }
-            if (sourceEntities == null)
+            if (sfIds == null || sfIds.Count == 0)
                 throw new ArgumentException(Resources.ConstructFromManyOperation0NeedsSourceLazies.Formato(sfOperationFullKey));
 
+            List<Lite> sourceEntities = sfIds.Select(idstr => Lite.Create(type, idstr)).ToList();
+            
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, EnumLogic<OperationDN>.ToEnum(sfOperationFullKey));
 
             ViewData[ViewDataKeys.WriteSFInfo] = true;

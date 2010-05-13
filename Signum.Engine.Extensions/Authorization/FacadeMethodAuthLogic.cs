@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertIsStarted(sb);
+                AuthLogic.AssertStarted(sb);
                 FacadeMethodLogic.Start(sb, serviceInterface);
 
                 cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool>(sb,

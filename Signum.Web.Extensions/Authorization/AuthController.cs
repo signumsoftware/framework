@@ -247,19 +247,7 @@ namespace Signum.Web.Authorization
                     user.Save();
                 }
 
-                //string texto = Resources.MailBody_RememberPassword.Formato(randomPassword);
-                user.Send(UserMailTemplate.ResetPassword, new Dictionary<string, object>() { { "password", randomPassword } });
-
-                //MailMessage message = new MailMessage()
-                //{
-                //    To = { user.Email },
-                //    Subject = Resources.MailSubject_RememberPassword,
-                //    Body = texto,
-                //    IsBodyHtml = true
-                //};
-
-                //SmtpClient smtp = new SmtpClient();
-                //smtp.Send(message);
+                user.Send(UserMailTemplate.ResetPassword, new Dictionary<string, string>() { { "password", randomPassword } });
 
                 ViewData["email"] = email;
                 return RedirectToAction("RememberPasswordSuccess");

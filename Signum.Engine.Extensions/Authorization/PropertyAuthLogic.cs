@@ -23,7 +23,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertIsStarted(sb);
+                AuthLogic.AssertStarted(sb);
                 PropertyLogic.Start(sb);
 
                 cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed>(sb,

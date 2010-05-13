@@ -43,8 +43,8 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertIsStarted(sb);
-                OperationLogic.AssertIsStarted(sb); 
+                AuthLogic.AssertStarted(sb);
+                OperationLogic.AssertStarted(sb); 
 
                 OperationLogic.Register(new BasicExecute<ITaskDN>(TaskOperation.ExecutePrivate)
                 {

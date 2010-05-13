@@ -40,7 +40,7 @@ namespace Signum.Engine.Authorization
 
         public static event Action RolesModified;
 
-        public static void AssertIsStarted(SchemaBuilder sb)
+        public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null)));
         }
@@ -103,7 +103,7 @@ namespace Signum.Engine.Authorization
                                                            e.Email
                                                        }).ToDynamic();
 
-                EmailLogic.Start(sb, dqm);
+                EmailLogic.AssertStarted(sb);
 
                 EmailLogic.RegisterTemplate(UserMailTemplate.ResetPassword, (eo, args) =>
                 {

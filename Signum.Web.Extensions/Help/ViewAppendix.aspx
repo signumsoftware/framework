@@ -3,6 +3,8 @@
 <%@ Import Namespace="Signum.Web.Help" %>
 <%@ Import Namespace="Signum.Web.Extensions" %>
 <%@ Import Namespace="Signum.Engine.Help" %>
+<%@ Import Namespace="Signum.Utilities" %>
+
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 <script src="<%=ClientScript.GetWebResourceUrl(typeof(Navigator), "Signum.Web.Scripts.SF_Globals.js")%>" type="text/javascript"></script>

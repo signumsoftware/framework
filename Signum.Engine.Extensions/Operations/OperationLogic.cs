@@ -41,7 +41,7 @@ namespace Signum.Engine.Operations
     {
         static Dictionary<Type, Dictionary<Enum, IOperation>> operations = new Dictionary<Type, Dictionary<Enum, IOperation>>();
 
-        public static void AssertIsStarted(SchemaBuilder sb)
+        public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null,null))); 
         }

@@ -116,6 +116,7 @@ namespace Signum.Entities.Processes
         }
 
         decimal? progress;
+        [NumberBetweenValidator(0, 100)]
         public decimal? Progress
         {
             get { return progress; }

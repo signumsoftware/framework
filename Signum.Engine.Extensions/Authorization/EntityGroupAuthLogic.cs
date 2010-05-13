@@ -30,7 +30,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertIsStarted(sb);
+                AuthLogic.AssertStarted(sb);
                 EntityGroupLogic.Start(sb);
 
                 cache = new AuthCache<RuleEntityGroupDN, EntityGroupAllowedRule, EntityGroupDN, Enum, EntityGroupAllowed>(sb,

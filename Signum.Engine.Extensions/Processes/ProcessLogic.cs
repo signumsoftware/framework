@@ -55,8 +55,8 @@ namespace Signum.Engine.Processes
 
                 EnumLogic<ProcessDN>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
 
-                OperationLogic.AssertIsStarted(sb);
-                AuthLogic.AssertIsStarted(sb);
+                OperationLogic.AssertStarted(sb);
+                AuthLogic.AssertStarted(sb);
                 new ProcessExecutionGraph().Register();
 
                 OperationLogic.Register(new BasicExecute<ProcessDN>(TaskOperation.ExecutePrivate)
@@ -497,14 +497,12 @@ namespace Signum.Engine.Processes
             }
             catch (Exception e)
             {
-             
-                    Execution.State = ProcessState.Error;
-                    Execution.ExceptionDate = DateTime.Today;
-                    Execution.Exception = e.Message;
-                    Execution.Save();
 
-              
-              
+                Execution.State = ProcessState.Error;
+                Execution.ExceptionDate = DateTime.Today;
+                Execution.Exception = e.Message;
+                Execution.Save();
+
             }
         }
 

@@ -36,7 +36,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertIsStarted(sb);
+                AuthLogic.AssertStarted(sb);
 
                 sb.Include<PermissionDN>();
 

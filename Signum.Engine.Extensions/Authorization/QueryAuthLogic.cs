@@ -26,7 +26,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                AuthLogic.AssertIsStarted(sb);
+                AuthLogic.AssertStarted(sb);
                 QueryLogic.Start(sb);
 
                 dqm.AllowQuery += new Func<object, bool>(dqm_AllowQuery);
