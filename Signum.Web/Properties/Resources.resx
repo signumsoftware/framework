@@ -396,4 +396,7 @@
   <data name="NumberOfRows" xml:space="preserve">
     <value>Number of rows</value>
   </data>
+  <data name="Excel" xml:space="preserve">
+    <value>Excel</value>
+  </data>
 </root>

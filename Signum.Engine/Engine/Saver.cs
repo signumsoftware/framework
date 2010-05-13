@@ -45,6 +45,7 @@ namespace Signum.Engine
             if (error.HasText())
                 throw new ApplicationException(error);
             
+            
             GraphExplorer.PropagateModifications(modifiables.Inverse());
 
             //colapsa modifiables (collections and embeddeds) keeping indentifiables only

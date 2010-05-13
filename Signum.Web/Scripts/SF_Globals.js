@@ -267,6 +267,31 @@ function Submit(urlController, requestExtraJsonData) {
     return false;
 }
 
+function SubmitOnly(urlController, requestExtraJsonData) {
+    if (requestExtraJsonData == null)
+        throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
+
+    var $form = $("<form method='post' action='" + urlController + "'></form>");
+    
+    if (!empty(requestExtraJsonData)) {
+        for (var key in requestExtraJsonData) {
+            if (jQuery.isFunction(requestExtraJsonData[key]))
+                $form.append(hiddenInput(key, requestExtraJsonData[key]()));
+            else
+                $form.append(hiddenInput(key, requestExtraJsonData[key]));
+        }
+    }
+
+    var currentForm = $("form");
+    currentForm.after($form);
+    
+    $form[0].submit();
+    
+    $form.remove();
+    
+    return false;
+}
+
 /*
 s : string to replace
 tr: dictionary of translations

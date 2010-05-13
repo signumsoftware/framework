@@ -57,7 +57,7 @@ namespace Signum.Web
             get { return typeof(T); }
         }
 
-        public void OnGetValue(MappingContext<T> ctx)
+        public virtual void OnGetValue(MappingContext<T> ctx)
         {
             if (GetValue != null)
             {
@@ -245,43 +245,14 @@ namespace Signum.Web
             }
         }
 
-        public override T DefaultGetValue(MappingContext<T> ctx)
+        public override void OnGetValue(MappingContext<T> ctx)
         {
-            var val = Change(ctx);
-
-            if (val == ctx.Value)
-                ctx.SupressChange = true;
-            else
-                ctx.Value = val;
+            base.OnGetValue(ctx);
 
             SetProperties(ctx);
-
-            return val;
         }
 
-        public void SetProperties(MappingContext<T> ctx)
-        {
-            foreach (PropertyMapping item in Properties.Values)
-            {
-                item.SetProperty(ctx);
-            }
-        }
-
-        public override void RecursiveValidation(MappingContext<T> ctx)
-        {
-            ModifiableEntity entity = ctx.Value;
-            foreach (MappingContext childCtx in ctx.Children())
-            {
-                string error = entity.PropertyCheck(childCtx.PropertyPack);
-                if (error.HasText())
-                    childCtx.Error.Add(error);
-
-
-                childCtx.ValidateInternal();
-            }
-        }
-
-        public T Change(MappingContext<T> ctx)
+        public override T DefaultGetValue(MappingContext<T> ctx)
         {
             string strRuntimeInfo;
             if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
@@ -319,6 +290,29 @@ namespace Signum.Web
                 return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
         }
 
+        public void SetProperties(MappingContext<T> ctx)
+        {
+            foreach (PropertyMapping item in Properties.Values)
+            {
+                item.SetProperty(ctx);
+            }
+        }
+
+        public override void RecursiveValidation(MappingContext<T> ctx)
+        {
+            ModifiableEntity entity = ctx.Value;
+            foreach (MappingContext childCtx in ctx.Children())
+            {
+                string error = entity.PropertyCheck(childCtx.PropertyPack);
+                if (error.HasText())
+                    childCtx.Error.Add(error);
+
+
+                childCtx.ValidateInternal();
+            }
+        }
+
+
         public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
@@ -326,7 +320,30 @@ namespace Signum.Web
             return this; 
         }
 
-        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Mapping<P> newMapping, Action<Mapping<P>> continuation)
+        public EntityMapping<T> CreateProperty<P>(Expression<Func<T, P>> property)
+        {
+             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
+
+            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
+                () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
+
+            propertyMapping.Mapping = Mapping.Create<P>();
+
+            return this;
+        }
+
+        public EntityMapping<T> SetProperty<P, M>(Expression<Func<T, P>> property, M newMapping, Action<M> continuation)
+           where M : Mapping<P>
+        {
+            SetProperty<P>(property, newMapping);
+
+            if (continuation != null)
+                continuation(newMapping);
+
+            return this;
+        }
+
+        public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Mapping<P> newMapping)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
@@ -334,8 +351,6 @@ namespace Signum.Web
                 () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
 
             propertyMapping.Mapping = newMapping;
-            if (continuation != null)
-                continuation(newMapping);
 
             return this;
         }
@@ -344,6 +359,12 @@ namespace Signum.Web
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
             Properties.Remove(pi.Name);
+            return this;
+        }
+
+        public EntityMapping<T> ClearProperties()
+        {
+            Properties.Clear();
             return this;
         }
     }

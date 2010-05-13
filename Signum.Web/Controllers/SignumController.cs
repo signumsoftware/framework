@@ -249,8 +249,7 @@ namespace Signum.Web.Controllers
         {
             return Navigator.Search(this, findOptions, sfTop, prefix);
         }
-
-        [AcceptVerbs(HttpVerbs.Post)]
+		[AcceptVerbs(HttpVerbs.Post)]
         public ContentResult AddFilter(string sfQueryUrlName, string columnName, int index, string prefix)
         {
             object queryName = Navigator.ResolveQueryFromUrlName(sfQueryUrlName);

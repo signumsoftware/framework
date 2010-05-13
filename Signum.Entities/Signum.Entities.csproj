@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Attributes.cd" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="Diagram.cd" />
     <None Include="SignumFramework.pfx" />
   </ItemGroup>

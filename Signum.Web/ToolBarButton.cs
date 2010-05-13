@@ -46,7 +46,11 @@ namespace Signum.Web
 
             if (ImgSrc.HasText())
             {
-                HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top; " + HtmlProps["style"].ToString();
+                if (HtmlProps.ContainsKey("style"))
+                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top; " + HtmlProps["style"].ToString();
+                else
+                    HtmlProps["style"] = "background:transparent url(" + ImgSrc + ")  no-repeat scroll left top;";
+
                 return helper.Div(Id, "", DivCssClass, HtmlProps);
             }
             else
