@@ -198,7 +198,7 @@ namespace Signum.Engine.Operations
         public static string CanExecute<T>(this T entity, Enum operationKey)
            where T : class, IIdentifiable
         {
-            return Find<IExecuteOperation>(entity.GetType(), operationKey).CanExecute(entity);
+            return Find<IEntityOperation>(entity.GetType(), operationKey).CanExecute(entity);
         }
 
         public static T ExecuteBase<T>(this T entity, Type baseType, Enum operationKey, params object[] args)
