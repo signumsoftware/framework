@@ -25,6 +25,8 @@ Validator.prototype = {
         formChildren = formChildren.not(".searchControl *");
         var requestData = formChildren.serialize();
 
+        requestData += qp(sfPrefix, this.valOptions.prefix);
+        
         if (!empty(this.valOptions.prefixToIgnore))
             requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
 
@@ -201,7 +203,8 @@ var PartialValidator = function(_pvalOptions) {
         formChildren = formChildren.not(".searchControl *, #" + sfReactive);
         var requestData = formChildren.serialize();
 
-        requestData += qp(sfPrefix, this.valOptions.prefix);
+        if (!empty(this.valOptions.prefix))
+            requestData += qp(sfPrefix, this.valOptions.prefix);
 
         if (formChildren.filter(this.pf(sfRuntimeInfo)).length == 0)
             requestData += qp(this.valOptions.prefix.compose(sfRuntimeInfo), new RuntimeInfo(this.valOptions.prefix).createValue(this.valOptions.type, '', 'n', ''));
