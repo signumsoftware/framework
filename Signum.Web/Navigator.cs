@@ -447,6 +447,11 @@ namespace Signum.Web
 
             return true;
         }
+
+        public static string GetName(Type type)
+        {
+            return TypesToNames.GetOrThrow(type, "{0} not registered. Call Navigator.RegisterTypeName");
+        }
     }
     
     public class NavigationManager

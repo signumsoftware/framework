@@ -119,7 +119,7 @@ namespace Signum.Web
 
             Type cleanStaticType = Reflector.ExtractLite(StaticType) ?? StaticType;
 
-            string staticTypeName = Navigator.TypesToNames[cleanStaticType];
+            string staticTypeName = Navigator.GetName(cleanStaticType);
 
             return "{0};{1};{2}".Formato(
                 staticTypeName,

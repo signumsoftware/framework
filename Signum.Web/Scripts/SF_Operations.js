@@ -284,7 +284,7 @@ var ConstructorFromMany = function(_options) {
 
     this.requestData = function(newPrefix, items) {
         log("ConstructorFromMany requestData");
-        
+
         var requestData = $('#' + sfTabId).serialize();
         requestData += qp("sfRuntimeType", $(this.pf(sfEntityTypeName)).val())
                      + qp("sfOperationFullKey", this.options.operationKey)
@@ -292,7 +292,7 @@ var ConstructorFromMany = function(_options) {
                      + qp("sfOldPrefix", this.options.prefix)
                      + qp("sfOnOk", singleQuote(this.options.onOk));
 
-        for(var i = 0; i<items.length; i++)
+        for (var i = 0; i < items.length; i++)
             requestData += qp("sfIds", items[i].id);
 
         if (!empty(this.options.requestExtraJsonData)) {
@@ -303,16 +303,15 @@ var ConstructorFromMany = function(_options) {
                     requestData += qp(key, this.options.requestExtraJsonData[key]);
             }
         }
-        
+
         return requestData;
     };
 
-    this.operationAjax = function(newPrefix, items, onSuccess)
-    {
+    this.operationAjax = function(newPrefix, items, onSuccess) {
         log("ConstructorFromMany operationAjax");
-    
+
         NotifyInfo(lang['executingOperation']);
-    
+
         var self = this;
         $.ajax({
             type: "POST",
@@ -325,26 +324,25 @@ var ConstructorFromMany = function(_options) {
                     if (onSuccess != null)
                         onSuccess(newPrefix, operationResult);
                 }
-                else{
+                else {
                     NotifyInfo(lang['error'], 2000);
                     return;
                 }
-             },
-             error:
+            },
+            error:
                 function() { NotifyInfo(lang['error'], 2000); }
         });
     };
-    
+
     this.defaultConstruct = function() {
         log("ConstructorFromMany defaultConstruct");
 
-        var onSuccess = function(items) 
-        {
-            this.operationAjax(this.newPrefix(), items, OpOpenPopup); 
+        var onSuccess = function(items) {
+            this.operationAjax(this.newPrefix(), items, OpOpenPopup);
         }
 
         var self = this;
-        HasSelectedItems({ prefix: this.newPrefix() }, onSuccess);
+        HasSelectedItems({ prefix: this.options.prefix }, function(items) { onSuccess.call(self, items) });
     };
 };
 

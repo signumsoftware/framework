@@ -32,7 +32,7 @@ namespace Signum.Web.Controllers
         public ViewResult View(string typeUrlName, int? id)
         {
             Type t = Navigator.ResolveTypeFromUrlName(typeUrlName);
-            
+
             if (id.HasValue && id.Value > 0)
                 return Navigator.View(this, Database.Retrieve(t, id.Value), true); //Always admin
 
@@ -47,7 +47,7 @@ namespace Signum.Web.Controllers
         }
 
         public ActionResult Create(string sfRuntimeType, string sfOnOk, string sfOnCancel, string prefix)
-        { 
+        {
             Type type = Navigator.ResolveType(sfRuntimeType);
 
             return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate);
@@ -147,10 +147,10 @@ namespace Signum.Web.Controllers
             return Navigator.PartialView(this, tc, sfUrl);
         }
 
-       [AcceptVerbs(HttpVerbs.Post)]
+        [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult TrySave()
         {
-            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal(); 
+            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
 
             if (context.GlobalErrors.Any())
             {
@@ -161,7 +161,7 @@ namespace Signum.Web.Controllers
             IdentifiableEntity ident = context.UntypedValue as IdentifiableEntity;
             if (ident == null)
                 throw new ArgumentNullException(Resources.IdentifiableEntityToSave);
-    
+
             Database.Save(ident);
 
             ViewData[ViewDataKeys.ChangeTicks] = context.GetTicksDictionary();
@@ -192,8 +192,8 @@ namespace Signum.Web.Controllers
 
             return Navigator.ModelState(new ModelStateData(this.ModelState)
             {
-                  NewToStr = context.UntypedValue.ToString(),
-                  NewtoStrLink = newLink
+                NewToStr = context.UntypedValue.ToString(),
+                NewtoStrLink = newLink
             });
         }
 
@@ -228,7 +228,7 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.NamesToTypes[typeName];
 
-            return(Content(jSerializer.Serialize(
+            return (Content(jSerializer.Serialize(
                 AutoCompleteUtils.FindLiteLike(type, implementations, q, l)
                 .Select(o => new { id = o.Id, text = o.ToStr, type = o.RuntimeType.Name }).ToList())));
         }
@@ -249,7 +249,7 @@ namespace Signum.Web.Controllers
         {
             return Navigator.Search(this, findOptions, sfTop, prefix);
         }
-        
+
         [AcceptVerbs(HttpVerbs.Post)]
         public ContentResult AddFilter(string sfQueryUrlName, string columnName, int index, string prefix)
         {
@@ -291,7 +291,7 @@ namespace Signum.Web.Controllers
         [AcceptVerbs(HttpVerbs.Post)]
         public PartialViewResult GetChooser(List<string> buttons, string prefix)
         {
-            if (buttons == null || buttons.Count==0)
+            if (buttons == null || buttons.Count == 0)
                 throw new InvalidOperationException(Resources.GetChooserNeedsAListOfOptions);
 
             string strButtons = buttons
@@ -359,6 +359,9 @@ namespace Signum.Web.Controllers
 
         public static string GetMimeType(string extension)
         {
+            if (extension.HasText() && !extension.StartsWith("."))
+                extension = ".{0}".Formato(extension);
+
             string mimeType = String.Empty;
 
             // Attempt to get the mime-type from the registry.
@@ -370,6 +373,97 @@ namespace Signum.Web.Controllers
 
                 if (type != null)
                     mimeType = type;
+            }
+
+            if (!mimeType.HasText())
+            {
+                switch (extension)
+                {
+                    case "txt":
+                        mimeType = "application/plain-text";
+                        break;
+                    case ".doc":
+                        mimeType = "application/msword";
+                        break;
+                    case ".dot":
+                        mimeType = "application/msword";
+                        break;
+                    case ".docx":
+                        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                        break;
+                    case ".dotx":
+                        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
+                        break;
+                    case ".docm":
+                        mimeType = "application/vnd.ms-word.document.macroEnabled.12";
+                        break;
+                    case ".dotm":
+                        mimeType = "application/vnd.ms-word.template.macroEnabled.12";
+                        break;
+                    case ".xls":
+                        mimeType = "application/vnd.ms-excel";
+                        break;
+                    case ".xlt":
+                        mimeType = "application/vnd.ms-excel";
+                        break;
+                    case ".xla":
+                        mimeType = "application/vnd.ms-excel";
+                        break;
+                    case ".xlsx":
+                        mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                        break;
+                    case ".xltx":
+                        mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.template";
+                        break;
+                    case ".xlsm":
+                        mimeType = "application/vnd.ms-excel.sheet.macroEnabled.12";
+                        break;
+                    case ".xltm":
+                        mimeType = "application/vnd.ms-excel.template.macroEnabled.12";
+                        break;
+                    case ".xlam":
+                        mimeType = "application/vnd.ms-excel.addin.macroEnabled.12";
+                        break;
+                    case ".xlsb":
+                        mimeType = "application/vnd.ms-excel.sheet.binary.macroEnabled.12";
+                        break;
+                    case ".ppt":
+                        mimeType = "application/vnd.ms-powerpoint";
+                        break;
+                    case ".pot":
+                        mimeType = "application/vnd.ms-powerpoint";
+                        break;
+                    case ".pps":
+                        mimeType = "application/vnd.ms-powerpoint";
+                        break;
+                    case ".ppa":
+                        mimeType = "application/vnd.ms-powerpoint";
+                        break;
+                    case ".pptx":
+                        mimeType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+                        break;
+                    case ".potx":
+                        mimeType = "application/vnd.openxmlformats-officedocument.presentationml.template";
+                        break;
+                    case ".ppsx":
+                        mimeType = "application/vnd.openxmlformats-officedocument.presentationml.slideshow";
+                        break;
+                    case ".ppam":
+                        mimeType = "application/vnd.ms-powerpoint.addin.macroEnabled.12";
+                        break;
+                    case ".pptm":
+                        mimeType = "application/vnd.ms-powerpoint.presentation.macroEnabled.12";
+                        break;
+                    case ".potm":
+                        mimeType = "application/vnd.ms-powerpoint.presentation.macroEnabled.12";
+                        break;
+                    case ".ppsm":
+                        mimeType = "application/vnd.ms-powerpoint.slideshow.macroEnabled.12";
+                        break;
+                    default:
+                        mimeType = "application/" + extension.Right(extension.Length -1);
+                        break;
+                }
             }
 
             return mimeType;

@@ -57,7 +57,7 @@ namespace Signum.Web
                         throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
 
                     sb.AppendLine(helper.AutoCompleteExtender(entityLine.Compose(EntityBaseKeys.ToStr),
-                                     Navigator.TypesToNames.GetOrThrow(entityLine.Type.CleanType(), "{0} not registered. Call Navigator.RegisterTypeName"),
+                                     Navigator.GetName(entityLine.Type.CleanType()),
                                      ImplementationsModelBinder.Render(entityLine.Implementations),
                                      entityLine.Compose("sfId"),
                                      "Signum/Autocomplete", entityLine.OnChangedTotal.HasText() ? entityLine.OnChangedTotal : "''"));
