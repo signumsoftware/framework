@@ -93,8 +93,6 @@
       <DependentUpon>Resources.fr.resx</DependentUpon>
     </Compile>
     <Compile Include="Reports\CompositeReportDN.cs" />
-    <Compile Include="Reports\Generator\CellBuilder.cs" />
-    <Compile Include="Reports\Generator\ExcelExtensions.cs" />
     <Compile Include="Reports\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -110,7 +108,15 @@
     </Compile>
     <Compile Include="Reports\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
-    <Compile Include="Reports\Generator\PlainExcelGenerator.cs" />
+    <Compile Include="Reports\PlainGenerator\CellBuilder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Reports\PlainGenerator\ExcelExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Reports\PlainGenerator\PlainExcelGenerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Reports\UserQueryDN.cs" />
     <Compile Include="Scheduler\CalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
@@ -142,11 +148,14 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Reports\PlainGenerator\plainExcelTemplate.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />
     <None Include="Files\Files.cd" />
-    <EmbeddedResource Include="Reports\Generator\plainExcelTemplate.xlsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Reports\CompositeGenerator\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
