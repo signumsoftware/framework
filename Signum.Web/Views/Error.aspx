@@ -2,7 +2,7 @@
 
 <%@ Import Namespace="Ucalenda.Web.Properties" %>
 <%@ Import Namespace="Signum.Engine.Authorization" %>
-<%@ Import Namespace="Ucalenda.Entities" %>
+
 <html>
 <head>
     <title>Error</title>
