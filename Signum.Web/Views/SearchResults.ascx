@@ -6,109 +6,102 @@
 <%@ Import Namespace="System.Collections.Generic" %>
 <%@ Import Namespace="Signum.Utilities" %>
 <%@ Import Namespace="Signum.Web.Properties" %>
-
 <% Context context = (Context)Model;
    FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];
    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    Type entitiesType = Reflector.ExtractLite(queryDescription.StaticColumns.Single(a => a.IsEntity).Type);
    bool viewable = findOptions.View && Navigator.IsNavigable(entitiesType, true);
-    
-//TODO Anto: Habilitar quickfilters: Controlar campos no filtrables  (con este método se pueden crear)
-//"<script type=\"text/javascript\">" + 
-//    "$(document).ready(function() {" + 
-//        "$('.tblResults td').bind('dblclick', function(e) {" + 
-//            "QuickFilter('" + Html.GlobalName("") + "', this.id);" + 
-//        "});" + 
-//    "});" + 
-//"</script>"
-%>
 
+   //TODO Anto: Habilitar quickfilters: Controlar campos no filtrables  (con este método se pueden crear)
+   //"<script type=\"text/javascript\">" + 
+   //    "$(document).ready(function() {" + 
+   //        "$('.tblResults td').bind('dblclick', function(e) {" + 
+   //            "QuickFilter('" + Html.GlobalName("") + "', this.id);" + 
+   //        "});" + 
+   //    "});" + 
+   //"</script>"
+%>
 <%  ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
-    int? EntityColumnIndex = (int?)ViewData[ViewDataKeys.EntityColumnIndex];
-    Dictionary<int, bool> colVisibility = new Dictionary<int, bool>();
-    for (int i = 0; i < queryResult.Columns.Length; i++)
-    {
-        colVisibility.Add(i, queryResult.Columns[i].Visible);
-    }
- %>
+    var entityColumn = queryResult.Columns.OfType<StaticColumn>().Single(c => c.IsEntity);
+    Dictionary<int, Action<HtmlHelper, object>> formatters = (Dictionary<int, Action<HtmlHelper, object>>)ViewData[ViewDataKeys.Formatters];
+%>
 <table id="<%=context.Compose("tblResults")%>" class="tblResults">
     <thead>
         <tr>
-            
-            <%if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1 && viewable)
+            <%if (findOptions.AllowMultiple.HasValue)
               {
-                  if (findOptions.AllowMultiple.HasValue)
-                  {%>
-                  <th></th>
-                  <%} %>
-            <th></th>
-            <%} %>
+            %>
+            <th>
+            </th>
+            <%}
+              if (viewable)
+              {%>
+            <th>
+            </th>
+            <%}
+
+              foreach (Column c in queryResult.VisibleColumns)
+              {
+            %>
+            <th>
+                <%= c.DisplayName %>
+            </th>
             <%
-                foreach (Column c in queryResult.VisibleColumns) 
-                {
-                    %>
-                    <th><%= c.DisplayName %></th>
-                    <%
                 }      
             %>
         </tr>
-    </thead>    
+    </thead>
     <tbody>
-    <%
-        List<Action<HtmlHelper, object>> formatters = (List<Action<HtmlHelper, object>>)ViewData[ViewDataKeys.Formatters];
-        for (int row=0; row<queryResult.Rows.Length; row++)
-        {
-            %>
-            <tr class="<%=(row % 2 == 1) ? "even" : ""%>" id="<%=context.Compose("trResults", row.ToString())%>" name="<%=context.Compose("trResults", row.ToString())%>">
-                <% Lite entityField = null;
-                   if (EntityColumnIndex.HasValue && EntityColumnIndex.Value != -1)
-                       entityField = (Lite)queryResult.Rows[row][EntityColumnIndex.Value];
-                   
-                       if (findOptions.AllowMultiple.HasValue)
-                       {
-                %>
-                <td class="<%=context.Compose("tdRowSelection")%>">
-                    <%
-                        if (entityField != null)
-                        {
+        <%
+            foreach (var row in queryResult.Rows)
+            {
+        %>
+        <tr class="<%=(row.Index % 2 == 1) ? "even" : ""%>" id="<%=context.Compose("trResults", row.Index.ToString())%>"
+            name="<%=context.Compose("trResults", row.Index.ToString())%>">
+            <% Lite entityField = (Lite)row[entityColumn];
 
-                            if (findOptions.AllowMultiple.Value)
-                    { 
-                        %>
-                        <input type="checkbox" name="<%=context.Compose("rowSelection", row.ToString())%>" id="<%=context.Compose("rowSelection", row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
-                    <%}
-                    else
-                    { %>
-                        <input type="radio" name="<%=context.Compose("rowSelection")%>" id="<%=context.Compose("radio", row.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
-                        <%
-                    }
-                        }
-                 %>
-                 </td>
-                 <%} %>
-                <% if (entityField != null && viewable)
-                   { %>
-                   <td id="<%=context.Compose("tdResults")%>">
-                    <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="Ver"><%=Html.Encode(Resources.View) %></a>
-                </td>
-                <% } %>
+               if (findOptions.AllowMultiple.HasValue)
+               {
+            %>
+            <td class="<%=context.Compose("tdRowSelection")%>">
                 <%
-                    for (int col = 0; col < queryResult.Columns.Length; col++)
-                {
-                    if (colVisibility[col])
-                    {
-                        %>
-                        <td id="<%=context.Compose("row"+row+"td", col.ToString())%>"><%formatters[col](Html, queryResult.Rows[row][col]);%></td>
-                        <%
+                    if (findOptions.AllowMultiple.Value)
+                    { 
+                %>
+                <input type="checkbox" name="<%=context.Compose("rowSelection", row.Index.ToString())%>"
+                    id="<%=context.Compose("rowSelection", row.Index.ToString())%>" value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                <%}
+                        else
+                        { %>
+                <input type="radio" name="<%=context.Compose("rowSelection")%>" id="<%=context.Compose("radio", row.Index.ToString())%>"
+                    value="<%= entityField.Id.ToString() + "__" + entityField.RuntimeType.Name + "__" + entityField.ToStr %>" />
+                <%
                     }
-                }
-                 %>
-            </tr>
+                %>
+            </td>
+            <%} %>
+            <% if (viewable)
+               { %>
+            <td id="<%=context.Compose("tdResults")%>">
+                <a href="<%= Navigator.ViewRoute(entityField.RuntimeType, entityField.Id) %>" title="<%=Html.Encode(Resources.View) %>">
+                    <%=Html.Encode(Resources.View) %></a>
+            </td>
+            <% } %>
             <%
-        }
-         %>
+                foreach (var col in queryResult.VisibleColumns)
+                {      
+            %>
+            <td id="<%=context.Compose("row"+row.Index+"td", col.Index.ToString())%>">
+                <%formatters[col.Index](Html, row[col]);%>
+            </td>
+            <%
+                }
+            %>
+        </tr>
+        <%
+            }
+        %>
     </tbody>
     <tfoot>
-        
     </tfoot>
 </table>
