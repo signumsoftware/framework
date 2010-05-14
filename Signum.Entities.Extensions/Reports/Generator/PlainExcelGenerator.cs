@@ -44,6 +44,9 @@ namespace Signum.Entities.Reports
 
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
             {
+                document.PackageProperties.Creator = "";
+                document.PackageProperties.LastModifiedBy = "";
+
                 WorkbookPart workbookPart = document.WorkbookPart;
 
                 WorksheetPart worksheetPart = document.GetWorksheetPart("rId1");
@@ -64,33 +67,48 @@ namespace Signum.Entities.Reports
 
                 UInt32Value headerStyleIndex = worksheet.FindCell("A1").StyleIndex;
 
-                worksheetPart.Worksheet = new Worksheet(
-                        new Sequence<Row>()
-                        {
-                            (from c in results.VisibleColumns
-                            select cb.Cell(c.DisplayName, headerStyleIndex)).ToRow(),
+                worksheetPart.Worksheet = new Worksheet();
 
-                            from r in results.Rows
-                            select (from c in results.VisibleColumns
-                                    let template = c.Format == "d"?TemplateCells.Date : cb.GetTemplateCell(c.Type)
-                                    select cb.Cell(r[c], template)).ToRow()
-                        }.ToSheetData());
-                
-                //Columns columns1 = new Columns();
+                Columns columns1 = new Columns();
+                foreach (var c in results.VisibleColumns)
+                    columns1.Append(new spreadsheet.Column()
+                    {
+                        Min = (uint)c.Index,
+                        Max = (uint)c.Index,
+                        Width = GetColumnWidth(c.Type),
+                        BestFit = true,
+                        CustomWidth = true
+                    });
+                worksheetPart.Worksheet.Append(columns1);
 
-                //for (uint i = 1; i <= results.VisibleColumns.Count(); i++)
-                //    columns1.Append(
-                //        new spreadsheet.Column() { Min = i, Max = i, Width=31, BestFit = true, CustomWidth = true });
+                worksheetPart.Worksheet.Append(new Sequence<Row>()
+                {
+                    (from c in results.VisibleColumns
+                    select cb.Cell(c.DisplayName, headerStyleIndex)).ToRow(),
 
-                //worksheet.Append(columns1);
+                    from r in results.Rows
+                    select (from c in results.VisibleColumns
+                            let template = c.Format == "d" ? TemplateCells.Date : cb.GetTemplateCell(c.Type)
+                            select cb.Cell(r[c], template)).ToRow()
+                }.ToSheetData());
 
-                //workbookPart.AddWorksheet(Resources.Data, worksheet);
-
-                //document.XLDeleteSheet("rId1");
-              
                 workbookPart.Workbook.Save();
                 document.Close();
             }
+        }
+
+        static double GetColumnWidth(Type type)
+        { 
+            type = type.UnNullify();
+
+            if (type == typeof(DateTime))
+                return 20;
+            if (type == typeof(string))
+                return 50;
+            if (type.IsLite())
+                return 50;
+
+            return 10;
         }
     }
 }
