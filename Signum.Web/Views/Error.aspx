@@ -1,14 +1,13 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
 
-<%@ Import Namespace="Ucalenda.Web.Properties" %>
 <%@ Import Namespace="Signum.Engine.Authorization" %>
 
-<html>
-<head>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <title>Error</title>
     <base href="<%= Request.Url.GetLeftPart( UriPartial.Authority ) + VirtualPathUtility.ToAbsolute( "~/" ) %>" />
-</head>
-<body id="portal">
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <div id="main-home">
         <%
             HandleErrorInfo hei = ViewData.Model as HandleErrorInfo;
@@ -20,15 +19,14 @@
             <%=Html.Encode(ex.Message)%></h1>
         <%
             }
-    else
-    {
+            else
+            {
         %>
         <h1>
             <%=Html.Encode("Error " + this.ViewContext.HttpContext.Response.StatusCode)%></h1>
         <h2>
-            <%=Html.Encode(Resources.ErrorAspx_ErrorOccurred)%></h2>
-        <% } %>
-        <%
+            <%=Html.Encode("Error thrown")%></h2>
+        <% } 
             if (hei != null)
             {
                 
@@ -48,14 +46,17 @@
         %>
         <div class="error-region">
             <span>Message: </span>
-            <pre><code>
-                <%= ex.Message%></code></pre>
+            <pre>
+                <code>
+                    <%= ex.Message%>
+                </code>
+            </pre>
             <span>StackTrace: </span>
-            <pre><code>
-                <%= ex.StackTrace%></code></pre>
+            <pre>
+                <code>
+                    <%= ex.StackTrace%>
+                </code>
+            </pre>
         </div>
-        <%}
-        %>
     </div>
-</body>
-</html>
+</asp:Content>
