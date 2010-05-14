@@ -37,7 +37,7 @@ namespace Signum.Entities.Reports
 
         static void WritePlainExcel(ResultTable results, Stream stream)
         {
-            typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Entities.Extensions.Reports.Generator.plainExcelTemplate.xlsx").CopyTo(stream); 
+            typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Entities.Extensions.Reports.PlainGenerator.plainExcelTemplate.xlsx").CopyTo(stream); 
 
             if (results == null)
                 throw new ApplicationException(Resources.ThereAreNoResultsToWrite);
