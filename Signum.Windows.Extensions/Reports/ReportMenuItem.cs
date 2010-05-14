@@ -89,7 +89,7 @@ namespace Signum.Windows.Reports
                     AddExtension = true,
                     DefaultExt = extension, //".xls", //".xlsx",
                     Filter = (extension == ".xls") ? Prop.Resources.Excel97_2003Spreadsheet : Prop.Resources.Excel2007Spreadsheet, //.Excel2007Spreadsheet,
-                    FileName = "{0}-{1}{2}".Formato(report.DisplayName, DateTime.Today, extension),
+                    FileName = report.DisplayName + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + extension,
                     OverwritePrompt = true,
                     Title = Prop.Resources.FindLocationFoExcelReport
                 };
