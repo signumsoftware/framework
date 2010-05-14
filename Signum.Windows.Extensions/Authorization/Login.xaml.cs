@@ -23,7 +23,7 @@ namespace Signum.Windows.Authorization
         {
             this.InitializeComponent();
             //estas instanciacniones están aquí porque en este punto todavía no se ha registrado el schema de Uri
-            //para "pack", ya que el login se hace un poc antes de lanzarse el registro de la aplicación. Una manera de evitarlo
+            //para "pack", ya que el login se hace un poco antes de lanzarse el registro de la aplicación. Una manera de evitarlo
             //sería poner esta línea:
             //UriParser.Register(new GenericUriParser(GenericUriParserOptions.GenericAuthority), "pack", -1);
             //en primer lugar en el Main de Program.cs de la solución.
