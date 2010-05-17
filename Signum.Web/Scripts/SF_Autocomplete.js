@@ -77,7 +77,7 @@ Autocompleter.prototype = {
         this.timerID = setTimeout(function() { self.keyup(e) }, self.options.delay);
     },
     keyup: function(key) {
-  
+
         if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
         if (this.currentText == this.$control.val()) return;
         var input = this.$control.val();
@@ -144,14 +144,18 @@ Autocompleter.prototype = {
 
     keydown: function(e) {
         var key = e.which ? e.which : e.keyCode;
-        if (key == 13 || key == 9) { //Enter or tab
+        if (key == 13 || key == 9) {    //enter or tab
             var selectedOption = $("." + this.resultSelectedClass);
             if (selectedOption.length > 0) {
                 this.onOk(selectedOption.data("data"));
             }
-            if (e.preventDefault) e.preventDefault();
-            if (e.stopPropagation) e.stopPropagation();
-
+            if (key == 9) {
+                this.$dd.hide();
+            }
+            if (key == 13) {    //no bubble for enter
+                if (e.preventDefault) e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+            }
             return;
         }
         if (key == 38) { //Arrow up
