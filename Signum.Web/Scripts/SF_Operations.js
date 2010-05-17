@@ -353,10 +353,14 @@ function OperationConstructFromMany(constructorFrom) {
 }
 
 function ReloadEntity(urlController, prefix, parentDiv) {
+    var $partialViewName = $('#' + sfPartialViewName);
+    var requestData = $("form *").not(".searchControl *").serialize() + qp(sfPrefix, prefix);
+    if($partialViewName.length == 1)
+        requestData += qp(sfPartialViewName, $partialViewName.val());
     $.ajax({
         type: "POST",
         url: urlController,
-        data: $("form *").not(".searchControl *").serialize() + qp(sfPrefix, prefix) + qp(sfPartialViewName, $('#' + sfPartialViewName).val()),
+        data: requestData,
         async: false,
         dataType: "html",
         success: function(msg) {
