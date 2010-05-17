@@ -1,12 +1,13 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
 <%@ Import Namespace="Signum.Web" %>
+<%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
 <asp:Content ContentPlaceHolderID="MainContent" runat="server">
     <script type="text/javascript"> $(function() { $("#email").focus(); }); </script>
 
     <div id="reset-password-container">    
-        <h2>Reset password</h2>
-        <p>Forgot your password? Enter your login email below. We will send you an email with a link to reset your password.</p>
+        <h2><%=Html.encode(Resources.ResetPassword) %></h2>
+        <p><%=Html.Encode(Resources.ForgotYourPassword) %></p>
         
         <%= Html.ValidationSummary() %>
         <% using (Html.BeginForm()) { %>

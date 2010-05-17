@@ -241,6 +241,15 @@ namespace Signum.Web.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Forgot your password? Enter your login email below. We will send you an email with a link to reset your password..
+        /// </summary>
+        public static string ForgotYourPassword {
+            get {
+                return ResourceManager.GetString("ForgotYourPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Help documentation.
         /// </summary>
         public static string HelpDocumentation {
@@ -390,6 +399,15 @@ namespace Signum.Web.Extensions.Properties {
         public static string Property0NotExistsInType1 {
             get {
                 return ResourceManager.GetString("Property0NotExistsInType1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remember.
+        /// </summary>
+        public static string Remember {
+            get {
+                return ResourceManager.GetString("Remember", resourceCulture);
             }
         }
         

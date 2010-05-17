@@ -273,4 +273,10 @@
   <data name="ChangePasswordAspx_WriteActualPasswordAndNewOne" xml:space="preserve">
     <value>Ecrivez votre mot de passe actuel et le nouveau</value>
   </data>
+  <data name="ForgotYourPassword" xml:space="preserve">
+    <value>Forgot your password? Enter your login email below. We will send you an email with a link to reset your password.</value>
+  </data>
+  <data name="Remember" xml:space="preserve">
+    <value>Remember</value>
+  </data>
 </root>

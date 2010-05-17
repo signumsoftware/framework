@@ -1,18 +1,19 @@
 ﻿<%@ Page Title="Remember password" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage" %>
 <%@ Import Namespace="Signum.Web" %>
+<%@ Import Namespace="Signum.Web.Extensions.Properties" %>
 
 <asp:Content ContentPlaceHolderID="MainContent" runat="server">
     <script type="text/javascript"> $(function(){$("#username").focus();}); </script>
     <div id="remember-login-form">
-    <h2>Remember password</h2>
-    <p>Type your user name and your e-mail address to receive a message with a new password</p>
+    <h2><%=Html.Encode(Resources.RememberPassword) %></h2>
+    <p><%=Html.Encode(Resources.RememberPasswordExplanation) %></p>
 
     <%= Html.ValidationSummary() %>
     <% using (Html.BeginForm()) { %>
     <table id="remember">
             <tr>
                 <td>
-                    <label for="username">User name</label>:
+                    <label for="username"><%=Html.Encode(Signum.Entities.Extensions.Properties.Resources.UserDN_UserName) %></label>:
                 </td>
                 <td>
                     <%= Html.TextBox("username", "", new { size = 30 })%>
@@ -30,7 +31,7 @@
             </tr>
             <tr>
             <td colspan="2" class="submit-container">
-                <input type="submit" value="Remember" />
+                <input type="submit" value="<%=Html.Encode(Resources.Remember) %>" />
             </td>
             </tr>
         </table>            
