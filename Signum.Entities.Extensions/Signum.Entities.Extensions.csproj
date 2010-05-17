@@ -92,6 +92,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.fr.resx</DependentUpon>
     </Compile>
+    <Compile Include="Reports\CompositeGenerator\CompositeExcelGenerator.cs" />
     <Compile Include="Reports\CompositeReportDN.cs" />
     <Compile Include="Reports\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
@@ -153,9 +154,6 @@
   <ItemGroup>
     <None Include="Authorization\Authorization.cd" />
     <None Include="Files\Files.cd" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Reports\CompositeGenerator\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

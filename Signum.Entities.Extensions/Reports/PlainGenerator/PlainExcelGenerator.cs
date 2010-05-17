@@ -49,7 +49,7 @@ namespace Signum.Entities.Reports
 
                 WorkbookPart workbookPart = document.WorkbookPart;
 
-                WorksheetPart worksheetPart = document.GetWorksheetPart("rId1");
+                WorksheetPart worksheetPart = document.GetWorksheetPartById("rId1");
                 Worksheet worksheet = worksheetPart.Worksheet;
 
                 CellBuilder cb = new CellBuilder()

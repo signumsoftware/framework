@@ -81,20 +81,7 @@ namespace Signum.Entities.Reports
               Where(c => c.CellReference == addressName).FirstOrDefault();
         }
 
-        //public static uint XLGetCellStyleId(this SpreadsheetDocument document, string sheetId, string addressName)
-        //{
-        //    WorkbookPart wbPart = document.WorkbookPart;
-
-        //    // Find the sheet with the supplied name, and then use that Sheet object
-        //    // to retrieve a reference to the appropriate worksheet.
-        //    WorksheetPart wsPart = GetWorksheetPart(sheetId, wbPart);
-        //    Cell theCell = wsPart.Worksheet.Descendants<Cell>().
-        //      Where(c => c.CellReference == addressName).FirstOrDefault();
-
-        //    return (uint)theCell.XLGetCellStyleId(document);
-        //}
-
-        public static WorksheetPart GetWorksheetPart(this SpreadsheetDocument document, string sheetId)
+        public static WorksheetPart GetWorksheetPartById(this SpreadsheetDocument document, string sheetId)
         {
             WorkbookPart wbPart = document.WorkbookPart;
 
@@ -102,7 +89,7 @@ namespace Signum.Entities.Reports
               Where(s => s.Id == sheetId).FirstOrDefault();
 
             if (theSheet == null)
-                throw new ArgumentException("sheetName");
+                throw new ArgumentException("Sheet with id {0} not found".Formato(sheetId));
 
             // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
             // a reference to the cell whose address matches the address you've supplied:
@@ -110,6 +97,22 @@ namespace Signum.Entities.Reports
             return wsPart;
         }
 
+        public static WorksheetPart GetWorksheetPartByName(this SpreadsheetDocument document, string sheetName)
+        {
+            WorkbookPart wbPart = document.WorkbookPart;
+
+            Sheet theSheet = wbPart.Workbook.Descendants<Sheet>().
+              Where(s => s.Id == sheetName).FirstOrDefault();
+
+            if (theSheet == null)
+                throw new ArgumentException("Sheet with name {0} not found".Formato(sheetName));
+
+            // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
+            // a reference to the cell whose address matches the address you've supplied:
+            WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id));
+            return wsPart;
+        }
+            
         public static uint XLGetCellStyleId(this Cell cell, SpreadsheetDocument document)
         {
             WorkbookPart wbPart = document.WorkbookPart;
