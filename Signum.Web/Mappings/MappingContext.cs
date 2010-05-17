@@ -154,7 +154,7 @@ namespace Signum.Web
 
     public abstract class MappingContext<T> : MappingContext
     {
-        public T Value { get; internal set; }
+        public T Value { get; set; }
         public override object UntypedValue
         {
             get { return Value; }

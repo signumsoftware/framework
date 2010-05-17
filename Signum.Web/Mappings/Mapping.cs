@@ -57,7 +57,7 @@ namespace Signum.Web
             get { return typeof(T); }
         }
 
-        public virtual void OnGetValue(MappingContext<T> ctx)
+        public void OnGetValue(MappingContext<T> ctx)
         {
             if (GetValue != null)
             {
@@ -245,14 +245,53 @@ namespace Signum.Web
             }
         }
 
-        public override void OnGetValue(MappingContext<T> ctx)
+        public override T DefaultGetValue(MappingContext<T> ctx)
         {
-            base.OnGetValue(ctx);
+            var val = OnGetEntity(ctx);
+
+            if (val == ctx.Value)
+                ctx.SupressChange = true;
+            else
+                ctx.Value = val;
 
             SetProperties(ctx);
+
+            return val;
         }
 
-        public override T DefaultGetValue(MappingContext<T> ctx)
+        public void SetProperties(MappingContext<T> ctx)
+        {
+            foreach (PropertyMapping item in Properties.Values)
+            {
+                item.SetProperty(ctx);
+            }
+        }
+
+        public override void RecursiveValidation(MappingContext<T> ctx)
+        {
+            ModifiableEntity entity = ctx.Value;
+            foreach (MappingContext childCtx in ctx.Children())
+            {
+                string error = entity.PropertyCheck(childCtx.PropertyPack);
+                if (error.HasText())
+                    childCtx.Error.Add(error);
+
+
+                childCtx.ValidateInternal();
+            }
+        }
+
+        public Func<MappingContext<T>, T> GetEntity;
+
+        public T OnGetEntity(MappingContext<T> ctx)
+        {
+            if (GetEntity != null)
+                return GetEntity(ctx);
+            else
+                return DefaultGetEntity(ctx);
+        }
+
+        public T DefaultGetEntity(MappingContext<T> ctx)
         {
             string strRuntimeInfo;
             if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
@@ -290,39 +329,16 @@ namespace Signum.Web
                 return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.RuntimeType, runtimeInfo.IdOrNull.Value);
         }
 
-        public void SetProperties(MappingContext<T> ctx)
-        {
-            foreach (PropertyMapping item in Properties.Values)
-            {
-                item.SetProperty(ctx);
-            }
-        }
-
-        public override void RecursiveValidation(MappingContext<T> ctx)
-        {
-            ModifiableEntity entity = ctx.Value;
-            foreach (MappingContext childCtx in ctx.Children())
-            {
-                string error = entity.PropertyCheck(childCtx.PropertyPack);
-                if (error.HasText())
-                    childCtx.Error.Add(error);
-
-
-                childCtx.ValidateInternal();
-            }
-        }
-
-
         public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
             continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
-            return this; 
+            return this;
         }
 
         public EntityMapping<T> CreateProperty<P>(Expression<Func<T, P>> property)
         {
-             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
             PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
                 () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
