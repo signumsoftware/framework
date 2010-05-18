@@ -80,7 +80,12 @@ namespace Signum.Entities.Reports
                     PivotCacheDefinition pcd = ptpart.PivotCacheDefinition;
                     WorksheetSource wss = pcd.Descendants<WorksheetSource>().First();
                     wss.Reference.Value = "A1:" + GetExcelColumn(results.VisibleColumns.Count() - 1) + (results.Rows.Count() + 1).ToString();
-                    pcd.CacheFields.InnerXml = "";
+                    //foreach (CacheField cf in pcd.CacheFields.Descendants<CacheField>())
+                    //    cf.InnerXml = "";
+                    //ptpart.PivotCacheDefinition = pcd;
+                    pcd.RefreshOnLoad = true;
+                    pcd.SaveData = false;
+                    pcd.Save();
                 }
 
                 workbookPart.Workbook.Save();
