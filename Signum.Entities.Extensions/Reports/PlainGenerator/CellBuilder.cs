@@ -112,42 +112,5 @@ namespace Signum.Entities.Reports
             TemplateCells template = GetTemplateCell(type);
             return Cell(value, template, styleIndex);
         }
-        
-
-        //public static Cell Cell(SpreadsheetDocument document, Type type, object value)
-        //{
-        //    Cell cell = CleanCell(type, value);
-
-        //    TypeCode tc = type.UnNullify().Map(a => a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
-        //    var cellValue = TypesConverter.TryGetS(tc) ?? CellValues.InlineString;
-
-        //    switch (cellValue)
-        //    {
-        //        case CellValues.Date:
-        //            cell.ApplyFormatAndStyle(document, TemplateCells.DateTime);
-        //            break;
-        //        case CellValues.Boolean:
-        //            cell.ApplyFormatAndStyle(document, TemplateCells.General);
-        //            break;
-        //        case CellValues.InlineString:
-        //        case CellValues.String:
-        //        case CellValues.SharedString:
-        //            if (type == typeof(string))
-        //                cell.ApplyFormatAndStyle(document, TemplateCells.Text);
-        //            else
-        //                cell.ApplyFormatAndStyle(document, TemplateCells.General);
-        //            break;
-        //        case CellValues.Number:
-        //            if (type == typeof(int))
-        //                cell.ApplyFormatAndStyle(document, TemplateCells.Number);
-        //            else
-        //                cell.ApplyFormatAndStyle(document, TemplateCells.Decimal);
-        //            break;
-        //        default:
-        //            throw new ApplicationException("Invalid CellValues value {0}".Formato(cellValue.ToString()));
-        //    }
-
-        //    return cell;
-        //}
     }
 }

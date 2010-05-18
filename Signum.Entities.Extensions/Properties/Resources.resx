@@ -573,4 +573,7 @@
   <data name="Data" xml:space="preserve">
     <value>Data</value>
   </data>
+  <data name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" xml:space="preserve">
+    <value>The Excel Template has a column {0} not present in the Find Window</value>
+  </data>
 </root>

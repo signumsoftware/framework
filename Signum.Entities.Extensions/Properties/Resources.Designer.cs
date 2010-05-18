@@ -1267,6 +1267,15 @@ namespace Signum.Entities.Extensions.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Excel Template has a column {0} not present in the Find Window.
+        /// </summary>
+        public static string TheExcelTemplateHasAColumn0NotPresentInTheFindWindow {
+            get {
+                return ResourceManager.GetString("TheExcelTemplateHasAColumn0NotPresentInTheFindWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There are no results to write.
         /// </summary>
         public static string ThereAreNoResultsToWrite {

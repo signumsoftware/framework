@@ -81,6 +81,50 @@ namespace Signum.Entities.Reports
               Where(c => c.CellReference == addressName).FirstOrDefault();
         }
 
+        public static string GetCellValue(this SpreadsheetDocument document, Worksheet worksheet, string addressName)
+        {
+            Cell theCell = worksheet.Descendants<Cell>().
+              Where(c => c.CellReference == addressName).FirstOrDefault();
+
+            // If the cell doesn't exist, return an empty string:
+            if (theCell == null)
+                return "";
+            
+            string value = theCell.InnerText;
+
+            // If the cell represents an integer number, you're done. 
+            // For dates, this code returns the serialized value that 
+            // represents the date. The code handles strings and booleans
+            // individually. For shared strings, the code looks up the corresponding
+            // value in the shared string table. For booleans, the code converts 
+            // the value into the words TRUE or FALSE.
+            if (theCell.DataType == null)
+                return value;
+
+            switch (theCell.DataType.Value)
+            {
+                case CellValues.SharedString:
+                    // For shared strings, look up the value in the shared strings table.
+                    var stringTable = document.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
+                    // If the shared string table is missing, something's wrong.
+                    // Just return the index that you found in the cell.
+                    // Otherwise, look up the correct text in the table.
+                    if (stringTable != null)
+                        return stringTable.SharedStringTable.ElementAt(int.Parse(value)).InnerText;
+                    break;
+                case CellValues.Boolean:
+                    switch (value)
+                    {
+                        case "0":
+                            return "FALSE";
+                        default:
+                            return "TRUE";
+                    }
+                    break;
+            }
+            return value;
+        }
+
         public static WorksheetPart GetWorksheetPartById(this SpreadsheetDocument document, string sheetId)
         {
             WorkbookPart wbPart = document.WorkbookPart;
@@ -102,7 +146,7 @@ namespace Signum.Entities.Reports
             WorkbookPart wbPart = document.WorkbookPart;
 
             Sheet theSheet = wbPart.Workbook.Descendants<Sheet>().
-              Where(s => s.Id == sheetName).FirstOrDefault();
+              Where(s => s.Name == sheetName).FirstOrDefault();
 
             if (theSheet == null)
                 throw new ArgumentException("Sheet with name {0} not found".Formato(sheetName));
@@ -111,25 +155,6 @@ namespace Signum.Entities.Reports
             // a reference to the cell whose address matches the address you've supplied:
             WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id));
             return wsPart;
-        }
-            
-        public static uint XLGetCellStyleId(this Cell cell, SpreadsheetDocument document)
-        {
-            WorkbookPart wbPart = document.WorkbookPart;
-
-            // It the cell doesn't exist, simply return a null reference:
-            if (cell == null)
-                return 0;
-            
-            // Go get the styles information.
-            var styles = wbPart.GetPartsOfType<WorkbookStylesPart>().FirstOrDefault();
-            if (styles == null)
-                return 0;
-
-            if (cell.StyleIndex == null)
-                return 0;
-
-            return (uint)System.Convert.ToInt32(cell.StyleIndex.Value);
         }
     }
 }
