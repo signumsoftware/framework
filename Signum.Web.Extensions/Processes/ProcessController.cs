@@ -32,5 +32,15 @@ namespace Signum.Web.Processes
 
             return Content(Math.Round(progress, 0).ToString());
         }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public PartialViewResult FinishProcessNormalPage()
+        {
+            ProcessExecutionDN process = this.ExtractEntity<ProcessExecutionDN>()
+                .ThrowIfNullC(Signum.Web.Properties.Resources.TypeWasNotPossibleToExtract);
+
+            return Navigator.NormalControl(this, process);
+        }
+
     }
 }
