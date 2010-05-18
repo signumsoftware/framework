@@ -71,12 +71,17 @@ namespace Signum.Entities.Reports
                                 select cb.Cell(r[kvp.Value.First], kvp.Value.Second.StyleIndex)).ToRow()
                 }.Cast<OpenXmlElement>());
 
-                var pivotTableSources = workbookPart.Workbook.PivotCaches
-                    .Descendants<WorksheetSource>()
-                    .Where(wss => wss.Sheet.Value == Resources.Data);
-                
-                foreach(WorksheetSource wss in pivotTableSources)
-                    wss.Reference.Value = "A1:" + GetExcelColumn(results.VisibleColumns.Count() - 1) + (results.Rows.Count()+1).ToString();
+                var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
+                    .Where(ptpart => ptpart.PivotCacheDefinition.Descendants<WorksheetSource>()
+                                                                .Any(wss => wss.Sheet.Value == Resources.Data));
+
+                foreach (PivotTableCacheDefinitionPart ptpart in pivotTableParts)
+                {
+                    PivotCacheDefinition pcd = ptpart.PivotCacheDefinition;
+                    WorksheetSource wss = pcd.Descendants<WorksheetSource>().First();
+                    wss.Reference.Value = "A1:" + GetExcelColumn(results.VisibleColumns.Count() - 1) + (results.Rows.Count() + 1).ToString();
+                    pcd.CacheFields.InnerXml = "";
+                }
 
                 workbookPart.Workbook.Save();
                 document.Close();

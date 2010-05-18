@@ -98,7 +98,8 @@ namespace Signum.Windows.Reports
                 {
                     File.WriteAllBytes(sfd.FileName, report.File.BinaryFile);
 
-                    ExcelReportGenerator.GenerarInforme(sfd.FileName, SearchControl.ResultTable);
+                    //ExcelReportGenerator.GenerarInforme(sfd.FileName, SearchControl.ResultTable);
+                    ExcelGenerator.WriteDataInExcelFile(SearchControl.ResultTable, sfd.FileName);
 
                     System.Diagnostics.Process.Start(sfd.FileName);
                 }
