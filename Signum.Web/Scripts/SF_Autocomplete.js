@@ -17,7 +17,10 @@ Autocompleter = function(controlId, url, _options) {
         onSuccess: null,
         entityIdFieldName: null,
         textField: "text",
-        extraParams: {}
+        extraParams: {},
+        
+        extraResult : null,
+        extraResultClick : null
     }, _options);
 
     self.timerID = 10;
@@ -77,10 +80,10 @@ Autocompleter.prototype = {
         this.timerID = setTimeout(function() { self.keyup(e) }, self.options.delay);
     },
     keyup: function(key) {
-
         if (key == 37 || key == 39 || key == 38 || key == 40 || key == 13) return;
-        if (this.currentText == this.$control.val()) return;
         var input = this.$control.val();
+        if (this.currentText == input) return;
+
         if (input != null && input.length < this.options.minChars) {
             this.$dd.html("").hide(); this.currentResults = [];
             return;
@@ -91,63 +94,100 @@ Autocompleter.prototype = {
         var data = $.extend({
             q: input, l: this.options.limit
         }, this.options.extraParams);
+
         var self = this;
-        if (self.request) self.request.abort();
+
         self.$control.addClass('loading');
-        self.request = $.getJSON(
+        if (self.currentResults == [] && self.currentInput != null && input.indexOf(self.currentInput) == 0)
+            self.showResults([], input);
+        else {
+            if (self.request) self.request.abort();
+
+            self.request = $.getJSON(
             self.url, data,
             function(results) {
                 if (results) {
-                    self.request = undefined;
-                    self.currentText = self.$control.val();
-
-                    var prevCount = self.currentResults.length;
-                    var newCount = results.length;
-
-                    if (prevCount == 0) self.$dd.hide();
-                    var $divsCurrentResults = self.$dd.children("." + self.resultClass);
-
-                    var i = 0;
-                    for (var l = results.length; i < l; i++) {
-                        if (i < prevCount) {
-                            $divsCurrentResults.eq(i).html(self.process(input, results[i])).data("data", results[i]);
-                        }
-                        else {
-                            var $rD = self.$resultDiv.clone();
-                            $rD.append(self.process(input, results[i])).data("data", results[i]);
-                            self.$dd.append($rD);
-                        }
-                    }
-                    var j;
-                    for (j = i; j < prevCount; j++) {
-                        $divsCurrentResults.eq(j).remove();
-                    }
-
-                    self.currentResults = results;
-
-                    var offset = self.$control.position();
-                    self.$dd.css({
-                        left: offset.left,
-                        top: offset.top + self.$control.outerHeight(),
-                        width: self.$control.width()
-                    });
-
-                    self.$control.removeClass('loading');
-
-                    if (prevCount == 0)
-                        self.$dd.slideDown("fast");
-                    else
-                        self.$dd.show();
+                    self.showResults(results, input);
                 }
             });
+        }
     },
 
+    showResults: function(results, input) {
+        var self = this;
+        self.currentInput = input;
+        self.request = undefined;
+        self.currentText = self.$control.val();
+
+        var prevCount = self.currentResults.length;
+        var newCount = results.length;
+        if (prevCount == 0) self.$dd.hide();
+        var $divsCurrentResults = self.$dd.children("." + self.resultClass);
+
+        var i = 0;
+        for (var l = results.length; i < l; i++) {
+            if (i < prevCount) {
+                $divsCurrentResults.eq(i).html(self.process(input, results[i])).data("data", results[i]);
+            }
+            else {
+                var $rD = self.$resultDiv.clone();
+                $rD.append(self.process(input, results[i])).data("data", results[i]);
+                self.$dd.append($rD);
+            }
+        }
+
+        var j;
+        for (j = i; j < prevCount; j++) {
+            $divsCurrentResults.eq(j).remove();
+        }
+
+        self.currentResults = results;
+
+        var $previousExtra = self.$dd.find(".extra");
+
+        //add extra result
+        if (self.options.extraResult != null) {
+            var $rD = self.$resultDiv.clone();
+            var obj = {};
+            obj.input = input;
+            obj.results = newCount;
+
+            var $rD = self.$resultDiv.clone()
+                            .addClass("extra")
+                            .data("data", obj)
+                            .click(function() {
+                                if (self.options.extraResultClick != null)
+                                    self.options.extraResultClick(obj);
+                            });
+
+            $rD.append(self.options.extraResult(obj));
+            if ($previousExtra.length) $previousExtra.remove();
+            self.$dd.append($rD);
+
+        }
+
+        var offset = self.$control.position();
+        self.$dd.css({
+            left: offset.left,
+            top: offset.top + self.$control.outerHeight(),
+            width: self.$control.width()
+        });
+
+        self.$control.removeClass('loading');
+
+        if (prevCount == 0 && !$previousExtra.length)
+            self.$dd.slideDown("fast");
+        else
+            self.$dd.show();
+
+    },
     keydown: function(e) {
         var key = e.which ? e.which : e.keyCode;
         if (key == 13 || key == 9) {    //enter or tab
             var selectedOption = $("." + this.resultSelectedClass);
             if (selectedOption.length > 0) {
-                this.onOk(selectedOption.data("data"));
+                if (selectedOption.hasClass("extra")) selectedOption.click();
+                else this.onOk(selectedOption.data("data"));
             }
             if (key == 9) {
                 this.$dd.hide();
@@ -190,7 +230,8 @@ Autocompleter.prototype = {
     click: function(e) {
         var target = e.srcElement || e.target;
         if (target != null) {
-            this.onOk($(target).closest("." + this.resultSelectedClass).data("data"));
+            if (!$(target).closest(".extra").length)
+                this.onOk($(target).closest("." + this.resultSelectedClass).data("data"));
             this.$dd.hide();
         }
     },

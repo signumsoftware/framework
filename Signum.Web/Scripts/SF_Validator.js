@@ -6,7 +6,8 @@
         showInlineErrors: true,
         fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
         parentDiv: "",
-        requestExtraJsonData: null
+        requestExtraJsonData: null,
+        ajaxError : null
     }, _valOptions);
 
     this.savingControllerUrl = (empty(this.valOptions.controllerUrl)) ? "Signum/TrySave" : this.valOptions.controllerUrl;
@@ -26,7 +27,7 @@ Validator.prototype = {
         var requestData = formChildren.serialize();
 
         requestData += qp(sfPrefix, this.valOptions.prefix);
-        
+
         if (!empty(this.valOptions.prefixToIgnore))
             requestData += qp(sfPrefixToIgnore, this.valOptions.prefixToIgnore);
 
@@ -86,6 +87,9 @@ Validator.prototype = {
                 else {
                     returnValue = true;
                 }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                if (self.ajaxError != null) self.ajaxError(xhr, ajaxOptions, thrownError);
             }
         });
         return returnValue;

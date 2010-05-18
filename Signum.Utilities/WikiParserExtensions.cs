@@ -10,7 +10,7 @@ namespace Signum.Utilities
     {
         public WikiSettings(bool format)
         {
-            Strong = Em = Underlined = Strike = Lists = Titles = format;
+            Strong = Em = Underlined = Strike = Lists = Titles = LineBreaks = format;
         }
 
         public Func<string, string> TokenParser;
@@ -20,6 +20,8 @@ namespace Signum.Utilities
         public bool Strike { get; set; }
         public bool Lists { get; set; }
         public bool Titles { get; set; }
+        public bool LineBreaks { get; set; }
+
     }
 
     public static class WikiParserExtensions
@@ -132,11 +134,15 @@ namespace Signum.Utilities
 
             //Remove multiple breakline  
             content = Regex.Replace(content,
-           "(?<content>\n{2,})", "\n",
+                "(?<content>\n{2,})", settings.LineBreaks ? "\n" : "",
            RegexOptions.Compiled);
 
             content = Regex.Replace(content,
-            "(?<content>\n)", "<br/>",
+                "(?<content>\n)", settings.LineBreaks ? "<br/>" : "",
+            RegexOptions.Compiled);
+
+            content = Regex.Replace(content,
+                "(?<content>\r)", "",
             RegexOptions.Compiled);
             return content;
         }

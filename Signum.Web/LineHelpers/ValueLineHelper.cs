@@ -157,7 +157,11 @@ namespace Signum.Web
             string setTicks = SetTicksFunction(helper, valueLine);
             string reloadOnChangeFunction = GetReloadFunction(helper, valueLine);
 
-            valueLine.ValueHtmlProps.Add("autocomplete", "off");
+            if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
+                valueLine.ValueHtmlProps.Add("autocomplete", "off");
+            else
+                valueLine.ValueHtmlProps.Remove("autocomplete");
+            
             if (valueLine.ValueHtmlProps.ContainsKey("onblur"))
                 valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + setTicks + valueLine.ValueHtmlProps["onblur"] + reloadOnChangeFunction;
             else

@@ -205,7 +205,7 @@ namespace Signum.Utilities
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
-                return Resources.DateLast.Formato(date.DayOfWeek.ToString());
+                return Resources.DateLast.Formato(date.DayOfWeek.ToString().FirstUpper());
             
             if (datediff == -1)
                 return Resources.Yesterday;
@@ -217,7 +217,7 @@ namespace Signum.Utilities
                 return Resources.Tomorrow;
 
             if (2 <= datediff && datediff <= 7)
-                return Resources.DateThis.Formato(date.DayOfWeek.ToString());
+                return Resources.DateThis.Formato(date.DayOfWeek.ToString().FirstUpper());
 
             if (date.Year == currentdate.Year)
             {

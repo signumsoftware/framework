@@ -398,7 +398,11 @@ String.prototype.format = function(values) {
     });
 };
 
-
+if (typeof String.prototype.trim !== 'function') {
+    String.prototype.trim = function() {
+        return this.replace(/^\s+|\s+$/, '');
+    }
+}
 
 var toggler = new 
 function() {
@@ -479,3 +483,54 @@ $.cssLoader = function(cond, url) {
         resourcesLoaded[url]=true;
     }
 };
+
+/* forms */
+$(function() {
+    $('input[placeholder], textarea[placeholder]').placeholder();
+});
+
+(function($) {
+    $.fn.placeholder = function() {
+        if ($.fn.placeholder.supported()) {
+            return $(this);
+        } else {
+
+            $(this).parent('form').submit(function(e) {
+            $('input[placeholder].placeholder, textarea[placeholder].placeholder', this).val('');
+            });
+
+            $(this).each(function() {
+                $.fn.placeholder.on(this);
+            });
+
+            return $(this)
+
+        .focus(function() {
+            if ($(this).hasClass('placeholder')) {
+                $.fn.placeholder.off(this);
+            }
+        })
+
+        .blur(function() {
+            if ($(this).val() == '') {
+                $.fn.placeholder.on(this);
+            }
+        });
+        }
+    };
+
+    // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
+    $.fn.placeholder.supported = function() {
+        var input = document.createElement('input');
+        return !!('placeholder' in input);
+    };
+
+    $.fn.placeholder.on = function(el) {
+        var $el = $(el);
+        $el.val($el.attr('placeholder')).addClass('placeholder');
+    };
+
+    $.fn.placeholder.off = function(el) {
+        $(el).val('').removeClass('placeholder');
+    };
+})(jQuery);

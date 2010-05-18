@@ -113,6 +113,10 @@ namespace Signum.Web
             return Span(html, name, value, null, null);
         }
 
+        public static string Href(this HtmlHelper html, string url, string text) {
+            return "<a href=\"{0}\">{1}</a>".Formato(url, text); 
+        }
+
         public static string Href(this HtmlHelper html, string name, string text, string href, string title, string cssClass, IDictionary<string, object> htmlAttributes)
         {
             string idname = name.HasText() ? (" id='" + name + "' name='" + name + "'") : "";
