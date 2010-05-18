@@ -273,13 +273,17 @@ namespace Signum.Web.Authorization
         }
         #endregion
 
-        public ActionResult Login()
+        public ActionResult Login(string referrer)
         {
             //We store the url referrer so that we can go back when logged in
-            string referrer = System.Web.HttpContext.Current.Request.UrlReferrer.TryCC(r => r.AbsolutePath);
-            string current = System.Web.HttpContext.Current.Request.RawUrl;
-            if (referrer != null && referrer != current)
-                ViewData["referrer"] = System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
+            //If passed by parameter, it would be appended in the URL and we do not need to append it in the ViewData
+            if (referrer == null)
+            {
+                referrer = System.Web.HttpContext.Current.Request.UrlReferrer.TryCC(r => r.AbsolutePath);
+                string current = System.Web.HttpContext.Current.Request.RawUrl;
+                if (referrer != null && referrer != current)
+                    ViewData["referrer"] = System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
+            }
             return View(AuthClient.LoginUrl);
         }
 

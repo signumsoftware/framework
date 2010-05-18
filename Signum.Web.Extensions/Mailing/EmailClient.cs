@@ -67,18 +67,25 @@ namespace Signum.Web.Mailing
         public static string RenderView(string templateAbsoluteUrl, IDictionary<string, string> args)
         {
             System.Net.WebClient wc = new System.Net.WebClient();
+            wc.Headers["Method"] = "Post";
+            wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+            byte[] postData = null;
             if (args != null && args.Count > 0)
             {
-                if (!templateAbsoluteUrl.Contains('?'))
-                    foreach (var kvp in args)
-                    {
-                        wc.QueryString[kvp.Key] = kvp.Value;
-                    }
-                else
-                    templateAbsoluteUrl = "{0}&{1}".Formato(templateAbsoluteUrl, args.ToString(kvp =>
-                        "{0}={1}".Formato(kvp.Key, kvp.Value), "&"));
+            postData = System.Text.Encoding.UTF8.GetBytes(args.ToString(kvp => "{0}={1}".Formato(kvp.Key, HttpUtility.UrlEncode(kvp.Value)), "&"));
+
+                //if (!templateAbsoluteUrl.Contains('?'))
+                //    foreach (var kvp in args)
+                //    {
+                //        wc.QueryString[kvp.Key] = kvp.Value;
+                //    }
+                //else
+                //    templateAbsoluteUrl = "{0}&{1}".Formato(templateAbsoluteUrl, args.ToString(kvp =>
+                //        "{0}={1}".Formato(kvp.Key, kvp.Value), "&"));
             }
-            byte[] requestedHTML = wc.DownloadData(templateAbsoluteUrl);
+            byte[] requestedHTML = wc.UploadData(templateAbsoluteUrl, postData);
+
+            //byte[] requestedHTML = wc.DownloadData(templateAbsoluteUrl);
             return encoding.GetString(requestedHTML);
         }
 
