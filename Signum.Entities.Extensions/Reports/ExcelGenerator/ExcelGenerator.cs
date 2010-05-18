@@ -74,7 +74,7 @@ namespace Signum.Entities.Reports
                 var pivotTableSources = workbookPart.Workbook.PivotCaches
                     .Descendants<WorksheetSource>()
                     .Where(wss => wss.Sheet.Value == Resources.Data);
-                PivotCache
+                
                 foreach(WorksheetSource wss in pivotTableSources)
                     wss.Reference.Value = "A1:" + GetExcelColumn(results.VisibleColumns.Count() - 1) + (results.Rows.Count()+1).ToString();
 
