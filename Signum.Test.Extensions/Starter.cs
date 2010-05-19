@@ -26,6 +26,8 @@ namespace Signum.Test.Extensions
 
                 DynamicQueryManager dqm = new DynamicQueryManager();
 
+                ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
+                
                 Signum.Test.Starter.InternalStart(sb, dqm);
 
                 sb.Settings.OverrideTypeAttributes<IUserRelatedDN>(new ImplementedByAttribute());
@@ -33,8 +35,6 @@ namespace Signum.Test.Extensions
                 OperationLogic.Start(sb, dqm);
             
                 new AlbumGraph().Register();
-
-                ConnectionScope.Default = new Connection(connectionString, sb.Schema, dqm);
             }
         }
 

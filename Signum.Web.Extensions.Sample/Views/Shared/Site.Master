@@ -98,7 +98,7 @@
             {
                   ViewDataDictionary vdd = new ViewDataDictionary(Model)
                   {
-                    {ViewDataKeys.MainControlUrl, ViewData[ViewDataKeys.MainControlUrl]}
+                    {ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName]}
                    };
 
                    Html.RenderPartial("Views/Shared/WidgetView", vdd);

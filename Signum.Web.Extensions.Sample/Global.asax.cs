@@ -84,7 +84,7 @@ namespace Signum.Web.Extensions.Sample
 
             OperationClient.Start(new OperationManager
             {
-                Settings = new Dictionary<Enum, OperationButton>()
+                Settings = new Dictionary<Enum, OperationSettings>()
             });
 
             MusicClient.Start();

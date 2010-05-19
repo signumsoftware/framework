@@ -36,11 +36,11 @@ namespace Signum.Web.Extensions.Sample
 
                 Navigator.RegisterTypeName<IAuthorDN>();
 
-                OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationButton>
+                OperationClient.Manager.Settings.AddRange(new Dictionary<Enum, OperationSettings>
                 {
-                    { AlbumOperation.Save, new OperationButton { Settings = new EntityOperationSettings { IsVisible = _ => false }}},
-                    { AlbumOperation.Clone, new OperationButton { Settings = new EntityOperationSettings { Post = true }}},
-                    { AlbumOperation.CreateFromBand, new OperationButton { Settings = new EntityOperationSettings { Options = { ControllerUrl = "Music/CreateAlbumFromBand", AvoidDefaultOk = true }}}},
+                    { AlbumOperation.Save, new EntityOperationSettings { IsVisible = _ => false }},
+                    { AlbumOperation.Clone, new EntityOperationSettings { OnClick = ctx => new JsOperationConstructorFrom(ctx.Options()).DefaultSubmit() }},
+                    { AlbumOperation.CreateFromBand, new EntityOperationSettings { ControllerUrl = "Music/CreateAlbumFromBand" }},
                 });
             }
         }

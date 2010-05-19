@@ -25,15 +25,10 @@ namespace Signum.Web.Extensions.Sample
 
             AlbumFromBandModel model = new AlbumFromBandModel(band.ToLite());
 
-            JsValidatorOptions voptions = new JsValidatorOptions
-            {
-                Prefix = prefix,
-                Type = typeof(AlbumFromBandModel).Name,
-                OnSuccess = "function(){ " + JsOperationBase.Execute(new JsOperationExecutor(new JsOperationOptions { Prefix = prefix, NavigateOnSuccess = true, ControllerUrl = "Music/CreateAlbumFromBandOnOk" })).ToJS() + "; }"
-            };
-            
             ViewData[ViewDataKeys.WriteSFInfo] = true;
-            ViewData[ViewDataKeys.OnOk] = "ValidatePartial(" + voptions.ToJS() + ");";
+            ViewData[ViewDataKeys.OnOk] = new JsOperationExecutor(
+                new JsOperationOptions { Prefix = prefix, ControllerUrl = "Music/CreateAlbumFromBandOnOk" })
+                .OperationAjax(prefix, JsOp.Navigate);
             
             return Navigator.PopupView(this, model, prefix);
         }

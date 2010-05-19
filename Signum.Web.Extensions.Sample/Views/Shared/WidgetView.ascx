@@ -5,7 +5,7 @@
     List<WidgetItem> widgets;
     
     if (ViewData["WidgetNode"] == null && Model as ModifiableEntity != null)
-        widgets = Html.GetWidgetsListForViewName((ModifiableEntity)Model, (string)ViewData[ViewDataKeys.MainControlUrl]);
+        widgets = Html.GetWidgetsListForViewName((ModifiableEntity)Model, (string)ViewData[ViewDataKeys.PartialViewName]);
     else {
         widgets = new List<WidgetItem>();
         widgets.Add((WidgetItem)ViewData["WidgetNode"]);
