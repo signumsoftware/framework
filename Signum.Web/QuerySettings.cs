@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using System.Web;
 using System.Web.Mvc;
+using Signum.Entities.Reflection;
 
 namespace Signum.Web
 {
@@ -38,27 +39,59 @@ namespace Signum.Web
         {
             FormatRules = new List<FormatterRule>
             {
-                new FormatterRule(c=>true, (h,o) => {
-                    if (o != null && o.GetType().BaseType == typeof(Enum)) h.Write(((Enum)o).NiceToString());
-                    else h.Write(o.TryToString());}),
-                new FormatterRule(c=>typeof(Lite).IsAssignableFrom(c.Type), (h,o)=>h.LightEntityLine((Lite)o, false)),
-                new FormatterRule(c=>c.Type == typeof(bool), (h,o) => h.Write("<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>"))
+                new FormatterRule(c=>true, c=> (h,o) =>
+                {
+                    if(o != null)
+                        h.Write(o.ToString());
+                }),
+                new FormatterRule(c => c.Type.UnNullify().IsEnum, c => (h,o) => 
+                {
+                    if (o != null)
+                        h.Write(((Enum)o).NiceToString());
+                }),
+                new FormatterRule(c => c.Type.UnNullify().IsLite(), c => (h,o) => 
+                {
+                    h.LightEntityLine((Lite)o, false);
+                }),
+                new FormatterRule(c=>c.Type.UnNullify() == typeof(DateTime), c => (h,o) => 
+                {
+                    if (o != null)
+                        h.Write(((DateTime)o).ToUserInterface().TryToString(c.Format));
+                }),
+                new FormatterRule(c=> Reflector.IsNumber(c.Type), c => (h,o) => 
+                {
+                    if (o != null)
+                    {
+                        h.Write(((IFormattable)o).TryToString(c.Format));
+                        if (c.Unit.HasText())
+                            h.Write(" " + c.Unit);
+                    }
+                }),
+                new FormatterRule(c=>c.Type == typeof(bool?), c => (h,o) => 
+                {
+                    if(o!= null)
+                        h.Write("<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>");
+                }),
+                new FormatterRule(c=>c.Type == typeof(bool), c => (h,o) => 
+                {
+                    h.Write("<div style='text-align:center'>"+h.CheckBox("", (bool)o, false)+"</div>");
+                })
             };
         }
 
         public Action<HtmlHelper, object> GetFormatter(Column column)
         {
             return formatters.TryGetC(column.Name) ??
-                   FormatRules.Last(cfr => cfr.IsApplyable(column)).Formatter;
+                   FormatRules.Last(cfr => cfr.IsApplyable(column)).Formatter(column);
         }
     }
 
     public class FormatterRule
     {
-        public Action<HtmlHelper, object> Formatter { get; set; }
+        public Func<Column, Action<HtmlHelper, object>> Formatter { get; set; }
         public Func<Column, bool> IsApplyable { get; set; }
 
-        public FormatterRule(Func<Column, bool> isApplyable, Action<HtmlHelper, object> formatter)
+        public FormatterRule(Func<Column, bool> isApplyable, Func<Column, Action<HtmlHelper, object>> formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;

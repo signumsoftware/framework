@@ -44,6 +44,36 @@ public static class Executor
         return ConnectionScope.Current.ExecuteNonQuery(preCommand);
     }
 
+    public static void ExecuteDataReader(string sql, Action<FieldReader> forEach)
+    {
+        ConnectionScope.Current.ExecuteDataReader(new SqlPreCommandSimple(sql), forEach);
+    }
+
+    public static void ExecuteDataReader(string sql, List<SqlParameter> parameters, Action<FieldReader> forEach)
+    {
+        ConnectionScope.Current.ExecuteDataReader(new SqlPreCommandSimple(sql, parameters), forEach);
+    }
+
+    public static void ExecuteDataReader(this SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
+    {
+        ConnectionScope.Current.ExecuteDataReader(preCommand, forEach);
+    }
+
+    public static DisposableDataReader ExecuteDataReader(string sql)
+    {
+        return ConnectionScope.Current.ExecuteDataReader(new SqlPreCommandSimple(sql));
+    }
+
+    public static DisposableDataReader ExecuteDataReader(string sql, List<SqlParameter> parameters)
+    {
+        return ConnectionScope.Current.ExecuteDataReader(new SqlPreCommandSimple(sql, parameters));
+    }
+
+    public static DisposableDataReader ExecuteDataReader(this SqlPreCommandSimple preCommand)
+    {
+        return ConnectionScope.Current.ExecuteDataReader(preCommand);
+    }
+
 
     public static DataTable ExecuteDataTable(string sql)
     {

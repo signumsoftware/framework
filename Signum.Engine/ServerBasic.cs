@@ -96,7 +96,7 @@ namespace Signum.Services
         public DateTime ServerNow()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => DateTime.Now);
+                () => TimeZoneManager.Now);
         }
 
         public List<Lite<TypeDN>> TypesAssignableFrom(Type type)

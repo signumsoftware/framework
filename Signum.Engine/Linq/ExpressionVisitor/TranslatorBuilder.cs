@@ -19,31 +19,33 @@ namespace Signum.Engine.Linq
 {  
     internal static class TranslatorBuilder
     {
-        static internal ITranslateResult Build(ProjectionExpression proj, ImmutableStack<string> prevAliases)
+        static internal ITranslateResult Build(ProjectionExpression proj, Scope previousScope)
         {
             Type type = proj.UniqueFunction == null ? proj.Type.ElementType() : proj.Type;
 
-            return (ITranslateResult)miBuildPrivate.GenericInvoke(new[] { type }, null, new object[] { proj, prevAliases });
+            return (ITranslateResult)miBuildPrivate.GenericInvoke(new[] { type }, null, new object[] { proj, previousScope });
         }
 
         static MethodInfo miBuildPrivate = ReflectionTools.GetMethodInfo(() => BuildTranslateResult<int>(null, null)).GetGenericMethodDefinition();
 
-        static internal TranslateResult<T> BuildTranslateResult<T>(ProjectionExpression proj, ImmutableStack<string> prevAliases)
+        static internal TranslateResult<T> BuildTranslateResult<T>(ProjectionExpression proj, Scope previousScope)
         {
-            string alias = proj.Source.Alias;
+            Scope scope = new Scope
+            {
+                Alias = proj.Source.Alias,
+                Parent = previousScope,
+                Positions = proj.Source.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i)
+            };
 
-            var aliases = prevAliases.Push(alias); 
+            bool hasFullObjects;
 
-            bool hasFullObjects; 
-
-            Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, aliases, out hasFullObjects);
+            Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope, out hasFullObjects);
 
             Expression<Func<IProjectionRow, SqlParameter[]>> createParams;
-            string sql = QueryFormatter.Format(proj.Source, aliases, out createParams);
+            string sql = QueryFormatter.Format(proj.Source, previousScope, out createParams);
 
             var result = new TranslateResult<T>
             {
-                Alias = alias,
                 CommandText = sql,
 
                 ProjectorExpression = lambda,
@@ -81,11 +83,11 @@ namespace Signum.Engine.Linq
         public class ProjectionBuilder : DbExpressionVisitor
         {
             ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
-            ImmutableStack<string> prevAliases;
+            Scope scope; 
 
             public PropertyInfo piToStrLite = ReflectionTools.GetPropertyInfo((Lite l) =>l.ToStr);
 
-            static MethodInfo miGetValue = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetValue<int>(null, null)).GetGenericMethodDefinition();
+           
 
             bool HasFullObjects;
 
@@ -98,9 +100,9 @@ namespace Signum.Engine.Linq
             static MethodInfo miGetLiteIdentifiable = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteIdentifiable<TypeDN>(null, null, null)).GetGenericMethodDefinition(); 
             static MethodInfo miGetLiteImplementedByAll = ReflectionTools.GetMethodInfo((IProjectionRow row) => row.GetLiteImplementedByAll<TypeDN>(null, null)).GetGenericMethodDefinition(); 
 
-            static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, ImmutableStack<string> prevAliases, out bool hasFullObjects)
+            static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, Scope scope, out bool hasFullObjects)
             {
-                ProjectionBuilder pb = new ProjectionBuilder() { prevAliases = prevAliases };
+                ProjectionBuilder pb = new ProjectionBuilder() { scope = scope };
                 Expression body = pb.Visit(expression);
                 hasFullObjects = pb.HasFullObjects;
                 return Expression.Lambda<Func<IProjectionRow, T>>(body, pb.row);
@@ -120,19 +122,14 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitColumn(ColumnExpression column)
             {
-                Debug.Assert(prevAliases.Contains(column.Alias));
-
-                return Expression.Call(this.row,
-                    miGetValue.MakeGenericMethod(column.Type),
-                    Expression.Constant(column.Alias),
-                    Expression.Constant(column.Name));
+                return scope.GetExpression(row, column.Alias, column.Name, column.Type);
             }
 
             MethodInfo miExecute = ReflectionTools.GetMethodInfo((ITranslateResult it) => it.Execute(null));
 
             protected override Expression VisitProjection(ProjectionExpression proj)
             {
-                ITranslateResult tr = TranslatorBuilder.Build(proj, prevAliases);
+                ITranslateResult tr = TranslatorBuilder.Build(proj, scope);
                 HasFullObjects |= tr.HasFullObjects;
 
                 Expression call = Expression.Call(Expression.Constant(tr), miExecute, this.row);
@@ -211,6 +208,37 @@ namespace Signum.Engine.Linq
             {
                 return Expression.Constant(sce.Value, sce.Type);
             }
+        }
+    }
+
+    internal class Scope
+    {
+        public Scope Parent;
+
+        public string Alias;
+
+        public Dictionary<string, int> Positions = new Dictionary<string, int>();
+
+        static PropertyInfo miParent = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Parent);
+        static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
+
+        public Expression GetExpression(Expression row, string alias, string name, Type type)
+        {
+            if (alias != Alias)
+            {
+                if (Parent == null)
+                    throw new InvalidOperationException("alias '{0}' not found".Formato(alias));
+
+                return Parent.GetExpression(Expression.Property(row, miParent), alias, name, type);
+            }
+
+            return FieldReader.GetExpression(
+                Expression.Property(row, miReader), Expression.Constant(Positions.GetOrThrow(name, "column name '{0'} not found in alias '" + alias + "'")), type);
+        }
+
+        internal bool ContainAlias(string alias)
+        {
+            return alias == Alias || (Parent != null && Parent.ContainAlias(alias));
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Data.SqlClient;
 using System.Data;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
@@ -30,16 +31,14 @@ namespace Signum.Engine.Linq
         internal Expression<Func<IProjectionRow, SqlParameter[]>> GetParametersExpression;
         internal Func<IProjectionRow, SqlParameter[]> GetParameters;
         internal Expression<Func<IProjectionRow, T>> ProjectorExpression;
-     
-        internal string Alias;
 
         public object Execute(IProjectionRow pr)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters(pr).ToList());
 
-            DataTable dt = Executor.ExecuteDataTable(command);
+            var disposable = Executor.ExecuteDataReader(command);
 
-            ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(dt, ProjectorExpression, HasFullObjects, pr, Alias);
+            ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(disposable, ProjectorExpression, HasFullObjects, pr);
 
             IEnumerable<T> reader = new ProjectionRowEnumerable<T>(enumerator);
 

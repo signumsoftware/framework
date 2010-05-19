@@ -46,16 +46,6 @@ namespace Signum.Engine
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".Formato(table.SqlScape(), campos.ToString(",\r\n").Indent(2)));
         }
 
-        //static HashSet<string> Keywords = Resources.__SqlKeywords__.Lines().Select(a => a.Trim().ToUpper(CultureInfo.InvariantCulture)).ToHashSet();
-
-        //public static string SqlScape(this string ident)
-        //{
-        //    if (Keywords.Contains(ident.ToUpper(CultureInfo.InvariantCulture)))
-        //        return "[" + ident + "]";
-
-        //    return ident;
-        //}
-
         internal static SqlPreCommand UpdateSetIdEntity(string table, List<SqlParameter> parameters, int id, long ticks)
         {
             SqlParameter ticksParam = SqlParameterBuilder.CreateParameter("ticks", SqlDbType.BigInt, false, ticks);

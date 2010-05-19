@@ -96,6 +96,7 @@
     <Compile Include="PropertyRoute.cs" />
     <Compile Include="Reflection\GraphExplorer.cs" />
     <Compile Include="Reflection\Reflector.cs" />
+    <Compile Include="TimeZoneManager.cs" />
     <Compile Include="Validator.cs" />
     <Compile Include="Services\IBaseServer.cs" />
     <Compile Include="Services\IDynamicQueryServer.cs" />

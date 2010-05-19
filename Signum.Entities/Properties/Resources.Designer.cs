@@ -827,6 +827,15 @@ namespace Signum.Entities.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to RemoteTimeZone not set.
+        /// </summary>
+        internal static string RemoteTimeZoneNotSet {
+            get {
+                return ResourceManager.GetString("RemoteTimeZoneNotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Removing entity from a new lite is not allowed.
         /// </summary>
         internal static string RemovingEntityNotAllowedInNewLazies {

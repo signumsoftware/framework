@@ -229,15 +229,17 @@ namespace Signum.Entities.DynamicQuery
 
         public static QueryToken[] DateTimeProperties(QueryToken parent, DateTimePrecision precission)
         {
+            string utc = TimeZoneManager.Mode == TimeZoneMode.Utc ? "Utc - " : "";
+
             return new[]
             {
-                NewNetProperty(parent, (DateTime dt)=>dt.Year, Resources.Year), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Month, Resources.Month), 
-                NewNetProperty(parent, (DateTime dt)=>dt.Day, Resources.Day), 
-                precission < DateTimePrecision.Hours ? null: NewNetProperty(parent, (DateTime dt)=>dt.Hour, Resources.Hour), 
-                precission < DateTimePrecision.Minutes ? null: NewNetProperty(parent, (DateTime dt)=>dt.Minute, Resources.Minute), 
-                precission < DateTimePrecision.Seconds ? null: NewNetProperty(parent, (DateTime dt)=>dt.Second, Resources.Second), 
-                precission < DateTimePrecision.Milliseconds? null: NewNetProperty(parent, (DateTime dt)=>dt.Millisecond, Resources.Millisecond), 
+                NewNetProperty(parent, (DateTime dt)=>dt.Year,utc + Resources.Year), 
+                NewNetProperty(parent, (DateTime dt)=>dt.Month,utc + Resources.Month), 
+                NewNetProperty(parent, (DateTime dt)=>dt.Day,utc + Resources.Day), 
+                precission < DateTimePrecision.Hours ? null: NewNetProperty(parent, (DateTime dt)=>dt.Hour,utc + Resources.Hour), 
+                precission < DateTimePrecision.Minutes ? null: NewNetProperty(parent, (DateTime dt)=>dt.Minute,utc + Resources.Minute), 
+                precission < DateTimePrecision.Seconds ? null: NewNetProperty(parent, (DateTime dt)=>dt.Second,utc + Resources.Second), 
+                precission < DateTimePrecision.Milliseconds? null: NewNetProperty(parent, (DateTime dt)=>dt.Millisecond,utc + Resources.Millisecond), 
             }.NotNull().ToArray();
         }
 

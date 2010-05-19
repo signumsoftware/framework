@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
+using Signum.Engine.Exceptions;
 
 namespace Signum.Test.LinqProvider
 {
@@ -59,7 +60,7 @@ namespace Signum.Test.LinqProvider
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Take(3);
         }
 
-        [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+        [TestMethod, ExpectedException(typeof(OrderByNotLastException))]
         public void OrderByNotLast()
         {
             var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();

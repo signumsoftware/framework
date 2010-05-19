@@ -17,6 +17,7 @@ using System.Collections;
 using Signum.Utilities.DataStructures;
 using System.Diagnostics;
 using Signum.Engine.Linq;
+using System.Data.SqlClient;
 
 namespace Signum.Engine.Maps
 {
@@ -28,6 +29,8 @@ namespace Signum.Engine.Maps
             get { return silentMode; }
             set { this.silentMode = value; }
         }
+
+        public TimeZoneMode TimeZoneMode { get; set; }
 
         public SchemaSettings Settings { get; private set; }
 
@@ -521,7 +524,12 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
-            
+
+            int i = 0;
+            foreach (var col in Columns.Values)
+            {
+                col.Position = i++;
+            }
         }
 
         public Field GetField(MemberInfo value, bool throws)
@@ -602,7 +610,8 @@ namespace Signum.Engine.Maps
     {
         string Name { get; }
         bool Nullable{get;}
-        Index Index{get;}
+        Index Index { get; }
+        int Position { get; set; }
         SqlDbType SqlDbType { get; }
         bool PrimaryKey { get; }
         bool Identity { get; }
@@ -627,6 +636,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
+        public int Position { get; set; }
 
         Table table; 
         public FieldPrimaryKey(Type fieldType, Table table) : base(fieldType) 
@@ -643,6 +653,7 @@ namespace Signum.Engine.Maps
         {
             return new[] { this };
         }
+
     }
 
     public partial class FieldValue : Field, IColumn
@@ -656,8 +667,17 @@ namespace Signum.Engine.Maps
         public int? Size { get; set; }
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
+        public int Position { get; set; }
 
-        public FieldValue(Type fieldType) : base(fieldType) { }
+        public FieldValue(Type fieldType)
+            : base(fieldType)
+        {
+            ParameterExpression reader = Expression.Parameter(typeof(FieldReader), "reader");
+            ParameterExpression ordinal = Expression.Parameter(typeof(int), "ordinal");
+            func = Expression.Lambda<Func<FieldReader, int, object>>(
+                Expression.Convert(
+                FieldReader.GetExpression(reader, ordinal, fieldType), typeof(object)), reader, ordinal).Compile();
+        }
 
         public override string ToString()
         {
@@ -688,6 +708,7 @@ namespace Signum.Engine.Maps
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             public Table ReferenceTable { get { return null; } }
+            public int Position { get; set; }
         }
 
         public EmbeddedHasValueColumn HasValue { get; set; }
@@ -748,6 +769,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
+        public int Position { get; set; }
 
         public bool IsLite { get; set; }
 
@@ -818,6 +840,7 @@ namespace Signum.Engine.Maps
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
+        public int Position { get; set; }
     }
 
     public partial class FieldMList : Field, IFieldFinder
@@ -860,6 +883,7 @@ namespace Signum.Engine.Maps
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             Table IColumn.ReferenceTable { get { return null; } }
+            public int Position { get; set; }
         }
 
         public partial class BackReferenceColumn : IColumn
@@ -873,6 +897,7 @@ namespace Signum.Engine.Maps
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             public Table ReferenceTable { get; set; }
+            public int Position { get; set; }
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
@@ -899,6 +924,12 @@ namespace Signum.Engine.Maps
         public void GenerateColumns()
         {
             Columns = new IColumn[] { PrimaryKey, BackReference}.Union(Field.Columns()).ToDictionary(a => a.Name);
+
+            int i = 0;
+            foreach (var col in Columns.Values)
+            {
+                col.Position = i++;
+            }
         }
     }
 

@@ -60,7 +60,7 @@ namespace Signum.Utilities
             if (!genericMethodDefinitoin.IsGenericMethodDefinition)
                 throw new ArgumentException(Resources.GenericMethodDefinitionShouldBeAGenericMethodDefinition);
 
-            return genericMethodDefinitoin.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinitoin);
+            return method.IsGenericMethod && ReflectionTools.MethodEqual(method.GetGenericMethodDefinition(), genericMethodDefinitoin);
         }
 
         public static bool FieldEquals<S,T>(this FieldInfo fi, Expression<Func<S, T>> field)

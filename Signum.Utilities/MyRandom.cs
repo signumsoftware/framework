@@ -90,7 +90,10 @@ namespace Signum.Utilities
 
         public static DateTime NextDateTime(this Random r, DateTime min, DateTime max)
         {
-            return new DateTime(min.Ticks + r.NextLong(max.Ticks - min.Ticks));
+            if (min.Kind != max.Kind)
+                throw new ArgumentException("min and max have differend Kind"); 
+
+            return new DateTime(min.Ticks + r.NextLong(max.Ticks - min.Ticks), min.Kind);
         }
 
         public static long NextLong(this Random r, long max)

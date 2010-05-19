@@ -114,11 +114,12 @@ namespace Signum.Web
         {
             DateTime? value = (DateTime?)valueLine.UntypedValue;
 
+            if (value.HasValue)
+                value = value.Value.ToUserInterface();
+
             if (valueLine.ReadOnly)
             {
-                return helper.Span(valueLine.ControlID, 
-                        value.HasValue ? Convert.ToDateTime(valueLine.UntypedValue).ToString(valueLine.Format) : "", 
-                        "valueLine");
+                return helper.Span(valueLine.ControlID, value.TryToString(valueLine.Format), "valueLine");
             }
     
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
@@ -139,7 +140,7 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps["size"] = (valueLine.Format == "d") ? 10 : 20;
             
-            string returnString = helper.TextBox(valueLine.ControlID, value != null ? ((DateTime)value).ToString(valueLine.Format) : "", valueLine.ValueHtmlProps) +
+            string returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps) +
                    "\n" +
                    helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions);
 

@@ -26,10 +26,10 @@ namespace Signum.Engine.Linq
         int indent = 2;
         int depth;
 
-        ImmutableStack<string> prevAliases; 
+        Scope parentScope; 
 
         ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
-        static MethodInfo miGetValue = ReflectionTools.GetMethodInfo((IProjectionRow pr) => pr.GetValue<int>(null, null)).GetGenericMethodDefinition();
+        static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
 
         List<Expression> parameterExpressions = new List<Expression>(); 
 
@@ -40,9 +40,7 @@ namespace Signum.Engine.Linq
             return "@p" + (parameter++);
         }
 
-        ConstructorInfo cons = typeof(SqlParameter).GetConstructor(new[] { typeof(string), typeof(SqlDbType) });
-        PropertyInfo piValue = ReflectionTools.GetPropertyInfo((SqlParameter s) => s.Value);
-        PropertyInfo piIsNullable = ReflectionTools.GetPropertyInfo((SqlParameter s) =>s.IsNullable); 
+        MethodInfo miUnsafeCreateParameter = ReflectionTools.GetMethodInfo(() => SqlParameterBuilder.UnsafeCreateParameter(null, SqlDbType.BigInt, false, null));
 
         public Expression CreateParameter(string name, Expression value)
         {
@@ -57,10 +55,11 @@ namespace Signum.Engine.Linq
                 Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
                 (Expression)Expression.Convert(value, typeof(object));
 
-            return Expression.MemberInit(
-                Expression.New(cons, Expression.Constant(name), Expression.Constant(sqlDbType)),
-                Expression.Bind(piIsNullable, Expression.Constant(nullable)),
-                Expression.Bind(piValue, valExpression));
+            return Expression.Call(null, miUnsafeCreateParameter, 
+                Expression.Constant(name), 
+                Expression.Constant(sqlDbType),
+                Expression.Constant(nullable),
+                valExpression);
         }
 
         private QueryFormatter() { }
@@ -68,7 +67,7 @@ namespace Signum.Engine.Linq
 
         static internal string Format(Expression expression, out Expression<Func<SqlParameter[]>> getParameters)
         {
-            QueryFormatter qf = new QueryFormatter() { prevAliases = ImmutableStack<string>.Empty };
+            QueryFormatter qf = new QueryFormatter() { parentScope = null };
             qf.Visit(expression);
 
             getParameters = Expression.Lambda<Func<SqlParameter[]>>(
@@ -77,9 +76,9 @@ namespace Signum.Engine.Linq
             return qf.sb.ToString();
         }
 
-        static internal string Format(Expression expression, ImmutableStack<string> prevAliases, out Expression<Func<IProjectionRow, SqlParameter[]>> getParameters)
+        static internal string Format(Expression expression, Scope parentScope, out Expression<Func<IProjectionRow, SqlParameter[]>> getParameters)
         {
-            QueryFormatter qf = new QueryFormatter() { prevAliases = prevAliases};
+            QueryFormatter qf = new QueryFormatter() { parentScope = parentScope };
             qf.Visit(expression);
 
             getParameters = Expression.Lambda<Func<IProjectionRow, SqlParameter[]>>(
@@ -388,14 +387,11 @@ namespace Signum.Engine.Linq
     
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (prevAliases.Contains(column.Alias))
+            if (parentScope != null && parentScope.ContainAlias(column.Alias))
             {
                 string paramName = GetNextParamAlias();
                 parameterExpressions.Add(CreateParameter(paramName,
-                    Expression.Call(this.row, 
-                      miGetValue.MakeGenericMethod(column.Type),
-                      Expression.Constant(column.Alias),
-                      Expression.Constant(column.Name))));
+                    parentScope.GetExpression(row, column.Alias, column.Name, column.Type))); 
 
                 sb.Append(paramName);
             }

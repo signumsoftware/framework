@@ -107,13 +107,18 @@ namespace Signum.Web
 
         internal static object Convert(string value, Type type)
         {
-            if (type == typeof(bool))
+            if (type.UnNullify() == typeof(bool))
             {
                 string[] vals = ((string)value).Split(',');
                 return (vals[0] == "true");
             }
-
-            if (typeof(Lite).IsAssignableFrom(type))
+            if (type.UnNullify() == typeof(DateTime))
+            {
+                if (value.HasText())
+                    return DateTime.Parse(value).FromUserInterface();
+                return null;
+            }
+            if (typeof(Lite).IsAssignableFrom(type.UnNullify()))
             {
                 string[] vals = ((string)value).Split(';');
                 int intValue;

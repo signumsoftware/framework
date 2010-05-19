@@ -10,12 +10,15 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Properties;
+using System.Data.SqlClient;
 
 namespace Signum.Engine.Linq
 {
     internal interface IProjectionRow
     {
-        S GetValue<S>(string alias, string name);
+        FieldReader Reader { get; }
+
+        IProjectionRow Parent { get; }
 
         Retriever Retriever { get; }
 
@@ -31,9 +34,11 @@ namespace Signum.Engine.Linq
 
     internal class ProjectionRowEnumerator<T> : IProjectionRow, IEnumerator<T>
     {
-        DataTable dt;
-        DataRow currentRow; 
-        int currentIndex = 0; 
+        public FieldReader Reader { get; private set;}
+
+        public IProjectionRow Parent { get; private set; }
+
+        DisposableDataReader disposableReader;
 
         T current;
         Func<IProjectionRow, T> projector; 
@@ -42,42 +47,38 @@ namespace Signum.Engine.Linq
         Retriever retriever;
         EntityCache objectCache; 
 
-
-        IProjectionRow previous;
-        string alias;
-
-        internal ProjectionRowEnumerator(DataTable dt, Expression<Func<IProjectionRow, T>> projectorExpression, bool HasFullObjects, IProjectionRow previous, string alias)
+        internal ProjectionRowEnumerator(DisposableDataReader disposableReader, Expression<Func<IProjectionRow, T>> projectorExpression, bool HasFullObjects, IProjectionRow parent)
         {
-            this.dt = dt;
+            this.disposableReader = disposableReader;
+            this.Reader = new FieldReader(disposableReader.Reader);
+
             this.projectorExpression = projectorExpression;
             this.projector = projectorExpression.Compile();
-            this.previous = previous;
-           
-            this.alias = alias;
+            this.Parent = parent;
 
-            if (HasFullObjects && previous == null)
+            if (HasFullObjects && parent == null)
             {
                 this.retriever = new Retriever();
                 this.objectCache = new EntityCache(); 
             }
         }
 
-        public S GetValue<S>(string alias, string name)
-        {
-            if (this.alias == alias)
-            {
-                object value = currentRow.IsNull(name) ? null : currentRow[name];
-                try
-                {
-                    return ReflectionTools.ChangeType<S>(value);
-                }
-                catch (Exception)
-                {
-                    throw new InvalidCastException(Resources.ImpossibleToConvertTheValueOf012To3.Formato(alias, name, value.TryToString() ?? "null", typeof(S)));
-                }
-            }
-            return previous.GetValue<S>(alias, name); 
-        }
+        //public S GetValue<S>(string alias, string name)
+        //{
+        //    if (this.alias == alias)
+        //    {
+        //        object value = currentRow.IsNull(name) ? null : currentRow[name];
+        //        try
+        //        {
+        //            return ReflectionTools.ChangeType<S>(value);
+        //        }
+        //        catch (Exception)
+        //        {
+        //            throw new InvalidCastException(Resources.ImpossibleToConvertTheValueOf012To3.Formato(alias, name, value.TryToString() ?? "null", typeof(S)));
+        //        }
+        //    }
+        //    return previous.GetValue<S>(alias, name); 
+        //}
 
         public T Current
         {
@@ -91,11 +92,9 @@ namespace Signum.Engine.Linq
 
         public bool MoveNext()
         {
-            if (currentIndex <  dt.Rows.Count)
+            if (disposableReader.Reader.Read())
             {
-                currentRow = dt.Rows[currentIndex];
                 this.current = this.projector(this);
-                currentIndex++; 
                 return true;
             }
             return false;
@@ -107,6 +106,8 @@ namespace Signum.Engine.Linq
 
         public void Dispose()
         {
+            disposableReader.Reader.Dispose();
+
             if (retriever != null)
             {
                 retriever.ProcessAll();
@@ -116,11 +117,13 @@ namespace Signum.Engine.Linq
             {
                 objectCache.Dispose(); 
             }
+
+            disposableReader.Dispose(); 
         }
 
         public Retriever Retriever
         {
-            get { return retriever ?? previous.Retriever; }
+            get { return retriever ?? Parent.Retriever; }
         }
   
         public MList<S> GetList<S>(RelationalTable tr, int id)

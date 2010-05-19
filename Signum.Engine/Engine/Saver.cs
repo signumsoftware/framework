@@ -85,10 +85,10 @@ namespace Signum.Engine
 
             SaveGroup(postSavings, schema, null);
 
+            EntityCache.Add(identifiables);
+
             foreach (var node in identifiables)
                 schema.OnSaved(node, roots.Contains(node), newEnities.Contains(node));
-
-            EntityCache.Add(identifiables);
         }
 
 

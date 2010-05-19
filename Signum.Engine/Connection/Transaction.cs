@@ -8,6 +8,7 @@ using Signum.Utilities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Engine.Properties;
+using Signum.Entities;
 
 namespace Signum.Engine
 {
@@ -91,7 +92,7 @@ namespace Signum.Engine
             public RealTransaction(ICoreTransaction parent, IsolationLevel? isolationLevel)
             {
                 IsolationLevel = isolationLevel;
-                Time = DateTime.Now;
+                Time = TimeZoneManager.Now;
                 this.parent = parent;
             }
 
@@ -207,7 +208,7 @@ namespace Signum.Engine
 
             public MockRealTransaction(ICoreTransaction parent)
             {
-                Time = DateTime.Now;
+                Time = TimeZoneManager.Now;
                 this.parent = parent;
             }
 

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 using Signum.Engine.Linq;
+using System.Data.SqlTypes;
 
 namespace Signum.Test.LinqProvider
 {
@@ -179,7 +180,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMaxException()
         {
-            Assert2.Throws<InvalidCastException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
+            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Max(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -191,7 +192,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void RootMinException()
         {
-            Assert2.Throws<InvalidCastException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
+            Assert2.Throws<SqlNullValueException>(() => Database.Query<ArtistDN>().Where(a => false).Min(a => a.Name.Length));
         }
 
         [TestMethod]
@@ -214,12 +215,26 @@ namespace Signum.Test.LinqProvider
         public void JoinGroupPair()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        group new { a, HasBonusTrack = (a.BonusTrack != null).InSql() } by a.Label into g
+                        group new { a, HasBonusTrack = a.BonusTrack != null } by a.Label into g
                         select new
                         {
                             Label = g.Key,
                             Albums = g.Count(),
                             BonusTracks = g.Count(a => a.HasBonusTrack)
+                        }).ToList();
+        }
+
+
+        [TestMethod]
+        public void GroupByEntityExpand()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        where a.Label.Name != "whatever"
+                        group a by a.Label into g
+                        select new
+                        {
+                            Label = g.Key.Name,
+                            Albums = g.Count(),
                         }).ToList();
         }
 

@@ -400,7 +400,6 @@ namespace Signum.Engine.Linq
         DAY,
         MONTH,
         YEAR,
-        GETDATE,
         DATEPART, 
         DATEDIFF,
         DATEADD,

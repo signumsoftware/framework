@@ -38,12 +38,12 @@ namespace Signum.Utilities
                 }
 
                 entry.LastTime = milliseconds;
-                entry.LastDate = DateTime.Now;
+                entry.LastDate = DateTime.UtcNow;
                 entry.TotalTime += milliseconds;
                 entry.Count++;
 
-                if (milliseconds < entry.MinTime) { entry.MinTime = milliseconds; entry.MinDate = DateTime.Now; }
-                if (milliseconds > entry.MaxTime) { entry.MaxTime = milliseconds; entry.MaxDate = DateTime.Now; }
+                if (milliseconds < entry.MinTime) { entry.MinTime = milliseconds; entry.MinDate = DateTime.UtcNow; }
+                if (milliseconds > entry.MaxTime) { entry.MaxTime = milliseconds; entry.MaxDate = DateTime.UtcNow; }
 
                 if (ShowDebug)
                     Debug.WriteLine(identifier + " - " + entry);

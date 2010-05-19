@@ -10,6 +10,7 @@ using System.IO;
 using Signum.Engine.Linq;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using System.Data.SqlTypes;
 
 namespace Signum.Test.LinqProvider
 {
@@ -270,21 +271,21 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectThrowIntNullable()
         {
-            Assert2.Throws<InvalidCastException>(() =>
+            Assert2.Throws<SqlNullValueException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Id).ToArray());
         }
 
         [TestMethod]
         public void SelectThrowBoolNullable()
         {
-            Assert2.Throws<InvalidCastException>(() =>
+            Assert2.Throws<SqlNullValueException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Dead).ToArray());
         }
         
         [TestMethod]
         public void SelectThrowEnumNullable()
         {
-            Assert2.Throws<InvalidCastException>(() =>
+            Assert2.Throws<SqlNullValueException>(() =>
                 Database.Query<AlbumDN>().Select(a => ((ArtistDN)a.Author).Sex).ToArray());
         }
 

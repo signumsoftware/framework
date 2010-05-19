@@ -101,10 +101,17 @@ namespace Signum.Web
     {
         public override T DefaultGetValue(MappingContext<T> ctx)
         {
-            if (typeof(T).UnNullify() == typeof(bool))
+            Type type = typeof(T).UnNullify();
+            if (type == typeof(bool))
             {
                 string[] vals = ctx.Input.Split(',');
                 return (T)(object)(vals[0] == "true" || vals[0] == "True");
+            }
+            else if (type == typeof(DateTime))
+            {
+                if (ctx.Input.HasText())
+                    return (T)(object)DateTime.Parse(ctx.Input).FromUserInterface();
+                return (T)(object)null;
             }
             else
                 return ReflectionTools.Parse<T>(ctx.Input);

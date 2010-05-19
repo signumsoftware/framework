@@ -455,7 +455,6 @@ namespace Signum.Engine.Linq
             {
                 case "string.Length": return TrySqlFunction(SqlFunction.LEN, m.Type, m.Expression);
                 case "Math.PI": return TrySqlFunction(SqlFunction.PI, m.Type);
-                case "DateTime.Now": return TrySqlFunction(SqlFunction.GETDATE, m.Type);
                 case "DateTime.Year": return TrySqlFunction(SqlFunction.YEAR, m.Type, m.Expression);
                 case "DateTime.Month": return TrySqlFunction(SqlFunction.MONTH, m.Type, m.Expression);
                 case "DateTime.Day": return TrySqlFunction(SqlFunction.DAY, m.Type, m.Expression);

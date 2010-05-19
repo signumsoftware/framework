@@ -131,7 +131,7 @@ namespace Signum.Engine
                 return "\'" + ((string)value).Replace("'", "''") + "'";
 
             if (value is DateTime)
-                return "convert(datetime, {0:s}, 126)".Formato(value);
+                return "convert(datetime, '{0:s}', 126)".Formato(value);
 
             if (value is bool)
                return (((bool)value) ? 1 : 0).ToString();

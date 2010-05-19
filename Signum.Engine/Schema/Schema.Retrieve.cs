@@ -22,7 +22,7 @@ namespace Signum.Engine.Maps
 
         internal SqlPreCommand BatchSelect(int[] ids)
         {
-            return SqlBuilder.SelectByIds(Name, new[] { "*" }, SqlBuilder.PrimaryKeyName, ids); 
+            return SqlBuilder.SelectByIds(Name, this.Columns.Values.Select(a => a.Name).ToArray(), SqlBuilder.PrimaryKeyName, ids);
         }
 
         internal SqlPreCommand BatchSelectLite(int[] ids)
@@ -30,24 +30,12 @@ namespace Signum.Engine.Maps
             return SqlBuilder.SelectByIds(Name, new[] { SqlBuilder.PrimaryKeyName, SqlBuilder.ToStrName }, SqlBuilder.PrimaryKeyName, ids); 
         }
 
-        internal void Fill(DataRow row, IdentifiableEntity ei, Retriever retriever)
+        internal void Fill(FieldReader reader, IdentifiableEntity ei, Retriever retriever)
         {
             foreach (EntityField ef in Fields.Values)
             {
-                ef.Setter(ei, ef.Field.GenerateValue(row, retriever)); 
+                ef.Setter(ei, ef.Field.GenerateValue(reader, retriever)); 
             }
-            
-            ei.Modified = false;
-            ei.IsNew = false; 
-        }
-
-        static string toStr = ReflectionTools.GetFieldInfo((IdentifiableEntity ei) => ei.toStr).Name;
-
-        internal void FillLite(DataRow row, Lite lite)
-        {
-            FieldValue campo = (FieldValue)Fields[toStr].Field;
-            lite.ToStr = (string)campo.GenerateValue(row, null);
-            lite.Modified = false;
         }
     }
 
@@ -55,41 +43,43 @@ namespace Signum.Engine.Maps
     {
         internal SqlPreCommand BatchSelect(int[] ids)
         {
-            return SqlBuilder.SelectByIds(Name, new[] { "*" }, BackReference.Name, ids);
+            return SqlBuilder.SelectByIds(Name, this.Columns.Values.Select(a => a.Name).ToArray(), BackReference.Name, ids);
         }
 
-        internal object FillItem(DataRow row, Retriever recuperador)
+        internal object GenerateValue(FieldReader reader, Retriever recuperador)
         {
-            return Field.GenerateValue(row, recuperador); 
+            return Field.GenerateValue(reader, recuperador); 
         }
     }
 
     public abstract partial class Field
     {
-        internal abstract object GenerateValue(DataRow row, Retriever retriever);
+        internal abstract object GenerateValue(FieldReader reader, Retriever retriever);
     }
 
     public partial class FieldPrimaryKey
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            return row.Cell(Name); 
+            return reader.GetInt32(this.Position);
         }
     }
 
     public partial class FieldValue
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        Func<FieldReader, int, object> func;
+
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            return row.Cell(Name); 
+            return func(reader, Position);
         }
     }
 
     public partial class FieldReference
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            int? id = (int?)row.Cell(Name);
+            int? id = reader.GetNullableInt32(Position);
 
             if (!id.HasValue)
                 if(!Nullable)throw new InvalidOperationException(Resources.Field0HasNullAndOsNotNullable.Formato(Name));
@@ -104,9 +94,9 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEnum
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            int? id = (int?)row.Cell(Name);
+            int? id = reader.GetNullableInt32(Position);
             if (!id.HasValue)
                 if (!Nullable) throw new InvalidOperationException(Resources.Field0HasNullAndOsNotNullable.Formato(Name));
                 else return null;
@@ -117,9 +107,9 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMList
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            int myID = (int)row.Cell(SqlBuilder.PrimaryKeyName);
+            int myID = reader.GetInt32(0);
 
             return retriever.GetList(RelationalTable, myID); 
         }
@@ -127,16 +117,16 @@ namespace Signum.Engine.Maps
 
     public partial class FieldEmbedded
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            if (HasValue != null && ((bool)row.Cell(HasValue.Name)) == false)
+            if (HasValue != null && !reader.GetBoolean(HasValue.Position))
                 return null;
 
             EmbeddedEntity result = Constructor();
 
             foreach (EntityField ef in EmbeddedFields.Values)
             {
-                ef.Setter(result, ef.Field.GenerateValue(row, retriever)); 
+                ef.Setter(result, ef.Field.GenerateValue(reader, retriever));
             }
 
             result.Modified = false;
@@ -148,9 +138,9 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedBy
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            var columns = ImplementationColumns.Where(c => row.Cell(c.Value.Name) != null).ToArray();
+            var columns = ImplementationColumns.Where(c => reader.GetNullableInt32(c.Value.Position) != null).ToArray();
 
             if(columns.Length == 0)
                 return null;
@@ -160,7 +150,7 @@ namespace Signum.Engine.Maps
 
             ImplementationColumn col = columns[0].Value;
 
-            int? id = (int?)row.Cell(col.Name);
+            int? id = (int?)reader.GetNullableInt32(col.Position);
 
              if(IsLite)
                 return retriever.GetLite(col.ReferenceTable, Reflector.ExtractLite(FieldType), id.Value);
@@ -171,10 +161,10 @@ namespace Signum.Engine.Maps
 
     public partial class FieldImplementedByAll
     {
-        internal override object GenerateValue(DataRow row, Retriever retriever)
+        internal override object GenerateValue(FieldReader reader, Retriever retriever)
         {
-            int? id = (int?)row.Cell(Column.Name);
-            int? idTipo = (int?)row.Cell(ColumnTypes.Name);
+            int? id = reader.GetNullableInt32(Column.Position);
+            int? idTipo = reader.GetNullableInt32(ColumnTypes.Position);
 
             if (id.HasValue != idTipo.HasValue)
                 throw new InvalidOperationException(Resources.ImplementedByAll01But23.Formato(Column.Name, id, ColumnTypes.Name, idTipo));

@@ -81,28 +81,27 @@ namespace Signum.Engine
 
             while (dic.Count > 0)
             {
-                var array = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
-                SqlPreCommandSimple preComand = table.BatchSelect(array).ToSimple();
-                DataTable dt = Executor.ExecuteDataTable(preComand);
-
-                if (array.Length != dt.Rows.Count)
+                int[] requested = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
+                List<int> found = new List<int>(requested.Length);
+                SqlPreCommandSimple preComand = table.BatchSelect(requested).ToSimple();
+                Executor.ExecuteDataReader(preComand, reader =>
                 {
-                    int[] ids = array.Except(dt.Rows.Cast<DataRow>().Select(row => (int)row[SqlBuilder.PrimaryKeyName])).ToArray();
+                    int id = (int)reader.GetInt32(0); //SqlBuilder.PrimaryKeyName
+                    IdentifiableEntity ie = dic[id];
 
-                    throw new EntityNotFoundException(table.Type, ids);
-                }
+                    table.Fill(reader, ie, this);
 
-                foreach (DataRow row in dt.Rows)
-                {
-                    int id = (int)row[SqlBuilder.PrimaryKeyName];
-                    IdentifiableEntity ei = dic[id];
+                    ie.Modified = false;
+                    ie.IsNew = false; 
 
-                    table.Fill(row, ei, this);
-
-                    EntityCache.Add(ei);
-                    PostRetrieving.Add(ei);
+                    EntityCache.Add(ie);
+                    PostRetrieving.Add(ie);
+                    found.Add(id);
                     dic.Remove(id);
-                }
+                });
+
+                if (found.Count != requested.Length)
+                    throw new EntityNotFoundException(table.Type, requested.Except(found).ToArray());
             }
 
             //if (dic.Count == 0) //alquien podria haber metido referencias de hermanos
@@ -115,27 +114,26 @@ namespace Signum.Engine
 
             while (dic.Count > 0)
             {
-                var array = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
+                int[] requested = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
+                List<int> found = new List<int>(requested.Length);
+                SqlPreCommandSimple preComand = table.BatchSelectLite(requested).ToSimple();
 
-                SqlPreCommandSimple preComand = table.BatchSelectLite(array).ToSimple();
-
-                DataTable dt = Executor.ExecuteDataTable(preComand);
-
-                if (array.Length != dt.Rows.Count)
-                    throw new InvalidOperationException(Resources.TheProperty0ForType1IsnotFound.Formato(table.Type.Name,
-                        array.Except(dt.Rows.Cast<DataRow>().Select(row => (int)row[SqlBuilder.PrimaryKeyName])).ToString(",")));
-
-                foreach (DataRow row in dt.Rows)
+                Executor.ExecuteDataReader(preComand, reader =>
                 {
-                    int id = (int)row[SqlBuilder.PrimaryKeyName];
+                    int id = (int)reader.GetInt32(0); //SqlBuilder.PrimaryKeyName;
                     List<Lite> lites = dic[id];
                     foreach (var lite in lites)
                     {
-                        table.FillLite(row, lite);
-                        PostRetrieving.Add(lite); 
+                        lite.ToStr = reader.GetString(1);
+                        lite.Modified = false;
+                        PostRetrieving.Add(lite);
                     }
                     dic.Remove(id);
-                }
+                    found.Add(id);
+                });
+
+                if (found.Count != requested.Length)
+                    throw new EntityNotFoundException(table.Type, requested.Except(found).ToArray());
             }
             reqLite.Remove(table); // se puede borrar pues la inclusion de lites no amplia la corteza
         }
@@ -146,27 +144,25 @@ namespace Signum.Engine
 
             while (dic.Count > 0)
             {
-                int[] ids = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
+                int[] requested = dic.Keys.Take(SqlBuilder.MaxParametersInSQL).ToArray();
+                SqlPreCommandSimple preComand = relationalTable.BatchSelect(requested).ToSimple();
 
-                SqlPreCommandSimple preComand = relationalTable.BatchSelect(ids).ToSimple();
-
-                DataTable dt = Executor.ExecuteDataTable(preComand);
-                Dictionary<int, List<DataRow>> rowGroups = dt.Rows.Cast<DataRow>().GroupToDictionary(r => (int)r[relationalTable.BackReference.Name]);
-                foreach (var id in ids)
+                Executor.ExecuteDataReader(preComand, reader =>
                 {
+                    int id = reader.GetInt32(1);
                     IList list = dic[id];
-                    List<DataRow> rows = rowGroups.TryGetC(id);
-                    if (rows != null)
-                    {
-                        foreach (DataRow row in rows)
-                        {
-                            object item = relationalTable.FillItem(row, this);
-                            list.Add(item);
-                        }
-                    }
-                    ((Modifiable)list).Modified = false;
+
+                    object value = relationalTable.GenerateValue(reader, this);
+
+                    list.Add(value);
+                });
+
+                foreach (var id in requested)
+                {
+                    ((Modifiable)dic[id]).Modified = false;
                 }
-                dic.RemoveRange(ids);
+
+                dic.RemoveRange(requested);
             }
         } 
         #endregion

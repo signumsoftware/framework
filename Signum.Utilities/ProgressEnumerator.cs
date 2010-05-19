@@ -9,7 +9,7 @@ namespace Signum.Utilities
 {
     public class ProgressEnumerator<T>: IEnumerable<T>, IEnumerator<T>, IProgressInfo
     {
-        DateTime start = DateTime.Now;
+        DateTime start = DateTime.UtcNow;
  
         int count;
         int current = 0; 
@@ -75,7 +75,7 @@ namespace Signum.Utilities
 
         TimeSpan IProgressInfo.Elapsed
         {
-            get { return DateTime.Now - start; }
+            get { return DateTime.UtcNow - start; }
         }
 
         TimeSpan IProgressInfo.Remaining
@@ -89,7 +89,7 @@ namespace Signum.Utilities
 
         DateTime IProgressInfo.EstimatedFinish
         {
-            get { return DateTime.Now + ((IProgressInfo)this).Remaining; }
+            get { return (DateTime.UtcNow + ((IProgressInfo)this).Remaining).ToLocalTime(); }
         }
 
         public override string ToString()

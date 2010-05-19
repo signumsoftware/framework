@@ -6,14 +6,17 @@ using System.Data;
 using Signum.Utilities;
 using System.Data.SqlClient;
 using Signum.Engine;
+using Signum.Engine.Maps;
+using Signum.Entities;
 
 namespace Signum.Engine
 {
-    internal static class SqlParameterBuilder
+    public static class SqlParameterBuilder
     {
         [ThreadStatic]
         static int contadorParametro;
-        public static string GetParameterName(string name)
+
+        static string GetParameterName(string name)
         {
             return "@" + name + (contadorParametro++).ToString();
         }
@@ -25,14 +28,31 @@ namespace Signum.Engine
 
         public static SqlParameter CreateParameter(string name, SqlDbType type, bool nullable, object value)
         {
-            SqlParameter param = new SqlParameter(GetParameterName(name), type)
+            AssertDateTime(value);
+
+            return new SqlParameter(GetParameterName(name), type)
             {
                 IsNullable = nullable,
                 Value = value == null ? DBNull.Value : value,
                 SourceColumn = name,
             };
+        }
 
-            return param; 
+        public static SqlParameter UnsafeCreateParameter(string name, SqlDbType type, bool nullable, object value)
+        {
+            AssertDateTime(value);
+
+            return new SqlParameter(name, type)
+            {
+                IsNullable = nullable,
+                Value = value == null ? DBNull.Value : value,
+            };
+        }
+
+        static void AssertDateTime(object value)
+        {
+            if (Schema.Current.TimeZoneMode == TimeZoneMode.Utc && value is DateTime && ((DateTime)value).Kind != DateTimeKind.Utc)
+                throw new InvalidOperationException("Attempt to use a non-Utc date in the database");
         }
     }
  

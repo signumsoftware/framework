@@ -55,6 +55,8 @@ namespace Signum.Engine
         protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand);
         protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand);
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
+        protected internal abstract void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach);
+        protected internal abstract DisposableDataReader ExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
 
         public abstract string SchemaName();
@@ -70,6 +72,10 @@ namespace Signum.Engine
         public Connection(string connectionString, Schema schema, DynamicQueryManager dqm)
             : base(schema, dqm)
         {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            if (!builder.MultipleActiveResultSets)
+                throw new InvalidOperationException("Set MultipleActiveResultSets=true in your connection string"); 
+
             this.connectionString = connectionString;
         }
 
@@ -154,7 +160,10 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    throw HandleException(ex);
+                    var nex = HandleException(ex);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
                 }
             }
         }
@@ -172,8 +181,55 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    throw HandleException(ex);
+                    var nex = HandleException(ex);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
                 }
+            }
+        }
+
+        protected internal override void ExecuteDataReader(SqlPreCommandSimple command, Action<FieldReader> forEach)
+        {
+            using (SqlConnection con = EnsureConnection())
+            using (SqlCommand cmd = NewCommand(command, con))
+            {
+                try
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        var fr = new FieldReader(reader);
+                        while (reader.Read())
+                        {
+                            forEach(fr);
+                        }
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    var nex = HandleException(ex);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
+                }
+            }
+        }
+
+        protected internal override DisposableDataReader ExecuteDataReader(SqlPreCommandSimple preCommand)
+        {
+            try
+            {
+                Transaction tr = new Transaction();
+                SqlCommand cmd = NewCommand(preCommand, null);
+                SqlDataReader reader = cmd.ExecuteReader();
+                return new DisposableDataReader(reader, tr);
+            }
+            catch (SqlException ex)
+            {
+                var nex = HandleException(ex);
+                if (nex == ex)
+                    throw;
+                throw nex;
             }
         }
 
@@ -193,7 +249,10 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    throw HandleException(ex);
+                    var nex = HandleException(ex);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
                 }
             }
         }
@@ -213,7 +272,10 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    throw HandleException(ex);
+                    var nex = HandleException(ex);
+                    if (nex == ex)
+                        throw;
+                    throw nex;
                 }
             }
         }
@@ -223,6 +285,7 @@ namespace Signum.Engine
             switch (ex.Number)
             {
                 case -2: return new TimeoutException(ex.Message, ex);
+                case 1033: return new OrderByNotLastException(ex);
                 case 2601: return new UniqueKeyException(ex);
                 case 547: return new ForeignKeyException(ex);
                 default: return ex;
@@ -278,9 +341,23 @@ namespace Signum.Engine
             return null;
         }
 
+        protected internal override void ExecuteDataReader(SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
+        {
+            executedCommands.Add(preCommand);
+        }
+
+        protected internal override DisposableDataReader ExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple)
+        {
+            executedCommands.Add(sqlPreCommandSimple);
+            return null;
+        }
+
         public override string SchemaName()
         {
             return "Mock";
         }
+
+
+
     }
 }

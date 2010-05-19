@@ -172,17 +172,17 @@ namespace Signum.Utilities
 
         public static DateTime TrimToSeconds(this DateTime dateTime)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Kind);
         }
 
         public static DateTime TrimToMinutes(this DateTime dateTime)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0);
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, dateTime.Kind);
         }
 
         public static DateTime TrimToHours(this DateTime dateTime)
         {
-            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0);
+            return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind);
         }
 
         public static DateTimePrecision GetPrecision(this DateTime dateTime)

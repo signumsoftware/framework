@@ -51,7 +51,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression binded = (ProjectionExpression)QueryBinder.Bind(filtered);
             ProjectionExpression optimized = (ProjectionExpression)Optimize(binded);
 
-            ITranslateResult result = TranslatorBuilder.Build((ProjectionExpression)optimized, ImmutableStack<string>.Empty);
+            ITranslateResult result = TranslatorBuilder.Build(optimized, null);
             return result; 
         }
 

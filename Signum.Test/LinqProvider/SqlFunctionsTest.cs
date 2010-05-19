@@ -82,7 +82,6 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DateDifFunctions()
         {
-            Dump((NoteDN n) => DateTime.Now.InSql());
             Dump((NoteDN n) => n.CreationTime.Year);
             Dump((NoteDN n) => n.CreationTime.Month);
             Dump((NoteDN n) => n.CreationTime.Day);
