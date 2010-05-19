@@ -83,6 +83,15 @@ namespace Signum.Engine
             }
         }
 
+        public byte[] GetByteArray(int ordinal)
+        {
+            if (reader.IsDBNull(ordinal))
+            {
+                return null;
+            }
+
+            return (byte[])reader.GetValue(ordinal);
+        }
 
         public bool GetBoolean(int ordinal)
         {
