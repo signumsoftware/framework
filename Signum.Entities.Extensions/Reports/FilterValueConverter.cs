@@ -14,7 +14,7 @@ namespace Signum.Entities.Reports
 {
     public static class FilterValueConverter
     {
-        public const string Continue = "Continue";
+        public const string Continue = "__Continue__";
 
         public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificFilters = new Dictionary<FilterType, List<IFilterValueConverter>>()
         {
@@ -102,7 +102,7 @@ namespace Signum.Entities.Reports
         {
             const string part = @"^((\+\d+)|(-\d+)|(\d+))$";
             static Regex partRegex = new Regex(part);
-            static Regex regex = new Regex(@"^(?<year>.+)/(?<month>.+)/(?<day>.+) (?<hour>.+):(?<minute>.+):(?<second>.+)$".Formato(part), RegexOptions.IgnoreCase);
+            static Regex regex = new Regex(@"^(?<year>.+)/(?<month>.+)/(?<day>.+) (?<hour>.+):(?<minute>.+):(?<second>.+)$", RegexOptions.IgnoreCase);
 
             public string Year;
             public string Month;
@@ -168,7 +168,7 @@ namespace Signum.Entities.Reports
 
             public DateTime ToDateTime()
             {
-                DateTime now = DateTime.Now;
+                DateTime now = TimeZoneManager.Now;
 
                 int year = Mix(now.Year, Year, "yyyy");
                 int month = Mix(now.Month, Month, "mm");
@@ -262,7 +262,7 @@ namespace Signum.Entities.Reports
 
             DateTime dateTime = (DateTime)value;
 
-            SmartSpan ss = SmartSpan.Substract(dateTime, DateTime.Now);
+            SmartSpan ss = SmartSpan.Substract(dateTime, TimeZoneManager.Now);
             result = ss.ToString();
             return null;
         }

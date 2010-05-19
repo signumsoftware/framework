@@ -203,6 +203,6 @@ namespace Signum.Engine.Files
             Database.Query<FileRepositoryDN>().FirstOrDefault(r => r.Active && r.FileTypes.Contains(fp.FileType));
 
         public static readonly Func<FilePathDN, string> DefaultCalculateSufix = (FilePathDN fp) =>
-            Path.Combine(DateTime.Now.ToString("yyyy-MM-dd"), fp.FileName);
+            Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM-dd"), fp.FileName);
     }
 }

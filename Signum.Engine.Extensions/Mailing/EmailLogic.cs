@@ -175,7 +175,7 @@ namespace Signum.Engine.Mailing
         public static void SendMail(EmailMessageDN emailMessage, bool throws)
         {
             emailMessage.State = EmailState.Sent;
-            emailMessage.Sent = DateTime.Now;
+            emailMessage.Sent = TimeZoneManager.Now;
             emailMessage.Received = null;
 
             try
@@ -203,7 +203,7 @@ namespace Signum.Engine.Mailing
 
         public static void SendMailAsync(EmailMessageDN emailMessage)
         {
-            emailMessage.Sent = DateTime.Now;
+            emailMessage.Sent = TimeZoneManager.Now;
             emailMessage.Received = null;
 
             MailMessage message = new MailMessage()

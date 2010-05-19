@@ -102,13 +102,13 @@ namespace Signum.Web.Authorization
                 UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefault(Resources.EmailNotExistsDatabase);
 
                 //Remove old previous requests
-                Database.Query<ResetPasswordRequestDN>().Where(r => r.RequestDate < DateTime.Now.AddMonths(1)).UnsafeDelete();
+                Database.Query<ResetPasswordRequestDN>().Where(r => r.RequestDate < TimeZoneManager.Now.AddMonths(1)).UnsafeDelete();
 
                 ResetPasswordRequestDN rpr = new ResetPasswordRequestDN()
                 {
                     Code = MyRandom.Current.NextString(5),
                     Email = email,
-                    RequestDate = DateTime.Now,
+                    RequestDate = TimeZoneManager.Now,
                 };
 
                 rpr.Save();
@@ -380,7 +380,7 @@ namespace Signum.Web.Authorization
                     //Remove cookie
                     HttpCookie cookie = new HttpCookie(AuthClient.CookieName)
                     {
-                        Expires = DateTime.Now.AddDays(-1) // or any other time in the past
+                        Expires = DateTime.Now.AddDays(-10) // or any other time in the past
                     };
                     System.Web.HttpContext.Current.Response.Cookies.Set(cookie);
 
@@ -501,6 +501,14 @@ namespace Signum.Web.Authorization
         //} 
         #endregion
 
+        public static void UpdateSessionUser()
+        {
+            var newUser = UserDN.Current.ToLite().Retrieve();
+
+            Thread.CurrentPrincipal = newUser;
+            System.Web.HttpContext.Current.Session[SessionUserKey] = newUser;
+        }
+
         public static void AddUserSession(string userName, UserDN user)
         {
             System.Web.HttpContext.Current.Session[SessionUserKey] = user;
@@ -516,7 +524,7 @@ namespace Signum.Web.Authorization
             Session.Remove(SessionUserKey);
             var authCookie = System.Web.HttpContext.Current.Request.Cookies[AuthClient.CookieName];
             if (authCookie != null && authCookie.Value.HasText())
-                Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-1);
+                Response.Cookies[AuthClient.CookieName].Expires = DateTime.Now.AddDays(-10);
 
             return RedirectToAction("Index", "Home");
         }

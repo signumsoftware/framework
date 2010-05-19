@@ -42,8 +42,8 @@ namespace Signum.Engine.Authorization
                    FromStates = new []{UserState.Created},
                    Execute = (u,_)=>
                    {
-                       u.AnulationDate=DateTime.Now;
-                       u.State=UserState.Disabled; 
+                       u.AnulationDate = TimeZoneManager.Now;
+                       u.State = UserState.Disabled;
                    },
                    AllowsNew = false ,
                    Lite = true 

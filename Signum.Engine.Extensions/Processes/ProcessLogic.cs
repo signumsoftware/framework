@@ -234,7 +234,7 @@ namespace Signum.Engine.Processes
                 }
                 else
                 {
-                    TimeSpan ts = next.Value - DateTime.Now;
+                    TimeSpan ts = next.Value - TimeZoneManager.Now;
                     if (ts < TimeSpan.Zero)
                         ts = TimeSpan.Zero;
                     else
@@ -252,7 +252,7 @@ namespace Signum.Engine.Processes
             {
 
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
-                           where pe.State == ProcessState.Planned && pe.PlannedDate <= DateTime.Now
+                           where pe.State == ProcessState.Planned && pe.PlannedDate <= TimeZoneManager.Now
                            orderby pe.PlannedDate
                            select pe).ToArray();
 
@@ -377,7 +377,7 @@ namespace Signum.Engine.Processes
                          Execute = (pe, _)=>
                          {
                              pe.State = ProcessState.Canceled;
-                             pe.CancelationDate = DateTime.Now; 
+                             pe.CancelationDate = TimeZoneManager.Now; 
                          }
                     },
                     new Goto(ProcessOperation.Execute, ProcessState.Queued)
@@ -395,7 +395,7 @@ namespace Signum.Engine.Processes
                          Execute = (pe, _)=>
                          {
                              pe.State = ProcessState.Suspending;
-                             pe.SuspendDate = DateTime.Now;
+                             pe.SuspendDate = TimeZoneManager.Now;
                          }
                     }
                 };
@@ -424,7 +424,7 @@ namespace Signum.Engine.Processes
 
         public static void ExecuteTest(this ProcessExecutionDN pe)
         {
-            pe.QueuedDate = DateTime.Now;
+            pe.QueuedDate = TimeZoneManager.Now;
             var ep = new ExecutingProcess
             {
                 Algorithm = registeredProcesses[EnumLogic<ProcessDN>.ToEnum(pe.Process.Key)],
@@ -473,7 +473,7 @@ namespace Signum.Engine.Processes
         public void Execute()
         {
             Execution.State = ProcessState.Executing;
-            Execution.ExecutionStart = DateTime.Now;
+            Execution.ExecutionStart = TimeZoneManager.Now;
             Execution.Progress = 0;
             Execution.Save();
 
@@ -483,14 +483,14 @@ namespace Signum.Engine.Processes
 
                 if (state == FinalState.Finished)
                 {
-                    Execution.ExecutionEnd = DateTime.Now;
+                    Execution.ExecutionEnd = TimeZoneManager.Now;
                     Execution.State = ProcessState.Finished;
                     Execution.Progress = null;
                     Execution.Save();
                 }
                 else
                 {
-                    Execution.SuspendDate = DateTime.Now;
+                    Execution.SuspendDate = TimeZoneManager.Now;
                     Execution.State = ProcessState.Suspended;
                     Execution.Save();
                 }

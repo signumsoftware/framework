@@ -31,7 +31,7 @@ namespace Signum.Entities.Scheduler
 
         public void CleanOldHolidays()
         {
-            holidays.RemoveAll(h => h.Date < DateTime.Now);
+            holidays.RemoveAll(h => h.Date < TimeZoneManager.Now);
         }
 
         public bool IsHoliday(DateTime date)

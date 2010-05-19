@@ -28,7 +28,7 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref task, value, () => Task); }
         }
 
-        DateTime? nextDate = DateTime.Now;
+        DateTime? nextDate = TimeZoneManager.Now;
         public DateTime? NextDate
         {
             get { return nextDate; }

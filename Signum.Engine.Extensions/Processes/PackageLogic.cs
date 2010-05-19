@@ -121,7 +121,7 @@ namespace Signum.Engine.Processes
                     using (Transaction tr = new Transaction(true))
                     {
                         ExecuteLine(pl, package);
-                        pl.FinishTime = DateTime.Now;
+                        pl.FinishTime = TimeZoneManager.Now;
                         pl.Save();
                         tr.Commit();
                     }

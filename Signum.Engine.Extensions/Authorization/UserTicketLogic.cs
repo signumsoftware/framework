@@ -62,7 +62,7 @@ namespace Signum.Engine.Authorization
                 {
                     User = UserDN.Current.ToLite(),
                     Device = device,
-                    ConnectionDate = DateTime.Now,
+                    ConnectionDate = TimeZoneManager.Now,
                     Ticket = Guid.NewGuid().ToString(),
                 };
 
@@ -88,7 +88,7 @@ namespace Signum.Engine.Authorization
 
                 userTicket.Ticket = Guid.NewGuid().ToString();
                 userTicket.Device = device;
-                userTicket.ConnectionDate = DateTime.Now;
+                userTicket.ConnectionDate = TimeZoneManager.Now;
                 userTicket.Save();
 
                 ticket = userTicket.StringTicket(); 
@@ -104,7 +104,7 @@ namespace Signum.Engine.Authorization
 
         public static int CleanExpiredTickets(UserDN user)
         {
-            DateTime min = DateTime.Now.Subtract(ExpirationInterval);
+            DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
             int result = user.Tickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
 
             List<Lite<UserTicketDN>> tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Select(t => t.ToLite()).ToList().Skip(MaxTicketsPerUser).ToList();
@@ -118,7 +118,7 @@ namespace Signum.Engine.Authorization
 
         public static int CleanAllExpiredTickets()
         {
-            DateTime min = DateTime.Now.Subtract(ExpirationInterval);
+            DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
             return Database.Query<UserTicketDN>().Where(a => a.ConnectionDate < min).UnsafeDelete();  
         }
     }

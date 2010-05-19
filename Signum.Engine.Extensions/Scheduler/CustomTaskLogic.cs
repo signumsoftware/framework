@@ -75,7 +75,7 @@ namespace Signum.Engine.Scheduler
             CustomTaskExecutionDN cte = new CustomTaskExecutionDN
             {
                 CustomTask = EnumLogic<CustomTaskDN>.ToEntity(key),
-                StartTime = DateTime.Now,
+                StartTime = TimeZoneManager.Now,
             };
 
             try
@@ -84,7 +84,7 @@ namespace Signum.Engine.Scheduler
 
                 tasks[key]();
 
-                cte.EndTime = DateTime.Now;
+                cte.EndTime = TimeZoneManager.Now;
                 cte.Save();
 
             }

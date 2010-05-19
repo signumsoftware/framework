@@ -69,7 +69,7 @@ namespace Signum.Engine.Operations
                     LogOperationDN log = new LogOperationDN
                     {
                         Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                        Start = DateTime.Now,
+                        Start = TimeZoneManager.Now,
                         User = UserDN.Current
                     };
 
@@ -80,7 +80,7 @@ namespace Signum.Engine.Operations
                     OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
 
                     log.Target = entity.ToLite<IIdentifiable>(); //in case AllowsNew == true
-                    log.End = DateTime.Now;
+                    log.End = TimeZoneManager.Now;
                     using (AuthLogic.User(AuthLogic.SystemUser))
                         log.Save();
 
@@ -98,7 +98,7 @@ namespace Signum.Engine.Operations
                         var log = new LogOperationDN
                         {
                             Operation = EnumLogic<OperationDN>.ToEntity(Key),
-                            Start = DateTime.Now,
+                            Start = TimeZoneManager.Now,
                             Target = entity.ToLite<IIdentifiable>(),
                             Exception = ex.Message,
                             User = UserDN.Current

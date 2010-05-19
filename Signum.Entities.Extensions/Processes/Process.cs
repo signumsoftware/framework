@@ -51,7 +51,7 @@ namespace Signum.Entities.Processes
             set { Set(ref state, value, () => State); }
         }
 
-        DateTime creationDate = DateTime.Now;
+        DateTime creationDate = TimeZoneManager.Now;
         public DateTime CreationDate
         {
             get { return creationDate; }
@@ -172,7 +172,7 @@ namespace Signum.Entities.Processes
         public void Queue()
         {
             State = ProcessState.Queued;
-            QueuedDate = DateTime.Now;
+            QueuedDate = TimeZoneManager.Now;
             ExecutionStart = null;
             ExecutionEnd = null;
             SuspendDate = null;

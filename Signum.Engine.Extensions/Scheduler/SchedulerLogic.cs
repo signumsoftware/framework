@@ -117,7 +117,7 @@ namespace Signum.Engine.Scheduler
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
             else
             {
-                TimeSpan ts = priorityQueue.Peek().NextDate.Value - DateTime.Now;
+                TimeSpan ts = priorityQueue.Peek().NextDate.Value - TimeZoneManager.Now;
                 if (ts < TimeSpan.Zero)
                     ts = TimeSpan.Zero; // cannot be negative !
                 if (ts.TotalMilliseconds > int.MaxValue)
@@ -148,7 +148,7 @@ namespace Signum.Engine.Scheduler
                 }
 
                 ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
-                if (st.NextDate.HasValue && (st.NextDate - DateTime.Now) > MinimumSpan)
+                if (st.NextDate.HasValue && (st.NextDate - TimeZoneManager.Now) > MinimumSpan)
                 {
                     SetTimer();
                     return;

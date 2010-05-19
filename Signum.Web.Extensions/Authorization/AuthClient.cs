@@ -16,6 +16,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Entities.Operations;
 using System.Linq.Expressions;
+using Signum.Engine.Maps;
 
 namespace Signum.Web.Authorization
 {
@@ -76,7 +77,17 @@ namespace Signum.Web.Authorization
                         context.HttpContext.Response.Redirect(loginUrl, true);
                     }
                 };
+
+                Schema.Current.EntityEvents<UserDN>().Saved += new SavedEntityEventHandler<UserDN>(AuthClient_Saved);
+
+                
             }
+        }
+
+        static void AuthClient_Saved(UserDN ident, bool isRoot, bool isNew)
+        {
+            if (ident.Is(UserDN.Current))
+                AuthController.UpdateSessionUser(); 
         }
 
         public static void StartAuthAdmin(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods, bool entityGroups)

@@ -35,7 +35,7 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref minute, value, () => Minute); }
         }
 
-        DateTime startingOn = DateTime.Today;
+        DateTime startingOn = TimeZoneManager.Now.Date;
         [DaysPrecissionValidator]
         public DateTime StartingOn
         {
@@ -47,9 +47,9 @@ namespace Signum.Entities.Scheduler
 
         protected DateTime BaseNext()
         {
-            DateTime result = DateTimeExtensions.Max(DateTime.Today, startingOn).AddHours(hour).AddMinutes(minute);
+            DateTime result = DateTimeExtensions.Max(TimeZoneManager.Now.Date, startingOn).AddHours(hour).AddMinutes(minute);
 
-            if (result < DateTime.Now)
+            if (result < TimeZoneManager.Now)
                 result = result.AddDays(1);
 
             return result;
