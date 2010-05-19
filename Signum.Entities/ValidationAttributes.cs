@@ -144,9 +144,9 @@ namespace Signum.Entities
     public class RegexValidatorAttribute : ValidatorAttribute
     {
         Regex regex;
-        public RegexValidatorAttribute(string regex)
+        public RegexValidatorAttribute(Regex regex)
         {
-            this.regex = new Regex(regex);
+            this.regex = regex;
         }
 
         string formatName;
@@ -187,7 +187,7 @@ namespace Signum.Entities
                           @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
 
         public EMailValidatorAttribute()
-            : base(EmailRegex)
+            : base(new Regex(EmailRegex, RegexOptions.IgnoreCase))
         {
             this.FormatName = "e-Mail";
         }
@@ -198,7 +198,7 @@ namespace Signum.Entities
         const string TelephoneRegex = @"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-0-9]+$";
 
         public TelephoneValidatorAttribute()
-            : base(TelephoneRegex)
+            : base(new Regex(TelephoneRegex))
         {
             this.FormatName = Resources.Telephone;
         }
@@ -219,7 +219,7 @@ namespace Signum.Entities
             + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
 
         public URLValidatorAttribute()
-            : base(URLRegex)
+            : base(new Regex(URLRegex, RegexOptions.IgnoreCase))
         {
             this.FormatName = "URL";
         }
@@ -229,7 +229,7 @@ namespace Signum.Entities
     {
         const string FileNameRegex = @"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:\"";|/]+$";
         public FileNameValidatorAttribute()
-            : base(FileNameRegex)
+            : base(new Regex(FileNameRegex))
         {
             this.FormatName = Resources.FileName;
         }

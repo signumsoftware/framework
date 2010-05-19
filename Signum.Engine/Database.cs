@@ -282,6 +282,14 @@ namespace Signum.Engine
             }
         }
 
+
+        public static void Delete<T>(int id)
+            where T : IdentifiableEntity
+        {
+            Delete(typeof(T), id);
+        }
+
+
         public static void Delete<T>(Lite<T> lite)
             where T : class, IIdentifiable
         {
